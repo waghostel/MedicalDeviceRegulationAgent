@@ -25,7 +25,7 @@ Here’s a rinsed and cleaned-up version of your text, keeping the intent but ma
 5. Run tests after completing the task.
 
    * If tests fail, fetch additional documentation (context7).
-6. Write a **task report** in `.kiro/specs/mvp-development-roadmap/task-execute-history/` (e.g. `task-1.md`).
+6. Write a **task report** in `./.kiro/specs/mvp-development-roadmap/task-execute-history/` (e.g. `task-1.md`).
 
    * Be transparent about test results, especially if some tests require future verification.
 
@@ -34,7 +34,7 @@ Here’s a rinsed and cleaned-up version of your text, keeping the intent but ma
 ### Test-Driven Development (TDD)
 
 * **Pre-Development**: Clearly define expected test outcomes before coding.
-* **Post-Development**: Document all test results in the `task-execute-history` folder to ensure traceability.
+* **Post-Development**: Document all test results in the `./.kiro/specs/mvp-development-roadmap/task-execute-history/` folder to ensure traceability.
 
 ---
 
@@ -115,10 +115,6 @@ Each completed task requires a report:
 - [x] 5. CopilotKit Chat Interface Implementation
 
 
-
-
-
-
   - Install and configure CopilotKit with proper TypeScript types
   - Create AgentWorkflowPage with CopilotSidebar integration
   - Implement slash command recognition and autocomplete
@@ -128,7 +124,12 @@ Each completed task requires a report:
   - Write integration tests for CopilotKit chat functionality
   - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5_
 
-- [ ] 6. Markdown Editor with AI Copilot
+- [x] 6. Markdown Editor with AI Copilot
+
+
+
+
+
 
   - Implement markdown editor using @uiw/react-md-editor or similar
   - Add @ mention functionality for linking to project resources
