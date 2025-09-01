@@ -3,6 +3,7 @@
 ## Development Standards and Best Practices
 
 ### Code Quality Requirements
+
 - Follow TypeScript strict mode for all frontend code
 - Use Python type hints for all backend functions
 - Implement comprehensive error handling with user-friendly messages
@@ -34,6 +35,7 @@ project-root/
 ## Agent Architecture Guidelines
 
 ### LangGraph Implementation
+
 - Use state-based agent workflows for complex regulatory tasks
 - Implement checkpoints for long-running processes (predicate searches)
 - Design agents to be interruptible and resumable
@@ -41,6 +43,7 @@ project-root/
 - Log all agent decisions and reasoning for audit trails
 
 ### Agent Tool Development
+
 ```python
 # Example tool structure for FDA API integration
 from langchain.tools import BaseTool
@@ -49,16 +52,16 @@ from typing import Dict, Any, Optional
 class FDAPredicateSearchTool(BaseTool):
     name = "fda_predicate_search"
     description = "Search FDA 510(k) database for predicate devices"
-    
+
     def _run(
-        self, 
-        device_description: str, 
+        self,
+        device_description: str,
         intended_use: str,
         product_code: Optional[str] = None
     ) -> Dict[str, Any]:
         """
         Execute predicate search with confidence scoring
-        
+
         Returns:
         {
             "predicates": [...],
@@ -72,6 +75,7 @@ class FDAPredicateSearchTool(BaseTool):
 ```
 
 ### CopilotKit Integration
+
 - Implement context-aware chat interface using CopilotKit
 - Maintain project state across chat sessions
 - Enable file uploads and document processing through chat
@@ -81,6 +85,7 @@ class FDAPredicateSearchTool(BaseTool):
 ## Database Design Principles
 
 ### SQLite Schema for MVP
+
 ```sql
 -- Projects table
 CREATE TABLE projects (
@@ -122,6 +127,7 @@ CREATE TABLE agent_interactions (
 ```
 
 ### Data Models (TypeScript/Python)
+
 ```typescript
 // Shared TypeScript interfaces
 interface PredicateDevice {
@@ -146,13 +152,14 @@ interface SourceCitation {
   url: string;
   title: string;
   effectiveDate: string;
-  documentType: 'FDA_510K' | 'FDA_GUIDANCE' | 'CFR_SECTION';
+  documentType: "FDA_510K" | "FDA_GUIDANCE" | "CFR_SECTION";
 }
 ```
 
 ## API Integration Standards
 
 ### openFDA API Wrapper
+
 ```python
 import asyncio
 import aiohttp
@@ -173,9 +180,9 @@ class OpenFDAClient:
         self.base_url = "https://api.fda.gov/device/510k.json"
         self.rate_limit = rate_limit
         self.session = None
-    
+
     async def search_predicates(
-        self, 
+        self,
         search_terms: List[str],
         product_code: Optional[str] = None,
         limit: int = 100
@@ -185,7 +192,7 @@ class OpenFDAClient:
         """
         # Implementation with proper error handling and retry logic
         pass
-    
+
     async def get_device_details(self, k_number: str) -> Dict:
         """
         Get detailed information for a specific K-number
@@ -194,6 +201,7 @@ class OpenFDAClient:
 ```
 
 ### Error Handling Standards
+
 ```python
 class RegulatoryAssistantError(Exception):
     """Base exception for regulatory assistant errors"""
@@ -219,20 +227,27 @@ class ClassificationUncertainError(RegulatoryAssistantError):
 ## UI Component Standards
 
 ### Shadcn UI Component Usage
+
 ```typescript
 // Example: Predicate Search Results Component
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Progress } from "@/components/ui/progress"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 
 interface PredicateResultCardProps {
   predicate: PredicateDevice;
   onSelect: (predicate: PredicateDevice) => void;
 }
 
-export function PredicateResultCard({ predicate, onSelect }: PredicateResultCardProps) {
+export function PredicateResultCard({
+  predicate,
+  onSelect,
+}: PredicateResultCardProps) {
   return (
-    <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => onSelect(predicate)}>
+    <Card
+      className="cursor-pointer hover:shadow-md transition-shadow"
+      onClick={() => onSelect(predicate)}
+    >
       <CardHeader>
         <CardTitle className="flex justify-between items-center">
           {predicate.deviceName}
@@ -241,11 +256,18 @@ export function PredicateResultCard({ predicate, onSelect }: PredicateResultCard
       </CardHeader>
       <CardContent>
         <div className="space-y-2">
-          <p className="text-sm text-muted-foreground">{predicate.intendedUse}</p>
+          <p className="text-sm text-muted-foreground">
+            {predicate.intendedUse}
+          </p>
           <div className="flex items-center space-x-2">
             <span className="text-sm font-medium">Confidence:</span>
-            <Progress value={predicate.confidenceScore * 100} className="flex-1" />
-            <span className="text-sm">{Math.round(predicate.confidenceScore * 100)}%</span>
+            <Progress
+              value={predicate.confidenceScore * 100}
+              className="flex-1"
+            />
+            <span className="text-sm">
+              {Math.round(predicate.confidenceScore * 100)}%
+            </span>
           </div>
         </div>
       </CardContent>
@@ -255,6 +277,7 @@ export function PredicateResultCard({ predicate, onSelect }: PredicateResultCard
 ```
 
 ### Responsive Design Requirements
+
 - Mobile-first design approach
 - Support for tablet and desktop layouts
 - Accessible keyboard navigation
@@ -264,28 +287,33 @@ export function PredicateResultCard({ predicate, onSelect }: PredicateResultCard
 ## Security and Compliance Implementation
 
 ### Authentication Flow (Google OAuth 2.0)
+
 ```typescript
 // Next.js API route for OAuth callback
-import { NextApiRequest, NextApiResponse } from 'next';
-import { google } from 'googleapis';
+import { NextApiRequest, NextApiResponse } from "next";
+import { google } from "googleapis";
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse
+) {
+  if (req.method !== "POST") {
+    return res.status(405).json({ error: "Method not allowed" });
   }
-  
+
   try {
     // Implement OAuth flow with proper error handling
     // Store user session securely
     // Redirect to dashboard
   } catch (error) {
-    console.error('OAuth error:', error);
-    res.status(500).json({ error: 'Authentication failed' });
+    console.error("OAuth error:", error);
+    res.status(500).json({ error: "Authentication failed" });
   }
 }
 ```
 
 ### Audit Trail Implementation
+
 ```python
 from datetime import datetime
 from typing import Dict, Any, List
@@ -293,7 +321,7 @@ from typing import Dict, Any, List
 class AuditLogger:
     def __init__(self, db_connection):
         self.db = db_connection
-    
+
     async def log_agent_action(
         self,
         project_id: int,
@@ -309,13 +337,13 @@ class AuditLogger:
         """
         await self.db.execute(
             """
-            INSERT INTO agent_interactions 
-            (project_id, agent_action, input_data, output_data, 
+            INSERT INTO agent_interactions
+            (project_id, agent_action, input_data, output_data,
              confidence_score, sources, reasoning, created_at)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             """,
-            (project_id, action, json.dumps(input_data), 
-             json.dumps(output_data), confidence_score, 
+            (project_id, action, json.dumps(input_data),
+             json.dumps(output_data), confidence_score,
              json.dumps(sources), reasoning, datetime.utcnow())
         )
 ```
@@ -323,6 +351,7 @@ class AuditLogger:
 ## Testing Requirements
 
 ### Unit Testing Standards
+
 ```python
 # Example test for predicate search functionality
 import pytest
@@ -332,7 +361,7 @@ from backend.tools.fda_predicate_search import FDAPredicateSearchTool
 @pytest.mark.asyncio
 async def test_predicate_search_success():
     tool = FDAPredicateSearchTool()
-    
+
     with patch('backend.tools.fda_predicate_search.OpenFDAClient') as mock_client:
         mock_client.return_value.search_predicates.return_value = [
             FDASearchResult(
@@ -344,18 +373,19 @@ async def test_predicate_search_success():
                 confidence_score=0.85
             )
         ]
-        
+
         result = await tool._arun(
             device_description="Test device description",
             intended_use="Test indication"
         )
-        
+
         assert result["confidence_score"] >= 0.8
         assert len(result["predicates"]) > 0
         assert "reasoning" in result
 ```
 
 ### Integration Testing
+
 - Test complete workflows from UI to database
 - Validate FDA API integration with real data
 - Test agent conversation flows
@@ -365,6 +395,7 @@ async def test_predicate_search_success():
 ## Performance Requirements
 
 ### Response Time Targets
+
 - Device classification: < 2 seconds
 - Predicate search: < 10 seconds
 - Comparison analysis: < 5 seconds
@@ -372,6 +403,7 @@ async def test_predicate_search_success():
 - Chat responses: < 3 seconds
 
 ### Caching Strategy
+
 ```python
 import redis
 from typing import Optional, Dict, Any
@@ -380,17 +412,17 @@ class RegulatoryCache:
     def __init__(self, redis_client: redis.Redis):
         self.redis = redis_client
         self.default_ttl = 3600  # 1 hour
-    
+
     async def get_predicate_search(self, search_key: str) -> Optional[Dict[str, Any]]:
         """Get cached predicate search results"""
         cached = await self.redis.get(f"predicate_search:{search_key}")
         return json.loads(cached) if cached else None
-    
+
     async def set_predicate_search(self, search_key: str, results: Dict[str, Any]):
         """Cache predicate search results"""
         await self.redis.setex(
-            f"predicate_search:{search_key}", 
-            self.default_ttl, 
+            f"predicate_search:{search_key}",
+            self.default_ttl,
             json.dumps(results)
         )
 ```
@@ -398,6 +430,7 @@ class RegulatoryCache:
 ## Deployment and Monitoring
 
 ### Environment Configuration
+
 ```bash
 # .env.local (development)
 NEXTAUTH_URL=http://localhost:3000
@@ -410,6 +443,7 @@ REDIS_URL=redis://localhost:6379
 ```
 
 ### Health Check Endpoints
+
 ```python
 from fastapi import FastAPI, HTTPException
 from backend.services.health import HealthChecker
@@ -419,16 +453,16 @@ app = FastAPI()
 @app.get("/health")
 async def health_check():
     checker = HealthChecker()
-    
+
     health_status = await checker.check_all([
         "database",
         "fda_api",
         "redis_cache"
     ])
-    
+
     if not health_status["healthy"]:
         raise HTTPException(status_code=503, detail=health_status)
-    
+
     return health_status
 ```
 
