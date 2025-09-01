@@ -20,13 +20,13 @@ app.add_middleware(
 
 
 @app.get("/")
-async def root():
+async def root() -> dict[str, str]:
     """Health check endpoint."""
     return {"message": "Medical Device Regulatory Assistant API is running"}
 
 
 @app.get("/health")
-async def health_check():
+async def health_check() -> dict[str, str]:
     """Detailed health check endpoint."""
     return {
         "status": "healthy",

@@ -8,7 +8,7 @@ from backend.main import app
 client = TestClient(app)
 
 
-def test_root_endpoint():
+def test_root_endpoint() -> None:
     """Test the root endpoint returns correct message."""
     response = client.get("/")
     assert response.status_code == 200
@@ -17,7 +17,7 @@ def test_root_endpoint():
     }
 
 
-def test_health_check_endpoint():
+def test_health_check_endpoint() -> None:
     """Test the health check endpoint returns correct status."""
     response = client.get("/health")
     assert response.status_code == 200
@@ -27,7 +27,7 @@ def test_health_check_endpoint():
     assert data["version"] == "0.1.0"
 
 
-def test_cors_headers():
+def test_cors_headers() -> None:
     """Test CORS headers are properly configured."""
     response = client.get("/", headers={"Origin": "http://localhost:3000"})
     assert response.status_code == 200

@@ -4,7 +4,8 @@ version = "0.1.0"
 description = "Backend services for Medical Device Regulatory Assistant MVP"
 authors = ["Medical Device Regulatory Assistant Team"]
 readme = "README.md"
-packages = [{include = "backend", from = "."}]
+package-mode = false
+
 
 [tool.poetry.dependencies]
 python = "^3.11"
