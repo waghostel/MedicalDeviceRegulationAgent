@@ -2,6 +2,14 @@
 
 ## Development Standards and Best Practices
 
+### Package Manager Requirements
+
+- **Frontend/TypeScript**: Use `pnpm` instead of npm for all JavaScript/TypeScript projects
+- **Backend/Python**: Use `poetry` to manage Python dependencies and run commands
+- **Test Execution**: Always use `poetry run python -m pytest tests/test_file.py -v` for Python tests
+- **Development Workflow**: Follow Test-Driven Development (TDD) procedures
+- **Terminal Management**: Clear terminal before running new commands for clean output
+
 ### Code Quality Requirements
 
 - Follow TypeScript strict mode for all frontend code
@@ -13,23 +21,52 @@
 
 ### Project Structure Standards
 
-```
+```text
 project-root/
 ├── .kiro/
-│   ├── steering/           # Steering documents (this file)
-│   └── specs/             # Feature specifications
-├── frontend/              # Next.js React application
-│   ├── components/        # Reusable UI components
-│   ├── pages/            # Next.js pages
-│   ├── hooks/            # Custom React hooks
-│   └── utils/            # Frontend utilities
-├── backend/              # FastAPI Python services
-│   ├── agents/           # LangGraph agent implementations
-│   ├── tools/            # Agent tools (FDA API, document processing)
-│   ├── models/           # Data models and schemas
-│   └── services/         # Business logic services
-├── shared/               # Shared types and utilities
-└── docs/                # Technical documentation
+│   ├── steering/                    # Steering documents (this file)
+│   └── specs/                      # Feature specifications
+│       └── mvp-development/        # MVP task execution history
+│           └── task_execute_history/
+├── medical-device-regulatory-assistant/  # Main application
+│   ├── backend/                    # FastAPI Python services (Poetry managed)
+│   │   ├── agents/                 # LangGraph agent implementations
+│   │   ├── tools/                  # Agent tools (FDA API, document processing)
+│   │   ├── models/                 # Data models and schemas
+│   │   ├── services/               # Business logic services
+│   │   ├── tests/                  # Python test files
+│   │   ├── pyproject.toml          # Poetry configuration
+│   │   └── main.py                 # FastAPI entry point
+│   ├── src/                        # Next.js React application (pnpm managed)
+│   │   ├── components/             # Reusable UI components
+│   │   ├── pages/                  # Next.js pages
+│   │   ├── hooks/                  # Custom React hooks
+│   │   └── utils/                  # Frontend utilities
+│   ├── shared/                     # Shared types and utilities
+│   ├── package.json                # pnpm configuration
+│   └── pnpm-lock.yaml             # pnpm lock file
+├── frontend/                       # Alternative frontend (pnpm managed)
+└── docs/                          # Technical documentation
+```
+
+### Command Examples
+
+**Frontend Development (pnpm):**
+```bash
+cd medical-device-regulatory-assistant
+pnpm install
+pnpm dev
+pnpm test
+pnpm build
+```
+
+**Backend Development (Poetry):**
+```bash
+cd medical-device-regulatory-assistant/backend
+poetry install
+poetry run uvicorn main:app --reload
+poetry run python -m pytest tests/ -v
+poetry run python -m pytest tests/test_main.py -v
 ```
 
 ## Agent Architecture Guidelines

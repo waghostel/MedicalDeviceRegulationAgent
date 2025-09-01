@@ -100,17 +100,17 @@ medical-device-regulatory-assistant/
 ## Available Scripts
 
 ```bash
-npm run dev          # Start development server with Turbopack
-npm run build        # Build for production
-npm run start        # Start production server
-npm run lint         # Run ESLint
-npm run lint:fix     # Fix ESLint issues
-npm run format       # Format code with Prettier
-npm run format:check # Check code formatting
-npm run test         # Run unit tests
-npm run test:watch   # Run tests in watch mode
-npm run test:coverage # Run tests with coverage
-npm run type-check   # TypeScript type checking
+pnpm dev          # Start development server with Turbopack
+pnpm build        # Build for production
+pnpm start        # Start production server
+pnpm lint         # Run ESLint
+pnpm lint:fix     # Fix ESLint issues
+pnpm format       # Format code with Prettier
+pnpm format:check # Check code formatting
+pnpm test         # Run unit tests
+pnpm test:watch   # Run tests in watch mode
+pnpm test:coverage # Run tests with coverage
+pnpm type-check   # TypeScript type checking
 ```
 
 ## Next Steps
@@ -127,7 +127,7 @@ To run the project:
 
 1. Copy `.env.local.example` to `.env.local`
 2. Configure Google OAuth credentials
-3. Run `npm run dev` to start development server
+3. Run `pnpm dev` to start development server
 4. Visit `http://localhost:3000`
 
 ## Quality Metrics

@@ -62,13 +62,13 @@ The system is a full-stack application built with a modern, robust technology se
 ## 4. Getting Started
 
 ### Prerequisites
-- Node.js and pnpm
-- Python and Poetry
+- Node.js 18+ and pnpm 9+
+- Python 3.11+ and Poetry
 - Google OAuth 2.0 Credentials
 - FDA API Key
 
 ### Environment Setup
-Create a `.env.local` file in the root of the project and add the following variables:
+Create a `.env.local` file in the `medical-device-regulatory-assistant` directory and add the following variables:
 ```bash
 # .env.local
 NEXTAUTH_URL=http://localhost:3000
@@ -80,62 +80,59 @@ DATABASE_URL=sqlite:./dev.db
 REDIS_URL=redis://localhost:6379
 ```
 
-### Installation & Running
+### Development Workflow
 
-**1. Backend (FastAPI):**
+**Backend (Poetry):**
 ```bash
-cd backend
+cd medical-device-regulatory-assistant/backend
+# Install dependencies
 poetry install
+# Run the development server
 poetry run uvicorn main:app --reload
+# Run tests
+poetry run python -m pytest tests/ -v
 ```
 
-**2. Frontend (Next.js):**
+**Frontend (pnpm):**
 ```bash
-cd frontend
+cd medical-device-regulatory-assistant
+# Install dependencies
 pnpm install
+# Run the development server
 pnpm dev
+# Run tests
+pnpm test
 ```
 The application will be available at `http://localhost:3000`.
 
 ## 5. Project Structure
 
-The repository is organized into distinct frontend and backend services.
+The repository is organized into a main application folder, `medical-device-regulatory-assistant`, which contains the frontend and backend services.
 
 ```
 project-root/
+├── medical-device-regulatory-assistant/
+│   ├── backend/            # FastAPI Python services
+│   │   ├── agents/         # LangGraph agent implementations
+│   │   ├── tools/          # Agent tools (FDA API, document processing)
+│   │   ├── models/         # Data models and schemas
+│   │   └── services/       # Business logic services
+│   ├── src/                # Next.js frontend source
+│   │   ├── app/
+│   │   ├── components/
+│   │   └── ...
+│   └── package.json        # Frontend dependencies and scripts
 ├── .kiro/
 │   ├── steering/           # High-level steering documents
 │   └── specs/              # Detailed feature specifications
-├── frontend/               # Next.js React application
-│   ├── components/         # Reusable UI components
-│   ├── pages/              # Next.js pages
-│   ├── hooks/              # Custom React hooks
-│   └── utils/              # Frontend utilities
-├── backend/                # FastAPI Python services
-│   ├── agents/             # LangGraph agent implementations
-│   ├── tools/              # Agent tools (FDA API, document processing)
-│   ├── models/             # Data models and schemas
-│   └── services/           # Business logic services
-├── shared/                 # Shared types and utilities
 └── docs/                   # Technical documentation
 ```
 
 ## 6. Testing
 
-The project includes a comprehensive testing strategy:
-- **Backend**: Unit and integration tests using `pytest`.
-- **Frontend**: Component and integration tests using `React Testing Library` and `Jest`.
+The project includes a comprehensive testing strategy using `pytest` for the backend and `React Testing Library` with `Jest` for the frontend.
 
-To run tests:
-```bash
-# Backend tests
-cd backend
-poetry run pytest
-
-# Frontend tests
-cd frontend
-pnpm test
-```
+To run the tests, please see the commands provided in the **Development Workflow** section above.
 
 ## 7. Compliance and Safety
 
