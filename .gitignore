@@ -70,4 +70,4 @@ typings/
 !.env.example
 
 # Ignore folder
-ignore/
+.ignore/
