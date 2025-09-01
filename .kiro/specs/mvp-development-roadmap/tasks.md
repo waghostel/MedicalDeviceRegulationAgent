@@ -2,6 +2,68 @@
 
 Convert the Medical Device Regulatory Assistant MVP design into a series of prompts for a code-generation LLM that will implement each step in a test-driven manner. Prioritize best practices, incremental progress, and early testing, ensuring no big jumps in complexity at any stage. Make sure that each prompt builds on the previous prompts, and ends with wiring things together. There should be no hanging or orphaned code that isn't integrated into a previous step. Focus ONLY on tasks that involve writing, modifying, or testing code.
 
+Here’s a rinsed and cleaned-up version of your text, keeping the intent but making it more concise and structured:
+
+---
+
+### Development Rules
+
+* Use **`pnpm`** instead of npm for JavaScript/TypeScript.
+* Use **`poetry`** for Python commands (e.g. `poetry run python -m pytest tests/test_gemini_tts_service.py -v`).
+* Follow **Test-Driven Development (TDD)**.
+* Always **clear the terminal** before running a new command.
+* After reading this file, say: **"I will use poetry and pnpm"**.
+
+---
+
+### Workflow
+
+1. Create a code-writing plan for the task.
+2. Define the testing criteria.
+3. Fetch related documentation (context7) if needed.
+4. Implement the task/code.
+5. Run tests after completing the task.
+
+   * If tests fail, fetch additional documentation (context7).
+6. Write a **task report** in `.kiro/specs/mvp-development-roadmap/task-execute-history/` (e.g. `task-1.md`).
+
+   * Be transparent about test results, especially if some tests require future verification.
+
+---
+
+### Test-Driven Development (TDD)
+
+* **Pre-Development**: Clearly define expected test outcomes before coding.
+* **Post-Development**: Document all test results in the `task-execute-history` folder to ensure traceability.
+
+---
+
+### Task Report Format
+
+Each completed task requires a report:
+
+**Task Report**
+
+* **Task**: \[Task ID and Title]
+* **Summary of Changes**
+
+  * \[Brief description of change #1]
+  * \[Brief description of change #2]
+* **Test Plan & Results**
+
+  * **Unit Tests**: \[Description]
+
+    * Result: \[✔ All tests passed / ✘ Failures]
+  * **Integration Tests**: \[Description]
+
+    * Result: \[✔ Passed / ✘ Failures]
+  * **Manual Verification**: \[Steps & findings]
+
+    * Result: \[✔ Works as expected]
+* **Code Snippets (Optional)**: Show relevant diffs or highlights.
+
+---
+
 ## Phase 1: Frontend Foundation (Weeks 1-2)
 
 - [x] 1. Project Setup and Core Infrastructure
