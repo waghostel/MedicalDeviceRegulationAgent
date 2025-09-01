@@ -1,1 +1,1 @@
-"""Test package for Medical Device Regulatory Assistant Backend."""
+# Test package
