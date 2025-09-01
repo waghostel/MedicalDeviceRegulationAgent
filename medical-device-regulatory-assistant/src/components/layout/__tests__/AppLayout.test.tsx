@@ -77,8 +77,8 @@ describe('AppLayout', () => {
       </AppLayout>
     );
 
-    // There are two "Quick Actions" headings - one in sidebar, one in quick actions panel
-    expect(screen.getAllByText('Quick Actions')).toHaveLength(2);
+    // There are three "Quick Actions" headings - toolbar, sidebar, and quick actions panel
+    expect(screen.getAllByText('Quick Actions')).toHaveLength(3);
     expect(
       screen.getByText('Quick actions will be implemented in Phase 2')
     ).toBeInTheDocument();

@@ -3,30 +3,67 @@
 import React, { useState } from 'react';
 import { Header } from './Header';
 import { Sidebar } from './Sidebar';
+import { QuickActionsToolbar } from './QuickActionsToolbar';
+import { CommandPalette } from './CommandPalette';
+import { Breadcrumb, BreadcrumbItem } from './Breadcrumb';
+import { useKeyboardShortcuts, createRegulatoryShortcuts } from '@/hooks/useKeyboardShortcuts';
 import { cn } from '@/lib/utils';
 
 interface AppLayoutProps {
   children: React.ReactNode;
   showSidebar?: boolean;
   showQuickActions?: boolean;
+  showBreadcrumb?: boolean;
+  breadcrumbItems?: BreadcrumbItem[];
   className?: string;
+  onQuickAction?: (action: string) => void;
 }
 
 export const AppLayout: React.FC<AppLayoutProps> = ({
   children,
   showSidebar = true,
   showQuickActions = false,
+  showBreadcrumb = false,
+  breadcrumbItems = [],
   className,
+  onQuickAction,
 }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
   };
 
+  const openCommandPalette = () => {
+    setCommandPaletteOpen(true);
+  };
+
+  const closeCommandPalette = () => {
+    setCommandPaletteOpen(false);
+  };
+
+  const handleQuickAction = (action: string) => {
+    onQuickAction?.(action);
+  };
+
+  // Set up keyboard shortcuts
+  const shortcuts = createRegulatoryShortcuts({
+    openCommandPalette,
+    findPredicates: () => handleQuickAction('find-predicates'),
+    checkClassification: () => handleQuickAction('check-classification'),
+    generateChecklist: () => handleQuickAction('generate-checklist'),
+    exportReport: () => handleQuickAction('export-report'),
+  });
+
+  useKeyboardShortcuts({ shortcuts });
+
   return (
     <div className="min-h-screen bg-background">
       <Header onMenuToggle={toggleSidebar} showMenuButton={showSidebar} />
+      
+      {/* Quick Actions Toolbar */}
+      <QuickActionsToolbar onAction={handleQuickAction} />
 
       <div className="flex">
         {showSidebar && (
@@ -63,7 +100,15 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
             className
           )}
         >
-          <div className="container mx-auto p-6">{children}</div>
+          <div className="container mx-auto p-6">
+            {/* Breadcrumb Navigation */}
+            {showBreadcrumb && breadcrumbItems.length > 0 && (
+              <div className="mb-4">
+                <Breadcrumb items={breadcrumbItems} />
+              </div>
+            )}
+            {children}
+          </div>
         </main>
 
         {/* Quick Actions Panel (if enabled) */}
@@ -85,6 +130,13 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
           </aside>
         )}
       </div>
+
+      {/* Command Palette */}
+      <CommandPalette
+        isOpen={commandPaletteOpen}
+        onClose={closeCommandPalette}
+        onAction={handleQuickAction}
+      />
     </div>
   );
 };
