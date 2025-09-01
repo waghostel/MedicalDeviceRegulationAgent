@@ -3,12 +3,20 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { CommandPalette } from '../CommandPalette';
 
 // Mock window.location
-Object.defineProperty(window, 'location', {
-  value: {
-    href: '',
-  },
-  writable: true,
-});
+const mockLocation = {
+  href: '',
+  assign: jest.fn(),
+  replace: jest.fn(),
+  reload: jest.fn(),
+};
+
+// Only define if not already defined
+if (!window.location || typeof window.location.assign !== 'function') {
+  Object.defineProperty(window, 'location', {
+    value: mockLocation,
+    writable: true,
+  });
+}
 
 describe('CommandPalette', () => {
   const mockOnClose = jest.fn();
@@ -53,8 +61,11 @@ describe('CommandPalette', () => {
       />
     );
 
-    const closeButton = screen.getByRole('button', { name: /close/i });
-    fireEvent.click(closeButton);
+    // Find the close button - it's the button with the X icon
+    const buttons = screen.getAllByRole('button');
+    const closeButton = buttons.find(button => button.innerHTML.includes('lucide-x'));
+    expect(closeButton).toBeDefined();
+    fireEvent.click(closeButton!);
 
     expect(mockOnClose).toHaveBeenCalled();
   });

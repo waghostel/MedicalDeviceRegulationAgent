@@ -41,6 +41,21 @@ export const Header: React.FC<HeaderProps> = ({
           </Link>
         </div>
 
+        <nav className="hidden md:flex items-center space-x-6 text-sm font-medium">
+          <Link
+            href="/"
+            className="transition-colors hover:text-foreground/80 text-foreground/60"
+          >
+            Dashboard
+          </Link>
+          <Link
+            href="/agent"
+            className="transition-colors hover:text-foreground/80 text-foreground/60"
+          >
+            AI Assistant
+          </Link>
+        </nav>
+
         <div className="flex flex-1 items-center justify-between space-x-2 md:justify-end">
           <nav className="flex items-center space-x-2">
             <Button variant="ghost" size="sm">

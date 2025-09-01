@@ -57,7 +57,7 @@ describe('AppLayout', () => {
     );
 
     expect(screen.getByText('Navigation')).toBeInTheDocument();
-    expect(screen.getByText('Dashboard')).toBeInTheDocument();
+    expect(screen.getAllByText('Dashboard')).toHaveLength(2); // One in header, one in sidebar
   });
 
   it('hides sidebar when showSidebar is false', () => {
