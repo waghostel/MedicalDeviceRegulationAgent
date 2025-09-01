@@ -14,12 +14,7 @@ from database.connection import DatabaseManager
 from database.config import DatabaseConfig
 
 
-@pytest.fixture(scope="session")
-def event_loop():
-    """Create an instance of the default event loop for the test session."""
-    loop = asyncio.get_event_loop_policy().new_event_loop()
-    yield loop
-    loop.close()
+# Removed deprecated event_loop fixture - using pytest-asyncio defaults
 
 
 @pytest_asyncio.fixture(scope="function")

@@ -178,11 +178,6 @@ Each completed task requires a report:
 
 - [x] 9. Database Setup and Models
 
-
-
-t
-
-
   - Set up SQLite database with schema from design document
   - Create database migration system using Prisma or raw SQL migrations
   - Implement User, Project, DeviceClassification, PredicateDevice data models
@@ -194,10 +189,6 @@ t
 
 - [x] 10. FastAPI Backend Service Setup
 
-
-
-
-
   - Initialize FastAPI application with proper project structure (agents/, tools/, models/, services/)
   - Configure CORS middleware for Next.js frontend integration
   - Implement authentication middleware using JWT tokens from NextAuth
@@ -207,7 +198,10 @@ t
   - Write integration tests for FastAPI application setup and middleware
   - _Requirements: 11.1, 11.2, 11.3, 11.4, 11.5_
 
-- [ ] 11. Project Management API Endpoints
+- [-] 11. Project Management API Endpoints
+
+
+
 
   - Create ProjectService class with CRUD operations for projects
   - Implement REST API endpoints: GET/POST/PUT/DELETE /api/projects

@@ -24,6 +24,7 @@ from middleware.error_handling import (
 
 # Import API routes
 from api.health import router as health_router
+from api.projects import router as projects_router
 
 
 @asynccontextmanager
@@ -94,6 +95,7 @@ app.add_exception_handler(Exception, general_exception_handler)
 
 # Include API routers
 app.include_router(health_router, prefix="/api")
+app.include_router(projects_router, prefix="/api")
 
 # Root endpoint
 @app.get("/", tags=["root"])
