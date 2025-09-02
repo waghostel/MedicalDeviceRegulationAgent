@@ -14,10 +14,12 @@ import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useProjects } from '@/hooks/use-projects';
+import { useDashboard } from '@/hooks/use-dashboard';
 import { useToast } from '@/hooks/use-toast';
 import { useWebSocket } from '@/hooks/use-websocket';
 import { useOffline } from '@/hooks/use-offline';
 import { Project, ProjectStatus } from '@/types/project';
+import { RegulatoryDashboard } from '@/components/dashboard/regulatory-dashboard';
 int
 erface ProjectDetailPageProps {
   params: { id: string };
@@ -34,8 +36,26 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
   // Find the current project
   const project = projects.find(p => p.id === params.id);
 
-  // WebSocket connection for real-time updates
-  const { isConnected, lastMessage } = useWebSocket(`/projects/${params.id}`);
+  // Dashboard data and functionality
+  const {
+    data: dashboardData,
+    loading: dashboardLoading,
+    error: dashboardError,
+    isConnected,
+    refreshDashboard,
+    exportDashboard,
+    startClassification,
+    searchPredicates,
+    selectPredicate,
+    handleStepClick
+  } = useDashboard({ 
+    projectId: params.id,
+    autoRefresh: true,
+    refreshInterval: 30000
+  });
+
+  // WebSocket connection for real-time updates (legacy)
+  const { lastMessage } = useWebSocket(`/projects/${params.id}`);
 
   useEffect(() => {
     if (lastMessage) {
@@ -282,124 +302,21 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
           </Card>
         </div>
 
-        {/* Main Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Main Content Area */}
-          <div className="lg:col-span-2">
-            <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <TabsList className="grid w-full grid-cols-4">
-                <TabsTrigger value="overview">Overview</TabsTrigger>
-                <TabsTrigger value="classification">Classification</TabsTrigger>
-                <TabsTrigger value="predicates">Predicates</TabsTrigger>
-                <TabsTrigger value="documents">Documents</TabsTrigger>
-              </TabsList>
-              
-              <TabsContent value="overview" className="mt-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Project Overview</CardTitle>
-                    <CardDescription>
-                      Regulatory strategy and progress summary
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      <div>
-                        <h4 className="font-medium mb-2">Intended Use</h4>
-                        <p className="text-gray-600">
-                          {project.intendedUse || 'Not specified'}
-                        </p>
-                      </div>
-                      
-                      <div>
-                        <h4 className="font-medium mb-2">Progress</h4>
-                        <div className="space-y-2">
-                          <div className="flex justify-between text-sm">
-                            <span>Overall Completion</span>
-                            <span>25%</span>
-                          </div>
-                          <Progress value={25} className="h-2" />
-                        </div>
-                      </div>
-                      
-                      <div>
-                        <h4 className="font-medium mb-2">Next Steps</h4>
-                        <ul className="text-sm text-gray-600 space-y-1">
-                          <li>• Complete device classification</li>
-                          <li>• Identify predicate devices</li>
-                          <li>• Review FDA guidance documents</li>
-                          <li>• Prepare 510(k) submission checklist</li>
-                        </ul>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-              
-              <TabsContent value="classification" className="mt-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Device Classification</CardTitle>
-                    <CardDescription>
-                      FDA classification and regulatory pathway
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-center py-8">
-                      <p className="text-gray-500 mb-4">
-                        Device classification not yet performed
-                      </p>
-                      <Button>
-                        Start Classification Analysis
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-              
-              <TabsContent value="predicates" className="mt-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Predicate Devices</CardTitle>
-                    <CardDescription>
-                      510(k) predicate search and comparison
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-center py-8">
-                      <p className="text-gray-500 mb-4">
-                        No predicate devices identified yet
-                      </p>
-                      <Button>
-                        Search Predicates
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-              
-              <TabsContent value="documents" className="mt-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Documents</CardTitle>
-                    <CardDescription>
-                      Project documents and FDA guidance
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-center py-8">
-                      <p className="text-gray-500 mb-4">
-                        No documents uploaded yet
-                      </p>
-                      <Button>
-                        Upload Documents
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-            </Tabs>
-          </div>
+        {/* Main Content - Dashboard */}
+        <div className="w-full">
+          <RegulatoryDashboard
+            projectId={params.id}
+            dashboardData={dashboardData}
+            loading={dashboardLoading}
+            error={dashboardError}
+            onRefresh={refreshDashboard}
+            onExport={exportDashboard}
+            onStartClassification={startClassification}
+            onSearchPredicates={searchPredicates}
+            onSelectPredicate={selectPredicate}
+            onStepClick={handleStepClick}
+          />
+        </div>
 
           {/* Sidebar */}
           <div className="space-y-6">

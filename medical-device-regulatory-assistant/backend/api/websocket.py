@@ -222,6 +222,38 @@ async def notify_agent_interaction(project_id: int, user_id: str, interaction_da
     await manager.send_project_update(message, project_id, user_id)
 
 
+async def notify_dashboard_update(project_id: int, user_id: str, update_type: str, data: dict):
+    """Notify clients about dashboard updates."""
+    message = {
+        "type": "dashboard_update",
+        "update_type": update_type,
+        "data": data,
+        "project_id": project_id,
+        "timestamp": "2024-01-01T00:00:00Z"  # This would be actual timestamp
+    }
+    await manager.send_project_update(message, project_id, user_id)
+
+
+async def notify_progress_updated(project_id: int, user_id: str, progress_data: dict):
+    """Notify clients about progress updates."""
+    message = {
+        "type": "progress_updated",
+        "data": progress_data,
+        "timestamp": "2024-01-01T00:00:00Z"  # This would be actual timestamp
+    }
+    await manager.send_project_update(message, project_id, user_id)
+
+
+async def notify_activity_added(project_id: int, user_id: str, activity_data: dict):
+    """Notify clients about new activity."""
+    message = {
+        "type": "activity_added",
+        "data": activity_data,
+        "timestamp": "2024-01-01T00:00:00Z"  # This would be actual timestamp
+    }
+    await manager.send_project_update(message, project_id, user_id)
+
+
 # Export the manager for use in other modules
 __all__ = [
     "router",
@@ -229,5 +261,8 @@ __all__ = [
     "notify_project_updated",
     "notify_classification_completed", 
     "notify_predicate_search_completed",
-    "notify_agent_interaction"
+    "notify_agent_interaction",
+    "notify_dashboard_update",
+    "notify_progress_updated",
+    "notify_activity_added"
 ]

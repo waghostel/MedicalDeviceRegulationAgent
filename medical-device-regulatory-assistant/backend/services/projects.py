@@ -54,8 +54,15 @@ class ProjectResponse(BaseModel):
 
 
 class ProjectDashboardData(BaseModel):
-    """Dashboard data aggregation for a project."""
+    """Enhanced dashboard data aggregation for a project."""
     project: ProjectResponse
+    classification: Optional[Dict[str, Any]] = None
+    predicate_devices: List[Dict[str, Any]] = []
+    progress: Dict[str, Any] = {}
+    recent_activity: List[Dict[str, Any]] = []
+    statistics: Dict[str, Any] = {}
+    
+    # Legacy fields for backward compatibility
     classification_status: Optional[Dict[str, Any]] = None
     predicate_count: int = 0
     selected_predicates: int = 0
@@ -353,14 +360,14 @@ class ProjectService:
         user_id: str
     ) -> ProjectDashboardData:
         """
-        Get aggregated dashboard data for a project.
+        Get comprehensive dashboard data for a project.
         
         Args:
             project_id: Project ID
             user_id: ID of the authenticated user
             
         Returns:
-            ProjectDashboardData: Dashboard data
+            ProjectDashboardData: Enhanced dashboard data
             
         Raises:
             HTTPException: If project not found or access denied
@@ -393,30 +400,101 @@ class ProjectService:
                     detail="Project not found or access denied"
                 )
             
-            # Get classification status
-            classification_status = None
+            # Build comprehensive classification data
+            classification = None
             if project.device_classifications:
                 latest_classification = max(
                     project.device_classifications, 
                     key=lambda x: x.created_at
                 )
-                classification_status = {
-                    "device_class": latest_classification.device_class,
-                    "product_code": latest_classification.product_code,
-                    "regulatory_pathway": latest_classification.regulatory_pathway,
-                    "confidence_score": latest_classification.confidence_score,
-                    "created_at": latest_classification.created_at
+                classification = {
+                    "id": str(latest_classification.id),
+                    "projectId": str(project.id),
+                    "deviceClass": latest_classification.device_class,
+                    "productCode": latest_classification.product_code,
+                    "regulatoryPathway": latest_classification.regulatory_pathway,
+                    "cfrSections": latest_classification.cfr_sections or [],
+                    "confidenceScore": latest_classification.confidence_score or 0.0,
+                    "reasoning": latest_classification.reasoning or "",
+                    "sources": latest_classification.sources or [],
+                    "createdAt": latest_classification.created_at.isoformat(),
+                    "updatedAt": latest_classification.created_at.isoformat()
                 }
             
-            # Count predicates
-            predicate_count = len(project.predicate_devices)
-            selected_predicates = len([p for p in project.predicate_devices if p.is_selected])
+            # Build predicate devices data
+            predicate_devices = []
+            for predicate in project.predicate_devices:
+                predicate_devices.append({
+                    "id": str(predicate.id),
+                    "projectId": str(project.id),
+                    "kNumber": predicate.k_number,
+                    "deviceName": predicate.device_name,
+                    "intendedUse": predicate.intended_use or "",
+                    "productCode": predicate.product_code or "",
+                    "clearanceDate": predicate.clearance_date.isoformat() if predicate.clearance_date else "",
+                    "confidenceScore": predicate.confidence_score or 0.0,
+                    "comparisonData": predicate.comparison_data or {
+                        "similarities": [],
+                        "differences": [],
+                        "riskAssessment": "low",
+                        "testingRecommendations": [],
+                        "substantialEquivalenceAssessment": ""
+                    },
+                    "isSelected": predicate.is_selected,
+                    "createdAt": predicate.created_at.isoformat(),
+                    "updatedAt": predicate.created_at.isoformat()
+                })
             
-            # Count documents and interactions
-            document_count = len(project.documents)
-            interaction_count = len(project.agent_interactions)
+            # Build progress data
+            progress = self._calculate_project_progress(
+                project, classification, predicate_devices
+            )
             
-            # Get last activity
+            # Build recent activity
+            recent_activity = []
+            for interaction in sorted(project.agent_interactions, key=lambda x: x.created_at, reverse=True)[:10]:
+                activity_type = self._map_agent_action_to_activity_type(interaction.agent_action)
+                recent_activity.append({
+                    "id": str(interaction.id),
+                    "type": activity_type,
+                    "title": self._generate_activity_title(interaction.agent_action),
+                    "description": interaction.reasoning or f"Agent performed {interaction.agent_action}",
+                    "timestamp": interaction.created_at.isoformat(),
+                    "status": "success" if interaction.confidence_score and interaction.confidence_score > 0.7 else "info",
+                    "metadata": {
+                        "confidence_score": interaction.confidence_score,
+                        "execution_time_ms": interaction.execution_time_ms
+                    }
+                })
+            
+            # Build statistics
+            predicate_count = len(predicate_devices)
+            selected_predicates = len([p for p in predicate_devices if p["isSelected"]])
+            average_confidence = (
+                sum(p["confidenceScore"] for p in predicate_devices) / predicate_count
+                if predicate_count > 0 else 0.0
+            )
+            
+            statistics = {
+                "totalPredicates": predicate_count,
+                "selectedPredicates": selected_predicates,
+                "averageConfidence": average_confidence,
+                "completionPercentage": progress["overallProgress"],
+                "documentsCount": len(project.documents),
+                "agentInteractions": len(project.agent_interactions)
+            }
+            
+            # Legacy fields for backward compatibility
+            classification_status = None
+            if classification:
+                classification_status = {
+                    "device_class": classification["deviceClass"],
+                    "product_code": classification["productCode"],
+                    "regulatory_pathway": classification["regulatoryPathway"],
+                    "confidence_score": classification["confidenceScore"],
+                    "created_at": classification["createdAt"]
+                }
+            
             last_activity = None
             if project.agent_interactions:
                 last_activity = max(
@@ -424,20 +502,21 @@ class ProjectService:
                     key=lambda x: x.created_at
                 ).created_at
             
-            # Calculate completion percentage
-            completion_percentage = self._calculate_completion_percentage(
-                project, classification_status, selected_predicates, document_count
-            )
-            
             return ProjectDashboardData(
                 project=ProjectResponse.model_validate(project),
+                classification=classification,
+                predicate_devices=predicate_devices,
+                progress=progress,
+                recent_activity=recent_activity,
+                statistics=statistics,
+                # Legacy fields
                 classification_status=classification_status,
                 predicate_count=predicate_count,
                 selected_predicates=selected_predicates,
-                document_count=document_count,
-                interaction_count=interaction_count,
+                document_count=len(project.documents),
+                interaction_count=len(project.agent_interactions),
                 last_activity=last_activity,
-                completion_percentage=completion_percentage
+                completion_percentage=progress["overallProgress"]
             )
     
     async def export_project(
@@ -551,6 +630,121 @@ class ProjectService:
                 documents=documents,
                 interactions=interactions
             )
+    
+    def _calculate_project_progress(
+        self,
+        project: Project,
+        classification: Optional[Dict[str, Any]],
+        predicate_devices: List[Dict[str, Any]]
+    ) -> Dict[str, Any]:
+        """
+        Calculate comprehensive project progress data.
+        
+        Args:
+            project: Project instance
+            classification: Classification data
+            predicate_devices: List of predicate devices
+            
+        Returns:
+            Dict: Progress data with step-by-step completion
+        """
+        # Classification progress
+        classification_step = {
+            "status": "completed" if classification else "pending",
+            "confidenceScore": classification["confidenceScore"] if classification else None,
+            "completedAt": classification["createdAt"] if classification else None
+        }
+        
+        # Predicate search progress
+        predicate_search_step = {
+            "status": "completed" if predicate_devices else "pending",
+            "confidenceScore": (
+                sum(p["confidenceScore"] for p in predicate_devices) / len(predicate_devices)
+                if predicate_devices else None
+            ),
+            "completedAt": (
+                max(p["createdAt"] for p in predicate_devices)
+                if predicate_devices else None
+            )
+        }
+        
+        # Comparison analysis progress
+        selected_predicates = [p for p in predicate_devices if p["isSelected"]]
+        comparison_analysis_step = {
+            "status": "completed" if selected_predicates else "pending",
+            "confidenceScore": (
+                sum(p["confidenceScore"] for p in selected_predicates) / len(selected_predicates)
+                if selected_predicates else None
+            ),
+            "completedAt": (
+                max(p["createdAt"] for p in selected_predicates)
+                if selected_predicates else None
+            )
+        }
+        
+        # Submission readiness progress
+        has_classification = classification is not None
+        has_selected_predicates = len(selected_predicates) > 0
+        has_documents = len(project.documents) > 0
+        
+        submission_readiness_step = {
+            "status": "completed" if (has_classification and has_selected_predicates and has_documents) else "pending",
+            "confidenceScore": None,
+            "completedAt": None
+        }
+        
+        # Calculate overall progress
+        steps = [classification_step, predicate_search_step, comparison_analysis_step, submission_readiness_step]
+        completed_steps = len([s for s in steps if s["status"] == "completed"])
+        overall_progress = (completed_steps / len(steps)) * 100
+        
+        # Generate next actions
+        next_actions = []
+        if not classification:
+            next_actions.append("Complete device classification")
+        elif not predicate_devices:
+            next_actions.append("Search for predicate devices")
+        elif not selected_predicates:
+            next_actions.append("Select and analyze predicate devices")
+        elif not has_documents:
+            next_actions.append("Upload supporting documents")
+        else:
+            next_actions.append("Review submission readiness")
+        
+        return {
+            "projectId": str(project.id),
+            "classification": classification_step,
+            "predicateSearch": predicate_search_step,
+            "comparisonAnalysis": comparison_analysis_step,
+            "submissionReadiness": submission_readiness_step,
+            "overallProgress": overall_progress,
+            "nextActions": next_actions,
+            "lastUpdated": datetime.utcnow().isoformat()
+        }
+    
+    def _map_agent_action_to_activity_type(self, agent_action: str) -> str:
+        """Map agent action to activity type."""
+        action_mapping = {
+            "classify_device": "classification",
+            "search_predicates": "predicate_search",
+            "compare_predicate": "comparison",
+            "process_document": "document_upload",
+            "predicate_search": "predicate_search",
+            "device_classification": "classification"
+        }
+        return action_mapping.get(agent_action, "agent_interaction")
+    
+    def _generate_activity_title(self, agent_action: str) -> str:
+        """Generate human-readable activity title."""
+        title_mapping = {
+            "classify_device": "Device Classification Completed",
+            "search_predicates": "Predicate Search Performed",
+            "compare_predicate": "Predicate Comparison Analysis",
+            "process_document": "Document Processed",
+            "predicate_search": "Predicate Search Completed",
+            "device_classification": "Device Classification Analysis"
+        }
+        return title_mapping.get(agent_action, f"Agent Action: {agent_action}")
     
     def _calculate_completion_percentage(
         self, 
