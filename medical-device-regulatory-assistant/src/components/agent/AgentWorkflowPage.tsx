@@ -9,6 +9,8 @@ import { Button } from '@/components/ui/button';
 import { SlashCommandGrid } from '@/components/ui/slash-command-card';
 import { useProjectContext } from '@/components/providers/ProjectContextProvider';
 import { ProjectContext } from '@/types/copilot';
+import { useAgentExecution } from '@/hooks/useAgentExecution';
+import { AgentExecutionStatusComponent } from './AgentExecutionStatus';
 
 interface AgentWorkflowPageProps {
   projectId?: string;
@@ -26,9 +28,50 @@ export function AgentWorkflowPage({ projectId, initialProject }: AgentWorkflowPa
     }
   }, [initialProject, setProject]);
 
+  // Agent execution hook
+  const {
+    status: agentStatus,
+    isExecuting,
+    result: agentResult,
+    executeTask,
+    cancelExecution
+  } = useAgentExecution({
+    onStatusUpdate: (status) => {
+      console.log('Agent status update:', status);
+    },
+    onComplete: (result) => {
+      console.log('Agent task completed:', result);
+      // Add result to conversation
+      const assistantMessage = {
+        id: `msg-${Date.now()}-assistant`,
+        role: 'assistant' as const,
+        content: `Task completed: ${result.taskType}`,
+        timestamp: new Date(),
+        projectId: state.currentProject?.id,
+        confidence: result.confidence,
+        sources: result.sources,
+        executionTime: result.executionTime
+      };
+      addMessage(assistantMessage);
+    },
+    onError: (error) => {
+      console.error('Agent execution error:', error);
+      // Add error message to conversation
+      const errorMessage = {
+        id: `msg-${Date.now()}-error`,
+        role: 'assistant' as const,
+        content: `Error: ${error}`,
+        timestamp: new Date(),
+        projectId: state.currentProject?.id,
+        isError: true
+      };
+      addMessage(errorMessage);
+    },
+    enableRealTimeUpdates: true
+  });
+
   const handleExecuteCommand = async (command: string) => {
     if (!state.currentProject) {
-      // Show error or prompt to select project
       console.warn('No project selected for command execution');
       return;
     }
@@ -47,9 +90,18 @@ export function AgentWorkflowPage({ projectId, initialProject }: AgentWorkflowPa
     addMessage(userMessage);
 
     try {
-      // This will be handled by CopilotKit's chat interface
-      // For now, we'll simulate the command execution
-      await simulateCommandExecution(command);
+      // Parse command to determine task type
+      const taskType = parseCommandToTaskType(command);
+      const parameters = parseCommandParameters(command);
+      
+      // Execute through agent
+      await executeTask(taskType, parameters, {
+        projectId: state.currentProject.id,
+        deviceDescription: state.currentProject.description,
+        intendedUse: state.currentProject.intendedUse,
+        deviceType: state.currentProject.deviceType
+      });
+      
     } catch (error) {
       console.error('Command execution failed:', error);
     } finally {
@@ -57,21 +109,36 @@ export function AgentWorkflowPage({ projectId, initialProject }: AgentWorkflowPa
     }
   };
 
-  const simulateCommandExecution = async (command: string) => {
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
+  const parseCommandToTaskType = (command: string): string => {
+    if (command.includes('/predicate-search') || command.includes('predicate')) {
+      return 'predicate_search';
+    } else if (command.includes('/classify-device') || command.includes('classify')) {
+      return 'device_classification';
+    } else if (command.includes('/compare-predicate') || command.includes('compare')) {
+      return 'predicate_comparison';
+    } else if (command.includes('/find-guidance') || command.includes('guidance')) {
+      return 'guidance_search';
+    }
+    return 'predicate_search'; // Default
+  };
+
+  const parseCommandParameters = (command: string): Record<string, any> => {
+    // Simple parameter parsing - in production, you'd want more sophisticated parsing
+    const params: Record<string, any> = {};
     
-    // Add assistant response
-    const assistantMessage = {
-      id: `msg-${Date.now()}-assistant`,
-      role: 'assistant' as const,
-      content: `Executing ${command} for project: ${state.currentProject?.name}`,
-      timestamp: new Date(),
-      projectId: state.currentProject?.id,
-      confidence: 0.85
-    };
+    // Extract K-number for comparison
+    const kNumberMatch = command.match(/K\d{6}/);
+    if (kNumberMatch) {
+      params.predicate_k_number = kNumberMatch[0];
+    }
     
-    addMessage(assistantMessage);
+    // Extract product code
+    const productCodeMatch = command.match(/product[_\s]code[:\s]+([A-Z]{3})/i);
+    if (productCodeMatch) {
+      params.product_code = productCodeMatch[1];
+    }
+    
+    return params;
   };
 
   return (
@@ -130,6 +197,15 @@ export function AgentWorkflowPage({ projectId, initialProject }: AgentWorkflowPa
                     </div>
                   </CardContent>
                 </Card>
+
+                {/* Agent Execution Status */}
+                {(isExecuting || agentStatus.status !== 'idle') && (
+                  <AgentExecutionStatusComponent
+                    status={agentStatus}
+                    onCancel={isExecuting ? () => cancelExecution('User cancelled') : undefined}
+                    showDetails={true}
+                  />
+                )}
 
                 {/* Quick Actions */}
                 <div>

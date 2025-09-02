@@ -37,6 +37,7 @@ nltk = "^3.9.1"
 beautifulsoup4 = "^4.13.5"
 requests-cache = "^1.2.1"
 pypdf = "^6.0.0"
+sse-starlette = "^3.0.2"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.0"
