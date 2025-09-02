@@ -326,6 +326,12 @@ class ToolRegistry:
         except ImportError:
             device_classification_available = False
         
+        try:
+            from .fda_predicate_search_tool import FDAPredicateSearchTool
+            predicate_search_available = True
+        except ImportError:
+            predicate_search_available = False
+        
         # Register Device Classification Tool (implemented)
         if device_classification_available:
             self.register_tool(
@@ -337,15 +343,19 @@ class ToolRegistry:
                 timeout=30
             )
         
+        # Register FDA Predicate Search Tool (implemented)
+        if predicate_search_available:
+            self.register_tool(
+                name="fda_predicate_search",
+                description="Search FDA 510(k) database for predicate devices with comprehensive analysis",
+                tool_class=FDAPredicateSearchTool,
+                dependencies=[],
+                rate_limit=240,  # FDA API limit
+                timeout=60
+            )
+        
         # Register placeholder tools for not yet implemented tools
         placeholder_tools = [
-            {
-                "name": "fda_predicate_search",
-                "description": "Search FDA 510(k) database for predicate devices",
-                "dependencies": [],
-                "rate_limit": 240,  # FDA API limit
-                "timeout": 60
-            },
             {
                 "name": "predicate_comparison",
                 "description": "Compare devices with predicate devices for substantial equivalence",
