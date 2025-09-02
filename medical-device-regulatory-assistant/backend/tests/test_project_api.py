@@ -12,9 +12,23 @@ from services.projects import ProjectCreateRequest, ProjectResponse, ProjectStat
 
 
 @pytest.fixture
-def client():
-    """Create test client"""
-    return TestClient(app)
+def client(mock_user):
+    """Create test client with mocked authentication"""
+    from api.projects import get_current_user
+    from services.projects import ProjectService
+    
+    # Override dependencies
+    def override_get_current_user():
+        return mock_user
+    
+    app.dependency_overrides[get_current_user] = override_get_current_user
+    
+    client = TestClient(app)
+    
+    yield client
+    
+    # Clean up
+    app.dependency_overrides.clear()
 
 
 @pytest.fixture
@@ -46,12 +60,10 @@ def mock_project_response():
 class TestProjectAPI:
     """Test cases for Project API endpoints"""
     
-    @patch('api.projects.get_current_user')
-    @patch('api.projects.ProjectService')
-    def test_create_project_success(self, mock_service_class, mock_get_user, client, mock_user, mock_project_response):
+    @patch('services.projects.ProjectService')
+    def test_create_project_success(self, mock_service_class, client, mock_user, mock_project_response):
         """Test successful project creation via API"""
         # Setup mocks
-        mock_get_user.return_value = mock_user
         mock_service = AsyncMock()
         mock_service.create_project.return_value = mock_project_response
         mock_service_class.return_value = mock_service

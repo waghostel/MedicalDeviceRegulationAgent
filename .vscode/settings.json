@@ -1,2 +1,22 @@
 {
+    "kiroAgent.trustedCommands": [
+        "cls",
+        "pnpm test *",
+        "pnpm jest *",
+        "pnpm add *",
+        "poetry run *",
+        "poetry run *",
+        "pnpm jest *",
+        "python *",
+        "pip *",
+        "pnpm *",
+        "poetry *",
+        "timeout *",
+        "npx *",
+        "poetry run *",
+        "poetry run python c *",
+        "python -c *",
+        "node *"
+    ],
+    "typescript.autoClosingTags": false
 }

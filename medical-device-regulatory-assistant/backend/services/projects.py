@@ -229,6 +229,22 @@ class ProjectService:
             await session.commit()
             await session.refresh(project)
             
+            # Send WebSocket notification
+            try:
+                from api.websocket import notify_project_updated
+                project_response = ProjectResponse.model_validate(project)
+                await notify_project_updated(
+                    project_id=project.id,
+                    user_id=user_id,
+                    data=project_response.model_dump()
+                )
+            except ImportError:
+                # WebSocket module not available, skip notification
+                pass
+            except Exception as e:
+                # Log error but don't fail the update
+                print(f"Failed to send WebSocket notification: {e}")
+            
             return ProjectResponse.model_validate(project)
     
     async def delete_project(

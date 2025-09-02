@@ -292,7 +292,15 @@ Each completed task requires a report:
 
 ## Phase 5: Integration and Testing (Weeks 9-10)
 
-- [ ] 17. Frontend-Backend API Integration
+- [x] 17. Frontend-Backend API Integration
+
+
+
+
+
+
+
+
 
   - Connect Project Management UI to FastAPI backend endpoints
   - Implement error handling and loading states for all API calls

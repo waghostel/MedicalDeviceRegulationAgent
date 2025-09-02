@@ -101,3 +101,8 @@ async def get_optional_user(
         return auth_service.verify_token(credentials.credentials)
     except HTTPException:
         return None
+
+
+async def get_current_user_ws(token: str) -> TokenData:
+    """Get current user for WebSocket connections."""
+    return auth_service.verify_token(token)
