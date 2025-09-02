@@ -319,17 +319,26 @@ class ToolRegistry:
     def _register_default_tools(self) -> None:
         """Register default regulatory tools"""
         
-        # Note: These are placeholder registrations
-        # Actual tool classes will be implemented in separate files
+        # Import actual tool implementations
+        try:
+            from .device_classification_tool import DeviceClassificationTool
+            device_classification_available = True
+        except ImportError:
+            device_classification_available = False
         
-        default_tools = [
-            {
-                "name": "device_classification",
-                "description": "Classify medical devices and determine FDA product codes",
-                "dependencies": [],
-                "rate_limit": 60,  # 60 requests per minute
-                "timeout": 30
-            },
+        # Register Device Classification Tool (implemented)
+        if device_classification_available:
+            self.register_tool(
+                name="device_classification",
+                description="Classify medical devices and determine FDA product codes, regulatory pathways, and CFR sections",
+                tool_class=DeviceClassificationTool,
+                dependencies=[],
+                rate_limit=60,  # 60 requests per minute
+                timeout=30
+            )
+        
+        # Register placeholder tools for not yet implemented tools
+        placeholder_tools = [
             {
                 "name": "fda_predicate_search",
                 "description": "Search FDA 510(k) database for predicate devices",
@@ -361,11 +370,11 @@ class ToolRegistry:
         ]
         
         # Register placeholder tools (will be replaced with actual implementations)
-        for tool_config in default_tools:
+        for tool_config in placeholder_tools:
             # Create a placeholder tool class
             class PlaceholderTool(BaseTool):
-                name = tool_config["name"]
-                description = tool_config["description"]
+                name: str = tool_config["name"]
+                description: str = tool_config["description"]
                 
                 def _run(self, **kwargs: Any) -> Dict[str, Any]:
                     return {"status": "placeholder", "message": f"Tool {self.name} not yet implemented"}
