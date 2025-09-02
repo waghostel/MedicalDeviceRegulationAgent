@@ -65,3 +65,71 @@ export interface ExpandedReasoning {
   conclusion: string;
   limitations: string[];
 }
+
+export interface ComplianceMetrics {
+  reasoning_completeness: number;
+  citation_completeness: number;
+  confidence_score_coverage: number;
+  average_confidence: number;
+  action_distribution: Record<string, number>;
+  error_rate: number;
+  total_entries_analyzed: number;
+}
+
+export interface ComplianceReport {
+  report_metadata: {
+    project_id: number;
+    report_type: string;
+    generated_at: string;
+    generated_by: string;
+    total_entries: number;
+  };
+  compliance_metrics: ComplianceMetrics;
+  audit_summary: {
+    total_interactions: number;
+    action_counts: Record<string, number>;
+    average_confidence: number;
+    total_execution_time: number;
+    average_execution_time: number;
+    error_count: number;
+    error_rate: number;
+    date_range?: {
+      start: string;
+      end: string;
+    };
+  };
+  integrity_verification?: AuditIntegrityResult;
+  regulatory_compliance: {
+    fda_traceability: boolean;
+    complete_reasoning_traces: boolean;
+    source_citations_complete: boolean;
+    confidence_scores_present: boolean;
+  };
+  detailed_entries?: AgentInteraction[];
+}
+
+export interface AuditIntegrityResult {
+  is_valid: boolean;
+  total_entries: number;
+  verified_entries: number;
+  tampered_entries: number[];
+  integrity_score: number;
+  verification_timestamp: string;
+  hash_algorithm: string;
+}
+
+export interface AuditLogFilter {
+  projectId?: string;
+  userId?: number;
+  agentAction?: string;
+  dateRange?: {
+    start: Date;
+    end: Date;
+  };
+  confidenceRange?: {
+    min: number;
+    max: number;
+  };
+  status?: AgentInteraction['status'];
+  searchTerm?: string;
+}

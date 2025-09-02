@@ -33,6 +33,8 @@ import { AgentInteraction, AuditLogFilter } from '@/types/audit';
 import { AuditLogFilters } from './AuditLogFilters';
 import { AgentInteractionCard } from './AgentInteractionCard';
 import { AuditLogExport } from './AuditLogExport';
+import { auditAPI, AuditTrailResponse } from '@/lib/api/audit';
+import { useToast } from '@/hooks/use-toast';
 
 interface AuditLogPageProps {
   projectId?: string;
@@ -41,81 +43,105 @@ interface AuditLogPageProps {
 export function AuditLogPage({ projectId }: AuditLogPageProps) {
   const [interactions, setInteractions] = useState<AgentInteraction[]>([]);
   const [filteredInteractions, setFilteredInteractions] = useState<AgentInteraction[]>([]);
+  const [auditSummary, setAuditSummary] = useState<AuditTrailResponse['summary'] | null>(null);
   const [filters, setFilters] = useState<AuditLogFilter>({});
   const [searchTerm, setSearchTerm] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [showFilters, setShowFilters] = useState(false);
   const [showExport, setShowExport] = useState(false);
+  const { toast } = useToast();
 
-  // Mock data for development - replace with actual API calls
+  // Load audit trail data from API
   useEffect(() => {
-    const mockInteractions: AgentInteraction[] = [
-      {
-        id: '1',
-        projectId: projectId || 'project-1',
-        userId: 'user-1',
-        agentAction: 'predicate-search',
-        inputData: {
-          deviceDescription: 'Cardiac monitoring device',
-          intendedUse: 'Continuous ECG monitoring for arrhythmia detection'
-        },
-        outputData: {
-          predicates: [
-            { kNumber: 'K123456', deviceName: 'CardioWatch Pro', confidenceScore: 0.89 }
-          ]
-        },
-        confidenceScore: 0.89,
-        sources: [
-          {
-            url: 'https://www.accessdata.fda.gov/scripts/cdrh/cfdocs/cfpmn/pmn.cfm?ID=K123456',
-            title: 'CardioWatch Pro 510(k) Summary',
-            effectiveDate: '2023-01-15',
-            documentType: 'FDA_510K',
-            accessedDate: '2024-01-20'
-          }
-        ],
-        reasoning: 'Device shows high similarity in intended use and technological characteristics. Both devices use similar ECG sensor technology and arrhythmia detection algorithms.',
-        executionTimeMs: 2340,
-        createdAt: new Date('2024-01-20T10:30:00Z'),
-        status: 'completed'
-      },
-      {
-        id: '2',
-        projectId: projectId || 'project-1',
-        userId: 'user-1',
-        agentAction: 'classify-device',
-        inputData: {
-          deviceDescription: 'Cardiac monitoring device with AI-powered analysis',
-          intendedUse: 'Real-time arrhythmia detection and alert system'
-        },
-        outputData: {
-          deviceClass: 'II',
-          productCode: 'DPS',
-          regulatoryPathway: '510k'
-        },
-        confidenceScore: 0.92,
-        sources: [
-          {
-            url: 'https://www.accessdata.fda.gov/scripts/cdrh/cfdocs/cfcfr/CFRSearch.cfm?fr=870.2300',
-            title: 'CFR 870.2300 - Electrocardiograph',
-            effectiveDate: '2023-03-01',
-            documentType: 'CFR_SECTION',
-            accessedDate: '2024-01-20'
-          }
-        ],
-        reasoning: 'Based on intended use for arrhythmia detection, device falls under Class II medical device category with product code DPS (Arrhythmia Detector and Alarm).',
-        executionTimeMs: 1850,
-        createdAt: new Date('2024-01-20T09:15:00Z'),
-        status: 'completed'
-      }
-    ];
+    const loadAuditTrail = async () => {
+      if (!projectId) return;
 
-    setTimeout(() => {
-      setInteractions(mockInteractions);
-      setFilteredInteractions(mockInteractions);
-      setIsLoading(false);
-    }, 1000);
-  }, [projectId]);
+      try {
+        setIsLoading(true);
+        const response = await auditAPI.getAuditTrail(parseInt(projectId), filters);
+        
+        setInteractions(response.audit_entries);
+        setAuditSummary(response.summary);
+        
+        // Set up real-time updates
+        const unsubscribe = auditAPI.subscribeToAuditUpdates(
+          parseInt(projectId),
+          (newInteraction) => {
+            setInteractions(prev => [newInteraction, ...prev]);
+            toast({
+              title: "New Audit Entry",
+              description: `${newInteraction.agentAction} completed`,
+            });
+          },
+          (error) => {
+            console.error('Audit stream error:', error);
+            toast({
+              title: "Connection Error",
+              description: "Lost connection to audit stream",
+              variant: "destructive",
+            });
+          }
+        );
+
+        return unsubscribe;
+      } catch (error) {
+        console.error('Failed to load audit trail:', error);
+        toast({
+          title: "Error",
+          description: "Failed to load audit trail",
+          variant: "destructive",
+        });
+        
+        // Fallback to mock data for development
+        const mockInteractions: AgentInteraction[] = [
+          {
+            id: '1',
+            projectId: projectId || 'project-1',
+            userId: 'user-1',
+            agentAction: 'predicate-search',
+            inputData: {
+              deviceDescription: 'Cardiac monitoring device',
+              intendedUse: 'Continuous ECG monitoring for arrhythmia detection'
+            },
+            outputData: {
+              predicates: [
+                { kNumber: 'K123456', deviceName: 'CardioWatch Pro', confidenceScore: 0.89 }
+              ]
+            },
+            confidenceScore: 0.89,
+            sources: [
+              {
+                url: 'https://www.accessdata.fda.gov/scripts/cdrh/cfdocs/cfpmn/pmn.cfm?ID=K123456',
+                title: 'CardioWatch Pro 510(k) Summary',
+                effectiveDate: '2023-01-15',
+                documentType: 'FDA_510K',
+                accessedDate: '2024-01-20'
+              }
+            ],
+            reasoning: 'Device shows high similarity in intended use and technological characteristics. Both devices use similar ECG sensor technology and arrhythmia detection algorithms.',
+            executionTimeMs: 2340,
+            createdAt: new Date('2024-01-20T10:30:00Z'),
+            status: 'completed'
+          }
+        ];
+        
+        setInteractions(mockInteractions);
+        setAuditSummary({
+          total_interactions: 1,
+          action_counts: { 'predicate-search': 1 },
+          average_confidence: 0.89,
+          total_execution_time: 2340,
+          average_execution_time: 2340,
+          error_count: 0,
+          error_rate: 0
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadAuditTrail();
+  }, [projectId, filters, toast]);
 
   // Filter interactions based on search term and filters
   useEffect(() => {
@@ -253,7 +279,9 @@ export function AuditLogPage({ projectId }: AuditLogPageProps) {
               <Activity className="h-4 w-4 text-blue-500" />
               <div>
                 <p className="text-sm font-medium">Total Interactions</p>
-                <p className="text-2xl font-bold">{interactions.length}</p>
+                <p className="text-2xl font-bold">
+                  {auditSummary?.total_interactions || interactions.length}
+                </p>
               </div>
             </div>
           </CardContent>
@@ -266,7 +294,10 @@ export function AuditLogPage({ projectId }: AuditLogPageProps) {
               <div>
                 <p className="text-sm font-medium">Avg Response Time</p>
                 <p className="text-2xl font-bold">
-                  {Math.round(interactions.reduce((acc, i) => acc + i.executionTimeMs, 0) / interactions.length / 1000)}s
+                  {auditSummary?.average_execution_time 
+                    ? Math.round(auditSummary.average_execution_time / 1000) 
+                    : Math.round(interactions.reduce((acc, i) => acc + i.executionTimeMs, 0) / interactions.length / 1000) || 0
+                  }s
                 </p>
               </div>
             </div>
@@ -280,7 +311,10 @@ export function AuditLogPage({ projectId }: AuditLogPageProps) {
               <div>
                 <p className="text-sm font-medium">Avg Confidence</p>
                 <p className="text-2xl font-bold">
-                  {Math.round(interactions.reduce((acc, i) => acc + i.confidenceScore, 0) / interactions.length * 100)}%
+                  {auditSummary?.average_confidence 
+                    ? Math.round(auditSummary.average_confidence * 100)
+                    : Math.round(interactions.reduce((acc, i) => acc + i.confidenceScore, 0) / interactions.length * 100) || 0
+                  }%
                 </p>
               </div>
             </div>
@@ -294,7 +328,10 @@ export function AuditLogPage({ projectId }: AuditLogPageProps) {
               <div>
                 <p className="text-sm font-medium">Success Rate</p>
                 <p className="text-2xl font-bold">
-                  {Math.round(interactions.filter(i => i.status === 'completed').length / interactions.length * 100)}%
+                  {auditSummary 
+                    ? Math.round((1 - auditSummary.error_rate / 100) * 100)
+                    : Math.round(interactions.filter(i => i.status === 'completed').length / interactions.length * 100) || 0
+                  }%
                 </p>
               </div>
             </div>
