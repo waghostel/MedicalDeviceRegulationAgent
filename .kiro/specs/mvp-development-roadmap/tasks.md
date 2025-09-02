@@ -9,7 +9,8 @@ Here’s a rinsed and cleaned-up version of your text, keeping the intent but ma
 ### Development Rules
 
 * Use **`pnpm`** instead of npm for JavaScript/TypeScript.
-* Use **`poetry`** for Python commands (e.g. `poetry run python -m pytest tests/test_gemini_tts_service.py -v`).
+* Use **`poetry`** for Python commands (e.g. `poetry run python test_document_tool.py`).
+* Create the test script and run it instead of run it directly with `poetry run python -c` 
 * Follow **Test-Driven Development (TDD)**.
 * Always **clear the terminal** before running a new command.
 * After reading this file, say: **"I will use poetry and pnpm"**.
@@ -273,7 +274,12 @@ Each completed task requires a report:
   - Write comprehensive unit tests for predicate search with mock FDA data
   - _Requirements: 9.1, 9.2, 9.3, 9.4, 9.5_
 
-- [ ] 16. Document Processing and Analysis Tools
+- [x] 16. Document Processing and Analysis Tools
+
+
+
+
+
 
   - Create DocumentProcessingTool for PDF/DOCX to markdown conversion
   - Implement OCR functionality for scanned FDA guidance documents

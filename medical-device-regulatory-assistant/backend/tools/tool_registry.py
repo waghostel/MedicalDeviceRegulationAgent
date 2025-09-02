@@ -354,6 +354,23 @@ class ToolRegistry:
                 timeout=60
             )
         
+        # Register Document Processing Tool (implemented)
+        try:
+            from .document_processing_tool import DocumentProcessingTool
+            document_processing_available = True
+        except ImportError:
+            document_processing_available = False
+        
+        if document_processing_available:
+            self.register_tool(
+                name="document_processing",
+                description="Process regulatory documents including PDF/DOCX conversion, OCR, NLP extraction, search, and summarization",
+                tool_class=DocumentProcessingTool,
+                dependencies=[],
+                rate_limit=30,  # 30 requests per minute for document processing
+                timeout=120  # 2 minutes for complex document processing
+            )
+        
         # Register placeholder tools for not yet implemented tools
         placeholder_tools = [
             {
@@ -366,16 +383,9 @@ class ToolRegistry:
             {
                 "name": "guidance_document_search",
                 "description": "Search FDA guidance documents for regulatory requirements",
-                "dependencies": [],
+                "dependencies": ["document_processing"],
                 "rate_limit": 60,
                 "timeout": 30
-            },
-            {
-                "name": "document_processor",
-                "description": "Process and extract information from regulatory documents",
-                "dependencies": [],
-                "rate_limit": 30,
-                "timeout": 120
             }
         ]
         
