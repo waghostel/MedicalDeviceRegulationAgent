@@ -412,3 +412,17 @@ Each completed task requires a report:
   - Implement health checks and graceful shutdown procedures
   - Write deployment documentation and runbooks for production operations
   - _Requirements: Production deployment and monitoring_
+
+
+
+- [x] 25. Create startup scripts for Windows system
+
+
+
+
+
+  - Detect and confirm which terminal and version is being used (e.g., cmd.exe or PowerShell)
+  - Provide a script to start the frontend
+  - Provide a script to start the backend
+  - Provide a master script that launches both frontend and backend together
+  - Document in Readme.md on when to use `.bat` vs `.ps1` and how to run them
