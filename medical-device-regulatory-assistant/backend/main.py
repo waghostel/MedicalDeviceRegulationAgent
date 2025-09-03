@@ -10,6 +10,7 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 
 # Import middleware
 from middleware.logging import RequestLoggingMiddleware
+from middleware.compression import CompressionMiddleware
 from middleware.error_handling import (
     RegulatoryAssistantError,
     FDAAPIError,
@@ -84,6 +85,9 @@ app.add_middleware(
     allow_headers=["*"],
     expose_headers=["X-Request-ID", "X-Process-Time"],
 )
+
+# Add performance middleware
+app.add_middleware(CompressionMiddleware, minimum_size=1024, compression_level=6)
 
 # Add request logging middleware
 app.add_middleware(RequestLoggingMiddleware)
