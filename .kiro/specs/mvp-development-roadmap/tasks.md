@@ -7,12 +7,23 @@ Here’s a rinsed and cleaned-up version of your text, keeping the intent but ma
 ---
 
 ### Development Rules
-
 * Use **`pnpm`** instead of npm for JavaScript/TypeScript.
 * Use **`poetry`** for Python commands (e.g. `poetry run python test_document_tool.py`).
 * Create the test script and run it instead of run it directly with `poetry run python -c` 
 * Follow **Test-Driven Development (TDD)**.
-* Always **clear the terminal** before running a new command. Type two commands at the same time (e.g., `cls ; <command>` for Windows `cmd.exe`, `clear && <command>` for macOS and Linux).
+* Always clear the terminal before running a new command. Type the clear command first, press Enter, then type the actual command and press Enter again.
+
+    Example 1(Windows): 
+    ```
+      cls
+      <command> 
+    ```
+
+    Example 2 (Mac and Linux)
+    ```
+    clear 
+    <command>
+    ```    
 * After reading this file, say: **"I will use poetry and pnpm"**.
 
 ---
@@ -132,6 +143,8 @@ Each completed task requires a report:
 
 
 
+
+
   - Implement markdown editor using @uiw/react-md-editor or similar
   - Add @ mention functionality for linking to project resources
   - Create document management system with file tree navigation
@@ -148,6 +161,8 @@ Each completed task requires a report:
 
 
 
+
+
   - Create SourceCitation TypeScript interface and components
   - Build expandable CitationPanel sidebar with source links
   - Implement citation formatting for different document types (FDA_510K, FDA_GUIDANCE, CFR_SECTION)
@@ -158,6 +173,10 @@ Each completed task requires a report:
   - _Requirements: 5.5, 7.1, 7.2, 7.3, 7.4, 7.5_
 
 - [x] 8. Audit Trail and Compliance UI
+
+
+
+
 
 
 
@@ -204,6 +223,7 @@ Each completed task requires a report:
 
 
 
+
   - Create ProjectService class with CRUD operations for projects
   - Implement REST API endpoints: GET/POST/PUT/DELETE /api/projects
   - Add project dashboard data aggregation endpoint
@@ -214,6 +234,8 @@ Each completed task requires a report:
   - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5_
  
 - [x] 12. openFDA API Integration Service
+
+
 
 
 
@@ -232,6 +254,8 @@ Each completed task requires a report:
 ## Phase 4: AI Agent Implementation (Weeks 7-8)
 
 - [x] 13. LangGraph Agent Architecture Setup
+
+
 
 
 
@@ -265,6 +289,8 @@ Each completed task requires a report:
 
 
 
+
+
   - Create FDAPredicateSearchTool class with openFDA integration
   - Implement semantic similarity scoring for predicate matching
   - Add technological characteristic extraction from 510(k) summaries
@@ -275,6 +301,8 @@ Each completed task requires a report:
   - _Requirements: 9.1, 9.2, 9.3, 9.4, 9.5_
 
 - [x] 16. Document Processing and Analysis Tools
+
+
 
 
 
@@ -302,6 +330,9 @@ Each completed task requires a report:
 
 
 
+
+
+
   - Connect Project Management UI to FastAPI backend endpoints
   - Implement error handling and loading states for all API calls
   - Add optimistic updates for better user experience
@@ -312,6 +343,7 @@ Each completed task requires a report:
   - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5_
 
 - [x] 18. CopilotKit Agent Integration
+
 
 
 
@@ -357,6 +389,7 @@ Each completed task requires a report:
 
 
 
+
   - Implement Redis caching for frequently accessed FDA data
   - Add database query optimization and indexing
   - Create background job processing for long-running agent tasks
@@ -367,6 +400,9 @@ Each completed task requires a report:
   - _Requirements: Performance targets from design document_
 
 - [x] 22. Error Handling and User Experience Polish
+
+
+
 
 
 
@@ -388,6 +424,10 @@ Each completed task requires a report:
 
 
 
+
+
+
+
   - Achieve >90% code coverage with unit and integration tests
   - Create end-to-end test suite covering all critical user journeys
   - Implement automated testing pipeline with GitHub Actions or similar
@@ -398,6 +438,10 @@ Each completed task requires a report:
   - _Requirements: All requirements validation_
 
 - [x] 24. Deployment and Production Setup
+
+
+
+
 
 
 
@@ -427,3 +471,13 @@ Each completed task requires a report:
 
   - Install `next-auth` dependency using `pnpm install next-auth`
   - Verify the application runs without the module not found error
+
+- [x] 27. Fix `ModuleNotFoundError` for `langchain_community`
+  - Add `langchain-community` to the `pyproject.toml` dependencies.
+  - Run `poetry install` to update the environment.
+  - Verify the backend server can start without the module error.
+
+- [x] 28. Fix `ModuleNotFoundError` for `asyncpg`
+  - Add `asyncpg` to the `pyproject.toml` dependencies.
+  - Run `poetry install` to update the environment.
+  - Verify the backend server can start without the module error.
