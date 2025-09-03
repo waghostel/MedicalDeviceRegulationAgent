@@ -20,8 +20,8 @@ import { useWebSocket } from '@/hooks/use-websocket';
 import { useOffline } from '@/hooks/use-offline';
 import { Project, ProjectStatus } from '@/types/project';
 import { RegulatoryDashboard } from '@/components/dashboard/regulatory-dashboard';
-int
-erface ProjectDetailPageProps {
+
+interface ProjectDetailPageProps {
   params: { id: string };
 }
 
@@ -316,73 +316,6 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
             onSelectPredicate={selectPredicate}
             onStepClick={handleStepClick}
           />
-        </div>
-
-          {/* Sidebar */}
-          <div className="space-y-6">
-            {/* Quick Actions */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Quick Actions</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                <Button className="w-full justify-start" variant="outline">
-                  Classify Device
-                </Button>
-                <Button className="w-full justify-start" variant="outline">
-                  Search Predicates
-                </Button>
-                <Button className="w-full justify-start" variant="outline">
-                  Find FDA Guidance
-                </Button>
-                <Button className="w-full justify-start" variant="outline">
-                  Generate Checklist
-                </Button>
-              </CardContent>
-            </Card>
-
-            {/* Status Actions */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Project Status</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                <Button 
-                  className="w-full justify-start" 
-                  variant={project.status === 'active' ? 'default' : 'outline'}
-                  onClick={() => handleStatusUpdate('active')}
-                >
-                  Mark as Active
-                </Button>
-                <Button 
-                  className="w-full justify-start" 
-                  variant={project.status === 'on-hold' ? 'default' : 'outline'}
-                  onClick={() => handleStatusUpdate('on-hold')}
-                >
-                  Put on Hold
-                </Button>
-                <Button 
-                  className="w-full justify-start" 
-                  variant={project.status === 'completed' ? 'default' : 'outline'}
-                  onClick={() => handleStatusUpdate('completed')}
-                >
-                  Mark Complete
-                </Button>
-              </CardContent>
-            </Card>
-
-            {/* Recent Activity */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Recent Activity</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-sm text-gray-500">
-                  No recent activity
-                </div>
-              </CardContent>
-            </Card>
-          </div>
         </div>
       </div>
     </div>

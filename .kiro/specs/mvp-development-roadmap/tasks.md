@@ -416,13 +416,14 @@ Each completed task requires a report:
 
 
 - [x] 25. Create startup scripts for Windows system
-
-
-
-
-
   - Detect and confirm which terminal and version is being used (e.g., cmd.exe or PowerShell)
   - Provide a script to start the frontend
   - Provide a script to start the backend
   - Provide a master script that launches both frontend and backend together
   - Document in Readme.md on when to use `.bat` vs `.ps1` and how to run them
+
+- [x] 26. Fix `next-auth` module not found error
+
+
+  - Install `next-auth` dependency using `pnpm install next-auth`
+  - Verify the application runs without the module not found error

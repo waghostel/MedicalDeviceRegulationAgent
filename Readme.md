@@ -114,14 +114,29 @@ project-root/
 ├── medical-device-regulatory-assistant/
 │   ├── backend/            # FastAPI Python services
 │   │   ├── agents/         # LangGraph agent implementations
-│   │   ├── tools/          # Agent tools (FDA API, document processing)
+│   │   ├── api/            # FastAPI endpoints
+│   │   ├── database/       # Database configurations and migrations
 │   │   ├── models/         # Data models and schemas
-│   │   └── services/       # Business logic services
+│   │   ├── services/       # Business logic services
+│   │   ├── tests/          # Backend tests
+│   │   └── tools/          # Agent tools (FDA API, document processing)
 │   ├── src/                # Next.js frontend source
-│   │   ├── app/
-│   │   ├── components/
-│   │   └── ...
-│   └── package.json        # Frontend dependencies and scripts
+│   │   ├── app/            # Next.js App Router
+│   │   ├── components/     # React components
+│   │   ├── hooks/          # React hooks
+│   │   ├── lib/            # Library functions
+│   │   ├── pages/          # Next.js Pages Router
+│   │   ├── styles/         # CSS styles
+│   │   └── types/          # TypeScript types
+│   ├── public/             # Static assets
+│   ├── .github/            # GitHub workflows
+│   ├── e2e/                # End-to-end tests
+│   ├── monitoring/         # Monitoring configurations
+│   ├── nginx/              # Nginx configuration
+│   ├── scripts/            # Helper scripts
+│   ├── .env.example        # Example environment variables
+│   ├── package.json        # Frontend dependencies and scripts
+│   └── ...
 ├── .kiro/
 │   ├── steering/           # High-level steering documents
 │   └── specs/              # Detailed feature specifications
