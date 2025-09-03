@@ -12,7 +12,7 @@ Here’s a rinsed and cleaned-up version of your text, keeping the intent but ma
 * Use **`poetry`** for Python commands (e.g. `poetry run python test_document_tool.py`).
 * Create the test script and run it instead of run it directly with `poetry run python -c` 
 * Follow **Test-Driven Development (TDD)**.
-* Always **clear the terminal** before running a new command. Type two command at the same time(e.g. `cls ; pwd`).
+* Always **clear the terminal** before running a new command. Type two commands at the same time (e.g., `cls ; <command>` for Windows `cmd.exe`, `clear && <command>` for macOS and Linux).
 * After reading this file, say: **"I will use poetry and pnpm"**.
 
 ---
@@ -397,7 +397,12 @@ Each completed task requires a report:
   - Write user acceptance tests based on success metrics from requirements
   - _Requirements: All requirements validation_
 
-- [ ] 24. Deployment and Production Setup
+- [x] 24. Deployment and Production Setup
+
+
+
+
+
 
   - Create Docker containers for frontend and backend services
   - Set up production database with proper backup and monitoring

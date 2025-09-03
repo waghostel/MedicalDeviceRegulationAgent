@@ -1,7 +1,10 @@
 """FastAPI main application entry point."""
 
 import os
+import signal
+import asyncio
 from contextlib import asynccontextmanager
+from typing import Dict, Any
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -31,20 +34,83 @@ from api.agent_integration import router as agent_router
 from api.audit import router as audit_router
 
 
+# Global shutdown event
+shutdown_event = asyncio.Event()
+
+def signal_handler(signum, frame):
+    """Handle shutdown signals gracefully."""
+    print(f"🛑 Received signal {signum}, initiating graceful shutdown...")
+    shutdown_event.set()
+
+# Register signal handlers
+signal.signal(signal.SIGTERM, signal_handler)
+signal.signal(signal.SIGINT, signal_handler)
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Application lifespan events."""
     # Startup
     print("🚀 Medical Device Regulatory Assistant API starting up...")
     
-    # Perform startup tasks here (database connections, etc.)
+    # Initialize database connections
+    try:
+        from database.connection import init_database
+        await init_database()
+        print("✅ Database connection initialized")
+    except Exception as e:
+        print(f"❌ Database initialization failed: {e}")
+        raise
+    
+    # Initialize Redis connection
+    try:
+        from services.cache import init_redis
+        await init_redis()
+        print("✅ Redis connection initialized")
+    except Exception as e:
+        print(f"⚠️ Redis initialization failed: {e}")
+        # Redis is optional, continue without it
+    
+    # Initialize FDA API client
+    try:
+        from services.fda_client import init_fda_client
+        await init_fda_client()
+        print("✅ FDA API client initialized")
+    except Exception as e:
+        print(f"❌ FDA API client initialization failed: {e}")
+        raise
+    
+    print("🎉 Application startup completed successfully")
     
     yield
     
     # Shutdown
     print("🛑 Medical Device Regulatory Assistant API shutting down...")
     
-    # Perform cleanup tasks here
+    # Close database connections
+    try:
+        from database.connection import close_database
+        await close_database()
+        print("✅ Database connections closed")
+    except Exception as e:
+        print(f"⚠️ Error closing database: {e}")
+    
+    # Close Redis connection
+    try:
+        from services.cache import close_redis
+        await close_redis()
+        print("✅ Redis connection closed")
+    except Exception as e:
+        print(f"⚠️ Error closing Redis: {e}")
+    
+    # Close FDA API client
+    try:
+        from services.fda_client import close_fda_client
+        await close_fda_client()
+        print("✅ FDA API client closed")
+    except Exception as e:
+        print(f"⚠️ Error closing FDA API client: {e}")
+    
+    print("✅ Graceful shutdown completed")
 
 
 # Create FastAPI application

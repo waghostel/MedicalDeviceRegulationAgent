@@ -1,87 +1,218 @@
 """Health check API endpoints."""
 
-from fastapi import APIRouter, HTTPException, status
-from services.health import HealthChecker, SystemHealth, HealthStatus
+from typing import List, Optional
+from fastapi import APIRouter, HTTPException, status, Query
+from services.health_check import health_service
 
 router = APIRouter(prefix="/health", tags=["health"])
 
 
-@router.get("/", response_model=SystemHealth)
-async def health_check() -> SystemHealth:
+@router.get("/")
+async def comprehensive_health_check(
+    checks: Optional[List[str]] = Query(None, description="Specific checks to run (database, redis, fda_api, disk_space, memory)")
+):
     """
     Comprehensive health check for all system components.
     
+    Args:
+        checks: Optional list of specific checks to run. If not provided, all checks are performed.
+    
     Returns:
-        SystemHealth: Overall system health status including all services
+        Dict: Overall system health status including all services
     """
-    checker = HealthChecker()
-    health_status = await checker.check_all()
-    
-    # Return 503 if system is unhealthy
-    if health_status.status == "unhealthy":
+    try:
+        if checks:
+            health_status = await health_service.check_specific(checks)
+        else:
+            health_status = await health_service.check_all()
+        
+        # Return 503 if system is unhealthy
+        if not health_status.get("healthy", False):
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail=health_status
+            )
+        
+        return health_status
+    except ValueError as e:
         raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail=health_status.dict()
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={"error": str(e)}
         )
-    
-    return health_status
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail={"error": f"Health check failed: {str(e)}"}
+        )
 
 
-@router.get("/database", response_model=HealthStatus)
-async def database_health() -> HealthStatus:
+@router.get("/database")
+async def database_health():
     """
     Check database connectivity and performance.
     
     Returns:
-        HealthStatus: Database health status
+        Dict: Database health status
     """
-    checker = HealthChecker()
-    db_status = await checker.check_database()
-    
-    if db_status.status != "healthy":
+    try:
+        health_status = await health_service.check_specific(["database"])
+        db_check = health_status["checks"]["database"]
+        
+        if not db_check.get("healthy", False):
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail=db_check
+            )
+        
+        return db_check
+    except HTTPException:
+        raise
+    except Exception as e:
         raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail=db_status.dict()
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail={"error": f"Database health check failed: {str(e)}"}
         )
-    
-    return db_status
 
 
-@router.get("/fda-api", response_model=HealthStatus)
-async def fda_api_health() -> HealthStatus:
+@router.get("/fda-api")
+async def fda_api_health():
     """
     Check FDA API connectivity and performance.
     
     Returns:
-        HealthStatus: FDA API health status
+        Dict: FDA API health status
     """
-    checker = HealthChecker()
-    fda_status = await checker.check_fda_api()
-    
-    if fda_status.status != "healthy":
+    try:
+        health_status = await health_service.check_specific(["fda_api"])
+        fda_check = health_status["checks"]["fda_api"]
+        
+        if not fda_check.get("healthy", False):
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail=fda_check
+            )
+        
+        return fda_check
+    except HTTPException:
+        raise
+    except Exception as e:
         raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail=fda_status.dict()
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail={"error": f"FDA API health check failed: {str(e)}"}
         )
-    
-    return fda_status
 
 
-@router.get("/cache", response_model=HealthStatus)
-async def cache_health() -> HealthStatus:
+@router.get("/redis")
+async def redis_health():
     """
-    Check cache system connectivity and performance.
+    Check Redis cache connectivity and performance.
     
     Returns:
-        HealthStatus: Cache system health status
+        Dict: Redis health status
     """
-    checker = HealthChecker()
-    cache_status = await checker.check_redis_cache()
-    
-    if cache_status.status != "healthy":
+    try:
+        health_status = await health_service.check_specific(["redis"])
+        redis_check = health_status["checks"]["redis"]
+        
+        if not redis_check.get("healthy", False):
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail=redis_check
+            )
+        
+        return redis_check
+    except HTTPException:
+        raise
+    except Exception as e:
         raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail=cache_status.dict()
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail={"error": f"Redis health check failed: {str(e)}"}
         )
+
+
+@router.get("/system")
+async def system_health():
+    """
+    Check system resources (disk space, memory).
     
-    return cache_status
+    Returns:
+        Dict: System resource health status
+    """
+    try:
+        health_status = await health_service.check_specific(["disk_space", "memory"])
+        
+        # Check if any system check failed
+        system_healthy = all(
+            check.get("healthy", False) 
+            for check in health_status["checks"].values()
+        )
+        
+        if not system_healthy:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail=health_status
+            )
+        
+        return health_status
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail={"error": f"System health check failed: {str(e)}"}
+        )
+
+
+@router.get("/ready")
+async def readiness_check():
+    """
+    Kubernetes-style readiness probe.
+    
+    Returns:
+        Dict: Simple ready/not ready status
+    """
+    try:
+        # Check only critical services for readiness
+        health_status = await health_service.check_specific(["database", "fda_api"])
+        
+        is_ready = health_status.get("healthy", False)
+        
+        if not is_ready:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail={"ready": False, "checks": health_status["checks"]}
+            )
+        
+        return {"ready": True, "timestamp": health_status["timestamp"]}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail={"ready": False, "error": str(e)}
+        )
+
+
+@router.get("/live")
+async def liveness_check():
+    """
+    Kubernetes-style liveness probe.
+    
+    Returns:
+        Dict: Simple alive/dead status
+    """
+    try:
+        # Basic liveness check - just verify the application is responding
+        return {
+            "alive": True,
+            "service": "medical-device-regulatory-assistant",
+            "version": "0.1.0",
+            "timestamp": health_service._run_check.__globals__["datetime"].now(
+                health_service._run_check.__globals__["timezone"].utc
+            ).isoformat()
+        }
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail={"alive": False, "error": str(e)}
+        )
