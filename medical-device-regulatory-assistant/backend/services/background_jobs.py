@@ -1,4 +1,4 @@
-"""
+   """
 Background Job Processing Service
 
 This service handles long-running tasks like predicate searches,
