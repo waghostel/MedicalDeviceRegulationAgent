@@ -12,7 +12,7 @@ Here’s a rinsed and cleaned-up version of your text, keeping the intent but ma
 * Use **`poetry`** for Python commands (e.g. `poetry run python test_document_tool.py`).
 * Create the test script and run it instead of run it directly with `poetry run python -c` 
 * Follow **Test-Driven Development (TDD)**.
-* Always **clear the terminal** before running a new command.
+* Always **clear the terminal** before running a new command. Type two command at the same time(e.g. `cls ; pwd`).
 * After reading this file, say: **"I will use poetry and pnpm"**.
 
 ---
@@ -381,7 +381,12 @@ Each completed task requires a report:
   - Write accessibility tests and ensure WCAG 2.1 compliance
   - _Requirements: 1.5, Error handling from design document_
 
-- [ ] 23. Testing and Quality Assurance
+- [x] 23. Testing and Quality Assurance
+
+
+
+
+
 
   - Achieve >90% code coverage with unit and integration tests
   - Create end-to-end test suite covering all critical user journeys

@@ -1,0 +1,219 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  frontend-tests:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'pnpm'
+        cache-dependency-path: 'medical-device-regulatory-assistant/pnpm-lock.yaml'
+    
+    - name: Install pnpm
+      run: npm install -g pnpm
+    
+    - name: Install dependencies
+      working-directory: medical-device-regulatory-assistant
+      run: pnpm install
+    
+    - name: Type check
+      working-directory: medical-device-regulatory-assistant
+      run: pnpm type-check
+    
+    - name: Lint
+      working-directory: medical-device-regulatory-assistant
+      run: pnpm lint
+    
+    - name: Format check
+      working-directory: medical-device-regulatory-assistant
+      run: pnpm format:check
+    
+    - name: Run unit tests with coverage
+      working-directory: medical-device-regulatory-assistant
+      run: pnpm test:coverage
+    
+    - name: Upload frontend coverage to Codecov
+      uses: codecov/codecov-action@v4
+      with:
+        file: ./medical-device-regulatory-assistant/coverage/lcov.info
+        flags: frontend
+        name: frontend-coverage
+
+  backend-tests:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Install Poetry
+      uses: snok/install-poetry@v1
+      with:
+        version: latest
+        virtualenvs-create: true
+        virtualenvs-in-project: true
+    
+    - name: Load cached venv
+      id: cached-poetry-dependencies
+      uses: actions/cache@v3
+      with:
+        path: medical-device-regulatory-assistant/backend/.venv
+        key: venv-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}
+    
+    - name: Install dependencies
+      working-directory: medical-device-regulatory-assistant/backend
+      if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+      run: poetry install --no-interaction --no-root
+    
+    - name: Install project
+      working-directory: medical-device-regulatory-assistant/backend
+      run: poetry install --no-interaction
+    
+    - name: Run linting
+      working-directory: medical-device-regulatory-assistant/backend
+      run: |
+        poetry run black --check .
+        poetry run isort --check-only .
+        poetry run flake8 .
+        poetry run mypy .
+    
+    - name: Run unit tests with coverage
+      working-directory: medical-device-regulatory-assistant/backend
+      run: poetry run python -m pytest tests/ -v --cov=backend --cov-report=xml --cov-report=html --cov-fail-under=90
+    
+    - name: Upload backend coverage to Codecov
+      uses: codecov/codecov-action@v4
+      with:
+        file: ./medical-device-regulatory-assistant/backend/coverage.xml
+        flags: backend
+        name: backend-coverage
+
+  e2e-tests:
+    runs-on: ubuntu-latest
+    needs: [frontend-tests, backend-tests]
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'pnpm'
+        cache-dependency-path: 'medical-device-regulatory-assistant/pnpm-lock.yaml'
+    
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Install Poetry
+      uses: snok/install-poetry@v1
+    
+    - name: Install pnpm
+      run: npm install -g pnpm
+    
+    - name: Install frontend dependencies
+      working-directory: medical-device-regulatory-assistant
+      run: pnpm install
+    
+    - name: Install backend dependencies
+      working-directory: medical-device-regulatory-assistant/backend
+      run: poetry install
+    
+    - name: Install Playwright
+      working-directory: medical-device-regulatory-assistant
+      run: pnpm exec playwright install --with-deps
+    
+    - name: Build frontend
+      working-directory: medical-device-regulatory-assistant
+      run: pnpm build
+    
+    - name: Start backend server
+      working-directory: medical-device-regulatory-assistant/backend
+      run: |
+        poetry run uvicorn main:app --host 0.0.0.0 --port 8000 &
+        sleep 10
+    
+    - name: Start frontend server
+      working-directory: medical-device-regulatory-assistant
+      run: |
+        pnpm start &
+        sleep 10
+    
+    - name: Run E2E tests
+      working-directory: medical-device-regulatory-assistant
+      run: pnpm test:e2e
+    
+    - name: Upload E2E test results
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: playwright-report
+        path: medical-device-regulatory-assistant/playwright-report/
+
+  security-tests:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Run Trivy vulnerability scanner
+      uses: aquasecurity/trivy-action@master
+      with:
+        scan-type: 'fs'
+        scan-ref: '.'
+        format: 'sarif'
+        output: 'trivy-results.sarif'
+    
+    - name: Upload Trivy scan results to GitHub Security tab
+      uses: github/codeql-action/upload-sarif@v2
+      with:
+        sarif_file: 'trivy-results.sarif'
+
+  performance-tests:
+    runs-on: ubuntu-latest
+    needs: [frontend-tests, backend-tests]
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+    
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Install Poetry
+      uses: snok/install-poetry@v1
+    
+    - name: Install dependencies
+      working-directory: medical-device-regulatory-assistant/backend
+      run: poetry install
+    
+    - name: Run performance tests
+      working-directory: medical-device-regulatory-assistant/backend
+      run: poetry run python -m pytest tests/performance/ -v --tb=short
+    
+    - name: Run load tests
+      working-directory: medical-device-regulatory-assistant/backend
+      run: poetry run python scripts/load_test.py
