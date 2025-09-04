@@ -13,11 +13,11 @@ from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 from sse_starlette import EventSourceResponse
 
-from ..agents.regulatory_agent import RegulatoryAgent
-from ..agents.regulatory_agent_state import AgentTaskType, AgentStatus
-from ..services.session_manager import SessionManager
-from ..services.audit_logger import AuditLogger
-from ..middleware.auth import get_current_user
+from agents.regulatory_agent import RegulatoryAgent
+from agents.regulatory_agent_state import AgentTaskType, AgentStatus
+from services.session_manager import SessionManager
+from services.audit_logger import AuditLogger
+from middleware.auth import get_current_user
 
 
 router = APIRouter(prefix="/api/agent", tags=["agent"])
@@ -402,7 +402,7 @@ async def health_check() -> Dict[str, Any]:
         # Check tool registry (if available)
         tool_health = {}
         try:
-            from ..tools.tool_registry import ToolRegistry
+            from tools.tool_registry import ToolRegistry
             registry = ToolRegistry()
             tool_health = await registry.health_check()
         except Exception as e:

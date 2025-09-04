@@ -1,12 +1,8 @@
-Analyze the cause the error, propose a fixing solution and create a new task at the bottom of task in `task.md` follow the task format provided below. Do not fix error at this stage.
+Use Playwright MCP to browse the web and find frontend or backend error. List these errors in `ERROR_FILE`
 
 ### Execute Steps
-
-1. **Read Related Files**: First, examine the error file and any related source files to understand the context
-2. **Root Cause Analysis**: Identify the underlying cause of the problem by reviewing relevant code, configuration, or documentation files
-3. **Run Simple Tests**: If possible, suggest or run basic tests to verify the issue
-4. **Use Additional Tools**: If the problem is complex, use the `sequentialthinking` MCP. For additional information, use the `Context7`, `fetch`, `deepwiki`, or `sentry` MCP as needed
-5. **Create Task**: Create a task execution plan following this format in SPEC_FOLDER
+1. **Start frontend/backend**: Start the server by executing the `START_DEV` script
+1. **Start PlayWright MCP**: Start the PlayWright
 
 ### Requirements\*\*
 
@@ -72,51 +68,3 @@ Analyze the cause the error, propose a fixing solution and create a new task at 
   - Create end-to-end test suite covering all critical user journeys
   - Implement automated testing pipeline with GitHub Actions or similar
 ```
-
----
-
-## ##　 Error message
-
-⨯ ./src/components/layout/AppLayout.tsx:10:1
-Module not found: Can't resolve '@/lib/utils'
-8 | import { Breadcrumb, BreadcrumbItem } from './Breadcrumb';
-9 | import { useKeyboardShortcuts, createRegulatoryShortcuts } from '@/hooks/useKeyboardShortcuts';
-
-> 10 | import { cn } from '@/lib/utils';
-
-     | ^
-
-11 |
-12 | interface AppLayoutProps {
-13 | children: React.ReactNode;
-
-https://nextjs.org/docs/messages/module-not-found
-⨯ ./src/components/layout/AppLayout.tsx:10:1
-Module not found: Can't resolve '@/lib/utils'
-8 | import { Breadcrumb, BreadcrumbItem } from './Breadcrumb';
-9 | import { useKeyboardShortcuts, createRegulatoryShortcuts } from '@/hooks/useKeyboardShortcuts';
-
-> 10 | import { cn } from '@/lib/utils';
-
-     | ^
-
-11 |
-12 | interface AppLayoutProps {
-13 | children: React.ReactNode;
-
-https://nextjs.org/docs/messages/module-not-found
-⨯ ./src/components/layout/AppLayout.tsx:10:1
-Module not found: Can't resolve '@/lib/utils'
-8 | import { Breadcrumb, BreadcrumbItem } from './Breadcrumb';
-9 | import { useKeyboardShortcuts, createRegulatoryShortcuts } from '@/hooks/useKeyboardShortcuts';
-
-> 10 | import { cn } from '@/lib/utils';
-
-     | ^
-
-11 |
-12 | interface AppLayoutProps {
-13 | children: React.ReactNode;
-
-https://nextjs.org/docs/messages/module-not-found
-GET / 500 in 3672ms

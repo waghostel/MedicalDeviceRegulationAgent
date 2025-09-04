@@ -11,7 +11,7 @@ from dataclasses import dataclass, asdict
 import sqlite3
 import aiosqlite
 
-from ..agents.regulatory_agent import RegulatoryAgent
+from agents.regulatory_agent import RegulatoryAgent
 
 
 @dataclass

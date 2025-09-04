@@ -5,14 +5,13 @@ import time
 from datetime import datetime, timezone
 from typing import Dict, Any, List, Optional
 import aiohttp
-import asyncpg
 import redis.asyncio as redis
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from database.connection import get_db_session
 from services.cache import get_redis_client
-from services.fda_client import OpenFDAClient
+from services.openfda import OpenFDAService
 
 
 class HealthCheckService:
@@ -232,7 +231,7 @@ class HealthCheckService:
     async def _check_fda_api(self) -> Dict[str, Any]:
         """Check FDA API connectivity and rate limits."""
         try:
-            fda_client = OpenFDAClient()
+            fda_service = OpenFDAService()
             
             # Test basic connectivity with a simple query
             async with aiohttp.ClientSession() as session:

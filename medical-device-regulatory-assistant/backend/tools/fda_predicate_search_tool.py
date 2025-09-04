@@ -23,7 +23,7 @@ from langchain.tools import BaseTool
 from pydantic import BaseModel, Field, ConfigDict
 
 try:
-    from ..services.openfda import (
+    from services.openfda import (
         OpenFDAService, 
         FDASearchResult, 
         FDAAPIError,

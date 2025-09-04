@@ -14,10 +14,10 @@ import hashlib
 import hmac
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from ..database.connection import get_db_session
-from ..services.audit_logger import AuditLogger
-from ..middleware.auth import get_current_user
-from ..models.user import User
+from database.connection import get_db_session
+from services.audit_logger import AuditLogger
+from middleware.auth import get_current_user
+from models.user import User
 
 
 router = APIRouter(prefix="/api/audit", tags=["audit"])
@@ -37,7 +37,7 @@ class AuditTrailRequest(BaseModel):
 class AuditExportRequest(BaseModel):
     """Request model for audit trail export"""
     project_id: int
-    format_type: str = Field(default="json", regex="^(json|csv|pdf)$")
+    format_type: str = Field(default="json", pattern="^(json|csv|pdf)$")
     user_id: Optional[int] = None
     start_date: Optional[datetime] = None
     end_date: Optional[datetime] = None
@@ -48,7 +48,7 @@ class AuditExportRequest(BaseModel):
 class ComplianceReportRequest(BaseModel):
     """Request model for compliance reporting"""
     project_id: int
-    report_type: str = Field(default="full", regex="^(full|summary|regulatory)$")
+    report_type: str = Field(default="full", pattern="^(full|summary|regulatory)$")
     include_integrity_check: bool = True
 
 

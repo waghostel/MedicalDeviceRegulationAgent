@@ -20,8 +20,8 @@ from .regulatory_agent_state import (
     ConfidenceScore,
     SourceCitation
 )
-from ..tools.tool_registry import ToolRegistry
-from ..services.audit_logger import AuditLogger
+from tools.tool_registry import ToolRegistry
+from services.audit_logger import AuditLogger
 
 
 class RegulatoryAgent:

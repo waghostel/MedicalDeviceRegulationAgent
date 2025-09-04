@@ -7,24 +7,28 @@ Here’s a rinsed and cleaned-up version of your text, keeping the intent but ma
 ---
 
 ### Development Rules
-* Use **`pnpm`** instead of npm for JavaScript/TypeScript.
-* Use **`poetry`** for Python commands (e.g. `poetry run python test_document_tool.py`).
-* Create the test script and run it instead of run it directly with `poetry run python -c` 
-* Follow **Test-Driven Development (TDD)**.
-* Always clear the terminal before running a new command. Type the clear command first, press Enter, then type the actual command and press Enter again.
 
-    Example 1(Windows): 
-    ```
-      cls
-      <command> 
-    ```
+- Use **`pnpm`** instead of npm for JavaScript/TypeScript.
+- Use **`poetry`** for Python commands (e.g. `poetry run python test_document_tool.py`).
+- Create the test script and run it instead of run it directly with `poetry run python -c`
+- Follow **Test-Driven Development (TDD)**.
+- Always clear the terminal before running a new command. Type the clear command first, press Enter, then type the actual command and press Enter again.
 
-    Example 2 (Mac and Linux)
-    ```
-    clear 
+  Example 1(Windows):
+
+  ```
+    cls
     <command>
-    ```    
-* After reading this file, say: **"I will use poetry and pnpm"**.
+  ```
+
+  Example 2 (Mac and Linux)
+
+  ```
+  clear
+  <command>
+  ```
+
+- After reading this file, say: **"I will use poetry and pnpm"**.
 
 ---
 
@@ -36,17 +40,18 @@ Here’s a rinsed and cleaned-up version of your text, keeping the intent but ma
 4. Implement the task/code.
 5. Run tests after completing the task.
 
-   * If tests fail, fetch additional documentation (context7).
+   - If tests fail, fetch additional documentation (context7).
+
 6. Write a **task report** in `./.kiro/specs/mvp-development-roadmap/task-execute-history/` (e.g. `task-1.md`).
 
-   * Be transparent about test results, especially if some tests require future verification.
+   - Be transparent about test results, especially if some tests require future verification.
 
 ---
 
 ### Test-Driven Development (TDD)
 
-* **Pre-Development**: Clearly define expected test outcomes before coding.
-* **Post-Development**: Document all test results in the `./.kiro/specs/mvp-development-roadmap/task-execute-history/` folder to ensure traceability.
+- **Pre-Development**: Clearly define expected test outcomes before coding.
+- **Post-Development**: Document all test results in the `./.kiro/specs/mvp-development-roadmap/task-execute-history/` folder to ensure traceability.
 
 ---
 
@@ -56,23 +61,27 @@ Each completed task requires a report:
 
 **Task Report**
 
-* **Task**: \[Task ID and Title]
-* **Summary of Changes**
+- **Task**: \[Task ID and Title]
+- **Summary of Changes**
 
-  * \[Brief description of change #1]
-  * \[Brief description of change #2]
-* **Test Plan & Results**
+  - \[Brief description of change #1]
+  - \[Brief description of change #2]
 
-  * **Unit Tests**: \[Description]
+- **Test Plan & Results**
 
-    * Result: \[✔ All tests passed / ✘ Failures]
-  * **Integration Tests**: \[Description]
+  - **Unit Tests**: \[Description]
 
-    * Result: \[✔ Passed / ✘ Failures]
-  * **Manual Verification**: \[Steps & findings]
+    - Result: \[✔ All tests passed / ✘ Failures]
 
-    * Result: \[✔ Works as expected]
-* **Code Snippets (Optional)**: Show relevant diffs or highlights.
+  - **Integration Tests**: \[Description]
+
+    - Result: \[✔ Passed / ✘ Failures]
+
+  - **Manual Verification**: \[Steps & findings]
+
+    - Result: \[✔ Works as expected]
+
+- **Code Snippets (Optional)**: Show relevant diffs or highlights.
 
 ---
 
@@ -111,7 +120,7 @@ Each completed task requires a report:
   - Write unit tests for all dashboard components with mock data
   - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5_
 
-- [X] 4. Navigation and Quick Actions UI
+- [x] 4. Navigation and Quick Actions UI
 
   - Create QuickActionsToolbar component with icon buttons for common tasks
   - Implement responsive navigation with mobile hamburger menu
@@ -202,7 +211,7 @@ Each completed task requires a report:
   - Add project export functionality (JSON, PDF formats)
   - Write comprehensive API tests using pytest and httpx
   - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5_
- 
+
 - [x] 12. openFDA API Integration Service
 
   - Create OpenFDAService class with rate limiting (240 requests/minute)
@@ -353,6 +362,7 @@ Each completed task requires a report:
   - _Requirements: Production deployment and monitoring_
 
 - [x] 25. Create startup scripts for Windows system
+
   - Detect and confirm which terminal and version is being used (e.g., cmd.exe or PowerShell)
   - Provide a script to start the frontend
   - Provide a script to start the backend
@@ -365,20 +375,24 @@ Each completed task requires a report:
   - Verify the application runs without the module not found error
 
 - [x] 27. Fix `ModuleNotFoundError` for `langchain_community`
+
   - Add `langchain-community` to the `pyproject.toml` dependencies.
   - Run `poetry install` to update the environment.
   - Verify the backend server can start without the module error.
 
 - [x] 28. Fix `ModuleNotFoundError` for `asyncpg`
+
   - Add `asyncpg` to the `pyproject.toml` dependencies.
   - Run `poetry install` to update the environment.
   - Verify the backend server can start without the module error.
 
 - [x] 29. Fix module not found error in AppLayout
+
   - Create a new file `utils.ts` in `src/lib`
   - Add the `cn` utility function to `src/lib/utils.ts`
 
 - [x] 30. Fix NextAuth configuration module not found error
+
   - Create missing `@/lib/auth.ts` file with NextAuth configuration
   - Implement Google OAuth provider setup with proper TypeScript types
   - Configure JWT strategy and session callbacks
@@ -386,6 +400,18 @@ Each completed task requires a report:
   - Verify NextAuth integration works with existing layout.tsx and API routes
 
 - [x] 31. Fix ModuleNotFoundError for aiohttp
+
   - Add aiohttp to the pyproject.toml dependencies.
   - Run poetry install to update the environment.
   - Verify the backend server can start without the module error.
+
+- [x] 32. Fix Backend Startup Import and Dependency Errors
+  - Remove unnecessary asyncpg import from health_check.py (using SQLite, not PostgreSQL)
+  - Fix relative import issues across multiple backend files (use absolute imports)
+  - Update Pydantic v2 compatibility (change regex= to pattern= in field validation)
+  - Add missing initialization functions (init_database, init_redis)
+  - Create missing services/cache.py file with Redis client management
+  - Temporarily disable ML dependencies incompatible with Python 3.13 (torch, transformers, etc.)
+  - Fix FDA service imports in main.py startup sequence
+  - Verify backend server starts successfully and responds to requests
+  - _Requirements: Backend infrastructure stability and error-free startup_

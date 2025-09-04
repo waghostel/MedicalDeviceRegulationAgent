@@ -208,7 +208,7 @@ async def get_project_dashboard(
 )
 async def export_project(
     project_id: int,
-    format_type: str = Query("json", regex="^(json|pdf)$", description="Export format: json or pdf"),
+    format_type: str = Query("json", pattern="^(json|pdf)$", description="Export format: json or pdf"),
     current_user: TokenData = Depends(get_current_user)
 ):
     """

@@ -161,3 +161,10 @@ async def get_db_session() -> AsyncGenerator[AsyncSession, None]:
     db_manager = get_database_manager()
     async with db_manager.get_session() as session:
         yield session
+
+
+async def init_database() -> None:
+    """Initialize database - create tables if they don't exist"""
+    db_manager = get_database_manager()
+    await db_manager.create_tables()
+    logger.info("Database initialized successfully")

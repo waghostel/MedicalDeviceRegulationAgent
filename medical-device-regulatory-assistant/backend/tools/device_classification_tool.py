@@ -18,13 +18,13 @@ from pydantic import BaseModel, Field, ConfigDict
 from typing import ClassVar
 
 try:
-    from ..services.openfda import (
+    from services.openfda import (
         OpenFDAService, 
         DeviceClassificationResult, 
         FDAAPIError,
         create_openfda_service
     )
-    from ..models.device_classification import DeviceClass, RegulatoryPathway
+    from models.device_classification import DeviceClass, RegulatoryPathway
 except ImportError:
     # Fallback for direct execution
     import sys
