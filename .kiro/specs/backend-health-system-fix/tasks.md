@@ -30,15 +30,15 @@ Convert the backend health system fix design into a series of prompts for a code
 
 ### Workflow
 
+`SPECS_FOLDER` = `./.kiro/specs/backend-health-system-fix/task-execute-history/` 
+
 1. Create a code-writing plan for the task.
 2. Define the testing criteria.
 3. Fetch related documentation (context7) if needed.
 4. Implement the task/code.
-5. Run tests after completing the task.
+5. Run tests after completing the task. If tests fail, fetch additional documentation (context7).
 
-   - If tests fail, fetch additional documentation (context7).
-
-6. Write a **task report** in `./.kiro/specs/mvp-development-roadmap/task-execute-history/` (e.g. `task-1.md`).
+6. Write a **task report** in `SPECS_FOLDER` (e.g. `task-1.md`).
 
    - Be transparent about test results, especially if some tests require future verification.
 
@@ -47,7 +47,7 @@ Convert the backend health system fix design into a series of prompts for a code
 ### Test-Driven Development (TDD)
 
 - **Pre-Development**: Clearly define expected test outcomes before coding.
-- **Post-Development**: Document all test results in the `./.kiro/specs/mvp-development-roadmap/task-execute-history/` folder to ensure traceability.
+- **Post-Development**: Document all test results in the `SPECS_FOLDER` folder to ensure traceability.
 
 --
 
