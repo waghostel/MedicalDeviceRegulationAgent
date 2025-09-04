@@ -20,23 +20,71 @@ const customJestConfig = {
     '!src/**/index.{js,jsx,ts,tsx}',
     '!src/app/layout.tsx',
     '!src/app/globals.css',
+    '!src/lib/testing/**', // Exclude test utilities from coverage
   ],
   coverageThreshold: {
     global: {
+      branches: 85,
+      functions: 85,
+      lines: 85,
+      statements: 85,
+    },
+    // Component-specific thresholds
+    'src/components/**/*.{js,jsx,ts,tsx}': {
       branches: 90,
       functions: 90,
       lines: 90,
       statements: 90,
     },
+    // Hook-specific thresholds
+    'src/hooks/**/*.{js,jsx,ts,tsx}': {
+      branches: 95,
+      functions: 95,
+      lines: 95,
+      statements: 95,
+    },
   },
-  coverageReporters: ['text', 'lcov', 'html'],
+  coverageReporters: ['text', 'text-summary', 'lcov', 'html', 'json'],
+  coverageDirectory: '<rootDir>/coverage',
   testMatch: [
     '<rootDir>/src/**/__tests__/**/*.{js,jsx,ts,tsx}',
     '<rootDir>/src/**/*.{test,spec}.{js,jsx,ts,tsx}',
     '<rootDir>/__tests__/**/*.{js,jsx,ts,tsx}',
   ],
-  testTimeout: 10000,
-  maxWorkers: '50%',
+  testTimeout: 15000,
+  maxWorkers: '75%', // Increased for better parallel execution
+  // Enhanced test categorization
+  projects: [
+    {
+      displayName: 'unit',
+      testMatch: ['<rootDir>/src/**/*.unit.{test,spec}.{js,jsx,ts,tsx}'],
+      testEnvironment: 'jsdom',
+    },
+    {
+      displayName: 'integration',
+      testMatch: ['<rootDir>/src/**/*.integration.{test,spec}.{js,jsx,ts,tsx}'],
+      testEnvironment: 'jsdom',
+      setupFilesAfterEnv: ['<rootDir>/jest.setup.js', '<rootDir>/src/lib/testing/integration-setup.js'],
+    },
+    {
+      displayName: 'accessibility',
+      testMatch: ['<rootDir>/src/**/*.accessibility.{test,spec}.{js,jsx,ts,tsx}'],
+      testEnvironment: 'jsdom',
+      setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
+    },
+  ],
+  // Performance monitoring
+  slowTestThreshold: 5,
+  // Enhanced error reporting
+  verbose: true,
+  errorOnDeprecated: true,
+  // Cache configuration
+  cacheDirectory: '<rootDir>/.jest-cache',
+  clearMocks: true,
+  restoreMocks: true,
+  // Global setup and teardown
+  globalSetup: '<rootDir>/src/lib/testing/global-setup.js',
+  globalTeardown: '<rootDir>/src/lib/testing/global-teardown.js',
 };
 
 // createJestConfig is exported this way to ensure that next/jest can load the Next.js config which is async
