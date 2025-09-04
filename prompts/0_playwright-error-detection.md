@@ -1,70 +1,71 @@
-Use Playwright MCP to browse the web and find frontend or backend error. List these errors in `ERROR_FILE`
+Use **Playwright MCP** to browse the web, detect, and collect frontend or backend error messages. Record these errors in `ERROR_FILE` on a per-page basis.
 
 ### Execute Steps
-1. **Start frontend/backend**: Start the server by executing the `START_DEV` script
-1. **Start PlayWright MCP**: Start the PlayWright
 
-### Requirements\*\*
+1. **Start frontend/backend**: Launch the server in development mode by executing the `START_DEV` script.
+2. **Start Playwright MCP**: Run Playwright MCP and open the frontend.
+3. **Navigate pages**: Move through the pages and collect error messages (or potential issues) one by one, saving them to `ERROR_FILE` per page.
 
-- Ask user to provide error message if you don't know what to fix
-- Analyze the root causes thoroughly before writing the task
-- Include at least one sub-task under each major task
-- Follow the exact format shown in the task examples
-- Focus on actionable solutions
-- Ensure the task addresses the underlying problem, not just the symptoms
-- Start with the task execution plan before fixing anything
-- Read specs and steering document if need more detail about the project
-- Create task and subtask
+### Requirements
+
+* Browse pages sequentially by clicking components in the left and top navigation menus.
+* Interact as a real user would: click on clickable components, type into input fields, and perform possible user behaviors to surface potential errors or poor UX.
+* Capture and record error messages using the specified error record format.
 
 ### File Path
 
-- `SPEC_FOLDER` = .kiro/specs/mvp-development-roadmap
-- `STEERING_FOLDER` = @.kiro/steering/
-- `TASKS.MD` = <SPEC_FOLDER>/tasks.md
-- `DESIGN.MD` = <SPEC_FOLDER>/design.md
-- `REQUIREMENTS.MD` = <SPEC_FOLDER>/design.md
+* `STEERING_FOLDER` = .kiro/steering/
+* `SPEC_FOLDER` = .kiro/specs/mvp-development-roadmap
+* `TASKS.MD` = \<SPEC\_FOLDER>/tasks.md
+* `DESIGN.MD` = \<SPEC\_FOLDER>/design.md
+* `REQUIREMENTS.MD` = \<SPEC\_FOLDER>/requirements.md
+* `START_DEV` = ./start-dev.sh
+* `ERROR_FILE` = ./identified\_error.md
 
-### Folder/file explanation
+### Folder/File Explanation
 
-- spcs folder - A directory that contains specification documents defining the requirements, design, and implementation details for a software project or system.
-- design.md - A markdown file that documents the architectural design, technical approach, and system structure for a project.
-- requirements.md - A markdown file that outlines the functional and non-functional requirements, constraints, and acceptance criteria for a project.
-- tasks.md - A markdown file that lists specific tasks, work items, or action items that need to be completed for a project.
-- steering folder - A directory with high-level document that provides strategic direction, project scope, objectives, and decision-making guidelines to guide a project's overall direction.
+* **specs folder** – Contains specification documents outlining requirements, design, and implementation details.
+* **design.md** – Documents the architectural design, technical approach, and system structure.
+* **requirements.md** – Outlines functional and non-functional requirements, constraints, and acceptance criteria.
+* **tasks.md** – Lists specific tasks, work items, or action items for the project.
+* **steering folder** – Provides strategic direction, project scope, objectives, and decision-making guidelines.
 
-### Task creation format
+### Error Message Record Format
 
-```
-- [ ] [Number]. [Task Title]
-  - [Sub-task description 1]
-  - [Sub-task description 2]
-  - [Sub-task description 3]
-  - [Additional sub-tasks as needed]
-```
+````
+- [Page name 1]
+  - [Error description 1]
+    - Captured error
+    ```
+    [Captured error messages]
+    ```
+  - [Error description 2]
+    - Captured error
+    ```
+    [Captured error messages]
+    ```
+  - [Error description 3]
+    - Captured error
+    ```
+    [Captured error messages]
+    ```
+  - [Additional errors as needed]
 
-### Task format example
-
-```
-- [ ] 23. Testing and Quality Assurance
-  - Achieve >90% code coverage with unit and integration tests
-  - Create end-to-end test suite covering all critical user journeys
-  - Implement automated testing pipeline with GitHub Actions or similar
-  - Add performance regression testing and monitoring
-  - Create load testing for concurrent users and agent workflows
-  - Implement security testing for authentication and data protection
-  - Write user acceptance tests based on success metrics from requirements
-```
-
-### Major task example
-
-```
-- [ ] 23. Testing and Quality Assurance
-```
-
-### Sub-task example
-
-```
-  - Achieve >90% code coverage with unit and integration tests
-  - Create end-to-end test suite covering all critical user journeys
-  - Implement automated testing pipeline with GitHub Actions or similar
-```
+- [Page name 2]
+  - [Error description 1]
+    - Captured error
+    ```
+    [Captured error messages]
+    ```
+  - [Error description 2]
+    - Captured error
+    ```
+    [Captured error messages]
+    ```
+  - [Error description 3]
+    - Captured error
+    ```
+    [Captured error messages]
+    ```
+  - [Additional errors as needed]
+````

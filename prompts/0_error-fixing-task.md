@@ -17,7 +17,7 @@ Analyze the cause the error, propose a fixing solution and create a new task at 
 * Focus on actionable solutions
 * Ensure the task addresses the underlying problem, not just the symptoms
 * Read specs and steering document if need more detail about the project
-* Try to create only one task, however, create multiple tasks is allowed if the error belong to different root causes.
+* Try to create only one task, however, create multiple tasks is allowed if the error belong to different root causes
   
   
 ### File Path
