@@ -30,10 +30,12 @@ export type DocumentType =
 export interface DocumentTemplate {
   id: string;
   name: string;
+  category: string;
   description: string;
-  type: DocumentType;
-  template: string;
   placeholders: TemplatePlaceholder[];
+  template: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface TemplatePlaceholder {
@@ -42,6 +44,7 @@ export interface TemplatePlaceholder {
   type: 'text' | 'textarea' | 'select' | 'date';
   required: boolean;
   options?: string[];
+  description?: string;
   defaultValue?: string;
 }
 
