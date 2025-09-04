@@ -1,30 +1,22 @@
 {
   "mcpServers": {
-
     "playwright": {
       "command": "npx",
-      "args": [
-        "@playwright/mcp@latest"
-      ],
+      "args": ["@playwright/mcp@latest"],
       "env": {},
       "disabled": false,
       "autoApprove": []
     },
     "fetch": {
-      "command": "uvx",
-      "args": [
-        "mcp-server-fetch"
-      ],
+      "command": "python3",
+      "args": ["-m", "mcp_server_fetch"],
       "env": {},
       "disabled": false,
       "autoApprove": []
     },
     "memory": {
       "command": "npx",
-      "args": [
-        "-y",
-        "@modelcontextprotocol/server-memory"
-      ],
+      "args": ["-y", "@modelcontextprotocol/server-memory"],
       "env": {},
       "disabled": false,
       "autoApprove": []
@@ -34,7 +26,7 @@
       "args": [
         "-y",
         "@modelcontextprotocol/server-filesystem",
-        "."
+        "/Users/cheneyshih/Documents/GitHub/MedicalDeviceRegulationAgent"
       ],
       "env": {},
       "disabled": false,
@@ -42,16 +34,10 @@
     },
     "sequentialthinking": {
       "command": "npx",
-      "args": [
-        "-y",
-        "@modelcontextprotocol/server-sequential-thinking"
-      ],
+      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"],
       "env": {},
       "disabled": false,
-      "autoApprove": [
-        "sequentialthinking",
-        "sequentialthinking"
-      ]
+      "autoApprove": ["sequentialthinking", "sequentialthinking"]
     },
     "Context7": {
       "command": "npx",
@@ -66,20 +52,15 @@
       "autoApprove": []
     },
     "markitdown": {
-      "command": "uvx",
-      "args": [
-        "markitdown-mcp"
-      ],
+      "command": "python3",
+      "args": ["-m", "markitdown_mcp"],
       "env": {},
       "disabled": false,
       "autoApprove": []
     },
     "sentry": {
       "command": "npx",
-      "args": [
-        "@sentry/mcp-server@latest",
-        "--host=sentry.io"
-      ],
+      "args": ["@sentry/mcp-server@latest", "--host=sentry.io"],
       "env": {
         "OPENAI_API_KEY": "",
         "SENTRY_ACCESS_TOKEN": "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"
