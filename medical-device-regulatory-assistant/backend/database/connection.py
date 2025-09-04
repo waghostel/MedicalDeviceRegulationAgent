@@ -156,6 +156,7 @@ def get_database_manager() -> DatabaseManager:
     return _db_manager
 
 
+@asynccontextmanager
 async def get_db_session() -> AsyncGenerator[AsyncSession, None]:
     """Dependency for getting database session in FastAPI"""
     db_manager = get_database_manager()
