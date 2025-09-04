@@ -4,7 +4,7 @@ Convert the Medical Device Regulatory Assistant MVP design into a series of prom
 
 Here’s a rinsed and cleaned-up version of your text, keeping the intent but making it more concise and structured:
 
----
+--
 
 ### Development Rules
 
@@ -30,7 +30,7 @@ Here’s a rinsed and cleaned-up version of your text, keeping the intent but ma
 
 - After reading this file, say: **"I will use poetry and pnpm"**.
 
----
+--
 
 ### Workflow
 
@@ -46,14 +46,14 @@ Here’s a rinsed and cleaned-up version of your text, keeping the intent but ma
 
    - Be transparent about test results, especially if some tests require future verification.
 
----
+--
 
 ### Test-Driven Development (TDD)
 
 - **Pre-Development**: Clearly define expected test outcomes before coding.
 - **Post-Development**: Document all test results in the `./.kiro/specs/mvp-development-roadmap/task-execute-history/` folder to ensure traceability.
 
----
+--
 
 ### Task Report Format
 
@@ -83,7 +83,7 @@ Each completed task requires a report:
 
 - **Code Snippets (Optional)**: Show relevant diffs or highlights.
 
----
+--
 
 ## Phase 1: Frontend Foundation (Weeks 1-2)
 
@@ -406,6 +406,7 @@ Each completed task requires a report:
   - Verify the backend server can start without the module error.
 
 - [x] 32. Fix Backend Startup Import and Dependency Errors
+
   - Remove unnecessary asyncpg import from health_check.py (using SQLite, not PostgreSQL)
   - Fix relative import issues across multiple backend files (use absolute imports)
   - Update Pydantic v2 compatibility (change regex= to pattern= in field validation)
@@ -415,3 +416,9 @@ Each completed task requires a report:
   - Fix FDA service imports in main.py startup sequence
   - Verify backend server starts successfully and responds to requests
   - _Requirements: Backend infrastructure stability and error-free startup_
+
+- [x] 33. Fix FDA Client Import Error in Backend
+  - Update `backend/main.py` to import from `services.openfda` instead of `services.fda_client`.
+  - Rename `init_fda_client` to `create_openfda_service` in `main.py`.
+  - Rename `close_fda_client` to `close` in `main.py` and call it on the service object.
+  - Verify the backend server starts without the `ModuleNotFoundError`.

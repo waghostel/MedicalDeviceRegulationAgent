@@ -72,8 +72,8 @@ async def lifespan(app: FastAPI):
     
     # Initialize FDA API client
     try:
-        from services.fda_client import init_fda_client
-        await init_fda_client()
+        from services.openfda import create_openfda_service
+        app.state.fda_service = await create_openfda_service()
         print("✅ FDA API client initialized")
     except Exception as e:
         print(f"❌ FDA API client initialization failed: {e}")
@@ -104,8 +104,8 @@ async def lifespan(app: FastAPI):
     
     # Close FDA API client
     try:
-        from services.fda_client import close_fda_client
-        await close_fda_client()
+        if hasattr(app.state, 'fda_service') and app.state.fda_service:
+            await app.state.fda_service.close()
         print("✅ FDA API client closed")
     except Exception as e:
         print(f"⚠️ Error closing FDA API client: {e}")
