@@ -384,3 +384,8 @@ Each completed task requires a report:
   - Configure JWT strategy and session callbacks
   - Add authentication pages configuration for sign-in and error handling
   - Verify NextAuth integration works with existing layout.tsx and API routes
+
+- [x] 31. Fix ModuleNotFoundError for aiohttp
+  - Add aiohttp to the pyproject.toml dependencies.
+  - Run poetry install to update the environment.
+  - Verify the backend server can start without the module error.

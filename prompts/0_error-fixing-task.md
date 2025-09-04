@@ -16,9 +16,9 @@ Analyze the cause the error, propose a fixing solution and create a new task at 
 * Follow the exact format shown in the task examples
 * Focus on actionable solutions
 * Ensure the task addresses the underlying problem, not just the symptoms
-* Start with the task execution plan before fixing anything
 * Read specs and steering document if need more detail about the project
-* Create task and subtask
+* Try to create only one task, however, create multiple tasks is allowed if the error belong to different root causes.
+  
   
 ### File Path
 * `SPEC_FOLDER` = .kiro/specs/mvp-development-roadmap
@@ -72,38 +72,3 @@ Analyze the cause the error, propose a fixing solution and create a new task at 
 -------------------------------------------------------------------------
 ##　Error message
 -------------------------------------------------------------------------
-
- ⨯ ./src/components/layout/AppLayout.tsx:10:1
-Module not found: Can't resolve '@/lib/utils'
-   8 | import { Breadcrumb, BreadcrumbItem } from './Breadcrumb';
-   9 | import { useKeyboardShortcuts, createRegulatoryShortcuts } from '@/hooks/useKeyboardShortcuts';
-> 10 | import { cn } from '@/lib/utils';
-     | ^
-  11 |
-  12 | interface AppLayoutProps {
-  13 |   children: React.ReactNode;
-
-https://nextjs.org/docs/messages/module-not-found
- ⨯ ./src/components/layout/AppLayout.tsx:10:1
-Module not found: Can't resolve '@/lib/utils'
-   8 | import { Breadcrumb, BreadcrumbItem } from './Breadcrumb';
-   9 | import { useKeyboardShortcuts, createRegulatoryShortcuts } from '@/hooks/useKeyboardShortcuts';
-> 10 | import { cn } from '@/lib/utils';
-     | ^
-  11 |
-  12 | interface AppLayoutProps {
-  13 |   children: React.ReactNode;
-
-https://nextjs.org/docs/messages/module-not-found
- ⨯ ./src/components/layout/AppLayout.tsx:10:1
-Module not found: Can't resolve '@/lib/utils'
-   8 | import { Breadcrumb, BreadcrumbItem } from './Breadcrumb';
-   9 | import { useKeyboardShortcuts, createRegulatoryShortcuts } from '@/hooks/useKeyboardShortcuts';
-> 10 | import { cn } from '@/lib/utils';
-     | ^
-  11 |
-  12 | interface AppLayoutProps {
-  13 |   children: React.ReactNode;
-
-https://nextjs.org/docs/messages/module-not-found
- GET / 500 in 3672ms
