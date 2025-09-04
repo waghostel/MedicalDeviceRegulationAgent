@@ -64,6 +64,15 @@ class HealthCheckService:
             'checks': results
         }
     
+    async def check_specific(self, check_names: List[str]) -> Dict[str, Any]:
+        """Run specific health checks by name"""
+        # Validate check names
+        invalid_checks = [name for name in check_names if name not in self.checks]
+        if invalid_checks:
+            raise ValueError(f"Invalid health check names: {invalid_checks}. Available: {list(self.checks.keys())}")
+        
+        return await self.check_all(include_checks=check_names)
+    
     async def _check_database(self) -> Dict[str, Any]:
         """Check database connectivity"""
         try:
@@ -184,3 +193,7 @@ class HealthCheckService:
                 'status': 'error',
                 'error': str(e)
             }
+
+
+# Global health service instance
+health_service = HealthCheckService()

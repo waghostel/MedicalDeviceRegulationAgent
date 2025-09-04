@@ -3,6 +3,7 @@
 import os
 import signal
 import asyncio
+import logging
 from contextlib import asynccontextmanager
 from typing import Dict, Any
 
@@ -34,84 +35,167 @@ from api.agent_integration import router as agent_router
 from api.audit import router as audit_router
 
 
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    handlers=[
+        logging.StreamHandler(),
+        logging.FileHandler("medical_device_assistant.log") if os.getenv("LOG_TO_FILE", "false").lower() == "true" else logging.NullHandler()
+    ]
+)
+
+logger = logging.getLogger(__name__)
+
 # Global shutdown event
 shutdown_event = asyncio.Event()
 
 def signal_handler(signum, frame):
     """Handle shutdown signals gracefully."""
+    logger.info(f"🛑 Received signal {signum}, initiating graceful shutdown...")
     print(f"🛑 Received signal {signum}, initiating graceful shutdown...")
     shutdown_event.set()
 
-# Register signal handlers
+# Register signal handlers for graceful shutdown
 signal.signal(signal.SIGTERM, signal_handler)
 signal.signal(signal.SIGINT, signal_handler)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Application lifespan events."""
-    # Startup
-    print("🚀 Medical Device Regulatory Assistant API starting up...")
+    """
+    Application lifespan context manager for startup and shutdown events.
     
-    # Initialize database connections
+    Handles initialization and cleanup of:
+    - Database connections
+    - Redis cache (optional)
+    - FDA API service
+    
+    Services are initialized in dependency order and cleaned up in reverse order.
+    """
+    startup_errors = []
+    initialized_services = []
+    startup_failed = False
+    
     try:
-        from database.connection import init_database
-        database_url = os.getenv("DATABASE_URL", "sqlite:./medical_device_assistant.db")
-        await init_database(database_url)
-        print("✅ Database connection initialized")
-    except Exception as e:
-        print(f"❌ Database initialization failed: {e}")
-        raise
-    
-    # Initialize Redis connection
-    try:
-        from services.cache import init_redis
-        await init_redis()
-        print("✅ Redis connection initialized")
-    except Exception as e:
-        print(f"⚠️ Redis initialization failed: {e}")
-        # Redis is optional, continue without it
-    
-    # Initialize FDA API client
-    try:
-        from services.openfda import create_openfda_service
-        app.state.fda_service = await create_openfda_service()
-        print("✅ FDA API client initialized")
-    except Exception as e:
-        print(f"❌ FDA API client initialization failed: {e}")
-        raise
-    
-    print("🎉 Application startup completed successfully")
-    
-    yield
-    
-    # Shutdown
-    print("🛑 Medical Device Regulatory Assistant API shutting down...")
-    
-    # Close database connections
-    try:
-        from database.connection import close_database
-        await close_database()
-        print("✅ Database connections closed")
-    except Exception as e:
-        print(f"⚠️ Error closing database: {e}")
-    
-    # Close Redis connection
-    try:
-        from services.cache import close_redis
-        await close_redis()
-        print("✅ Redis connection closed")
-    except Exception as e:
-        print(f"⚠️ Error closing Redis: {e}")
-    
-    # Close FDA API client
-    try:
-        if hasattr(app.state, 'fda_service') and app.state.fda_service:
-            await app.state.fda_service.close()
-        print("✅ FDA API client closed")
-    except Exception as e:
-        print(f"⚠️ Error closing FDA API client: {e}")
-    
-    print("✅ Graceful shutdown completed")
+        # Startup phase
+        print("🚀 Medical Device Regulatory Assistant API starting up...")
+        
+        # 1. Initialize database connections (required)
+        try:
+            from database.connection import init_database
+            database_url = os.getenv("DATABASE_URL", "sqlite:./medical_device_assistant.db")
+            db_manager = await init_database(database_url)
+            app.state.db_manager = db_manager
+            initialized_services.append("database")
+            print("✅ Database connection initialized")
+        except Exception as e:
+            error_msg = f"Database initialization failed: {e}"
+            print(f"❌ {error_msg}")
+            startup_errors.append(("database", error_msg))
+            startup_failed = True
+            # Database is critical - fail startup
+            raise RuntimeError(f"Critical service initialization failed: {error_msg}")
+        
+        # 2. Initialize Redis connection (optional)
+        try:
+            from services.cache import init_redis, get_redis_client
+            await init_redis()
+            redis_client = await get_redis_client()
+            app.state.redis_client = redis_client
+            if redis_client:
+                initialized_services.append("redis")
+                print("✅ Redis connection initialized")
+            else:
+                print("⚠️ Redis not available - continuing without cache")
+        except Exception as e:
+            error_msg = f"Redis initialization failed: {e}"
+            print(f"⚠️ {error_msg}")
+            startup_errors.append(("redis", error_msg))
+            app.state.redis_client = None
+            # Redis is optional, continue without it
+        
+        # 3. Initialize FDA API client (required)
+        try:
+            from services.openfda import create_openfda_service
+            # Pass Redis client if available for caching
+            redis_url = os.getenv("REDIS_URL") if hasattr(app.state, 'redis_client') and app.state.redis_client else None
+            fda_api_key = os.getenv("FDA_API_KEY")
+            
+            fda_service = await create_openfda_service(
+                api_key=fda_api_key,
+                redis_url=redis_url,
+                cache_ttl=3600  # 1 hour cache
+            )
+            app.state.fda_service = fda_service
+            initialized_services.append("fda_service")
+            print("✅ FDA API client initialized")
+        except Exception as e:
+            error_msg = f"FDA API client initialization failed: {e}"
+            print(f"❌ {error_msg}")
+            startup_errors.append(("fda_service", error_msg))
+            startup_failed = True
+            # FDA service is critical - fail startup
+            raise RuntimeError(f"Critical service initialization failed: {error_msg}")
+        
+        # Log startup summary
+        if startup_errors:
+            print(f"⚠️ Startup completed with {len(startup_errors)} non-critical errors")
+            for service, error in startup_errors:
+                print(f"   - {service}: {error}")
+        else:
+            print("🎉 Application startup completed successfully - all services initialized")
+        
+        print(f"📊 Initialized services: {', '.join(initialized_services)}")
+        
+        yield
+        
+    finally:
+        # Shutdown phase - cleanup in reverse order of initialization
+        print("🛑 Medical Device Regulatory Assistant API shutting down...")
+        shutdown_errors = []
+        
+        # Close FDA API client first (depends on Redis)
+        if "fda_service" in initialized_services:
+            try:
+                if hasattr(app.state, 'fda_service') and app.state.fda_service:
+                    await app.state.fda_service.close()
+                    print("✅ FDA API client closed")
+            except Exception as e:
+                error_msg = f"Error closing FDA API client: {e}"
+                print(f"⚠️ {error_msg}")
+                shutdown_errors.append(("fda_service", error_msg))
+        
+        # Close Redis connection
+        if "redis" in initialized_services:
+            try:
+                from services.cache import close_redis_client
+                await close_redis_client()
+                print("✅ Redis connection closed")
+            except Exception as e:
+                error_msg = f"Error closing Redis: {e}"
+                print(f"⚠️ {error_msg}")
+                shutdown_errors.append(("redis", error_msg))
+        
+        # Close database connections last
+        if "database" in initialized_services:
+            try:
+                from database.connection import close_database
+                await close_database()
+                print("✅ Database connections closed")
+            except Exception as e:
+                error_msg = f"Error closing database: {e}"
+                print(f"⚠️ {error_msg}")
+                shutdown_errors.append(("database", error_msg))
+        
+        # Log shutdown summary
+        if shutdown_errors:
+            print(f"⚠️ Shutdown completed with {len(shutdown_errors)} errors:")
+            for service, error in shutdown_errors:
+                print(f"   - {service}: {error}")
+        else:
+            print("✅ Graceful shutdown completed successfully")
+        
+        print("👋 Medical Device Regulatory Assistant API stopped")
 
 
 # Create FastAPI application

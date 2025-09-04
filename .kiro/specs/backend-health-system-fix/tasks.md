@@ -90,7 +90,7 @@ Each completed task requires a report:
   - Write unit tests to verify async context manager functionality works correctly
   - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5_
 
-- [X] 2. Update FastAPI Database Dependencies
+- [x] 2. Update FastAPI Database Dependencies
 
   - Create new `backend/database/dependencies.py` file with proper FastAPI dependency injection
   - Implement `get_db_connection()` function that yields database connections correctly
@@ -108,7 +108,7 @@ Each completed task requires a report:
   - Write unit tests for each health check component individually
   - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5_
 
-- [ ] 4. Update FastAPI Application Lifespan Management
+- [x] 4. Update FastAPI Application Lifespan Management
 
   - Modify `backend/main.py` to use proper lifespan context manager for application startup/shutdown
   - Replace existing database initialization with the new `init_database()` function

@@ -94,7 +94,14 @@ class ProjectService:
     """Service class for project management operations."""
     
     def __init__(self):
-        self.db_manager = get_database_manager()
+        self._db_manager = None
+    
+    @property
+    def db_manager(self):
+        """Lazy initialization of database manager"""
+        if self._db_manager is None:
+            self._db_manager = get_database_manager()
+        return self._db_manager
     
     async def create_project(
         self, 

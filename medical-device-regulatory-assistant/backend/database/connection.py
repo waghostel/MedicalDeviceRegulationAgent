@@ -127,3 +127,11 @@ async def close_database() -> None:
     if db_manager:
         await db_manager.close()
         db_manager = None
+
+
+@asynccontextmanager
+async def get_db_session():
+    """Get database session context manager for transactions"""
+    db_manager = get_database_manager()
+    async with db_manager.get_connection() as conn:
+        yield conn
