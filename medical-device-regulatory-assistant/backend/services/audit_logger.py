@@ -5,7 +5,7 @@ Audit Logger Service for regulatory compliance and traceability
 import asyncio
 import json
 from typing import Dict, Any, List, Optional
-from datetime import datetime
+from datetime import datetime, timedelta
 from dataclasses import dataclass, asdict
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -13,6 +13,12 @@ from sqlalchemy import select, and_
 
 from models.agent_interaction import AgentInteraction
 from database.connection import get_db_session
+from database.exceptions import (
+    DatabaseError,
+    QueryError,
+    handle_database_errors,
+    handle_query_errors
+)
 
 
 @dataclass
@@ -48,6 +54,7 @@ class AuditLogger:
         self.buffer_size = 100
         self.auto_flush = True
     
+    @handle_database_errors(operation_name="log_agent_action")
     async def log_agent_action(
         self,
         project_id: int,
@@ -177,6 +184,7 @@ class AuditLogger:
             execution_time_ms=execution_time_ms
         )
     
+    @handle_query_errors
     async def get_audit_trail(
         self,
         project_id: int,
@@ -372,6 +380,7 @@ class AuditLogger:
         else:
             raise ValueError(f"Unsupported export format: {format_type}")
     
+    @handle_database_errors(operation_name="flush_buffer")
     async def flush_buffer(self) -> None:
         """Flush buffered log entries to database"""
         
@@ -381,18 +390,34 @@ class AuditLogger:
         entries_to_write = self.log_buffer.copy()
         self.log_buffer.clear()
         
-        async with self.session_factory() as session:
-            try:
-                for entry in entries_to_write:
-                    await self._write_to_database_session(session, entry)
-                
-                await session.commit()
-                
-            except Exception as e:
-                await session.rollback()
-                # Re-add entries to buffer for retry
-                self.log_buffer.extend(entries_to_write)
-                raise e
+        try:
+            async with self.session_factory() as session:
+                try:
+                    for entry in entries_to_write:
+                        await self._write_to_database_session(session, entry)
+                    
+                    await session.commit()
+                    
+                except Exception as e:
+                    await session.rollback()
+                    # Re-add entries to buffer for retry
+                    self.log_buffer.extend(entries_to_write)
+                    raise DatabaseError(
+                        f"Failed to flush audit log buffer: {str(e)}",
+                        original_error=e,
+                        context={"entries_count": len(entries_to_write)}
+                    )
+        except DatabaseError:
+            # Re-raise database errors
+            raise
+        except Exception as e:
+            # Re-add entries to buffer for retry
+            self.log_buffer.extend(entries_to_write)
+            raise DatabaseError(
+                f"Unexpected error during buffer flush: {str(e)}",
+                original_error=e,
+                context={"entries_count": len(entries_to_write)}
+            )
     
     async def _write_to_database(self, log_entry: AuditLogEntry) -> None:
         """Write single log entry to database"""

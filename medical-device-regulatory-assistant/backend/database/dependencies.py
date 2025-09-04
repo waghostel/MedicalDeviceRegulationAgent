@@ -8,10 +8,17 @@ import aiosqlite
 from fastapi import HTTPException, status
 
 from .connection import get_database_manager, DatabaseManager
+from .exceptions import (
+    DatabaseError,
+    ConnectionError,
+    handle_database_errors,
+    handle_connection_errors
+)
 
 logger = logging.getLogger(__name__)
 
 
+@handle_database_errors(operation_name="fastapi_dependency", reraise=False)
 async def get_db_connection() -> AsyncGenerator[aiosqlite.Connection, None]:
     """
     FastAPI dependency to get database connection with proper error handling.
@@ -42,11 +49,23 @@ async def get_db_connection() -> AsyncGenerator[aiosqlite.Connection, None]:
             # Verify connection is working
             await conn.execute("SELECT 1")
             yield conn
-    except Exception as e:
-        logger.error(f"Database connection failed: {e}")
+    except ConnectionError as e:
+        logger.error(f"Database connection error in dependency: {e}")
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Database service unavailable - connection failed"
+            detail=f"Database connection failed: {str(e)}"
+        )
+    except DatabaseError as e:
+        logger.error(f"Database error in dependency: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=f"Database service error: {str(e)}"
+        )
+    except Exception as e:
+        logger.error(f"Unexpected error in database dependency: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Database service unavailable - unexpected error"
         )
 
 
@@ -86,6 +105,7 @@ class DatabaseDependency:
         
         return self._db_manager
     
+    @handle_database_errors(operation_name="class_dependency", reraise=False)
     async def __call__(self) -> AsyncGenerator[aiosqlite.Connection, None]:
         """
         Get database connection with proper error handling.
@@ -107,11 +127,23 @@ class DatabaseDependency:
                 logger.debug("Database connection established successfully")
                 yield conn
                 
-        except Exception as e:
-            logger.error(f"Database connection failed in class dependency: {e}")
+        except ConnectionError as e:
+            logger.error(f"Database connection error in class dependency: {e}")
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                detail=f"Database service unavailable - connection failed: {str(e)}"
+                detail=f"Database connection failed: {str(e)}"
+            )
+        except DatabaseError as e:
+            logger.error(f"Database error in class dependency: {e}")
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail=f"Database service error: {str(e)}"
+            )
+        except Exception as e:
+            logger.error(f"Unexpected error in class dependency: {e}")
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="Database service unavailable - unexpected error"
             )
     
     async def health_check(self) -> bool:
