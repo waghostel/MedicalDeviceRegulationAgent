@@ -4,6 +4,72 @@
 
 This design document outlines the comprehensive frontend testing strategy for the Medical Device Regulatory Assistant. The design focuses on creating a systematic approach to test all frontend components with mock data, identify mock data usage patterns, and establish a migration path to real backend integration.
 
+## Parameters
+- `SPECS_FOLDER` = `./.kiro/specs/frontend-testing-comprehensive/task-execute-history/` 
+
+
+## Development Rules
+- Use **`pnpm`** instead of npm for JavaScript/TypeScript.
+- Use **`poetry`** for Python commands (e.g. `poetry run python test_document_tool.py`).
+- Create the test script and run it instead of run it directly with `poetry run python -c`
+- Follow **Test-Driven Development (TDD)**.
+- Always clear the terminal before running a new command. Type the clear command first, press Enter, then type the actual command and press Enter again.
+
+  Example 1(Windows):
+
+  ```
+    cls
+    <command>
+  ```
+
+  Example 2 (Mac and Linux)
+
+  ```
+  clear
+  <command>
+  ```
+
+- After reading this file, say: **"I will use poetry and pnpm"**.
+
+--
+
+### Workflow
+1. Create a code-writing plan for the task.
+2. Define the testing criteria.
+3. Fetch related documentation (context7) if needed.
+4. Implement the task/code.
+5. Run tests after completing the task. If tests fail, fetch additional documentation (context7).
+6. Write a **task report** in `SPECS_FOLDER` (e.g. `task-1.md`).
+   - Be transparent about test results, especially if some tests require future verification.
+
+--
+
+### Test-Driven Development (TDD)
+- **Pre-Development**: Clearly define expected test outcomes before coding.
+- **Post-Development**: Document all test results in the `SPECS_FOLDER` folder to ensure traceability.
+--
+
+### Task Report Format
+
+Each completed task requires a report:
+
+**Task Report**
+- **Task**: \[Task ID and Title]
+- **Summary of Changes**
+  - \[Brief description of change #1]
+  - \[Brief description of change #2]
+- **Test Plan & Results**
+  - **Unit Tests**: \[Description]
+    - Result: \[✔ All tests passed / ✘ Failures]
+  - **Integration Tests**: \[Description]
+    - Result: \[✔ Passed / ✘ Failures]
+  - **Manual Verification**: \[Steps & findings]
+    - Result: \[✔ Works as expected]
+- **Code Snippets (Optional)**: Show relevant diffs or highlights.
+
+---
+
+
 ## Architecture
 
 ### Testing Architecture Overview
