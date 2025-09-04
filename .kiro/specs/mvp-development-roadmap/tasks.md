@@ -145,6 +145,8 @@ Each completed task requires a report:
 
 
 
+
+
   - Implement markdown editor using @uiw/react-md-editor or similar
   - Add @ mention functionality for linking to project resources
   - Create document management system with file tree navigation
@@ -163,6 +165,8 @@ Each completed task requires a report:
 
 
 
+
+
   - Create SourceCitation TypeScript interface and components
   - Build expandable CitationPanel sidebar with source links
   - Implement citation formatting for different document types (FDA_510K, FDA_GUIDANCE, CFR_SECTION)
@@ -173,6 +177,8 @@ Each completed task requires a report:
   - _Requirements: 5.5, 7.1, 7.2, 7.3, 7.4, 7.5_
 
 - [x] 8. Audit Trail and Compliance UI
+
+
 
 
 
@@ -242,6 +248,7 @@ Each completed task requires a report:
 
 
 
+
   - Create OpenFDAService class with rate limiting (240 requests/minute)
   - Implement predicate device search with advanced query building
   - Add device classification lookup functionality
@@ -254,6 +261,7 @@ Each completed task requires a report:
 ## Phase 4: AI Agent Implementation (Weeks 7-8)
 
 - [x] 13. LangGraph Agent Architecture Setup
+
 
 
 
@@ -291,6 +299,7 @@ Each completed task requires a report:
 
 
 
+
   - Create FDAPredicateSearchTool class with openFDA integration
   - Implement semantic similarity scoring for predicate matching
   - Add technological characteristic extraction from 510(k) summaries
@@ -301,6 +310,7 @@ Each completed task requires a report:
   - _Requirements: 9.1, 9.2, 9.3, 9.4, 9.5_
 
 - [x] 16. Document Processing and Analysis Tools
+
 
 
 
@@ -333,6 +343,7 @@ Each completed task requires a report:
 
 
 
+
   - Connect Project Management UI to FastAPI backend endpoints
   - Implement error handling and loading states for all API calls
   - Add optimistic updates for better user experience
@@ -343,6 +354,7 @@ Each completed task requires a report:
   - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5_
 
 - [x] 18. CopilotKit Agent Integration
+
 
 
 
@@ -408,6 +420,7 @@ Each completed task requires a report:
 
 
 
+
   - Implement comprehensive error boundaries and fallback UI components
   - Add user-friendly error messages with actionable suggestions
   - Create loading skeletons and progress indicators for all async operations
@@ -428,6 +441,9 @@ Each completed task requires a report:
 
 
 
+
+
+
   - Achieve >90% code coverage with unit and integration tests
   - Create end-to-end test suite covering all critical user journeys
   - Implement automated testing pipeline with GitHub Actions or similar
@@ -438,6 +454,9 @@ Each completed task requires a report:
   - _Requirements: All requirements validation_
 
 - [x] 24. Deployment and Production Setup
+
+
+
 
 
 
@@ -481,3 +500,7 @@ Each completed task requires a report:
   - Add `asyncpg` to the `pyproject.toml` dependencies.
   - Run `poetry install` to update the environment.
   - Verify the backend server can start without the module error.
+
+- [ ] 29. Fix module not found error in AppLayout
+  - Create a new file `utils.ts` in `src/lib`
+  - Add the `cn` utility function to `src/lib/utils.ts`

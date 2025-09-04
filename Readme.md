@@ -29,7 +29,8 @@ The system is a full-stack application built with a modern, robust technology se
 - **Authentication**: Google OAuth 2.0.
 
 ### System Architecture Diagram
-```
+
+```text
 ┌─────────────────────────────────────────────────────────────┐
 │                    Frontend (Next.js)                       │
 ├─────────────────────────────────────────────────────────────┤
@@ -62,13 +63,133 @@ The system is a full-stack application built with a modern, robust technology se
 ## 4. Getting Started
 
 ### Prerequisites
-- Node.js 18+ and pnpm 9+
-- Python 3.11+ and Poetry
-- Google OAuth 2.0 Credentials
-- FDA API Key
 
-### Environment Setup
+The startup scripts will automatically check for and guide you through installing:
+
+- **Node.js** (v18 or higher)
+- **pnpm** (package manager for frontend)
+- **Python** (3.11 or higher)
+- **Poetry** (package manager for backend)
+- **Google OAuth 2.0 Credentials**
+- **FDA API Key**
+
+### Quick Start
+
+#### Option 1: Root Level Scripts (Easiest)
+
+From the project root directory, use these convenience scripts:
+
+```bash
+# Mac/Linux - Start both frontend and backend
+./start-dev.sh
+
+# Mac/Linux - Start individual services
+./start-frontend.sh
+./start-backend.sh
+```
+
+#### Option 2: Platform-Specific Scripts
+
+Navigate to the `medical-device-regulatory-assistant` directory first, then:
+
+**Mac/Linux:**
+
+```bash
+# Start both services
+./scripts/unix/start-all.sh
+
+# Start individual services
+./scripts/unix/start-frontend.sh
+./scripts/unix/start-backend.sh
+```
+
+**Windows:**
+
+```cmd
+# Command Prompt - Start both services
+scripts\windows\start-all.bat
+
+# PowerShell - Start both services
+scripts\windows\start-all.ps1
+
+# Individual services (replace start-all with start-frontend or start-backend)
+scripts\windows\start-frontend.bat
+scripts\windows\start-backend.bat
+```
+
+### Platform-Specific Script Guide
+
+#### Mac/Linux
+
+All scripts are located in `scripts/unix/` and are executable shell scripts:
+
+```bash
+# Make scripts executable (if needed)
+chmod +x scripts/unix/*.sh
+
+# Run from medical-device-regulatory-assistant directory
+./scripts/unix/start-all.sh
+./scripts/unix/start-frontend.sh  
+./scripts/unix/start-backend.sh
+```
+
+#### Windows
+
+##### When to Use .bat vs .ps1 Scripts
+
+| Terminal | Script Type | Command Example |
+|----------|-------------|-----------------|
+| **Command Prompt (cmd.exe)** | `.bat` files | `scripts\windows\start-all.bat` |
+| **PowerShell** | `.ps1` files | `scripts\windows\start-all.ps1` |
+| **Windows Terminal** | Either (depends on shell) | Run detection script first |
+
+##### Command Prompt (cmd.exe)
+
+```cmd
+# Navigate to project directory
+cd medical-device-regulatory-assistant
+
+# Run any .bat script directly
+scripts\windows\start-all.bat
+scripts\windows\start-frontend.bat
+scripts\windows\start-backend.bat
+```
+
+##### PowerShell
+
+```powershell
+# Navigate to project directory
+cd medical-device-regulatory-assistant
+
+# Run .ps1 scripts (may require execution policy change)
+scripts\windows\start-all.ps1
+scripts\windows\start-frontend.ps1
+scripts\windows\start-backend.ps1
+
+# If you get execution policy errors, run:
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+```
+
+##### Terminal Detection
+
+Not sure which terminal you're using? Run the detection script:
+
+```cmd
+# Command Prompt
+scripts\windows\detect-terminal.bat
+
+# PowerShell
+scripts\windows\detect-terminal.ps1
+```
+
+### Manual Development Setup
+
+If you prefer manual setup or need more control:
+
+#### Environment Setup
+
 Create a `.env.local` file in the `medical-device-regulatory-assistant` directory and add the following variables:
+
 ```bash
 # .env.local
 NEXTAUTH_URL=http://localhost:3000
@@ -80,36 +201,43 @@ DATABASE_URL=sqlite:./dev.db
 REDIS_URL=redis://localhost:6379
 ```
 
-### Development Workflow
+#### Frontend (Next.js)
 
-**Backend (Poetry):**
-```bash
-cd medical-device-regulatory-assistant/backend
-# Install dependencies
-poetry install
-# Run the development server
-poetry run uvicorn main:app --reload
-# Run tests
-poetry run python -m pytest tests/ -v
-```
-
-**Frontend (pnpm):**
 ```bash
 cd medical-device-regulatory-assistant
 # Install dependencies
 pnpm install
-# Run the development server
+# Start development server
 pnpm dev
 # Run tests
 pnpm test
 ```
-The application will be available at `http://localhost:3000`.
+
+#### Backend (FastAPI)
+
+```bash
+cd medical-device-regulatory-assistant/backend
+# Install dependencies
+poetry install
+# Start development server
+poetry run uvicorn main:app --reload --host 0.0.0.0 --port 8000
+# Run tests
+poetry run python -m pytest tests/ -v
+```
+
+### Application URLs
+
+Once started, the application will be available at:
+
+- **Frontend**: http://localhost:3000
+- **Backend API**: http://localhost:8000
+- **API Documentation**: http://localhost:8000/docs
 
 ## 5. Project Structure
 
 The repository is organized into a main application folder, `medical-device-regulatory-assistant`, which contains the frontend and backend services.
 
-```
+```text
 project-root/
 ├── medical-device-regulatory-assistant/
 │   ├── backend/            # FastAPI Python services
@@ -147,11 +275,30 @@ project-root/
 
 The project includes a comprehensive testing strategy using `pytest` for the backend and `React Testing Library` with `Jest` for the frontend.
 
-To run the tests, please see the commands provided in the **Development Workflow** section above.
+To run the tests, please see the commands provided in the **Manual Development Setup** section above.
 
 ## 7. Compliance and Safety
 
 This tool is designed with regulatory compliance at its core.
+
 - **Human-in-the-Loop**: The AI is an assistant. A qualified human professional must review and approve all critical AI outputs.
 - **Auditable Traceability**: Every action taken by the agent is logged in a transparent, human-readable format, providing a full "reasoning trace."
 - **Confidence & Citation**: Every piece of information the agent provides is accompanied by a confidence score (0-1) and a direct citation to the source URL or document.
+
+## 8. Learn More
+
+To learn more about the technologies used in this project:
+
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial
+- [FastAPI Documentation](https://fastapi.tiangolo.com/) - learn about FastAPI features
+- [LangGraph Documentation](https://langchain-ai.github.io/langgraph/) - learn about agent workflows
+- [CopilotKit Documentation](https://docs.copilotkit.ai/) - learn about AI-powered UI components
+
+You can check out the [Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+
+## 9. Deployment
+
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.

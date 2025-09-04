@@ -1,5 +1,91 @@
 {
   "mcpServers": {
 
+    "playwright": {
+      "command": "npx",
+      "args": [
+        "@playwright/mcp@latest"
+      ],
+      "env": {},
+      "disabled": false,
+      "autoApprove": []
+    },
+    "fetch": {
+      "command": "uvx",
+      "args": [
+        "mcp-server-fetch"
+      ],
+      "env": {},
+      "disabled": false,
+      "autoApprove": []
+    },
+    "memory": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-memory"
+      ],
+      "env": {},
+      "disabled": false,
+      "autoApprove": []
+    },
+    "filesystem": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "."
+      ],
+      "env": {},
+      "disabled": false,
+      "autoApprove": []
+    },
+    "sequentialthinking": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-sequential-thinking"
+      ],
+      "env": {},
+      "disabled": false,
+      "autoApprove": [
+        "sequentialthinking",
+        "sequentialthinking"
+      ]
+    },
+    "Context7": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@upstash/context7-mcp",
+        "--api-key",
+        "ctx7sk-0320279f-d909-4b92-bc13-a00004a5cb16"
+      ],
+      "env": {},
+      "disabled": false,
+      "autoApprove": []
+    },
+    "markitdown": {
+      "command": "uvx",
+      "args": [
+        "markitdown-mcp"
+      ],
+      "env": {},
+      "disabled": false,
+      "autoApprove": []
+    },
+    "sentry": {
+      "command": "npx",
+      "args": [
+        "@sentry/mcp-server@latest",
+        "--host=sentry.io"
+      ],
+      "env": {
+        "OPENAI_API_KEY": "",
+        "SENTRY_ACCESS_TOKEN": "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"
+      },
+      "disabled": false,
+      "autoApprove": []
+    }
   }
 }
