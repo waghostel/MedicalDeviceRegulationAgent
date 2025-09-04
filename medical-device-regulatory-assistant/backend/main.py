@@ -55,7 +55,8 @@ async def lifespan(app: FastAPI):
     # Initialize database connections
     try:
         from database.connection import init_database
-        await init_database()
+        database_url = os.getenv("DATABASE_URL", "sqlite:./medical_device_assistant.db")
+        await init_database(database_url)
         print("✅ Database connection initialized")
     except Exception as e:
         print(f"❌ Database initialization failed: {e}")

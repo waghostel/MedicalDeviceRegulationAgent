@@ -2,16 +2,16 @@
 
 import asyncio
 import time
+import logging
 from datetime import datetime, timezone
 from typing import Dict, Any, List, Optional
 import aiohttp
 import redis.asyncio as redis
-from sqlalchemy import text
-from sqlalchemy.ext.asyncio import AsyncSession
 
-from database.connection import get_db_session
 from services.cache import get_redis_client
 from services.openfda import OpenFDAService
+
+logger = logging.getLogger(__name__)
 
 
 class HealthCheckService:
@@ -159,30 +159,14 @@ class HealthCheckService:
     async def _check_database(self) -> Dict[str, Any]:
         """Check database connectivity and performance."""
         try:
-            async with get_db_session() as session:
-                # Test basic connectivity
-                result = await session.execute(text("SELECT 1"))
-                result.scalar()
-                
-                # Test table access
-                result = await session.execute(text("SELECT COUNT(*) FROM users"))
-                user_count = result.scalar()
-                
-                # Check connection pool status
-                pool_info = {
-                    "user_count": user_count,
-                    "connection_status": "active"
-                }
-                
-                return {
-                    "healthy": True,
-                    "status": "connected",
-                    "details": pool_info
-                }
+            from database.connection import get_database_manager
+            db_manager = get_database_manager()
+            return await db_manager.health_check()
         except Exception as e:
+            logger.error(f"Database health check failed: {e}")
             return {
                 "healthy": False,
-                "status": "disconnected",
+                "status": "error",
                 "error": str(e)
             }
     

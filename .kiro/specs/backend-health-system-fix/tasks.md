@@ -2,7 +2,6 @@
 
 Convert the backend health system fix design into a series of prompts for a code-generation LLM that will implement each step in a test-driven manner. Prioritize best practices, incremental progress, and early testing, ensuring no big jumps in complexity at any stage. Make sure that each prompt builds on the previous prompts, and ends with wiring things together. There should be no hanging or orphaned code that isn't integrated into a previous step. Focus ONLY on tasks that involve writing, modifying, or testing code.
 
-
 ### Development Rules
 
 - Use **`pnpm`** instead of npm for JavaScript/TypeScript.
@@ -80,9 +79,10 @@ Each completed task requires a report:
 
 - **Code Snippets (Optional)**: Show relevant diffs or highlights.
 
-
 --
-- [ ] 1. Fix Database Connection Manager Implementation
+
+- [x] 1. Fix Database Connection Manager Implementation
+
   - Replace the current database connection implementation in `backend/database/connection.py` with proper async context manager support
   - Implement `DatabaseManager` class with correct aiosqlite usage and async context managers
   - Add proper connection pooling, initialization, and cleanup methods
@@ -91,6 +91,7 @@ Each completed task requires a report:
   - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5_
 
 - [ ] 2. Update FastAPI Database Dependencies
+
   - Create new `backend/database/dependencies.py` file with proper FastAPI dependency injection
   - Implement `get_db_connection()` function that yields database connections correctly
   - Replace any existing database dependency functions that may be causing async generator issues
@@ -99,6 +100,7 @@ Each completed task requires a report:
   - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5_
 
 - [ ] 3. Rewrite Health Check Service Implementation
+
   - Replace the existing `backend/services/health_check.py` with the new implementation from the design
   - Implement `HealthCheckService` class with proper async database connection usage
   - Add comprehensive health checks for database, Redis, FDA API, disk space, and memory
@@ -107,6 +109,7 @@ Each completed task requires a report:
   - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5_
 
 - [ ] 4. Update FastAPI Application Lifespan Management
+
   - Modify `backend/main.py` to use proper lifespan context manager for application startup/shutdown
   - Replace existing database initialization with the new `init_database()` function
   - Add proper error handling for startup failures and graceful shutdown procedures
@@ -115,6 +118,7 @@ Each completed task requires a report:
   - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5_
 
 - [ ] 5. Add Database Error Handling and Recovery
+
   - Create `backend/database/exceptions.py` with custom database exception classes
   - Implement error handling decorator for database operations
   - Add specific handling for async context manager errors and connection issues
@@ -123,6 +127,7 @@ Each completed task requires a report:
   - _Requirements: 5.1, 5.2, 5.3, 5.4, 5.5_
 
 - [ ] 6. Create Pydantic Models for Health Check Responses
+
   - Create `backend/models/health.py` with proper Pydantic models for health check responses
   - Implement `HealthCheckResponse`, `HealthCheckDetail`, and `DatabaseHealthDetail` models
   - Add proper type validation and serialization for all health check data
@@ -131,6 +136,7 @@ Each completed task requires a report:
   - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5_
 
 - [ ] 7. Update Health Check API Endpoints
+
   - Modify the `/health` endpoint in `backend/main.py` to use the new health check service
   - Add `/health/{check_name}` endpoint for individual health check components
   - Implement proper HTTP status codes (503 for unhealthy, 200 for healthy)
@@ -139,6 +145,7 @@ Each completed task requires a report:
   - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5_
 
 - [ ] 8. Add aiosqlite Dependency and Configuration
+
   - Update `backend/pyproject.toml` to include `aiosqlite` as a dependency
   - Run `poetry install` to ensure the new dependency is available
   - Verify that aiosqlite is compatible with the current Python version and other dependencies
@@ -147,6 +154,7 @@ Each completed task requires a report:
   - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5_
 
 - [ ] 9. Create Comprehensive Database Integration Tests
+
   - Create `backend/tests/test_database_integration.py` with comprehensive database tests
   - Test database manager initialization, connection management, and cleanup
   - Test concurrent database access and connection pooling

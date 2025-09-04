@@ -2,170 +2,128 @@
 Database connection management and session handling
 """
 
+import aiosqlite
 import asyncio
 import logging
+import os
 from contextlib import asynccontextmanager
-from typing import AsyncGenerator, Optional
-
-from sqlalchemy.ext.asyncio import (
-    AsyncSession,
-    AsyncEngine,
-    create_async_engine,
-    async_sessionmaker,
-)
-from sqlalchemy.pool import StaticPool
-from sqlalchemy import event
-
-from models.base import Base
-from .config import DatabaseConfig, get_database_config
+from typing import AsyncGenerator, Optional, Dict, Any
 
 logger = logging.getLogger(__name__)
 
 
 class DatabaseManager:
-    """Database connection and session manager"""
+    """Database connection and session manager using aiosqlite"""
     
-    def __init__(self, config: Optional[DatabaseConfig] = None):
-        self.config = config or get_database_config()
-        self._engine: Optional[AsyncEngine] = None
-        self._session_factory: Optional[async_sessionmaker[AsyncSession]] = None
+    def __init__(self, database_url: str):
+        self.database_url = database_url
+        self._connection: Optional[aiosqlite.Connection] = None
+        self._lock = asyncio.Lock()
         
-    @property
-    def engine(self) -> AsyncEngine:
-        """Get or create database engine"""
-        if self._engine is None:
-            self._engine = self._create_engine()
-        return self._engine
-    
-    @property 
-    def session_factory(self) -> async_sessionmaker[AsyncSession]:
-        """Get or create session factory"""
-        if self._session_factory is None:
-            self._session_factory = async_sessionmaker(
-                bind=self.engine,
-                class_=AsyncSession,
-                expire_on_commit=False,
-                autoflush=True,
-                autocommit=False,
-            )
-        return self._session_factory
-    
-    def _create_engine(self) -> AsyncEngine:
-        """Create database engine with proper configuration"""
-        engine_kwargs = {
-            "echo": False,  # Set to True for SQL logging in development
-            "future": True,
-        }
-        
-        # SQLite-specific configuration
-        if self.config.database_url.startswith("sqlite"):
-            engine_kwargs.update({
-                "poolclass": StaticPool,
-                "connect_args": {
-                    "check_same_thread": False,
-                    "timeout": 20,
-                },
-            })
+        # Extract database path from URL
+        if database_url.startswith("sqlite:"):
+            self.database_path = database_url.replace("sqlite:", "")
         else:
-            # PostgreSQL/other database configuration
-            engine_kwargs.update({
-                "pool_size": self.config.pool_size,
-                "max_overflow": self.config.max_overflow,
-                "pool_timeout": self.config.pool_timeout,
-                "pool_recycle": self.config.pool_recycle,
-            })
-        
-        engine = create_async_engine(self.config.database_url, **engine_kwargs)
-        
-        # Enable foreign key constraints for SQLite
-        if self.config.database_url.startswith("sqlite"):
-            @event.listens_for(engine.sync_engine, "connect")
-            def set_sqlite_pragma(dbapi_connection, connection_record):
-                cursor = dbapi_connection.cursor()
-                cursor.execute("PRAGMA foreign_keys=ON")
-                cursor.execute("PRAGMA journal_mode=WAL")
-                cursor.execute("PRAGMA synchronous=NORMAL")
-                cursor.execute("PRAGMA cache_size=1000")
-                cursor.execute("PRAGMA temp_store=MEMORY")
-                cursor.close()
-        
-        return engine
+            self.database_path = database_url
     
-    async def create_tables(self) -> None:
-        """Create all database tables"""
-        try:
-            async with self.engine.begin() as conn:
-                await conn.run_sync(Base.metadata.create_all)
-            logger.info("Database tables created successfully")
-        except Exception as e:
-            logger.error(f"Failed to create database tables: {e}")
-            raise
-    
-    async def drop_tables(self) -> None:
-        """Drop all database tables"""
-        try:
-            async with self.engine.begin() as conn:
-                await conn.run_sync(Base.metadata.drop_all)
-            logger.info("Database tables dropped successfully")
-        except Exception as e:
-            logger.error(f"Failed to drop database tables: {e}")
-            raise
-    
-    @asynccontextmanager
-    async def get_session(self) -> AsyncGenerator[AsyncSession, None]:
-        """Get database session with automatic cleanup"""
-        async with self.session_factory() as session:
-            try:
-                yield session
-                await session.commit()
-            except Exception:
-                await session.rollback()
-                raise
-            finally:
-                await session.close()
-    
-    async def health_check(self) -> bool:
-        """Check database connection health"""
-        try:
-            from sqlalchemy import text
-            async with self.get_session() as session:
-                await session.execute(text("SELECT 1"))
-            return True
-        except Exception as e:
-            logger.error(f"Database health check failed: {e}")
-            return False
+    async def initialize(self) -> None:
+        """Initialize database connection and create tables if needed"""
+        async with self._lock:
+            if self._connection is None:
+                try:
+                    self._connection = await aiosqlite.connect(
+                        self.database_path,
+                        check_same_thread=False
+                    )
+                    # Enable foreign keys
+                    await self._connection.execute("PRAGMA foreign_keys = ON")
+                    await self._connection.execute("PRAGMA journal_mode = WAL")
+                    await self._connection.execute("PRAGMA synchronous = NORMAL")
+                    await self._connection.execute("PRAGMA cache_size = 1000")
+                    await self._connection.execute("PRAGMA temp_store = MEMORY")
+                    await self._connection.commit()
+                    logger.info(f"Database connection established: {self.database_path}")
+                except Exception as e:
+                    logger.error(f"Failed to initialize database: {e}")
+                    raise
     
     async def close(self) -> None:
-        """Close database connections"""
-        if self._engine:
-            await self._engine.dispose()
-            self._engine = None
-            self._session_factory = None
-            logger.info("Database connections closed")
+        """Close database connection"""
+        async with self._lock:
+            if self._connection:
+                await self._connection.close()
+                self._connection = None
+                logger.info("Database connection closed")
+    
+    @asynccontextmanager
+    async def get_connection(self) -> AsyncGenerator[aiosqlite.Connection, None]:
+        """Get database connection with proper async context manager"""
+        if self._connection is None:
+            await self.initialize()
+        
+        try:
+            yield self._connection
+        except Exception as e:
+            logger.error(f"Database operation failed: {e}")
+            raise
+    
+    async def health_check(self) -> Dict[str, Any]:
+        """Perform database health check"""
+        try:
+            async with self.get_connection() as conn:
+                # Simple query to test connectivity
+                cursor = await conn.execute("SELECT 1")
+                result = await cursor.fetchone()
+                await cursor.close()
+                
+                if result and result[0] == 1:
+                    return {
+                        "healthy": True,
+                        "status": "connected",
+                        "database_path": self.database_path,
+                        "message": "Database connection successful"
+                    }
+                else:
+                    return {
+                        "healthy": False,
+                        "status": "query_failed",
+                        "error": "Test query returned unexpected result"
+                    }
+        except Exception as e:
+            return {
+                "healthy": False,
+                "status": "disconnected",
+                "error": str(e)
+            }
 
 
 # Global database manager instance
-_db_manager: Optional[DatabaseManager] = None
+db_manager: Optional[DatabaseManager] = None
 
 
 def get_database_manager() -> DatabaseManager:
-    """Get global database manager instance"""
-    global _db_manager
-    if _db_manager is None:
-        _db_manager = DatabaseManager()
-    return _db_manager
+    """Get the global database manager instance"""
+    global db_manager
+    if db_manager is None:
+        raise RuntimeError("Database manager not initialized")
+    return db_manager
 
 
-@asynccontextmanager
-async def get_db_session() -> AsyncGenerator[AsyncSession, None]:
-    """Dependency for getting database session in FastAPI"""
-    db_manager = get_database_manager()
-    async with db_manager.get_session() as session:
-        yield session
+async def init_database(database_url: str = None) -> DatabaseManager:
+    """Initialize the global database manager"""
+    global db_manager
+    
+    if database_url is None:
+        database_url = os.getenv("DATABASE_URL", "sqlite:./medical_device_assistant.db")
+    
+    db_manager = DatabaseManager(database_url)
+    await db_manager.initialize()
+    return db_manager
 
 
-async def init_database() -> None:
-    """Initialize database - create tables if they don't exist"""
-    db_manager = get_database_manager()
-    await db_manager.create_tables()
-    logger.info("Database initialized successfully")
+async def close_database() -> None:
+    """Close the global database manager"""
+    global db_manager
+    if db_manager:
+        await db_manager.close()
+        db_manager = None
