@@ -1,0 +1,23 @@
+{
+  "enabled": true,
+  "name": "Fix error",
+  "description": "Analyzes root causes of error message provided by user and propose the error fixing plan, after getting user permission, start fixing it.",
+  "version": "1",
+  "when": {
+    "type": "userTriggered",
+    "patterns": [
+      "**/*error*.log",
+      "**/*error*.txt",
+      "**/*error*.md",
+      "**/logs/**",
+      "**/*.log",
+      "**/*exception*",
+      "**/*traceback*",
+      "**/*stderr*"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "An error file has been detected by user. Please analyze the error by following these steps:\n\n1. **Read Related Files**: First, examine the error file and any related source files to understand the context\n2. **Root Cause Analysis**: Identify the underlying cause of the problem by reviewing relevant code, configuration, or documentation files\n3. **Run Simple Tests**: If possible, suggest or run basic tests to verify the issue\n4. **Use Additional Tools**: If the problem is complex, use the `sequentialthinking` MCP. For additional information, use the `Context7`, `fetch`, `deepwiki`, or `sentry` MCP as needed\n5. **Create Task**: Create a task execution plan following this format in  `.kiro/specs/mvp-development-roadmap/tasks.md`\n6. **Ask User Permission**: Ask user permission before start fixing the error\n7. **Fix error**: Fix the error follow the task execution steps\n\nTask creation format\n```\n- [ ] [Number]. [Task Title]\n  - [Sub-task description 1]\n  - [Sub-task description 2]\n  - [Sub-task description 3]\n  - [Additional sub-tasks as needed]\n```\n\n**Requirements**:\n* Ask user to provide error message if you don't know what to fix\n* Analyze the root cause thoroughly before writing the task\n* Include at least one sub-task under each major task\n* Follow the exact format shown in the task examples\n* Focus on actionable solutions\n* Ensure the task addresses the underlying problem, not just the symptoms\n* Start with the task execution plan before fixing anything\n* Always ask the user’s permission before executing the plan\n\n"
+  }
+}
