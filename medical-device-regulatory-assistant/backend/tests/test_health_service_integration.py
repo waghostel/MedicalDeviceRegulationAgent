@@ -4,8 +4,8 @@ Integration tests for health check service with Pydantic models
 
 import pytest
 from unittest.mock import AsyncMock, patch, MagicMock
-from backend.services.health_check import HealthCheckService
-from backend.models.health import HealthCheckResponse, HealthCheckDetail
+from services.health_check import HealthCheckService
+from models.health import HealthCheckResponse, HealthCheckDetail
 
 
 class TestHealthCheckServiceIntegration:
@@ -20,9 +20,9 @@ class TestHealthCheckServiceIntegration:
     async def test_check_all_returns_pydantic_model(self, health_service):
         """Test that check_all returns a proper HealthCheckResponse model"""
         # Mock all the dependencies to avoid actual connections
-        with patch('backend.services.health_check.get_database_manager') as mock_db, \
-             patch('backend.services.health_check.get_redis_client') as mock_redis, \
-             patch('backend.services.health_check.OpenFDAService') as mock_fda, \
+        with patch('services.health_check.get_database_manager') as mock_db, \
+             patch('services.health_check.get_redis_client') as mock_redis, \
+             patch('services.health_check.OpenFDAService') as mock_fda, \
              patch('shutil.disk_usage') as mock_disk:
             
             # Mock database health check
@@ -83,7 +83,7 @@ class TestHealthCheckServiceIntegration:
     @pytest.mark.asyncio
     async def test_check_specific_returns_pydantic_model(self, health_service):
         """Test that check_specific returns a proper HealthCheckResponse model"""
-        with patch('backend.services.health_check.get_database_manager') as mock_db:
+        with patch('services.health_check.get_database_manager') as mock_db:
             # Mock database health check
             mock_db_manager = AsyncMock()
             mock_db_manager.health_check.return_value = {
@@ -107,7 +107,7 @@ class TestHealthCheckServiceIntegration:
     @pytest.mark.asyncio
     async def test_health_check_with_errors_returns_pydantic_model(self, health_service):
         """Test that health checks with errors still return proper Pydantic models"""
-        with patch('backend.services.health_check.get_database_manager') as mock_db:
+        with patch('services.health_check.get_database_manager') as mock_db:
             # Mock database health check to raise an exception
             mock_db.side_effect = Exception("Database connection failed")
             

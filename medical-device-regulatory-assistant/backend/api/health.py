@@ -27,13 +27,13 @@ async def comprehensive_health_check(
             health_status = await health_service.check_all()
         
         # Return 503 if system is unhealthy
-        if not health_status.get("healthy", False):
+        if not health_status.healthy:
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                detail=health_status
+                detail=health_status.model_dump()
             )
         
-        return health_status
+        return health_status.model_dump()
     except ValueError as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -56,15 +56,15 @@ async def database_health():
     """
     try:
         health_status = await health_service.check_specific(["database"])
-        db_check = health_status["checks"]["database"]
+        db_check = health_status.checks["database"]
         
-        if not db_check.get("healthy", False):
+        if not db_check.healthy:
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                detail=db_check
+                detail=db_check.model_dump()
             )
         
-        return db_check
+        return db_check.model_dump()
     except HTTPException:
         raise
     except Exception as e:
@@ -84,15 +84,15 @@ async def fda_api_health():
     """
     try:
         health_status = await health_service.check_specific(["fda_api"])
-        fda_check = health_status["checks"]["fda_api"]
+        fda_check = health_status.checks["fda_api"]
         
-        if not fda_check.get("healthy", False):
+        if not fda_check.healthy:
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                detail=fda_check
+                detail=fda_check.model_dump()
             )
         
-        return fda_check
+        return fda_check.model_dump()
     except HTTPException:
         raise
     except Exception as e:
@@ -112,15 +112,15 @@ async def redis_health():
     """
     try:
         health_status = await health_service.check_specific(["redis"])
-        redis_check = health_status["checks"]["redis"]
+        redis_check = health_status.checks["redis"]
         
-        if not redis_check.get("healthy", False):
+        if not redis_check.healthy:
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                detail=redis_check
+                detail=redis_check.model_dump()
             )
         
-        return redis_check
+        return redis_check.model_dump()
     except HTTPException:
         raise
     except Exception as e:
@@ -143,17 +143,17 @@ async def system_health():
         
         # Check if any system check failed
         system_healthy = all(
-            check.get("healthy", False) 
-            for check in health_status["checks"].values()
+            check.healthy 
+            for check in health_status.checks.values()
         )
         
         if not system_healthy:
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                detail=health_status
+                detail=health_status.model_dump()
             )
         
-        return health_status
+        return health_status.model_dump()
     except HTTPException:
         raise
     except Exception as e:
@@ -175,15 +175,15 @@ async def readiness_check():
         # Check only critical services for readiness
         health_status = await health_service.check_specific(["database", "fda_api"])
         
-        is_ready = health_status.get("healthy", False)
+        is_ready = health_status.healthy
         
         if not is_ready:
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                detail={"ready": False, "checks": health_status["checks"]}
+                detail={"ready": False, "checks": {k: v.model_dump() for k, v in health_status.checks.items()}}
             )
         
-        return {"ready": True, "timestamp": health_status["timestamp"]}
+        return {"ready": True, "timestamp": health_status.timestamp}
     except HTTPException:
         raise
     except Exception as e:
