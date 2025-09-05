@@ -69,7 +69,6 @@ Each completed task requires a report:
 
 ---
 
-
 ## Architecture
 
 ### Testing Architecture Overview
