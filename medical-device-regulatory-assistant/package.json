@@ -35,7 +35,15 @@
     "visual:test": "pnpm test:e2e:visual",
     "visual:update": "pnpm test:e2e:visual-update",
     "visual:cross-browser": "pnpm test:e2e:cross-browser",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "maintenance:daily": "node scripts/testing-maintenance.js daily",
+    "maintenance:weekly": "node scripts/testing-maintenance.js weekly",
+    "maintenance:monthly": "node scripts/testing-maintenance.js monthly",
+    "maintenance:validate-mock": "node scripts/testing-maintenance.js validate-mock-data",
+    "maintenance:coverage": "node scripts/testing-maintenance.js analyze-coverage",
+    "maintenance:performance": "node scripts/testing-maintenance.js check-performance",
+    "maintenance:cleanup": "node scripts/testing-maintenance.js cleanup",
+    "maintenance:health": "node scripts/testing-maintenance.js health-check"
   },
   "packageManager": "pnpm@9.0.0",
   "dependencies": {

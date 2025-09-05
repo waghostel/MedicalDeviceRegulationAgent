@@ -1,0 +1,489 @@
+name: Comprehensive Testing Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  schedule:
+    # Run nightly at 2 AM UTC for comprehensive testing
+    - cron: '0 2 * * *'
+
+env:
+  NODE_VERSION: '20'
+  PYTHON_VERSION: '3.11'
+  PNPM_VERSION: '9.0.0'
+
+jobs:
+  # Code Quality and Static Analysis
+  code-quality:
+    name: Code Quality & Static Analysis
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0 # Full history for better analysis
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'pnpm'
+        cache-dependency-path: 'medical-device-regulatory-assistant/pnpm-lock.yaml'
+    
+    - name: Install pnpm
+      run: npm install -g pnpm@${{ env.PNPM_VERSION }}
+    
+    - name: Install frontend dependencies
+      working-directory: medical-device-regulatory-assistant
+      run: pnpm install --frozen-lockfile
+    
+    - name: TypeScript type checking
+      working-directory: medical-device-regulatory-assistant
+      run: pnpm type-check
+    
+    - name: ESLint analysis
+      working-directory: medical-device-regulatory-assistant
+      run: pnpm lint --format=json --output-file=eslint-report.json
+      continue-on-error: true
+    
+    - name: Prettier format check
+      working-directory: medical-device-regulatory-assistant
+      run: pnpm format:check
+    
+    - name: Upload ESLint report
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: eslint-report
+        path: medical-device-regulatory-assistant/eslint-report.json
+
+  # Frontend Unit Tests
+  frontend-unit-tests:
+    name: Frontend Unit Tests
+    runs-on: ubuntu-latest
+    needs: code-quality
+    
+    strategy:
+      matrix:
+        test-type: [unit, integration, accessibility]
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'pnpm'
+        cache-dependency-path: 'medical-device-regulatory-assistant/pnpm-lock.yaml'
+    
+    - name: Install pnpm
+      run: npm install -g pnpm@${{ env.PNPM_VERSION }}
+    
+    - name: Install dependencies
+      working-directory: medical-device-regulatory-assistant
+      run: pnpm install --frozen-lockfile
+    
+    - name: Run ${{ matrix.test-type }} tests
+      working-directory: medical-device-regulatory-assistant
+      run: |
+        case "${{ matrix.test-type }}" in
+          "unit")
+            pnpm test:unit --coverage --coverageReporters=lcov --coverageReporters=json
+            ;;
+          "integration")
+            pnpm test:integration --coverage --coverageReporters=lcov --coverageReporters=json
+            ;;
+          "accessibility")
+            pnpm test:accessibility --coverage --coverageReporters=lcov --coverageReporters=json
+            ;;
+        esac
+    
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v4
+      with:
+        file: ./medical-device-regulatory-assistant/coverage/lcov.info
+        flags: frontend-${{ matrix.test-type }}
+        name: frontend-${{ matrix.test-type }}-coverage
+        token: ${{ secrets.CODECOV_TOKEN }}
+
+  # Backend Tests
+  backend-tests:
+    name: Backend Tests
+    runs-on: ubuntu-latest
+    needs: code-quality
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+    
+    - name: Install Poetry
+      uses: snok/install-poetry@v1
+      with:
+        version: latest
+        virtualenvs-create: true
+        virtualenvs-in-project: true
+    
+    - name: Load cached venv
+      id: cached-poetry-dependencies
+      uses: actions/cache@v4
+      with:
+        path: medical-device-regulatory-assistant/backend/.venv
+        key: venv-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}
+    
+    - name: Install dependencies
+      working-directory: medical-device-regulatory-assistant/backend
+      if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+      run: poetry install --no-interaction --no-root
+    
+    - name: Install project
+      working-directory: medical-device-regulatory-assistant/backend
+      run: poetry install --no-interaction
+    
+    - name: Run backend linting
+      working-directory: medical-device-regulatory-assistant/backend
+      run: |
+        poetry run black --check .
+        poetry run isort --check-only .
+        poetry run flake8 .
+        poetry run mypy .
+    
+    - name: Run backend tests with coverage
+      working-directory: medical-device-regulatory-assistant/backend
+      run: |
+        poetry run python -m pytest tests/ -v \
+          --cov=backend \
+          --cov-report=xml \
+          --cov-report=html \
+          --cov-report=term \
+          --cov-fail-under=85 \
+          --junitxml=pytest-report.xml
+    
+    - name: Upload backend coverage to Codecov
+      uses: codecov/codecov-action@v4
+      with:
+        file: ./medical-device-regulatory-assistant/backend/coverage.xml
+        flags: backend
+        name: backend-coverage
+        token: ${{ secrets.CODECOV_TOKEN }}
+    
+    - name: Upload test results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: backend-test-results
+        path: |
+          medical-device-regulatory-assistant/backend/pytest-report.xml
+          medical-device-regulatory-assistant/backend/htmlcov/
+
+  # End-to-End Tests
+  e2e-tests:
+    name: End-to-End Tests
+    runs-on: ubuntu-latest
+    needs: [frontend-unit-tests, backend-tests]
+    
+    strategy:
+      matrix:
+        browser: [chromium, firefox, webkit]
+        shard: [1/3, 2/3, 3/3]
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'pnpm'
+        cache-dependency-path: 'medical-device-regulatory-assistant/pnpm-lock.yaml'
+    
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+    
+    - name: Install Poetry
+      uses: snok/install-poetry@v1
+    
+    - name: Install pnpm
+      run: npm install -g pnpm@${{ env.PNPM_VERSION }}
+    
+    - name: Install frontend dependencies
+      working-directory: medical-device-regulatory-assistant
+      run: pnpm install --frozen-lockfile
+    
+    - name: Install backend dependencies
+      working-directory: medical-device-regulatory-assistant/backend
+      run: poetry install
+    
+    - name: Install Playwright browsers
+      working-directory: medical-device-regulatory-assistant
+      run: pnpm exec playwright install --with-deps ${{ matrix.browser }}
+    
+    - name: Build frontend
+      working-directory: medical-device-regulatory-assistant
+      run: pnpm build
+    
+    - name: Run E2E tests
+      working-directory: medical-device-regulatory-assistant
+      run: |
+        pnpm exec playwright test \
+          --project=${{ matrix.browser }} \
+          --shard=${{ matrix.shard }} \
+          --reporter=html,json,junit
+      env:
+        CI: true
+    
+    - name: Upload E2E test results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: e2e-results-${{ matrix.browser }}-${{ strategy.job-index }}
+        path: |
+          medical-device-regulatory-assistant/playwright-report/
+          medical-device-regulatory-assistant/test-results/
+
+  # Visual Regression Tests
+  visual-regression:
+    name: Visual Regression Tests
+    runs-on: ubuntu-latest
+    needs: [frontend-unit-tests, backend-tests]
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'pnpm'
+        cache-dependency-path: 'medical-device-regulatory-assistant/pnpm-lock.yaml'
+    
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+    
+    - name: Install Poetry
+      uses: snok/install-poetry@v1
+    
+    - name: Install pnpm
+      run: npm install -g pnpm@${{ env.PNPM_VERSION }}
+    
+    - name: Install dependencies
+      working-directory: medical-device-regulatory-assistant
+      run: pnpm install --frozen-lockfile
+    
+    - name: Install backend dependencies
+      working-directory: medical-device-regulatory-assistant/backend
+      run: poetry install
+    
+    - name: Install Playwright
+      working-directory: medical-device-regulatory-assistant
+      run: pnpm exec playwright install --with-deps chromium
+    
+    - name: Build frontend
+      working-directory: medical-device-regulatory-assistant
+      run: pnpm build
+    
+    - name: Run visual regression tests
+      working-directory: medical-device-regulatory-assistant
+      run: pnpm test:e2e:visual --project=visual-chromium
+      env:
+        CI: true
+    
+    - name: Upload visual diff artifacts
+      uses: actions/upload-artifact@v4
+      if: failure()
+      with:
+        name: visual-regression-diffs
+        path: |
+          medical-device-regulatory-assistant/test-results/
+          medical-device-regulatory-assistant/playwright-report/
+
+  # Performance Tests
+  performance-tests:
+    name: Performance Tests
+    runs-on: ubuntu-latest
+    needs: [frontend-unit-tests, backend-tests]
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'pnpm'
+        cache-dependency-path: 'medical-device-regulatory-assistant/pnpm-lock.yaml'
+    
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+    
+    - name: Install Poetry
+      uses: snok/install-poetry@v1
+    
+    - name: Install pnpm
+      run: npm install -g pnpm@${{ env.PNPM_VERSION }}
+    
+    - name: Install dependencies
+      working-directory: medical-device-regulatory-assistant
+      run: pnpm install --frozen-lockfile
+    
+    - name: Install backend dependencies
+      working-directory: medical-device-regulatory-assistant/backend
+      run: poetry install
+    
+    - name: Build frontend for production
+      working-directory: medical-device-regulatory-assistant
+      run: pnpm build
+    
+    - name: Run Lighthouse CI
+      working-directory: medical-device-regulatory-assistant
+      run: |
+        pnpm lighthouse:collect
+        pnpm lighthouse:assert
+      env:
+        LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
+    
+    - name: Run bundle size analysis
+      working-directory: medical-device-regulatory-assistant
+      run: pnpm bundlesize
+    
+    - name: Run backend performance tests
+      working-directory: medical-device-regulatory-assistant/backend
+      run: poetry run python -m pytest tests/performance/ -v --tb=short
+    
+    - name: Upload performance reports
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: performance-reports
+        path: |
+          medical-device-regulatory-assistant/.lighthouseci/
+          medical-device-regulatory-assistant/backend/performance-report.json
+
+  # Security Tests
+  security-tests:
+    name: Security Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Run Trivy vulnerability scanner
+      uses: aquasecurity/trivy-action@master
+      with:
+        scan-type: 'fs'
+        scan-ref: '.'
+        format: 'sarif'
+        output: 'trivy-results.sarif'
+    
+    - name: Upload Trivy scan results to GitHub Security tab
+      uses: github/codeql-action/upload-sarif@v3
+      if: always()
+      with:
+        sarif_file: 'trivy-results.sarif'
+    
+    - name: Setup Node.js for npm audit
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'pnpm'
+        cache-dependency-path: 'medical-device-regulatory-assistant/pnpm-lock.yaml'
+    
+    - name: Install pnpm
+      run: npm install -g pnpm@${{ env.PNPM_VERSION }}
+    
+    - name: Run npm security audit
+      working-directory: medical-device-regulatory-assistant
+      run: pnpm audit --audit-level moderate
+      continue-on-error: true
+    
+    - name: Setup Python for safety check
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+    
+    - name: Install Poetry
+      uses: snok/install-poetry@v1
+    
+    - name: Run Python security audit
+      working-directory: medical-device-regulatory-assistant/backend
+      run: |
+        poetry add --group dev safety
+        poetry run safety check
+      continue-on-error: true
+
+  # Test Results Summary
+  test-summary:
+    name: Test Results Summary
+    runs-on: ubuntu-latest
+    needs: [e2e-tests, visual-regression, performance-tests, security-tests]
+    if: always()
+    
+    steps:
+    - name: Download all artifacts
+      uses: actions/download-artifact@v4
+    
+    - name: Generate test summary
+      run: |
+        echo "# Test Results Summary" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "## Test Status" >> $GITHUB_STEP_SUMMARY
+        echo "- Frontend Unit Tests: ${{ needs.frontend-unit-tests.result }}" >> $GITHUB_STEP_SUMMARY
+        echo "- Backend Tests: ${{ needs.backend-tests.result }}" >> $GITHUB_STEP_SUMMARY
+        echo "- E2E Tests: ${{ needs.e2e-tests.result }}" >> $GITHUB_STEP_SUMMARY
+        echo "- Visual Regression: ${{ needs.visual-regression.result }}" >> $GITHUB_STEP_SUMMARY
+        echo "- Performance Tests: ${{ needs.performance-tests.result }}" >> $GITHUB_STEP_SUMMARY
+        echo "- Security Tests: ${{ needs.security-tests.result }}" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "## Coverage Reports" >> $GITHUB_STEP_SUMMARY
+        echo "Coverage reports are available in the Codecov dashboard." >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "## Artifacts" >> $GITHUB_STEP_SUMMARY
+        echo "Test artifacts and reports are available in the Actions tab." >> $GITHUB_STEP_SUMMARY
+
+  # Notification on failure
+  notify-failure:
+    name: Notify on Failure
+    runs-on: ubuntu-latest
+    needs: [e2e-tests, visual-regression, performance-tests, security-tests]
+    if: failure() && github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: Send Slack notification
+      uses: 8398a7/action-slack@v3
+      with:
+        status: failure
+        channel: '#dev-alerts'
+        text: 'Comprehensive testing pipeline failed on main branch'
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+# Workflow dispatch for manual runs
+  manual-trigger:
+    name: Manual Test Run
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Manual test trigger
+      run: |
+        echo "Manual test run triggered by ${{ github.actor }}"
+        echo "Running comprehensive test suite..."
