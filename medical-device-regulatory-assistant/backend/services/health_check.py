@@ -12,7 +12,7 @@ import os
 from datetime import datetime
 
 # Import Pydantic models
-from ..models.health import (
+from models.health import (
     HealthCheckResponse,
     HealthCheckDetail,
     DatabaseHealthDetail,

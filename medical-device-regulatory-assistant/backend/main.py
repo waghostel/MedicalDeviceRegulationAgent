@@ -5,7 +5,7 @@ import signal
 import asyncio
 import logging
 from contextlib import asynccontextmanager
-from typing import Dict, Any
+from typing import Dict, Any, List
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -276,23 +276,205 @@ async def root() -> dict[str, str]:
     }
 
 
-# Legacy health endpoint for backward compatibility
-@app.get("/health", tags=["health"], deprecated=True)
-async def legacy_health_check() -> dict[str, str]:
+# Health check endpoints using the new health check service
+@app.get("/health", tags=["health"])
+async def health_check():
     """
-    Legacy health check endpoint.
-    
-    **Deprecated**: Use `/api/health` for comprehensive health checks.
+    Comprehensive health check endpoint using the new health check service.
     
     Returns:
-        dict: Basic health status
+        HealthCheckResponse: Complete system health status
+        
+    Raises:
+        HTTPException: 503 if any health check fails
     """
-    return {
-        "status": "healthy",
-        "service": "medical-device-regulatory-assistant-backend",
-        "version": "0.1.0",
-        "note": "Use /api/health for detailed health information"
-    }
+    from fastapi import HTTPException
+    from services.health_check import health_service
+    
+    try:
+        health_status = await health_service.check_all()
+        
+        if not health_status.healthy:
+            # Return 503 Service Unavailable for unhealthy status
+            raise HTTPException(
+                status_code=503, 
+                detail={
+                    "error": "System is unhealthy",
+                    "health_status": health_status.model_dump(),
+                    "suggestions": _get_health_suggestions(health_status)
+                }
+            )
+        
+        return health_status
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Health check failed with unexpected error: {e}")
+        raise HTTPException(
+            status_code=503,
+            detail={
+                "error": "Health check system failure",
+                "message": str(e),
+                "suggestions": [
+                    "Check application logs for detailed error information",
+                    "Verify all required services are running",
+                    "Contact system administrator if problem persists"
+                ]
+            }
+        )
+
+
+@app.get("/health/{check_name}", tags=["health"])
+async def specific_health_check(check_name: str):
+    """
+    Check specific health component.
+    
+    Args:
+        check_name: Name of the health check component
+                   (database, redis, fda_api, disk_space, memory)
+    
+    Returns:
+        HealthCheckResponse: Specific component health status
+        
+    Raises:
+        HTTPException: 400 for invalid check name, 503 if check fails
+    """
+    from fastapi import HTTPException
+    from services.health_check import health_service
+    
+    valid_checks = ['database', 'redis', 'fda_api', 'disk_space', 'memory']
+    if check_name not in valid_checks:
+        raise HTTPException(
+            status_code=400, 
+            detail={
+                "error": f"Invalid check name: {check_name}",
+                "valid_checks": valid_checks,
+                "suggestions": [
+                    f"Use one of the valid check names: {', '.join(valid_checks)}",
+                    "Check the API documentation for available health checks",
+                    "Use /health for all checks at once"
+                ]
+            }
+        )
+    
+    try:
+        health_status = await health_service.check_specific([check_name])
+        
+        if not health_status.healthy:
+            # Return 503 Service Unavailable for unhealthy status
+            raise HTTPException(
+                status_code=503, 
+                detail={
+                    "error": f"{check_name} health check failed",
+                    "health_status": health_status.model_dump(),
+                    "suggestions": _get_component_suggestions(check_name, health_status.checks[check_name])
+                }
+            )
+        
+        return health_status
+    except HTTPException:
+        raise
+    except ValueError as e:
+        raise HTTPException(
+            status_code=400,
+            detail={
+                "error": "Invalid health check configuration",
+                "message": str(e),
+                "suggestions": [
+                    "Verify the health check name is correct",
+                    "Check system configuration",
+                    "Contact system administrator"
+                ]
+            }
+        )
+    except Exception as e:
+        logger.error(f"Health check {check_name} failed with unexpected error: {e}")
+        raise HTTPException(
+            status_code=503,
+            detail={
+                "error": f"{check_name} health check system failure",
+                "message": str(e),
+                "suggestions": _get_component_suggestions(check_name, None, str(e))
+            }
+        )
+
+
+def _get_health_suggestions(health_status) -> List[str]:
+    """Generate actionable suggestions based on failed health checks."""
+    suggestions = []
+    
+    for check_name, check_result in health_status.checks.items():
+        if not check_result.healthy:
+            suggestions.extend(_get_component_suggestions(check_name, check_result))
+    
+    if not suggestions:
+        suggestions = [
+            "Check application logs for detailed error information",
+            "Verify all required services are running",
+            "Contact system administrator if problem persists"
+        ]
+    
+    return suggestions
+
+
+def _get_component_suggestions(check_name: str, check_result=None, error_msg: str = None) -> List[str]:
+    """Generate component-specific actionable suggestions."""
+    suggestions = []
+    
+    if check_name == "database":
+        suggestions.extend([
+            "Verify database file exists and is accessible",
+            "Check database file permissions",
+            "Ensure SQLite is properly installed",
+            "Verify DATABASE_URL environment variable is correct"
+        ])
+        if check_result and check_result.error:
+            if "permission" in check_result.error.lower():
+                suggestions.append("Fix database file permissions (chmod 644)")
+            elif "not found" in check_result.error.lower():
+                suggestions.append("Create database file or check path configuration")
+    
+    elif check_name == "redis":
+        suggestions.extend([
+            "Verify Redis server is running",
+            "Check Redis connection configuration",
+            "Verify REDIS_URL environment variable",
+            "Test Redis connectivity manually"
+        ])
+        if check_result and check_result.status == "not_configured":
+            suggestions.append("Redis is optional - system can run without it")
+    
+    elif check_name == "fda_api":
+        suggestions.extend([
+            "Check internet connectivity",
+            "Verify FDA API is accessible (https://api.fda.gov)",
+            "Check for API rate limiting",
+            "Verify FDA_API_KEY if required"
+        ])
+        if check_result and "rate limit" in str(check_result.error or "").lower():
+            suggestions.append("Wait for rate limit reset or reduce API request frequency")
+    
+    elif check_name == "disk_space":
+        suggestions.extend([
+            "Free up disk space by removing unnecessary files",
+            "Check for large log files that can be rotated",
+            "Monitor disk usage regularly",
+            "Consider increasing disk capacity"
+        ])
+        if check_result and check_result.status == "low_space":
+            suggestions.append("Immediate action required - disk space critically low")
+    
+    elif check_name == "memory":
+        suggestions.extend([
+            "Monitor memory usage patterns",
+            "Restart application if memory leak suspected",
+            "Consider increasing available memory",
+            "Check for memory-intensive processes"
+        ])
+        if check_result and check_result.status == "high_usage":
+            suggestions.append("Consider restarting the application to free memory")
+    
+    return suggestions
 
 
 if __name__ == "__main__":
