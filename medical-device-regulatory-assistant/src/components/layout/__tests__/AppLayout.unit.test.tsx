@@ -5,66 +5,35 @@
 
 import React from 'react';
 import { screen, fireEvent, waitFor } from '@testing-library/react';
+import '@testing-library/jest-dom';
 import { renderWithProviders, createMockSession } from '@/lib/testing/test-utils';
 import { AppLayout } from '../AppLayout';
 
 // Mock the child components
 jest.mock('../Header', () => ({
-  Header: (props) => (
-    <div data-testid="mock-header">
-      {props.showMenuButton && (
-        <button onClick={props.onMenuToggle} data-testid="menu-toggle">
-          Menu
-        </button>
-      )}
-      Header Component
-    </div>
-  ),
+  Header: jest.fn(),
 }));
 
 jest.mock('../Sidebar', () => ({
-  Sidebar: () => <div data-testid="mock-sidebar">Sidebar Component</div>,
+  Sidebar: jest.fn(),
 }));
 
 jest.mock('../QuickActionsToolbar', () => ({
-  QuickActionsToolbar: (props) => (
-    <div data-testid="mock-quick-actions">
-      <button onClick={() => props.onAction('test-action')} data-testid="quick-action-btn">
-        Quick Action
-      </button>
-    </div>
-  ),
+  QuickActionsToolbar: jest.fn(),
 }));
 
 jest.mock('../CommandPalette', () => ({
-  CommandPalette: (props) => (
-    props.isOpen ? (
-      <div data-testid="mock-command-palette">
-        <button onClick={props.onClose} data-testid="close-palette">Close</button>
-        <button onClick={() => props.onAction('palette-action')} data-testid="palette-action">
-          Palette Action
-        </button>
-      </div>
-    ) : null
-  ),
+  CommandPalette: jest.fn(),
 }));
 
 jest.mock('../Breadcrumb', () => ({
-  Breadcrumb: (props) => (
-    <div data-testid="mock-breadcrumb">
-      {props.items.map((item, index) => (
-        <span key={index} data-testid={`breadcrumb-item-${index}`}>
-          {item.label}
-        </span>
-      ))}
-    </div>
-  ),
+  Breadcrumb: jest.fn(),
 }));
 
 // Mock keyboard shortcuts hook
 jest.mock('@/hooks/useKeyboardShortcuts', () => ({
   useKeyboardShortcuts: jest.fn(),
-  createRegulatoryShortcuts: jest.fn(() => ({})),
+  createRegulatoryShortcuts: jest.fn(() => []),
 }));
 
 describe('AppLayout Component', () => {
@@ -73,8 +42,60 @@ describe('AppLayout Component', () => {
     children: <div data-testid="main-content">Main Content</div>,
   };
 
+  // Set up mock implementations
+  const { Header } = require('../Header');
+  const { Sidebar } = require('../Sidebar');
+  const { QuickActionsToolbar } = require('../QuickActionsToolbar');
+  const { CommandPalette } = require('../CommandPalette');
+  const { Breadcrumb } = require('../Breadcrumb');
+
   beforeEach(() => {
     jest.clearAllMocks();
+    
+    // Configure mock implementations
+    (Header as jest.Mock).mockImplementation((props: any) => (
+      <div data-testid="mock-header">
+        {props.showMenuButton && (
+          <button onClick={props.onMenuToggle} data-testid="menu-toggle">
+            Menu
+          </button>
+        )}
+        Header Component
+      </div>
+    ));
+
+    (Sidebar as jest.Mock).mockImplementation(() => (
+      <div data-testid="mock-sidebar">Sidebar Component</div>
+    ));
+
+    (QuickActionsToolbar as jest.Mock).mockImplementation((props: any) => (
+      <div data-testid="mock-quick-actions">
+        <button onClick={() => props.onAction('test-action')} data-testid="quick-action-btn">
+          Quick Action
+        </button>
+      </div>
+    ));
+
+    (CommandPalette as jest.Mock).mockImplementation((props: any) => (
+      props.isOpen ? (
+        <div data-testid="mock-command-palette">
+          <button onClick={props.onClose} data-testid="close-palette">Close</button>
+          <button onClick={() => props.onAction('palette-action')} data-testid="palette-action">
+            Palette Action
+          </button>
+        </div>
+      ) : null
+    ));
+
+    (Breadcrumb as jest.Mock).mockImplementation((props: any) => (
+      <div data-testid="mock-breadcrumb">
+        {props.items.map((item: any, index: number) => (
+          <span key={index} data-testid={`breadcrumb-item-${index}`}>
+            {item.label}
+          </span>
+        ))}
+      </div>
+    ));
   });
 
   describe('Basic Rendering', () => {

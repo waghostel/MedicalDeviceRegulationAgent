@@ -1,7 +1,5 @@
 {
   "enabled": true,
-  "name": "Fix error",
-  "description": "Analyzes root causes of error message provided by user and propose the error fixing plan, after getting user permission, start fixing it.",
   "name": "fix_error",
   "description": "Analyzes the root cause of the error message provided by the user and proposes a detailed error-fixing plan. Do not begin applying any fixes until receiving explicit permission from the user. If the error message is not provided, ask the user to supply it before proceeding.",
   "version": "1",

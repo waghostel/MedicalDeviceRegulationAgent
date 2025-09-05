@@ -13,6 +13,18 @@ const customJestConfig = {
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
   },
+  transform: {
+    '^.+\\.(js|jsx|ts|tsx)$': ['babel-jest', {
+      presets: [
+        ['@babel/preset-env', { targets: { node: 'current' } }],
+        ['@babel/preset-react', { runtime: 'automatic' }],
+        '@babel/preset-typescript'
+      ]
+    }]
+  },
+  transformIgnorePatterns: [
+    'node_modules/(?!(.*\\.mjs$))'
+  ],
   collectCoverageFrom: [
     'src/**/*.{js,jsx,ts,tsx}',
     '!src/**/*.d.ts',
@@ -59,18 +71,55 @@ const customJestConfig = {
       displayName: 'unit',
       testMatch: ['<rootDir>/src/**/*.unit.{test,spec}.{js,jsx,ts,tsx}'],
       testEnvironment: 'jsdom',
+      setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
+      moduleNameMapper: {
+        '^@/(.*)$': '<rootDir>/src/$1',
+      },
+      transform: {
+        '^.+\\.(js|jsx|ts|tsx)$': ['babel-jest', {
+          presets: [
+            ['@babel/preset-env', { targets: { node: 'current' } }],
+            ['@babel/preset-react', { runtime: 'automatic' }],
+            '@babel/preset-typescript'
+          ]
+        }]
+      },
     },
     {
       displayName: 'integration',
       testMatch: ['<rootDir>/src/**/*.integration.{test,spec}.{js,jsx,ts,tsx}'],
       testEnvironment: 'jsdom',
       setupFilesAfterEnv: ['<rootDir>/jest.setup.js', '<rootDir>/src/lib/testing/integration-setup.js'],
+      moduleNameMapper: {
+        '^@/(.*)$': '<rootDir>/src/$1',
+      },
+      transform: {
+        '^.+\\.(js|jsx|ts|tsx)$': ['babel-jest', {
+          presets: [
+            ['@babel/preset-env', { targets: { node: 'current' } }],
+            ['@babel/preset-react', { runtime: 'automatic' }],
+            '@babel/preset-typescript'
+          ]
+        }]
+      },
     },
     {
       displayName: 'accessibility',
       testMatch: ['<rootDir>/src/**/*.accessibility.{test,spec}.{js,jsx,ts,tsx}'],
       testEnvironment: 'jsdom',
       setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
+      moduleNameMapper: {
+        '^@/(.*)$': '<rootDir>/src/$1',
+      },
+      transform: {
+        '^.+\\.(js|jsx|ts|tsx)$': ['babel-jest', {
+          presets: [
+            ['@babel/preset-env', { targets: { node: 'current' } }],
+            ['@babel/preset-react', { runtime: 'automatic' }],
+            '@babel/preset-typescript'
+          ]
+        }]
+      },
     },
   ],
   // Performance monitoring
