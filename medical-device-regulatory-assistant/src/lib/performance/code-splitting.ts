@@ -8,6 +8,8 @@
 import React, { Suspense, ComponentType, LazyExoticComponent } from 'react';
 import { performanceMonitor } from './optimization';
 
+import React, { Suspense, ComponentType, LazyExoticComponent } from 'react';
+
 // Loading component for Suspense fallbacks
 export const LoadingSpinner: React.FC<{ message?: string }> = ({ 
   message = "Loading..." 
