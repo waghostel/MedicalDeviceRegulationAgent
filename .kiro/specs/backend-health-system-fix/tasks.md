@@ -8,6 +8,9 @@ Convert the backend health system fix design into a series of prompts for a code
 - Use **`poetry`** for Python commands (e.g. `poetry run python test_document_tool.py`).
 - Create the test script and run it instead of run it directly with `poetry run python -c`
 - Follow **Test-Driven Development (TDD)**.
+- Do not skip any further tests after fixing a testing error.
+- Always re-run the test once the error has been fixed.
+- Describe the true test result in the report, even if the test has failed.
 - Always clear the terminal before running a new command. Type the clear command first, press Enter, then type the actual command and press Enter again.
 
   Example 1(Windows):
@@ -144,7 +147,7 @@ Each completed task requires a report:
   - Write API integration tests to verify endpoints return correct responses
   - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5_
 
-- [ ] 8. Add aiosqlite Dependency and Configuration
+- [x] 8. Add aiosqlite Dependency and Configuration
 
   - Update `backend/pyproject.toml` to include `aiosqlite` as a dependency
   - Run `poetry install` to ensure the new dependency is available
