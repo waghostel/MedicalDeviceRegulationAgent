@@ -1,6 +1,6 @@
 {
   "enabled": true,
-  "name": "find-redundant",
+  "name": "refactor-code",
   "description": "Find redundant or duplicate files in the codebase.",
   "version": "1",
   "when": {
