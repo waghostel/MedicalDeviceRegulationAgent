@@ -30,7 +30,7 @@ Convert the backend health system fix design into a series of prompts for a code
 
 ### Workflow
 
-`SPECS_FOLDER` = `./.kiro/specs/backend-health-system-fix/task-execute-history/` 
+`SPECS_FOLDER` = `./.kiro/specs/backend-health-system-fix/task-execute-history/`
 
 1. Create a code-writing plan for the task.
 2. Define the testing criteria.
@@ -126,7 +126,7 @@ Each completed task requires a report:
   - Write unit tests to verify error handling works correctly for various failure scenarios
   - _Requirements: 5.1, 5.2, 5.3, 5.4, 5.5_
 
-- [ ] 6. Create Pydantic Models for Health Check Responses
+- [x] 6. Create Pydantic Models for Health Check Responses
 
   - Create `backend/models/health.py` with proper Pydantic models for health check responses
   - Implement `HealthCheckResponse`, `HealthCheckDetail`, and `DatabaseHealthDetail` models

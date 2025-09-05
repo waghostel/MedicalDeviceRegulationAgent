@@ -9,6 +9,17 @@ from .cache import get_redis_client
 from .openfda import OpenFDAService
 import shutil
 import os
+from datetime import datetime
+
+# Import Pydantic models
+from ..models.health import (
+    HealthCheckResponse,
+    HealthCheckDetail,
+    DatabaseHealthDetail,
+    RedisHealthDetail,
+    FDAAPIHealthDetail,
+    SystemResourceHealthDetail,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -22,7 +33,7 @@ class HealthCheckService:
             'memory': self._check_memory
         }
     
-    async def check_all(self, include_checks: List[str] = None) -> Dict[str, Any]:
+    async def check_all(self, include_checks: List[str] = None) -> HealthCheckResponse:
         """Run all health checks or specified subset"""
         start_time = time.time()
         
@@ -36,35 +47,45 @@ class HealthCheckService:
             if check_name in self.checks:
                 check_start = time.time()
                 try:
-                    result = await self.checks[check_name]()
-                    result['execution_time_ms'] = round((time.time() - check_start) * 1000, 2)
-                    result['timestamp'] = time.strftime('%Y-%m-%dT%H:%M:%S.%fZ')
-                    results[check_name] = result
+                    result_dict = await self.checks[check_name]()
+                    execution_time = round((time.time() - check_start) * 1000, 2)
+                    timestamp = datetime.utcnow().isoformat() + 'Z'
                     
-                    if not result.get('healthy', False):
+                    # Create HealthCheckDetail from result
+                    result_dict['execution_time_ms'] = execution_time
+                    result_dict['timestamp'] = timestamp
+                    
+                    health_detail = HealthCheckDetail(**result_dict)
+                    results[check_name] = health_detail
+                    
+                    if not health_detail.healthy:
                         overall_healthy = False
                         
                 except Exception as e:
                     logger.error(f"Health check {check_name} failed: {e}")
-                    results[check_name] = {
-                        'healthy': False,
-                        'status': 'error',
-                        'error': str(e),
-                        'execution_time_ms': round((time.time() - check_start) * 1000, 2),
-                        'timestamp': time.strftime('%Y-%m-%dT%H:%M:%S.%fZ')
-                    }
+                    execution_time = round((time.time() - check_start) * 1000, 2)
+                    timestamp = datetime.utcnow().isoformat() + 'Z'
+                    
+                    error_detail = HealthCheckDetail(
+                        healthy=False,
+                        status='error',
+                        error=str(e),
+                        execution_time_ms=execution_time,
+                        timestamp=timestamp
+                    )
+                    results[check_name] = error_detail
                     overall_healthy = False
         
-        return {
-            'healthy': overall_healthy,
-            'timestamp': time.strftime('%Y-%m-%dT%H:%M:%S.%fZ'),
-            'execution_time_ms': round((time.time() - start_time) * 1000, 2),
-            'service': 'medical-device-regulatory-assistant',
-            'version': '0.1.0',
-            'checks': results
-        }
+        return HealthCheckResponse(
+            healthy=overall_healthy,
+            timestamp=datetime.utcnow().isoformat() + 'Z',
+            execution_time_ms=round((time.time() - start_time) * 1000, 2),
+            service='medical-device-regulatory-assistant',
+            version='0.1.0',
+            checks=results
+        )
     
-    async def check_specific(self, check_names: List[str]) -> Dict[str, Any]:
+    async def check_specific(self, check_names: List[str]) -> HealthCheckResponse:
         """Run specific health checks by name"""
         # Validate check names
         invalid_checks = [name for name in check_names if name not in self.checks]

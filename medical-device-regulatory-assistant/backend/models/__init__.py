@@ -10,6 +10,16 @@ from .predicate_device import PredicateDevice
 from .agent_interaction import AgentInteraction
 from .project_document import ProjectDocument
 
+# Pydantic models for API responses
+from .health import (
+    HealthCheckResponse,
+    HealthCheckDetail,
+    DatabaseHealthDetail,
+    RedisHealthDetail,
+    FDAAPIHealthDetail,
+    SystemResourceHealthDetail,
+)
+
 __all__ = [
     "Base",
     "User",
@@ -18,4 +28,11 @@ __all__ = [
     "PredicateDevice",
     "AgentInteraction",
     "ProjectDocument",
+    # Health check models
+    "HealthCheckResponse",
+    "HealthCheckDetail",
+    "DatabaseHealthDetail",
+    "RedisHealthDetail",
+    "FDAAPIHealthDetail",
+    "SystemResourceHealthDetail",
 ]
