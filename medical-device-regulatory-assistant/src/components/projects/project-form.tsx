@@ -34,23 +34,35 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Project, ProjectCreateRequest, ProjectUpdateRequest, ProjectStatus } from '@/types/project';
+import {
+  Project,
+  ProjectCreateRequest,
+  ProjectUpdateRequest,
+  ProjectStatus,
+} from '@/types/project';
 import { toast } from '@/hooks/use-toast';
 
-// Form validation schema
+// Form validation schema - matches backend validation
 const projectFormSchema = z.object({
-  name: z.string()
+  name: z
+    .string()
     .min(1, 'Project name is required')
-    .max(100, 'Project name must be less than 100 characters'),
-  description: z.string()
-    .max(500, 'Description must be less than 500 characters')
-    .optional(),
-  device_type: z.string()
-    .max(100, 'Device type must be less than 100 characters')
-    .optional(),
-  intended_use: z.string()
-    .max(1000, 'Intended use must be less than 1000 characters')
-    .optional(),
+    .max(255, 'Project name must be less than 255 characters'),
+  description: z
+    .string()
+    .max(1000, 'Description must be less than 1000 characters')
+    .optional()
+    .or(z.literal('')),
+  device_type: z
+    .string()
+    .max(255, 'Device type must be less than 255 characters')
+    .optional()
+    .or(z.literal('')),
+  intended_use: z
+    .string()
+    .max(2000, 'Intended use must be less than 2000 characters')
+    .optional()
+    .or(z.literal('')),
   status: z.nativeEnum(ProjectStatus).optional(),
 });
 
@@ -60,7 +72,9 @@ interface ProjectFormProps {
   project?: Project;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSubmit: (data: ProjectCreateRequest | ProjectUpdateRequest) => Promise<Project | null>;
+  onSubmit: (
+    data: ProjectCreateRequest | ProjectUpdateRequest
+  ) => Promise<Project | null>;
   loading?: boolean;
 }
 
@@ -129,29 +143,54 @@ export function ProjectForm({
 
   const handleSubmit = async (data: ProjectFormData) => {
     setIsSubmitting(true);
-    
+
     try {
+      // Clean up empty strings to undefined for backend
+      const cleanData = {
+        ...data,
+        description: data.description?.trim() || undefined,
+        device_type: data.device_type?.trim() || undefined,
+        intended_use: data.intended_use?.trim() || undefined,
+      };
+
       const submitData = isEditing
-        ? (data as ProjectUpdateRequest)
-        : (data as ProjectCreateRequest);
-      
+        ? (cleanData as ProjectUpdateRequest)
+        : (cleanData as ProjectCreateRequest);
+
       const result = await onSubmit(submitData);
-      
+
       if (result) {
         toast({
           title: isEditing ? 'Project Updated' : 'Project Created',
           description: `Project "${result.name}" has been ${isEditing ? 'updated' : 'created'} successfully.`,
         });
-        
+
         onOpenChange(false);
         form.reset();
       }
     } catch (error: any) {
-      toast({
-        title: isEditing ? 'Update Failed' : 'Creation Failed',
-        description: error.message || `Failed to ${isEditing ? 'update' : 'create'} project.`,
-        variant: 'destructive',
-      });
+      // Handle backend validation errors
+      if (error.message.includes('Invalid project data')) {
+        toast({
+          title: 'Validation Error',
+          description: 'Please check your input and try again.',
+          variant: 'destructive',
+        });
+      } else if (error.message.includes('Authentication required')) {
+        toast({
+          title: 'Authentication Required',
+          description: 'Please sign in to continue.',
+          variant: 'destructive',
+        });
+      } else {
+        toast({
+          title: isEditing ? 'Update Failed' : 'Creation Failed',
+          description:
+            error.message ||
+            `Failed to ${isEditing ? 'update' : 'create'} project.`,
+          variant: 'destructive',
+        });
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -177,7 +216,10 @@ export function ProjectForm({
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+          <form
+            onSubmit={form.handleSubmit(handleSubmit)}
+            className="space-y-6"
+          >
             {/* Project Name */}
             <FormField
               control={form.control}
@@ -216,7 +258,8 @@ export function ProjectForm({
                     />
                   </FormControl>
                   <FormDescription>
-                    Optional description to help identify and organize your project
+                    Optional description to help identify and organize your
+                    project
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -272,7 +315,8 @@ export function ProjectForm({
                     />
                   </FormControl>
                   <FormDescription>
-                    Clear statement of the device's intended medical purpose and target patient population
+                    Clear statement of the device's intended medical purpose and
+                    target patient population
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -298,9 +342,15 @@ export function ProjectForm({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value={ProjectStatus.DRAFT}>Draft</SelectItem>
-                        <SelectItem value={ProjectStatus.IN_PROGRESS}>In Progress</SelectItem>
-                        <SelectItem value={ProjectStatus.COMPLETED}>Completed</SelectItem>
+                        <SelectItem value={ProjectStatus.DRAFT}>
+                          Draft
+                        </SelectItem>
+                        <SelectItem value={ProjectStatus.IN_PROGRESS}>
+                          In Progress
+                        </SelectItem>
+                        <SelectItem value={ProjectStatus.COMPLETED}>
+                          Completed
+                        </SelectItem>
                       </SelectContent>
                     </Select>
                     <FormDescription>
@@ -322,18 +372,19 @@ export function ProjectForm({
                 <X className="h-4 w-4 mr-2" />
                 Cancel
               </Button>
-              <Button
-                type="submit"
-                disabled={isSubmitting || loading}
-              >
+              <Button type="submit" disabled={isSubmitting || loading}>
                 {isSubmitting ? (
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                 ) : (
                   <Save className="h-4 w-4 mr-2" />
                 )}
                 {isSubmitting
-                  ? (isEditing ? 'Updating...' : 'Creating...')
-                  : (isEditing ? 'Update Project' : 'Create Project')}
+                  ? isEditing
+                    ? 'Updating...'
+                    : 'Creating...'
+                  : isEditing
+                    ? 'Update Project'
+                    : 'Create Project'}
               </Button>
             </DialogFooter>
           </form>

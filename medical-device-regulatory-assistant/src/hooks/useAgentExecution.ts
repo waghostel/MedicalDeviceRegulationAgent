@@ -238,7 +238,6 @@ export function useAgentExecution(options: UseAgentExecutionOptions = {}) {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer test-token' // For MVP - replace with real auth
         },
         body: JSON.stringify({
           task_type: taskType,
@@ -320,7 +319,6 @@ export function useAgentExecution(options: UseAgentExecutionOptions = {}) {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer test-token'
         },
         body: JSON.stringify({
           session_id: status.sessionId,
@@ -351,7 +349,7 @@ export function useAgentExecution(options: UseAgentExecutionOptions = {}) {
     try {
       const response = await fetch(`/api/agent/session/${sessionId}/status`, {
         headers: {
-          'Authorization': 'Bearer test-token'
+          'Content-Type': 'application/json',
         }
       });
       
