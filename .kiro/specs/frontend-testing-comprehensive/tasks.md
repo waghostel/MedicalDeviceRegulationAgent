@@ -126,6 +126,9 @@
   - _Requirements: 3.7, 6.5_
 
 - [ ] 4. Implement end-to-end tests with Playwright for critical user journeys
+
+
+
   - Create complete user onboarding test from login to first project creation
   - Test dashboard navigation and widget interactions across different screen sizes
   - Test agent workflow with simulated AI responses and citation handling

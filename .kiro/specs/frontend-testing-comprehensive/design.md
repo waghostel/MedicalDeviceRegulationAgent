@@ -13,9 +13,8 @@ This design document outlines the comprehensive frontend testing strategy for th
 - Use **`poetry`** for Python commands (e.g. `poetry run python test_document_tool.py`).
 - Create the test script and run it instead of run it directly with `poetry run python -c`
 - Follow **Test-Driven Development (TDD)**.
-- Do not skip a further test after fixing a testing error. Always re-run the test once the error has been fixed.
-
-Describe the true test result in the report.
+- Do not skip any further tests after fixing a testing error. Always re-run the test once the error has been fixed.
+- Describe the true test result in the report, even if the test has failed.
 - Always clear the terminal before running a new command. Type the clear command first, press Enter, then type the actual command and press Enter again.
 
   Example 1(Windows):

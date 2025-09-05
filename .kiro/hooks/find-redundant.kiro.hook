@@ -1,0 +1,16 @@
+{
+  "enabled": true,
+  "name": "find_redundant",
+  "description": "Find redundant or duplicate files in the codebase.",
+  "version": "1",
+  "when": {
+    "type": "userTriggered",
+    "patterns": [
+      "./.kiro/specs/frontend-testing-comprehensive/task-execute-history/"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "Search and investigate potential unlinked or unused files. \nProvide them in a list using the format below. \nOnly list the files—do not delete them. \n\n---\n**Duplicate/redundant file list example**\n* [ ] **filename1**\n  * Function of this file\n  * Reason why this may not be used\n* [ ] **filename2**\n  * Function of this file\n  * Reason why this may not be used\n"
+  }
+}
