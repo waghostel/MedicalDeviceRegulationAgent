@@ -52,8 +52,8 @@ shutdown_event = asyncio.Event()
 
 def signal_handler(signum, frame):
     """Handle shutdown signals gracefully."""
-    logger.info(f"🛑 Received signal {signum}, initiating graceful shutdown...")
-    print(f"🛑 Received signal {signum}, initiating graceful shutdown...")
+    logger.info(f"[STOPPING] Received signal {signum}, initiating graceful shutdown...")
+    print(f"[STOPPING] Received signal {signum}, initiating graceful shutdown...")
     shutdown_event.set()
 
 # Register signal handlers for graceful shutdown
@@ -78,7 +78,7 @@ async def lifespan(app: FastAPI):
     
     try:
         # Startup phase
-        print("🚀 Medical Device Regulatory Assistant API starting up...")
+        print("Starting Medical Device Regulatory Assistant API...")
         
         # 1. Initialize database connections (required)
         try:
@@ -87,10 +87,10 @@ async def lifespan(app: FastAPI):
             db_manager = await init_database(database_url)
             app.state.db_manager = db_manager
             initialized_services.append("database")
-            print("✅ Database connection initialized")
+            print("Database connection initialized")
         except Exception as e:
             error_msg = f"Database initialization failed: {e}"
-            print(f"❌ {error_msg}")
+            print(f"[ERROR] {error_msg}")
             startup_errors.append(("database", error_msg))
             startup_failed = True
             # Database is critical - fail startup
@@ -104,12 +104,12 @@ async def lifespan(app: FastAPI):
             app.state.redis_client = redis_client
             if redis_client:
                 initialized_services.append("redis")
-                print("✅ Redis connection initialized")
+                print("[OK] Redis connection initialized")
             else:
-                print("⚠️ Redis not available - continuing without cache")
+                print("[WARNING] Redis not available - continuing without cache")
         except Exception as e:
             error_msg = f"Redis initialization failed: {e}"
-            print(f"⚠️ {error_msg}")
+            print(f"[WARNING] {error_msg}")
             startup_errors.append(("redis", error_msg))
             app.state.redis_client = None
             # Redis is optional, continue without it
@@ -128,10 +128,10 @@ async def lifespan(app: FastAPI):
             )
             app.state.fda_service = fda_service
             initialized_services.append("fda_service")
-            print("✅ FDA API client initialized")
+            print("[OK] FDA API client initialized")
         except Exception as e:
             error_msg = f"FDA API client initialization failed: {e}"
-            print(f"❌ {error_msg}")
+            print(f"[ERROR] {error_msg}")
             startup_errors.append(("fda_service", error_msg))
             startup_failed = True
             # FDA service is critical - fail startup
@@ -139,19 +139,19 @@ async def lifespan(app: FastAPI):
         
         # Log startup summary
         if startup_errors:
-            print(f"⚠️ Startup completed with {len(startup_errors)} non-critical errors")
+            print(f"[WARNING] Startup completed with {len(startup_errors)} non-critical errors")
             for service, error in startup_errors:
                 print(f"   - {service}: {error}")
         else:
-            print("🎉 Application startup completed successfully - all services initialized")
+            print("[SUCCESS] Application startup completed successfully - all services initialized")
         
-        print(f"📊 Initialized services: {', '.join(initialized_services)}")
+        print(f"[INFO] Initialized services: {', '.join(initialized_services)}")
         
         yield
         
     finally:
         # Shutdown phase - cleanup in reverse order of initialization
-        print("🛑 Medical Device Regulatory Assistant API shutting down...")
+        print("[STOPPING] Medical Device Regulatory Assistant API shutting down...")
         shutdown_errors = []
         
         # Close FDA API client first (depends on Redis)
@@ -159,10 +159,10 @@ async def lifespan(app: FastAPI):
             try:
                 if hasattr(app.state, 'fda_service') and app.state.fda_service:
                     await app.state.fda_service.close()
-                    print("✅ FDA API client closed")
+                    print("[OK] FDA API client closed")
             except Exception as e:
                 error_msg = f"Error closing FDA API client: {e}"
-                print(f"⚠️ {error_msg}")
+                print(f"[WARNING] {error_msg}")
                 shutdown_errors.append(("fda_service", error_msg))
         
         # Close Redis connection
@@ -170,10 +170,10 @@ async def lifespan(app: FastAPI):
             try:
                 from services.cache import close_redis_client
                 await close_redis_client()
-                print("✅ Redis connection closed")
+                print("[OK] Redis connection closed")
             except Exception as e:
                 error_msg = f"Error closing Redis: {e}"
-                print(f"⚠️ {error_msg}")
+                print(f"[WARNING] {error_msg}")
                 shutdown_errors.append(("redis", error_msg))
         
         # Close database connections last
@@ -181,21 +181,21 @@ async def lifespan(app: FastAPI):
             try:
                 from database.connection import close_database
                 await close_database()
-                print("✅ Database connections closed")
+                print("[OK] Database connections closed")
             except Exception as e:
                 error_msg = f"Error closing database: {e}"
-                print(f"⚠️ {error_msg}")
+                print(f"[WARNING] {error_msg}")
                 shutdown_errors.append(("database", error_msg))
         
         # Log shutdown summary
         if shutdown_errors:
-            print(f"⚠️ Shutdown completed with {len(shutdown_errors)} errors:")
+            print(f"[WARNING] Shutdown completed with {len(shutdown_errors)} errors:")
             for service, error in shutdown_errors:
                 print(f"   - {service}: {error}")
         else:
-            print("✅ Graceful shutdown completed successfully")
+            print("[OK] Graceful shutdown completed successfully")
         
-        print("👋 Medical Device Regulatory Assistant API stopped")
+        print("[GOODBYE] Medical Device Regulatory Assistant API stopped")
 
 
 # Create FastAPI application

@@ -11,6 +11,6 @@
   },
   "then": {
     "type": "askAgent",
-    "prompt": "1. Understand the task: Identify what task needs to be created. Ask the user for clarification if needed.\n2. Identify the target folder: Confirm which <TARGET_SPEC_FOLDER> contains the task.md file. Ask the user for clarification if needed.\n3. Create and append: Write the new task based on user requirements and append it to the bottom of the task.md file.\n\nLocation\n\\.kiro\\specs\\<TARGET_SPEC_FOLDER>\\task.md"
+    "prompt": "1. Understand the task: Identify what task needs to be created. Ask the user for clarification if needed.\n2. Identify the target folder: Confirm which <TARGET_SPEC_FOLDER> contains the task.md file. Ask the user for clarification if needed.\n3. Create and append: Write the new task based on user requirements and append it to the bottom of the task.md file.\n4. Ask user permission: The created task must be confirmed by the user before execution. Do not execute it immediately after creation.\n\nTask file location\n\\.kiro\\specs\\<TARGET_SPEC_FOLDER>\\task.md"
   }
 }

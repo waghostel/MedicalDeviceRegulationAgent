@@ -1,26 +1,23 @@
 # Medical Device Regulatory Assistant - Frontend Startup Script (PowerShell)
-# This script starts the Next.js frontend development server
+# Modified for testing - uses relative paths
 
 Write-Host "Starting Medical Device Regulatory Assistant Frontend..." -ForegroundColor Green
 Write-Host ""
 
-# Navigate to the medical-device-regulatory-assistant directory if it exists
+# Navigate to the medical-device-regulatory-assistant directory
 if (Test-Path "medical-device-regulatory-assistant") {
     Set-Location "medical-device-regulatory-assistant"
     Write-Host "Navigated to medical-device-regulatory-assistant directory" -ForegroundColor Cyan
-} elseif (-not (Test-Path "package.json")) {
-    Write-Host "Error: package.json not found." -ForegroundColor Red
-    Write-Host "Please run this script from either:" -ForegroundColor Yellow
-    Write-Host "  1. The parent directory containing 'medical-device-regulatory-assistant' folder" -ForegroundColor Yellow
-    Write-Host "  2. The 'medical-device-regulatory-assistant' directory itself" -ForegroundColor Yellow
+} else {
+    Write-Host "Error: medical-device-regulatory-assistant directory not found in current location." -ForegroundColor Red
     Write-Host "Current directory: $(Get-Location)" -ForegroundColor Yellow
     Read-Host "Press Enter to exit"
     exit 1
 }
 
-# Double-check we're in the correct directory
+# Check if we're in the correct directory
 if (-not (Test-Path "package.json")) {
-    Write-Host "Error: package.json not found after navigation." -ForegroundColor Red
+    Write-Host "Error: package.json not found." -ForegroundColor Red
     Write-Host "Current directory: $(Get-Location)" -ForegroundColor Yellow
     Read-Host "Press Enter to exit"
     exit 1
@@ -43,10 +40,7 @@ if (-not (Test-Path "node_modules")) {
     pnpm install
     if ($LASTEXITCODE -ne 0) {
         Write-Host "Error: Failed to install dependencies." -ForegroundColor Red
-        # Return to original directory if we navigated
-        if ((Split-Path -Leaf (Get-Location)) -eq "medical-device-regulatory-assistant") {
-            Set-Location ..
-        }
+        Set-Location ..
         Read-Host "Press Enter to exit"
         exit 1
     }
@@ -63,10 +57,7 @@ try {
 } catch {
     Write-Host "Frontend server encountered an error." -ForegroundColor Red
 } finally {
-    # Return to original directory if we navigated
-    if ((Split-Path -Leaf (Get-Location)) -eq "medical-device-regulatory-assistant") {
-        Set-Location ..
-    }
+    Set-Location ..
     Write-Host "Frontend server stopped." -ForegroundColor Yellow
     Read-Host "Press Enter to exit"
 }
