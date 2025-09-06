@@ -1,0 +1,16 @@
+{
+  "enabled": true,
+  "name": "verify_test",
+  "description": "Verify whether the tests for the current task have been completed.",
+  "version": "1",
+  "when": {
+    "type": "userTriggered",
+    "patterns": [
+      "./.kiro/specs/frontend-testing-comprehensive/task-execute-history/"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "1. Check that all the latest tests have passed.\n2. Ensure the final test has been run after fixing any test errors.\n3. Document the test results in the task report following the format described in the specs documents."
+  }
+}

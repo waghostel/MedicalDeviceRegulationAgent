@@ -1,3 +1,4 @@
+Set-Location "C:\Users\Cheney\Documents\Github\MedicalDeviceRegulationAgent\medical-device-regulatory-assistant"
 # Medical Device Regulatory Assistant - Backend Startup Script (PowerShell)
 # This script starts the FastAPI backend development server
 
