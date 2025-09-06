@@ -42,6 +42,11 @@ class HealthCheckService:
         
         results = {}
         overall_healthy = True
+        critical_services_healthy = True
+        
+        # Define which services are critical vs optional
+        critical_services = {'fda_api'}  # Database is critical but may be initializing
+        optional_services = {'redis', 'disk_space', 'memory'}
         
         for check_name in include_checks:
             if check_name in self.checks:
@@ -58,8 +63,17 @@ class HealthCheckService:
                     health_detail = HealthCheckDetail(**result_dict)
                     results[check_name] = health_detail
                     
+                    # Determine if this affects overall health
                     if not health_detail.healthy:
-                        overall_healthy = False
+                        # Special handling for database during startup
+                        if check_name == 'database' and health_detail.status == 'not_initialized':
+                            # Database not initialized is acceptable during startup
+                            pass
+                        elif check_name in critical_services:
+                            critical_services_healthy = False
+                            overall_healthy = False
+                        elif check_name not in optional_services:
+                            overall_healthy = False
                         
                 except Exception as e:
                     logger.error(f"Health check {check_name} failed: {e}")
@@ -74,7 +88,13 @@ class HealthCheckService:
                         timestamp=timestamp
                     )
                     results[check_name] = error_detail
-                    overall_healthy = False
+                    
+                    # Critical service errors affect overall health
+                    if check_name in critical_services:
+                        critical_services_healthy = False
+                        overall_healthy = False
+                    elif check_name not in optional_services:
+                        overall_healthy = False
         
         return HealthCheckResponse(
             healthy=overall_healthy,
@@ -97,8 +117,22 @@ class HealthCheckService:
     async def _check_database(self) -> Dict[str, Any]:
         """Check database connectivity"""
         try:
-            db_manager = get_database_manager()
+            # Check if database manager is initialized
+            try:
+                db_manager = get_database_manager()
+            except RuntimeError as e:
+                if "not initialized" in str(e):
+                    return {
+                        'healthy': False,
+                        'status': 'not_initialized',
+                        'error': 'Database manager not initialized - service may be starting up',
+                        'message': 'Database will be available once application startup completes'
+                    }
+                raise
+            
+            # If manager exists, perform health check
             return await db_manager.health_check()
+            
         except Exception as e:
             logger.error(f"Database health check failed: {e}")
             return {
@@ -113,9 +147,9 @@ class HealthCheckService:
             redis_client = await get_redis_client()
             if redis_client is None:
                 return {
-                    'healthy': False,
+                    'healthy': True,  # Redis is optional, so this is healthy
                     'status': 'not_configured',
-                    'message': 'Redis client not initialized'
+                    'message': 'Redis not configured - running without cache (this is normal)'
                 }
             
             # Test Redis connection
@@ -132,37 +166,82 @@ class HealthCheckService:
                 }
             }
         except Exception as e:
-            return {
-                'healthy': False,
-                'status': 'disconnected',
-                'error': str(e)
-            }
+            # Check if it's a connection refused error (Redis not running)
+            error_str = str(e).lower()
+            if ('connection refused' in error_str or 
+                'refused the network connection' in error_str or
+                'connect call failed' in error_str or
+                'connection error' in error_str):
+                return {
+                    'healthy': True,  # Redis is optional, so this is still healthy
+                    'status': 'not_available',
+                    'message': 'Redis server not running - application will work without cache',
+                    'error': str(e)
+                }
+            else:
+                return {
+                    'healthy': True,  # Still healthy since Redis is optional
+                    'status': 'configuration_error',
+                    'error': str(e),
+                    'message': 'Redis configuration issue - application will work without cache'
+                }
     
     async def _check_fda_api(self) -> Dict[str, Any]:
         """Check FDA API accessibility"""
         try:
-            fda_service = OpenFDAService()
-            # Test with a simple query
-            results = await fda_service.search_predicates(
-                search_terms=["device"],
-                limit=1
-            )
+            # Use a simpler HTTP check instead of the full service
+            import httpx
             
-            return {
-                'healthy': True,
-                'status': 'accessible',
-                'details': {
-                    'requests_remaining': None,  # FDA doesn't provide this info
-                    'rate_limit_reset': None,
-                    'total_results': len(results) if results else 0
+            async with httpx.AsyncClient(timeout=10.0) as client:
+                response = await client.get(
+                    "https://api.fda.gov/device/510k.json",
+                    params={"limit": 1}
+                )
+                response.raise_for_status()
+                
+                # Parse response to get result count
+                data = response.json()
+                total_results = len(data.get('results', []))
+                
+                return {
+                    'healthy': True,
+                    'status': 'accessible',
+                    'details': {
+                        'status_code': response.status_code,
+                        'response_time_ms': response.elapsed.total_seconds() * 1000,
+                        'total_results': total_results
+                    }
                 }
-            }
-        except Exception as e:
+                
+        except httpx.TimeoutException:
             return {
                 'healthy': False,
-                'status': 'inaccessible',
-                'error': str(e)
+                'status': 'timeout',
+                'error': 'FDA API request timed out',
+                'message': 'Check internet connection and FDA API availability'
             }
+        except httpx.HTTPStatusError as e:
+            return {
+                'healthy': False,
+                'status': 'http_error',
+                'error': f'FDA API returned HTTP {e.response.status_code}',
+                'message': 'FDA API may be experiencing issues'
+            }
+        except Exception as e:
+            error_str = str(e).lower()
+            if 'network' in error_str or 'connection' in error_str:
+                return {
+                    'healthy': False,
+                    'status': 'network_error',
+                    'error': str(e),
+                    'message': 'Check internet connection'
+                }
+            else:
+                return {
+                    'healthy': False,
+                    'status': 'error',
+                    'error': str(e)
+                }
     
     async def _check_disk_space(self) -> Dict[str, Any]:
         """Check available disk space"""

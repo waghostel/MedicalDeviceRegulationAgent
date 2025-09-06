@@ -1,7 +1,7 @@
 {
   "enabled": true,
   "name": "task_report",
-  "description": "Creates comprehensive task reports in the specified SPECS_FOLDER, following the defined task report format. The report should include sections for:\n- Task Summary\n- Changes\n- Test Results\n- Code Snippets\nAlso, ensure that any failed tests are clearly described in the report.",
+  "description": "Read previous chat history or user provide content, creates comprehensive task reports in the specified SPECS_FOLDER, following the defined task report format. The report should include sections for:\n- Task Summary\n- Changes\n- Test Results\n- Code Snippets\nAlso, ensure that any failed tests are clearly described in the report.",
   "version": "1",
   "when": {
     "type": "userTriggered",

@@ -21,7 +21,9 @@
         "poetry run python *",
         "poetry run python -c *",
         "python -c *",
-        "clear"
+        "clear",
+        "curl -s *",
+        "Stop-Job *"
     ],
     "typescript.autoClosingTags": false
 }
