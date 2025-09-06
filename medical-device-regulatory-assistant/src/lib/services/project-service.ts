@@ -57,12 +57,24 @@ export class ProjectService {
    * Create a new project
    */
   async createProject(projectData: ProjectCreateRequest): Promise<Project> {
-    const response = await apiClient.post<Project>('/api/projects', projectData);
-    
-    // Invalidate project list cache
-    this.invalidateCache('projects-list');
-    
-    return response.data;
+    try {
+      const response = await apiClient.post<Project>('/api/projects', projectData);
+      
+      // Invalidate project list cache
+      this.invalidateCache('projects-list');
+      
+      return response.data;
+    } catch (error: any) {
+      // Enhanced error handling for backend integration
+      if (error.status === 401) {
+        throw new Error('Authentication required. Please sign in.');
+      } else if (error.status === 400) {
+        throw new Error(error.details?.message || 'Invalid project data provided.');
+      } else if (error.status >= 500) {
+        throw new Error('Server error. Please try again later.');
+      }
+      throw new Error(error.message || 'Failed to create project.');
+    }
   }
 
   /**
@@ -120,26 +132,52 @@ export class ProjectService {
    * Update a project
    */
   async updateProject(projectId: number, projectData: ProjectUpdateRequest): Promise<Project> {
-    const response = await apiClient.put<Project>(`/api/projects/${projectId}`, projectData);
-    
-    // Invalidate related cache entries
-    this.invalidateCache(`project-${projectId}`);
-    this.invalidateCache('projects-list');
-    this.invalidateCache(`dashboard-${projectId}`);
-    
-    return response.data;
+    try {
+      const response = await apiClient.put<Project>(`/api/projects/${projectId}`, projectData);
+      
+      // Invalidate related cache entries
+      this.invalidateCache(`project-${projectId}`);
+      this.invalidateCache('projects-list');
+      this.invalidateCache(`dashboard-${projectId}`);
+      
+      return response.data;
+    } catch (error: any) {
+      // Enhanced error handling for backend integration
+      if (error.status === 401) {
+        throw new Error('Authentication required. Please sign in.');
+      } else if (error.status === 404) {
+        throw new Error('Project not found or access denied.');
+      } else if (error.status === 400) {
+        throw new Error(error.details?.message || 'Invalid project data provided.');
+      } else if (error.status >= 500) {
+        throw new Error('Server error. Please try again later.');
+      }
+      throw new Error(error.message || 'Failed to update project.');
+    }
   }
 
   /**
    * Delete a project
    */
   async deleteProject(projectId: number): Promise<void> {
-    await apiClient.delete(`/api/projects/${projectId}`);
-    
-    // Invalidate related cache entries
-    this.invalidateCache(`project-${projectId}`);
-    this.invalidateCache('projects-list');
-    this.invalidateCache(`dashboard-${projectId}`);
+    try {
+      await apiClient.delete(`/api/projects/${projectId}`);
+      
+      // Invalidate related cache entries
+      this.invalidateCache(`project-${projectId}`);
+      this.invalidateCache('projects-list');
+      this.invalidateCache(`dashboard-${projectId}`);
+    } catch (error: any) {
+      // Enhanced error handling for backend integration
+      if (error.status === 401) {
+        throw new Error('Authentication required. Please sign in.');
+      } else if (error.status === 404) {
+        throw new Error('Project not found or access denied.');
+      } else if (error.status >= 500) {
+        throw new Error('Server error. Please try again later.');
+      }
+      throw new Error(error.message || 'Failed to delete project.');
+    }
   }
 
   /**
@@ -154,12 +192,24 @@ export class ProjectService {
       return cached;
     }
 
-    const response = await apiClient.get<ProjectDashboardData>(`/api/projects/${projectId}/dashboard`);
-    
-    // Cache with shorter TTL (2 minutes for dashboard data)
-    this.setCache(cacheKey, response.data, 2 * 60 * 1000);
-    
-    return response.data;
+    try {
+      const response = await apiClient.get<ProjectDashboardData>(`/api/projects/${projectId}/dashboard`);
+      
+      // Cache with shorter TTL (2 minutes for dashboard data)
+      this.setCache(cacheKey, response.data, 2 * 60 * 1000);
+      
+      return response.data;
+    } catch (error: any) {
+      // Enhanced error handling for backend integration
+      if (error.status === 401) {
+        throw new Error('Authentication required. Please sign in.');
+      } else if (error.status === 404) {
+        throw new Error('Project not found or access denied.');
+      } else if (error.status >= 500) {
+        throw new Error('Server error. Please try again later.');
+      }
+      throw new Error(error.message || 'Failed to get project dashboard.');
+    }
   }
 
   /**

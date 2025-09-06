@@ -29,44 +29,141 @@ export default defineConfig({
     screenshot: 'only-on-failure',
     /* Record video on failure */
     video: 'retain-on-failure',
+    /* Visual comparison settings */
+    ignoreHTTPSErrors: true,
+    /* Reduce flakiness in visual tests */
+    actionTimeout: 10000,
+    navigationTimeout: 30000,
+  },
+  
+  /* Global test timeout */
+  timeout: 30000,
+  
+  /* Expect timeout for assertions */
+  expect: {
+    /* Visual comparison threshold */
+    threshold: 0.2,
+    /* Animation handling */
+    toHaveScreenshot: {
+      threshold: 0.2,
+      mode: 'css',
+      animations: 'disabled',
+    },
+    toMatchSnapshot: {
+      threshold: 0.2,
+    },
   },
 
   /* Configure projects for major browsers */
   projects: [
+    // Desktop browsers for cross-browser testing
     {
       name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
+      use: { 
+        ...devices['Desktop Chrome'],
+        viewport: { width: 1280, height: 720 },
+      },
     },
-
     {
       name: 'firefox',
-      use: { ...devices['Desktop Firefox'] },
+      use: { 
+        ...devices['Desktop Firefox'],
+        viewport: { width: 1280, height: 720 },
+      },
     },
-
     {
       name: 'webkit',
-      use: { ...devices['Desktop Safari'] },
-    },
-
-    /* Test against mobile viewports. */
-    {
-      name: 'Mobile Chrome',
-      use: { ...devices['Pixel 5'] },
+      use: { 
+        ...devices['Desktop Safari'],
+        viewport: { width: 1280, height: 720 },
+      },
     },
     {
-      name: 'Mobile Safari',
-      use: { ...devices['iPhone 12'] },
+      name: 'edge',
+      use: { 
+        ...devices['Desktop Edge'], 
+        channel: 'msedge',
+        viewport: { width: 1280, height: 720 },
+      },
     },
 
-    /* Test against branded browsers. */
-    // {
-    //   name: 'Microsoft Edge',
-    //   use: { ...devices['Desktop Edge'], channel: 'msedge' },
-    // },
-    // {
-    //   name: 'Google Chrome',
-    //   use: { ...devices['Desktop Chrome'], channel: 'chrome' },
-    // },
+    // Mobile viewports for responsive testing
+    {
+      name: 'mobile-chrome',
+      use: { 
+        ...devices['Pixel 5'],
+        isMobile: true,
+        hasTouch: true,
+      },
+    },
+    {
+      name: 'mobile-safari',
+      use: { 
+        ...devices['iPhone 12'],
+        isMobile: true,
+        hasTouch: true,
+      },
+    },
+
+    // Tablet viewports
+    {
+      name: 'tablet-chrome',
+      use: {
+        ...devices['Desktop Chrome'],
+        viewport: { width: 768, height: 1024 },
+        isMobile: true,
+        hasTouch: true,
+      },
+    },
+    {
+      name: 'tablet-safari',
+      use: {
+        ...devices['Desktop Safari'],
+        viewport: { width: 768, height: 1024 },
+        isMobile: true,
+        hasTouch: true,
+      },
+    },
+
+    // High DPI displays
+    {
+      name: 'high-dpi',
+      use: {
+        ...devices['Desktop Chrome'],
+        viewport: { width: 1920, height: 1080 },
+        deviceScaleFactor: 2,
+      },
+    },
+
+    // Visual regression specific projects
+    {
+      name: 'visual-chromium',
+      testDir: './e2e/visual',
+      use: {
+        ...devices['Desktop Chrome'],
+        viewport: { width: 1280, height: 720 },
+        // Disable animations for consistent screenshots
+        reducedMotion: 'reduce',
+      },
+    },
+    {
+      name: 'visual-firefox',
+      testDir: './e2e/visual',
+      use: {
+        ...devices['Desktop Firefox'],
+        viewport: { width: 1280, height: 720 },
+        reducedMotion: 'reduce',
+      },
+    },
+    {
+      name: 'visual-webkit',
+      testDir: './e2e/visual',
+      use: {
+        ...devices['Desktop Safari'],
+        viewport: { width: 1280, height: 720 },
+        reducedMotion: 'reduce',
+      },
+    },
   ],
 
   /* Run your local dev server before starting the tests */

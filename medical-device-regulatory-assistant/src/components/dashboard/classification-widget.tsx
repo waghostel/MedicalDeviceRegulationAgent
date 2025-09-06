@@ -1,38 +1,58 @@
 /**
  * Classification Widget Component
  * Displays device classification status, product code, and regulatory pathway
+ * Now uses real API data instead of mock data
  */
 
 'use client';
 
 import React from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { 
-  CheckCircle, 
-  Clock, 
-  AlertCircle, 
-  RefreshCw, 
-  FileText, 
+import {
+  CheckCircle,
+  Clock,
+  AlertCircle,
+  RefreshCw,
+  FileText,
   ExternalLink,
-  Loader2
+  Loader2,
 } from 'lucide-react';
-import { DeviceClassification, ClassificationWidgetProps } from '@/types/dashboard';
+import { useClassification } from '@/hooks/use-classification';
+
+interface ClassificationWidgetProps {
+  projectId: number;
+  autoRefresh?: boolean;
+}
 
 export function ClassificationWidget({
-  classification,
-  loading = false,
-  error,
-  onStartClassification,
-  onRefresh
+  projectId,
+  autoRefresh = false,
 }: ClassificationWidgetProps) {
+  const {
+    classification,
+    loading,
+    error,
+    startClassification,
+    refreshClassification,
+  } = useClassification({
+    projectId,
+    autoRefresh,
+  });
   const getStatusIcon = () => {
     if (loading) return <Loader2 className="h-4 w-4 animate-spin" />;
     if (error) return <AlertCircle className="h-4 w-4 text-red-500" />;
-    if (classification) return <CheckCircle className="h-4 w-4 text-green-500" />;
+    if (classification)
+      return <CheckCircle className="h-4 w-4 text-green-500" />;
     return <Clock className="h-4 w-4 text-gray-400" />;
   };
 
@@ -75,16 +95,18 @@ export function ClassificationWidget({
         <CardContent>
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
-            <AlertDescription>
-              {error}
-            </AlertDescription>
+            <AlertDescription>{error}</AlertDescription>
           </Alert>
           <div className="mt-4 flex gap-2">
-            <Button variant="outline" onClick={onRefresh} disabled={loading}>
+            <Button
+              variant="outline"
+              onClick={refreshClassification}
+              disabled={loading}
+            >
               <RefreshCw className="h-4 w-4 mr-2" />
               Retry
             </Button>
-            <Button onClick={onStartClassification} disabled={loading}>
+            <Button onClick={startClassification} disabled={loading}>
               Start Classification
             </Button>
           </div>
@@ -112,7 +134,7 @@ export function ClassificationWidget({
             <p className="text-gray-600 mb-4">
               Device classification analysis has not been performed yet.
             </p>
-            <Button onClick={onStartClassification} disabled={loading}>
+            <Button onClick={startClassification} disabled={loading}>
               {loading ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -171,24 +193,29 @@ export function ClassificationWidget({
         {/* Classification Results */}
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="text-sm font-medium text-gray-600">Device Class</label>
+            <label className="text-sm font-medium text-gray-600">
+              Device Class
+            </label>
             <div className="flex items-center gap-2 mt-1">
               <Badge variant="outline" className="text-lg font-bold">
-                Class {classification.deviceClass}
+                Class {classification?.deviceClass}
               </Badge>
             </div>
           </div>
           <div>
-            <label className="text-sm font-medium text-gray-600">Product Code</label>
+            <label className="text-sm font-medium text-gray-600">
+              Product Code
+            </label>
             <div className="flex items-center gap-2 mt-1">
               <code className="bg-gray-100 px-2 py-1 rounded text-sm font-mono">
-                {classification.productCode}
+                {classification?.productCode}
               </code>
               <Button variant="ghost" size="sm" asChild>
-                <a 
-                  href={`https://www.accessdata.fda.gov/scripts/cdrh/cfdocs/cfpcd/classification.cfm?ID=${classification.productCode}`}
+                <a
+                  href={`https://www.accessdata.fda.gov/scripts/cdrh/cfdocs/cfpcd/classification.cfm?ID=${classification?.productCode}`}
                   target="_blank"
                   rel="noopener noreferrer"
+                  title="View FDA Product Code Details"
                 >
                   <ExternalLink className="h-3 w-3" />
                 </a>
@@ -199,51 +226,68 @@ export function ClassificationWidget({
 
         {/* Regulatory Pathway */}
         <div>
-          <label className="text-sm font-medium text-gray-600">Regulatory Pathway</label>
+          <label className="text-sm font-medium text-gray-600">
+            Regulatory Pathway
+          </label>
           <div className="mt-1">
-            <Badge variant={getPathwayBadgeVariant(classification.regulatoryPathway)}>
-              {classification.regulatoryPathway}
+            <Badge
+              variant={getPathwayBadgeVariant(
+                classification?.regulatoryPathway || ''
+              )}
+            >
+              {classification?.regulatoryPathway}
             </Badge>
           </div>
         </div>
 
         {/* CFR Sections */}
-        {classification.cfrSections && classification.cfrSections.length > 0 && (
-          <div>
-            <label className="text-sm font-medium text-gray-600">CFR Sections</label>
-            <div className="flex flex-wrap gap-1 mt-1">
-              {classification.cfrSections.slice(0, 3).map((section, index) => (
-                <Badge key={index} variant="outline" className="text-xs">
-                  {section}
-                </Badge>
-              ))}
-              {classification.cfrSections.length > 3 && (
-                <Badge variant="outline" className="text-xs">
-                  +{classification.cfrSections.length - 3} more
-                </Badge>
-              )}
+        {classification?.cfrSections &&
+          classification.cfrSections.length > 0 && (
+            <div>
+              <label className="text-sm font-medium text-gray-600">
+                CFR Sections
+              </label>
+              <div className="flex flex-wrap gap-1 mt-1">
+                {classification.cfrSections
+                  .slice(0, 3)
+                  .map((section, index) => (
+                    <Badge key={index} variant="outline" className="text-xs">
+                      {section}
+                    </Badge>
+                  ))}
+                {classification.cfrSections.length > 3 && (
+                  <Badge variant="outline" className="text-xs">
+                    +{classification.cfrSections.length - 3} more
+                  </Badge>
+                )}
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
         {/* Confidence Score */}
         <div>
           <div className="flex items-center justify-between mb-2">
-            <label className="text-sm font-medium text-gray-600">Confidence Score</label>
-            <span className={`text-sm font-semibold ${getConfidenceColor(classification.confidenceScore)}`}>
-              {Math.round(classification.confidenceScore * 100)}%
+            <label className="text-sm font-medium text-gray-600">
+              Confidence Score
+            </label>
+            <span
+              className={`text-sm font-semibold ${getConfidenceColor(classification?.confidenceScore || 0)}`}
+            >
+              {Math.round((classification?.confidenceScore || 0) * 100)}%
             </span>
           </div>
-          <Progress 
-            value={classification.confidenceScore * 100} 
+          <Progress
+            value={(classification?.confidenceScore || 0) * 100}
             className="h-2"
           />
         </div>
 
         {/* Reasoning */}
-        {classification.reasoning && (
+        {classification?.reasoning && (
           <div>
-            <label className="text-sm font-medium text-gray-600">Analysis Reasoning</label>
+            <label className="text-sm font-medium text-gray-600">
+              Analysis Reasoning
+            </label>
             <div className="mt-1 p-3 bg-gray-50 rounded-md">
               <p className="text-sm text-gray-700">
                 {classification.reasoning}
@@ -254,18 +298,19 @@ export function ClassificationWidget({
 
         {/* Actions */}
         <div className="flex gap-2 pt-2">
-          <Button variant="outline" size="sm" onClick={onRefresh}>
+          <Button variant="outline" size="sm" onClick={refreshClassification}>
             <RefreshCw className="h-4 w-4 mr-2" />
             Refresh
           </Button>
-          <Button variant="outline" size="sm" onClick={onStartClassification}>
+          <Button variant="outline" size="sm" onClick={startClassification}>
             Re-analyze
           </Button>
         </div>
 
         {/* Metadata */}
         <div className="text-xs text-gray-500 pt-2 border-t">
-          Completed: {new Date(classification.createdAt).toLocaleString()}
+          Completed:{' '}
+          {new Date(classification?.createdAt || '').toLocaleString()}
         </div>
       </CardContent>
     </Card>

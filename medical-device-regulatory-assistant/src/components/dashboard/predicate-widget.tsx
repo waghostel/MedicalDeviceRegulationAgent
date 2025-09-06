@@ -1,49 +1,62 @@
 /**
  * Predicate Widget Component
  * Displays predicate devices with confidence scores and selection status
+ * Now uses real API data instead of mock data
  */
 
 'use client';
 
 import React, { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
-  CheckCircle, 
-  Clock, 
-  AlertCircle, 
-  RefreshCw, 
-  Search, 
+import {
+  CheckCircle,
+  Clock,
+  AlertCircle,
+  RefreshCw,
+  Search,
   ExternalLink,
   Loader2,
   Star,
   FileText,
-  TrendingUp
+  TrendingUp,
 } from 'lucide-react';
-import { PredicateDevice, PredicateWidgetProps } from '@/types/dashboard';
+import { usePredicates } from '@/hooks/use-predicates';
+
+interface PredicateWidgetProps {
+  projectId: number;
+  autoRefresh?: boolean;
+}
 
 export function PredicateWidget({
-  predicates,
-  loading = false,
-  error,
-  onSearchPredicates,
-  onSelectPredicate,
-  onRefresh
+  projectId,
+  autoRefresh = false,
 }: PredicateWidgetProps) {
+  const {
+    predicates,
+    selectedPredicates,
+    topMatches,
+    averageConfidence,
+    loading,
+    error,
+    searchPredicates,
+    selectPredicate,
+    refreshPredicates,
+  } = usePredicates({
+    projectId,
+    autoRefresh,
+  });
   const [activeTab, setActiveTab] = useState('overview');
-
-  const selectedPredicates = predicates.filter(p => p.isSelected);
-  const topMatches = predicates
-    .sort((a, b) => b.confidenceScore - a.confidenceScore)
-    .slice(0, 5);
-
-  const averageConfidence = predicates.length > 0 
-    ? predicates.reduce((sum, p) => sum + p.confidenceScore, 0) / predicates.length
-    : 0;
 
   const getConfidenceColor = (score: number) => {
     if (score >= 0.8) return 'text-green-600';
@@ -70,16 +83,18 @@ export function PredicateWidget({
         <CardContent>
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
-            <AlertDescription>
-              {error}
-            </AlertDescription>
+            <AlertDescription>{error}</AlertDescription>
           </Alert>
           <div className="mt-4 flex gap-2">
-            <Button variant="outline" onClick={onRefresh} disabled={loading}>
+            <Button
+              variant="outline"
+              onClick={refreshPredicates}
+              disabled={loading}
+            >
               <RefreshCw className="h-4 w-4 mr-2" />
               Retry
             </Button>
-            <Button onClick={onSearchPredicates} disabled={loading}>
+            <Button onClick={searchPredicates} disabled={loading}>
               Search Predicates
             </Button>
           </div>
@@ -105,9 +120,10 @@ export function PredicateWidget({
           <div className="text-center py-6">
             <Search className="h-12 w-12 text-gray-400 mx-auto mb-4" />
             <p className="text-gray-600 mb-4">
-              No predicate devices have been identified yet. Start by searching the FDA database.
+              No predicate devices have been identified yet. Start by searching
+              the FDA database.
             </p>
-            <Button onClick={onSearchPredicates} disabled={loading}>
+            <Button onClick={searchPredicates} disabled={loading}>
               {loading ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -160,9 +176,7 @@ export function PredicateWidget({
         <CardTitle className="flex items-center gap-2">
           <CheckCircle className="h-4 w-4 text-green-500" />
           Predicate Devices
-          <Badge variant="default">
-            {predicates.length} Found
-          </Badge>
+          <Badge variant="default">{predicates.length} Found</Badge>
         </CardTitle>
         <CardDescription>
           510(k) predicate devices for substantial equivalence comparison
@@ -173,22 +187,30 @@ export function PredicateWidget({
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="top-matches">Top Matches</TabsTrigger>
-            <TabsTrigger value="selected">Selected ({selectedPredicates.length})</TabsTrigger>
+            <TabsTrigger value="selected">
+              Selected ({selectedPredicates.length})
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="mt-4 space-y-4">
             {/* Statistics */}
             <div className="grid grid-cols-3 gap-4">
               <div className="text-center">
-                <div className="text-2xl font-bold text-blue-600">{predicates.length}</div>
+                <div className="text-2xl font-bold text-blue-600">
+                  {predicates.length}
+                </div>
                 <div className="text-sm text-gray-600">Total Found</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-green-600">{selectedPredicates.length}</div>
+                <div className="text-2xl font-bold text-green-600">
+                  {selectedPredicates.length}
+                </div>
                 <div className="text-sm text-gray-600">Selected</div>
               </div>
               <div className="text-center">
-                <div className={`text-2xl font-bold ${getConfidenceColor(averageConfidence)}`}>
+                <div
+                  className={`text-2xl font-bold ${getConfidenceColor(averageConfidence)}`}
+                >
                   {Math.round(averageConfidence * 100)}%
                 </div>
                 <div className="text-sm text-gray-600">Avg. Confidence</div>
@@ -198,8 +220,12 @@ export function PredicateWidget({
             {/* Average Confidence Bar */}
             <div>
               <div className="flex items-center justify-between mb-2">
-                <label className="text-sm font-medium text-gray-600">Average Confidence</label>
-                <span className={`text-sm font-semibold ${getConfidenceColor(averageConfidence)}`}>
+                <label className="text-sm font-medium text-gray-600">
+                  Average Confidence
+                </label>
+                <span
+                  className={`text-sm font-semibold ${getConfidenceColor(averageConfidence)}`}
+                >
                   {Math.round(averageConfidence * 100)}%
                 </span>
               </div>
@@ -208,11 +234,11 @@ export function PredicateWidget({
 
             {/* Quick Actions */}
             <div className="flex gap-2">
-              <Button variant="outline" size="sm" onClick={onRefresh}>
+              <Button variant="outline" size="sm" onClick={refreshPredicates}>
                 <RefreshCw className="h-4 w-4 mr-2" />
                 Refresh
               </Button>
-              <Button variant="outline" size="sm" onClick={onSearchPredicates}>
+              <Button variant="outline" size="sm" onClick={searchPredicates}>
                 <Search className="h-4 w-4 mr-2" />
                 Search More
               </Button>
@@ -228,14 +254,21 @@ export function PredicateWidget({
                       <Badge variant="outline" className="text-xs">
                         {predicate.kNumber}
                       </Badge>
-                      <Badge variant={getConfidenceBadgeVariant(predicate.confidenceScore)} className="text-xs">
+                      <Badge
+                        variant={getConfidenceBadgeVariant(
+                          predicate.confidenceScore
+                        )}
+                        className="text-xs"
+                      >
                         {Math.round(predicate.confidenceScore * 100)}%
                       </Badge>
                       {predicate.isSelected && (
                         <Star className="h-3 w-3 text-yellow-500 fill-current" />
                       )}
                     </div>
-                    <h4 className="font-medium text-sm mb-1">{predicate.deviceName}</h4>
+                    <h4 className="font-medium text-sm mb-1">
+                      {predicate.deviceName}
+                    </h4>
                     <p className="text-xs text-gray-600 line-clamp-2">
                       {predicate.intendedUse}
                     </p>
@@ -244,20 +277,21 @@ export function PredicateWidget({
                         Product Code: {predicate.productCode}
                       </span>
                       <span className="text-xs text-gray-500">
-                        Cleared: {new Date(predicate.clearanceDate).toLocaleDateString()}
+                        Cleared:{' '}
+                        {new Date(predicate.clearanceDate).toLocaleDateString()}
                       </span>
                     </div>
                   </div>
                   <div className="flex flex-col gap-1 ml-2">
                     <Button
-                      variant={predicate.isSelected ? "default" : "outline"}
+                      variant={predicate.isSelected ? 'default' : 'outline'}
                       size="sm"
-                      onClick={() => onSelectPredicate?.(predicate)}
+                      onClick={() => selectPredicate(predicate)}
                     >
                       {predicate.isSelected ? 'Selected' : 'Select'}
                     </Button>
                     <Button variant="ghost" size="sm" asChild>
-                      <a 
+                      <a
                         href={`https://www.accessdata.fda.gov/scripts/cdrh/cfdocs/cfpmn/pmn.cfm?ID=${predicate.kNumber}`}
                         target="_blank"
                         rel="noopener noreferrer"
@@ -276,18 +310,33 @@ export function PredicateWidget({
               <div className="text-center py-6">
                 <Star className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                 <p className="text-gray-600 mb-4">
-                  No predicate devices selected yet. Review the top matches and select the most suitable ones.
+                  No predicate devices selected yet. Review the top matches and
+                  select the most suitable ones.
                 </p>
-                <Button variant="outline" onClick={() => setActiveTab('top-matches')}>
+                <Button
+                  variant="outline"
+                  onClick={() => setActiveTab('top-matches')}
+                >
                   View Top Matches
                 </Button>
               </div>
             ) : (
               <>
                 <div className="flex items-center justify-between">
-                  <h4 className="font-medium">Selected Predicates ({selectedPredicates.length})</h4>
+                  <h4 className="font-medium">
+                    Selected Predicates ({selectedPredicates.length})
+                  </h4>
                   <Badge variant="secondary">
-                    Avg: {Math.round(selectedPredicates.reduce((sum, p) => sum + p.confidenceScore, 0) / selectedPredicates.length * 100)}%
+                    Avg:{' '}
+                    {Math.round(
+                      (selectedPredicates.reduce(
+                        (sum, p) => sum + p.confidenceScore,
+                        0
+                      ) /
+                        selectedPredicates.length) *
+                        100
+                    )}
+                    %
                   </Badge>
                 </div>
                 {selectedPredicates.map((predicate) => (
@@ -303,7 +352,9 @@ export function PredicateWidget({
                           </Badge>
                           <Star className="h-3 w-3 text-yellow-500 fill-current" />
                         </div>
-                        <h4 className="font-medium text-sm mb-1">{predicate.deviceName}</h4>
+                        <h4 className="font-medium text-sm mb-1">
+                          {predicate.deviceName}
+                        </h4>
                         <p className="text-xs text-gray-600 line-clamp-2">
                           {predicate.intendedUse}
                         </p>
@@ -312,12 +363,12 @@ export function PredicateWidget({
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => onSelectPredicate?.(predicate)}
+                          onClick={() => selectPredicate(predicate)}
                         >
                           Deselect
                         </Button>
                         <Button variant="ghost" size="sm" asChild>
-                          <a 
+                          <a
                             href={`https://www.accessdata.fda.gov/scripts/cdrh/cfdocs/cfpmn/pmn.cfm?ID=${predicate.kNumber}`}
                             target="_blank"
                             rel="noopener noreferrer"

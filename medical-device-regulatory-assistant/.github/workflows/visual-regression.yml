@@ -1,0 +1,362 @@
+name: Visual Regression Testing
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  schedule:
+    # Run daily at 2 AM UTC
+    - cron: '0 2 * * *'
+
+jobs:
+  visual-tests:
+    name: Visual Regression Tests
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        browser: [chromium, firefox, webkit]
+        
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        
+    - name: Setup pnpm
+      uses: pnpm/action-setup@v2
+      with:
+        version: 9
+        
+    - name: Install dependencies
+      run: pnpm install --frozen-lockfile
+      
+    - name: Install Playwright browsers
+      run: pnpm exec playwright install --with-deps ${{ matrix.browser }}
+      
+    - name: Setup Python for backend
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        
+    - name: Install Poetry
+      uses: snok/install-poetry@v1
+      with:
+        version: latest
+        virtualenvs-create: true
+        virtualenvs-in-project: true
+        
+    - name: Install backend dependencies
+      run: |
+        cd backend
+        poetry install --no-interaction --no-ansi
+        
+    - name: Build application
+      run: pnpm build
+      
+    - name: Run visual regression tests
+      run: pnpm exec playwright test e2e/visual --project=${{ matrix.browser }}
+      env:
+        CI: true
+        
+    - name: Upload test results
+      uses: actions/upload-artifact@v4
+      if: failure()
+      with:
+        name: visual-test-results-${{ matrix.browser }}
+        path: |
+          test-results/
+          playwright-report/
+        retention-days: 7
+        
+    - name: Upload visual diffs
+      uses: actions/upload-artifact@v4
+      if: failure()
+      with:
+        name: visual-diffs-${{ matrix.browser }}
+        path: test-results/**/*-diff.png
+        retention-days: 30
+
+  cross-browser-tests:
+    name: Cross-Browser Compatibility
+    runs-on: ubuntu-latest
+    needs: visual-tests
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        
+    - name: Setup pnpm
+      uses: pnpm/action-setup@v2
+      with:
+        version: 9
+        
+    - name: Install dependencies
+      run: pnpm install --frozen-lockfile
+      
+    - name: Install all Playwright browsers
+      run: pnpm exec playwright install --with-deps
+      
+    - name: Setup Python for backend
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        
+    - name: Install Poetry
+      uses: snok/install-poetry@v1
+      with:
+        version: latest
+        virtualenvs-create: true
+        virtualenvs-in-project: true
+        
+    - name: Install backend dependencies
+      run: |
+        cd backend
+        poetry install --no-interaction --no-ansi
+        
+    - name: Build application
+      run: pnpm build
+      
+    - name: Run cross-browser tests
+      run: pnpm test:e2e:cross-browser
+      env:
+        CI: true
+        
+    - name: Upload cross-browser results
+      uses: actions/upload-artifact@v4
+      if: failure()
+      with:
+        name: cross-browser-test-results
+        path: |
+          test-results/
+          playwright-report/
+        retention-days: 7
+
+  mobile-tests:
+    name: Mobile Visual Tests
+    runs-on: ubuntu-latest
+    needs: visual-tests
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        
+    - name: Setup pnpm
+      uses: pnpm/action-setup@v2
+      with:
+        version: 9
+        
+    - name: Install dependencies
+      run: pnpm install --frozen-lockfile
+      
+    - name: Install Playwright browsers
+      run: pnpm exec playwright install --with-deps chromium webkit
+      
+    - name: Setup Python for backend
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        
+    - name: Install Poetry
+      uses: snok/install-poetry@v1
+      with:
+        version: latest
+        virtualenvs-create: true
+        virtualenvs-in-project: true
+        
+    - name: Install backend dependencies
+      run: |
+        cd backend
+        poetry install --no-interaction --no-ansi
+        
+    - name: Build application
+      run: pnpm build
+      
+    - name: Run mobile visual tests
+      run: pnpm test:e2e:mobile
+      env:
+        CI: true
+        
+    - name: Upload mobile test results
+      uses: actions/upload-artifact@v4
+      if: failure()
+      with:
+        name: mobile-test-results
+        path: |
+          test-results/
+          playwright-report/
+        retention-days: 7
+
+  performance-visual-tests:
+    name: Performance & Accessibility Visual Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        
+    - name: Setup pnpm
+      uses: pnpm/action-setup@v2
+      with:
+        version: 9
+        
+    - name: Install dependencies
+      run: pnpm install --frozen-lockfile
+      
+    - name: Install Playwright browsers
+      run: pnpm exec playwright install --with-deps chromium
+      
+    - name: Setup Python for backend
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        
+    - name: Install Poetry
+      uses: snok/install-poetry@v1
+      with:
+        version: latest
+        virtualenvs-create: true
+        virtualenvs-in-project: true
+        
+    - name: Install backend dependencies
+      run: |
+        cd backend
+        poetry install --no-interaction --no-ansi
+        
+    - name: Build application
+      run: pnpm build
+      
+    - name: Run Lighthouse CI
+      run: pnpm lighthouse
+      env:
+        CI: true
+        
+    - name: Run performance tests
+      run: pnpm test:performance
+      
+    - name: Run accessibility tests
+      run: pnpm test:accessibility
+      
+    - name: Upload Lighthouse reports
+      uses: actions/upload-artifact@v4
+      with:
+        name: lighthouse-reports
+        path: |
+          lighthouse-reports/
+          .lighthouseci/
+        retention-days: 30
+        
+    - name: Upload performance test results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: performance-test-results
+        path: |
+          coverage/
+          jest-performance-report.json
+        retention-days: 7
+
+  visual-regression-report:
+    name: Generate Visual Regression Report
+    runs-on: ubuntu-latest
+    needs: [visual-tests, cross-browser-tests, mobile-tests]
+    if: always()
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Download all artifacts
+      uses: actions/download-artifact@v4
+      
+    - name: Generate consolidated report
+      run: |
+        mkdir -p visual-regression-report
+        
+        # Combine all visual test results
+        find . -name "*.png" -path "*/visual-*" -exec cp {} visual-regression-report/ \;
+        
+        # Create summary report
+        cat > visual-regression-report/summary.md << EOF
+        # Visual Regression Test Summary
+        
+        ## Test Run Information
+        - **Commit**: ${{ github.sha }}
+        - **Branch**: ${{ github.ref_name }}
+        - **Timestamp**: $(date -u)
+        - **Triggered by**: ${{ github.event_name }}
+        
+        ## Test Results
+        - **Visual Tests**: $(find . -name "*visual*" -type d | wc -l) browser configurations tested
+        - **Cross-Browser Tests**: Chromium, Firefox, WebKit, Edge
+        - **Mobile Tests**: Mobile Chrome, Mobile Safari, Tablet viewports
+        - **Performance Tests**: Lighthouse CI, Jest performance benchmarks
+        - **Accessibility Tests**: jest-axe, keyboard navigation, screen reader compatibility
+        
+        ## Artifacts
+        - Visual diffs available in test-results directories
+        - Lighthouse reports in lighthouse-reports directory
+        - Performance benchmarks in coverage directory
+        
+        EOF
+        
+    - name: Upload consolidated report
+      uses: actions/upload-artifact@v4
+      with:
+        name: visual-regression-report
+        path: visual-regression-report/
+        retention-days: 30
+        
+    - name: Comment on PR
+      if: github.event_name == 'pull_request'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const fs = require('fs');
+          
+          // Check if there are any visual diffs
+          const hasDiffs = fs.existsSync('visual-diffs-chromium') || 
+                          fs.existsSync('visual-diffs-firefox') || 
+                          fs.existsSync('visual-diffs-webkit');
+          
+          const comment = hasDiffs 
+            ? `⚠️ **Visual Regression Detected**
+            
+            Visual differences were found in this PR. Please review the uploaded artifacts to ensure these changes are intentional.
+            
+            - Check the \`visual-diffs-*\` artifacts for detailed comparisons
+            - Review the \`visual-regression-report\` for a complete summary
+            - If changes are intentional, update the visual baselines with \`pnpm visual:update\``
+            : `✅ **Visual Regression Tests Passed**
+            
+            No visual regressions detected. All screenshots match the baseline images.`;
+          
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: comment
+          });

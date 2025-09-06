@@ -1,16 +1,16 @@
 {
   "enabled": true,
-  "name": "task_report",
+  "name": "task-report",
   "description": "Creates comprehensive task reports in the specified SPECS_FOLDER, following the defined task report format. The report should include sections for:\n- Task Summary\n- Changes\n- Test Results\n- Code Snippets\nAlso, ensure that any failed tests are clearly described in the report.",
   "version": "1",
   "when": {
     "type": "userTriggered",
     "patterns": [
-      "./.kiro/specs/frontend-testing-comprehensive/task-execute-history/"
+      "./.kiro/specs/<CURRENT_SPECS>/task-execute-history/"
     ]
   },
   "then": {
     "type": "askAgent",
-    "prompt": "Please write a comprehensive task report in current SPECS_FOLDER (e.g. ./.kiro/specs/frontend-testing-comprehensive/task-execute-history/) following this format:\n\n**Task Report Format:**\n- **Task**: [Task ID and Title]\n- **Summary of Changes**\n  - [Brief description of change #1]\n  - [Brief description of change #2]\n- **Test Plan & Results**\n  - **Unit Tests**: [Description]\n    - Result: [✔ All tests passed / ✘ Failures]\n  - **Integration Tests**: [Description]\n    - Result: [✔ Passed / ✘ Failures]\n  - **Manual Verification**: [Steps & findings]\n    - Result: [✔ Works as expected]\n- **Code Snippets (Optional)**: Show relevant diffs or highlights.\n\nName the file with the completed task number (e.g., task-1.md, task-3.2.md). Be transparent about test results, especially if some tests require future verification."
+    "prompt": "Please write a comprehensive task report in current SPECS_FOLDER (e.g. ./.kiro/specs/<CURRENT_SPECS/task-execute-history/) following this format:\n\n**Task Report Format:**\n- **Task**: [Task ID and Title]\n- **Summary of Changes**\n  - [Brief description of change #1]\n  - [Brief description of change #2]\n- **Test Plan & Results**\n  - **Unit Tests**: [Description]\n    - Result: [✔ All tests passed / ✘ Failures]\n  - **Integration Tests**: [Description]\n    - Result: [✔ Passed / ✘ Failures]\n  - **Manual Verification**: [Steps & findings]\n    - Result: [✔ Works as expected]\n- **Code Snippets (Optional)**: Show relevant diffs or highlights.\n\nName the file with the completed task number (e.g., task-1.md, task-3.2.md). Be transparent about test results, especially if some tests require future verification."
   }
 }
