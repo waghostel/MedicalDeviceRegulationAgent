@@ -275,3 +275,46 @@
   - Set up continuous integration pipeline with all test suites
   - Create maintenance schedule for test data and mock services
   - _Requirements: 5.6, 6.6_
+
+- [ ] 9. Test frontend-backend integration with startup scripts
+  - Validate all startup scripts (start-backend.ps1, start-frontend.ps1, start-dev.ps1) work correctly
+  - Test individual service startup and health checks
+  - Test full-stack integration with curl and API testing
+  - Identify and resolve potential integration issues
+  - _Requirements: 9.1, 9.2, 9.3, 9.4_
+
+- [ ] 9.1 Test backend startup script and service health
+
+  - Execute start-backend.ps1 and verify FastAPI server starts successfully
+  - Test backend health endpoints and API documentation accessibility
+  - Validate Poetry environment setup and dependency installation
+  - Test backend service responds to basic API calls with curl
+  - Verify database connectivity and initialization
+  - _Requirements: 9.1, 9.2_
+
+- [ ] 9.2 Test frontend startup script and service health
+
+  - Execute start-frontend.ps1 and verify Next.js development server starts
+  - Test frontend accessibility at http://localhost:3000
+  - Validate pnpm dependency installation and build process
+  - Test frontend routing and basic page rendering
+  - Verify static assets and styling load correctly
+  - _Requirements: 9.1, 9.2_
+
+- [ ] 9.3 Test full-stack integration with start-dev.ps1
+
+  - Execute start-dev.ps1 and verify both services start in separate windows
+  - Test frontend-backend communication through API calls
+  - Validate authentication flow between frontend and backend
+  - Test database operations through frontend interface
+  - Verify WebSocket connections and real-time features
+  - _Requirements: 9.3, 9.4_
+
+- [ ] 9.4 Comprehensive integration testing with automated tools
+
+  - Create curl test scripts for all major API endpoints
+  - Test error handling and recovery scenarios
+  - Validate CORS configuration and cross-origin requests
+  - Test concurrent user scenarios and load handling
+  - Document common issues and troubleshooting procedures
+  - _Requirements: 9.4, 6.6_

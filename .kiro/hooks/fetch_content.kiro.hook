@@ -1,6 +1,6 @@
 {
   "enabled": true,
-  "name": "fetch-content",
+  "name": "fetch_content",
   "description": "Create learning materail based on the content or file provided by user..",
   "version": "1",
   "when": {

@@ -1,7 +1,7 @@
 {
   "enabled": true,
-  "name": "verify_test",
-  "description": "Verify whether the tests for the current task have been completed.",
+  "name": "create_task",
+  "description": "Create a task in the user-specified spec folder. Append the new task to the bottom of task.md.",
   "version": "1",
   "when": {
     "type": "userTriggered",
@@ -11,6 +11,6 @@
   },
   "then": {
     "type": "askAgent",
-    "prompt": "1. Check that all the latest tests have passed.\n2. Ensure the final test has been run after fixing any test errors.\n3. Document the test results in the task report following the format described in the specs documents."
+    "prompt": "1. Understand the task: Identify what task needs to be created. Ask the user for clarification if needed.\n2. Identify the target folder: Confirm which <TARGET_SPEC_FOLDER> contains the task.md file. Ask the user for clarification if needed.\n3. Create and append: Write the new task based on user requirements and append it to the bottom of the task.md file.\n\nLocation\n\\.kiro\\specs\\<TARGET_SPEC_FOLDER>\\task.md"
   }
 }

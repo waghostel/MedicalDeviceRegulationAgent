@@ -1,6 +1,6 @@
 {
   "enabled": true,
-  "name": "security-analysis",
+  "name": "security_analysis",
   "description": "Analyzes the root cause of the error message provided by the user and proposes a detailed error-fixing plan. Do not begin applying any fixes until receiving explicit permission from the user. If the error message is not provided, ask the user to supply it before proceeding.",
   "version": "1",
   "when": {
