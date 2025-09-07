@@ -60,7 +60,32 @@ The system is a full-stack application built with a modern, robust technology se
 └─────────────────────────────────────────────────────────────┘
 ```
 
-## 4. Getting Started
+## 4. Scripts and Automation
+
+This project includes a suite of scripts to automate common development, testing, and maintenance tasks. These are located in the root directory.
+
+### Development and Startup Scripts
+
+-   **`start-dev.ps1` / `start-dev.sh`**: The main entry point for starting the development environment. It launches both the frontend and backend services concurrently.
+-   **`start-dev-optimized.ps1`**: An optimized version of the startup script that offers faster launch times by skipping non-essential checks, ideal for daily development.
+-   **`start-frontend.ps1` / `start-frontend.sh`**: Starts only the Next.js frontend service.
+-   **`start-backend.ps1` / `start-backend.sh`**: Starts only the FastAPI backend service.
+-   **`setup-redis.ps1` / `setup-redis-windows.ps1`**: Helper scripts to install and configure Redis, which is an optional dependency for caching and performance improvement.
+
+### Testing Scripts
+
+-   **`run-integration-tests.ps1`**: Executes a comprehensive suite of integration tests to validate the entire system, from health checks to API authentication.
+-   **`test-integration.ps1`**: A general-purpose script for running various integration tests, including frontend-backend communication and CORS checks.
+-   **`test-start-dev.ps1`**, **`test-start-frontend.ps1`**, **`test-start-backend.ps1`**: Scripts used specifically for testing the startup logic of the main development scripts.
+
+### Monitoring and Maintenance Scripts
+
+-   **`monitor-system-health.ps1`**: A real-time dashboard to monitor the health of all system components, including the database, Redis, and external APIs.
+-   **`performance-monitor.ps1`**: Tracks key performance indicators (KPIs) like response times, resource usage, and error rates, with options for alerting.
+-   **`monitor-startup-performance.ps1`**: Measures and compares the startup times of different development scripts to identify performance bottlenecks.
+-   **`maintenance-scripts.ps1`**: A collection of maintenance tasks such as log rotation, temporary file cleanup, and database backups.
+
+## 5. Getting Started
 
 ### Prerequisites
 
@@ -297,7 +322,7 @@ To learn more about the technologies used in this project:
 
 You can check out the [Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
-## 9. Deployment
+## 10. Deployment
 
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
