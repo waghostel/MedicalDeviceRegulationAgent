@@ -394,7 +394,7 @@
 - Navigate to the backend directory: cd medical-device-regulatory-assistant/backend
 - Run the database seeder to populate the database with mock data: poetry run python -m database.seeder
 
-- [ ] 13. Run backend tests
+- [x] 13. Run backend tests
 
   - In the backend directory, run the automated tests for the backend services and API: poetry run python -m pytest tests/ -v
   - This will verify the backend logic, database interactions, and API endpoints.
