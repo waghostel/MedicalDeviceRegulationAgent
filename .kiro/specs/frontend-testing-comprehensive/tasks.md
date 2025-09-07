@@ -99,7 +99,7 @@
   - Test project editing with optimistic updates and conflict resolution
   - Test project deletion with confirmation dialogs and cleanup
   - Test project list filtering, sorting, and pagination functionality
-  - Test concurrent project operations and state synchronization
+_n  - Test concurrent project operations and state synchronization
   - _Requirements: 3.2, 6.3, 6.5_
 
 - [x] 3.3 Create integration tests for regulatory analysis workflows
@@ -399,3 +399,9 @@
   - Create troubleshooting guide for common platform-specific issues
   - Implement automated environment validation
   - _Requirements: 10.6, 5.6_
+
+- [x] 11. Verify frontend_investigation_report.md
+  - Read the sterring document and analyze the folder structure
+  - Make the content of frontend_investigation_report.md to fully describe current system status
+  - Make the mermaid chart to fully visulaize current structure
+  - Follow the document format in prompts\0_front-end-investigation.md
