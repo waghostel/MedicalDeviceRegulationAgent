@@ -408,24 +408,24 @@ _n  - Test concurrent project operations and state synchronization
 
 
 - [ ] 12. Seed the database
- - Navigate to the backend directory: cd medical-device-regulatory-assistant/backend
- - Run the database seeder to populate the database with mock data: poetry run python -m database.seeder
+- Navigate to the backend directory: cd medical-device-regulatory-assistant/backend
+- Run the database seeder to populate the database with mock data: poetry run python -m database.seeder
 
 - [ ] 13. Run backend tests
- - In the backend directory, run the automated tests for the backend services and API: poetry run python -m pytest tests/ -v
- - This will verify the backend logic, database interactions, and API endpoints.
+  - In the backend directory, run the automated tests for the backend services and API: poetry run python -m pytest tests/ -v
+  - This will verify the backend logic, database interactions, and API endpoints.
 
 - [ ] 14. Run frontend tests
- - Navigate to the medical-device-regulatory-assistant directory: cd medical-device-regulatory-assistant
- - Run the automated tests for the frontend components and integration with mock APIs: pnpm test
- - This will verify that the UI components render correctly and handle user interactions as expected.
+- Navigate to the medical-device-regulatory-assistant directory: cd medical-device-regulatory-assistant
+- Run the automated tests for the frontend components and integration with mock APIs: pnpm test
+- This will verify that the UI components render correctly and handle user interactions as expected.
 
-- [ ] 4. Run end-to-end tests
- - In the medical-device-regulatory-assistant directory, run the Playwright end-to-end tests: pnpm test:e2e
- - This will launch a browser and simulate user journeys, testing the full application stack from the frontend to the backend and the database.
+- [ ] 15. Run end-to-end tests
+  - In the medical-device-regulatory-assistant directory, run the Playwright end-to-end tests: pnpm test:e2e
+  - This will launch a browser and simulate user journeys, testing the full application stack from the frontend to the backend and the database.
 
-- [ ] 5. Manually test the application
- - If all automated tests pass, you can manually test the application to get a feel for the user experience:
-   - Start the backend server: cd medical-device-regulatory-assistant/backend && poetry run uvicorn main:app --reload
-   - In a new terminal, start the frontend server: cd medical-device-regulatory-assistant && pnpm dev
-   - Open http://localhost:3000/projects in your browser and interact with the application.
+- [ ] 16. Manually test the application
+- If all automated tests pass, you can manually test the application to get a feel for the user experience:
+  - Start the backend server: cd medical-device-regulatory-assistant/backend && poetry run uvicorn main:app --reload
+  - In a new terminal, start the frontend server: cd medical-device-regulatory-assistant && pnpm dev
+  - Open http://localhost:3000/projects in your browser and interact with the application.
