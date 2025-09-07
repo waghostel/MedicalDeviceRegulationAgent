@@ -12,45 +12,45 @@ The primary target user is a **Regulatory Affairs Manager** at a medical device 
 
 The "Project Hub" page, also referred to as the **Regulatory Strategy Dashboard**, is the central workspace for each medical device project. It serves as the main interface for users to manage their regulatory projects and interact with the AI assistant. The features of the Project Hub are directly aligned with the core MVP capabilities:
 
-*   **Project Creation and Management:** Users can create, edit, and delete projects, which is the foundation for all other features.
-*   **Device Classification:** The hub provides access to the device classification feature, which is a critical first step in the regulatory process.
-*   **Predicate Search and Analysis:** The hub is the starting point for the predicate search and analysis workflow, which is the #1 priority feature of the MVP.
-*   **FDA Guidance Document Mapping:** The hub provides access to the FDA guidance document mapping feature.
-*   **Real-time Updates:** The hub uses WebSockets to provide real-time updates on the status of long-running tasks, such as predicate searches.
-*   **Export:** The hub allows users to export project data, including reports and audit trails.
+* **Project Creation and Management:** Users can create, edit, and delete projects, which is the foundation for all other features.
+* **Device Classification:** The hub provides access to the device classification feature, which is a critical first step in the regulatory process.
+* **Predicate Search and Analysis:** The hub is the starting point for the predicate search and analysis workflow, which is the #1 priority feature of the MVP.
+* **FDA Guidance Document Mapping:** The hub provides access to the FDA guidance document mapping feature.
+* **Real-time Updates:** The hub uses WebSockets to provide real-time updates on the status of long-running tasks, such as predicate searches.
+* **Export:** The hub allows users to export project data, including reports and audit trails.
 
 ## 4. Technical Deep Dive
 
 ### Frontend
 
-*   **Framework:** Next.js 14 with the App Router.
-*   **UI Components:** Shadcn UI and Tailwind CSS are used for building the UI.
-*   **State Management:** React hooks, including `useContext` and `useState`, are used for state management. Custom hooks like `useProjects` and `useWebSocket` encapsulate the logic for interacting with the backend.
-*   **API Interaction:** A custom `apiClient` is used to interact with the backend API. It handles authentication, retry logic, and error handling.
-*   **Real-time Updates:** WebSockets are used for real-time updates. The `useWebSocket` and `useProjectWebSocket` hooks manage the WebSocket connection and subscriptions.
-*   **Authentication:** NextAuth.js is used for authentication, with Google OAuth 2.0 as the provider.
+* **Framework:** Next.js 14 with the App Router.
+* **UI Components:** Shadcn UI and Tailwind CSS are used for building the UI.
+* **State Management:** React hooks, including `useContext` and `useState`, are used for state management. Custom hooks like `useProjects` and `useWebSocket` encapsulate the logic for interacting with the backend.
+* **API Interaction:** A custom `apiClient` is used to interact with the backend API. It handles authentication, retry logic, and error handling.
+* **Real-time Updates:** WebSockets are used for real-time updates. The `useWebSocket` and `useProjectWebSocket` hooks manage the WebSocket connection and subscriptions.
+* **Authentication:** NextAuth.js is used for authentication, with Google OAuth 2.0 as the provider.
 
 ### Backend
 
-*   **Framework:** FastAPI is used for the backend, with Python as the programming language.
-*   **Agent Architecture:** LangGraph is used for building the state-based agent workflows. CopilotKit is used for the AI chat interface.
-*   **API Endpoints:** The backend provides a set of API endpoints for managing projects, including CRUD operations, dashboard data, and project export.
-*   **Authentication:** JWT-based authentication is used to protect the API endpoints.
-*   **Database:** SQLite is used for local development. The database schema is defined using SQLAlchemy.
-*   **API Integration:** A wrapper is used for the openFDA API, with rate limiting and error handling.
+* **Framework:** FastAPI is used for the backend, with Python as the programming language.
+* **Agent Architecture:** LangGraph is used for building the state-based agent workflows. CopilotKit is used for the AI chat interface.
+* **API Endpoints:** The backend provides a set of API endpoints for managing projects, including CRUD operations, dashboard data, and project export.
+* **Authentication:** JWT-based authentication is used to protect the API endpoints.
+* **Database:** SQLite is used for local development. The database schema is defined using SQLAlchemy.
+* **API Integration:** A wrapper is used for the openFDA API, with rate limiting and error handling.
 
 ### Testing
 
-*   **Frontend:** Jest and React Testing Library are used for unit and component testing. Playwright is used for end-to-end testing.
-*   **Backend:** pytest is used for unit and integration testing.
+* **Frontend:** Jest and React Testing Library are used for unit and component testing. Playwright is used for end-to-end testing.
+* **Backend:** pytest is used for unit and integration testing.
 
 ## 5. Compliance and Safety
 
 The Medical Device Regulatory Assistant is designed with a strong emphasis on compliance and safety:
 
-*   **Human-in-the-Loop:** The AI is an assistant, and all critical outputs must be reviewed by a human regulatory professional.
-*   **Auditable Traceability:** Every AI action is logged, and full reasoning traces are provided for all conclusions.
-*   **Confidence and Citation Model:** Every AI output includes a confidence score and direct citations to source documents.
+* **Human-in-the-Loop:** The AI is an assistant, and all critical outputs must be reviewed by a human regulatory professional.
+* **Auditable Traceability:** Every AI action is logged, and full reasoning traces are provided for all conclusions.
+* **Confidence and Citation Model:** Every AI output includes a confidence score and direct citations to source documents.
 
 ## 6. Q&A
 
@@ -78,29 +78,29 @@ The frontend is already using a form of lazy loading for the project list. The `
 
 Based on my analysis, here are some features that might not be fully implemented or could be improved:
 
-*   [ ] Comprehensive testing for all components and services.
-*   [ ] Full implementation of the project export to PDF, the current implementation is a basic one.
-*   [ ] Advanced filtering and sorting options for the project list.
-*   [ ] More detailed project dashboard with more visualizations.
-*   [ ] User roles and permissions for project access control.
-*   [ ] In-app notifications for project updates.
+* [ ] Comprehensive testing for all components and services.
+* [ ] Full implementation of the project export to PDF, the current implementation is a basic one.
+* [ ] Advanced filtering and sorting options for the project list.
+* [ ] More detailed project dashboard with more visualizations.
+* [ ] User roles and permissions for project access control.
+* [ ] In-app notifications for project updates.
 
 **What will you suggest to do in this page?**
 
 I would suggest the following improvements for the "Project Hub" page:
 
-*   **Improve the UI/UX:** The current UI is functional, but it could be improved to be more visually appealing and user-friendly. For example, you could add more spacing, use a more consistent color palette, and improve the layout of the project cards.
-*   **Add more visualizations:** The project dashboard could be improved by adding more visualizations, such as charts and graphs, to make it easier to understand the project's progress and status.
-*   **Implement more advanced filtering and sorting:** The current filtering and sorting options are basic. You could add more advanced options, such as filtering by date range, sorting by different criteria, and saving filter presets.
-*   **Add a "quick view" feature:** A "quick view" feature would allow users to see the most important information about a project without having to navigate to the project details page.
+* **Improve the UI/UX:** The current UI is functional, but it could be improved to be more visually appealing and user-friendly. For example, you could add more spacing, use a more consistent color palette, and improve the layout of the project cards.
+* **Add more visualizations:** The project dashboard could be improved by adding more visualizations, such as charts and graphs, to make it easier to understand the project's progress and status.
+* **Implement more advanced filtering and sorting:** The current filtering and sorting options are basic. You could add more advanced options, such as filtering by date range, sorting by different criteria, and saving filter presets.
+* **Add a "quick view" feature:** A "quick view" feature would allow users to see the most important information about a project without having to navigate to the project details page.
 
 **What is the design you think should be modified?**
 
 I would suggest the following design modifications:
 
-*   **Project Cards:** The project cards could be redesigned to be more visually appealing and to show more information at a glance. For example, you could add a progress bar, a list of recent activities, and a "quick actions" menu.
-*   **Dashboard:** The dashboard could be redesigned to be more interactive and to provide more insights into the project's status. For example, you could add a timeline view, a burndown chart, and a team velocity chart.
-*   **Overall Layout:** The overall layout of the page could be improved to be more spacious and easier to navigate. For example, you could use a two-column layout, with the project list on the left and the project details on the right.
+* **Project Cards:** The project cards could be redesigned to be more visually appealing and to show more information at a glance. For example, you could add a progress bar, a list of recent activities, and a "quick actions" menu.
+* **Dashboard:** The dashboard could be redesigned to be more interactive and to provide more insights into the project's status. For example, you could add a timeline view, a burndown chart, and a team velocity chart.
+* **Overall Layout:** The overall layout of the page could be improved to be more spacious and easier to navigate. For example, you could use a two-column layout, with the project list on the left and the project details on the right.
 
 **Q: Is the data structure NoSQL? Can it be modified to MongoDB in the future?**
 
@@ -108,10 +108,10 @@ I would suggest the following design modifications:
 
 Modifying the backend to use MongoDB is possible, but it would require significant changes:
 
-*   **Switching to an ODM:** You would need to replace SQLAlchemy with a MongoDB-specific Object-Document Mapper (ODM) like Beanie or MongoEngine.
-*   **Rewriting Data Models:** The data models in `backend/models/` would need to be rewritten to use the chosen ODM.
-*   **Updating Database Queries:** All database queries in the service layer would need to be updated to use the ODM's query language.
-*   **Data Migration:** You would need to migrate the data from the existing relational database to MongoDB.
+* **Switching to an ODM:** You would need to replace SQLAlchemy with a MongoDB-specific Object-Document Mapper (ODM) like Beanie or MongoEngine.
+* **Rewriting Data Models:** The data models in `backend/models/` would need to be rewritten to use the chosen ODM.
+* **Updating Database Queries:** All database queries in the service layer would need to be updated to use the ODM's query language.
+* **Data Migration:** You would need to migrate the data from the existing relational database to MongoDB.
 
 **Q: Is there any mock data in the database?**
 
@@ -123,8 +123,8 @@ Modifying the backend to use MongoDB is possible, but it would require significa
 
 Here's a breakdown of how this works:
 
-*   **Storing JSON:** You can store JSON data in a `TEXT` column and use the JSON1 functions to work with it.
-*   **Querying JSON:** The JSON1 extension provides a set of functions (e.g., `json_extract()`, `json_object()`, `json_array()`) that allow you to query and manipulate the JSON data directly in your SQL queries.
+* **Storing JSON:** You can store JSON data in a `TEXT` column and use the JSON1 functions to work with it.
+* **Querying JSON:** The JSON1 extension provides a set of functions (e.g., `json_extract()`, `json_object()`, `json_array()`) that allow you to query and manipulate the JSON data directly in your SQL queries.
 
 **Example:**
 
@@ -152,9 +152,9 @@ FROM products;
 
 No, it's not the same as a native NoSQL database like MongoDB. Here are the key differences:
 
-*   **Schema:** SQLite is still a schema-based database, even when using the JSON1 extension. You still need to define your tables and columns.
-*   **Performance:** For very large and complex JSON documents, a native NoSQL database will likely offer better performance and scalability.
-*   **Features:** NoSQL databases like MongoDB have a much richer set of features for working with JSON/BSON data, such as indexing on nested fields, aggregation pipelines, and sharding.
+* **Schema:** SQLite is still a schema-based database, even when using the JSON1 extension. You still need to define your tables and columns.
+* **Performance:** For very large and complex JSON documents, a native NoSQL database will likely offer better performance and scalability.
+* **Features:** NoSQL databases like MongoDB have a much richer set of features for working with JSON/BSON data, such as indexing on nested fields, aggregation pipelines, and sharding.
 
 **What about BSON?**
 
@@ -172,38 +172,38 @@ Here's a breakdown of the required changes:
 
 ### 1. Database Schema
 
-*   **New Tables:** You would need to add new tables to the database to store EU-specific data, such as:
-    *   `eu_regulations` (for MDR/IVDR requirements)
-    *   `notified_bodies`
-    *   `ce_marking_status`
-    *   `eu_guidance_documents`
-*   **Modifying Existing Tables:** You might need to add new columns to the existing tables. For example, you might want to add a `market` column to the `projects` table to distinguish between US and EU projects.
+* **New Tables:** You would need to add new tables to the database to store EU-specific data, such as:
+    * `eu_regulations` (for MDR/IVDR requirements)
+    * `notified_bodies`
+    * `ce_marking_status`
+    * `eu_guidance_documents`
+* **Modifying Existing Tables:** You might need to add new columns to the existing tables. For example, you might want to add a `market` column to the `projects` table to distinguish between US and EU projects.
 
 ### 2. Backend
 
-*   **New SQLAlchemy Models:** You would need to create new SQLAlchemy models to represent the new database tables.
-*   **Updated Services:** The existing services would need to be updated to handle the new data. For example, the `ProjectService` would need to be updated to handle the creation and management of EU-specific projects.
-*   **New Services:** You might need to create new services to implement the EU-specific business logic, such as a service for searching for notified bodies or for generating a declaration of conformity.
-*   **Extended API:** The API would need to be extended with new endpoints for the EU-specific data.
+* **New SQLAlchemy Models:** You would need to create new SQLAlchemy models to represent the new database tables.
+* **Updated Services:** The existing services would need to be updated to handle the new data. For example, the `ProjectService` would need to be updated to handle the creation and management of EU-specific projects.
+* **New Services:** You might need to create new services to implement the EU-specific business logic, such as a service for searching for notified bodies or for generating a declaration of conformity.
+* **Extended API:** The API would need to be extended with new endpoints for the EU-specific data.
 
 ### 3. Frontend
 
-*   **New UI Components:** You would need to create new UI components to display the EU-specific data, such as a component for displaying the CE marking status or for searching for notified bodies.
-*   **Updated UI Components:** The existing UI components would need to be updated to handle the new data. For example, the `ProjectList` component would need to be updated to filter projects by market.
-*   **New Pages:** You might need to create new pages to display the EU-specific information, such as a page for managing the technical documentation for the CE marking.
+* **New UI Components:** You would need to create new UI components to display the EU-specific data, such as a component for displaying the CE marking status or for searching for notified bodies.
+* **Updated UI Components:** The existing UI components would need to be updated to handle the new data. For example, the `ProjectList` component would need to be updated to filter projects by market.
+* **New Pages:** You might need to create new pages to display the EU-specific information, such as a page for managing the technical documentation for the CE marking.
 
 ### 4. AI Agent
 
-*   **New Instruction Templates:** You would need to create new instruction templates for the AI agent to understand the EU regulations and to provide guidance on the EU-specific requirements.
-*   **New Tools:** You would need to create new tools for the agent, such as a tool for searching the EU's EUDAMED database.
+* **New Instruction Templates:** You would need to create new instruction templates for the AI agent to understand the EU regulations and to provide guidance on the EU-specific requirements.
+* **New Tools:** You would need to create new tools for the agent, such as a tool for searching the EU's EUDAMED database.
 
 ### Recommendations
 
 While this is a significant amount of work, the current architecture is modular and extensible. Here are some recommendations on how to approach the implementation of the EU market extension:
 
-*   **Create a new module:** To keep the codebase clean and maintainable, I would recommend creating a new, separate module for the EU-specific functionality. This would include new models, services, API endpoints, and UI components.
-*   **Use feature flags:** You could use feature flags to enable or disable the EU-specific functionality. This would allow you to develop and test the new functionality without affecting the existing US-specific functionality.
-*   **Take a phased approach:** You could take a phased approach to the implementation, starting with the most important features and then gradually adding more functionality over time.
+* **Create a new module:** To keep the codebase clean and maintainable, I would recommend creating a new, separate module for the EU-specific functionality. This would include new models, services, API endpoints, and UI components.
+* **Use feature flags:** You could use feature flags to enable or disable the EU-specific functionality. This would allow you to develop and test the new functionality without affecting the existing US-specific functionality.
+* **Take a phased approach:** You could take a phased approach to the implementation, starting with the most important features and then gradually adding more functionality over time.
 
 In conclusion, while adding support for the EU market would be a big job, the current architecture provides a solid foundation to build upon.
 
@@ -215,17 +215,17 @@ Here's a detailed breakdown of my recommendation:
 
 ### Why a Relational Database is Still a Good Fit
 
-1.  **Data Integrity and Consistency:** Your core data (projects, users, classifications, audit trails) is highly structured and relational. A relational database enforces data integrity through schemas and constraints, which is crucial for a regulatory application where data accuracy and consistency are paramount.
-2.  **Transactional Guarantees (ACID):** Relational databases are ACID compliant, which guarantees that your database transactions are processed reliably. This is important for ensuring that your data is always in a consistent state, even if there are errors or failures.
-3.  **Powerful Querying:** SQL is a very powerful and expressive language for querying relational data. You can perform complex joins and aggregations to get the exact data you need.
-4.  **JSON Support:** Modern relational databases like PostgreSQL and SQLite have excellent support for JSON. This means you can have the best of both worlds: the schema flexibility of NoSQL where you need it, and the data integrity of a relational database for your core data.
+1. **Data Integrity and Consistency:** Your core data (projects, users, classifications, audit trails) is highly structured and relational. A relational database enforces data integrity through schemas and constraints, which is crucial for a regulatory application where data accuracy and consistency are paramount.
+2. **Transactional Guarantees (ACID):** Relational databases are ACID compliant, which guarantees that your database transactions are processed reliably. This is important for ensuring that your data is always in a consistent state, even if there are errors or failures.
+3. **Powerful Querying:** SQL is a very powerful and expressive language for querying relational data. You can perform complex joins and aggregations to get the exact data you need.
+4. **JSON Support:** Modern relational databases like PostgreSQL and SQLite have excellent support for JSON. This means you can have the best of both worlds: the schema flexibility of NoSQL where you need it, and the data integrity of a relational database for your core data.
 
 ### How to Handle Data Type Extensions with a Relational Database
 
 For your EU market extension plan, you can use a hybrid approach within your relational database:
 
-*   **Structured Data:** For the structured parts of the EU data (e.g., a list of notified bodies with their names, addresses, and contact information), you can create new tables with a well-defined schema.
-*   **Semi-structured Data:** For the less structured or more dynamic parts of the EU data (e.g., the specific requirements for a particular device type, which might change over time), you can store this data in a JSON column within a new `eu_requirements` table.
+* **Structured Data:** For the structured parts of the EU data (e.g., a list of notified bodies with their names, addresses, and contact information), you can create new tables with a well-defined schema.
+* **Semi-structured Data:** For the less structured or more dynamic parts of the EU data (e.g., the specific requirements for a particular device type, which might change over time), you can store this data in a JSON column within a new `eu_requirements` table.
 
 This approach gives you the flexibility to extend your data model without having to perform complex schema migrations for every little change.
 
@@ -233,9 +233,9 @@ This approach gives you the flexibility to extend your data model without having
 
 While I don't recommend migrating to a NoSQL database for your core application at this stage, there are some scenarios where a NoSQL database could be a good choice in the future:
 
-*   **Storing Large Amounts of Unstructured Data:** If you need to store and analyze large amounts of unstructured data, such as the full text of all FDA guidance documents, a NoSQL database like Elasticsearch or MongoDB could be a good choice.
-*   **Caching:** A NoSQL database like Redis is an excellent choice for caching frequently accessed data to improve performance. Your current application is already set up to use Redis for caching.
-*   **High-velocity Data Ingestion:** If you need to ingest a large volume of data at a high velocity, such as real-time data from medical devices, a NoSQL database could be a good choice.
+* **Storing Large Amounts of Unstructured Data:** If you need to store and analyze large amounts of unstructured data, such as the full text of all FDA guidance documents, a NoSQL database like Elasticsearch or MongoDB could be a good choice.
+* **Caching:** A NoSQL database like Redis is an excellent choice for caching frequently accessed data to improve performance. Your current application is already set up to use Redis for caching.
+* **High-velocity Data Ingestion:** If you need to ingest a large volume of data at a high velocity, such as real-time data from medical devices, a NoSQL database could be a good choice.
 
 ### Conclusion
 
@@ -293,34 +293,34 @@ sequenceDiagram
 
 ### Steering
 
-*   `.kiro/steering/medical-device-regulatory-assistant-mvp.md`
-*   `.kiro/steering/technical-implementation-guidelines.md`
-*   `.kiro/steering/agent-instruction-templates.md`
-*   `.kiro/steering/llm-tool-reference-guide.md`
+* `.kiro/steering/medical-device-regulatory-assistant-mvp.md`
+* `.kiro/steering/technical-implementation-guidelines.md`
+* `.kiro/steering/agent-instruction-templates.md`
+* `.kiro/steering/llm-tool-reference-guide.md`
 
 ### Frontend
 
-*   `medical-device-regulatory-assistant/package.json`
-*   `medical-device-regulatory-assistant/src/app/projects/page.tsx`
-*   `medical-device-regulatory-assistant/src/components/projects/project-list.tsx`
-*   `medical-device-regulatory-assistant/src/hooks/use-projects.ts`
-*   `medical-device-regulatory-assistant/src/hooks/use-websocket.ts`
-*   `medical-device-regulatory-assistant/src/lib/api-client.ts`
-*   `medical-device-regulatory-assistant/src/lib/services/project-service.ts`
+* `medical-device-regulatory-assistant/package.json`
+* `medical-device-regulatory-assistant/src/app/projects/page.tsx`
+* `medical-device-regulatory-assistant/src/components/projects/project-list.tsx`
+* `medical-device-regulatory-assistant/src/hooks/use-projects.ts`
+* `medical-device-regulatory-assistant/src/hooks/use-websocket.ts`
+* `medical-device-regulatory-assistant/src/lib/api-client.ts`
+* `medical-device-regulatory-assistant/src/lib/services/project-service.ts`
 
 ### Backend
 
-*   `medical-device-regulatory-assistant/backend/main.py`
-*   `medical-device-regulatory-assistant/backend/api/projects.py`
-*   `medical-device-regulatory-assistant/backend/api/websocket.py`
-*   `medical-device-regulatory-assistant/backend/services/auth.py`
-*   `medical-device-regulatory-assistant/backend/services/projects.py`
-*   `medical-device-regulatory-assistant/backend/models/project.py`
+* `medical-device-regulatory-assistant/backend/main.py`
+* `medical-device-regulatory-assistant/backend/api/projects.py`
+* `medical-device-regulatory-assistant/backend/api/websocket.py`
+* `medical-device-regulatory-assistant/backend/services/auth.py`
+* `medical-device-regulatory-assistant/backend/services/projects.py`
+* `medical-device-regulatory-assistant/backend/models/project.py`
 
 ### Testing
 
-*   `medical-device-regulatory-assistant/test-api-integration.js`
-*   `medical-device-regulatory-assistant/e2e/critical-user-journeys.spec.ts`
+* `medical-device-regulatory-assistant/test-api-integration.js`
+* `medical-device-regulatory-assistant/e2e/critical-user-journeys.spec.ts`
   
 
 
