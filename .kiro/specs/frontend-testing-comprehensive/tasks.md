@@ -436,7 +436,7 @@
   - Perform a project-wide replacement of the deprecated `datetime.utcnow()` with the timezone-aware `datetime.now(datetime.UTC)`.
   - Run the full test suite after the replacement to ensure no regressions were introduced.
 
-- [ ] 18. Run frontend tests
+- [x] 20. Run frontend tests
 
   - Navigate to the medical-device-regulatory-assistant directory: cd medical-device-regulatory-assistant
   - Run the automated tests for the frontend components and integration with mock APIs: pnpm test

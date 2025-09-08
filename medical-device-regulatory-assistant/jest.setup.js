@@ -98,3 +98,75 @@ Object.defineProperty(window, 'matchMedia', {
     dispatchEvent: jest.fn(),
   })),
 });
+
+// Polyfills for Pointer Capture API (required by Radix UI)
+Object.defineProperty(Element.prototype, 'hasPointerCapture', {
+  value: jest.fn(() => false),
+  writable: true,
+});
+
+Object.defineProperty(Element.prototype, 'setPointerCapture', {
+  value: jest.fn(),
+  writable: true,
+});
+
+Object.defineProperty(Element.prototype, 'releasePointerCapture', {
+  value: jest.fn(),
+  writable: true,
+});
+
+// Mock getComputedStyle for better component testing
+Object.defineProperty(window, 'getComputedStyle', {
+  value: jest.fn().mockImplementation(() => ({
+    getPropertyValue: jest.fn(() => ''),
+    display: 'block',
+    visibility: 'visible',
+    opacity: '1',
+    transform: 'none',
+    transition: 'none',
+    animation: 'none',
+  })),
+  writable: true,
+});
+
+// Mock scrollIntoView for better component testing
+Object.defineProperty(Element.prototype, 'scrollIntoView', {
+  value: jest.fn(),
+  writable: true,
+});
+
+// Mock getBoundingClientRect for layout-dependent tests
+Object.defineProperty(Element.prototype, 'getBoundingClientRect', {
+  value: jest.fn(() => ({
+    bottom: 0,
+    height: 0,
+    left: 0,
+    right: 0,
+    top: 0,
+    width: 0,
+    x: 0,
+    y: 0,
+  })),
+  writable: true,
+});
+
+// Mock focus and blur methods for accessibility testing
+Object.defineProperty(HTMLElement.prototype, 'focus', {
+  value: jest.fn(),
+  writable: true,
+});
+
+Object.defineProperty(HTMLElement.prototype, 'blur', {
+  value: jest.fn(),
+  writable: true,
+});
+
+// Note: Clipboard API mock removed to avoid conflicts with user-event library
+
+// Setup Radix UI mocks for better testing compatibility
+try {
+  const { setupRadixUIMocks } = require('./src/lib/testing/radix-ui-mocks');
+  setupRadixUIMocks();
+} catch (error) {
+  console.warn('Could not setup Radix UI mocks:', error.message);
+}
