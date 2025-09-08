@@ -2,7 +2,7 @@
 
 import pytest
 import jwt
-from datetime import datetime, timedelta, UTC
+from datetime import datetime, timezone, timedelta, UTC
 from fastapi import HTTPException
 from fastapi.security import HTTPAuthorizationCredentials
 

@@ -4,7 +4,7 @@ Standalone test for audit functionality without complex imports
 
 import asyncio
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Dict, Any, List, Optional
 
 
@@ -39,7 +39,7 @@ class MockAuditLogger:
             "sources": sources,
             "reasoning": reasoning,
             "execution_time_ms": execution_time_ms,
-            "created_at": datetime.utcnow().isoformat()
+            "created_at": datetime.now(timezone.utc).isoformat()
         }
         
         self.entries.append(entry)
@@ -349,7 +349,7 @@ async def test_audit_functionality():
     
     # Simulate retention policy (would normally delete old entries)
     retention_days = 365
-    cutoff_date = datetime.utcnow()  # In real implementation, this would be cutoff_date - timedelta(days=retention_days)
+    cutoff_date = datetime.now(timezone.utc)  # In real implementation, this would be cutoff_date - timedelta(days=retention_days)
     
     entries_to_retain = len(audit_entries)  # All entries are recent in this test
     entries_to_archive = 0

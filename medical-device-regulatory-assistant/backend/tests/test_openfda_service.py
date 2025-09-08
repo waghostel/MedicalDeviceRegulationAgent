@@ -5,7 +5,7 @@ Unit tests for OpenFDA API Integration Service
 import pytest
 import asyncio
 import json
-from datetime import datetime, timedelta
+from datetime import datetime, timezone, timedelta
 from unittest.mock import AsyncMock, MagicMock, patch
 from typing import Dict, Any
 

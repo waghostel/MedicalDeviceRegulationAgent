@@ -5,7 +5,7 @@ Database seeding functionality for sample data
 import asyncio
 import logging
 import json
-from datetime import datetime, date
+from datetime import datetime, timezone, date
 from typing import List
 
 from .connection import get_database_manager

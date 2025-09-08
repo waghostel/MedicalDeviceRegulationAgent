@@ -8,7 +8,7 @@ import httpx
 from unittest.mock import patch
 import jwt
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timezone, timedelta
 
 BASE_URL = "http://localhost:8000"
 

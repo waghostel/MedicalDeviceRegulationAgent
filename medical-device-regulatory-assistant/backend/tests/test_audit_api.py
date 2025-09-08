@@ -4,7 +4,7 @@ Tests for Audit Trail API endpoints
 
 import pytest
 import json
-from datetime import datetime, timedelta
+from datetime import datetime, timezone, timedelta
 from unittest.mock import AsyncMock, patch, MagicMock
 from fastapi.testclient import TestClient
 from httpx import AsyncClient

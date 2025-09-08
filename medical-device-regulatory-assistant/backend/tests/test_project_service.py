@@ -3,7 +3,7 @@ Tests for project service functionality
 """
 
 import pytest
-from datetime import datetime
+from datetime import datetime, timezone
 from unittest.mock import patch
 
 from fastapi import HTTPException

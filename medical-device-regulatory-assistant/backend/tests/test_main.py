@@ -183,11 +183,11 @@ class TestHealthEndpoints:
         with patch('services.health.HealthChecker.check_all') as mock_check_all:
             # Mock successful health check
             from services.health import SystemHealth, HealthStatus
-            from datetime import datetime
+            from datetime import datetime, timezone
             
             mock_health_status = SystemHealth(
                 status="healthy",
-                timestamp=datetime.utcnow(),
+                timestamp=datetime.now(timezone.utc),
                 services=[],
                 overall_response_time_ms=100.0
             )
@@ -204,13 +204,13 @@ class TestHealthEndpoints:
         with patch('services.health.HealthChecker.check_database') as mock_check_database:
             # Mock successful database check
             from services.health import HealthStatus
-            from datetime import datetime
+            from datetime import datetime, timezone
             
             mock_db_status = HealthStatus(
                 service="database",
                 status="healthy",
                 response_time_ms=50.0,
-                timestamp=datetime.utcnow(),
+                timestamp=datetime.now(timezone.utc),
                 details={}
             )
             mock_check_database.return_value = mock_db_status
@@ -227,13 +227,13 @@ class TestHealthEndpoints:
         with patch('services.health.HealthChecker.check_fda_api') as mock_check_fda_api:
             # Mock successful FDA API check
             from services.health import HealthStatus
-            from datetime import datetime
+            from datetime import datetime, timezone
             
             mock_fda_status = HealthStatus(
                 service="fda_api",
                 status="healthy",
                 response_time_ms=200.0,
-                timestamp=datetime.utcnow(),
+                timestamp=datetime.now(timezone.utc),
                 details={}
             )
             mock_check_fda_api.return_value = mock_fda_status

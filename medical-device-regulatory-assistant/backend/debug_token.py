@@ -4,7 +4,7 @@
 import os
 import sys
 import jwt
-from datetime import datetime, timedelta
+from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
 # Add backend directory to path
@@ -18,7 +18,7 @@ secret_key = "test-secret-key-for-medical-device-assistant"
 algorithm = "HS256"
 
 # Create token data
-now = datetime.utcnow()
+now = datetime.now(timezone.utc)
 user_data = {
     "sub": "test-user-123",
     "email": "test.user@medicaldevice.com",

@@ -4,7 +4,7 @@
 import os
 import sys
 import jwt
-from datetime import datetime, timedelta
+from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
 # Add backend directory to path
@@ -25,7 +25,7 @@ def test_simple_auth():
     auth_service = AuthService()
     
     # Create a simple valid token
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc)
     print(f"Current time: {now}")
     
     payload = {

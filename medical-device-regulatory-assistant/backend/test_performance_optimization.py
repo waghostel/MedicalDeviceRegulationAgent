@@ -15,7 +15,7 @@ import json
 import time
 import pytest
 import redis.asyncio as redis
-from datetime import datetime, timedelta
+from datetime import datetime, timezone, timedelta
 from typing import Dict, Any, List
 import httpx
 from unittest.mock import Mock, patch, AsyncMock

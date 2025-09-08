@@ -3,7 +3,7 @@ Regulatory Agent State Management for LangGraph workflows
 """
 
 from typing import Dict, Any, List, Optional, TypedDict, Annotated
-from datetime import datetime
+from datetime import datetime, timezone
 from dataclasses import dataclass, field
 from enum import Enum
 
@@ -36,7 +36,7 @@ class SourceCitation:
     title: str
     effective_date: str
     document_type: str
-    accessed_date: str = field(default_factory=lambda: datetime.utcnow().isoformat())
+    accessed_date: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
 
 
 @dataclass
@@ -56,7 +56,7 @@ class AgentResult:
     sources: List[SourceCitation]
     reasoning_trace: List[str]
     execution_time_ms: int
-    created_at: str = field(default_factory=lambda: datetime.utcnow().isoformat())
+    created_at: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
 
 
 class RegulatoryAgentState(TypedDict):
@@ -131,9 +131,9 @@ class RegulatoryAgentStateManager:
         """Create initial agent state for a new session"""
         
         if session_id is None:
-            session_id = f"session_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}_{project_id}"
+            session_id = f"session_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}_{project_id}"
         
-        current_time = datetime.utcnow().isoformat()
+        current_time = datetime.now(timezone.utc).isoformat()
         
         return RegulatoryAgentState(
             # Project context
@@ -188,7 +188,7 @@ class RegulatoryAgentStateManager:
         """Update agent state with new information"""
         
         # Update timestamp
-        state["updated_at"] = datetime.utcnow().isoformat()
+        state["updated_at"] = datetime.now(timezone.utc).isoformat()
         
         # Apply updates
         for key, value in updates.items():
@@ -237,7 +237,7 @@ class RegulatoryAgentStateManager:
             "execution_time_ms": execution_time_ms
         })
         
-        state["updated_at"] = datetime.utcnow().isoformat()
+        state["updated_at"] = datetime.now(timezone.utc).isoformat()
         
         return state
     
@@ -254,13 +254,13 @@ class RegulatoryAgentStateManager:
             "error_type": error_type,
             "message": error_message,
             "details": error_details or {},
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "task": state.get("current_task")
         }
         
         state["error_log"].append(error_entry)
         state["status"] = AgentStatus.ERROR
-        state["updated_at"] = datetime.utcnow().isoformat()
+        state["updated_at"] = datetime.now(timezone.utc).isoformat()
         
         return state
     
@@ -272,7 +272,7 @@ class RegulatoryAgentStateManager:
     ) -> RegulatoryAgentState:
         """Create a checkpoint for long-running processes"""
         
-        timestamp = datetime.utcnow().isoformat()
+        timestamp = datetime.now(timezone.utc).isoformat()
         
         state["checkpoint_data"][checkpoint_name] = {
             "data": checkpoint_data,
@@ -302,7 +302,7 @@ class RegulatoryAgentStateManager:
             if key in state:
                 state[key] = value
         
-        state["updated_at"] = datetime.utcnow().isoformat()
+        state["updated_at"] = datetime.now(timezone.utc).isoformat()
         
         return state
     

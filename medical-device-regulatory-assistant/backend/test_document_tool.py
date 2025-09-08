@@ -243,7 +243,7 @@ def test_document_models():
             DocumentMetadata, ProcessedDocument, DocumentType, 
             ProcessingStatus, validate_document_metadata
         )
-        from datetime import datetime
+        from datetime import datetime, timezone
         
         print("✅ Successfully imported document models")
         

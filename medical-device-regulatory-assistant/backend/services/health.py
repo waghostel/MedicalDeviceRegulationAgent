@@ -3,7 +3,7 @@
 import asyncio
 import time
 from typing import Dict, Any, List
-from datetime import datetime
+from datetime import datetime, timezone
 
 import httpx
 import aiosqlite
@@ -49,7 +49,7 @@ class HealthChecker:
                 service="database",
                 status="healthy",
                 response_time_ms=response_time,
-                timestamp=datetime.utcnow(),
+                timestamp=datetime.now(timezone.utc),
                 details={"database_path": self.database_path}
             )
             
@@ -60,7 +60,7 @@ class HealthChecker:
                 service="database",
                 status="unhealthy",
                 response_time_ms=max(response_time, 0.1),  # Ensure minimum response time
-                timestamp=datetime.utcnow(),
+                timestamp=datetime.now(timezone.utc),
                 details={"error": str(e)}
             )
     
@@ -82,7 +82,7 @@ class HealthChecker:
                 service="fda_api",
                 status="healthy",
                 response_time_ms=response_time,
-                timestamp=datetime.utcnow(),
+                timestamp=datetime.now(timezone.utc),
                 details={
                     "api_url": self.fda_api_url,
                     "status_code": response.status_code
@@ -96,7 +96,7 @@ class HealthChecker:
                 service="fda_api",
                 status="unhealthy",
                 response_time_ms=max(response_time, 0.1),  # Ensure minimum response time
-                timestamp=datetime.utcnow(),
+                timestamp=datetime.now(timezone.utc),
                 details={"error": str(e)}
             )
     
@@ -115,7 +115,7 @@ class HealthChecker:
                 service="redis_cache",
                 status="healthy",
                 response_time_ms=response_time,
-                timestamp=datetime.utcnow(),
+                timestamp=datetime.now(timezone.utc),
                 details={"note": "Redis not implemented in MVP, simulated check"}
             )
             
@@ -126,7 +126,7 @@ class HealthChecker:
                 service="redis_cache",
                 status="unhealthy",
                 response_time_ms=max(response_time, 0.1),  # Ensure minimum response time
-                timestamp=datetime.utcnow(),
+                timestamp=datetime.now(timezone.utc),
                 details={"error": str(e)}
             )
     
@@ -151,7 +151,7 @@ class HealthChecker:
                     service="unknown",
                     status="error",
                     response_time_ms=0,
-                    timestamp=datetime.utcnow(),
+                    timestamp=datetime.now(timezone.utc),
                     details={"error": str(check)}
                 ))
             else:
@@ -168,7 +168,7 @@ class HealthChecker:
         
         return SystemHealth(
             status=overall_status,
-            timestamp=datetime.utcnow(),
+            timestamp=datetime.now(timezone.utc),
             services=services,
             overall_response_time_ms=max(overall_response_time, 0.1)  # Ensure minimum response time
         )

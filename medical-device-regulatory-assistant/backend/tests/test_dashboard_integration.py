@@ -5,7 +5,7 @@ Tests for enhanced dashboard data aggregation and real-time updates
 
 import pytest
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 from unittest.mock import AsyncMock, patch, MagicMock
 from httpx import AsyncClient
 from fastapi.testclient import TestClient

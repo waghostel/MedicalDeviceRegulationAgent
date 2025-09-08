@@ -6,7 +6,7 @@ Provides endpoints for connecting CopilotKit chat interface to LangGraph agents
 import asyncio
 import uuid
 from typing import Dict, Any, List, Optional
-from datetime import datetime
+from datetime import datetime, timezone
 
 from fastapi import APIRouter, HTTPException, BackgroundTasks, Depends
 from fastapi.responses import StreamingResponse
@@ -269,13 +269,13 @@ async def stream_session_updates(
                     "session_id": session_id,
                     "status": state.get("status", "unknown"),
                     "current_task": state.get("current_task"),
-                    "timestamp": datetime.utcnow().isoformat()
+                    "timestamp": datetime.now(timezone.utc).isoformat()
                 }
             }
             
             # Monitor for updates (simplified implementation)
             # In a production system, you'd use a proper event system
-            last_update = datetime.utcnow()
+            last_update = datetime.now(timezone.utc)
             
             while True:
                 await asyncio.sleep(1)  # Check every second
@@ -292,10 +292,10 @@ async def stream_session_updates(
                                 "status": current_state.get("status", "unknown"),
                                 "current_task": current_state.get("current_task"),
                                 "completed_tasks": current_state.get("completed_tasks", []),
-                                "timestamp": datetime.utcnow().isoformat()
+                                "timestamp": datetime.now(timezone.utc).isoformat()
                             }
                         }
-                        last_update = datetime.utcnow()
+                        last_update = datetime.now(timezone.utc)
                     
                     # Stop streaming if session is completed or errored
                     status = current_state.get("status", "")
@@ -305,7 +305,7 @@ async def stream_session_updates(
                             "data": {
                                 "session_id": session_id,
                                 "final_status": status,
-                                "timestamp": datetime.utcnow().isoformat()
+                                "timestamp": datetime.now(timezone.utc).isoformat()
                             }
                         }
                         break
@@ -366,7 +366,7 @@ async def cancel_session_task(
             user_id=user.id,
             action="session_cancelled",
             input_data={"session_id": session_id, "reason": request.reason},
-            output_data={"cancelled_at": datetime.utcnow().isoformat()},
+            output_data={"cancelled_at": datetime.now(timezone.utc).isoformat()},
             confidence_score=1.0,
             sources=[],
             reasoning=f"User cancelled session: {request.reason or 'No reason provided'}"
@@ -376,7 +376,7 @@ async def cancel_session_task(
             "session_id": session_id,
             "status": "cancelled",
             "message": "Session cancelled successfully",
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.now(timezone.utc).isoformat()
         }
         
     except HTTPException:
@@ -410,7 +410,7 @@ async def health_check() -> Dict[str, Any]:
         
         return {
             "status": "healthy",
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "active_sessions": session_count,
             "tools": tool_health
         }
@@ -419,7 +419,7 @@ async def health_check() -> Dict[str, Any]:
         return {
             "status": "unhealthy",
             "error": str(e),
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.now(timezone.utc).isoformat()
         }
 
 

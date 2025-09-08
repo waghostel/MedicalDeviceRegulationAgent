@@ -5,7 +5,7 @@ Audit Logger Service for regulatory compliance and traceability
 import asyncio
 import json
 from typing import Dict, Any, List, Optional
-from datetime import datetime, timedelta
+from datetime import datetime, timezone, timedelta
 from dataclasses import dataclass, asdict
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -37,7 +37,7 @@ class AuditLogEntry:
     
     def __post_init__(self):
         if self.timestamp is None:
-            self.timestamp = datetime.utcnow().isoformat()
+            self.timestamp = datetime.now(timezone.utc).isoformat()
 
 
 class AuditLogger:
@@ -463,7 +463,7 @@ class AuditLogger:
             Number of entries deleted
         """
         
-        cutoff_date = datetime.utcnow() - timedelta(days=retention_days)
+        cutoff_date = datetime.now(timezone.utc) - timedelta(days=retention_days)
         
         async with self.session_factory() as session:
             query = select(AgentInteraction).where(

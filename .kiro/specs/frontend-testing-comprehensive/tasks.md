@@ -431,7 +431,7 @@
   - Fix the `AsyncClient` initialization and resolve async fixture compatibility warnings to stabilize API integration tests.
   - Restore the performance testing infrastructure to enable load and concurrent user testing.
 
-- [ ] 19. Address Deprecation Warnings and Improve Code Health
+- [x] 19. Address Deprecation Warnings and Improve Code Health
 
   - Perform a project-wide replacement of the deprecated `datetime.utcnow()` with the timezone-aware `datetime.now(datetime.UTC)`.
   - Run the full test suite after the replacement to ensure no regressions were introduced.

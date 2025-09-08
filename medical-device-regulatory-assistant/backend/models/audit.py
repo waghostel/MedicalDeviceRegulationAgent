@@ -3,7 +3,7 @@ Audit trail models for compliance and security
 """
 
 import re
-from datetime import datetime, UTC
+from datetime import datetime, timezone, UTC
 from typing import Dict, Any, Optional
 from pydantic import BaseModel, Field, field_validator, ConfigDict
 

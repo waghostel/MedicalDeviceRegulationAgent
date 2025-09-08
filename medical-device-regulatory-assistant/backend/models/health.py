@@ -4,7 +4,7 @@ Pydantic models for health check responses
 
 from pydantic import BaseModel, Field, ConfigDict
 from typing import Dict, Any, Optional
-from datetime import datetime
+from datetime import datetime, timezone
 
 
 class HealthCheckDetail(BaseModel):

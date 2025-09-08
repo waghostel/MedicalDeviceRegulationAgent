@@ -7,7 +7,7 @@ for improved performance of the Medical Device Regulatory Assistant.
 
 import logging
 import time
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Dict, List, Any, Optional
 from sqlalchemy import text, Index, inspect
 from sqlalchemy.ext.asyncio import AsyncSession

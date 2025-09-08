@@ -5,7 +5,7 @@ Unit tests for Audit Logger Service
 import pytest
 import asyncio
 from unittest.mock import Mock, AsyncMock, patch
-from datetime import datetime, timedelta
+from datetime import datetime, timezone, timedelta
 from typing import Dict, Any, List
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -258,7 +258,7 @@ class TestAuditLogger:
                 sources=[],
                 reasoning="Test reasoning",
                 execution_time_ms=1500,
-                created_at=datetime.utcnow()
+                created_at=datetime.now(timezone.utc)
             )
         ]
         
@@ -290,8 +290,8 @@ class TestAuditLogger:
             project_id=1,
             user_id=2,
             action_filter="classification",
-            start_date=datetime.utcnow() - timedelta(days=7),
-            end_date=datetime.utcnow(),
+            start_date=datetime.now(timezone.utc) - timedelta(days=7),
+            end_date=datetime.now(timezone.utc),
             limit=50
         )
         
@@ -308,19 +308,19 @@ class TestAuditLogger:
                 agent_action="device_classification",
                 confidence_score=0.85,
                 execution_time_ms=1500,
-                created_at=datetime.utcnow()
+                created_at=datetime.now(timezone.utc)
             ),
             Mock(
                 agent_action="predicate_search",
                 confidence_score=0.75,
                 execution_time_ms=2500,
-                created_at=datetime.utcnow() - timedelta(hours=1)
+                created_at=datetime.now(timezone.utc) - timedelta(hours=1)
             ),
             Mock(
                 agent_action="error_fda_api",
                 confidence_score=0.0,
                 execution_time_ms=500,
-                created_at=datetime.utcnow() - timedelta(hours=2)
+                created_at=datetime.now(timezone.utc) - timedelta(hours=2)
             )
         ]
         
@@ -377,7 +377,7 @@ class TestAuditLogger:
                 sources=[],
                 reasoning="Test",
                 execution_time_ms=1000,
-                created_at=datetime.utcnow()
+                created_at=datetime.now(timezone.utc)
             )
         ]
         
@@ -414,7 +414,7 @@ class TestAuditLogger:
                 sources=[],
                 reasoning="Test",
                 execution_time_ms=1000,
-                created_at=datetime.utcnow()
+                created_at=datetime.now(timezone.utc)
             )
         ]
         

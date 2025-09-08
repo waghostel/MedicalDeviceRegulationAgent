@@ -5,7 +5,7 @@ Main Regulatory Agent implementation using LangGraph
 import asyncio
 import time
 from typing import Dict, Any, List, Optional, Callable
-from datetime import datetime
+from datetime import datetime, timezone
 
 from langgraph.graph import StateGraph, END, START
 from langgraph.checkpoint.memory import MemorySaver
@@ -267,7 +267,7 @@ class RegulatoryAgent:
         # Add task start to action history
         state["action_history"].append({
             "action": f"started_{state['current_task'].value}",
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "parameters": state.get("task_parameters", {})
         })
         

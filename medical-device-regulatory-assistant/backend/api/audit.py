@@ -4,7 +4,7 @@ Provides REST API for audit trail management and compliance reporting
 """
 
 from typing import List, Optional, Dict, Any
-from datetime import datetime, timedelta
+from datetime import datetime, timezone, timedelta
 from fastapi import APIRouter, Depends, HTTPException, Query, BackgroundTasks
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
@@ -211,7 +211,7 @@ async def generate_compliance_report(
             "report_metadata": {
                 "project_id": request.project_id,
                 "report_type": request.report_type,
-                "generated_at": datetime.utcnow().isoformat(),
+                "generated_at": datetime.now(timezone.utc).isoformat(),
                 "generated_by": current_user.email,
                 "total_entries": len(audit_entries)
             },
@@ -264,7 +264,7 @@ async def apply_retention_policy(
             "project_id": request.project_id,
             "archive_before_delete": request.archive_before_delete,
             "initiated_by": current_user.email,
-            "initiated_at": datetime.utcnow().isoformat()
+            "initiated_at": datetime.now(timezone.utc).isoformat()
         }
         
     except Exception as e:
@@ -309,7 +309,7 @@ async def verify_audit_integrity(
             verified_entries=verified_entries,
             tampered_entries=tampered_entries,
             integrity_score=integrity_score,
-            verification_timestamp=datetime.utcnow(),
+            verification_timestamp=datetime.now(timezone.utc),
             hash_algorithm="SHA-256"
         )
         
@@ -351,7 +351,7 @@ async def log_audit_entry(
         
         return {
             "message": "Audit entry logged successfully",
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.now(timezone.utc).isoformat()
         }
         
     except Exception as e:

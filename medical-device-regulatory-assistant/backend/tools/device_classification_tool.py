@@ -8,7 +8,7 @@ regulatory pathway determination, and CFR section identification.
 import asyncio
 import json
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Dict, List, Optional, Any, Tuple
 from dataclasses import dataclass, asdict
 import re

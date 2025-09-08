@@ -8,7 +8,7 @@ and other performance-critical operations.
 import json
 import logging
 import hashlib
-from datetime import datetime, timedelta
+from datetime import datetime, timezone, timedelta
 from typing import Dict, Any, Optional, List, Union
 from dataclasses import dataclass, asdict
 

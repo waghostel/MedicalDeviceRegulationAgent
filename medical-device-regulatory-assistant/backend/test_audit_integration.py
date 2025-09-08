@@ -5,7 +5,7 @@ Tests the complete audit workflow from logging to compliance reporting
 
 import asyncio
 import json
-from datetime import datetime, timedelta
+from datetime import datetime, timezone, timedelta
 from typing import Dict, Any, List
 
 
@@ -161,7 +161,7 @@ class AuditIntegrationTest:
                     "id": i,
                     "project_id": 1,
                     "user_id": 1,
-                    "created_at": datetime.utcnow() - timedelta(hours=i),
+                    "created_at": datetime.now(timezone.utc) - timedelta(hours=i),
                     **action_data
                 }
                 self.audit_entries.append(entry)
@@ -196,7 +196,7 @@ class AuditIntegrationTest:
             # Test filtering by date range
             recent_entries = [
                 e for e in all_entries 
-                if e["created_at"] >= datetime.utcnow() - timedelta(hours=2)
+                if e["created_at"] >= datetime.now(timezone.utc) - timedelta(hours=2)
             ]
             print(f"   ✅ Recent entries (last 2 hours): {len(recent_entries)} entries")
             
@@ -337,7 +337,7 @@ class AuditIntegrationTest:
                 "verified_entries": verified_count,
                 "tampered_entries": tampered_entries,
                 "integrity_score": integrity_score,
-                "verification_timestamp": datetime.utcnow().isoformat(),
+                "verification_timestamp": datetime.now(timezone.utc).isoformat(),
                 "hash_algorithm": "SHA-256"
             }
             
@@ -397,7 +397,7 @@ class AuditIntegrationTest:
         try:
             entries = self.audit_entries
             retention_days = 365
-            cutoff_date = datetime.utcnow() - timedelta(days=retention_days)
+            cutoff_date = datetime.now(timezone.utc) - timedelta(days=retention_days)
             
             # Simulate retention policy
             entries_to_retain = []
@@ -420,7 +420,7 @@ class AuditIntegrationTest:
             # Simulate archival process
             if entries_to_archive:
                 archive_data = {
-                    "archived_at": datetime.utcnow().isoformat(),
+                    "archived_at": datetime.now(timezone.utc).isoformat(),
                     "retention_policy": f"{retention_days} days",
                     "entries": entries_to_archive
                 }
@@ -451,7 +451,7 @@ class AuditIntegrationTest:
                 "sources": [],
                 "reasoning": "Real-time audit update test",
                 "execution_time_ms": 500,
-                "created_at": datetime.utcnow()
+                "created_at": datetime.now(timezone.utc)
             }
             
             # Simulate adding to audit trail

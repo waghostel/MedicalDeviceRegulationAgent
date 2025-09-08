@@ -3,7 +3,7 @@ Project service for managing medical device regulatory projects.
 """
 
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List, Optional, Dict, Any
 from pathlib import Path
 
@@ -238,7 +238,7 @@ class ProjectService:
             for field, value in update_data.items():
                 setattr(project, field, value)
             
-            project.updated_at = datetime.utcnow()
+            project.updated_at = datetime.now(timezone.utc)
             
             await session.commit()
             await session.refresh(project)
@@ -726,7 +726,7 @@ class ProjectService:
             "submissionReadiness": submission_readiness_step,
             "overallProgress": overall_progress,
             "nextActions": next_actions,
-            "lastUpdated": datetime.utcnow().isoformat()
+            "lastUpdated": datetime.now(timezone.utc).isoformat()
         }
     
     def _map_agent_action_to_activity_type(self, agent_action: str) -> str:

@@ -9,7 +9,7 @@ including mock tokens, test users, and authentication helpers.
 import os
 import sys
 import jwt
-from datetime import datetime, timedelta
+from datetime import datetime, timezone, timedelta
 from typing import Dict, Any, Optional
 from fastapi.testclient import TestClient
 from fastapi import HTTPException
@@ -87,7 +87,7 @@ class AuthTestFramework:
         user_data = self.test_users[user_type].copy()
         
         # Add timestamp claims
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         user_data.update({
             "iat": int((now - timedelta(minutes=5)).timestamp()),  # Issued 5 minutes ago to avoid clock skew
             "exp": int((now + timedelta(minutes=expires_in_minutes)).timestamp())
@@ -121,7 +121,7 @@ class AuthTestFramework:
         elif invalid_type == "wrong_signature":
             # Create token with wrong secret
             user_data = self.test_users["valid_user"].copy()
-            now = datetime.utcnow()
+            now = datetime.now(timezone.utc)
             user_data.update({
                 "iat": now,
                 "exp": now + timedelta(hours=1)
@@ -130,7 +130,7 @@ class AuthTestFramework:
         
         elif invalid_type == "missing_claims":
             # Create token without required claims
-            now = datetime.utcnow()
+            now = datetime.now(timezone.utc)
             incomplete_data = {
                 "iat": int((now - timedelta(minutes=5)).timestamp()),
                 "exp": int((now + timedelta(hours=1)).timestamp())

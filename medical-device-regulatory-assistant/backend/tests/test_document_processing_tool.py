@@ -14,7 +14,7 @@ import pytest
 import tempfile
 import os
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, timezone
 from unittest.mock import Mock, patch, MagicMock
 import json
 

@@ -9,7 +9,7 @@ import asyncio
 import json
 import logging
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, timezone, timedelta
 from enum import Enum
 from typing import Dict, Any, Optional, List, Callable
 from dataclasses import dataclass, asdict

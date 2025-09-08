@@ -9,7 +9,7 @@ from .cache import get_redis_client
 from .openfda import OpenFDAService
 import shutil
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 
 # Import Pydantic models
 from models.health import (
@@ -54,7 +54,7 @@ class HealthCheckService:
                 try:
                     result_dict = await self.checks[check_name]()
                     execution_time = round((time.time() - check_start) * 1000, 2)
-                    timestamp = datetime.utcnow().isoformat() + 'Z'
+                    timestamp = datetime.now(timezone.utc).isoformat() + 'Z'
                     
                     # Create HealthCheckDetail from result
                     result_dict['execution_time_ms'] = execution_time
@@ -78,7 +78,7 @@ class HealthCheckService:
                 except Exception as e:
                     logger.error(f"Health check {check_name} failed: {e}")
                     execution_time = round((time.time() - check_start) * 1000, 2)
-                    timestamp = datetime.utcnow().isoformat() + 'Z'
+                    timestamp = datetime.now(timezone.utc).isoformat() + 'Z'
                     
                     error_detail = HealthCheckDetail(
                         healthy=False,
@@ -98,7 +98,7 @@ class HealthCheckService:
         
         return HealthCheckResponse(
             healthy=overall_healthy,
-            timestamp=datetime.utcnow().isoformat() + 'Z',
+            timestamp=datetime.now(timezone.utc).isoformat() + 'Z',
             execution_time_ms=round((time.time() - start_time) * 1000, 2),
             service='medical-device-regulatory-assistant',
             version='0.1.0',

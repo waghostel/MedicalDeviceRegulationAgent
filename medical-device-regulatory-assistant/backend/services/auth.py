@@ -1,7 +1,7 @@
 """Authentication service for JWT token validation."""
 
 import os
-from datetime import datetime, timedelta, UTC
+from datetime import datetime, timezone, timedelta, UTC
 from typing import Optional, Dict, Any
 
 import jwt

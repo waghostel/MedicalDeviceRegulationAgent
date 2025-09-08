@@ -6,7 +6,7 @@ Manages agent sessions, conversation history, and context persistence
 import asyncio
 import json
 from typing import Dict, Any, List, Optional, Tuple
-from datetime import datetime, timedelta
+from datetime import datetime, timezone, timedelta
 from dataclasses import dataclass, asdict
 import aiosqlite
 
@@ -127,7 +127,7 @@ class SessionManager:
         async with aiosqlite.connect(self.db_path) as db:
             async with db.execute(
                 "SELECT session_id FROM agent_sessions WHERE user_id = ? AND updated_at > ?",
-                (user_id, (datetime.utcnow() - timedelta(hours=24)).isoformat())
+                (user_id, (datetime.now(timezone.utc) - timedelta(hours=24)).isoformat())
             ) as cursor:
                 async for row in cursor:
                     session_id = row[0]
@@ -153,7 +153,7 @@ class SessionManager:
         async with aiosqlite.connect(self.db_path) as db:
             async with db.execute(
                 "SELECT session_id FROM agent_sessions WHERE project_id = ? AND updated_at > ?",
-                (project_id, (datetime.utcnow() - timedelta(hours=24)).isoformat())
+                (project_id, (datetime.now(timezone.utc) - timedelta(hours=24)).isoformat())
             ) as cursor:
                 async for row in cursor:
                     session_id = row[0]
@@ -176,7 +176,7 @@ class SessionManager:
             self.active_sessions[session_id] = agent
             
             if metadata:
-                metadata.updated_at = datetime.utcnow()
+                metadata.updated_at = datetime.now(timezone.utc)
                 self.session_metadata[session_id] = metadata
                 await self._persist_session(session_id, metadata, agent)
     
@@ -247,7 +247,7 @@ class SessionManager:
     async def cleanup_expired_sessions(self) -> int:
         """Clean up expired sessions"""
         
-        cutoff_time = datetime.utcnow() - timedelta(seconds=self.session_timeout)
+        cutoff_time = datetime.now(timezone.utc) - timedelta(seconds=self.session_timeout)
         expired_sessions = []
         
         # Find expired sessions in memory
@@ -304,7 +304,7 @@ class SessionManager:
         history = await self.get_conversation_history(session_id)
         
         # Add new message
-        message["timestamp"] = datetime.utcnow().isoformat()
+        message["timestamp"] = datetime.now(timezone.utc).isoformat()
         history.append(message)
         
         # Keep only last 100 messages
@@ -315,7 +315,7 @@ class SessionManager:
         async with aiosqlite.connect(self.db_path) as db:
             await db.execute(
                 "UPDATE agent_sessions SET conversation_history = ?, updated_at = ? WHERE session_id = ?",
-                (json.dumps(history), datetime.utcnow().isoformat(), session_id)
+                (json.dumps(history), datetime.now(timezone.utc).isoformat(), session_id)
             )
             await db.commit()
     
@@ -444,7 +444,7 @@ class SessionManager:
             
             async with db.execute(
                 "SELECT COUNT(*) FROM agent_sessions WHERE updated_at > ?",
-                ((datetime.utcnow() - timedelta(hours=24)).isoformat(),)
+                ((datetime.now(timezone.utc) - timedelta(hours=24)).isoformat(),)
             ) as cursor:
                 recent_count = (await cursor.fetchone())[0]
         

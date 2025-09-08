@@ -16,7 +16,7 @@ import hashlib
 import logging
 from typing import Dict, List, Optional, Any, Tuple
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, timezone
 import asyncio
 from dataclasses import dataclass, asdict
 

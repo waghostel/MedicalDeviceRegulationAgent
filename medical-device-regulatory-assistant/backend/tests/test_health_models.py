@@ -3,7 +3,7 @@ Unit tests for health check Pydantic models
 """
 
 import pytest
-from datetime import datetime
+from datetime import datetime, timezone
 from pydantic import ValidationError
 import json
 

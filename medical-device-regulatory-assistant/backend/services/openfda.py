@@ -11,7 +11,7 @@ This service provides integration with the FDA's openFDA API for:
 import asyncio
 import json
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime, timezone, timedelta
 from typing import Dict, List, Optional, Any, Union
 from dataclasses import dataclass, asdict
 from urllib.parse import urlencode

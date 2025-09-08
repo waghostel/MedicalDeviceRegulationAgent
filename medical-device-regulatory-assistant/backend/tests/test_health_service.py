@@ -111,13 +111,13 @@ class TestHealthChecker:
              patch.object(checker, 'check_fda_api') as mock_fda, \
              patch.object(checker, 'check_redis_cache') as mock_redis:
             
-            from datetime import datetime
+            from datetime import datetime, timezone
             
             mock_db.return_value = HealthStatus(
                 service="database",
                 status="healthy",
                 response_time_ms=50.0,
-                timestamp=datetime.utcnow(),
+                timestamp=datetime.now(timezone.utc),
                 details={}
             )
             
@@ -125,7 +125,7 @@ class TestHealthChecker:
                 service="fda_api",
                 status="healthy",
                 response_time_ms=200.0,
-                timestamp=datetime.utcnow(),
+                timestamp=datetime.now(timezone.utc),
                 details={}
             )
             
@@ -133,7 +133,7 @@ class TestHealthChecker:
                 service="redis_cache",
                 status="healthy",
                 response_time_ms=10.0,
-                timestamp=datetime.utcnow(),
+                timestamp=datetime.now(timezone.utc),
                 details={}
             )
             
@@ -154,13 +154,13 @@ class TestHealthChecker:
              patch.object(checker, 'check_fda_api') as mock_fda, \
              patch.object(checker, 'check_redis_cache') as mock_redis:
             
-            from datetime import datetime
+            from datetime import datetime, timezone
             
             mock_db.return_value = HealthStatus(
                 service="database",
                 status="healthy",
                 response_time_ms=50.0,
-                timestamp=datetime.utcnow(),
+                timestamp=datetime.now(timezone.utc),
                 details={}
             )
             
@@ -168,7 +168,7 @@ class TestHealthChecker:
                 service="fda_api",
                 status="unhealthy",
                 response_time_ms=5000.0,
-                timestamp=datetime.utcnow(),
+                timestamp=datetime.now(timezone.utc),
                 details={"error": "API timeout"}
             )
             
@@ -176,7 +176,7 @@ class TestHealthChecker:
                 service="redis_cache",
                 status="healthy",
                 response_time_ms=10.0,
-                timestamp=datetime.utcnow(),
+                timestamp=datetime.now(timezone.utc),
                 details={}
             )
             
@@ -197,13 +197,13 @@ class TestHealthChecker:
              patch.object(checker, 'check_fda_api') as mock_fda, \
              patch.object(checker, 'check_redis_cache') as mock_redis:
             
-            from datetime import datetime
+            from datetime import datetime, timezone
             
             mock_db.return_value = HealthStatus(
                 service="database",
                 status="unhealthy",
                 response_time_ms=10.0,
-                timestamp=datetime.utcnow(),
+                timestamp=datetime.now(timezone.utc),
                 details={"error": "Connection failed"}
             )
             
@@ -211,7 +211,7 @@ class TestHealthChecker:
                 service="fda_api",
                 status="unhealthy",
                 response_time_ms=20.0,
-                timestamp=datetime.utcnow(),
+                timestamp=datetime.now(timezone.utc),
                 details={"error": "API unavailable"}
             )
             
@@ -219,7 +219,7 @@ class TestHealthChecker:
                 service="redis_cache",
                 status="unhealthy",
                 response_time_ms=5.0,
-                timestamp=datetime.utcnow(),
+                timestamp=datetime.now(timezone.utc),
                 details={"error": "Cache unavailable"}
             )
             
@@ -240,21 +240,21 @@ class TestHealthChecker:
              patch.object(checker, 'check_fda_api') as mock_fda, \
              patch.object(checker, 'check_redis_cache') as mock_redis:
             
-            from datetime import datetime
+            from datetime import datetime, timezone
             
             mock_db.side_effect = Exception("Database check failed")
             mock_fda.return_value = HealthStatus(
                 service="fda_api",
                 status="healthy",
                 response_time_ms=200.0,
-                timestamp=datetime.utcnow(),
+                timestamp=datetime.now(timezone.utc),
                 details={}
             )
             mock_redis.return_value = HealthStatus(
                 service="redis_cache",
                 status="healthy",
                 response_time_ms=10.0,
-                timestamp=datetime.utcnow(),
+                timestamp=datetime.now(timezone.utc),
                 details={}
             )
             

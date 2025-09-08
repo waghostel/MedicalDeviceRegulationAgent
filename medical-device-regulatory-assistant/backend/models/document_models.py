@@ -4,7 +4,7 @@ Document Models for Medical Device Regulatory Assistant
 Data models for document processing, metadata, versioning, and analysis results.
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Dict, List, Optional, Any
 from dataclasses import dataclass, field
 from enum import Enum

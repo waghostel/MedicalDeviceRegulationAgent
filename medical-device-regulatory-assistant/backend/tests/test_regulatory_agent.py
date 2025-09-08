@@ -5,7 +5,7 @@ Unit tests for Regulatory Agent and State Management
 import pytest
 import asyncio
 from unittest.mock import Mock, AsyncMock, patch
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Dict, Any
 
 from backend.agents.regulatory_agent_state import (
@@ -322,8 +322,8 @@ class TestRegulatoryAgent:
             "confidence_scores": {},
             "error_log": [],
             "checkpoint_data": {},
-            "created_at": datetime.utcnow().isoformat(),
-            "updated_at": datetime.utcnow().isoformat()
+            "created_at": datetime.now(timezone.utc).isoformat(),
+            "updated_at": datetime.now(timezone.utc).isoformat()
         }
         
         self.agent.app = AsyncMock()
@@ -391,8 +391,8 @@ class TestRegulatoryAgent:
             "confidence_scores": {"device_classification": 0.85},
             "error_log": [],
             "checkpoint_data": {},
-            "created_at": datetime.utcnow().isoformat(),
-            "updated_at": datetime.utcnow().isoformat()
+            "created_at": datetime.now(timezone.utc).isoformat(),
+            "updated_at": datetime.now(timezone.utc).isoformat()
         }
         
         # Mock workflow app
@@ -404,8 +404,8 @@ class TestRegulatoryAgent:
             "confidence_scores": {"device_classification": 0.85},
             "error_log": [],
             "checkpoint_data": {},
-            "created_at": datetime.utcnow().isoformat(),
-            "updated_at": datetime.utcnow().isoformat()
+            "created_at": datetime.now(timezone.utc).isoformat(),
+            "updated_at": datetime.now(timezone.utc).isoformat()
         }
         
         # Execute task
@@ -457,8 +457,8 @@ class TestRegulatoryAgent:
             "confidence_scores": {},
             "error_log": [],
             "checkpoint_data": {},
-            "created_at": datetime.utcnow().isoformat(),
-            "updated_at": datetime.utcnow().isoformat()
+            "created_at": datetime.now(timezone.utc).isoformat(),
+            "updated_at": datetime.now(timezone.utc).isoformat()
         }
         
         self.agent.app = AsyncMock()

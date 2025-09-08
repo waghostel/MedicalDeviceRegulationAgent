@@ -5,7 +5,7 @@ Unit tests for FDA Predicate Search Agent Tool
 import pytest
 import asyncio
 from unittest.mock import AsyncMock, MagicMock, patch
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List, Dict, Any
 
 from backend.tools.fda_predicate_search_tool import (

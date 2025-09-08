@@ -5,7 +5,7 @@ Simple test script for audit functionality
 import asyncio
 import sys
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 
 # Add the backend directory to the Python path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
