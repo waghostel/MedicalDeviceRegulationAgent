@@ -42,6 +42,11 @@ class Project(Base):
         nullable=False
     )
     
+    # Enhanced fields for improved project management
+    priority: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)  # high, medium, low
+    tags: Mapped[Optional[str]] = mapped_column(Text, nullable=True)  # JSON array of tags
+    project_metadata: Mapped[Optional[str]] = mapped_column(Text, nullable=True)  # JSON metadata for extensibility
+    
     # Relationships
     user: Mapped["User"] = relationship("User", back_populates="projects")
     device_classifications: Mapped[List["DeviceClassification"]] = relationship(
