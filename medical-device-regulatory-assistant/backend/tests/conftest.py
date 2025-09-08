@@ -8,13 +8,16 @@ import pytest_asyncio
 from pathlib import Path
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
 from sqlalchemy.pool import StaticPool
+import httpx
+from fastapi.testclient import TestClient
 
 from models.base import Base
 from database.connection import DatabaseManager
 from database.config import DatabaseConfig
 
 
-# Removed deprecated event_loop fixture - using pytest-asyncio defaults
+# Configure pytest-asyncio
+pytest_plugins = ('pytest_asyncio',)
 
 
 @pytest_asyncio.fixture(scope="function")
@@ -79,3 +82,24 @@ async def sample_project(test_session, sample_user):
     test_session.add(project)
     await test_session.flush()
     return project
+
+
+@pytest_asyncio.fixture(scope="function")
+async def async_client():
+    """Create an async HTTP client for testing"""
+    async with httpx.AsyncClient() as client:
+        yield client
+
+
+@pytest_asyncio.fixture(scope="function")
+async def test_app():
+    """Create a test FastAPI application"""
+    from main import app
+    return app
+
+
+@pytest_asyncio.fixture(scope="function")
+async def test_client(test_app):
+    """Create a test client for the FastAPI application"""
+    with TestClient(test_app) as client:
+        yield client

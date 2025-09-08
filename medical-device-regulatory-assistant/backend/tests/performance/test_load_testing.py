@@ -254,7 +254,11 @@ async def test_sustained_load():
 @pytest.mark.asyncio
 async def test_memory_usage_under_load():
     """Test memory usage doesn't grow excessively under load."""
-    import psutil
+    try:
+        import psutil
+    except ImportError:
+        pytest.skip("psutil not available - skipping memory test")
+    
     import os
     
     # Get initial memory usage

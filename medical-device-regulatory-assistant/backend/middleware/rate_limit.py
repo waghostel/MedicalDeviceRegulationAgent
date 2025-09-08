@@ -3,8 +3,10 @@ Rate limiting middleware for API protection
 """
 
 import time
-from typing import Dict, List
+from typing import Dict, List, Callable
 from collections import defaultdict, deque
+from fastapi import Request, Response, HTTPException
+from starlette.middleware.base import BaseHTTPMiddleware
 
 
 class RateLimiter:
@@ -80,3 +82,75 @@ class RateLimiter:
             return time.time()
         
         return user_requests[0] + self.window_seconds
+
+
+class RateLimitMiddleware(BaseHTTPMiddleware):
+    """Middleware to enforce rate limiting"""
+    
+    def __init__(self, app, max_requests: int = 100, window_seconds: int = 60, **kwargs):
+        super().__init__(app)
+        self.rate_limiter = RateLimiter(max_requests, window_seconds)
+        self.exempt_paths = kwargs.get("exempt_paths", ["/health", "/docs", "/openapi.json"])
+    
+    def get_client_id(self, request: Request) -> str:
+        """
+        Get client identifier for rate limiting
+        
+        Args:
+            request: FastAPI request object
+            
+        Returns:
+            Client identifier (IP address or user ID)
+        """
+        # Try to get user ID from authentication
+        if hasattr(request.state, "user") and request.state.user:
+            return f"user:{request.state.user.id}"
+        
+        # Fall back to IP address
+        client_ip = request.client.host if request.client else "unknown"
+        forwarded_for = request.headers.get("X-Forwarded-For")
+        if forwarded_for:
+            client_ip = forwarded_for.split(",")[0].strip()
+        
+        return f"ip:{client_ip}"
+    
+    async def dispatch(self, request: Request, call_next: Callable) -> Response:
+        """Apply rate limiting to requests"""
+        
+        # Skip rate limiting for exempt paths
+        if request.url.path in self.exempt_paths:
+            return await call_next(request)
+        
+        client_id = self.get_client_id(request)
+        
+        if not self.rate_limiter.is_allowed(client_id):
+            # Rate limit exceeded
+            remaining = self.rate_limiter.get_remaining_requests(client_id)
+            reset_time = self.rate_limiter.get_reset_time(client_id)
+            
+            response = Response(
+                content='{"error": "RATE_LIMIT_EXCEEDED", "message": "Too many requests"}',
+                status_code=429,
+                media_type="application/json"
+            )
+            
+            # Add rate limit headers
+            response.headers["X-RateLimit-Limit"] = str(self.rate_limiter.max_requests)
+            response.headers["X-RateLimit-Remaining"] = str(remaining)
+            response.headers["X-RateLimit-Reset"] = str(int(reset_time))
+            response.headers["Retry-After"] = str(int(reset_time - time.time()))
+            
+            return response
+        
+        # Process request normally
+        response = await call_next(request)
+        
+        # Add rate limit headers to successful responses
+        remaining = self.rate_limiter.get_remaining_requests(client_id)
+        reset_time = self.rate_limiter.get_reset_time(client_id)
+        
+        response.headers["X-RateLimit-Limit"] = str(self.rate_limiter.max_requests)
+        response.headers["X-RateLimit-Remaining"] = str(remaining)
+        response.headers["X-RateLimit-Reset"] = str(int(reset_time))
+        
+        return response

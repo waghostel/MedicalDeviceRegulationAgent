@@ -425,13 +425,13 @@
   - Add an assertion to ensure that the exception was raised.
   - Write task-17.md report
 
-- [ ] 18. Harden API, Security, and Test Configurations
+- [x] 18. Harden API, Security, and Test Configurations
 
   - Implement and test the missing rate-limiting and security header features to pass security tests.
   - Fix the `AsyncClient` initialization and resolve async fixture compatibility warnings to stabilize API integration tests.
   - Restore the performance testing infrastructure to enable load and concurrent user testing.
 
-- [ ] 17. Address Deprecation Warnings and Improve Code Health
+- [ ] 19. Address Deprecation Warnings and Improve Code Health
 
   - Perform a project-wide replacement of the deprecated `datetime.utcnow()` with the timezone-aware `datetime.now(datetime.UTC)`.
   - Run the full test suite after the replacement to ensure no regressions were introduced.
