@@ -442,12 +442,12 @@
   - Run the automated tests for the frontend components and integration with mock APIs: pnpm test
   - This will verify that the UI components render correctly and handle user interactions as expected.
 
-- [ ] 19. Run end-to-end tests
+- [x] 21. Run end-to-end tests
 
   - In the medical-device-regulatory-assistant directory, run the Playwright end-to-end tests: pnpm test:e2e
   - This will launch a browser and simulate user journeys, testing the full application stack from the frontend to the backend and the database.
 
-- [ ] 20. Manually test the application
+- [ ] 22. Manually test the application
   - If all automated tests pass, you can manually test the application to get a feel for the user experience:
   - Start the backend server: cd medical-device-regulatory-assistant/backend && poetry run uvicorn main:app --reload
   - In a new terminal, start the frontend server: cd medical-device-regulatory-assistant && pnpm dev

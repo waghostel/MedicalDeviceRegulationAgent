@@ -22,7 +22,7 @@ from sqlalchemy import select, and_, or_, desc
 from sqlalchemy.orm import selectinload
 
 # Internal imports
-from backend.models.document_models import (
+from models.document_models import (
     ProcessedDocument,
     DocumentMetadata,
     DocumentVersion,
@@ -33,15 +33,13 @@ from backend.models.document_models import (
     FDAGuidanceDocument,
     DocumentProcessingJob,
     ProcessingStatus,
-    DocumentType
-)
-from backend.tools.document_processing_tool import (
-    DocumentProcessingTool,
-    DocumentProcessingConfig
-)
-from models.document_models import (
+    DocumentType,
     ProcessedDocument as DBDocument,
     DocumentVersion as DBDocumentVersion
+)
+from tools.document_processing_tool import (
+    DocumentProcessingTool,
+    DocumentProcessingConfig
 )
 from models.project import Project as DBProject
 

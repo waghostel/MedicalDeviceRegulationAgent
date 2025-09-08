@@ -1,0 +1,117 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - generic [ref=e3]:
+      - generic [ref=e5]:
+        - generic [ref=e6]:
+          - heading "Regulatory Assistant" [level=1] [ref=e7]
+          - generic [ref=e8]: Cardiac Monitoring Device
+        - button "Hide Chat" [ref=e10]
+      - generic [ref=e12]:
+        - generic [ref=e13]:
+          - generic [ref=e15]:
+            - text: Current Project
+            - generic [ref=e16]: in-progress
+          - generic [ref=e17]:
+            - generic [ref=e18]:
+              - strong [ref=e19]: "Device Type:"
+              - text: Class II Medical Device
+            - generic [ref=e20]:
+              - strong [ref=e21]: "Intended Use:"
+              - text: For continuous monitoring of cardiac rhythm in ambulatory patients to detect arrhythmias
+            - generic [ref=e22]:
+              - strong [ref=e23]: "Description:"
+              - text: A wearable cardiac monitoring device for continuous heart rhythm analysis
+        - generic [ref=e24]:
+          - heading "Quick Actions" [level=2] [ref=e25]
+          - generic [ref=e26]:
+            - generic [ref=e27] [cursor=pointer]:
+              - generic [ref=e29] [cursor=pointer]:
+                - generic [ref=e30] [cursor=pointer]:
+                  - generic [ref=e31] [cursor=pointer]: 🔍
+                  - code [ref=e32] [cursor=pointer]: /predicate-search
+                - generic [ref=e33] [cursor=pointer]: search
+              - generic [ref=e34] [cursor=pointer]:
+                - paragraph [ref=e35] [cursor=pointer]: Find similar predicate devices for 510(k) submissions
+                - button "Execute Command" [ref=e36]
+            - generic [ref=e37] [cursor=pointer]:
+              - generic [ref=e39] [cursor=pointer]:
+                - generic [ref=e40] [cursor=pointer]:
+                  - generic [ref=e41] [cursor=pointer]: 📋
+                  - code [ref=e42] [cursor=pointer]: /classify-device
+                - generic [ref=e43] [cursor=pointer]: classification
+              - generic [ref=e44] [cursor=pointer]:
+                - paragraph [ref=e45] [cursor=pointer]: Determine device classification and product code
+                - button "Execute Command" [ref=e46]
+            - generic [ref=e47] [cursor=pointer]:
+              - generic [ref=e49] [cursor=pointer]:
+                - generic [ref=e50] [cursor=pointer]:
+                  - generic [ref=e51] [cursor=pointer]: ⚖️
+                  - code [ref=e52] [cursor=pointer]: /compare-predicate
+                - generic [ref=e53] [cursor=pointer]: analysis
+              - generic [ref=e54] [cursor=pointer]:
+                - paragraph [ref=e55] [cursor=pointer]: Compare your device with a specific predicate
+                - button "Execute Command" [ref=e56]
+            - generic [ref=e57] [cursor=pointer]:
+              - generic [ref=e59] [cursor=pointer]:
+                - generic [ref=e60] [cursor=pointer]:
+                  - generic [ref=e61] [cursor=pointer]: 📚
+                  - code [ref=e62] [cursor=pointer]: /find-guidance
+                - generic [ref=e63] [cursor=pointer]: guidance
+              - generic [ref=e64] [cursor=pointer]:
+                - paragraph [ref=e65] [cursor=pointer]: Search FDA guidance documents
+                - button "Execute Command" [ref=e66]
+        - generic [ref=e67]:
+          - generic [ref=e69]: How to Use the Regulatory Assistant
+          - generic [ref=e70]:
+            - generic [ref=e71]:
+              - heading "Chat Interface" [level=4] [ref=e72]
+              - paragraph [ref=e73]: Use the chat sidebar to interact with the AI assistant. You can type naturally or use slash commands for specific actions.
+            - generic [ref=e74]:
+              - heading "Slash Commands" [level=4] [ref=e75]
+              - paragraph [ref=e76]: "Click on the command cards above or type them directly in the chat:"
+              - list [ref=e77]:
+                - listitem [ref=e78]:
+                  - code [ref=e79]: /predicate-search
+                  - text: "- Find similar predicate devices for 510(k) submissions"
+                - listitem [ref=e80]:
+                  - code [ref=e81]: /classify-device
+                  - text: "- Determine device classification and product code"
+                - listitem [ref=e82]:
+                  - code [ref=e83]: /compare-predicate
+                  - text: "- Compare your device with a specific predicate"
+                - listitem [ref=e84]:
+                  - code [ref=e85]: /find-guidance
+                  - text: "- Search FDA guidance documents"
+    - generic [ref=e88]:
+      - button "Close Chat" [ref=e90]:
+        - img [ref=e92]
+        - img [ref=e96]
+      - generic [ref=e98]:
+        - generic [ref=e99]:
+          - generic [ref=e100]: CopilotKit
+          - generic [ref=e101]:
+            - generic [ref=e102]:
+              - button "Open Help" [ref=e104]: Help
+              - button "Debug" [ref=e105]:
+                - text: Debug
+                - img [ref=e106]
+            - button "Close" [ref=e110]:
+              - img [ref=e111]
+        - generic:
+          - contentinfo
+        - generic [ref=e113]:
+          - generic [ref=e114]:
+            - textbox "Type a message..." [ref=e115]
+            - button [disabled] [ref=e117]:
+              - img [ref=e118]
+          - paragraph [ref=e121]: Powered by CopilotKit
+  - button "bd5c9079-929b-4d55-bdc9-16d1c8181b71 !" [ref=e122]:
+    - img "bd5c9079-929b-4d55-bdc9-16d1c8181b71" [ref=e124]
+    - generic [ref=e128]: "!"
+  - button "Open Next.js Dev Tools" [ref=e134] [cursor=pointer]:
+    - img [ref=e135] [cursor=pointer]
+  - alert [ref=e140]
+```

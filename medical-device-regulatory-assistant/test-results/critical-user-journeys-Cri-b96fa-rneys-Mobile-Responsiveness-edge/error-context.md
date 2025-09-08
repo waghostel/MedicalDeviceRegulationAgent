@@ -1,0 +1,84 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e3]:
+      - generic [ref=e4]:
+        - button "Toggle Menu" [ref=e5]:
+          - img
+          - generic [ref=e6]: Toggle Menu
+        - link "Medical Device Regulatory Assistant MVP" [ref=e8] [cursor=pointer]:
+          - /url: /
+          - generic [ref=e9] [cursor=pointer]: Medical Device Regulatory Assistant
+          - generic [ref=e10] [cursor=pointer]: MVP
+        - navigation [ref=e12]:
+          - button "User menu" [ref=e13]:
+            - img
+            - generic [ref=e14]: User menu
+          - button "Settings" [ref=e15]:
+            - img
+            - generic [ref=e16]: Settings
+    - generic [ref=e19]:
+      - generic [ref=e20]:
+        - img [ref=e21]
+        - generic [ref=e23]: Quick Actions
+      - generic [ref=e24]:
+        - generic [ref=e25]:
+          - button [ref=e26]:
+            - img
+          - generic: Search for predicate devices
+        - generic [ref=e27]:
+          - button [ref=e28]:
+            - img
+          - generic: Determine device classification
+        - generic [ref=e29]:
+          - button [ref=e30]:
+            - img
+          - generic: Create submission checklist
+        - generic [ref=e31]:
+          - button [ref=e32]:
+            - img
+          - generic: Export current analysis
+    - main [ref=e34]:
+      - generic [ref=e36]:
+        - generic [ref=e37]:
+          - heading "Medical Device Regulatory Assistant" [level=1] [ref=e38]
+          - paragraph [ref=e39]: AI-powered regulatory pathway discovery for medical device companies
+        - generic [ref=e40]:
+          - generic [ref=e41]:
+            - generic [ref=e42]:
+              - generic [ref=e43]: Project Status
+              - generic [ref=e44]: MVP
+            - generic [ref=e45]:
+              - generic [ref=e46]: Setup Complete
+              - paragraph [ref=e47]: Core infrastructure initialized
+          - generic [ref=e48]:
+            - generic [ref=e50]: Next Steps
+            - generic [ref=e51]:
+              - generic [ref=e52]: Phase 1
+              - paragraph [ref=e53]: Frontend foundation and UI components
+          - generic [ref=e54]:
+            - generic [ref=e56]: Focus Area
+            - generic [ref=e57]:
+              - generic [ref=e58]: 510(k)
+              - paragraph [ref=e59]: Predicate search and analysis workflow
+        - generic [ref=e60]:
+          - generic [ref=e62]: Welcome to the Medical Device Regulatory Assistant
+          - generic [ref=e63]:
+            - paragraph [ref=e64]: This AI-powered platform streamlines the regulatory process for medical device companies, with an initial focus on the US FDA market and 510(k) predicate search workflows.
+            - generic [ref=e65]:
+              - heading "Core Capabilities (Coming Soon)" [level=3] [ref=e66]
+              - list [ref=e67]:
+                - listitem [ref=e68]: Auto-classification with FDA product codes
+                - listitem [ref=e69]: Predicate search & analysis with comparison tables
+                - listitem [ref=e70]: FDA guidance document mapping
+                - listitem [ref=e71]: Real-time FDA database integration
+                - listitem [ref=e72]: 510(k) submission checklist generator
+            - paragraph [ref=e74]:
+              - strong [ref=e75]: "Current Status:"
+              - text: Project setup and core infrastructure complete. Ready to begin Phase 1 development.
+  - button "Open Next.js Dev Tools" [ref=e81] [cursor=pointer]:
+    - img [ref=e82] [cursor=pointer]
+  - alert [ref=e87]
+```

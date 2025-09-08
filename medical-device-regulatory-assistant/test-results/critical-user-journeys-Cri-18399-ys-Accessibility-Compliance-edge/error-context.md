@@ -1,0 +1,132 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e3]:
+      - generic [ref=e4]:
+        - link "Medical Device Regulatory Assistant MVP" [ref=e6] [cursor=pointer]:
+          - /url: /
+          - generic [ref=e7] [cursor=pointer]: Medical Device Regulatory Assistant
+          - generic [ref=e8] [cursor=pointer]: MVP
+        - navigation [ref=e9]:
+          - link "Dashboard" [ref=e10] [cursor=pointer]:
+            - /url: /
+          - link "AI Assistant" [ref=e11] [cursor=pointer]:
+            - /url: /agent
+        - navigation [ref=e13]:
+          - button "User menu" [ref=e14]:
+            - img
+            - generic [ref=e15]: User menu
+          - button "Settings" [ref=e16]:
+            - img
+            - generic [ref=e17]: Settings
+    - generic [ref=e20]:
+      - generic [ref=e21]:
+        - img [ref=e22]
+        - generic [ref=e24]: Quick Actions
+      - generic [ref=e25]:
+        - button "Find Similar Predicates Ctrl+P" [ref=e27]:
+          - img
+          - generic [ref=e28]: Find Similar Predicates
+          - generic [ref=e29]: Ctrl+P
+        - button "Check Classification Ctrl+C" [ref=e31]:
+          - img
+          - generic [ref=e32]: Check Classification
+          - generic [ref=e33]: Ctrl+C
+        - button "Generate Checklist Ctrl+L" [ref=e35]:
+          - img
+          - generic [ref=e36]: Generate Checklist
+          - generic [ref=e37]: Ctrl+L
+        - button "Export Report Ctrl+E" [ref=e39]:
+          - img
+          - generic [ref=e40]: Export Report
+          - generic [ref=e41]: Ctrl+E
+    - generic [ref=e42]:
+      - complementary [ref=e43]:
+        - generic [ref=e46]:
+          - generic [ref=e47]:
+            - heading "Navigation" [level=2] [ref=e48]
+            - generic [ref=e49]:
+              - link "Dashboard" [ref=e50] [cursor=pointer]:
+                - /url: /
+                - img
+                - text: Dashboard
+              - link "Projects" [ref=e51] [cursor=pointer]:
+                - /url: /projects
+                - img
+                - text: Projects
+              - link "Agent Workflow" [ref=e52] [cursor=pointer]:
+                - /url: /agent
+                - img
+                - text: Agent Workflow
+              - link "Documents" [ref=e53] [cursor=pointer]:
+                - /url: /documents
+                - img
+                - text: Documents
+              - link "Predicate Search" [ref=e54] [cursor=pointer]:
+                - /url: /predicate-search
+                - img
+                - text: Predicate Search
+              - link "Analytics" [ref=e55] [cursor=pointer]:
+                - /url: /analytics
+                - img
+                - text: Analytics
+          - generic [ref=e56]:
+            - heading "Quick Actions" [level=2] [ref=e57]
+            - generic [ref=e58]:
+              - button "Find Predicates" [ref=e59]:
+                - img
+                - text: Find Predicates
+              - button "Check Classification" [ref=e60]:
+                - img
+                - text: Check Classification
+              - button "Generate Checklist" [ref=e61]:
+                - img
+                - text: Generate Checklist
+          - link "Settings" [ref=e63] [cursor=pointer]:
+            - /url: /settings
+            - img
+            - text: Settings
+      - main [ref=e64]:
+        - generic [ref=e66]:
+          - generic [ref=e67]:
+            - heading "Medical Device Regulatory Assistant" [level=1] [ref=e68]
+            - paragraph [ref=e69]: AI-powered regulatory pathway discovery for medical device companies
+          - generic [ref=e70]:
+            - generic [ref=e71]:
+              - generic [ref=e72]:
+                - generic [ref=e73]: Project Status
+                - generic [ref=e74]: MVP
+              - generic [ref=e75]:
+                - generic [ref=e76]: Setup Complete
+                - paragraph [ref=e77]: Core infrastructure initialized
+            - generic [ref=e78]:
+              - generic [ref=e80]: Next Steps
+              - generic [ref=e81]:
+                - generic [ref=e82]: Phase 1
+                - paragraph [ref=e83]: Frontend foundation and UI components
+            - generic [ref=e84]:
+              - generic [ref=e86]: Focus Area
+              - generic [ref=e87]:
+                - generic [ref=e88]: 510(k)
+                - paragraph [ref=e89]: Predicate search and analysis workflow
+          - generic [ref=e90]:
+            - generic [ref=e92]: Welcome to the Medical Device Regulatory Assistant
+            - generic [ref=e93]:
+              - paragraph [ref=e94]: This AI-powered platform streamlines the regulatory process for medical device companies, with an initial focus on the US FDA market and 510(k) predicate search workflows.
+              - generic [ref=e95]:
+                - heading "Core Capabilities (Coming Soon)" [level=3] [ref=e96]
+                - list [ref=e97]:
+                  - listitem [ref=e98]: Auto-classification with FDA product codes
+                  - listitem [ref=e99]: Predicate search & analysis with comparison tables
+                  - listitem [ref=e100]: FDA guidance document mapping
+                  - listitem [ref=e101]: Real-time FDA database integration
+                  - listitem [ref=e102]: 510(k) submission checklist generator
+              - paragraph [ref=e104]:
+                - strong [ref=e105]: "Current Status:"
+                - text: Project setup and core infrastructure complete. Ready to begin Phase 1 development.
+  - button "Open Next.js Dev Tools" [ref=e111] [cursor=pointer]:
+    - img [ref=e112] [cursor=pointer]
+  - alert [ref=e117]
+```

@@ -169,11 +169,6 @@ export default defineConfig({
   /* Run your local dev server before starting the tests */
   webServer: [
     {
-      command: 'cd backend && poetry run uvicorn main:app --host 0.0.0.0 --port 8000',
-      port: 8000,
-      reuseExistingServer: !process.env.CI,
-    },
-    {
       command: 'pnpm dev',
       port: 3000,
       reuseExistingServer: !process.env.CI,
