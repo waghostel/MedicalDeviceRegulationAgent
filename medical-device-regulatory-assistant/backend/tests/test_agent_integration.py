@@ -14,7 +14,7 @@ from ..main import app
 from ..agents.regulatory_agent import RegulatoryAgent
 from ..agents.regulatory_agent_state import AgentTaskType, AgentStatus
 from ..services.session_manager import SessionManager
-from ..api.agent_integration import session_manager
+from ..api.agent_integration import get_session_manager
 
 
 @pytest.fixture

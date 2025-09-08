@@ -55,7 +55,7 @@ class DatabaseConfig(BaseSettings):
         
     def model_post_init(self, __context) -> None:
         """Post-initialization processing"""
-        if self.database_url.startswith("sqlite"):
+        if self.database_url and isinstance(self.database_url, str) and self.database_url.startswith("sqlite"):
             # Extract database path from URL for SQLite
             if ":///" in self.database_url:
                 path_part = self.database_url.split("///")[1]

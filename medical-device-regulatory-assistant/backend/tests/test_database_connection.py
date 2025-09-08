@@ -8,6 +8,7 @@ import asyncio
 import tempfile
 import os
 from unittest.mock import patch, AsyncMock
+from sqlalchemy import text
 
 from database.connection import DatabaseManager, init_database, close_database, get_database_manager
 
@@ -18,7 +19,7 @@ def temp_database_path():
     with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as tmp:
         db_path = tmp.name
     
-    yield f"sqlite:{db_path}"
+    yield f"sqlite+aiosqlite:///{db_path}"
     
     try:
         os.unlink(db_path)
@@ -58,9 +59,8 @@ class TestDatabaseManager:
         db_manager = temp_database
         
         async with db_manager.get_connection() as conn:
-            cursor = await conn.execute("SELECT 1")
-            result = await cursor.fetchone()
-            await cursor.close()
+            cursor = await conn.execute(text("SELECT 1"))
+            result = cursor.fetchone()
             assert result[0] == 1
     
     @pytest.mark.asyncio
@@ -70,9 +70,8 @@ class TestDatabaseManager:
         
         async def query_database():
             async with db_manager.get_connection() as conn:
-                cursor = await conn.execute("SELECT 1")
-                result = await cursor.fetchone()
-                await cursor.close()
+                cursor = await conn.execute(text("SELECT 1"))
+                result = cursor.fetchone()
                 return result[0]
         
         # Run multiple concurrent queries
@@ -116,14 +115,13 @@ class TestDatabaseManager:
         
         async with db_manager.get_connection() as conn:
             # Check foreign keys are enabled
-            cursor = await conn.execute("PRAGMA foreign_keys")
-            result = await cursor.fetchone()
-            await cursor.close()
+            cursor = await conn.execute(text("PRAGMA foreign_keys"))
+            result = cursor.fetchone()
             assert result[0] == 1  # Foreign keys should be ON
             
             # Check journal mode is WAL
-            cursor = await conn.execute("PRAGMA journal_mode")
-            result = await cursor.fetchone()
+            cursor = await conn.execute(text("PRAGMA journal_mode"))
+            result = cursor.fetchone()
             await cursor.close()
             assert result[0].upper() == "WAL"
 

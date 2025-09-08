@@ -399,18 +399,59 @@
   - In the backend directory, run the automated tests for the backend services and API: poetry run python -m pytest tests/ -v
   - This will verify the backend logic, database interactions, and API endpoints.
 
-- [ ] 14. Run frontend tests
-- Navigate to the medical-device-regulatory-assistant directory: cd medical-device-regulatory-assistant
-- Run the automated tests for the frontend components and integration with mock APIs: pnpm test
-- This will verify that the UI components render correctly and handle user interactions as expected.
+- [x] 14. Resolve Critical Database and Authentication Failures
 
-- [ ] 15. Run end-to-end tests
+  - Investigate and fix the `DatabaseConfig` object parsing to resolve the `AttributeError: 'startswith'` in all database tests.
+  - Implement the missing authentication functions: `validate_jwt_token`, `hash_password`, and `verify_password`.
+  - Correct the JWT validation logic and ensure the user object contains the required `sub` attribute to fix the 50+ authentication test failures.
+
+- [x] 15. Fix Tool, Dependency, and Validation Errors
+
+  - Resolve the Pydantic model validation errors that cause failures across all device classification and other tools.
+  - Add the `psutil` dependency to `pyproject.toml` to enable performance monitoring tests.
+  - Address the `sentence_transformers` dependency issue, finding a Python 3.13 compatible version or a suitable alternative.
+
+- [-] 16. Modify test_search_and_analyze_predicates_no_results
+  - Run poetry run python -m pytest tests/test_device_classification_tool.py tests/test_fda_predicate_search_tool.py -v --tb=short -q test
+  - Replace the with pytest.raises(PredicateNotFoundError): block with a try...except
+     PredicateNotFoundError: block.
+  - Add an assertion to ensure that the exception was raised.
+
+  - [ ] 17. Modify test_arun_api_error
+    - Replace the with pytest.raises(FDAAPIError): block with a try...except FDAAPIError: block.
+    - Add an assertion to ensure that the exception was raised.
+
+
+
+
+
+
+
+
+- [ ] 16. Harden API, Security, and Test Configurations
+
+  - Implement and test the missing rate-limiting and security header features to pass security tests.
+  - Fix the `AsyncClient` initialization and resolve async fixture compatibility warnings to stabilize API integration tests.
+  - Restore the performance testing infrastructure to enable load and concurrent user testing.
+
+- [ ] 17. Address Deprecation Warnings and Improve Code Health
+
+  - Perform a project-wide replacement of the deprecated `datetime.utcnow()` with the timezone-aware `datetime.now(datetime.UTC)`.
+  - Run the full test suite after the replacement to ensure no regressions were introduced.
+
+- [ ] 18. Run frontend tests
+
+  - Navigate to the medical-device-regulatory-assistant directory: cd medical-device-regulatory-assistant
+  - Run the automated tests for the frontend components and integration with mock APIs: pnpm test
+  - This will verify that the UI components render correctly and handle user interactions as expected.
+
+- [ ] 19. Run end-to-end tests
 
   - In the medical-device-regulatory-assistant directory, run the Playwright end-to-end tests: pnpm test:e2e
   - This will launch a browser and simulate user journeys, testing the full application stack from the frontend to the backend and the database.
 
-- [ ] 16. Manually test the application
-- If all automated tests pass, you can manually test the application to get a feel for the user experience:
+- [ ] 20. Manually test the application
+  - If all automated tests pass, you can manually test the application to get a feel for the user experience:
   - Start the backend server: cd medical-device-regulatory-assistant/backend && poetry run uvicorn main:app --reload
   - In a new terminal, start the frontend server: cd medical-device-regulatory-assistant && pnpm dev
   - Open http://localhost:3000/projects in your browser and interact with the application.

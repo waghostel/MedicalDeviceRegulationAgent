@@ -30,7 +30,7 @@ from PIL import Image
 import spacy
 import nltk
 from transformers import pipeline, AutoTokenizer, AutoModel
-from sentence_transformers import SentenceTransformer
+# from sentence_transformers import SentenceTransformer  # Disabled for Python 3.13 compatibility
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
@@ -96,10 +96,12 @@ def get_summarizer():
     return _summarizer
 
 def get_sentence_transformer():
-    """Lazy load sentence transformer model"""
+    """Lazy load sentence transformer model - disabled for Python 3.13 compatibility"""
     global _sentence_transformer
     if _sentence_transformer is None:
-        _sentence_transformer = SentenceTransformer('all-MiniLM-L6-v2')
+        # _sentence_transformer = SentenceTransformer('all-MiniLM-L6-v2')  # Disabled for Python 3.13 compatibility
+        logger.warning("SentenceTransformer disabled for Python 3.13 compatibility. Using TF-IDF fallback.")
+        return None
     return _sentence_transformer
 
 
@@ -150,8 +152,20 @@ class DocumentProcessingTool(BaseTool):
             nltk.data.find('tokenizers/punkt')
             nltk.data.find('corpora/stopwords')
         except LookupError:
-            nltk.download('punkt', quiet=True)
-            nltk.download('stopwords', quiet=True)
+            try:
+                nltk.download('punkt', quiet=True)
+                nltk.download('stopwords', quiet=True)
+            except Exception:
+                pass
+        
+        # Also try to download punkt_tab for newer NLTK versions
+        try:
+            nltk.data.find('tokenizers/punkt_tab')
+        except LookupError:
+            try:
+                nltk.download('punkt_tab', quiet=True)
+            except Exception:
+                pass
     
     def _run(self, action: str, **kwargs) -> Dict[str, Any]:
         """
@@ -601,15 +615,21 @@ class DocumentProcessingTool(BaseTool):
                     text = str(doc)
                 doc_texts.append(text)
             
-            # Use sentence transformer for semantic search
+            # Use sentence transformer for semantic search, fallback to TF-IDF
             sentence_transformer = get_sentence_transformer()
             
-            # Encode query and documents
-            query_embedding = sentence_transformer.encode([query])
-            doc_embeddings = sentence_transformer.encode(doc_texts)
-            
-            # Calculate similarities
-            similarities = cosine_similarity(query_embedding, doc_embeddings)[0]
+            if sentence_transformer is not None:
+                # Encode query and documents using sentence transformer
+                query_embedding = sentence_transformer.encode([query])
+                doc_embeddings = sentence_transformer.encode(doc_texts)
+                similarities = cosine_similarity(query_embedding, doc_embeddings)[0]
+            else:
+                # Fallback to TF-IDF when sentence transformers are not available
+                logger.info("Using TF-IDF fallback for document search")
+                vectorizer = TfidfVectorizer(stop_words='english', max_features=1000)
+                all_texts = [query] + doc_texts
+                tfidf_matrix = vectorizer.fit_transform(all_texts)
+                similarities = cosine_similarity(tfidf_matrix[0:1], tfidf_matrix[1:])[0]
             
             # Get top results
             top_indices = np.argsort(similarities)[::-1][:top_k]

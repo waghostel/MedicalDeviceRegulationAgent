@@ -36,5 +36,10 @@ class User(Base):
         cascade="all, delete-orphan"
     )
     
+    @property
+    def sub(self) -> str:
+        """Return user ID as string for JWT compatibility (sub claim)"""
+        return str(self.id)
+    
     def __repr__(self) -> str:
         return f"<User(id={self.id}, email='{self.email}', name='{self.name}')>"

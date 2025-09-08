@@ -1,13 +1,14 @@
 """Authentication service for JWT token validation."""
 
 import os
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Optional, Dict, Any
 
 import jwt
 from fastapi import HTTPException, status, Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel
+import bcrypt
 
 
 class TokenData(BaseModel):
@@ -17,6 +18,42 @@ class TokenData(BaseModel):
     name: str
     exp: datetime
     iat: datetime
+
+
+
+
+def hash_password(password: str) -> str:
+    """Hash a password using bcrypt."""
+    salt = bcrypt.gensalt()
+    hashed = bcrypt.hashpw(password.encode('utf-8'), salt)
+    return hashed.decode('utf-8')
+
+
+def verify_password(password: str, hashed_password: str) -> bool:
+    """Verify a password against its hash."""
+    return bcrypt.checkpw(password.encode('utf-8'), hashed_password.encode('utf-8'))
+
+
+def validate_jwt_token(token: str, secret_key: str = None) -> Dict[str, Any]:
+    """Validate JWT token and return payload."""
+    if secret_key is None:
+        secret_key = os.getenv("NEXTAUTH_SECRET", "your-secret-key")
+    
+    try:
+        payload = jwt.decode(token, secret_key, algorithms=["HS256"])
+        return payload
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Token expired",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    except (jwt.DecodeError, jwt.InvalidSignatureError, jwt.InvalidTokenError):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Could not validate credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
 
 
 class AuthService:
@@ -47,7 +84,7 @@ class AuthService:
                 )
             
             # Check if token is expired
-            if exp < datetime.utcnow():
+            if exp < datetime.now(UTC).replace(tzinfo=None):
                 raise HTTPException(
                     status_code=status.HTTP_401_UNAUTHORIZED,
                     detail="Token expired",

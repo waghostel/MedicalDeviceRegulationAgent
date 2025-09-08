@@ -39,11 +39,11 @@ from backend.tools.document_processing_tool import (
     DocumentProcessingTool,
     DocumentProcessingConfig
 )
-from backend.database.models import (
-    Document as DBDocument,
-    DocumentVersion as DBDocumentVersion,
-    Project as DBProject
+from models.document_models import (
+    ProcessedDocument as DBDocument,
+    DocumentVersion as DBDocumentVersion
 )
+from models.project import Project as DBProject
 
 # Configure logging
 logger = logging.getLogger(__name__)

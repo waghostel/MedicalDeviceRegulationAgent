@@ -2,7 +2,7 @@
 
 import pytest
 import jwt
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from fastapi import HTTPException
 from fastapi.security import HTTPAuthorizationCredentials
 
@@ -23,7 +23,7 @@ class TestAuthService:
         if expires_delta is None:
             expires_delta = timedelta(hours=1)
         
-        now = datetime.utcnow()
+        now = datetime.now(UTC).replace(tzinfo=None)
         exp = now + expires_delta
         
         payload = {
@@ -51,7 +51,7 @@ class TestAuthService:
         assert result.sub == "user123"
         assert result.email == "john.doe@example.com"
         assert result.name == "John Doe"
-        assert result.exp > datetime.utcnow()
+        assert result.exp > datetime.now(UTC).replace(tzinfo=None)
     
     def test_verify_expired_token(self):
         """Test verification of expired JWT token."""
@@ -87,8 +87,8 @@ class TestAuthService:
         """Test verification of token missing required user data."""
         # Create token without required fields
         payload = {
-            "exp": datetime.utcnow() + timedelta(hours=1),
-            "iat": datetime.utcnow(),
+            "exp": datetime.now(UTC).replace(tzinfo=None) + timedelta(hours=1),
+            "iat": datetime.now(UTC).replace(tzinfo=None),
         }
         
         token = jwt.encode(payload, self.test_secret, algorithm="HS256")
@@ -113,8 +113,8 @@ class TestAuthService:
                 "sub": user_data["sub"],
                 "email": user_data["email"],
                 "name": user_data["name"],
-                "exp": datetime.utcnow() + timedelta(hours=1),
-                "iat": datetime.utcnow(),
+                "exp": datetime.now(UTC).replace(tzinfo=None) + timedelta(hours=1),
+                "iat": datetime.now(UTC).replace(tzinfo=None),
             },
             "wrong-secret",
             algorithm="HS256"
@@ -141,8 +141,8 @@ class TestAuthDependencies:
             "sub": user_data.get("sub", "test-user-id"),
             "email": user_data.get("email", "test@example.com"),
             "name": user_data.get("name", "Test User"),
-            "exp": datetime.utcnow() + timedelta(hours=1),
-            "iat": datetime.utcnow(),
+            "exp": datetime.now(UTC).replace(tzinfo=None) + timedelta(hours=1),
+            "iat": datetime.now(UTC).replace(tzinfo=None),
         }
         
         return jwt.encode(payload, self.test_secret, algorithm="HS256")

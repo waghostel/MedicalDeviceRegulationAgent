@@ -2,13 +2,16 @@
 Database connection management and session handling
 """
 
-import aiosqlite
 import asyncio
 import logging
 import os
 from contextlib import asynccontextmanager
-from typing import AsyncGenerator, Optional, Dict, Any
+from typing import AsyncGenerator, Optional, Dict, Any, Union
 
+from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, create_async_engine, async_sessionmaker
+from sqlalchemy.pool import StaticPool
+
+from .config import DatabaseConfig
 from .exceptions import (
     DatabaseError,
     ConnectionError,
@@ -23,19 +26,21 @@ logger = logging.getLogger(__name__)
 
 
 class DatabaseManager:
-    """Database connection and session manager using aiosqlite"""
+    """Database connection and session manager using SQLAlchemy"""
     
-    def __init__(self, database_url: str):
-        self.database_url = database_url
-        self._connection: Optional[aiosqlite.Connection] = None
+    def __init__(self, database_config: Union[str, DatabaseConfig]):
+        # Handle both string URLs and DatabaseConfig objects
+        if isinstance(database_config, str):
+            self.config = DatabaseConfig(database_url=database_config)
+        elif isinstance(database_config, DatabaseConfig):
+            self.config = database_config
+        else:
+            raise ValueError("database_config must be either a string URL or DatabaseConfig object")
+            
+        self._engine: Optional[AsyncEngine] = None
+        self._session_factory: Optional[async_sessionmaker] = None
         self._lock = asyncio.Lock()
         self._error_recovery = None
-        
-        # Extract database path from URL
-        if database_url.startswith("sqlite:"):
-            self.database_path = database_url.replace("sqlite:", "")
-        else:
-            self.database_path = database_url
     
     @property
     def error_recovery(self) -> DatabaseErrorRecovery:
@@ -44,119 +49,156 @@ class DatabaseManager:
             self._error_recovery = DatabaseErrorRecovery(self)
         return self._error_recovery
     
+    @property
+    def engine(self) -> AsyncEngine:
+        """Get or create the database engine"""
+        if self._engine is None:
+            # Configure engine based on database URL
+            if self.config.database_url.startswith("sqlite"):
+                # For SQLite, use StaticPool for in-memory databases
+                if ":memory:" in self.config.database_url:
+                    self._engine = create_async_engine(
+                        self.config.database_url,
+                        poolclass=StaticPool,
+                        connect_args={
+                            "check_same_thread": False,
+                        },
+                        echo=False
+                    )
+                else:
+                    self._engine = create_async_engine(
+                        self.config.database_url,
+                        echo=False
+                    )
+            else:
+                self._engine = create_async_engine(
+                    self.config.database_url,
+                    pool_size=self.config.pool_size,
+                    max_overflow=self.config.max_overflow,
+                    pool_timeout=self.config.pool_timeout,
+                    pool_recycle=self.config.pool_recycle,
+                    echo=False
+                )
+        return self._engine
+    
+    @property
+    def session_factory(self) -> async_sessionmaker:
+        """Get or create the session factory"""
+        if self._session_factory is None:
+            self._session_factory = async_sessionmaker(
+                bind=self.engine,
+                class_=AsyncSession,
+                expire_on_commit=False
+            )
+        return self._session_factory
+    
     @handle_connection_errors
     async def initialize(self) -> None:
-        """Initialize database connection and create tables if needed"""
+        """Initialize database engine"""
         async with self._lock:
-            if self._connection is None:
+            if self._engine is None:
                 try:
-                    # Validate database path exists and is accessible
-                    if not os.path.exists(os.path.dirname(self.database_path) or "."):
-                        os.makedirs(os.path.dirname(self.database_path), exist_ok=True)
+                    # Create engine (this will be done lazily via property)
+                    engine = self.engine
                     
-                    self._connection = await aiosqlite.connect(
-                        self.database_path,
-                        check_same_thread=False
-                    )
+                    # Test connection
+                    async with engine.begin() as conn:
+                        from sqlalchemy import text
+                        await conn.execute(text("SELECT 1"))
                     
-                    # Enable foreign keys
-                    await self._connection.execute("PRAGMA foreign_keys = ON")
-                    await self._connection.execute("PRAGMA journal_mode = WAL")
-                    await self._connection.execute("PRAGMA synchronous = NORMAL")
-                    await self._connection.execute("PRAGMA cache_size = 1000")
-                    await self._connection.execute("PRAGMA temp_store = MEMORY")
-                    await self._connection.commit()
+                    logger.info(f"Database engine initialized: {self.config.database_url}")
                     
-                    logger.info(f"Database connection established: {self.database_path}")
-                    
-                except aiosqlite.Error as e:
-                    logger.error(f"SQLite error during initialization: {e}")
-                    raise ConnectionError(
-                        f"Failed to connect to database at {self.database_path}",
-                        database_path=self.database_path,
-                        original_error=e
-                    )
-                except OSError as e:
-                    logger.error(f"File system error during initialization: {e}")
-                    raise InitializationError(
-                        f"Cannot access database file at {self.database_path}",
-                        initialization_step="file_access",
-                        original_error=e
-                    )
                 except Exception as e:
-                    logger.error(f"Unexpected error during initialization: {e}")
+                    logger.error(f"Database initialization failed: {e}")
                     raise InitializationError(
                         f"Database initialization failed: {str(e)}",
-                        initialization_step="connection_setup",
+                        initialization_step="engine_setup",
                         original_error=e
                     )
     
     @handle_connection_errors
     async def close(self) -> None:
-        """Close database connection"""
+        """Close database engine"""
         async with self._lock:
-            if self._connection:
+            if self._engine:
                 try:
-                    await self._connection.close()
-                    self._connection = None
-                    logger.info("Database connection closed")
+                    await self._engine.dispose()
+                    self._engine = None
+                    self._session_factory = None
+                    logger.info("Database engine closed")
                 except Exception as e:
-                    logger.error(f"Error closing database connection: {e}")
-                    # Set connection to None even if close fails to prevent reuse
-                    self._connection = None
+                    logger.error(f"Error closing database engine: {e}")
+                    # Set engine to None even if close fails to prevent reuse
+                    self._engine = None
+                    self._session_factory = None
                     raise ConnectionError(
-                        "Failed to close database connection properly",
-                        database_path=self.database_path,
+                        "Failed to close database engine properly",
                         original_error=e
                     )
     
+    @handle_connection_errors
+    async def create_tables(self) -> None:
+        """Create database tables using SQLAlchemy metadata"""
+        try:
+            from models.base import Base
+            
+            async with self.engine.begin() as conn:
+                await conn.run_sync(Base.metadata.create_all)
+            
+            logger.info("Database tables created successfully")
+            
+        except Exception as e:
+            logger.error(f"Error creating database tables: {e}")
+            raise DatabaseError(
+                f"Failed to create database tables: {str(e)}",
+                original_error=e,
+                context={"database_url": self.config.database_url}
+            )
+    
+    @handle_connection_errors
+    async def drop_tables(self) -> None:
+        """Drop all database tables using SQLAlchemy metadata"""
+        try:
+            from models.base import Base
+            
+            async with self.engine.begin() as conn:
+                await conn.run_sync(Base.metadata.drop_all)
+            
+            logger.info("Database tables dropped successfully")
+            
+        except Exception as e:
+            logger.error(f"Error dropping database tables: {e}")
+            raise DatabaseError(
+                f"Failed to drop database tables: {str(e)}",
+                original_error=e,
+                context={"database_url": self.config.database_url}
+            )
+    
     @asynccontextmanager
-    async def get_connection(self) -> AsyncGenerator[aiosqlite.Connection, None]:
-        """Get database connection with proper async context manager"""
-        if self._connection is None:
+    async def get_session(self) -> AsyncGenerator[AsyncSession, None]:
+        """Get database session for SQLAlchemy-style usage"""
+        async with self.session_factory() as session:
             try:
-                await self.initialize()
+                yield session
+            except Exception:
+                await session.rollback()
+                raise
+            finally:
+                await session.close()
+    
+    @asynccontextmanager
+    async def get_connection(self):
+        """Get database connection for raw SQL operations"""
+        async with self.engine.begin() as conn:
+            try:
+                yield conn
             except Exception as e:
-                logger.error(f"Failed to initialize database connection: {e}")
-                raise ConnectionError(
-                    "Cannot establish database connection",
-                    database_path=self.database_path,
-                    original_error=e
+                logger.error(f"Database operation failed: {e}")
+                raise DatabaseError(
+                    f"Database operation failed: {str(e)}",
+                    original_error=e,
+                    context={"database_url": self.config.database_url}
                 )
-        
-        # Verify connection is still valid
-        try:
-            # Quick test to ensure connection is alive
-            await self._connection.execute("SELECT 1")
-        except Exception as e:
-            logger.warning(f"Database connection test failed, attempting reconnection: {e}")
-            try:
-                await self.close()
-                await self.initialize()
-            except Exception as reconnect_error:
-                logger.error(f"Failed to reconnect to database: {reconnect_error}")
-                raise ConnectionError(
-                    "Database connection lost and reconnection failed",
-                    database_path=self.database_path,
-                    original_error=reconnect_error
-                )
-        
-        try:
-            yield self._connection
-        except aiosqlite.Error as e:
-            logger.error(f"SQLite operation failed: {e}")
-            raise DatabaseError(
-                f"Database operation failed: {str(e)}",
-                original_error=e,
-                context={"database_path": self.database_path}
-            )
-        except Exception as e:
-            logger.error(f"Unexpected error during database operation: {e}")
-            raise DatabaseError(
-                f"Unexpected database error: {str(e)}",
-                original_error=e,
-                context={"database_path": self.database_path}
-            )
     
     @handle_health_check_errors
     async def health_check(self) -> Dict[str, Any]:
@@ -164,69 +206,31 @@ class DatabaseManager:
         try:
             async with self.get_connection() as conn:
                 # Simple query to test connectivity
-                cursor = await conn.execute("SELECT 1")
-                result = await cursor.fetchone()
-                await cursor.close()
+                from sqlalchemy import text
+                result = await conn.execute(text("SELECT 1"))
+                test_result = result.scalar()
                 
-                if result and result[0] == 1:
-                    # Additional health checks
-                    health_details = {
+                if test_result == 1:
+                    return {
                         "healthy": True,
                         "status": "connected",
-                        "database_path": self.database_path,
+                        "database_path": str(self.config.database_path) if self.config.database_path else self.config.database_url,
                         "message": "Database connection successful"
                     }
-                    
-                    # Check database configuration
-                    try:
-                        # Check foreign keys
-                        cursor = await conn.execute("PRAGMA foreign_keys")
-                        fk_result = await cursor.fetchone()
-                        await cursor.close()
-                        health_details["foreign_keys_enabled"] = bool(fk_result and fk_result[0])
-                        
-                        # Check journal mode
-                        cursor = await conn.execute("PRAGMA journal_mode")
-                        journal_result = await cursor.fetchone()
-                        await cursor.close()
-                        health_details["journal_mode"] = journal_result[0] if journal_result else "unknown"
-                        
-                    except Exception as config_error:
-                        logger.warning(f"Could not retrieve database configuration: {config_error}")
-                        health_details["configuration_warning"] = str(config_error)
-                    
-                    return health_details
                 else:
                     raise HealthCheckError(
                         "Test query returned unexpected result",
                         check_type="connectivity_test"
                     )
                     
-        except ConnectionError as e:
-            logger.error(f"Database health check failed - connection error: {e}")
-            return {
-                "healthy": False,
-                "status": "connection_failed",
-                "error": str(e),
-                "database_path": self.database_path,
-                "suggestion": "Check database file permissions and path accessibility"
-            }
-        except DatabaseError as e:
-            logger.error(f"Database health check failed - database error: {e}")
-            return {
-                "healthy": False,
-                "status": "database_error",
-                "error": str(e),
-                "database_path": self.database_path,
-                "suggestion": "Check database integrity and schema"
-            }
         except Exception as e:
-            logger.error(f"Database health check failed - unexpected error: {e}")
-            raise HealthCheckError(
-                f"Health check failed: {str(e)}",
-                check_type="general_health_check",
-                original_error=e
-            )
+            logger.error(f"Database health check failed: {e}")
+            return {
+                "healthy": False,
+                "status": "disconnected",
+                "database_path": str(self.config.database_path) if self.config.database_path else self.config.database_url,
+                "message": f"Database connection failed: {str(e)}"
+            }
 
 
 # Global database manager instance
@@ -247,7 +251,7 @@ async def init_database(database_url: str = None) -> DatabaseManager:
     global db_manager
     
     if database_url is None:
-        database_url = os.getenv("DATABASE_URL", "sqlite:./medical_device_assistant.db")
+        database_url = os.getenv("DATABASE_URL", "sqlite+aiosqlite:///./medical_device_assistant.db")
     
     try:
         db_manager = DatabaseManager(database_url)
@@ -286,5 +290,5 @@ async def close_database() -> None:
 async def get_db_session():
     """Get database session context manager for transactions"""
     db_manager = get_database_manager()
-    async with db_manager.get_connection() as conn:
-        yield conn
+    async with db_manager.get_session() as session:
+        yield session
