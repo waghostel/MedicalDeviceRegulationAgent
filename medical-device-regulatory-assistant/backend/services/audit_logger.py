@@ -11,7 +11,7 @@ from dataclasses import dataclass, asdict
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, and_
 
-from models.agent_interaction import AgentInteraction
+from backend.models.agent_interaction import AgentInteraction
 from database.connection import get_db_session
 from database.exceptions import (
     DatabaseError,
