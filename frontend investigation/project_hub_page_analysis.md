@@ -1,4 +1,4 @@
-# Project Hub Page Analysis (Revised)
+# Project Hub Page Analysis (Updated)
 
 ## 1. Project Vision and Goals
 
@@ -18,6 +18,8 @@ The "Project Hub" page, also referred to as the **Regulatory Strategy Dashboard*
 * **FDA Guidance Document Mapping:** The hub provides access to the FDA guidance document mapping feature.
 * **Real-time Updates:** The hub uses WebSockets to provide real-time updates on the status of long-running tasks, such as predicate searches.
 * **Export:** The hub allows users to export project data, including reports and audit trails.
+* **Agent Workflow:** A dedicated UI for interacting with the AI agent, allowing users to execute tasks and monitor their progress in real-time.
+* **Audit Trail:** A comprehensive audit trail of all user and agent actions, ensuring regulatory compliance and traceability.
 
 ## 4. Technical Deep Dive
 
@@ -25,19 +27,21 @@ The "Project Hub" page, also referred to as the **Regulatory Strategy Dashboard*
 
 * **Framework:** Next.js 14 with the App Router.
 * **UI Components:** Shadcn UI and Tailwind CSS are used for building the UI.
-* **State Management:** React hooks, including `useContext` and `useState`, are used for state management. Custom hooks like `useProjects` and `useWebSocket` encapsulate the logic for interacting with the backend.
-* **API Interaction:** A custom `apiClient` is used to interact with the backend API. It handles authentication, retry logic, and error handling.
+* **State Management:** React hooks, including `useContext` and `useState`, are used for state management. Custom hooks like `useProjects`, `useWebSocket`, `useAgentExecution`, `use-classification`, `use-dashboard`, `use-documents`, `use-predicates`, and `use-toast` encapsulate the logic for interacting with the backend.
+* **API Interaction:** A custom `apiClient` is used to interact with the backend API. It handles authentication, retry logic with exponential backoff, timeout, and error handling.
 * **Real-time Updates:** WebSockets are used for real-time updates. The `useWebSocket` and `useProjectWebSocket` hooks manage the WebSocket connection and subscriptions.
 * **Authentication:** NextAuth.js is used for authentication, with Google OAuth 2.0 as the provider.
+* **Offline Support:** The application has some level of offline support, indicated by an "Offline" badge in the UI.
 
 ### Backend
 
 * **Framework:** FastAPI is used for the backend, with Python as the programming language.
 * **Agent Architecture:** LangGraph is used for building the state-based agent workflows. CopilotKit is used for the AI chat interface.
-* **API Endpoints:** The backend provides a set of API endpoints for managing projects, including CRUD operations, dashboard data, and project export.
+* **API Endpoints:** The backend provides a set of API endpoints for managing projects, including CRUD operations, dashboard data, and project export. It also has dedicated endpoints for agent interaction (`/api/agent`), audit trails (`/api/audit`), and health checks (`/api/health`).
 * **Authentication:** JWT-based authentication is used to protect the API endpoints.
 * **Database:** SQLite is used for local development. The database schema is defined using SQLAlchemy.
 * **API Integration:** A wrapper is used for the openFDA API, with rate limiting and error handling.
+* **Application Lifecycle:** The application uses a `lifespan` context manager to manage the startup and shutdown of services like the database, Redis, and the FDA API client.
 
 ### Testing
 
@@ -49,14 +53,14 @@ The "Project Hub" page, also referred to as the **Regulatory Strategy Dashboard*
 The Medical Device Regulatory Assistant is designed with a strong emphasis on compliance and safety:
 
 * **Human-in-the-Loop:** The AI is an assistant, and all critical outputs must be reviewed by a human regulatory professional.
-* **Auditable Traceability:** Every AI action is logged, and full reasoning traces are provided for all conclusions.
+* **Auditable Traceability:** Every AI action is logged, and full reasoning traces are provided for all conclusions. The new audit trail feature provides a comprehensive and verifiable record of all activities.
 * **Confidence and Citation Model:** Every AI output includes a confidence score and direct citations to source documents.
 
 ## 6. Q&A
 
 **What is the data structure being saved for each project?**
 
-Based on the `models/project.py` file, the data structure for each project is defined by the `Project` model in SQLAlchemy. It includes the following fields: `id`, `user_id`, `name`, `description`, `device_type`, `intended_use`, and `status`. It also has relationships with other models like `User`, `DeviceClassification`, `PredicateDevice`, `AgentInteraction`, and `ProjectDocument`.
+Based on the `models/project.py` file, the data structure for each project is defined by the `Project` model in SQLAlchemy. It includes the following fields: `id`, `user_id`, `name`, `description`, `device_type`, `intended_use`, and `status`. It also has relationships with other models like `User`, `DeviceClassification`, `PredicateDevice`, `AgentInteraction`, and `ProjectDocument`. The `AgentInteraction` model is a new addition to support the audit trail feature.
 
 **Does it connect to the database and backend already?**
 
@@ -64,11 +68,11 @@ Yes, the frontend is connected to the backend, and the backend is connected to t
 
 **Does all the backend project creation, listing, management feature being created?**
 
-Yes, the backend API for project creation, listing, and management has been created. The `api/projects.py` file defines the endpoints for creating, listing, retrieving, updating, and deleting projects. The `services/projects.py` file contains the business logic for these operations.
+Yes, the backend API for project creation, listing, and management has been created. The `api/projects.py` file defines the endpoints for creating, listing, retrieving, updating, and deleting projects. The `services/projects.py` file contains the business logic for these operations. The service has been enhanced with dashboard data aggregation, project export, and progress calculation.
 
 **Does the databased and backend started?**
 
-The code I have analyzed shows how to start the backend, but I cannot determine if it is currently running. The `main.py` file has a `if __name__ == "__main__":` block that starts the FastAPI application using `uvicorn`. The `package.json` file has a `dev` script that runs `next dev` to start the frontend. However, I don't have information about the current status of the processes.
+The code I have analyzed shows how to start the backend, but I cannot determine if it is currently running. The `main.py` file has a `if __name__ == "__main__":` block that starts the FastAPI application using `uvicorn`. The `package.json` file has a `dev` script that runs `next dev` to start the frontend. However, I don't have information about the current status of the processes. The new `api/health.py` endpoint can be used to check the status of the backend and its dependencies.
 
 **How to implement with lazy loading?**
 
@@ -78,12 +82,12 @@ The frontend is already using a form of lazy loading for the project list. The `
 
 Based on my analysis, here are some features that might not be fully implemented or could be improved:
 
-* [ ] Comprehensive testing for all components and services.
+* [ ] Comprehensive testing for all new components and services.
 * [ ] Full implementation of the project export to PDF, the current implementation is a basic one.
-* [ ] Advanced filtering and sorting options for the project list.
+* [x] Advanced filtering and sorting options for the project list. (Now implemented)
 * [ ] More detailed project dashboard with more visualizations.
 * [ ] User roles and permissions for project access control.
-* [ ] In-app notifications for project updates.
+* [x] In-app notifications for project updates. (Now implemented with `use-toast`)
 
 **What will you suggest to do in this page?**
 
@@ -91,7 +95,6 @@ I would suggest the following improvements for the "Project Hub" page:
 
 * **Improve the UI/UX:** The current UI is functional, but it could be improved to be more visually appealing and user-friendly. For example, you could add more spacing, use a more consistent color palette, and improve the layout of the project cards.
 * **Add more visualizations:** The project dashboard could be improved by adding more visualizations, such as charts and graphs, to make it easier to understand the project's progress and status.
-* **Implement more advanced filtering and sorting:** The current filtering and sorting options are basic. You could add more advanced options, such as filtering by date range, sorting by different criteria, and saving filter presets.
 * **Add a "quick view" feature:** A "quick view" feature would allow users to see the most important information about a project without having to navigate to the project details page.
 
 **What is the design you think should be modified?**
@@ -126,28 +129,6 @@ Here's a breakdown of how this works:
 * **Storing JSON:** You can store JSON data in a `TEXT` column and use the JSON1 functions to work with it.
 * **Querying JSON:** The JSON1 extension provides a set of functions (e.g., `json_extract()`, `json_object()`, `json_array()`) that allow you to query and manipulate the JSON data directly in your SQL queries.
 
-**Example:**
-
-```sql
--- Create a table with a JSON column
-CREATE TABLE products (
-  id INTEGER PRIMARY KEY,
-  name TEXT,
-  details TEXT -- This will store JSON
-);
-
--- Insert a product with JSON details
-INSERT INTO products (name, details)
-VALUES ('My Product', '{"color": "blue", "sizes": ["S", "M", "L"]}');
-
--- Query the JSON data
-SELECT
-  name,
-  json_extract(details, '$.color') AS color,
-  json_extract(details, '$.sizes[1]') AS medium_size
-FROM products;
-```
-
 **Is it the same as a NoSQL database?**
 
 No, it's not the same as a native NoSQL database like MongoDB. Here are the key differences:
@@ -173,10 +154,10 @@ Here's a breakdown of the required changes:
 ### 1. Database Schema
 
 * **New Tables:** You would need to add new tables to the database to store EU-specific data, such as:
-    * `eu_regulations` (for MDR/IVDR requirements)
-    * `notified_bodies`
-    * `ce_marking_status`
-    * `eu_guidance_documents`
+  * `eu_regulations` (for MDR/IVDR requirements)
+  * `notified_bodies`
+  * `ce_marking_status`
+  * `eu_guidance_documents`
 * **Modifying Existing Tables:** You might need to add new columns to the existing tables. For example, you might want to add a `market` column to the `projects` table to distinguish between US and EU projects.
 
 ### 2. Backend
@@ -253,6 +234,8 @@ The `e2e/critical-user-journeys.spec.ts` file contains end-to-end tests that sim
 
 ## 8. Mermaid Chart
 
+### Project Management
+
 ```mermaid
 sequenceDiagram
     participant User
@@ -289,6 +272,32 @@ sequenceDiagram
     Frontend->>User: Removes project from list
 ```
 
+### Agent Interaction
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant Frontend
+    participant Backend (Agent API)
+    participant LangGraph Agent
+    participant AuditLogger
+
+    User->>Frontend: Initiates agent task (e.g., "Classify my device")
+    Frontend->>Backend (Agent API): POST /api/agent/execute
+    Backend (Agent API)->>LangGraph Agent: Starts agent workflow
+    LangGraph Agent->>AuditLogger: Logs start of task
+    LangGraph Agent-->>Backend (Agent API): Returns session ID and initial status
+    Backend (Agent API)-->>Frontend: Returns session ID
+    Frontend->>Backend (Agent API): Subscribes to real-time updates (SSE)
+    loop Real-time Progress
+        LangGraph Agent->>Backend (Agent API): Sends progress update
+        Backend (Agent API)-->>Frontend: Streams update to UI
+    end
+    LangGraph Agent->>AuditLogger: Logs completion of task
+    LangGraph Agent-->>Backend (Agent API): Returns final result
+    Backend (Agent API)-->>Frontend: Streams final result
+```
+
 ## 9. Analyzed Files
 
 ### Steering
@@ -302,49 +311,57 @@ sequenceDiagram
 
 * `medical-device-regulatory-assistant/package.json`
 * `medical-device-regulatory-assistant/src/app/projects/page.tsx`
+* `medical-device-regulatory-assistant/src/app/agent/page.tsx`
+* `medical-device-regulatory-assistant/src/app/audit/page.tsx`
 * `medical-device-regulatory-assistant/src/components/projects/project-list.tsx`
 * `medical-device-regulatory-assistant/src/hooks/use-projects.ts`
 * `medical-device-regulatory-assistant/src/hooks/use-websocket.ts`
+* `medical-device-regulatory-assistant/src/hooks/useAgentExecution.ts`
 * `medical-device-regulatory-assistant/src/lib/api-client.ts`
 * `medical-device-regulatory-assistant/src/lib/services/project-service.ts`
+* `medical-device-regulatory-assistant/src/lib/services/dashboard-service.ts`
 
 ### Backend
 
 * `medical-device-regulatory-assistant/backend/main.py`
 * `medical-device-regulatory-assistant/backend/api/projects.py`
 * `medical-device-regulatory-assistant/backend/api/websocket.py`
+* `medical-device-regulatory-assistant/backend/api/agent_integration.py`
+* `medical-device-regulatory-assistant/backend/api/audit.py`
+* `medical-device-regulatory-assistant/backend/api/health.py`
 * `medical-device-regulatory-assistant/backend/services/auth.py`
 * `medical-device-regulatory-assistant/backend/services/projects.py`
+* `medical-device-regulatory-assistant/backend/services/audit_logger.py`
 * `medical-device-regulatory-assistant/backend/models/project.py`
+* `medical-device-regulatory-assistant/backend/models/agent_interaction.py`
+* `medical-device-regulatory-assistant/backend/models/audit.py`
 
 ### Testing
 
 * `medical-device-regulatory-assistant/test-api-integration.js`
 * `medical-device-regulatory-assistant/e2e/critical-user-journeys.spec.ts`
-  
-
 
 ## Future steps
 
 - [ ] 1. Seed the database
- - Navigate to the backend directory: cd medical-device-regulatory-assistant/backend
- - Run the database seeder to populate the database with mock data: poetry run python -m database.seeder
+  - Navigate to the backend directory: cd medical-device-regulatory-assistant/backend
+  - Run the database seeder to populate the database with mock data: poetry run python -m database.seeder
 
 - [ ] 2. Run backend tests
- - In the backend directory, run the automated tests for the backend services and API: poetry run python -m pytest tests/ -v
- - This will verify the backend logic, database interactions, and API endpoints.
+  - In the backend directory, run the automated tests for the backend services and API: poetry run python -m pytest tests/ -v
+  - This will verify the backend logic, database interactions, and API endpoints.
 
 - [ ] 3. Run frontend tests
- - Navigate to the medical-device-regulatory-assistant directory: cd medical-device-regulatory-assistant
- - Run the automated tests for the frontend components and integration with mock APIs: pnpm test
- - This will verify that the UI components render correctly and handle user interactions as expected.
+  - Navigate to the medical-device-regulatory-assistant directory: cd medical-device-regulatory-assistant
+  - Run the automated tests for the frontend components and integration with mock APIs: pnpm test
+  - This will verify that the UI components render correctly and handle user interactions as expected.
 
 - [ ] 4. Run end-to-end tests
- - In the medical-device-regulatory-assistant directory, run the Playwright end-to-end tests: pnpm test:e2e
- - This will launch a browser and simulate user journeys, testing the full application stack from the frontend to the backend and the database.
+  - In the medical-device-regulatory-assistant directory, run the Playwright end-to-end tests: pnpm test:e2e
+  - This will launch a browser and simulate user journeys, testing the full application stack from the frontend to the backend and the database.
 
 - [ ] 5. Manually test the application
- - If all automated tests pass, you can manually test the application to get a feel for the user experience:
-   - Start the backend server: cd medical-device-regulatory-assistant/backend && poetry run uvicorn main:app --reload
-   - In a new terminal, start the frontend server: cd medical-device-regulatory-assistant && pnpm dev
-   - Open http://localhost:3000/projects in your browser and interact with the application.
+  - If all automated tests pass, you can manually test the application to get a feel for the user experience:
+    - Start the backend server: cd medical-device-regulatory-assistant/backend && poetry run uvicorn main:app --reload
+    - In a new terminal, start the frontend server: cd medical-device-regulatory-assistant && pnpm dev
+    - Open http://localhost:3000/projects in your browser and interact with the application.
