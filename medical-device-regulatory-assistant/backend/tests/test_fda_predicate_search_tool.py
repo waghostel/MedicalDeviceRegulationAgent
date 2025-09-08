@@ -15,7 +15,7 @@ from backend.tools.fda_predicate_search_tool import (
     TechnicalCharacteristic,
     PredicateSearchResult
 )
-from backend.services.openfda import (
+from services.openfda import (
     FDASearchResult,
     FDAAPIError,
     PredicateNotFoundError
@@ -298,11 +298,16 @@ class TestFDAPredicateSearchTool:
         # Mock empty results
         predicate_search_tool.openfda_service.search_predicates.return_value = []
         
-        with pytest.raises(PredicateNotFoundError):
+        exception_raised = False
+        try:
             await predicate_search_tool._search_and_analyze_predicates(
                 device_description=sample_device_description,
                 intended_use=sample_intended_use
             )
+        except PredicateNotFoundError:
+            exception_raised = True
+        
+        assert exception_raised, "PredicateNotFoundError should have been raised"
     
     def test_generate_search_recommendations(self, predicate_search_tool):
         """Test search recommendation generation"""

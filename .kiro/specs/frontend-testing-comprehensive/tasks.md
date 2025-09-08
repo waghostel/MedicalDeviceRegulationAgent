@@ -297,7 +297,7 @@
 - [x] 9.2 Test frontend startup script and service health
 
   - Execute start-frontend.ps1 and verify Next.js development server starts ✅
-  - Test frontend accessibility at http://localhost:3000 ✅
+  - Test frontend accessibility at <http://localhost:3000> ✅
   - Validate pnpm dependency installation and build process ✅
   - Test frontend routing and basic page rendering ✅
   - Verify static assets and styling load correctly ✅
@@ -411,24 +411,20 @@
   - Add the `psutil` dependency to `pyproject.toml` to enable performance monitoring tests.
   - Address the `sentence_transformers` dependency issue, finding a Python 3.13 compatible version or a suitable alternative.
 
-- [-] 16. Modify test_search_and_analyze_predicates_no_results
-  - Run poetry run python -m pytest tests/test_device_classification_tool.py tests/test_fda_predicate_search_tool.py -v --tb=short -q test
+- [x] 16. Modify test_search_and_analyze_predicates_no_results
+
+  - Run poetry run python -m pytest tests/test_device_classification_tool.py tests/test_fda_predicate_search_tool.py -v --tb=short -q
   - Replace the with pytest.raises(PredicateNotFoundError): block with a try...except
-     PredicateNotFoundError: block.
+    PredicateNotFoundError: block.
   - Add an assertion to ensure that the exception was raised.
 
-  - [ ] 17. Modify test_arun_api_error
-    - Replace the with pytest.raises(FDAAPIError): block with a try...except FDAAPIError: block.
-    - Add an assertion to ensure that the exception was raised.
+- [ ] 17. Modify test_arun_api_err
+  - Run poetry run python -m pytest tests/test_device_classification_tool.py tests/test_fda_predicate_search_tool.py -v --tb=short -q to evaulte if the test need to be fixed.
+  - Replace the with pytest.raises(FDAAPIError): block with a try...except FDAAPIError: block.
+  - Add an assertion to ensure that the exception was raised.
+  - Write task-17.md report
 
-
-
-
-
-
-
-
-- [ ] 16. Harden API, Security, and Test Configurations
+- [ ] 18. Harden API, Security, and Test Configurations
 
   - Implement and test the missing rate-limiting and security header features to pass security tests.
   - Fix the `AsyncClient` initialization and resolve async fixture compatibility warnings to stabilize API integration tests.
@@ -454,4 +450,4 @@
   - If all automated tests pass, you can manually test the application to get a feel for the user experience:
   - Start the backend server: cd medical-device-regulatory-assistant/backend && poetry run uvicorn main:app --reload
   - In a new terminal, start the frontend server: cd medical-device-regulatory-assistant && pnpm dev
-  - Open http://localhost:3000/projects in your browser and interact with the application.
+  - Open <http://localhost:3000/projects> in your browser and interact with the application.
