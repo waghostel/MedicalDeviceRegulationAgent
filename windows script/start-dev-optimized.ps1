@@ -199,9 +199,8 @@ function Start-FrontendOptimized {
     
     $frontendArgs = @("dev", "--port", "3000")
     
-    if ($Fast) {
-        $frontendArgs += "--turbo"  # Use Turbo mode if available
-    }
+    # Always use Turbopack for better performance
+    # Note: Turbopack is now enabled by default in package.json
     
     # Start frontend in new window
     $frontendProcess = Start-Process -FilePath "pnpm" -ArgumentList $frontendArgs -WindowStyle Normal -PassThru
@@ -241,7 +240,7 @@ function Show-StartupSummary {
     }
     
     if ($FrontendStarted) {
-        Write-Host "✅ Frontend: http://localhost:3000" -ForegroundColor Green
+        Write-Host "✅ Frontend: http://localhost:3000 (Turbopack)" -ForegroundColor Green
     }
     
     # Performance rating

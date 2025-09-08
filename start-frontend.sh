@@ -22,7 +22,8 @@ DEFAULT_HOST="localhost"
 PORT=$DEFAULT_PORT
 HOST=$DEFAULT_HOST
 BUILD=false
-TURBO=false
+TURBO=true  # Enable Turbopack by default
+WEBPACK=false
 
 while [[ $# -gt 0 ]]; do
     case $1 in
@@ -40,6 +41,12 @@ while [[ $# -gt 0 ]]; do
             ;;
         --turbo)
             TURBO=true
+            WEBPACK=false
+            shift
+            ;;
+        --webpack)
+            TURBO=false
+            WEBPACK=true
             shift
             ;;
         --help|-h)
@@ -49,7 +56,8 @@ while [[ $# -gt 0 ]]; do
             echo "  --port PORT      Port to run on (default: $DEFAULT_PORT)"
             echo "  --host HOST      Host to bind to (default: $DEFAULT_HOST)"
             echo "  --build          Build for production"
-            echo "  --turbo          Use turbo mode (if available)"
+            echo "  --turbo          Use Turbopack (default)"
+            echo "  --webpack        Use Webpack instead of Turbopack"
             echo "  --help, -h       Show this help message"
             exit 0
             ;;
@@ -228,11 +236,12 @@ fi
 if [ "$BUILD" = true ]; then
     COMMAND="pnpm build"
     print_info "Building for production..."
-elif [ "$TURBO" = true ] && command_exists turbo; then
-    COMMAND="pnpm turbo dev"
-    print_info "Using Turbo mode..."
+elif [ "$WEBPACK" = true ]; then
+    COMMAND="pnpm dev:webpack"
+    print_info "Using Webpack bundler..."
 else
     COMMAND="pnpm dev"
+    print_info "Using Turbopack bundler (default)..."
 fi
 
 # Start the server
@@ -243,6 +252,7 @@ print_info "========================================"
 print_info "Host: $HOST"
 print_info "Port: $PORT"
 print_info "Mode: $([ "$BUILD" = true ] && echo "Production Build" || echo "Development")"
+print_info "Bundler: $([ "$WEBPACK" = true ] && echo "Webpack" || echo "Turbopack")"
 print_info "Command: $COMMAND"
 print_info ""
 print_info "Frontend URL: http://$HOST:$PORT"

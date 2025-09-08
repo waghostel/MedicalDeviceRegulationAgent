@@ -53,7 +53,7 @@ if (-not (Test-Path "node_modules")) {
 }
 
 # Start the development server
-Write-Host "Starting Next.js development server..." -ForegroundColor Green
+Write-Host "Starting Next.js development server with Turbopack..." -ForegroundColor Green
 Write-Host "Frontend will be available at: http://localhost:3000" -ForegroundColor Cyan
 Write-Host "Press Ctrl+C to stop the server" -ForegroundColor Yellow
 Write-Host ""

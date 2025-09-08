@@ -98,7 +98,7 @@ Write-Host ""
 Write-Host "========================================" -ForegroundColor Cyan
 Write-Host "Starting Services" -ForegroundColor Green
 Write-Host "========================================" -ForegroundColor Cyan
-Write-Host "Frontend: http://localhost:3000" -ForegroundColor Cyan
+Write-Host "Frontend: http://localhost:3000 (Turbopack)" -ForegroundColor Cyan
 Write-Host "Backend:  http://localhost:8000" -ForegroundColor Cyan
 Write-Host "API Docs: http://localhost:8000/docs" -ForegroundColor Cyan
 Write-Host ""
@@ -114,7 +114,7 @@ Start-Process powershell -ArgumentList "-NoExit", "-Command", "Set-Location '$ba
 # Wait a moment for backend to start
 Start-Sleep -Seconds 3
 
-# Start frontend in new PowerShell window
+# Start frontend in new PowerShell window with Turbopack
 $frontendPath = Get-Location
 Start-Process powershell -ArgumentList "-NoExit", "-Command", "Set-Location '$frontendPath'; pnpm dev" -WindowStyle Normal
 

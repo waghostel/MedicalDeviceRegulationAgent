@@ -232,11 +232,15 @@ REDIS_URL=redis://localhost:6379
 cd medical-device-regulatory-assistant
 # Install dependencies
 pnpm install
-# Start development server
+# Start development server with Turbopack (default)
 pnpm dev
+# Start development server with Webpack (fallback)
+pnpm dev:webpack
 # Run tests
 pnpm test
 ```
+
+**Note**: The development server now uses **Turbopack** by default for faster builds and hot reloading. Turbopack is Next.js's new bundler that provides significantly improved development performance.
 
 #### Backend (FastAPI)
 
@@ -254,9 +258,28 @@ poetry run python -m pytest tests/ -v
 
 Once started, the application will be available at:
 
-- **Frontend**: http://localhost:3000
+- **Frontend**: http://localhost:3000 (powered by Turbopack)
 - **Backend API**: http://localhost:8000
 - **API Documentation**: http://localhost:8000/docs
+
+### Development Performance
+
+This project uses **Turbopack** for frontend development, providing:
+
+- **Faster startup times**: Up to 10x faster than Webpack for large applications
+- **Faster updates**: Near-instant hot module replacement (HMR)
+- **Better memory usage**: More efficient bundling and caching
+- **Improved developer experience**: Faster feedback loops during development
+
+If you encounter any issues with Turbopack, you can fall back to Webpack using:
+```bash
+pnpm dev:webpack
+```
+
+Or use the `--webpack` flag with the shell scripts:
+```bash
+./start-frontend.sh --webpack
+```
 
 ## 5. Project Structure
 

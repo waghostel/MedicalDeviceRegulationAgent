@@ -208,7 +208,7 @@ echo ""
 print_info "========================================"
 print_info "Starting Services"
 print_info "========================================"
-print_info "Frontend: http://localhost:$FRONTEND_PORT"
+print_info "Frontend: http://localhost:$FRONTEND_PORT (Turbopack)"
 print_info "Backend:  http://localhost:$BACKEND_PORT"
 print_info "API Docs: http://localhost:$BACKEND_PORT/docs"
 print_info ""
@@ -223,7 +223,7 @@ BACKEND_PID=$!
 cd ..
 
 # Start frontend
-print_info "Starting frontend server..."
+print_info "Starting frontend server with Turbopack..."
 pnpm dev > frontend.log 2>&1 &
 FRONTEND_PID=$!
 
