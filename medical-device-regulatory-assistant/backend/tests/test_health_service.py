@@ -1,7 +1,7 @@
 """Integration tests for health service."""
 
 import pytest
-from unittest.mock import patch, AsyncMock
+from unittest.mock import patch, AsyncMock, Mock
 import aiosqlite
 import httpx
 
@@ -56,7 +56,7 @@ class TestHealthChecker:
         with patch('httpx.AsyncClient') as mock_client:
             mock_response = AsyncMock()
             mock_response.status_code = 200
-            mock_response.raise_for_status.return_value = None
+            mock_response.raise_for_status = Mock(return_value=None)
             
             mock_client.return_value.__aenter__.return_value.get.return_value = mock_response
             

@@ -243,20 +243,31 @@ class RegulatoryAgentStateManager:
     
     def add_error(
         self,
-        state: RegulatoryAgentState,
+        state: Optional[RegulatoryAgentState],
         error_type: str,
         error_message: str,
         error_details: Optional[Dict[str, Any]] = None
     ) -> RegulatoryAgentState:
         """Add an error to the agent state"""
         
+        # Handle case where state is None
+        if state is None:
+            state = {
+                "error_log": [],
+                "status": AgentStatus.ERROR,
+                "updated_at": datetime.now(timezone.utc).isoformat()
+            }
+        
         error_entry = {
             "error_type": error_type,
             "message": error_message,
             "details": error_details or {},
             "timestamp": datetime.now(timezone.utc).isoformat(),
-            "task": state.get("current_task")
+            "task": state.get("current_task") if state else None
         }
+        
+        if "error_log" not in state:
+            state["error_log"] = []
         
         state["error_log"].append(error_entry)
         state["status"] = AgentStatus.ERROR
@@ -310,16 +321,16 @@ class RegulatoryAgentStateManager:
         """Get a summary of the current agent context"""
         
         return {
-            "project_id": state["project_id"],
-            "device_description": state["device_description"],
-            "intended_use": state["intended_use"],
-            "current_task": state["current_task"].value if state["current_task"] else None,
-            "status": state["status"].value,
-            "completed_tasks": list(state["results"].keys()),
-            "confidence_scores": state["confidence_scores"],
+            "project_id": state.get("project_id"),
+            "device_description": state.get("device_description"),
+            "intended_use": state.get("intended_use"),
+            "current_task": state.get("current_task").value if state.get("current_task") else None,
+            "status": state.get("status").value if state.get("status") else "unknown",
+            "completed_tasks": list(state.get("results", {}).keys()),
+            "confidence_scores": state.get("confidence_scores", {}),
             "session_duration": self._calculate_session_duration(state),
-            "error_count": len(state["error_log"]),
-            "checkpoint_count": len(state["checkpoint_data"])
+            "error_count": len(state.get("error_log", [])),
+            "checkpoint_count": len(state.get("checkpoint_data", {}))
         }
     
     def _calculate_session_duration(self, state: RegulatoryAgentState) -> str:

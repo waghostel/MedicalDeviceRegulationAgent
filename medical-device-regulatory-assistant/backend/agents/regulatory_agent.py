@@ -202,14 +202,19 @@ class RegulatoryAgent:
             
         except Exception as e:
             # Handle error and update state
+            current_state_values = None
+            if 'current_state' in locals() and current_state and current_state.values:
+                current_state_values = current_state.values
+            
             error_state = self.state_manager.add_error(
-                current_state.values if 'current_state' in locals() else {},
+                current_state_values,
                 error_type="task_execution_error",
                 error_message=str(e),
                 error_details={"task_type": task_type.value, "parameters": task_parameters}
             )
             
-            await self.app.aupdate_state(config, error_state)
+            if 'current_state' in locals() and current_state:
+                await self.app.aupdate_state(config, error_state)
             raise
     
     async def get_session_state(self, session_id: str) -> Dict[str, Any]:

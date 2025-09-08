@@ -150,3 +150,122 @@ iso_string = datetime.now(timezone.utc).isoformat()
 - **Future-Proof**: Codebase now ready for future Python versions
 
 The codebase is now free of datetime deprecation warnings and uses proper timezone-aware datetime handling throughout. All core functionality continues to work as expected, with improved code quality and maintainability.
+---
+
+
+## Appendix: Project Guidelines and Rules
+
+### Technical Implementation Guidelines
+
+The following technical implementation guidelines were referenced during this task execution:
+
+#### Package Manager Requirements
+- **Frontend/TypeScript**: Use `pnpm` instead of npm for all JavaScript/TypeScript projects
+- **Backend/Python**: Use `poetry` to manage Python dependencies and run commands
+- **Test Execution**: Always use `poetry run python -m pytest tests/test_file.py -v` for Python tests
+- **Development Workflow**: Follow Test-Driven Development (TDD) procedures
+- **Terminal Management**: Clear terminal before running new commands for clean output
+
+#### Code Quality Requirements
+- Follow TypeScript strict mode for all frontend code
+- Use Python type hints for all backend functions
+- Implement comprehensive error handling with user-friendly messages
+- Write unit tests for all core regulatory logic
+- Document all API endpoints and data models
+- Use ESLint and Prettier for consistent code formatting
+
+### Medical Device Regulatory Assistant MVP Context
+
+This task was executed within the context of the Medical Device Regulatory Assistant MVP project:
+
+#### Project Overview
+- **Target**: Agentic AI Regulatory Assistant for medical device regulatory pathway discovery
+- **Focus**: US FDA market specialization for medical device companies
+- **Primary User**: Regulatory Affairs Managers at medical device startups (10-50 employees)
+- **Core Pain Point**: 510(k) predicate search and comparison workflow optimization
+
+#### Core MVP Capabilities
+1. **Auto-Classification with FDA Product Codes**
+2. **Predicate Search & Analysis with Comparison Tables** (Priority #1)
+3. **FDA Guidance Document Mapping**
+4. **Real-time FDA Database Integration**
+5. **510(k) Submission Checklist Generator**
+
+#### Technical Architecture
+- **Frontend**: React, Next.js, Shadcn UI, Tailwind CSS
+- **Backend**: Next.js (full-stack), FastAPI (Python AI integration)
+- **AI Framework**: LangGraph (Agent Architecture), CopilotKit (UI)
+- **Database**: SQLite for local development
+- **Authentication**: Google OAuth 2.0
+
+### LLM Tool Reference Context
+
+The following tool references were available during task execution:
+
+#### Frontend Technology Stack
+- **Next.js 14**: Context7 ID `/vercel/next.js` or `/vercel/next.js/v14`
+- **React 18+**: Context7 ID `/facebook/react`
+- **Shadcn UI**: Context7 ID `/shadcn-ui/ui`
+- **Tailwind CSS**: Context7 ID `/tailwindlabs/tailwindcss`
+- **CopilotKit**: Context7 ID `/copilotkit/copilotkit`
+- **NextAuth.js**: Context7 ID `/nextauthjs/next-auth`
+
+#### Backend Technology Stack
+- **FastAPI**: Context7 ID `/tiangolo/fastapi`
+- **LangGraph**: Context7 ID `/langchain-ai/langgraph`
+- **Poetry**: Python package management documentation
+- **SQLite**: Python sqlite3 documentation
+
+#### Testing Frameworks
+- **Jest**: Context7 ID `/jestjs/jest`
+- **React Testing Library**: Context7 ID `/testing-library/react-testing-library`
+- **pytest**: Context7 ID `/pytest-dev/pytest`
+
+### Agent Instruction Templates
+
+The following agent instruction templates were referenced:
+
+#### Template Structure Guidelines
+All instruction.md files follow this structure:
+1. **Agent Persona Definition**
+2. **Specific Workflow Templates**
+3. **Response Format Standards**
+4. **Error Handling and Edge Cases**
+5. **Quality Assurance Checklist**
+6. **Integration with Quick Actions**
+
+#### Key Workflow Templates
+- **510(k) Predicate Search Template**
+- **Predicate Comparison Analysis Template**
+- **Device Classification Template**
+- **FDA Guidance Document Search Template**
+
+#### Response Format Standards
+Always include:
+1. **Confidence Score**: Numerical score (0-1) with explanation
+2. **Source Citations**: Full URLs, document titles, effective dates
+3. **Reasoning Trace**: Step-by-step explanation of analysis
+4. **Limitations**: What the analysis cannot determine
+5. **Next Steps**: Recommended actions for the user
+
+### Compliance and Safety Requirements
+
+#### Human-in-the-Loop Philosophy
+- AI is always an assistant, never the final authority
+- Human RA professionals must review all critical outputs
+- "Suggest, but humans decide" approach
+- Required approval before use in formal submissions
+
+#### Auditable Traceability
+- Every AI action must be logged transparently
+- Full reasoning traces for all conclusions
+- Always cite source URLs and effective dates
+- Exportable audit trails for regulatory inspections
+
+#### Confidence and Citation Model
+- Every AI output includes confidence score (0-1)
+- Clear reasoning traces explaining conclusions
+- Direct citations to source documents
+- Version tracking for all regulations and guidance
+
+These guidelines and rules provided the context and standards that informed the technical decisions made during the datetime deprecation warning resolution task.
