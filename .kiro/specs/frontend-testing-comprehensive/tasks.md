@@ -418,7 +418,8 @@
     PredicateNotFoundError: block.
   - Add an assertion to ensure that the exception was raised.
 
-- [ ] 17. Modify test_arun_api_err
+- [x] 17. Modify test_arun_api_err
+
   - Run poetry run python -m pytest tests/test_device_classification_tool.py tests/test_fda_predicate_search_tool.py -v --tb=short -q to evaulte if the test need to be fixed.
   - Replace the with pytest.raises(FDAAPIError): block with a try...except FDAAPIError: block.
   - Add an assertion to ensure that the exception was raised.

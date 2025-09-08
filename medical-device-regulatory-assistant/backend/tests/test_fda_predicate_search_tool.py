@@ -447,11 +447,16 @@ class TestFDAPredicateSearchTool:
         # Mock API error
         predicate_search_tool.openfda_service.search_predicates.side_effect = FDAAPIError("API Error")
         
-        with pytest.raises(FDAAPIError):
+        exception_raised = False
+        try:
             await predicate_search_tool._arun(
                 device_description=sample_device_description,
                 intended_use=sample_intended_use
             )
+        except FDAAPIError:
+            exception_raised = True
+        
+        assert exception_raised, "FDAAPIError should have been raised"
     
     def test_get_schema(self, predicate_search_tool):
         """Test schema generation"""
