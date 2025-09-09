@@ -60,6 +60,19 @@ project-root/
         ├── task-*.md               # Task creation and execution
         ├── agent-templates/        # Instruction templates
         └── steering-docs/          # Copied steering documents
+    ├── frontend/                   # Frontend documentation
+    │   ├── testing-*.md            # Testing guides and strategies
+    │   ├── turbopack-*.md          # Performance optimization docs
+    │   └── scripts-*.md            # Build and deployment scripts
+    ├── backend/                    # Backend documentation
+    │   ├── deployment-*.md         # Deployment guides
+    │   ├── authentication-*.md     # Auth implementation
+    │   ├── health-check-*.md       # Monitoring and health checks
+    │   └── redis-*.md              # Caching and session management
+    └── kiro-instructions/          # AI Agent guidance
+        ├── task-*.md               # Task creation and execution
+        ├── agent-templates/        # Instruction templates
+        └── steering-docs/          # Copied steering documents
 ```
 
 ### Command Examples

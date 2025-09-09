@@ -17,13 +17,17 @@
         "python -c *",
         "node *",
         "cls *",
-        "cls ; poetry run python main.py",
+        "cls ; poetry run python *",
         "poetry run python *",
         "poetry run python -c *",
         "python -c *",
         "clear",
         "curl -s *",
-        "Stop-Job *"
+        "Stop-Job *",
+        "mv *",
+        "find *",
+        "rmdir *",
+        "find *"
     ],
     "typescript.autoClosingTags": false
 }
