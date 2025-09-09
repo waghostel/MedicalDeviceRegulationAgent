@@ -1,0 +1,432 @@
+{
+  "users": [
+    {
+      "google_id": "user_123456789",
+      "email": "john.doe@medtech.com",
+      "name": "John Doe",
+      "avatar_url": "https://lh3.googleusercontent.com/a/default-user"
+    },
+    {
+      "google_id": "user_987654321",
+      "email": "jane.smith@deviceco.com",
+      "name": "Jane Smith",
+      "avatar_url": "https://lh3.googleusercontent.com/a/default-user-2"
+    },
+    {
+      "google_id": "user_456789123",
+      "email": "mike.johnson@cardiotech.com",
+      "name": "Mike Johnson",
+      "avatar_url": "https://lh3.googleusercontent.com/a/default-user-3"
+    },
+    {
+      "google_id": "user_789123456",
+      "email": "sarah.wilson@orthomed.com",
+      "name": "Sarah Wilson"
+    }
+  ],
+  "projects": [
+    {
+      "name": "Cardiac Monitoring Device",
+      "description": "A wearable device for continuous cardiac rhythm monitoring with AI-powered arrhythmia detection. The device uses advanced ECG sensors and machine learning algorithms to provide real-time cardiac monitoring for ambulatory patients.",
+      "device_type": "Cardiac Monitor",
+      "intended_use": "For continuous monitoring of cardiac rhythm in ambulatory patients to detect arrhythmias and provide alerts to healthcare providers",
+      "status": "in_progress",
+      "priority": "high",
+      "tags": ["cardiac", "wearable", "monitoring", "AI", "ECG"],
+      "user_email": "john.doe@medtech.com"
+    },
+    {
+      "name": "Blood Glucose Meter",
+      "description": "Portable blood glucose monitoring system with smartphone connectivity and cloud data storage for diabetes management",
+      "device_type": "Glucose Meter",
+      "intended_use": "For quantitative measurement of glucose in capillary blood from the fingertip for diabetes management",
+      "status": "draft",
+      "priority": "medium",
+      "tags": ["diabetes", "glucose", "portable", "smartphone"],
+      "user_email": "jane.smith@deviceco.com"
+    },
+    {
+      "name": "Surgical Navigation System",
+      "description": "Computer-assisted surgical navigation system for orthopedic procedures using real-time imaging and tracking",
+      "device_type": "Surgical Navigation System",
+      "intended_use": "To provide real-time guidance during orthopedic surgical procedures by tracking surgical instruments relative to patient anatomy",
+      "status": "completed",
+      "priority": "high",
+      "tags": ["surgery", "navigation", "orthopedic", "imaging"],
+      "user_email": "mike.johnson@cardiotech.com"
+    },
+    {
+      "name": "Wound Care Dressing",
+      "description": "Advanced antimicrobial wound dressing with silver nanoparticles for chronic wound management",
+      "device_type": "Wound Dressing",
+      "intended_use": "For management of chronic wounds including diabetic ulcers, pressure ulcers, and venous leg ulcers",
+      "status": "in_progress",
+      "priority": "medium",
+      "tags": ["wound care", "antimicrobial", "chronic wounds"],
+      "user_email": "sarah.wilson@orthomed.com"
+    },
+    {
+      "name": "Pulse Oximeter",
+      "description": "Non-invasive pulse oximeter for measuring oxygen saturation and pulse rate in hospital and home settings",
+      "device_type": "Pulse Oximeter",
+      "intended_use": "For non-invasive measurement of functional oxygen saturation of arterial hemoglobin and pulse rate",
+      "status": "draft",
+      "priority": "low",
+      "tags": ["oximetry", "non-invasive", "monitoring"],
+      "user_email": "john.doe@medtech.com"
+    },
+    {
+      "name": "Insulin Pump",
+      "description": "Continuous subcutaneous insulin infusion pump with integrated continuous glucose monitoring",
+      "device_type": "Insulin Pump",
+      "intended_use": "For continuous subcutaneous infusion of insulin in patients with diabetes mellitus requiring insulin therapy",
+      "status": "in_progress",
+      "priority": "high",
+      "tags": ["diabetes", "insulin", "pump", "CGM"],
+      "user_email": "jane.smith@deviceco.com"
+    }
+  ],
+  "device_classifications": [
+    {
+      "project_name": "Cardiac Monitoring Device",
+      "device_class": "II",
+      "product_code": "DPS",
+      "regulatory_pathway": "510k",
+      "cfr_sections": ["21 CFR 870.2300"],
+      "confidence_score": 0.92,
+      "reasoning": "Device is substantially equivalent to existing cardiac monitors with similar intended use and technological characteristics"
+    },
+    {
+      "project_name": "Blood Glucose Meter",
+      "device_class": "II",
+      "product_code": "NBW",
+      "regulatory_pathway": "510k",
+      "cfr_sections": ["21 CFR 862.1345"],
+      "confidence_score": 0.95,
+      "reasoning": "Standard glucose meter with established predicate devices and well-defined regulatory pathway"
+    },
+    {
+      "project_name": "Surgical Navigation System",
+      "device_class": "II",
+      "product_code": "IYE",
+      "regulatory_pathway": "510k",
+      "cfr_sections": ["21 CFR 888.1720"],
+      "confidence_score": 0.88,
+      "reasoning": "Computer-assisted surgical system with established predicate devices in orthopedic applications"
+    },
+    {
+      "project_name": "Wound Care Dressing",
+      "device_class": "II",
+      "product_code": "NAE",
+      "regulatory_pathway": "510k",
+      "cfr_sections": ["21 CFR 878.4018"],
+      "confidence_score": 0.85,
+      "reasoning": "Antimicrobial wound dressing with silver, similar to existing cleared devices"
+    },
+    {
+      "project_name": "Pulse Oximeter",
+      "device_class": "II",
+      "product_code": "DQA",
+      "regulatory_pathway": "510k",
+      "cfr_sections": ["21 CFR 870.2700"],
+      "confidence_score": 0.98,
+      "reasoning": "Well-established device type with numerous predicate devices available"
+    },
+    {
+      "project_name": "Insulin Pump",
+      "device_class": "II",
+      "product_code": "LZG",
+      "regulatory_pathway": "510k",
+      "cfr_sections": ["21 CFR 880.5725"],
+      "confidence_score": 0.90,
+      "reasoning": "Insulin infusion pump with established regulatory pathway and predicate devices"
+    }
+  ],
+  "predicate_devices": [
+    {
+      "project_name": "Cardiac Monitoring Device",
+      "k_number": "K193456",
+      "device_name": "CardioWatch Pro",
+      "intended_use": "Continuous cardiac rhythm monitoring for ambulatory patients",
+      "product_code": "DPS",
+      "clearance_date": "2019-08-15",
+      "confidence_score": 0.89,
+      "is_selected": true,
+      "comparison_data": {
+        "similarities": [
+          "Similar intended use for cardiac rhythm monitoring",
+          "Same product code (DPS)",
+          "Ambulatory monitoring capability",
+          "ECG signal acquisition and processing"
+        ],
+        "differences": [
+          "AI-powered arrhythmia detection (new feature)",
+          "Enhanced battery life",
+          "Improved sensor technology",
+          "Cloud connectivity features"
+        ],
+        "risk_assessment": "low",
+        "testing_recommendations": [
+          "Software validation for AI algorithms",
+          "Cybersecurity testing for cloud connectivity",
+          "Clinical validation of arrhythmia detection accuracy",
+          "Biocompatibility testing for skin contact materials"
+        ]
+      }
+    },
+    {
+      "project_name": "Cardiac Monitoring Device",
+      "k_number": "K182345",
+      "device_name": "HeartTracker Mobile",
+      "intended_use": "Portable ECG monitoring for cardiac rhythm analysis",
+      "product_code": "DPS",
+      "clearance_date": "2018-03-22",
+      "confidence_score": 0.82,
+      "is_selected": false,
+      "comparison_data": {
+        "similarities": [
+          "ECG monitoring capability",
+          "Portable design",
+          "Same product code"
+        ],
+        "differences": [
+          "Different form factor (handheld vs wearable)",
+          "Limited continuous monitoring",
+          "No AI features"
+        ],
+        "risk_assessment": "medium",
+        "testing_recommendations": [
+          "Comparative clinical study",
+          "Usability testing",
+          "Software verification and validation"
+        ]
+      }
+    },
+    {
+      "project_name": "Blood Glucose Meter",
+      "k_number": "K201234",
+      "device_name": "GlucoSmart Pro",
+      "intended_use": "Blood glucose measurement for diabetes management",
+      "product_code": "NBW",
+      "clearance_date": "2020-11-10",
+      "confidence_score": 0.94,
+      "is_selected": true,
+      "comparison_data": {
+        "similarities": [
+          "Capillary blood glucose measurement",
+          "Same product code (NBW)",
+          "Smartphone connectivity",
+          "Similar accuracy requirements"
+        ],
+        "differences": [
+          "Enhanced data analytics",
+          "Cloud storage integration",
+          "Improved user interface"
+        ],
+        "risk_assessment": "low",
+        "testing_recommendations": [
+          "Accuracy and precision testing",
+          "Cybersecurity assessment",
+          "Software validation",
+          "Clinical evaluation"
+        ]
+      }
+    },
+    {
+      "project_name": "Surgical Navigation System",
+      "k_number": "K175678",
+      "device_name": "OrthoNav 3D",
+      "intended_use": "Computer-assisted orthopedic surgery navigation",
+      "product_code": "IYE",
+      "clearance_date": "2017-09-05",
+      "confidence_score": 0.87,
+      "is_selected": true,
+      "comparison_data": {
+        "similarities": [
+          "Orthopedic surgical navigation",
+          "Real-time tracking capability",
+          "Same product code (IYE)",
+          "3D imaging integration"
+        ],
+        "differences": [
+          "Enhanced tracking accuracy",
+          "Improved user interface",
+          "Additional surgical procedure support"
+        ],
+        "risk_assessment": "medium",
+        "testing_recommendations": [
+          "Accuracy validation testing",
+          "Software verification and validation",
+          "Clinical evaluation",
+          "Electromagnetic compatibility testing"
+        ]
+      }
+    },
+    {
+      "project_name": "Wound Care Dressing",
+      "k_number": "K190987",
+      "device_name": "SilverHeal Advanced",
+      "intended_use": "Antimicrobial wound dressing for chronic wounds",
+      "product_code": "NAE",
+      "clearance_date": "2019-06-18",
+      "confidence_score": 0.91,
+      "is_selected": true,
+      "comparison_data": {
+        "similarities": [
+          "Silver-based antimicrobial properties",
+          "Chronic wound management",
+          "Same product code (NAE)",
+          "Similar wound types"
+        ],
+        "differences": [
+          "Nanoparticle technology",
+          "Enhanced absorption capacity",
+          "Improved wear time"
+        ],
+        "risk_assessment": "low",
+        "testing_recommendations": [
+          "Biocompatibility testing",
+          "Antimicrobial efficacy testing",
+          "Clinical evaluation",
+          "Cytotoxicity assessment"
+        ]
+      }
+    },
+    {
+      "project_name": "Pulse Oximeter",
+      "k_number": "K203456",
+      "device_name": "OxyCheck Pro",
+      "intended_use": "Non-invasive oxygen saturation and pulse rate monitoring",
+      "product_code": "DQA",
+      "clearance_date": "2020-04-12",
+      "confidence_score": 0.96,
+      "is_selected": true,
+      "comparison_data": {
+        "similarities": [
+          "Non-invasive SpO2 measurement",
+          "Pulse rate monitoring",
+          "Same product code (DQA)",
+          "Similar accuracy specifications"
+        ],
+        "differences": [
+          "Enhanced low perfusion performance",
+          "Improved motion artifact resistance",
+          "Additional display features"
+        ],
+        "risk_assessment": "low",
+        "testing_recommendations": [
+          "Accuracy testing per ISO 80601-2-61",
+          "Motion artifact testing",
+          "Low perfusion testing",
+          "Clinical validation"
+        ]
+      }
+    },
+    {
+      "project_name": "Insulin Pump",
+      "k_number": "K184567",
+      "device_name": "InsuFlow Advanced",
+      "intended_use": "Continuous subcutaneous insulin infusion",
+      "product_code": "LZG",
+      "clearance_date": "2018-12-03",
+      "confidence_score": 0.88,
+      "is_selected": true,
+      "comparison_data": {
+        "similarities": [
+          "Continuous insulin infusion",
+          "Programmable basal rates",
+          "Same product code (LZG)",
+          "Similar safety features"
+        ],
+        "differences": [
+          "Integrated CGM capability",
+          "Enhanced user interface",
+          "Improved battery life",
+          "Smartphone connectivity"
+        ],
+        "risk_assessment": "medium",
+        "testing_recommendations": [
+          "Insulin delivery accuracy testing",
+          "Software verification and validation",
+          "Cybersecurity assessment",
+          "Clinical evaluation",
+          "Biocompatibility testing"
+        ]
+      }
+    }
+  ],
+  "agent_interactions": [
+    {
+      "project_name": "Cardiac Monitoring Device",
+      "user_email": "john.doe@medtech.com",
+      "agent_action": "device_classification",
+      "input_data": {
+        "device_description": "A wearable device for continuous cardiac rhythm monitoring with AI-powered arrhythmia detection",
+        "intended_use": "For continuous monitoring of cardiac rhythm in ambulatory patients"
+      },
+      "output_data": {
+        "device_class": "II",
+        "product_code": "DPS",
+        "regulatory_pathway": "510k",
+        "cfr_sections": ["21 CFR 870.2300"]
+      },
+      "confidence_score": 0.92,
+      "reasoning": "Device classified as Class II based on intended use for cardiac monitoring. Product code DPS applies to cardiac monitors. 510(k) pathway appropriate due to substantial equivalence to existing devices.",
+      "execution_time_ms": 2150
+    },
+    {
+      "project_name": "Cardiac Monitoring Device",
+      "user_email": "john.doe@medtech.com",
+      "agent_action": "predicate_search",
+      "input_data": {
+        "device_type": "Cardiac Monitor",
+        "product_code": "DPS",
+        "intended_use": "continuous cardiac rhythm monitoring"
+      },
+      "output_data": {
+        "predicates_found": 8,
+        "top_matches": ["K193456", "K182345", "K176789"],
+        "search_criteria": "product_code:DPS AND intended_use:cardiac monitoring"
+      },
+      "confidence_score": 0.85,
+      "reasoning": "Found multiple suitable predicate devices with similar intended use and technological characteristics. Top matches show high similarity scores.",
+      "execution_time_ms": 3200
+    },
+    {
+      "project_name": "Blood Glucose Meter",
+      "user_email": "jane.smith@deviceco.com",
+      "agent_action": "device_classification",
+      "input_data": {
+        "device_description": "Portable blood glucose monitoring system with smartphone connectivity",
+        "intended_use": "For quantitative measurement of glucose in capillary blood"
+      },
+      "output_data": {
+        "device_class": "II",
+        "product_code": "NBW",
+        "regulatory_pathway": "510k",
+        "cfr_sections": ["21 CFR 862.1345"]
+      },
+      "confidence_score": 0.95,
+      "reasoning": "Standard glucose meter classification. Well-established device type with clear regulatory pathway.",
+      "execution_time_ms": 1800
+    },
+    {
+      "project_name": "Surgical Navigation System",
+      "user_email": "mike.johnson@cardiotech.com",
+      "agent_action": "predicate_comparison",
+      "input_data": {
+        "user_device": "Computer-assisted surgical navigation system for orthopedic procedures",
+        "predicate_k_number": "K175678"
+      },
+      "output_data": {
+        "similarity_score": 0.87,
+        "key_similarities": ["orthopedic application", "real-time tracking", "3D imaging"],
+        "key_differences": ["enhanced accuracy", "additional procedures", "improved UI"],
+        "substantial_equivalence": "likely"
+      },
+      "confidence_score": 0.83,
+      "reasoning": "High similarity in core functionality and intended use. Differences appear to be enhancements rather than fundamental changes.",
+      "execution_time_ms": 4500
+    }
+  ]
+}

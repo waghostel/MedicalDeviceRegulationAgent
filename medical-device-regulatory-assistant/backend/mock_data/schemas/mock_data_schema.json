@@ -1,0 +1,359 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://medical-device-regulatory-assistant.com/schemas/mock-data-config.json",
+  "title": "Medical Device Regulatory Assistant Mock Data Configuration",
+  "description": "JSON schema for configuring mock data for the Medical Device Regulatory Assistant application",
+  "type": "object",
+  "properties": {
+    "users": {
+      "type": "array",
+      "description": "Array of user objects for seeding user data",
+      "items": {
+        "type": "object",
+        "properties": {
+          "google_id": {
+            "type": "string",
+            "description": "Google OAuth ID for the user",
+            "pattern": "^[a-zA-Z0-9_-]+$",
+            "minLength": 1,
+            "maxLength": 255
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "User's email address",
+            "maxLength": 255
+          },
+          "name": {
+            "type": "string",
+            "description": "User's full name",
+            "minLength": 1,
+            "maxLength": 255
+          },
+          "avatar_url": {
+            "type": "string",
+            "format": "uri",
+            "description": "URL to user's avatar image (optional)"
+          }
+        },
+        "required": ["google_id", "email", "name"],
+        "additionalProperties": false
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "projects": {
+      "type": "array",
+      "description": "Array of project objects for seeding project data",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Project name",
+            "minLength": 1,
+            "maxLength": 255
+          },
+          "description": {
+            "type": "string",
+            "description": "Project description (optional)",
+            "maxLength": 2000
+          },
+          "device_type": {
+            "type": "string",
+            "description": "Type of medical device (optional)",
+            "maxLength": 255,
+            "examples": [
+              "Cardiac Monitor",
+              "Blood Glucose Meter",
+              "Surgical Instrument",
+              "Diagnostic Device",
+              "Therapeutic Device"
+            ]
+          },
+          "intended_use": {
+            "type": "string",
+            "description": "Intended use statement for the device (optional)",
+            "maxLength": 5000
+          },
+          "status": {
+            "type": "string",
+            "enum": ["draft", "in_progress", "completed"],
+            "description": "Current project status",
+            "default": "draft"
+          },
+          "priority": {
+            "type": "string",
+            "enum": ["high", "medium", "low"],
+            "description": "Project priority level (optional)"
+          },
+          "tags": {
+            "type": "array",
+            "description": "Array of tags for categorizing the project (optional)",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 50
+            },
+            "maxItems": 10,
+            "uniqueItems": true
+          },
+          "user_email": {
+            "type": "string",
+            "format": "email",
+            "description": "Email of the user who owns this project"
+          }
+        },
+        "required": ["name", "user_email"],
+        "additionalProperties": false
+      },
+      "minItems": 0
+    },
+    "device_classifications": {
+      "type": "array",
+      "description": "Array of device classification objects",
+      "items": {
+        "type": "object",
+        "properties": {
+          "project_name": {
+            "type": "string",
+            "description": "Name of the project this classification belongs to"
+          },
+          "device_class": {
+            "type": "string",
+            "enum": ["I", "II", "III"],
+            "description": "FDA device class"
+          },
+          "product_code": {
+            "type": "string",
+            "description": "FDA product code",
+            "pattern": "^[A-Z]{3}$",
+            "examples": ["DPS", "FRO", "LRH", "MHX"]
+          },
+          "regulatory_pathway": {
+            "type": "string",
+            "enum": ["510k", "PMA", "De Novo"],
+            "description": "FDA regulatory pathway"
+          },
+          "cfr_sections": {
+            "type": "array",
+            "description": "Applicable CFR sections (optional)",
+            "items": {
+              "type": "string",
+              "pattern": "^21 CFR [0-9]+\\.[0-9]+$"
+            },
+            "uniqueItems": true
+          },
+          "confidence_score": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "description": "Confidence score for the classification (0-1)"
+          },
+          "reasoning": {
+            "type": "string",
+            "description": "Reasoning for the classification decision (optional)",
+            "maxLength": 2000
+          }
+        },
+        "required": ["project_name", "device_class", "product_code", "regulatory_pathway"],
+        "additionalProperties": false
+      },
+      "minItems": 0
+    },
+    "predicate_devices": {
+      "type": "array",
+      "description": "Array of predicate device objects",
+      "items": {
+        "type": "object",
+        "properties": {
+          "project_name": {
+            "type": "string",
+            "description": "Name of the project this predicate belongs to"
+          },
+          "k_number": {
+            "type": "string",
+            "description": "FDA 510(k) number",
+            "pattern": "^K[0-9]{6}$",
+            "examples": ["K123456", "K193456", "K203456"]
+          },
+          "device_name": {
+            "type": "string",
+            "description": "Name of the predicate device",
+            "minLength": 1,
+            "maxLength": 500
+          },
+          "intended_use": {
+            "type": "string",
+            "description": "Intended use statement for the predicate device (optional)",
+            "maxLength": 5000
+          },
+          "product_code": {
+            "type": "string",
+            "description": "FDA product code for the predicate device (optional)",
+            "pattern": "^[A-Z]{3}$"
+          },
+          "clearance_date": {
+            "type": "string",
+            "format": "date",
+            "description": "FDA clearance date (YYYY-MM-DD format, optional)"
+          },
+          "confidence_score": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "description": "Confidence score for predicate match (0-1, optional)"
+          },
+          "is_selected": {
+            "type": "boolean",
+            "description": "Whether this predicate is selected as primary",
+            "default": false
+          },
+          "comparison_data": {
+            "type": "object",
+            "description": "Comparison data between user device and predicate (optional)",
+            "properties": {
+              "similarities": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "List of similarities"
+              },
+              "differences": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "List of differences"
+              },
+              "risk_assessment": {
+                "type": "string",
+                "enum": ["low", "medium", "high"],
+                "description": "Risk assessment level"
+              },
+              "testing_recommendations": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Recommended testing based on differences"
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "required": ["project_name", "k_number", "device_name"],
+        "additionalProperties": false
+      },
+      "minItems": 0
+    },
+    "agent_interactions": {
+      "type": "array",
+      "description": "Array of agent interaction objects for audit trail",
+      "items": {
+        "type": "object",
+        "properties": {
+          "project_name": {
+            "type": "string",
+            "description": "Name of the project this interaction belongs to"
+          },
+          "user_email": {
+            "type": "string",
+            "format": "email",
+            "description": "Email of the user who initiated this interaction"
+          },
+          "agent_action": {
+            "type": "string",
+            "description": "Type of agent action performed",
+            "enum": [
+              "device_classification",
+              "predicate_search",
+              "predicate_comparison",
+              "guidance_search",
+              "document_processing",
+              "regulatory_analysis"
+            ]
+          },
+          "input_data": {
+            "type": "object",
+            "description": "Input data provided to the agent (optional)",
+            "additionalProperties": true
+          },
+          "output_data": {
+            "type": "object",
+            "description": "Output data generated by the agent (optional)",
+            "additionalProperties": true
+          },
+          "confidence_score": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "description": "Confidence score for the agent's output (optional)"
+          },
+          "reasoning": {
+            "type": "string",
+            "description": "Agent's reasoning for the decision (optional)",
+            "maxLength": 5000
+          },
+          "execution_time_ms": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Execution time in milliseconds (optional)"
+          }
+        },
+        "required": ["project_name", "user_email", "agent_action"],
+        "additionalProperties": false
+      },
+      "minItems": 0
+    }
+  },
+  "required": ["users", "projects"],
+  "additionalProperties": false,
+  "examples": [
+    {
+      "users": [
+        {
+          "google_id": "user_123456789",
+          "email": "john.doe@medtech.com",
+          "name": "John Doe",
+          "avatar_url": "https://example.com/avatar1.jpg"
+        }
+      ],
+      "projects": [
+        {
+          "name": "Cardiac Monitoring Device",
+          "description": "A wearable device for continuous cardiac rhythm monitoring",
+          "device_type": "Cardiac Monitor",
+          "intended_use": "For continuous monitoring of cardiac rhythm in ambulatory patients",
+          "status": "in_progress",
+          "priority": "high",
+          "tags": ["cardiac", "wearable", "monitoring"],
+          "user_email": "john.doe@medtech.com"
+        }
+      ],
+      "device_classifications": [
+        {
+          "project_name": "Cardiac Monitoring Device",
+          "device_class": "II",
+          "product_code": "DPS",
+          "regulatory_pathway": "510k",
+          "confidence_score": 0.92,
+          "reasoning": "Device is substantially equivalent to existing cardiac monitors"
+        }
+      ],
+      "predicate_devices": [
+        {
+          "project_name": "Cardiac Monitoring Device",
+          "k_number": "K193456",
+          "device_name": "CardioWatch Pro",
+          "intended_use": "Continuous cardiac rhythm monitoring",
+          "product_code": "DPS",
+          "clearance_date": "2019-08-15",
+          "confidence_score": 0.89,
+          "is_selected": true
+        }
+      ]
+    }
+  ]
+}
