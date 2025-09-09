@@ -10,6 +10,7 @@ Convert the Project Frontend Backend Integration requirements into a series of p
 - Follow **Test-Driven Development (TDD)**.
 - Always clear the terminal before running a new command. Type the clear command first, press Enter, then type the actual command and press Enter again.
 
+
 Example 1(Windows):
 
 ```bash
@@ -54,15 +55,17 @@ Each completed task requires a report:
   - [Brief description of change #2]
 - **Test Plan & Results**
   - **Unit Tests**: [Description]
-    - Result: [✔ All tests passed / ✘ Failures]
+    - [Test command]
+      - Result: [✔ All tests passed / ✘ Failures]
   - **Integration Tests**: [Description]
-    - Result: [✔ Passed / ✘ Failures]
+    - [Test command]
+      - Result: [✔ Passed / ✘ Failures]
   - **Manual Verification**: [Steps & findings]
     - Result: [✔ Works as expected]
   - **Undone tests**:
     - [ ][Test name]
-      - [Description(Faild reason and what need to be modified)]
       - [Test command]
+      - [Description(Faild reason and what need to be modified)]
 - **Code Snippets (Optional)**: Show relevant diffs or highlights.
 
 ## Task 1. Enhanced Database Models and Schema
@@ -205,7 +208,7 @@ Each completed task requires a report:
 
 ## 6. Performance Optimization and Caching
 
-- [-] Task 6.1 Implement frontend performance optimizations
+- [x] Task 6.1 Implement frontend performance optimizations
 
   - Add React.memo and useMemo for expensive computations
   - Implement virtual scrolling for large project lists

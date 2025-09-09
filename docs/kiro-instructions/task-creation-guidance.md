@@ -26,7 +26,7 @@ Convert the [Spec Name] requirements into a series of prompts for a code-generat
 
 #### B. Development Rules Section
 
-```markdown
+````markdown
 ## Development Rules
 
 - Use **`pnpm`** instead of npm for JavaScript/TypeScript.
@@ -41,6 +41,7 @@ Example 1(Windows):
 cls
 <command>
 ```
+````
 
 Example 2 (Mac and Linux)
 
@@ -51,7 +52,7 @@ clear
 
 - After reading this file, say: **"I will use poetry and pnpm"**.
 
-```
+````
 
 #### C. Workflow Section
 ```markdown
@@ -65,7 +66,7 @@ clear
    - If tests fail, fetch additional documentation (context7).
 6. Write a **task report** in `./.kiro/specs/[spec-name]/task-execute-history/` (e.g. `task-1.1.md`).
    - Be transparent about test results, especially if some tests require future verification.
-```
+````
 
 #### D. Test-Driven Development Section
 
@@ -115,6 +116,7 @@ Each completed task requires a report:
 ## 1. Phase Name
 
 - [ ] 1.1 Task Title
+
   - Detailed description of what needs to be done
   - Specific implementation requirements
   - Technical specifications
@@ -203,7 +205,7 @@ Before committing a tasks.md file, verify:
 
 ## Example Template
 
-```markdown
+````markdown
 # Implementation Plan
 
 Convert the [Your Spec Name] requirements into a series of prompts for a code-generation LLM that will implement each step in a test-driven manner. Prioritize best practices, incremental progress, and early testing, ensuring no big jumps in complexity at any stage. Make sure that each prompt builds on the previous prompts, and ends with wiring things together. There should be no hanging or orphaned code that isn't integrated into a previous step. Focus ONLY on tasks that involve writing, modifying, or testing code.
@@ -222,6 +224,7 @@ Example 1(Windows):
 cls
 <command>
 ```
+````
 
 Example 2 (Mac and Linux)
 
@@ -260,20 +263,23 @@ Each completed task requires a report:
   - [Brief description of change #2]
 - **Test Plan & Results**
   - **Unit Tests**: [Description]
-    - Result: [✔ All tests passed / ✘ Failures]
+    - [Test command]
+      - Result: [✔ All tests passed / ✘ Failures]
   - **Integration Tests**: [Description]
-    - Result: [✔ Passed / ✘ Failures]
+    - [Test command]
+      - Result: [✔ Passed / ✘ Failures]
   - **Manual Verification**: [Steps & findings]
     - Result: [✔ Works as expected]
   - **Undone tests**:
     - [ ][Test name]
-      - [Description(faild reason and what need to be modified)]
       - [Test command]
+      - [Description(Faild reason and what need to be modified)]
 - **Code Snippets (Optional)**: Show relevant diffs or highlights.
 
 ## 1. Your First Phase
 
 - [ ] 1.1 Your First Task
+
   - Describe what needs to be implemented
   - Include specific technical requirements
   - Add any important constraints or considerations
@@ -299,3 +305,4 @@ Each completed task requires a report:
 8. **Version Control**: Keep task files in version control for tracking
 
 This guidance ensures that your tasks.md files will be properly recognized and executed by Kiro's spec-driven development system.
+```

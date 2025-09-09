@@ -1,8 +1,9 @@
 /**
  * Project Form Component for creating and editing projects
+ * Optimized with React.memo and useMemo for performance
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, memo, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -43,6 +44,7 @@ import {
   ProjectStatus,
 } from '@/types/project';
 import { contextualToast } from '@/hooks/use-toast';
+import { useRenderPerformance } from '@/lib/performance/optimization';
 
 // Form validation schema - matches backend validation
 const projectFormSchema = z.object({
@@ -99,26 +101,34 @@ const COMMON_DEVICE_TYPES = [
   'Other',
 ];
 
-export function ProjectForm({
+export const ProjectForm = memo(function ProjectForm({
   project,
   open,
   onOpenChange,
   onSubmit,
   loading = false,
 }: ProjectFormProps) {
-  const isEditing = !!project;
+  // Performance monitoring
+  useRenderPerformance('ProjectForm');
+  const isEditing = useMemo(() => !!project, [project]);
   const formSubmission = useFormSubmissionState();
 
-  const form = useForm<ProjectFormData>({
-    resolver: zodResolver(projectFormSchema),
-    defaultValues: {
-      name: '',
-      description: '',
-      device_type: '',
-      intended_use: '',
-      status: ProjectStatus.DRAFT,
-    },
-  });
+  // Memoize form configuration
+  const formConfig = useMemo(
+    () => ({
+      resolver: zodResolver(projectFormSchema),
+      defaultValues: {
+        name: '',
+        description: '',
+        device_type: '',
+        intended_use: '',
+        status: ProjectStatus.DRAFT,
+      },
+    }),
+    []
+  );
+
+  const form = useForm<ProjectFormData>(formConfig);
 
   // Reset form when project changes or dialog opens/closes
   useEffect(() => {
@@ -407,4 +417,4 @@ export function ProjectForm({
       </DialogContent>
     </Dialog>
   );
-}
+});

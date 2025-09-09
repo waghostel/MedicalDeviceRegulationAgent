@@ -1,8 +1,9 @@
 /**
  * Project Card Component with loading states and optimistic updates
+ * Optimized with React.memo for performance
  */
 
-import { useState } from 'react';
+import { useState, memo, useMemo } from 'react';
 import { MoreHorizontal, Calendar, FileText, Activity } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -16,6 +17,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Project, ProjectStatus } from '@/types/project';
 import { cn } from '@/lib/utils';
+import { useRenderPerformance } from '@/lib/performance/optimization';
 
 interface ProjectCardProps {
   project: Project;
@@ -45,7 +47,7 @@ const statusConfig = {
   },
 };
 
-export function ProjectCard({
+export const ProjectCard = memo(function ProjectCard({
   project,
   onSelect,
   onEdit,
@@ -54,12 +56,14 @@ export function ProjectCard({
   loading = false,
   className,
 }: ProjectCardProps) {
+  // Performance monitoring
+  useRenderPerformance('ProjectCard');
   const [isDeleting, setIsDeleting] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
 
   const handleDelete = async () => {
     if (!onDelete) return;
-    
+
     setIsDeleting(true);
     try {
       await onDelete(project);
@@ -70,7 +74,7 @@ export function ProjectCard({
 
   const handleExport = async () => {
     if (!onExport) return;
-    
+
     setIsExporting(true);
     try {
       await onExport(project);
@@ -79,10 +83,23 @@ export function ProjectCard({
     }
   };
 
-  const statusInfo = statusConfig[project.status];
-  const createdDate = new Date(project.created_at);
-  const updatedDate = new Date(project.updated_at);
-  const isRecentlyUpdated = Date.now() - updatedDate.getTime() < 24 * 60 * 60 * 1000; // 24 hours
+  // Memoize expensive computations
+  const statusInfo = useMemo(
+    () => statusConfig[project.status],
+    [project.status]
+  );
+  const createdDate = useMemo(
+    () => new Date(project.created_at),
+    [project.created_at]
+  );
+  const updatedDate = useMemo(
+    () => new Date(project.updated_at),
+    [project.updated_at]
+  );
+  const isRecentlyUpdated = useMemo(
+    () => Date.now() - updatedDate.getTime() < 24 * 60 * 60 * 1000, // 24 hours
+    [updatedDate]
+  );
 
   return (
     <Card
@@ -116,7 +133,7 @@ export function ProjectCard({
               )}
             </div>
           </div>
-          
+
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
@@ -131,14 +148,16 @@ export function ProjectCard({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
-              <DropdownMenuItem onClick={(e) => {
-                e.stopPropagation();
-                onEdit?.(project);
-              }}>
+              <DropdownMenuItem
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEdit?.(project);
+                }}
+              >
                 <FileText className="mr-2 h-4 w-4" />
                 Edit Project
               </DropdownMenuItem>
-              <DropdownMenuItem 
+              <DropdownMenuItem
                 onClick={(e) => {
                   e.stopPropagation();
                   handleExport();
@@ -172,25 +191,29 @@ export function ProjectCard({
               {project.description}
             </p>
           )}
-          
+
           {project.device_type && (
             <div className="flex items-center gap-2">
-              <span className="text-xs font-medium text-muted-foreground">Device Type:</span>
+              <span className="text-xs font-medium text-muted-foreground">
+                Device Type:
+              </span>
               <Badge variant="outline" className="text-xs">
                 {project.device_type}
               </Badge>
             </div>
           )}
-          
+
           {project.intended_use && (
             <div className="space-y-1">
-              <span className="text-xs font-medium text-muted-foreground">Intended Use:</span>
+              <span className="text-xs font-medium text-muted-foreground">
+                Intended Use:
+              </span>
               <p className="text-xs text-muted-foreground line-clamp-2">
                 {project.intended_use}
               </p>
             </div>
           )}
-          
+
           <div className="flex items-center justify-between text-xs text-muted-foreground pt-2 border-t">
             <div className="flex items-center gap-1">
               <Calendar className="w-3 h-3" />
@@ -207,14 +230,21 @@ export function ProjectCard({
       </CardContent>
     </Card>
   );
-}
+});
 
 /**
  * Skeleton loader for project cards
  */
-export function ProjectCardSkeleton({ className }: { className?: string }) {
+export const ProjectCardSkeleton = memo(function ProjectCardSkeleton({
+  className,
+}: {
+  className?: string;
+}) {
   return (
-    <Card data-testid="project-card-skeleton" className={cn('animate-pulse', className)}>
+    <Card
+      data-testid="project-card-skeleton"
+      className={cn('animate-pulse', className)}
+    >
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
           <div className="flex-1 space-y-2">
@@ -227,24 +257,24 @@ export function ProjectCardSkeleton({ className }: { className?: string }) {
           <div className="h-8 w-8 bg-gray-200 rounded"></div>
         </div>
       </CardHeader>
-      
+
       <CardContent className="pt-0">
         <div className="space-y-3">
           <div className="space-y-2">
             <div className="h-3 bg-gray-200 rounded w-full"></div>
             <div className="h-3 bg-gray-200 rounded w-2/3"></div>
           </div>
-          
+
           <div className="flex items-center gap-2">
             <div className="h-3 bg-gray-200 rounded w-20"></div>
             <div className="h-4 bg-gray-200 rounded w-16"></div>
           </div>
-          
+
           <div className="space-y-1">
             <div className="h-3 bg-gray-200 rounded w-24"></div>
             <div className="h-3 bg-gray-200 rounded w-full"></div>
           </div>
-          
+
           <div className="flex items-center justify-between pt-2 border-t">
             <div className="h-3 bg-gray-200 rounded w-24"></div>
             <div className="h-3 bg-gray-200 rounded w-24"></div>
@@ -253,4 +283,4 @@ export function ProjectCardSkeleton({ className }: { className?: string }) {
       </CardContent>
     </Card>
   );
-}
+});
