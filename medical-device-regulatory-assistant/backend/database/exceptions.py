@@ -85,6 +85,18 @@ class HealthCheckError(DatabaseError):
         super().__init__(message, original_error, context)
 
 
+class PoolExhaustedError(DatabaseError):
+    """Connection pool exhausted error - raised when no connections are available."""
+    
+    def __init__(self, message: str, pool_size: Optional[int] = None, max_overflow: Optional[int] = None, original_error: Optional[Exception] = None):
+        context = {}
+        if pool_size is not None:
+            context["pool_size"] = pool_size
+        if max_overflow is not None:
+            context["max_overflow"] = max_overflow
+        super().__init__(message, original_error, context)
+
+
 def handle_database_errors(
     operation_name: Optional[str] = None,
     reraise: bool = True,

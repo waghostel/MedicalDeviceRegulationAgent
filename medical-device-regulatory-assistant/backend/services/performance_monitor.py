@@ -1,613 +1,435 @@
 """
-Performance Monitoring Service
-
-This service monitors application performance, tracks metrics,
-and provides alerting for performance issues.
+Database performance monitoring service
 """
 
 import asyncio
-import json
 import logging
 import time
-from datetime import datetime, timezone, timedelta
-from typing import Dict, List, Any, Optional, Callable
-from dataclasses import dataclass, asdict
-from collections import defaultdict, deque
-import statistics
+from typing import Dict, Any, List, Optional
+from datetime import datetime, timedelta
+from dataclasses import dataclass, field
 
-import redis.asyncio as redis
-from pydantic import BaseModel
+from sqlalchemy import text
+from database.connection import get_database_manager
+from database.performance_indexes import DatabaseIndexManager
+from database.connection_pool import get_enhanced_connection_manager
+from services.query_optimizer import get_query_optimizer
 
 logger = logging.getLogger(__name__)
 
 
 @dataclass
-class PerformanceMetric:
-    """Performance metric data point"""
-    timestamp: datetime
-    metric_name: str
-    value: float
-    tags: Dict[str, str]
-    unit: str = "ms"
-
-
-@dataclass
 class PerformanceAlert:
-    """Performance alert"""
-    alert_id: str
-    metric_name: str
-    threshold: float
-    current_value: float
-    severity: str  # "warning", "critical"
+    """Performance alert data structure"""
+    alert_type: str
+    severity: str  # low, medium, high, critical
     message: str
-    timestamp: datetime
+    metric_value: float
+    threshold: float
+    timestamp: datetime = field(default_factory=datetime.now)
     resolved: bool = False
 
 
-class MetricsCollector:
-    """
-    Collects and stores performance metrics
-    """
-    
-    def __init__(self, redis_client: Optional[redis.Redis] = None):
-        self.redis_client = redis_client
-        self.metrics_buffer = deque(maxlen=1000)  # In-memory buffer
-        self.metric_aggregates = defaultdict(list)
-        
-        # Performance targets from design document
-        self.performance_targets = {
-            "device_classification": 2000,  # 2 seconds in ms
-            "predicate_search": 10000,      # 10 seconds in ms
-            "comparison_analysis": 5000,    # 5 seconds in ms
-            "document_processing": 30000,   # 30 seconds in ms
-            "chat_responses": 3000,         # 3 seconds in ms
-            "api_response": 1000,           # 1 second in ms
-            "database_query": 500,          # 500ms
-            "cache_operation": 50           # 50ms
-        }
-    
-    async def record_api_request(
-        self,
-        endpoint: str,
-        method: str,
-        status_code: int,
-        response_time: float,
-        user_id: Optional[int] = None,
-        project_id: Optional[int] = None
-    ) -> None:
-        """Record API request metrics"""
-        metric = PerformanceMetric(
-            timestamp=datetime.now(),
-            metric_name="api_request",
-            value=response_time * 1000,  # Convert to milliseconds
-            tags={
-                "endpoint": endpoint,
-                "method": method,
-                "status_code": str(status_code),
-                "user_id": str(user_id) if user_id else "anonymous",
-                "project_id": str(project_id) if project_id else "none"
-            }
-        )
-        
-        await self._store_metric(metric)
-    
-    async def record_database_query(
-        self,
-        query_type: str,
-        execution_time: float,
-        table_name: Optional[str] = None,
-        rows_affected: Optional[int] = None
-    ) -> None:
-        """Record database query metrics"""
-        metric = PerformanceMetric(
-            timestamp=datetime.now(),
-            metric_name="database_query",
-            value=execution_time * 1000,
-            tags={
-                "query_type": query_type,
-                "table_name": table_name or "unknown",
-                "rows_affected": str(rows_affected) if rows_affected else "0"
-            }
-        )
-        
-        await self._store_metric(metric)
-    
-    async def record_cache_operation(
-        self,
-        operation: str,  # "get", "set", "delete"
-        hit: bool,
-        response_time: float,
-        key_namespace: Optional[str] = None
-    ) -> None:
-        """Record cache operation metrics"""
-        metric = PerformanceMetric(
-            timestamp=datetime.now(),
-            metric_name="cache_operation",
-            value=response_time * 1000,
-            tags={
-                "operation": operation,
-                "hit": str(hit),
-                "namespace": key_namespace or "default"
-            }
-        )
-        
-        await self._store_metric(metric)
-    
-    async def record_agent_workflow(
-        self,
-        workflow_type: str,
-        execution_time: float,
-        confidence_score: Optional[float] = None,
-        success: bool = True
-    ) -> None:
-        """Record agent workflow metrics"""
-        metric = PerformanceMetric(
-            timestamp=datetime.now(),
-            metric_name=workflow_type,
-            value=execution_time * 1000,
-            tags={
-                "success": str(success),
-                "confidence_score": str(confidence_score) if confidence_score else "none"
-            }
-        )
-        
-        await self._store_metric(metric)
-    
-    async def record_background_job(
-        self,
-        job_type: str,
-        execution_time: float,
-        status: str,
-        retry_count: int = 0
-    ) -> None:
-        """Record background job metrics"""
-        metric = PerformanceMetric(
-            timestamp=datetime.now(),
-            metric_name="background_job",
-            value=execution_time * 1000,
-            tags={
-                "job_type": job_type,
-                "status": status,
-                "retry_count": str(retry_count)
-            }
-        )
-        
-        await self._store_metric(metric)
-    
-    async def _store_metric(self, metric: PerformanceMetric) -> None:
-        """Store metric in buffer and Redis"""
-        # Add to in-memory buffer
-        self.metrics_buffer.append(metric)
-        
-        # Add to aggregates for quick calculations
-        self.metric_aggregates[metric.metric_name].append(metric.value)
-        
-        # Keep only recent values for aggregates
-        if len(self.metric_aggregates[metric.metric_name]) > 100:
-            self.metric_aggregates[metric.metric_name] = self.metric_aggregates[metric.metric_name][-100:]
-        
-        # Store in Redis if available
-        if self.redis_client:
-            try:
-                metric_data = {
-                    "timestamp": metric.timestamp.isoformat(),
-                    "metric_name": metric.metric_name,
-                    "value": metric.value,
-                    "tags": json.dumps(metric.tags),
-                    "unit": metric.unit
-                }
-                
-                # Store with TTL of 24 hours
-                await self.redis_client.setex(
-                    f"metric:{metric.metric_name}:{int(metric.timestamp.timestamp())}",
-                    86400,
-                    json.dumps(metric_data)
-                )
-                
-                # Also add to time series for aggregation
-                await self.redis_client.zadd(
-                    f"metrics_ts:{metric.metric_name}",
-                    {json.dumps(metric_data): metric.timestamp.timestamp()}
-                )
-                
-                # Keep only last 24 hours of time series data
-                cutoff = (datetime.now() - timedelta(hours=24)).timestamp()
-                await self.redis_client.zremrangebyscore(
-                    f"metrics_ts:{metric.metric_name}",
-                    0,
-                    cutoff
-                )
-                
-            except Exception as e:
-                logger.error(f"Failed to store metric in Redis: {e}")
-    
-    async def get_metrics(self, time_range_hours: int = 1) -> Dict[str, Any]:
-        """Get aggregated metrics for the specified time range"""
-        cutoff_time = datetime.now() - timedelta(hours=time_range_hours)
-        
-        # Filter recent metrics from buffer
-        recent_metrics = [
-            m for m in self.metrics_buffer 
-            if m.timestamp >= cutoff_time
-        ]
-        
-        # Group by metric name
-        grouped_metrics = defaultdict(list)
-        for metric in recent_metrics:
-            grouped_metrics[metric.metric_name].append(metric)
-        
-        # Calculate aggregates
-        aggregated = {}
-        
-        for metric_name, metrics in grouped_metrics.items():
-            values = [m.value for m in metrics]
-            
-            if values:
-                aggregated[metric_name] = {
-                    "count": len(values),
-                    "avg": statistics.mean(values),
-                    "min": min(values),
-                    "max": max(values),
-                    "p50": statistics.median(values),
-                    "p95": self._percentile(values, 0.95),
-                    "p99": self._percentile(values, 0.99),
-                    "unit": metrics[0].unit,
-                    "target": self.performance_targets.get(metric_name),
-                    "meets_target": statistics.mean(values) <= self.performance_targets.get(metric_name, float('inf'))
-                }
-        
-        # Add overall statistics
-        all_api_requests = [m for m in recent_metrics if m.metric_name == "api_request"]
-        
-        return {
-            "time_range_hours": time_range_hours,
-            "total_metrics": len(recent_metrics),
-            "metrics": aggregated,
-            "api_requests": {
-                "total": len(all_api_requests),
-                "avg_response_time": statistics.mean([m.value for m in all_api_requests]) if all_api_requests else 0,
-                "requests_per_minute": len(all_api_requests) / (time_range_hours * 60) if time_range_hours > 0 else 0
-            },
-            "timestamp": datetime.now().isoformat()
-        }
-    
-    def _percentile(self, values: List[float], percentile: float) -> float:
-        """Calculate percentile of values"""
-        if not values:
-            return 0.0
-        
-        sorted_values = sorted(values)
-        index = int(percentile * len(sorted_values))
-        
-        if index >= len(sorted_values):
-            return sorted_values[-1]
-        
-        return sorted_values[index]
-
-
 class PerformanceMonitor:
-    """
-    Main performance monitoring service
-    """
+    """Database performance monitoring service"""
     
-    def __init__(self, redis_client: Optional[redis.Redis] = None):
-        self.redis_client = redis_client
-        self.metrics_collector = MetricsCollector(redis_client)
-        self.alerts: List[PerformanceAlert] = []
-        self.alert_handlers: List[Callable] = []
+    def __init__(self):
+        self._db_manager = None
+        self._connection_manager = None
+        self._query_optimizer = None
+        self._index_manager = None
+        self._alerts: List[PerformanceAlert] = []
+        self._monitoring_active = False
+        self._monitoring_interval = 60  # seconds
+        self._monitoring_task: Optional[asyncio.Task] = None
         
-        # Alert thresholds
-        self.alert_thresholds = {
-            "api_request": {"warning": 2000, "critical": 5000},  # ms
-            "database_query": {"warning": 1000, "critical": 3000},  # ms
-            "device_classification": {"warning": 3000, "critical": 5000},  # ms
-            "predicate_search": {"warning": 15000, "critical": 30000},  # ms
-            "comparison_analysis": {"warning": 8000, "critical": 15000},  # ms
-            "document_processing": {"warning": 45000, "critical": 90000},  # ms
-            "chat_responses": {"warning": 5000, "critical": 10000},  # ms
+        # Performance thresholds
+        self._thresholds = {
+            "slow_query_time": 1.0,  # seconds
+            "connection_pool_usage": 0.8,  # 80%
+            "failed_connection_rate": 0.1,  # 10%
+            "average_response_time": 0.5,  # seconds
+            "database_size_mb": 1000,  # MB
+            "index_usage_rate": 0.7  # 70%
         }
     
-    def add_alert_handler(self, handler: Callable[[PerformanceAlert], None]) -> None:
-        """Add alert handler function"""
-        self.alert_handlers.append(handler)
+    @property
+    def db_manager(self):
+        """Lazy initialization of database manager"""
+        if self._db_manager is None:
+            self._db_manager = get_database_manager()
+        return self._db_manager
     
-    async def check_performance_alerts(self) -> List[PerformanceAlert]:
-        """Check for performance issues and generate alerts"""
-        current_alerts = []
-        
-        # Get recent metrics
-        metrics = await self.metrics_collector.get_metrics(time_range_hours=1)
-        
-        for metric_name, metric_data in metrics.get("metrics", {}).items():
-            if metric_name not in self.alert_thresholds:
-                continue
-            
-            avg_value = metric_data["avg"]
-            thresholds = self.alert_thresholds[metric_name]
-            
-            # Check for critical alert
-            if avg_value > thresholds["critical"]:
-                alert = PerformanceAlert(
-                    alert_id=f"{metric_name}_critical_{int(time.time())}",
-                    metric_name=metric_name,
-                    threshold=thresholds["critical"],
-                    current_value=avg_value,
-                    severity="critical",
-                    message=f"{metric_name} average response time ({avg_value:.0f}ms) exceeds critical threshold ({thresholds['critical']}ms)",
-                    timestamp=datetime.now()
-                )
-                current_alerts.append(alert)
-                
-            # Check for warning alert
-            elif avg_value > thresholds["warning"]:
-                alert = PerformanceAlert(
-                    alert_id=f"{metric_name}_warning_{int(time.time())}",
-                    metric_name=metric_name,
-                    threshold=thresholds["warning"],
-                    current_value=avg_value,
-                    severity="warning",
-                    message=f"{metric_name} average response time ({avg_value:.0f}ms) exceeds warning threshold ({thresholds['warning']}ms)",
-                    timestamp=datetime.now()
-                )
-                current_alerts.append(alert)
-        
-        # Store alerts and notify handlers
-        for alert in current_alerts:
-            self.alerts.append(alert)
-            
-            # Notify alert handlers
-            for handler in self.alert_handlers:
-                try:
-                    await handler(alert) if asyncio.iscoroutinefunction(handler) else handler(alert)
-                except Exception as e:
-                    logger.error(f"Alert handler failed: {e}")
-        
-        return current_alerts
+    @property
+    def connection_manager(self):
+        """Lazy initialization of connection manager"""
+        if self._connection_manager is None:
+            try:
+                self._connection_manager = get_enhanced_connection_manager()
+            except RuntimeError:
+                # Enhanced connection manager not initialized, use regular db_manager
+                self._connection_manager = None
+        return self._connection_manager
     
-    async def check_target_compliance(self, targets: Dict[str, float]) -> Dict[str, Any]:
-        """Check compliance with performance targets"""
-        metrics = await self.metrics_collector.get_metrics(time_range_hours=24)
-        
-        compliance_results = {}
-        total_metrics = 0
-        compliant_metrics = 0
-        
-        for metric_name, target_ms in targets.items():
-            if metric_name in metrics.get("metrics", {}):
-                metric_data = metrics["metrics"][metric_name]
-                avg_value = metric_data["avg"]
-                is_compliant = avg_value <= target_ms
-                
-                compliance_results[metric_name] = {
-                    "target_ms": target_ms,
-                    "actual_avg_ms": avg_value,
-                    "compliant": is_compliant,
-                    "compliance_ratio": min(1.0, target_ms / avg_value) if avg_value > 0 else 1.0,
-                    "sample_count": metric_data["count"]
-                }
-                
-                total_metrics += 1
-                if is_compliant:
-                    compliant_metrics += 1
-        
-        overall_compliance = compliant_metrics / total_metrics if total_metrics > 0 else 0.0
-        
-        return {
-            "overall_compliance": overall_compliance,
-            "compliant_metrics": compliant_metrics,
-            "total_metrics": total_metrics,
-            "metric_compliance": compliance_results,
-            "timestamp": datetime.now().isoformat()
-        }
+    @property
+    def query_optimizer(self):
+        """Lazy initialization of query optimizer"""
+        if self._query_optimizer is None:
+            self._query_optimizer = get_query_optimizer()
+        return self._query_optimizer
     
-    async def record_workflow_completion(
-        self,
-        workflow_type: str,
-        execution_time: float,
-        cache_hit: bool = False,
-        success: bool = True
-    ) -> None:
-        """Record workflow completion metrics"""
-        await self.metrics_collector.record_agent_workflow(
-            workflow_type=workflow_type,
-            execution_time=execution_time,
-            success=success
-        )
-        
-        # Also record cache performance
-        if cache_hit:
-            await self.metrics_collector.record_cache_operation(
-                operation="get",
-                hit=True,
-                response_time=0.001,  # Cache hits are very fast
-                key_namespace=workflow_type
-            )
+    @property
+    def index_manager(self):
+        """Lazy initialization of index manager"""
+        if self._index_manager is None:
+            self._index_manager = DatabaseIndexManager(self.db_manager.engine)
+        return self._index_manager
     
-    async def get_performance_dashboard(self) -> Dict[str, Any]:
-        """Get comprehensive performance dashboard data"""
-        # Get metrics for different time ranges
-        metrics_1h = await self.metrics_collector.get_metrics(1)
-        metrics_24h = await self.metrics_collector.get_metrics(24)
+    async def start_monitoring(self) -> None:
+        """Start continuous performance monitoring"""
+        if self._monitoring_active:
+            logger.warning("Performance monitoring is already active")
+            return
         
-        # Get recent alerts
-        recent_alerts = [
-            alert for alert in self.alerts
-            if alert.timestamp >= datetime.now() - timedelta(hours=24)
-        ]
-        
-        # Calculate performance trends
-        trends = {}
-        for metric_name in self.metrics_collector.performance_targets.keys():
-            if metric_name in metrics_1h.get("metrics", {}) and metric_name in metrics_24h.get("metrics", {}):
-                current_avg = metrics_1h["metrics"][metric_name]["avg"]
-                historical_avg = metrics_24h["metrics"][metric_name]["avg"]
-                
-                trend = "stable"
-                if current_avg > historical_avg * 1.1:
-                    trend = "degrading"
-                elif current_avg < historical_avg * 0.9:
-                    trend = "improving"
-                
-                trends[metric_name] = {
-                    "current_avg": current_avg,
-                    "historical_avg": historical_avg,
-                    "trend": trend,
-                    "change_percent": ((current_avg - historical_avg) / historical_avg * 100) if historical_avg > 0 else 0
-                }
-        
-        return {
-            "current_metrics": metrics_1h,
-            "historical_metrics": metrics_24h,
-            "recent_alerts": [asdict(alert) for alert in recent_alerts],
-            "performance_trends": trends,
-            "system_health": await self._get_system_health(),
-            "timestamp": datetime.now().isoformat()
-        }
+        self._monitoring_active = True
+        self._monitoring_task = asyncio.create_task(self._monitoring_loop())
+        logger.info(f"Performance monitoring started with {self._monitoring_interval}s interval")
     
-    async def _get_system_health(self) -> Dict[str, Any]:
-        """Get overall system health indicators"""
-        metrics = await self.metrics_collector.get_metrics(1)
-        
-        # Calculate health score based on performance targets
-        health_score = 0.0
-        total_weight = 0.0
-        
-        for metric_name, target in self.metrics_collector.performance_targets.items():
-            if metric_name in metrics.get("metrics", {}):
-                actual = metrics["metrics"][metric_name]["avg"]
-                
-                # Calculate health contribution (1.0 = perfect, 0.0 = terrible)
-                if actual <= target:
-                    contribution = 1.0
-                else:
-                    # Degrade score based on how much we exceed target
-                    contribution = max(0.0, 1.0 - (actual - target) / target)
-                
-                weight = 1.0
-                if metric_name in ["api_request", "database_query"]:
-                    weight = 2.0  # Higher weight for critical metrics
-                
-                health_score += contribution * weight
-                total_weight += weight
-        
-        overall_health = health_score / total_weight if total_weight > 0 else 0.0
-        
-        # Determine health status
-        if overall_health >= 0.9:
-            status = "excellent"
-        elif overall_health >= 0.7:
-            status = "good"
-        elif overall_health >= 0.5:
-            status = "fair"
-        else:
-            status = "poor"
-        
-        return {
-            "overall_health_score": overall_health,
-            "health_status": status,
-            "active_alerts": len([a for a in self.alerts if not a.resolved]),
-            "critical_alerts": len([a for a in self.alerts if a.severity == "critical" and not a.resolved])
-        }
+    async def stop_monitoring(self) -> None:
+        """Stop continuous performance monitoring"""
+        self._monitoring_active = False
+        if self._monitoring_task:
+            self._monitoring_task.cancel()
+            try:
+                await self._monitoring_task
+            except asyncio.CancelledError:
+                pass
+            self._monitoring_task = None
+        logger.info("Performance monitoring stopped")
     
-    async def health_check(self) -> Dict[str, Any]:
-        """Perform health check on monitoring system"""
+    async def _monitoring_loop(self) -> None:
+        """Main monitoring loop"""
+        while self._monitoring_active:
+            try:
+                await self._collect_performance_metrics()
+                await asyncio.sleep(self._monitoring_interval)
+            except asyncio.CancelledError:
+                break
+            except Exception as e:
+                logger.error(f"Error in performance monitoring loop: {e}")
+                await asyncio.sleep(self._monitoring_interval)
+    
+    async def _collect_performance_metrics(self) -> None:
+        """Collect and analyze performance metrics"""
         try:
-            # Test metrics collection
-            test_start = time.time()
-            await self.metrics_collector.record_api_request(
-                endpoint="/health",
-                method="GET",
-                status_code=200,
-                response_time=0.1
-            )
+            # Collect database health metrics
+            health_data = await self.db_manager.health_check()
             
-            # Test metrics retrieval
-            metrics = await self.metrics_collector.get_metrics(1)
+            # Collect connection pool metrics
+            if self.connection_manager:
+                pool_metrics = await self.connection_manager.get_performance_metrics()
+                await self._check_connection_pool_alerts(pool_metrics)
             
-            response_time = time.time() - test_start
+            # Collect query performance metrics
+            query_metrics = await self.query_optimizer.get_query_metrics_summary()
+            await self._check_query_performance_alerts(query_metrics)
             
-            return {
-                "status": "healthy",
-                "response_time_seconds": response_time,
-                "metrics_buffer_size": len(self.metrics_collector.metrics_buffer),
-                "active_alerts": len([a for a in self.alerts if not a.resolved]),
-                "redis_connected": self.redis_client is not None,
-                "timestamp": datetime.now().isoformat()
-            }
+            # Collect database size and index usage
+            await self._check_database_size_alerts()
+            await self._check_index_usage_alerts()
             
         except Exception as e:
+            logger.error(f"Error collecting performance metrics: {e}")
+    
+    async def _check_connection_pool_alerts(self, pool_metrics: Dict[str, Any]) -> None:
+        """Check for connection pool performance alerts"""
+        try:
+            pool_data = pool_metrics.get("connection_pool", {})
+            performance_data = pool_metrics.get("performance", {})
+            
+            # Check pool usage
+            current_size = pool_data.get("current_size", 0)
+            checked_out = pool_data.get("checked_out", 0)
+            max_size = pool_data.get("configured_size", 1) + pool_data.get("max_overflow", 0)
+            
+            if max_size > 0:
+                usage_rate = checked_out / max_size
+                if usage_rate > self._thresholds["connection_pool_usage"]:
+                    await self._create_alert(
+                        "connection_pool_high_usage",
+                        "high",
+                        f"Connection pool usage is {usage_rate:.1%} (threshold: {self._thresholds['connection_pool_usage']:.1%})",
+                        usage_rate,
+                        self._thresholds["connection_pool_usage"]
+                    )
+            
+            # Check failed connection rate
+            total_connections = performance_data.get("connection_requests", 0)
+            failed_connections = performance_data.get("failed_connections", 0)
+            
+            if total_connections > 0:
+                failure_rate = failed_connections / total_connections
+                if failure_rate > self._thresholds["failed_connection_rate"]:
+                    await self._create_alert(
+                        "high_connection_failure_rate",
+                        "critical",
+                        f"Connection failure rate is {failure_rate:.1%} (threshold: {self._thresholds['failed_connection_rate']:.1%})",
+                        failure_rate,
+                        self._thresholds["failed_connection_rate"]
+                    )
+            
+            # Check average connection time
+            avg_time = performance_data.get("average_connection_time_ms", 0) / 1000
+            if avg_time > self._thresholds["average_response_time"]:
+                await self._create_alert(
+                    "slow_connection_time",
+                    "medium",
+                    f"Average connection time is {avg_time:.3f}s (threshold: {self._thresholds['average_response_time']}s)",
+                    avg_time,
+                    self._thresholds["average_response_time"]
+                )
+                
+        except Exception as e:
+            logger.error(f"Error checking connection pool alerts: {e}")
+    
+    async def _check_query_performance_alerts(self, query_metrics: Dict[str, Any]) -> None:
+        """Check for query performance alerts"""
+        try:
+            # Check average execution time
+            avg_time = query_metrics.get("average_execution_time_seconds", 0)
+            if avg_time > self._thresholds["slow_query_time"]:
+                await self._create_alert(
+                    "slow_average_query_time",
+                    "medium",
+                    f"Average query execution time is {avg_time:.3f}s (threshold: {self._thresholds['slow_query_time']}s)",
+                    avg_time,
+                    self._thresholds["slow_query_time"]
+                )
+            
+            # Check for slow queries
+            slow_queries = query_metrics.get("slow_queries_count", 0)
+            total_queries = query_metrics.get("total_unique_queries", 1)
+            slow_query_rate = slow_queries / total_queries
+            
+            if slow_query_rate > 0.2:  # More than 20% of queries are slow
+                await self._create_alert(
+                    "high_slow_query_rate",
+                    "high",
+                    f"{slow_queries} out of {total_queries} queries are slow ({slow_query_rate:.1%})",
+                    slow_query_rate,
+                    0.2
+                )
+                
+        except Exception as e:
+            logger.error(f"Error checking query performance alerts: {e}")
+    
+    async def _check_database_size_alerts(self) -> None:
+        """Check for database size alerts"""
+        try:
+            async with self.db_manager.get_connection() as conn:
+                # Get database size (SQLite specific)
+                if self.db_manager.config.database_url.startswith("sqlite"):
+                    size_query = text("SELECT page_count * page_size as size FROM pragma_page_count(), pragma_page_size()")
+                    result = await conn.execute(size_query)
+                    size_bytes = result.scalar() or 0
+                    size_mb = size_bytes / (1024 * 1024)
+                    
+                    if size_mb > self._thresholds["database_size_mb"]:
+                        await self._create_alert(
+                            "large_database_size",
+                            "medium",
+                            f"Database size is {size_mb:.1f}MB (threshold: {self._thresholds['database_size_mb']}MB)",
+                            size_mb,
+                            self._thresholds["database_size_mb"]
+                        )
+                        
+        except Exception as e:
+            logger.error(f"Error checking database size alerts: {e}")
+    
+    async def _check_index_usage_alerts(self) -> None:
+        """Check for index usage alerts"""
+        try:
+            # Get table statistics to check if indexes are being used effectively
+            stats = await self.index_manager.get_table_statistics()
+            
+            for table_name, table_stats in stats.items():
+                if isinstance(table_stats, dict):
+                    row_count = table_stats.get("row_count", 0)
+                    index_count = table_stats.get("index_count", 0)
+                    
+                    # Alert if large tables have few indexes
+                    if row_count > 1000 and index_count < 2:
+                        await self._create_alert(
+                            "insufficient_indexes",
+                            "medium",
+                            f"Table {table_name} has {row_count} rows but only {index_count} indexes",
+                            index_count,
+                            2
+                        )
+                        
+        except Exception as e:
+            logger.error(f"Error checking index usage alerts: {e}")
+    
+    async def _create_alert(
+        self, 
+        alert_type: str, 
+        severity: str, 
+        message: str, 
+        metric_value: float, 
+        threshold: float
+    ) -> None:
+        """Create a performance alert"""
+        # Check if similar alert already exists and is not resolved
+        existing_alert = next(
+            (alert for alert in self._alerts 
+             if alert.alert_type == alert_type and not alert.resolved),
+            None
+        )
+        
+        if existing_alert:
+            # Update existing alert
+            existing_alert.metric_value = metric_value
+            existing_alert.timestamp = datetime.now()
+            existing_alert.message = message
+        else:
+            # Create new alert
+            alert = PerformanceAlert(
+                alert_type=alert_type,
+                severity=severity,
+                message=message,
+                metric_value=metric_value,
+                threshold=threshold
+            )
+            self._alerts.append(alert)
+            logger.warning(f"Performance alert created: {severity.upper()} - {message}")
+    
+    async def get_performance_report(self) -> Dict[str, Any]:
+        """Generate comprehensive performance report"""
+        try:
+            # Database health
+            health_data = await self.db_manager.health_check()
+            
+            # Connection pool metrics
+            pool_metrics = {}
+            if self.connection_manager:
+                pool_metrics = await self.connection_manager.get_performance_metrics()
+            
+            # Query performance
+            query_metrics = await self.query_optimizer.get_query_metrics_summary()
+            query_analysis = await self.query_optimizer.analyze_query_performance()
+            
+            # Table statistics
+            table_stats = await self.index_manager.get_table_statistics()
+            
+            # Active alerts
+            active_alerts = [
+                {
+                    "type": alert.alert_type,
+                    "severity": alert.severity,
+                    "message": alert.message,
+                    "metric_value": alert.metric_value,
+                    "threshold": alert.threshold,
+                    "timestamp": alert.timestamp.isoformat(),
+                    "resolved": alert.resolved
+                }
+                for alert in self._alerts
+                if not alert.resolved
+            ]
+            
+            report = {
+                "timestamp": datetime.now().isoformat(),
+                "monitoring_active": self._monitoring_active,
+                "database_health": health_data,
+                "connection_pool": pool_metrics,
+                "query_performance": {
+                    "summary": query_metrics,
+                    "analysis": query_analysis
+                },
+                "table_statistics": table_stats,
+                "active_alerts": active_alerts,
+                "alert_summary": {
+                    "total_alerts": len(self._alerts),
+                    "active_alerts": len(active_alerts),
+                    "critical_alerts": len([a for a in active_alerts if a["severity"] == "critical"]),
+                    "high_alerts": len([a for a in active_alerts if a["severity"] == "high"]),
+                    "medium_alerts": len([a for a in active_alerts if a["severity"] == "medium"]),
+                    "low_alerts": len([a for a in active_alerts if a["severity"] == "low"])
+                },
+                "thresholds": self._thresholds
+            }
+            
+            return report
+            
+        except Exception as e:
+            logger.error(f"Error generating performance report: {e}")
             return {
-                "status": "unhealthy",
                 "error": str(e),
                 "timestamp": datetime.now().isoformat()
             }
-
-
-# Alert handlers
-async def log_alert_handler(alert: PerformanceAlert) -> None:
-    """Log performance alerts"""
-    logger.warning(f"Performance Alert [{alert.severity.upper()}]: {alert.message}")
-
-
-async def email_alert_handler(alert: PerformanceAlert) -> None:
-    """Send email alerts (placeholder implementation)"""
-    # In a real implementation, this would send emails
-    logger.info(f"Would send email alert: {alert.message}")
-
-
-# Factory function
-async def create_performance_monitor(redis_url: str = "redis://localhost:6379") -> PerformanceMonitor:
-    """Create performance monitor with Redis connection"""
-    try:
-        redis_client = redis.from_url(redis_url)
-        await redis_client.ping()
-        logger.info("Connected to Redis for performance monitoring")
-    except Exception as e:
-        logger.warning(f"Failed to connect to Redis for monitoring: {e}")
-        redis_client = None
     
-    monitor = PerformanceMonitor(redis_client)
+    async def resolve_alert(self, alert_type: str) -> bool:
+        """Resolve an active alert"""
+        for alert in self._alerts:
+            if alert.alert_type == alert_type and not alert.resolved:
+                alert.resolved = True
+                logger.info(f"Performance alert resolved: {alert_type}")
+                return True
+        return False
     
-    # Add default alert handlers
-    monitor.add_alert_handler(log_alert_handler)
+    async def clear_resolved_alerts(self) -> int:
+        """Clear all resolved alerts"""
+        initial_count = len(self._alerts)
+        self._alerts = [alert for alert in self._alerts if not alert.resolved]
+        cleared_count = initial_count - len(self._alerts)
+        logger.info(f"Cleared {cleared_count} resolved alerts")
+        return cleared_count
     
-    return monitor
-
-
-# Performance monitoring decorators
-def monitor_performance(metric_name: str):
-    """Decorator to monitor function performance"""
-    def decorator(func):
-        async def async_wrapper(*args, **kwargs):
-            start_time = time.time()
-            success = True
-            
-            try:
-                result = await func(*args, **kwargs)
-                return result
-            except Exception as e:
-                success = False
-                raise
-            finally:
-                execution_time = time.time() - start_time
-                
-                # Record metric (would need access to metrics collector)
-                logger.debug(f"Function {func.__name__} executed in {execution_time:.4f}s")
+    async def optimize_performance(self) -> Dict[str, Any]:
+        """Run automated performance optimizations"""
+        optimization_results = {}
         
-        def sync_wrapper(*args, **kwargs):
-            start_time = time.time()
-            success = True
+        try:
+            # Create performance indexes
+            await self.index_manager.create_performance_indexes()
+            optimization_results["indexes"] = "created"
             
-            try:
-                result = func(*args, **kwargs)
-                return result
-            except Exception as e:
-                success = False
-                raise
-            finally:
-                execution_time = time.time() - start_time
-                logger.debug(f"Function {func.__name__} executed in {execution_time:.4f}s")
+            # Optimize database
+            db_optimization = await self.index_manager.optimize_database()
+            optimization_results["database_optimization"] = db_optimization
+            
+            # Optimize connection pool if available
+            if self.connection_manager:
+                pool_optimization = await self.connection_manager.optimize_connection_pool()
+                optimization_results["connection_pool"] = pool_optimization
+            
+            logger.info("Performance optimization completed")
+            
+        except Exception as e:
+            optimization_results["error"] = str(e)
+            logger.error(f"Performance optimization failed: {e}")
         
-        return async_wrapper if asyncio.iscoroutinefunction(func) else sync_wrapper
+        return optimization_results
     
-    return decorator
+    def set_threshold(self, metric: str, value: float) -> bool:
+        """Set performance threshold for a metric"""
+        if metric in self._thresholds:
+            self._thresholds[metric] = value
+            logger.info(f"Performance threshold updated: {metric} = {value}")
+            return True
+        return False
+    
+    def get_thresholds(self) -> Dict[str, float]:
+        """Get current performance thresholds"""
+        return self._thresholds.copy()
+
+
+# Global performance monitor instance
+_performance_monitor: Optional[PerformanceMonitor] = None
+
+
+def get_performance_monitor() -> PerformanceMonitor:
+    """Get the global performance monitor instance"""
+    global _performance_monitor
+    if _performance_monitor is None:
+        _performance_monitor = PerformanceMonitor()
+    return _performance_monitor

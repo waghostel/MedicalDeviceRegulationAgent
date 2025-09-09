@@ -1,119 +1,134 @@
 """
-Enhanced Project Service with comprehensive caching integration.
-
-This service extends the base project service with intelligent caching,
-cache warming, and invalidation strategies for optimal performance.
+Enhanced project service with optimized queries and performance monitoring
 """
 
 import json
-import logging
 from datetime import datetime, timezone
-from typing import List, Optional, Dict, Any
+from typing import List, Optional, Dict, Any, Tuple
 
-from sqlalchemy.orm import Session, selectinload
-from sqlalchemy import select, and_, or_, func
+from sqlalchemy.orm import Session
+from sqlalchemy import select, and_, or_, func, text
 from fastapi import HTTPException, status
 
-# Import base service and models
-from .projects import (
-    ProjectService,
+from models.project import Project, ProjectStatus
+from models.user import User
+from models.device_classification import DeviceClassification
+from models.predicate_device import PredicateDevice
+from models.agent_interaction import AgentInteraction
+from models.project_document import ProjectDocument
+from services.query_optimizer import get_query_optimizer
+from services.performance_monitor import get_performance_monitor
+from database.connection import get_database_manager
+
+# Import existing models from the original service
+from services.projects import (
     ProjectCreateRequest,
-    ProjectUpdateRequest,
+    ProjectUpdateRequest, 
     ProjectResponse,
     ProjectDashboardData,
     ProjectSearchFilters,
     ProjectExportData
 )
-from .project_cache import (
-    ProjectCacheService,
-    CacheInvalidationEvent,
-    get_project_cache_service
+
+from exceptions.project_exceptions import (
+    ProjectNotFoundError,
+    ProjectAccessDeniedError,
+    ProjectValidationError,
+    ProjectStateError,
+    ProjectExportError,
 )
 
-from models.project import Project, ProjectStatus
-from models.user import User
 
-logger = logging.getLogger(__name__)
-
-
-class EnhancedProjectService(ProjectService):
-    """
-    Enhanced project service with comprehensive caching integration
-    """
+class EnhancedProjectService:
+    """Enhanced project service with optimized queries and performance monitoring"""
     
     def __init__(self):
-        super().__init__()
-        self._cache_service: Optional[ProjectCacheService] = None
+        self._db_manager = None
+        self._query_optimizer = None
+        self._performance_monitor = None
     
-    async def _get_cache_service(self) -> ProjectCacheService:
-        """Get project cache service instance"""
-        if self._cache_service is None:
-            self._cache_service = await get_project_cache_service()
-        return self._cache_service
+    @property
+    def db_manager(self):
+        """Lazy initialization of database manager"""
+        if self._db_manager is None:
+            self._db_manager = get_database_manager()
+        return self._db_manager
+    
+    @property
+    def query_optimizer(self):
+        """Lazy initialization of query optimizer"""
+        if self._query_optimizer is None:
+            self._query_optimizer = get_query_optimizer()
+        return self._query_optimizer
+    
+    @property
+    def performance_monitor(self):
+        """Lazy initialization of performance monitor"""
+        if self._performance_monitor is None:
+            self._performance_monitor = get_performance_monitor()
+        return self._performance_monitor
     
     async def create_project(
         self, 
         project_data: ProjectCreateRequest, 
         user_id: str
     ) -> ProjectResponse:
-        """
-        Create a new project with cache warming
-        """
-        # Create project using base service
-        project_response = await super().create_project(project_data, user_id)
+        """Create a new project with optimized user lookup"""
         
-        # Warm caches after creation
-        cache_service = await self._get_cache_service()
-        try:
-            # Cache the new project detail
-            await cache_service.cache_project_detail(
-                project_response.id,
-                project_response.model_dump()
-            )
-            
-            # Invalidate user project lists to include new project
-            await cache_service.invalidate_user_project_caches(user_id)
-            
-            logger.info(f"Caches warmed for new project {project_response.id}")
-            
-        except Exception as e:
-            logger.warning(f"Cache warming failed for new project: {e}")
-        
-        return project_response
+        async with self.query_optimizer.monitored_query("create_project", f"user:{user_id}"):
+            async with self.db_manager.get_session() as session:
+                # Optimized user lookup with index
+                user_stmt = select(User).where(User.google_id == user_id)
+                user_result = await session.execute(user_stmt)
+                user = user_result.scalar_one_or_none()
+                
+                if not user:
+                    raise ProjectNotFoundError(project_id=0, user_id=user_id)
+                
+                # Create new project
+                project = Project(
+                    user_id=user.id,
+                    name=project_data.name,
+                    description=project_data.description,
+                    device_type=project_data.device_type,
+                    intended_use=project_data.intended_use,
+                    status=ProjectStatus.DRAFT
+                )
+                
+                session.add(project)
+                await session.commit()
+                await session.refresh(project)
+                
+                return ProjectResponse.model_validate(project)
     
     async def get_project(
         self, 
         project_id: int, 
         user_id: str
     ) -> ProjectResponse:
-        """
-        Get project with caching
-        """
-        cache_service = await self._get_cache_service()
+        """Get a specific project with optimized query"""
         
-        # Try to get from cache first
-        try:
-            cached_project = await cache_service.get_project_detail(project_id)
-            if cached_project:
-                logger.debug(f"Project {project_id} retrieved from cache")
-                return ProjectResponse(**cached_project)
-        except Exception as e:
-            logger.warning(f"Cache retrieval failed for project {project_id}: {e}")
-        
-        # Get from database
-        project_response = await super().get_project(project_id, user_id)
-        
-        # Cache the result
-        try:
-            await cache_service.cache_project_detail(
-                project_id,
-                project_response.model_dump()
-            )
-            logger.debug(f"Project {project_id} cached after database retrieval")
-        except Exception as e:
-            logger.warning(f"Cache storage failed for project {project_id}: {e}")
-        
-        return project_response
+        async with self.query_optimizer.monitored_query("get_project", f"project:{project_id}"):
+            async with self.db_manager.get_session() as session:
+                # Optimized query with proper join and index usage
+                stmt = (
+                    select(Project)
+                    .join(User, Project.user_id == User.id)
+                    .where(
+                        and_(
+                            Project.id == project_id,
+                            User.google_id == user_id
+                        )
+                    )
+                )
+                
+                result = await session.execute(stmt)
+                project = result.scalar_one_or_none()
+                
+                if not project:
+                    raise ProjectNotFoundError(project_id=project_id, user_id=user_id)
+                
+                return ProjectResponse.model_validate(project)
     
     async def update_project(
         self, 
@@ -121,132 +136,265 @@ class EnhancedProjectService(ProjectService):
         project_data: ProjectUpdateRequest, 
         user_id: str
     ) -> ProjectResponse:
-        """
-        Update project with cache invalidation and warming
-        """
-        # Update project using base service
-        project_response = await super().update_project(project_id, project_data, user_id)
+        """Update a project with optimized query and WebSocket notification"""
         
-        # Handle cache invalidation and warming
-        cache_service = await self._get_cache_service()
-        try:
-            # Create invalidation event
-            invalidation_event = CacheInvalidationEvent(
-                event_type='project_update',
-                project_id=project_id,
-                user_id=user_id,
-                timestamp=datetime.now(timezone.utc),
-                metadata={'updated_fields': list(project_data.model_dump(exclude_unset=True).keys())}
-            )
-            
-            # Handle cache invalidation
-            await cache_service.handle_cache_invalidation_event(invalidation_event)
-            
-            # Warm caches with fresh data
-            await cache_service.warm_project_caches_on_update(
-                project_id,
-                user_id,
-                project_response.model_dump()
-            )
-            
-            logger.info(f"Caches updated for project {project_id}")
-            
-        except Exception as e:
-            logger.warning(f"Cache update failed for project {project_id}: {e}")
-        
-        return project_response
+        async with self.query_optimizer.monitored_query("update_project", f"project:{project_id}"):
+            async with self.db_manager.get_session() as session:
+                # Optimized project lookup
+                stmt = (
+                    select(Project)
+                    .join(User, Project.user_id == User.id)
+                    .where(
+                        and_(
+                            Project.id == project_id,
+                            User.google_id == user_id
+                        )
+                    )
+                )
+                
+                result = await session.execute(stmt)
+                project = result.scalar_one_or_none()
+                
+                if not project:
+                    raise ProjectNotFoundError(project_id=project_id, user_id=user_id)
+                
+                # Update project fields
+                update_data = project_data.model_dump(exclude_unset=True)
+                for field, value in update_data.items():
+                    setattr(project, field, value)
+                
+                project.updated_at = datetime.now(timezone.utc)
+                
+                await session.commit()
+                await session.refresh(project)
+                
+                # Send WebSocket notification (if available)
+                try:
+                    from api.websocket import notify_project_updated
+                    project_response = ProjectResponse.model_validate(project)
+                    await notify_project_updated(
+                        project_id=project.id,
+                        user_id=user_id,
+                        data=project_response.model_dump()
+                    )
+                except (ImportError, Exception) as e:
+                    # Log but don't fail the update
+                    pass
+                
+                return ProjectResponse.model_validate(project)
     
     async def delete_project(
         self, 
         project_id: int, 
         user_id: str
     ) -> Dict[str, str]:
-        """
-        Delete project with cache invalidation
-        """
-        # Delete project using base service
-        result = await super().delete_project(project_id, user_id)
+        """Delete a project with optimized query"""
         
-        # Invalidate all related caches
-        cache_service = await self._get_cache_service()
-        try:
-            await cache_service.invalidate_project_cache(project_id, user_id)
-            logger.info(f"Caches invalidated for deleted project {project_id}")
-        except Exception as e:
-            logger.warning(f"Cache invalidation failed for deleted project {project_id}: {e}")
-        
-        return result
+        async with self.query_optimizer.monitored_query("delete_project", f"project:{project_id}"):
+            async with self.db_manager.get_session() as session:
+                # Optimized project lookup
+                stmt = (
+                    select(Project)
+                    .join(User, Project.user_id == User.id)
+                    .where(
+                        and_(
+                            Project.id == project_id,
+                            User.google_id == user_id
+                        )
+                    )
+                )
+                
+                result = await session.execute(stmt)
+                project = result.scalar_one_or_none()
+                
+                if not project:
+                    raise ProjectNotFoundError(project_id=project_id, user_id=user_id)
+                
+                project_name = project.name
+                await session.delete(project)
+                await session.commit()
+                
+                return {"message": f"Project '{project_name}' deleted successfully"}
     
     async def list_projects(
         self, 
         user_id: str, 
         filters: ProjectSearchFilters
-    ) -> List[ProjectResponse]:
-        """
-        List projects with caching
-        """
-        cache_service = await self._get_cache_service()
+    ) -> Tuple[List[ProjectResponse], int]:
+        """List projects with optimized query and pagination"""
         
-        # Try to get from cache first
-        try:
-            filters_dict = filters.model_dump()
-            cached_projects = await cache_service.get_project_list(user_id, filters_dict)
-            if cached_projects:
-                logger.debug(f"Project list retrieved from cache for user {user_id}")
-                return [ProjectResponse(**project) for project in cached_projects]
-        except Exception as e:
-            logger.warning(f"Cache retrieval failed for project list: {e}")
+        # Use the optimized query from query_optimizer
+        projects, total_count = await self.query_optimizer.get_optimized_projects_query(
+            user_id=user_id,
+            search=filters.search,
+            status=filters.status,
+            device_type=filters.device_type,
+            limit=filters.limit,
+            offset=filters.offset,
+            include_related=False
+        )
         
-        # Get from database
-        projects = await super().list_projects(user_id, filters)
-        
-        # Cache the result
-        try:
-            projects_data = [project.model_dump() for project in projects]
-            await cache_service.cache_project_list(
-                user_id,
-                filters.model_dump(),
-                projects_data
-            )
-            logger.debug(f"Project list cached for user {user_id}")
-        except Exception as e:
-            logger.warning(f"Cache storage failed for project list: {e}")
-        
-        return projects
+        project_responses = [ProjectResponse.model_validate(project) for project in projects]
+        return project_responses, total_count
     
     async def get_dashboard_data(
         self, 
         project_id: int, 
         user_id: str
     ) -> ProjectDashboardData:
-        """
-        Get dashboard data with caching
-        """
-        cache_service = await self._get_cache_service()
+        """Get comprehensive dashboard data with optimized queries"""
         
-        # Try to get from cache first
-        try:
-            cached_dashboard = await cache_service.get_project_dashboard(project_id)
-            if cached_dashboard:
-                logger.debug(f"Dashboard data retrieved from cache for project {project_id}")
-                return ProjectDashboardData(**cached_dashboard)
-        except Exception as e:
-            logger.warning(f"Cache retrieval failed for dashboard data: {e}")
+        # Use the optimized dashboard query
+        project = await self.query_optimizer.get_optimized_project_dashboard(
+            project_id=project_id,
+            user_id=user_id
+        )
         
-        # Get from database
-        dashboard_data = await super().get_dashboard_data(project_id, user_id)
+        if not project:
+            raise ProjectNotFoundError(project_id=project_id, user_id=user_id)
         
-        # Cache the result
-        try:
-            await cache_service.cache_project_dashboard(
-                project_id,
-                dashboard_data.model_dump()
+        # Build comprehensive classification data
+        classification = None
+        if project.device_classifications:
+            latest_classification = max(
+                project.device_classifications, 
+                key=lambda x: x.created_at
             )
-            logger.debug(f"Dashboard data cached for project {project_id}")
-        except Exception as e:
-            logger.warning(f"Cache storage failed for dashboard data: {e}")
+            classification = {
+                "id": str(latest_classification.id),
+                "projectId": str(project.id),
+                "deviceClass": latest_classification.device_class.value if latest_classification.device_class else None,
+                "productCode": latest_classification.product_code,
+                "regulatoryPathway": latest_classification.regulatory_pathway.value if latest_classification.regulatory_pathway else None,
+                "cfrSections": latest_classification.cfr_sections or [],
+                "confidenceScore": latest_classification.confidence_score or 0.0,
+                "reasoning": latest_classification.reasoning or "",
+                "sources": latest_classification.sources or [],
+                "createdAt": latest_classification.created_at.isoformat(),
+                "updatedAt": latest_classification.updated_at.isoformat()
+            }
         
-        return dashboard_data
+        # Build predicate devices data
+        predicate_devices = []
+        for predicate in project.predicate_devices:
+            predicate_devices.append({
+                "id": str(predicate.id),
+                "projectId": str(project.id),
+                "kNumber": predicate.k_number,
+                "deviceName": predicate.device_name,
+                "intendedUse": predicate.intended_use or "",
+                "productCode": predicate.product_code or "",
+                "clearanceDate": predicate.clearance_date.isoformat() if predicate.clearance_date else "",
+                "confidenceScore": predicate.confidence_score or 0.0,
+                "comparisonData": predicate.comparison_data or {
+                    "similarities": [],
+                    "differences": [],
+                    "riskAssessment": "low",
+                    "testingRecommendations": [],
+                    "substantialEquivalenceAssessment": ""
+                },
+                "isSelected": predicate.is_selected,
+                "createdAt": predicate.created_at.isoformat(),
+                "updatedAt": predicate.updated_at.isoformat()
+            })
+        
+        # Build progress data
+        progress = self._calculate_project_progress(
+            project, classification, predicate_devices
+        )
+        
+        # Build recent activity
+        recent_activity = []
+        for interaction in sorted(project.agent_interactions, key=lambda x: x.created_at, reverse=True)[:10]:
+            activity_type = self._map_agent_action_to_activity_type(interaction.agent_action)
+            recent_activity.append({
+                "id": str(interaction.id),
+                "type": activity_type,
+                "title": self._generate_activity_title(interaction.agent_action),
+                "description": interaction.reasoning or f"Agent performed {interaction.agent_action}",
+                "timestamp": interaction.created_at.isoformat(),
+                "status": "success" if interaction.confidence_score and interaction.confidence_score > 0.7 else "info",
+                "metadata": {
+                    "confidence_score": interaction.confidence_score,
+                    "execution_time_ms": interaction.execution_time_ms
+                }
+            })
+        
+        # Build statistics
+        predicate_count = len(predicate_devices)
+        selected_predicates = len([p for p in predicate_devices if p["isSelected"]])
+        average_confidence = (
+            sum(p["confidenceScore"] for p in predicate_devices) / predicate_count
+            if predicate_count > 0 else 0.0
+        )
+        
+        statistics = {
+            "totalPredicates": predicate_count,
+            "selectedPredicates": selected_predicates,
+            "averageConfidence": average_confidence,
+            "completionPercentage": progress["overallProgress"],
+            "documentsCount": len(project.documents),
+            "agentInteractions": len(project.agent_interactions)
+        }
+        
+        # Legacy fields for backward compatibility
+        classification_status = None
+        if classification:
+            classification_status = {
+                "device_class": classification["deviceClass"],
+                "product_code": classification["productCode"],
+                "regulatory_pathway": classification["regulatoryPathway"],
+                "confidence_score": classification["confidenceScore"],
+                "created_at": classification["createdAt"]
+            }
+        
+        last_activity = None
+        if project.agent_interactions:
+            last_activity = max(
+                project.agent_interactions, 
+                key=lambda x: x.created_at
+            ).created_at
+        
+        return ProjectDashboardData(
+            project=ProjectResponse.model_validate(project),
+            classification=classification,
+            predicate_devices=predicate_devices,
+            progress=progress,
+            recent_activity=recent_activity,
+            statistics=statistics,
+            # Legacy fields
+            classification_status=classification_status,
+            predicate_count=predicate_count,
+            selected_predicates=selected_predicates,
+            document_count=len(project.documents),
+            interaction_count=len(project.agent_interactions),
+            last_activity=last_activity,
+            completion_percentage=progress["overallProgress"]
+        )
+    
+    async def get_user_statistics(self, user_id: str) -> Dict[str, Any]:
+        """Get user statistics with optimized query"""
+        return await self.query_optimizer.get_optimized_user_statistics(user_id)
+    
+    async def get_recent_activity(self, user_id: str, limit: int = 10) -> List[Dict[str, Any]]:
+        """Get recent activity with optimized query"""
+        interactions = await self.query_optimizer.get_optimized_recent_activity(user_id, limit)
+        
+        activity = []
+        for interaction in interactions:
+            activity.append({
+                "id": str(interaction.id),
+                "type": self._map_agent_action_to_activity_type(interaction.agent_action),
+                "title": self._generate_activity_title(interaction.agent_action),
+                "description": interaction.reasoning or f"Agent performed {interaction.agent_action}",
+                "timestamp": interaction.created_at.isoformat(),
+                "project_id": interaction.project_id,
+                "project_name": interaction.project.name if interaction.project else "Unknown",
+                "confidence_score": interaction.confidence_score,
+                "execution_time_ms": interaction.execution_time_ms
+            })
+        
+        return activity
     
     async def export_project(
         self, 
@@ -254,237 +402,185 @@ class EnhancedProjectService(ProjectService):
         user_id: str, 
         format_type: str = "json"
     ) -> ProjectExportData:
-        """
-        Export project with caching
-        """
-        cache_service = await self._get_cache_service()
+        """Export complete project data with optimized query"""
         
-        # Try to get from cache first
-        try:
-            cached_export = await cache_service.get_project_export(project_id, format_type)
-            if cached_export:
-                logger.debug(f"Export data retrieved from cache for project {project_id}")
-                return ProjectExportData(**cached_export)
-        except Exception as e:
-            logger.warning(f"Cache retrieval failed for export data: {e}")
+        # Use optimized dashboard query to get all related data
+        project = await self.query_optimizer.get_optimized_project_dashboard(
+            project_id=project_id,
+            user_id=user_id
+        )
         
-        # Get from database
-        export_data = await super().export_project(project_id, user_id, format_type)
+        if not project:
+            raise ProjectNotFoundError(project_id=project_id, user_id=user_id)
         
-        # Cache the result
-        try:
-            await cache_service.cache_project_export(
-                project_id,
-                format_type,
-                export_data.model_dump()
-            )
-            logger.debug(f"Export data cached for project {project_id}")
-        except Exception as e:
-            logger.warning(f"Cache storage failed for export data: {e}")
+        # Convert related data to dictionaries
+        classifications = []
+        for classification in project.device_classifications:
+            classifications.append({
+                "id": classification.id,
+                "device_class": classification.device_class.value if classification.device_class else None,
+                "product_code": classification.product_code,
+                "regulatory_pathway": classification.regulatory_pathway.value if classification.regulatory_pathway else None,
+                "cfr_sections": classification.cfr_sections,
+                "confidence_score": classification.confidence_score,
+                "reasoning": classification.reasoning,
+                "sources": classification.sources,
+                "created_at": classification.created_at.isoformat()
+            })
         
-        return export_data
+        predicates = []
+        for predicate in project.predicate_devices:
+            predicates.append({
+                "id": predicate.id,
+                "k_number": predicate.k_number,
+                "device_name": predicate.device_name,
+                "intended_use": predicate.intended_use,
+                "product_code": predicate.product_code,
+                "clearance_date": predicate.clearance_date.isoformat() if predicate.clearance_date else None,
+                "confidence_score": predicate.confidence_score,
+                "comparison_data": predicate.comparison_data,
+                "is_selected": predicate.is_selected,
+                "created_at": predicate.created_at.isoformat()
+            })
+        
+        documents = []
+        for document in project.documents:
+            documents.append({
+                "id": document.id,
+                "filename": document.filename,
+                "file_path": document.file_path,
+                "document_type": document.document_type,
+                "metadata": document.metadata,
+                "created_at": document.created_at.isoformat(),
+                "updated_at": document.updated_at.isoformat()
+            })
+        
+        interactions = []
+        for interaction in project.agent_interactions:
+            interactions.append({
+                "id": interaction.id,
+                "agent_action": interaction.agent_action,
+                "input_data": interaction.input_data,
+                "output_data": interaction.output_data,
+                "confidence_score": interaction.confidence_score,
+                "sources": interaction.sources,
+                "reasoning": interaction.reasoning,
+                "execution_time_ms": interaction.execution_time_ms,
+                "created_at": interaction.created_at.isoformat()
+            })
+        
+        return ProjectExportData(
+            project=ProjectResponse.model_validate(project),
+            classifications=classifications,
+            predicates=predicates,
+            documents=documents,
+            interactions=interactions
+        )
     
-    # Additional enhanced methods
-    async def get_project_stats(self, user_id: str) -> Dict[str, Any]:
-        """
-        Get user project statistics with caching
-        """
-        cache_service = await self._get_cache_service()
-        
-        # Try to get from cache first
-        try:
-            cached_stats = await cache_service.get_project_stats(user_id)
-            if cached_stats:
-                logger.debug(f"Project stats retrieved from cache for user {user_id}")
-                return cached_stats
-        except Exception as e:
-            logger.warning(f"Cache retrieval failed for project stats: {e}")
-        
-        # Calculate stats from database
-        async with self.db_manager.get_session() as session:
-            # Get user projects with counts
-            stmt = (
-                select(
-                    func.count(Project.id).label('total_projects'),
-                    func.count(Project.id).filter(Project.status == ProjectStatus.DRAFT).label('draft_projects'),
-                    func.count(Project.id).filter(Project.status == ProjectStatus.IN_PROGRESS).label('in_progress_projects'),
-                    func.count(Project.id).filter(Project.status == ProjectStatus.COMPLETED).label('completed_projects')
-                )
-                .select_from(Project)
-                .join(User)
-                .where(User.google_id == user_id)
-            )
-            
-            result = await session.execute(stmt)
-            stats_row = result.first()
-            
-            stats = {
-                'total_projects': stats_row.total_projects or 0,
-                'draft_projects': stats_row.draft_projects or 0,
-                'in_progress_projects': stats_row.in_progress_projects or 0,
-                'completed_projects': stats_row.completed_projects or 0,
-                'completion_rate': (
-                    (stats_row.completed_projects or 0) / (stats_row.total_projects or 1) * 100
-                ),
-                'last_updated': datetime.now(timezone.utc).isoformat()
-            }
-        
-        # Cache the result
-        try:
-            await cache_service.cache_project_stats(user_id, stats)
-            logger.debug(f"Project stats cached for user {user_id}")
-        except Exception as e:
-            logger.warning(f"Cache storage failed for project stats: {e}")
-        
-        return stats
-    
-    async def search_projects(
-        self, 
-        search_query: str, 
-        user_id: str, 
-        limit: int = 20
-    ) -> List[ProjectResponse]:
-        """
-        Search projects with caching
-        """
-        cache_service = await self._get_cache_service()
-        
-        # Try to get from cache first
-        try:
-            cached_results = await cache_service.get_project_search(search_query, user_id)
-            if cached_results:
-                logger.debug(f"Search results retrieved from cache for query: {search_query}")
-                return [ProjectResponse(**project) for project in cached_results[:limit]]
-        except Exception as e:
-            logger.warning(f"Cache retrieval failed for search results: {e}")
-        
-        # Search in database
-        filters = ProjectSearchFilters(search=search_query, limit=limit)
-        projects = await self.list_projects(user_id, filters)
-        
-        # Cache the result
-        try:
-            projects_data = [project.model_dump() for project in projects]
-            await cache_service.cache_project_search(search_query, user_id, projects_data)
-            logger.debug(f"Search results cached for query: {search_query}")
-        except Exception as e:
-            logger.warning(f"Cache storage failed for search results: {e}")
-        
-        return projects
-    
-    # Cache management methods
-    async def invalidate_project_caches(self, project_id: int, user_id: str) -> Dict[str, Any]:
-        """
-        Manually invalidate all caches for a project
-        """
-        cache_service = await self._get_cache_service()
-        
-        try:
-            invalidated_count = await cache_service.invalidate_project_cache(project_id, user_id)
-            return {
-                'success': True,
-                'project_id': project_id,
-                'invalidated_keys': invalidated_count,
-                'timestamp': datetime.now(timezone.utc).isoformat()
-            }
-        except Exception as e:
-            logger.error(f"Manual cache invalidation failed: {e}")
-            return {
-                'success': False,
-                'project_id': project_id,
-                'error': str(e),
-                'timestamp': datetime.now(timezone.utc).isoformat()
-            }
-    
-    async def warm_project_caches(
-        self, 
-        project_id: int, 
-        user_id: str
+    def _calculate_project_progress(
+        self,
+        project: Project,
+        classification: Optional[Dict[str, Any]],
+        predicate_devices: List[Dict[str, Any]]
     ) -> Dict[str, Any]:
-        """
-        Manually warm caches for a project
-        """
-        try:
-            # Get fresh data from database
-            project_response = await super().get_project(project_id, user_id)
-            dashboard_data = await super().get_dashboard_data(project_id, user_id)
-            
-            # Warm caches
-            cache_service = await self._get_cache_service()
-            results = await cache_service.warm_project_caches_on_update(
-                project_id,
-                user_id,
-                project_response.model_dump(),
-                dashboard_data.model_dump()
-            )
-            
-            return {
-                'success': True,
-                'project_id': project_id,
-                'warmed_caches': results,
-                'timestamp': datetime.now(timezone.utc).isoformat()
-            }
-            
-        except Exception as e:
-            logger.error(f"Manual cache warming failed: {e}")
-            return {
-                'success': False,
-                'project_id': project_id,
-                'error': str(e),
-                'timestamp': datetime.now(timezone.utc).isoformat()
-            }
-    
-    async def get_cache_stats(self) -> Dict[str, Any]:
-        """
-        Get comprehensive cache statistics
-        """
-        cache_service = await self._get_cache_service()
-        return await cache_service.get_project_cache_stats()
-    
-    async def health_check(self) -> Dict[str, Any]:
-        """
-        Perform health check including cache service
-        """
-        cache_service = await self._get_cache_service()
-        cache_health = await cache_service.health_check()
+        """Calculate comprehensive project progress data"""
+        # Classification progress
+        classification_step = {
+            "status": "completed" if classification else "pending",
+            "confidenceScore": classification["confidenceScore"] if classification else None,
+            "completedAt": classification["createdAt"] if classification else None
+        }
         
-        # Test database connectivity
-        try:
-            async with self.db_manager.get_session() as session:
-                from sqlalchemy import text
-                await session.execute(text("SELECT 1"))
-            
-            db_health = {
-                'status': 'healthy',
-                'database_available': True
-            }
-        except Exception as e:
-            db_health = {
-                'status': 'unhealthy',
-                'database_available': False,
-                'error': str(e)
-            }
+        # Predicate search progress
+        predicate_search_step = {
+            "status": "completed" if predicate_devices else "pending",
+            "confidenceScore": (
+                sum(p["confidenceScore"] for p in predicate_devices) / len(predicate_devices)
+                if predicate_devices else None
+            ),
+            "completedAt": (
+                max(p["createdAt"] for p in predicate_devices)
+                if predicate_devices else None
+            )
+        }
+        
+        # Comparison analysis progress
+        selected_predicates = [p for p in predicate_devices if p["isSelected"]]
+        comparison_analysis_step = {
+            "status": "completed" if selected_predicates else "pending",
+            "confidenceScore": (
+                sum(p["confidenceScore"] for p in selected_predicates) / len(selected_predicates)
+                if selected_predicates else None
+            ),
+            "completedAt": (
+                max(p["createdAt"] for p in selected_predicates)
+                if selected_predicates else None
+            )
+        }
+        
+        # Submission readiness progress
+        has_classification = classification is not None
+        has_selected_predicates = len(selected_predicates) > 0
+        has_documents = len(project.documents) > 0
+        
+        submission_readiness_step = {
+            "status": "completed" if (has_classification and has_selected_predicates and has_documents) else "pending",
+            "confidenceScore": None,
+            "completedAt": None
+        }
+        
+        # Calculate overall progress
+        steps = [classification_step, predicate_search_step, comparison_analysis_step, submission_readiness_step]
+        completed_steps = len([s for s in steps if s["status"] == "completed"])
+        overall_progress = (completed_steps / len(steps)) * 100
+        
+        # Generate next actions
+        next_actions = []
+        if not classification:
+            next_actions.append("Complete device classification")
+        elif not predicate_devices:
+            next_actions.append("Search for predicate devices")
+        elif not selected_predicates:
+            next_actions.append("Select and analyze predicate devices")
+        elif not has_documents:
+            next_actions.append("Upload supporting documents")
+        else:
+            next_actions.append("Review submission readiness")
         
         return {
-            'service_status': 'healthy' if (
-                cache_health.get('status') == 'healthy' and 
-                db_health.get('status') == 'healthy'
-            ) else 'unhealthy',
-            'cache_service': cache_health,
-            'database_service': db_health,
-            'timestamp': datetime.now(timezone.utc).isoformat()
+            "projectId": str(project.id),
+            "classification": classification_step,
+            "predicateSearch": predicate_search_step,
+            "comparisonAnalysis": comparison_analysis_step,
+            "submissionReadiness": submission_readiness_step,
+            "overallProgress": overall_progress,
+            "nextActions": next_actions,
+            "lastUpdated": datetime.now(timezone.utc).isoformat()
         }
-
-
-# Factory function for creating enhanced project service
-def create_enhanced_project_service() -> EnhancedProjectService:
-    """
-    Create enhanced project service instance
     
-    Returns:
-        Configured enhanced project service
-    """
-    return EnhancedProjectService()
+    def _map_agent_action_to_activity_type(self, agent_action: str) -> str:
+        """Map agent action to activity type"""
+        action_mapping = {
+            "classify_device": "classification",
+            "search_predicates": "predicate_search",
+            "compare_predicate": "comparison",
+            "process_document": "document_upload",
+            "predicate_search": "predicate_search",
+            "device_classification": "classification"
+        }
+        return action_mapping.get(agent_action, "agent_interaction")
+    
+    def _generate_activity_title(self, agent_action: str) -> str:
+        """Generate human-readable activity title"""
+        title_mapping = {
+            "classify_device": "Device Classification Completed",
+            "search_predicates": "Predicate Search Performed",
+            "compare_predicate": "Predicate Comparison Analysis",
+            "process_document": "Document Processed",
+            "predicate_search": "Predicate Search Completed",
+            "device_classification": "Device Classification Analysis"
+        }
+        return title_mapping.get(agent_action, f"Agent Action: {agent_action}")
 
 
 # Global enhanced project service instance
@@ -495,5 +591,5 @@ def get_enhanced_project_service() -> EnhancedProjectService:
     """Get the global enhanced project service instance"""
     global _enhanced_project_service
     if _enhanced_project_service is None:
-        _enhanced_project_service = create_enhanced_project_service()
+        _enhanced_project_service = EnhancedProjectService()
     return _enhanced_project_service
