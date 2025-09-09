@@ -7,6 +7,7 @@ You are working on an **Agentic AI Regulatory Assistant** designed specifically 
 ## Primary User Persona
 
 **Target User**: Regulatory Affairs Managers at medical device startups (10-50 employees)
+
 - Have budget authority but lack extensive resources
 - Need to navigate complex FDA regulations efficiently
 - Primary pain point: 510(k) predicate search and comparison workflow
@@ -15,12 +16,14 @@ You are working on an **Agentic AI Regulatory Assistant** designed specifically 
 ## Core MVP Capabilities (US FDA Focus Only)
 
 ### 1. Auto-Classification with FDA Product Codes
+
 - Classify devices based on intended use
 - Automatically suggest specific FDA product codes and CFR sections
 - Critical for 510(k) submissions
 - Must provide confidence scores and reasoning traces
 
 ### 2. Predicate Search & Analysis with Comparison Tables
+
 - Automate search for predicate devices in FDA databases
 - Generate ranked lists of potential predicates
 - Create side-by-side technological characteristic comparisons
@@ -28,18 +31,21 @@ You are working on an **Agentic AI Regulatory Assistant** designed specifically 
 - **This is the #1 priority feature** - 15% of submissions fail due to incorrect predicate selection
 
 ### 3. FDA Guidance Document Mapping
+
 - Automatically identify relevant FDA guidance documents
 - Based on device type and technology characteristics
 - Include cybersecurity guidance for connected devices
 - Always cite sources with URLs and effective dates
 
 ### 4. Real-time FDA Database Integration
+
 - Direct API integration with openFDA
 - Live predicate searches (not static data)
 - Device classification lookups
 - Adverse event monitoring capabilities
 
 ### 5. 510(k) Submission Checklist Generator
+
 - Generate market-specific checklists
 - Based on device classification and predicate analysis
 - Tailored specifically for FDA submissions
@@ -48,6 +54,7 @@ You are working on an **Agentic AI Regulatory Assistant** designed specifically 
 ## Technical Architecture Guidelines
 
 ### Core Technologies
+
 - **Frontend**: React, Next.js, Shadcn UI, Tailwind CSS
 - **Backend**: Next.js (full-stack), FastAPI (Python AI integration)
 - **AI Framework**: LangGraph (Agent Architecture), CopilotKit (UI)
@@ -55,12 +62,14 @@ You are working on an **Agentic AI Regulatory Assistant** designed specifically 
 - **Authentication**: Google OAuth 2.0
 
 ### Project Structure
+
 - **Project-Based System**: Each medical device gets its own workspace
 - **Markdown-First**: All reports stored as markdown for LLM processing
 - **Structured Data Store**: JSON files for extracted data (device specs, K-numbers)
 - **Agent Guidance System**: instruction.md files for AI behavior templates
 
 ### Key Agent Tools
+
 - **openFDA API Integration**: Robust wrapper with rate limiting and error handling
 - **Document Processing Pipeline**: OCR and NLP for PDF guidance documents
 - **FDA-Specific Tools**: Parse product codes, CFR sections, generate comparison tables
@@ -69,6 +78,7 @@ You are working on an **Agentic AI Regulatory Assistant** designed specifically 
 ## User Interface Requirements
 
 ### Core Pages
+
 1. **Regulatory Strategy Dashboard**: Project homepage with AI-powered overview
 2. **Agent Workflow Page**: Universal conversational UI with slash commands for:
    - 510(k) Predicate Search
@@ -80,7 +90,9 @@ You are working on an **Agentic AI Regulatory Assistant** designed specifically 
 5. **Quick Actions Toolbar**: One-click access to common tasks
 
 ### Instruction Templates (instruction.md)
+
 Create specific templates for:
+
 - 510(k) Predicate Search workflows
 - Predicate Comparison Analysis procedures
 - Device Classification methodologies
@@ -89,18 +101,21 @@ Create specific templates for:
 ## Compliance and Safety Requirements
 
 ### Human-in-the-Loop Philosophy
+
 - AI is always an assistant, never the final authority
 - Human RA professionals must review all critical outputs
 - "Suggest, but humans decide" approach
 - Required approval before use in formal submissions
 
 ### Auditable Traceability
+
 - Every AI action must be logged transparently
 - Full reasoning traces for all conclusions
 - Always cite source URLs and effective dates
 - Exportable audit trails for regulatory inspections
 
 ### Confidence and Citation Model
+
 - Every AI output includes confidence score (0-1)
 - Clear reasoning traces explaining conclusions
 - Direct citations to source documents
@@ -109,16 +124,19 @@ Create specific templates for:
 ## Development Priorities
 
 ### Phase 1: Core Classification and Search
+
 1. Device classification engine with FDA product codes
 2. openFDA API integration for predicate searches
 3. Basic comparison table generation
 
 ### Phase 2: Enhanced Analysis
+
 1. Technological characteristic extraction
 2. Substantial equivalence justification
 3. FDA guidance document mapping
 
 ### Phase 3: Submission Support
+
 1. 510(k) checklist generation
 2. Evidence gap analysis
 3. Submission readiness validation
@@ -133,6 +151,7 @@ Create specific templates for:
 ## Regulatory Constraints
 
 ### What the System CANNOT Do
+
 - Provide legal advice
 - Handle Protected Health Information (PHI)
 - Reproduce paywalled content (ISO standards, etc.)
@@ -140,6 +159,7 @@ Create specific templates for:
 - Guarantee submission approval
 
 ### What the System MUST Do
+
 - Maintain complete audit trails
 - Cite all sources with dates
 - Provide confidence scores

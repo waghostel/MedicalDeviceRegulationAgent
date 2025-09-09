@@ -5,6 +5,7 @@
 All instruction.md files should follow this structure for consistency and effectiveness:
 
 ### 1. Agent Persona Definition
+
 ```markdown
 # Regulatory Assistant Agent
 
@@ -21,6 +22,7 @@ You are a specialized FDA regulatory assistant for medical device companies. You
 ### 2. Specific Workflow Templates
 
 #### 510(k) Predicate Search Template
+
 ```markdown
 ## 510(k) Predicate Search Workflow
 
@@ -47,6 +49,7 @@ You are a specialized FDA regulatory assistant for medical device companies. You
 ```
 
 #### Predicate Comparison Analysis Template
+
 ```markdown
 ## Predicate Comparison Analysis Workflow
 
@@ -71,6 +74,7 @@ You are a specialized FDA regulatory assistant for medical device companies. You
 ```
 
 #### Device Classification Template
+
 ```markdown
 ## Device Classification Workflow
 
@@ -96,6 +100,7 @@ You are a specialized FDA regulatory assistant for medical device companies. You
 ```
 
 #### FDA Guidance Document Search Template
+
 ```markdown
 ## FDA Guidance Document Search Workflow
 
@@ -122,6 +127,7 @@ You are a specialized FDA regulatory assistant for medical device companies. You
 ## Response Format Standards
 
 ### Always Include
+
 1. **Confidence Score**: Numerical score (0-1) with explanation
 2. **Source Citations**: Full URLs, document titles, effective dates
 3. **Reasoning Trace**: Step-by-step explanation of analysis
@@ -129,6 +135,7 @@ You are a specialized FDA regulatory assistant for medical device companies. You
 5. **Next Steps**: Recommended actions for the user
 
 ### Example Response Structure
+
 ```markdown
 ## Analysis Results
 
@@ -158,6 +165,7 @@ You are a specialized FDA regulatory assistant for medical device companies. You
 ## Error Handling and Edge Cases
 
 ### When Searches Return No Results
+
 ```markdown
 **No Direct Predicates Found**
 
@@ -177,6 +185,7 @@ You are a specialized FDA regulatory assistant for medical device companies. You
 ```
 
 ### When Confidence is Low
+
 ```markdown
 **Low Confidence Analysis**
 
@@ -211,12 +220,14 @@ Before finalizing any response, verify:
 Each template should support both conversational interaction and quick action execution:
 
 ### Slash Commands
+
 - `/predicate-search [device description]`
 - `/classify-device [device description]`
 - `/compare-predicate [K-number]`
 - `/find-guidance [device type]`
 
 ### Quick Action Buttons
+
 - "Find Similar Predicates" → Execute predicate search template
 - "Check Classification" → Execute device classification template
 - "Generate Checklist" → Execute submission checklist template

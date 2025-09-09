@@ -52,6 +52,7 @@ project-root/
 ### Command Examples
 
 **Frontend Development (pnpm):**
+
 ```bash
 cd medical-device-regulatory-assistant
 pnpm install
@@ -61,6 +62,7 @@ pnpm build
 ```
 
 **Backend Development (Poetry):**
+
 ```bash
 cd medical-device-regulatory-assistant/backend
 poetry install
