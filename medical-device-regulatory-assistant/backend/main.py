@@ -77,11 +77,46 @@ async def lifespan(app: FastAPI):
         # 1. Initialize database connections (required)
         try:
             from database.connection import init_database
+            from database.integrated_seeder import auto_seed_on_startup, get_seeder_config
+            
             database_url = os.getenv("DATABASE_URL", "sqlite:./medical_device_assistant.db")
             db_manager = await init_database(database_url)
             app.state.db_manager = db_manager
             initialized_services.append("database")
             print("Database connection initialized")
+            
+            # Auto-seed database if configured
+            try:
+                seeder_config = get_seeder_config()
+                print(f"[INFO] Seeder configuration: environment={seeder_config.environment.value}, auto_seed={seeder_config.auto_seed_on_startup}")
+                
+                seeding_results = await auto_seed_on_startup()
+                if seeding_results:
+                    if seeding_results["success"]:
+                        print("[OK] Database auto-seeding completed successfully")
+                        if seeding_results.get("warnings"):
+                            for warning in seeding_results["warnings"]:
+                                print(f"[WARNING] Seeding: {warning}")
+                    else:
+                        print("[WARNING] Database auto-seeding failed:")
+                        for error in seeding_results.get("errors", []):
+                            print(f"   - {error}")
+                        # Don't fail startup for seeding errors in development
+                        if seeder_config.environment.value == "production":
+                            startup_errors.append(("seeding", "Auto-seeding failed in production"))
+                else:
+                    print("[INFO] Database auto-seeding skipped (disabled in configuration)")
+                    
+            except Exception as e:
+                error_msg = f"Database seeding error: {e}"
+                print(f"[WARNING] {error_msg}")
+                startup_errors.append(("seeding", error_msg))
+                # Don't fail startup for seeding errors unless in production
+                seeder_config = get_seeder_config()
+                if seeder_config.environment.value == "production":
+                    startup_failed = True
+                    raise RuntimeError(f"Critical seeding failure in production: {error_msg}")
+                    
         except Exception as e:
             error_msg = f"Database initialization failed: {e}"
             print(f"[ERROR] {error_msg}")

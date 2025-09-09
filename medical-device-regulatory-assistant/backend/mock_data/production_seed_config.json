@@ -1,0 +1,86 @@
+{
+  "users": [
+    {
+      "google_id": "demo_user_001",
+      "email": "demo@medical-device-assistant.com",
+      "name": "Demo User"
+    }
+  ],
+  "projects": [
+    {
+      "name": "Demo Cardiac Monitor",
+      "description": "Demonstration project for cardiac monitoring device regulatory pathway",
+      "device_type": "Cardiac Monitor",
+      "intended_use": "For demonstration of regulatory pathway discovery for cardiac monitoring devices",
+      "status": "draft",
+      "priority": "medium",
+      "tags": ["demo", "cardiac"],
+      "user_email": "demo@medical-device-assistant.com"
+    },
+    {
+      "name": "Demo Blood Glucose Meter",
+      "description": "Demonstration project for blood glucose monitoring device regulatory pathway",
+      "device_type": "Glucose Meter",
+      "intended_use": "For demonstration of regulatory pathway discovery for glucose monitoring devices",
+      "status": "draft",
+      "priority": "medium",
+      "tags": ["demo", "glucose"],
+      "user_email": "demo@medical-device-assistant.com"
+    }
+  ],
+  "device_classifications": [
+    {
+      "project_name": "Demo Cardiac Monitor",
+      "device_class": "II",
+      "product_code": "DPS",
+      "regulatory_pathway": "510k",
+      "cfr_sections": ["21 CFR 870.2300"],
+      "confidence_score": 0.90,
+      "reasoning": "Demonstration classification for cardiac monitoring device"
+    },
+    {
+      "project_name": "Demo Blood Glucose Meter",
+      "device_class": "II",
+      "product_code": "NBW",
+      "regulatory_pathway": "510k",
+      "cfr_sections": ["21 CFR 862.1345"],
+      "confidence_score": 0.95,
+      "reasoning": "Demonstration classification for glucose monitoring device"
+    }
+  ],
+  "predicate_devices": [
+    {
+      "project_name": "Demo Cardiac Monitor",
+      "k_number": "K190001",
+      "device_name": "Demo CardioWatch",
+      "intended_use": "Demonstration predicate for cardiac monitoring",
+      "product_code": "DPS",
+      "clearance_date": "2019-01-15",
+      "confidence_score": 0.85,
+      "is_selected": true,
+      "comparison_data": {
+        "similarities": ["Similar monitoring capability", "Same product code"],
+        "differences": ["Enhanced features", "Improved accuracy"],
+        "risk_assessment": "low",
+        "testing_recommendations": ["Clinical validation", "Software verification"]
+      }
+    },
+    {
+      "project_name": "Demo Blood Glucose Meter",
+      "k_number": "K200002",
+      "device_name": "Demo GlucoCheck",
+      "intended_use": "Demonstration predicate for glucose monitoring",
+      "product_code": "NBW",
+      "clearance_date": "2020-02-10",
+      "confidence_score": 0.90,
+      "is_selected": true,
+      "comparison_data": {
+        "similarities": ["Blood glucose measurement", "Similar accuracy"],
+        "differences": ["Enhanced connectivity", "Improved user interface"],
+        "risk_assessment": "low",
+        "testing_recommendations": ["Accuracy testing", "Clinical evaluation"]
+      }
+    }
+  ],
+  "agent_interactions": []
+}
