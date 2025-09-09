@@ -86,14 +86,14 @@ Each completed task requires a report:
 
 ## 2. JSON-Based Mock Data Configuration System
 
-- [ ] 2.1 Create JSON schema for mock data configuration
+- [x] 2.1 Create JSON schema for mock data configuration
 
   - Define comprehensive JSON schema for users, projects, classifications, and predicates
   - Create sample mock data configuration file with realistic medical device data
   - Implement JSON validation using jsonschema library
   - _Requirements: 5.1, 5.2, 5.4_
 
-- [ ] 2.2 Implement enhanced database seeder with JSON support
+- [x] 2.2 Implement enhanced database seeder with JSON support
 
   - Create EnhancedDatabaseSeeder class that reads JSON configuration
   - Implement methods for seeding users, projects, and related data
