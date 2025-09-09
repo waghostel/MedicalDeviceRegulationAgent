@@ -7,14 +7,17 @@ This document provides guidelines for creating properly formatted `tasks.md` fil
 ## Required File Structure
 
 ### 1. File Location
+
 Tasks must be located in the correct directory structure:
-```
+
+```markdown
 .kiro/specs/[spec-name]/tasks.md
 ```
 
 ### 2. Required Sections (in order)
 
 #### A. Title and Introduction
+
 ```markdown
 # Implementation Plan
 
@@ -22,6 +25,7 @@ Convert the [Spec Name] requirements into a series of prompts for a code-generat
 ```
 
 #### B. Development Rules Section
+
 ```markdown
 ## Development Rules
 
@@ -46,6 +50,7 @@ clear
 ```
 
 - After reading this file, say: **"I will use poetry and pnpm"**.
+
 ```
 
 #### C. Workflow Section
@@ -63,6 +68,7 @@ clear
 ```
 
 #### D. Test-Driven Development Section
+
 ```markdown
 ## Test-Driven Development (TDD)
 
@@ -71,6 +77,7 @@ clear
 ```
 
 #### E. Task Report Format Section
+
 ```markdown
 ## Task Report Format
 
@@ -95,6 +102,7 @@ Each completed task requires a report:
 ### 3. Task Definitions
 
 #### Task Format Requirements
+
 - Use numbered sections for phases/categories
 - Use checkbox format for individual tasks: `- [ ]` for incomplete, `- [x]` for complete
 - Include task ID and descriptive title
@@ -102,6 +110,7 @@ Each completed task requires a report:
 - Reference requirements using `_Requirements: X.X, Y.Y_` format
 
 #### Example Task Structure
+
 ```markdown
 ## 1. Phase Name
 
@@ -120,22 +129,26 @@ Each completed task requires a report:
 ## Critical Formatting Rules
 
 ### 1. File Ending
+
 - **MUST** end with a single trailing newline character
 - No extra blank lines at the end
 - This is enforced by markdown linters
 
 ### 2. Markdown Compliance
+
 - Follow standard markdown formatting
 - Use proper heading hierarchy (# ## ###)
 - Ensure code blocks have language specifications
 - Maintain consistent indentation
 
 ### 3. Checkbox Format
+
 - Use `- [ ]` for incomplete tasks (space between brackets)
 - Use `- [x]` for completed tasks (x between brackets)
 - Maintain consistent indentation for sub-items
 
 ### 4. Requirements References
+
 - Always include `_Requirements: X.X, Y.Y_` at the end of task descriptions
 - Reference the corresponding requirements.md file sections
 - Use italics formatting with underscores
@@ -143,24 +156,30 @@ Each completed task requires a report:
 ## Common Issues and Solutions
 
 ### Issue 1: Tasks Not Detected
+
 **Symptoms**: Kiro doesn't recognize the tasks.md file as spec-driven
 **Solutions**:
+
 - Verify all required sections are present in correct order
 - Check that Development Rules section includes the exact pnpm/poetry requirements
 - Ensure file ends with single trailing newline
 - Validate markdown formatting with a linter
 
 ### Issue 2: Task Execution Fails
+
 **Symptoms**: Tasks are detected but fail to execute properly
 **Solutions**:
+
 - Verify task descriptions are clear and actionable
 - Ensure requirements references are valid
 - Check that task dependencies are properly ordered
 - Validate that all required files exist (requirements.md, etc.)
 
 ### Issue 3: Formatting Warnings
+
 **Symptoms**: Markdown linter warnings in IDE
 **Solutions**:
+
 - Add blank lines around headings
 - Specify language for code blocks
 - Fix list formatting and indentation
@@ -261,6 +280,7 @@ Each completed task requires a report:
   - Ensure integration with existing code
   - Include testing requirements
   - _Requirements: 1.3, 2.1_
+
 ```
 
 ## Best Practices

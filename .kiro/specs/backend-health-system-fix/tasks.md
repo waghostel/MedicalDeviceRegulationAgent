@@ -15,14 +15,14 @@ Convert the backend health system fix design into a series of prompts for a code
 
   Example 1(Windows):
 
-  ```
+  ```bash
     cls
     <command>
   ```
 
   Example 2 (Mac and Linux)
 
-  ```
+  ```bash
   clear
   <command>
   ```

@@ -6,26 +6,31 @@ Successfully adapted the Next.js project to use Turbopack for development.
 ## Changes Made
 
 ### 1. Package.json Scripts Updated
+
 - `"dev": "next dev --turbo"` - Now uses Turbopack by default
 - `"dev:webpack": "next dev"` - Added fallback to Webpack
 
 ### 2. Next.js Configuration Enhanced
+
 - Added experimental Turbopack configuration in `next.config.ts`
 - Maintained backward compatibility
 
 ### 3. Shell Scripts Updated
 
 #### Unix/Linux Scripts (start-*.sh):
+
 - `start-dev.sh` - Updated to use Turbopack by default
 - `start-frontend.sh` - Added Turbopack/Webpack selection with `--turbo`/`--webpack` flags
 - Enhanced status messages to indicate Turbopack usage
 
 #### Windows Scripts (*.ps1):
+
 - `start-dev.ps1` - Updated to use Turbopack
 - `start-frontend.ps1` - Updated startup messages
 - `start-dev-optimized.ps1` - Enhanced for Turbopack performance
 
 ### 4. Documentation Updated
+
 - Added Turbopack section to README.md
 - Explained performance benefits
 - Provided fallback instructions
