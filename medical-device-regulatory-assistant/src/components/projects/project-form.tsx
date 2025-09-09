@@ -40,7 +40,7 @@ import {
   ProjectUpdateRequest,
   ProjectStatus,
 } from '@/types/project';
-import { toast } from '@/hooks/use-toast';
+import { contextualToast } from '@/hooks/use-toast';
 
 // Form validation schema - matches backend validation
 const projectFormSchema = z.object({
@@ -160,10 +160,10 @@ export function ProjectForm({
       const result = await onSubmit(submitData);
 
       if (result) {
-        toast({
-          title: isEditing ? 'Project Updated' : 'Project Created',
-          description: `Project "${result.name}" has been ${isEditing ? 'updated' : 'created'} successfully.`,
-        });
+        contextualToast.success(
+          isEditing ? 'Project Updated' : 'Project Created',
+          `Project "${result.name}" has been ${isEditing ? 'updated' : 'created'} successfully.`
+        );
 
         onOpenChange(false);
         form.reset();
@@ -171,24 +171,27 @@ export function ProjectForm({
     } catch (error: any) {
       // Handle backend validation errors
       if (error.message.includes('Invalid project data')) {
-        toast({
-          title: 'Validation Error',
-          description: 'Please check your input and try again.',
-          variant: 'destructive',
-        });
+        contextualToast.validationError(
+          'Please check your input and try again.'
+        );
       } else if (error.message.includes('Authentication required')) {
-        toast({
-          title: 'Authentication Required',
-          description: 'Please sign in to continue.',
-          variant: 'destructive',
+        contextualToast.authExpired(() => {
+          // Redirect to sign in or trigger auth flow
+          window.location.href = '/api/auth/signin';
+        });
+      } else if (
+        error.message.includes('Network') ||
+        error.message.includes('fetch')
+      ) {
+        contextualToast.networkError(() => {
+          // Retry the form submission
+          handleSubmit(onFormSubmit)();
         });
       } else {
-        toast({
-          title: isEditing ? 'Update Failed' : 'Creation Failed',
-          description:
-            error.message ||
-            `Failed to ${isEditing ? 'update' : 'create'} project.`,
-          variant: 'destructive',
+        // For project save failures, use the contextual toast with retry
+        contextualToast.projectSaveFailed(() => {
+          // Retry the form submission
+          handleSubmit(onFormSubmit)();
         });
       }
     } finally {

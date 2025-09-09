@@ -252,7 +252,7 @@ clear
 
 Each completed task requires a report:
 
-**Task Report**
+### Task Report
 
 - **Task**: [Task ID and Title]
 - **Summary of Changes**
@@ -265,6 +265,10 @@ Each completed task requires a report:
     - Result: [✔ Passed / ✘ Failures]
   - **Manual Verification**: [Steps & findings]
     - Result: [✔ Works as expected]
+  - **Undone tests**:
+    - [ ][Test name]
+      - [Description(faild reason and what need to be modified)]
+      - [Test command]
 - **Code Snippets (Optional)**: Show relevant diffs or highlights.
 
 ## 1. Your First Phase

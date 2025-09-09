@@ -4,6 +4,8 @@
  */
 
 import { toast } from '@/hooks/use-toast';
+import { APIError } from '@/types/error';
+import { trackAPICall } from '@/lib/services/error-reporting';
 
 // Types for API responses and errors
 export interface ApiResponse<T = any> {
@@ -78,20 +80,38 @@ class ApiClient {
   ): Promise<ApiResponse<T>> {
     const url = `${this.baseUrl}${endpoint}`;
     const retryConfig = { ...this.defaultRetryConfig, ...config.retry };
+    const startTime = Date.now();
     
-    let lastError: ApiError;
+    let lastError: APIError;
     
     for (let attempt = 0; attempt <= retryConfig.maxRetries; attempt++) {
       try {
         const response = await this.makeRequest<T>(url, config);
+        
+        // Track successful API call
+        trackAPICall(
+          config.method || 'GET',
+          endpoint,
+          response.status,
+          Date.now() - startTime
+        );
+        
         return response;
       } catch (error) {
-        lastError = this.normalizeError(error);
+        lastError = this.normalizeError(error, endpoint, config.method);
+        
+        // Track failed API call
+        trackAPICall(
+          config.method || 'GET',
+          endpoint,
+          lastError.status,
+          Date.now() - startTime
+        );
         
         // Don't retry if it's the last attempt or retry condition is not met
         if (
           attempt === retryConfig.maxRetries ||
-          !retryConfig.retryCondition?.(lastError)
+          !lastError.retryable
         ) {
           break;
         }
@@ -191,59 +211,121 @@ class ApiClient {
   }
 
   /**
-   * Normalize different error types into a consistent ApiError format
+   * Normalize different error types into a consistent APIError format
    */
-  private normalizeError(error: any): ApiError {
-    if (error.message && typeof error.status === 'number') {
-      return error as ApiError;
+  private normalizeError(error: any, endpoint?: string, method?: string): APIError {
+    // If already an APIError, return as-is
+    if (error instanceof APIError) {
+      return error;
     }
     
+    // Handle fetch/network errors
     if (error instanceof TypeError && error.message.includes('fetch')) {
-      return {
-        message: 'Network error - please check your internet connection',
-        code: 'NETWORK_ERROR',
-      };
+      return APIError.network('Network request failed', {
+        endpoint,
+        isOnline: navigator.onLine,
+      });
     }
     
-    return {
-      message: error.message || 'An unexpected error occurred',
-      code: 'UNKNOWN_ERROR',
-      details: error,
-    };
+    // Handle timeout errors
+    if (error.name === 'AbortError' || error.code === 'TIMEOUT') {
+      return APIError.fromError(error, {
+        type: 'timeout',
+        operation: `${method || 'GET'} ${endpoint}`,
+      });
+    }
+    
+    // Handle HTTP errors with status codes
+    if (error.status) {
+      if (error.status === 401) {
+        return APIError.auth('Authentication failed', {
+          isTokenExpired: true,
+          redirectUrl: '/auth/signin',
+        });
+      }
+      
+      if (error.status === 400) {
+        return APIError.validation('Request validation failed', {
+          fieldErrors: error.details?.fieldErrors,
+        });
+      }
+      
+      if (error.status === 403) {
+        return APIError.auth('Access denied', {
+          isTokenExpired: false,
+        });
+      }
+      
+      if (error.status === 404) {
+        return APIError.fromError(error, {
+          type: 'server',
+          status: 404,
+          userMessage: 'The requested resource was not found.',
+        });
+      }
+      
+      if (error.status >= 500) {
+        return APIError.fromError(error, {
+          type: 'server',
+          status: error.status,
+          isTemporary: true,
+        });
+      }
+    }
+    
+    // Handle FDA API specific errors
+    if (endpoint?.includes('fda') || endpoint?.includes('predicate')) {
+      return APIError.fdaAPI('FDA service unavailable', {
+        endpoint,
+        isServiceDown: true,
+      });
+    }
+    
+    // Default to generic server error
+    return APIError.fromError(error, {
+      type: 'server',
+      code: 'API_ERROR',
+      status: error.status || 500,
+    });
   }
 
   /**
    * Show user-friendly error toast
    */
-  private showErrorToast(error: ApiError) {
-    let title = 'Request Failed';
-    let description = error.message;
-    
-    // Customize messages for common error types
-    switch (error.code) {
-      case 'NETWORK_ERROR':
-        title = 'Connection Error';
-        description = 'Unable to connect to the server. Please check your internet connection.';
-        break;
-      case 'TIMEOUT':
-        title = 'Request Timeout';
-        description = 'The request took too long to complete. Please try again.';
-        break;
-      case 'UNAUTHORIZED':
-        title = 'Authentication Required';
-        description = 'Please sign in to continue.';
-        break;
-      case 'FORBIDDEN':
-        title = 'Access Denied';
-        description = 'You do not have permission to perform this action.';
-        break;
+  private showErrorToast(error: APIError) {
+    // Don't show toast for certain error types that are handled elsewhere
+    if (error.type === 'auth' && error.code === 'UNAUTHORIZED') {
+      // Auth errors are typically handled by auth middleware
+      return;
     }
     
     toast({
-      title,
-      description,
+      title: this.getErrorTitle(error),
+      description: error.userMessage || error.message,
       variant: 'destructive',
     });
+  }
+  
+  /**
+   * Get appropriate error title based on error type
+   */
+  private getErrorTitle(error: APIError): string {
+    switch (error.type) {
+      case 'network':
+        return 'Connection Error';
+      case 'auth':
+        return 'Authentication Error';
+      case 'validation':
+        return 'Validation Error';
+      case 'fda-api':
+        return 'FDA Service Error';
+      case 'timeout':
+        return 'Request Timeout';
+      case 'server':
+        return error.status >= 500 ? 'Server Error' : 'Request Error';
+      default:
+        return 'Request Failed';
+    }
   }
 
   /**
