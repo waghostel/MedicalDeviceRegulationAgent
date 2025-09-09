@@ -7,12 +7,14 @@ The Medical Device Regulatory Assistant is designed to work across Windows, Linu
 ## System Requirements
 
 ### Minimum Requirements
+
 - **CPU**: 2 cores, 2.0 GHz
 - **RAM**: 4 GB (8 GB recommended)
 - **Storage**: 2 GB free space
 - **Network**: Internet connection for FDA API access
 
 ### Software Requirements
+
 - **Node.js**: 18.0 or higher
 - **Python**: 3.8 or higher
 - **Git**: Latest version
@@ -22,6 +24,7 @@ The Medical Device Regulatory Assistant is designed to work across Windows, Linu
 ### Windows Setup
 
 #### Prerequisites
+
 1. **Install Node.js**
    ```powershell
    # Download from https://nodejs.org/
@@ -63,6 +66,7 @@ The Medical Device Regulatory Assistant is designed to work across Windows, Linu
    ```
 
 #### Running the Application
+
 ```powershell
 # Start both services
 .\start-dev.ps1
@@ -77,6 +81,7 @@ The Medical Device Regulatory Assistant is designed to work across Windows, Linu
 ```
 
 #### Windows-Specific Features
+
 - PowerShell scripts with advanced error handling
 - Windows Service integration support
 - Windows Task Scheduler integration
@@ -85,6 +90,7 @@ The Medical Device Regulatory Assistant is designed to work across Windows, Linu
 ### Linux Setup (Ubuntu/Debian)
 
 #### Prerequisites
+
 1. **Update system packages**
    ```bash
    sudo apt update && sudo apt upgrade -y
@@ -129,6 +135,7 @@ The Medical Device Regulatory Assistant is designed to work across Windows, Linu
    ```
 
 #### Running the Application
+
 ```bash
 # Make scripts executable
 chmod +x start-dev.sh start-backend.sh start-frontend.sh
@@ -146,6 +153,7 @@ chmod +x start-dev.sh start-backend.sh start-frontend.sh
 ```
 
 #### Linux-Specific Features
+
 - Systemd service integration
 - Cron job scheduling
 - Linux process management
@@ -154,6 +162,7 @@ chmod +x start-dev.sh start-backend.sh start-frontend.sh
 ### macOS Setup
 
 #### Prerequisites
+
 1. **Install Homebrew** (recommended)
    ```bash
    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
@@ -200,6 +209,7 @@ chmod +x start-dev.sh start-backend.sh start-frontend.sh
    ```
 
 #### Running the Application
+
 ```bash
 # Make scripts executable
 chmod +x start-dev.sh start-backend.sh start-frontend.sh
@@ -217,6 +227,7 @@ chmod +x start-dev.sh start-backend.sh start-frontend.sh
 ```
 
 #### macOS-Specific Features
+
 - LaunchDaemon integration
 - macOS notification support
 - Keychain integration potential
@@ -225,6 +236,7 @@ chmod +x start-dev.sh start-backend.sh start-frontend.sh
 ## Script Comparison
 
 ### Windows PowerShell Scripts
+
 - `start-dev.ps1` - Main development startup script
 - `start-backend.ps1` - Backend-only startup
 - `start-frontend.ps1` - Frontend-only startup
@@ -233,6 +245,7 @@ chmod +x start-dev.sh start-backend.sh start-frontend.sh
 - PowerShell-native features
 
 ### Linux/macOS Bash Scripts
+
 - `start-dev.sh` - Main development startup script
 - `start-backend.sh` - Backend-only startup
 - `start-frontend.sh` - Frontend-only startup
@@ -243,6 +256,7 @@ chmod +x start-dev.sh start-backend.sh start-frontend.sh
 ## Environment Variables
 
 ### Common Environment Variables
+
 ```bash
 # Backend Configuration
 DATABASE_URL=sqlite:./medical_device_assistant.db
@@ -262,6 +276,7 @@ PYTHONPATH=.
 ### Platform-Specific Environment Files
 
 #### Windows (.env.windows)
+
 ```env
 # Windows-specific paths
 DATABASE_URL=sqlite:C:\path\to\medical_device_assistant.db
@@ -272,6 +287,7 @@ WINDOWS_SERVICE_NAME=MedicalDeviceAssistant
 ```
 
 #### Linux (.env.linux)
+
 ```env
 # Linux-specific paths
 DATABASE_URL=sqlite:/var/lib/medical-device-assistant/database.db
@@ -282,6 +298,7 @@ SYSTEMD_SERVICE_NAME=medical-device-assistant
 ```
 
 #### macOS (.env.macos)
+
 ```env
 # macOS-specific paths
 DATABASE_URL=sqlite:~/Library/Application Support/MedicalDeviceAssistant/database.db
@@ -294,6 +311,7 @@ LAUNCHD_SERVICE_NAME=com.medicaldevice.assistant
 ## Port Configuration
 
 ### Default Ports
+
 - **Frontend**: 3000
 - **Backend**: 8000
 - **Redis** (optional): 6379
@@ -301,6 +319,7 @@ LAUNCHD_SERVICE_NAME=com.medicaldevice.assistant
 ### Port Conflict Resolution
 
 #### Windows
+
 ```powershell
 # Check what's using a port
 netstat -ano | findstr :3000
@@ -310,6 +329,7 @@ taskkill /PID <PID> /F
 ```
 
 #### Linux/macOS
+
 ```bash
 # Check what's using a port
 lsof -i :3000
@@ -327,26 +347,31 @@ sudo fuser -k 3000/tcp
 ### SQLite Database Location
 
 #### Windows
+
 - Default: `medical-device-regulatory-assistant\backend\medical_device_assistant.db`
 - Recommended: `%APPDATA%\MedicalDeviceAssistant\database.db`
 
 #### Linux
+
 - Default: `medical-device-regulatory-assistant/backend/medical_device_assistant.db`
 - Recommended: `/var/lib/medical-device-assistant/database.db`
 
 #### macOS
+
 - Default: `medical-device-regulatory-assistant/backend/medical_device_assistant.db`
 - Recommended: `~/Library/Application Support/MedicalDeviceAssistant/database.db`
 
 ### Database Permissions
 
 #### Windows
+
 ```powershell
 # Set proper permissions
 icacls "medical_device_assistant.db" /grant Users:F
 ```
 
 #### Linux/macOS
+
 ```bash
 # Set proper permissions
 chmod 644 medical_device_assistant.db
@@ -358,6 +383,7 @@ chown $USER:$USER medical_device_assistant.db
 ### Windows Services
 
 #### Create Windows Service
+
 ```powershell
 # Using NSSM (Non-Sucking Service Manager)
 nssm install MedicalDeviceAssistant "C:\path\to\start-dev.ps1"
@@ -366,6 +392,7 @@ nssm start MedicalDeviceAssistant
 ```
 
 #### PowerShell Service Script
+
 ```powershell
 # service-install.ps1
 $serviceName = "MedicalDeviceAssistant"
@@ -378,6 +405,7 @@ New-Service -Name $serviceName -DisplayName $serviceDisplayName -BinaryPathName 
 ### Linux Systemd Services
 
 #### Create Systemd Service
+
 ```bash
 # /etc/systemd/system/medical-device-assistant.service
 [Unit]
@@ -397,6 +425,7 @@ WantedBy=multi-user.target
 ```
 
 #### Enable and Start Service
+
 ```bash
 sudo systemctl daemon-reload
 sudo systemctl enable medical-device-assistant
@@ -407,6 +436,7 @@ sudo systemctl status medical-device-assistant
 ### macOS LaunchDaemon
 
 #### Create LaunchDaemon
+
 ```xml
 <!-- /Library/LaunchDaemons/com.medicaldevice.assistant.plist -->
 <?xml version="1.0" encoding="UTF-8"?>
@@ -430,6 +460,7 @@ sudo systemctl status medical-device-assistant
 ```
 
 #### Load LaunchDaemon
+
 ```bash
 sudo launchctl load /Library/LaunchDaemons/com.medicaldevice.assistant.plist
 sudo launchctl start com.medicaldevice.assistant
@@ -507,6 +538,7 @@ file medical_device_assistant.db
 ### Platform-Specific Debugging
 
 #### Windows Debugging
+
 ```powershell
 # Enable verbose logging
 $VerbosePreference = "Continue"
@@ -519,6 +551,7 @@ Get-Counter "\Process(node)\% Processor Time"
 ```
 
 #### Linux Debugging
+
 ```bash
 # Check system logs
 journalctl -u medical-device-assistant -f
@@ -532,6 +565,7 @@ ss -tulpn | grep -E ':(3000|8000)'
 ```
 
 #### macOS Debugging
+
 ```bash
 # Check system logs
 log show --predicate 'subsystem == "com.medicaldevice.assistant"' --info
@@ -548,18 +582,21 @@ netstat -an | grep -E ':(3000|8000)'
 ### Platform-Specific Optimizations
 
 #### Windows
+
 - Use Windows Performance Toolkit for profiling
 - Enable Windows Defender exclusions for project directory
 - Use Windows Subsystem for Linux (WSL) for better performance
 - Configure Windows power settings for high performance
 
 #### Linux
+
 - Use `systemd-analyze` for boot performance
 - Configure kernel parameters for better networking
 - Use `perf` for application profiling
 - Optimize file system (ext4, btrfs) settings
 
 #### macOS
+
 - Use Instruments for profiling
 - Configure Energy Saver settings
 - Use `fs_usage` for file system monitoring
@@ -570,18 +607,21 @@ netstat -an | grep -E ':(3000|8000)'
 ### Platform-Specific Security
 
 #### Windows
+
 - Use Windows Defender or third-party antivirus
 - Configure Windows Firewall rules
 - Use Windows Security Center
 - Enable Windows Update automatic installation
 
 #### Linux
+
 - Configure iptables/ufw firewall
 - Use SELinux or AppArmor
 - Keep system packages updated
 - Use fail2ban for intrusion prevention
 
 #### macOS
+
 - Use built-in macOS security features
 - Configure Application Firewall
 - Use Gatekeeper for application security
