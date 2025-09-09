@@ -10,6 +10,15 @@ from pathlib import Path
 from sqlalchemy.orm import Session, selectinload
 from sqlalchemy import select, and_, or_, func
 from fastapi import HTTPException, status
+
+# Import custom exceptions
+from exceptions.project_exceptions import (
+    ProjectNotFoundError,
+    ProjectAccessDeniedError,
+    ProjectValidationError,
+    ProjectStateError,
+    ProjectExportError,
+)
 from pydantic import BaseModel, Field
 
 from models.project import Project, ProjectStatus
@@ -128,10 +137,7 @@ class ProjectService:
             user = user_result.scalar_one_or_none()
             
             if not user:
-                raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND,
-                    detail="User not found"
-                )
+                raise ProjectNotFoundError(project_id=0, user_id=user_id)
             
             # Create new project
             project = Project(
@@ -184,10 +190,7 @@ class ProjectService:
             project = result.scalar_one_or_none()
             
             if not project:
-                raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND,
-                    detail="Project not found or access denied"
-                )
+                raise ProjectNotFoundError(project_id=project_id, user_id=user_id)
             
             return ProjectResponse.model_validate(project)
     

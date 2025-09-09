@@ -1,0 +1,120 @@
+{
+  "users": [
+    {
+      "google_id": "minimal_user_001",
+      "email": "minimal@test.com",
+      "name": "Minimal Test User"
+    }
+  ],
+  "projects": [
+    {
+      "name": "Simple Cardiac Monitor",
+      "description": "Basic cardiac monitoring device for quick testing",
+      "device_type": "Cardiac Monitor",
+      "intended_use": "For monitoring cardiac rhythm",
+      "status": "draft",
+      "priority": "medium",
+      "tags": ["cardiac", "simple"],
+      "user_email": "minimal@test.com"
+    },
+    {
+      "name": "Basic Glucose Meter",
+      "description": "Simple glucose measurement device",
+      "device_type": "Glucose Meter",
+      "intended_use": "For measuring blood glucose",
+      "status": "in_progress",
+      "priority": "high",
+      "tags": ["glucose", "diabetes"],
+      "user_email": "minimal@test.com"
+    }
+  ],
+  "device_classifications": [
+    {
+      "project_name": "Simple Cardiac Monitor",
+      "device_class": "II",
+      "product_code": "DPS",
+      "regulatory_pathway": "510k",
+      "cfr_sections": ["21 CFR 870.2300"],
+      "confidence_score": 0.90,
+      "reasoning": "Standard cardiac monitor classification"
+    },
+    {
+      "project_name": "Basic Glucose Meter",
+      "device_class": "II",
+      "product_code": "NBW",
+      "regulatory_pathway": "510k",
+      "cfr_sections": ["21 CFR 862.1345"],
+      "confidence_score": 0.95,
+      "reasoning": "Standard glucose meter classification"
+    }
+  ],
+  "predicate_devices": [
+    {
+      "project_name": "Simple Cardiac Monitor",
+      "k_number": "K190001",
+      "device_name": "Basic CardioMonitor",
+      "intended_use": "Cardiac rhythm monitoring",
+      "product_code": "DPS",
+      "clearance_date": "2019-01-15",
+      "confidence_score": 0.88,
+      "is_selected": true,
+      "comparison_data": {
+        "similarities": ["Similar monitoring capability", "Same product code"],
+        "differences": ["Enhanced features"],
+        "risk_assessment": "low",
+        "testing_recommendations": ["Basic validation testing"]
+      }
+    },
+    {
+      "project_name": "Basic Glucose Meter",
+      "k_number": "K200002",
+      "device_name": "Simple GlucoMeter",
+      "intended_use": "Blood glucose measurement",
+      "product_code": "NBW",
+      "clearance_date": "2020-02-20",
+      "confidence_score": 0.92,
+      "is_selected": true,
+      "comparison_data": {
+        "similarities": ["Glucose measurement", "Similar accuracy"],
+        "differences": ["Improved interface"],
+        "risk_assessment": "low",
+        "testing_recommendations": ["Accuracy testing"]
+      }
+    }
+  ],
+  "agent_interactions": [
+    {
+      "project_name": "Simple Cardiac Monitor",
+      "user_email": "minimal@test.com",
+      "agent_action": "device_classification",
+      "input_data": {
+        "device_description": "Basic cardiac monitoring device",
+        "intended_use": "For monitoring cardiac rhythm"
+      },
+      "output_data": {
+        "device_class": "II",
+        "product_code": "DPS",
+        "regulatory_pathway": "510k"
+      },
+      "confidence_score": 0.90,
+      "reasoning": "Standard cardiac monitor classification with high confidence",
+      "execution_time_ms": 1500
+    },
+    {
+      "project_name": "Basic Glucose Meter",
+      "user_email": "minimal@test.com",
+      "agent_action": "predicate_search",
+      "input_data": {
+        "device_type": "Glucose Meter",
+        "product_code": "NBW"
+      },
+      "output_data": {
+        "predicates_found": 3,
+        "top_matches": ["K200002", "K190003", "K180004"]
+      },
+      "confidence_score": 0.85,
+      "reasoning": "Found suitable predicate devices for glucose meter",
+      "execution_time_ms": 2200
+    }
+  ]
+}

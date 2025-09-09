@@ -11,28 +11,51 @@ The mock data configuration system allows you to define realistic test data for 
 ```
 mock_data/
 ├── schemas/
-│   └── mock_data_schema.json          # JSON schema definition
-├── sample_mock_data_config.json       # Sample configuration file
-├── json_validator.py                  # Validation utility classes
-├── validate_config.py                 # CLI validation tool
-└── README.md                          # This file
+│   └── mock_data_schema.json                    # JSON schema definition
+├── sample_mock_data_config.json                 # Original sample configuration (6 projects)
+├── comprehensive_mock_data_config.json          # Comprehensive dataset (20+ projects)
+├── edge_cases_mock_data_config.json            # Edge cases and error scenarios
+├── minimal_test_config.json                    # Minimal dataset (2 projects)
+├── performance_test_config.json                # Base performance testing config
+├── generate_performance_data.py                # High-volume data generator script
+├── json_validator.py                           # Validation utility classes
+├── validate_config.py                          # CLI validation tool
+└── README.md                                   # This file
 ```
 
 ## Quick Start
 
-### 1. Validate the Sample Configuration
+### 1. Choose Your Configuration
+
+Select the appropriate configuration for your needs:
+
+- **`minimal_test_config.json`** - Quick testing with 2 simple projects
+- **`sample_mock_data_config.json`** - Original sample with 6 basic projects  
+- **`comprehensive_mock_data_config.json`** - Full dataset with 20+ diverse projects
+- **`edge_cases_mock_data_config.json`** - Edge cases and error scenarios
+
+### 2. Validate Configuration
 
 ```bash
 cd medical-device-regulatory-assistant/backend/mock_data
-python validate_config.py sample_mock_data_config.json
+python validate_config.py comprehensive_mock_data_config.json
 ```
 
-### 2. Create Your Own Configuration
+### 3. Generate Performance Data (Optional)
 
-Copy the sample configuration and modify it:
+For high-volume testing:
 
 ```bash
-cp sample_mock_data_config.json my_config.json
+python generate_performance_data.py
+# This creates high_volume_small_config.json, high_volume_medium_config.json, high_volume_large_config.json
+```
+
+### 4. Create Custom Configuration
+
+Copy an existing configuration and modify it:
+
+```bash
+cp comprehensive_mock_data_config.json my_config.json
 # Edit my_config.json with your data
 python validate_config.py my_config.json
 ```
@@ -51,6 +74,71 @@ else:
     for error in errors:
         print(f"Error: {error}")
 ```
+
+## Available Configurations
+
+### Core Configurations
+
+#### `comprehensive_mock_data_config.json`
+- **20+ diverse medical device projects** covering various device classes
+- **Multiple device types**: Cardiac monitors, glucose meters, surgical systems, AI software, implantable devices
+- **All regulatory pathways**: 510(k), PMA, De Novo
+- **Complete related data**: Classifications, predicates, agent interactions
+- **Use case**: Full feature testing, demonstrations, comprehensive development
+
+#### `sample_mock_data_config.json`  
+- **6 basic medical device projects** with standard configurations
+- **Common device types**: Cardiac monitor, glucose meter, surgical navigation, wound dressing, pulse oximeter, insulin pump
+- **Standard pathways**: Primarily 510(k) with some PMA
+- **Use case**: Basic testing, getting started, simple demonstrations
+
+#### `minimal_test_config.json`
+- **2 simple projects** for quick testing
+- **Basic device types**: Cardiac monitor, glucose meter
+- **Standard 510(k) pathway** only
+- **Use case**: Quick development cycles, CI/CD testing, minimal setup
+
+### Specialized Testing Configurations
+
+#### `edge_cases_mock_data_config.json`
+- **Edge case scenarios** for robust testing
+- **Data validation testing**: Empty fields, extremely long text, special characters, Unicode
+- **Error scenarios**: Invalid K-numbers, malformed data, API timeouts
+- **Orphaned data**: Projects with missing relationships
+- **Use case**: Error handling validation, UI stress testing, data validation
+
+#### Performance Testing Configurations
+- **`performance_test_config.json`** - Base configuration for performance testing
+- **Generated configurations** via `generate_performance_data.py`:
+  - `high_volume_small_config.json` - 5 projects, 100 predicates, 50 interactions
+  - `high_volume_medium_config.json` - 10 projects, 500 predicates, 200 interactions  
+  - `high_volume_large_config.json` - 25 projects, 2500 predicates, 1250 interactions
+- **Use case**: Load testing, performance validation, stress testing
+
+## Device Types Covered
+
+The comprehensive configuration includes:
+
+### Cardiovascular (Class II & III)
+- Cardiac Monitoring Device, Pacemaker, Defibrillator
+
+### Diabetes Management (Class II)  
+- Blood Glucose Meter, Insulin Pump, Continuous Glucose Monitor
+
+### Surgical Systems (Class II)
+- Surgical Navigation System, Robotic Surgical System, Surgical Mesh
+
+### Diagnostic Imaging (Class II)
+- Pulse Oximeter, Ultrasound System, AI Diagnostic Software
+
+### Implantable Devices (Class II & III)
+- Neural Stimulator, Intraocular Lens, Dental Implant System
+
+### Critical Care (Class II & III)
+- Ventilator, Hemodialysis Machine
+
+### Specialty Devices (Class II)
+- Wound Care Dressing, Bone Graft Substitute, Contact Lens
 
 ## Configuration File Format
 

@@ -1,0 +1,271 @@
+{
+  "users": [
+    {
+      "google_id": "user_edge_001",
+      "email": "test.user@startup.com",
+      "name": "Test User",
+      "avatar_url": null
+    },
+    {
+      "google_id": "user_edge_002",
+      "email": "regulatory@bigpharma.com",
+      "name": "Regulatory Affairs Manager with Very Long Name That Tests UI Limits",
+      "avatar_url": "https://invalid-url-that-should-be-handled-gracefully.com/avatar.jpg"
+    }
+  ],
+  "projects": [
+    {
+      "name": "Project with Extremely Long Name That Should Test UI Rendering and Database Field Limits for Medical Device Regulatory Assistant Testing Purposes",
+      "description": "This is an extremely long description that tests the limits of text field handling in both the database and UI components. It contains multiple paragraphs and should test text wrapping, truncation, and display capabilities. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.",
+      "device_type": "Novel Medical Device with Unprecedented Technology",
+      "intended_use": "For the treatment of rare conditions that have never been addressed by medical devices before, requiring extensive regulatory review and potentially novel regulatory pathways",
+      "status": "draft",
+      "priority": "high",
+      "tags": ["edge-case", "long-text", "novel-technology", "rare-disease", "regulatory-challenge"],
+      "user_email": "test.user@startup.com"
+    },
+    {
+      "name": "",
+      "description": null,
+      "device_type": null,
+      "intended_use": null,
+      "status": "draft",
+      "priority": null,
+      "tags": [],
+      "user_email": "test.user@startup.com"
+    },
+    {
+      "name": "Minimal Project",
+      "description": "Min",
+      "device_type": "X",
+      "intended_use": "Test",
+      "status": "completed",
+      "priority": "low",
+      "tags": ["minimal"],
+      "user_email": "regulatory@bigpharma.com"
+    },
+    {
+      "name": "Special Characters Project !@#$%^&*()_+-=[]{}|;':\",./<>?",
+      "description": "Testing special characters: àáâãäåæçèéêëìíîïðñòóôõöøùúûüýþÿ",
+      "device_type": "Device with Unicode: 中文 العربية русский 日本語",
+      "intended_use": "For testing internationalization and special character handling in the system",
+      "status": "in_progress",
+      "priority": "medium",
+      "tags": ["special-chars", "unicode", "i18n", "testing"],
+      "user_email": "regulatory@bigpharma.com"
+    },
+    {
+      "name": "Orphaned Project",
+      "description": "This project has no related data - no classifications, predicates, or agent interactions",
+      "device_type": "Orphaned Device",
+      "intended_use": "For testing how the system handles projects with missing related data",
+      "status": "draft",
+      "priority": "low",
+      "tags": ["orphaned", "no-data"],
+      "user_email": "test.user@startup.com"
+    },
+    {
+      "name": "High Volume Data Project",
+      "description": "This project will have many related records to test performance",
+      "device_type": "Performance Test Device",
+      "intended_use": "For testing system performance with large amounts of related data",
+      "status": "in_progress",
+      "priority": "high",
+      "tags": ["performance", "high-volume", "stress-test"],
+      "user_email": "regulatory@bigpharma.com"
+    },
+    {
+      "name": "Error Prone Project",
+      "description": "This project is designed to trigger various error conditions",
+      "device_type": "Error Test Device",
+      "intended_use": "For testing error handling and recovery mechanisms",
+      "status": "draft",
+      "priority": "medium",
+      "tags": ["error-testing", "edge-case", "validation"],
+      "user_email": "test.user@startup.com"
+    }
+  ],
+  "device_classifications": [
+    {
+      "project_name": "Project with Extremely Long Name That Should Test UI Rendering and Database Field Limits for Medical Device Regulatory Assistant Testing Purposes",
+      "device_class": "Unknown",
+      "product_code": "UNK",
+      "regulatory_pathway": "Unknown",
+      "cfr_sections": [],
+      "confidence_score": 0.15,
+      "reasoning": "Unable to classify device due to novel technology and lack of regulatory precedent. Requires FDA consultation."
+    },
+    {
+      "project_name": "Special Characters Project !@#$%^&*()_+-=[]{}|;':\",./<>?",
+      "device_class": "II",
+      "product_code": "TST",
+      "regulatory_pathway": "510k",
+      "cfr_sections": ["21 CFR 999.9999"],
+      "confidence_score": 0.50,
+      "reasoning": "Classification uncertain due to special characters and internationalization requirements"
+    },
+    {
+      "project_name": "High Volume Data Project",
+      "device_class": "II",
+      "product_code": "PER",
+      "regulatory_pathway": "510k",
+      "cfr_sections": ["21 CFR 888.1234"],
+      "confidence_score": 0.85,
+      "reasoning": "Standard classification for performance testing device"
+    },
+    {
+      "project_name": "Error Prone Project",
+      "device_class": "III",
+      "product_code": "ERR",
+      "regulatory_pathway": "PMA",
+      "cfr_sections": ["21 CFR 999.0001"],
+      "confidence_score": 0.01,
+      "reasoning": "Classification failed due to invalid data inputs and system errors"
+    }
+  ],
+  "predicate_devices": [
+    {
+      "project_name": "High Volume Data Project",
+      "k_number": "K999001",
+      "device_name": "Performance Predicate 1",
+      "intended_use": "Performance testing predicate device 1",
+      "product_code": "PER",
+      "clearance_date": "2020-01-01",
+      "confidence_score": 0.85,
+      "is_selected": true,
+      "comparison_data": {
+        "similarities": ["Performance testing", "Similar intended use"],
+        "differences": ["Enhanced performance metrics"],
+        "risk_assessment": "low",
+        "testing_recommendations": ["Performance validation"]
+      }
+    },
+    {
+      "project_name": "High Volume Data Project",
+      "k_number": "K999002",
+      "device_name": "Performance Predicate 2",
+      "intended_use": "Performance testing predicate device 2",
+      "product_code": "PER",
+      "clearance_date": "2020-02-01",
+      "confidence_score": 0.82,
+      "is_selected": false,
+      "comparison_data": {
+        "similarities": ["Performance testing", "Similar technology"],
+        "differences": ["Different performance parameters"],
+        "risk_assessment": "low",
+        "testing_recommendations": ["Comparative testing"]
+      }
+    },
+    {
+      "project_name": "High Volume Data Project",
+      "k_number": "K999003",
+      "device_name": "Performance Predicate 3",
+      "intended_use": "Performance testing predicate device 3",
+      "product_code": "PER",
+      "clearance_date": "2020-03-01",
+      "confidence_score": 0.80,
+      "is_selected": false,
+      "comparison_data": {
+        "similarities": ["Performance testing", "Similar design"],
+        "differences": ["Different implementation"],
+        "risk_assessment": "medium",
+        "testing_recommendations": ["Design validation"]
+      }
+    },
+    {
+      "project_name": "Error Prone Project",
+      "k_number": "INVALID_K_NUMBER",
+      "device_name": "Invalid Predicate Device",
+      "intended_use": "This predicate has invalid data to test error handling",
+      "product_code": "INVALID",
+      "clearance_date": "invalid-date",
+      "confidence_score": -0.5,
+      "is_selected": false,
+      "comparison_data": {
+        "similarities": [],
+        "differences": ["Everything is different"],
+        "risk_assessment": "unknown",
+        "testing_recommendations": ["Fix data validation errors"]
+      }
+    }
+  ],
+  "agent_interactions": [
+    {
+      "project_name": "Project with Extremely Long Name That Should Test UI Rendering and Database Field Limits for Medical Device Regulatory Assistant Testing Purposes",
+      "user_email": "test.user@startup.com",
+      "agent_action": "device_classification",
+      "input_data": {
+        "device_description": "Novel medical device with unprecedented technology that has never been seen before in the regulatory landscape",
+        "intended_use": "For treating rare conditions with no existing regulatory precedent"
+      },
+      "output_data": {
+        "error": "Unable to classify device",
+        "reason": "No similar devices found in FDA database",
+        "recommendation": "Consult with FDA through pre-submission meeting"
+      },
+      "confidence_score": 0.15,
+      "reasoning": "Device classification failed due to lack of regulatory precedent and novel technology. Requires human expert review and FDA consultation.",
+      "execution_time_ms": 15000
+    },
+    {
+      "project_name": "Error Prone Project",
+      "user_email": "test.user@startup.com",
+      "agent_action": "predicate_search",
+      "input_data": {
+        "device_type": "Error Test Device",
+        "product_code": "ERR",
+        "intended_use": "error testing"
+      },
+      "output_data": {
+        "error": "Search timeout",
+        "predicates_found": 0,
+        "error_details": "FDA API timeout after 30 seconds"
+      },
+      "confidence_score": 0.0,
+      "reasoning": "Predicate search failed due to API timeout. System should implement retry logic and graceful error handling.",
+      "execution_time_ms": 30000
+    },
+    {
+      "project_name": "High Volume Data Project",
+      "user_email": "regulatory@bigpharma.com",
+      "agent_action": "bulk_predicate_analysis",
+      "input_data": {
+        "device_type": "Performance Test Device",
+        "analyze_all_predicates": true,
+        "predicate_count": 50
+      },
+      "output_data": {
+        "predicates_analyzed": 50,
+        "processing_time": "2.5 minutes",
+        "memory_usage": "512 MB",
+        "top_matches": 10,
+        "performance_metrics": {
+          "avg_analysis_time": 3000,
+          "max_analysis_time": 8000,
+          "min_analysis_time": 1500
+        }
+      },
+      "confidence_score": 0.88,
+      "reasoning": "Successfully processed large volume of predicate data. Performance metrics within acceptable limits.",
+      "execution_time_ms": 150000
+    },
+    {
+      "project_name": "Special Characters Project !@#$%^&*()_+-=[]{}|;':\",./<>?",
+      "user_email": "regulatory@bigpharma.com",
+      "agent_action": "internationalization_test",
+      "input_data": {
+        "device_description": "Device with Unicode: 中文 العربية русский 日本語",
+        "intended_use": "Testing internationalization: àáâãäåæçèéêëìíîïðñòóôõöøùúûüýþÿ"
+      },
+      "output_data": {
+        "unicode_support": true,
+        "special_chars_handled": true,
+        "encoding": "UTF-8",
+        "warnings": ["Some special characters may not display correctly in all browsers"]
+      },
+      "confidence_score": 0.75,
+      "reasoning": "System successfully handled Unicode and special characters with minor display warnings.",
+      "execution_time_ms": 2200
+    }
+  ]
+}

@@ -27,7 +27,8 @@
         "mv *",
         "find *",
         "rmdir *",
-        "find *"
+        "find *",
+        "grep *"
     ],
     "typescript.autoClosingTags": false
 }

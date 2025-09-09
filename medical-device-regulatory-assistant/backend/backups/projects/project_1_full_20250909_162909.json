@@ -1,0 +1,74 @@
+{
+  "project": {
+    "id": 1,
+    "name": "Test Medical Device Project",
+    "description": "A comprehensive test project for regulatory compliance",
+    "device_type": "Class II Medical Device",
+    "intended_use": "For diagnostic testing of cardiovascular conditions",
+    "status": "DRAFT",
+    "created_at": "2025-09-09T08:29:09.983024+00:00",
+    "updated_at": "2025-09-09T08:29:09.983539+00:00"
+  },
+  "classifications": [
+    {
+      "id": 1,
+      "device_class": "Class II",
+      "product_code": "DQO",
+      "regulatory_pathway": "510(k)",
+      "confidence_score": 0.85,
+      "reasoning": "Based on intended use and technological characteristics"
+    }
+  ],
+  "predicates": [
+    {
+      "id": 1,
+      "k_number": "K123456",
+      "device_name": "Similar Cardiovascular Diagnostic Device",
+      "product_code": "DQO",
+      "confidence_score": 0.78,
+      "is_selected": true
+    },
+    {
+      "id": 2,
+      "k_number": "K789012",
+      "device_name": "Another Cardiovascular Device",
+      "product_code": "DQO",
+      "confidence_score": 0.65,
+      "is_selected": false
+    }
+  ],
+  "documents": [
+    {
+      "id": 1,
+      "filename": "device_specification.pdf",
+      "document_type": "specification",
+      "created_at": "2025-09-09T08:29:09.983547+00:00"
+    }
+  ],
+  "interactions": [
+    {
+      "id": 1,
+      "agent_action": "classify_device",
+      "confidence_score": 0.85,
+      "reasoning": "Device classification completed successfully"
+    }
+  ],
+  "metadata": {
+    "export_id": "584b2e1ec712451d",
+    "project_id": 1,
+    "user_id": "test_user_123",
+    "format_type": "json",
+    "created_at": "2025-09-09T08:29:09.983673+00:00",
+    "version": "2.0",
+    "schema_version": "1.0",
+    "checksum": "21fcf226a42e37f2d6845c42ff9d3daed618f5cf6178269ce67b8047676fb6c2",
+    "size_bytes": 1420
+  },
+  "validation": {
+    "is_valid": true,
+    "errors": [],
+    "warnings": [],
+    "validation_time_ms": 0.026,
+    "validated_at": "2025-09-09T08:29:09.983859+00:00"
+  }
+}

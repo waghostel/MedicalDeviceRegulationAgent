@@ -1,0 +1,983 @@
+{
+  "users": [
+    {
+      "google_id": "user_123456789",
+      "email": "john.doe@medtech.com",
+      "name": "John Doe",
+      "avatar_url": "https://lh3.googleusercontent.com/a/default-user"
+    },
+    {
+      "google_id": "user_987654321",
+      "email": "jane.smith@deviceco.com",
+      "name": "Jane Smith",
+      "avatar_url": "https://lh3.googleusercontent.com/a/default-user-2"
+    },
+    {
+      "google_id": "user_456789123",
+      "email": "mike.johnson@cardiotech.com",
+      "name": "Mike Johnson",
+      "avatar_url": "https://lh3.googleusercontent.com/a/default-user-3"
+    },
+    {
+      "google_id": "user_789123456",
+      "email": "sarah.wilson@orthomed.com",
+      "name": "Sarah Wilson"
+    },
+    {
+      "google_id": "user_321654987",
+      "email": "david.chen@neurotech.com",
+      "name": "David Chen",
+      "avatar_url": "https://lh3.googleusercontent.com/a/default-user-4"
+    },
+    {
+      "google_id": "user_654987321",
+      "email": "lisa.martinez@ophthalmics.com",
+      "name": "Lisa Martinez",
+      "avatar_url": "https://lh3.googleusercontent.com/a/default-user-5"
+    },
+    {
+      "google_id": "user_147258369",
+      "email": "robert.taylor@dentaltech.com",
+      "name": "Robert Taylor"
+    },
+    {
+      "google_id": "user_963852741",
+      "email": "emily.brown@respiratorycare.com",
+      "name": "Emily Brown",
+      "avatar_url": "https://lh3.googleusercontent.com/a/default-user-6"
+    }
+  ],
+  "projects": [
+    {
+      "name": "Cardiac Monitoring Device",
+      "description": "A wearable device for continuous cardiac rhythm monitoring with AI-powered arrhythmia detection. The device uses advanced ECG sensors and machine learning algorithms to provide real-time cardiac monitoring for ambulatory patients.",
+      "device_type": "Cardiac Monitor",
+      "intended_use": "For continuous monitoring of cardiac rhythm in ambulatory patients to detect arrhythmias and provide alerts to healthcare providers",
+      "status": "in_progress",
+      "priority": "high",
+      "tags": ["cardiac", "wearable", "monitoring", "AI", "ECG"],
+      "user_email": "john.doe@medtech.com"
+    },
+    {
+      "name": "Blood Glucose Meter",
+      "description": "Portable blood glucose monitoring system with smartphone connectivity and cloud data storage for diabetes management",
+      "device_type": "Glucose Meter",
+      "intended_use": "For quantitative measurement of glucose in capillary blood from the fingertip for diabetes management",
+      "status": "draft",
+      "priority": "medium",
+      "tags": ["diabetes", "glucose", "portable", "smartphone"],
+      "user_email": "jane.smith@deviceco.com"
+    },
+    {
+      "name": "Surgical Navigation System",
+      "description": "Computer-assisted surgical navigation system for orthopedic procedures using real-time imaging and tracking",
+      "device_type": "Surgical Navigation System",
+      "intended_use": "To provide real-time guidance during orthopedic surgical procedures by tracking surgical instruments relative to patient anatomy",
+      "status": "completed",
+      "priority": "high",
+      "tags": ["surgery", "navigation", "orthopedic", "imaging"],
+      "user_email": "mike.johnson@cardiotech.com"
+    },
+    {
+      "name": "Wound Care Dressing",
+      "description": "Advanced antimicrobial wound dressing with silver nanoparticles for chronic wound management",
+      "device_type": "Wound Dressing",
+      "intended_use": "For management of chronic wounds including diabetic ulcers, pressure ulcers, and venous leg ulcers",
+      "status": "in_progress",
+      "priority": "medium",
+      "tags": ["wound care", "antimicrobial", "chronic wounds"],
+      "user_email": "sarah.wilson@orthomed.com"
+    },
+    {
+      "name": "Pulse Oximeter",
+      "description": "Non-invasive pulse oximeter for measuring oxygen saturation and pulse rate in hospital and home settings",
+      "device_type": "Pulse Oximeter",
+      "intended_use": "For non-invasive measurement of functional oxygen saturation of arterial hemoglobin and pulse rate",
+      "status": "draft",
+      "priority": "low",
+      "tags": ["oximetry", "non-invasive", "monitoring"],
+      "user_email": "john.doe@medtech.com"
+    },
+    {
+      "name": "Insulin Pump",
+      "description": "Continuous subcutaneous insulin infusion pump with integrated continuous glucose monitoring",
+      "device_type": "Insulin Pump",
+      "intended_use": "For continuous subcutaneous infusion of insulin in patients with diabetes mellitus requiring insulin therapy",
+      "status": "in_progress",
+      "priority": "high",
+      "tags": ["diabetes", "insulin", "pump", "CGM"],
+      "user_email": "jane.smith@deviceco.com"
+    },
+    {
+      "name": "Neural Stimulator",
+      "description": "Implantable neurostimulation device for chronic pain management using electrical stimulation of spinal cord",
+      "device_type": "Neurostimulator",
+      "intended_use": "For the management of chronic intractable pain of the trunk and/or limbs through spinal cord stimulation",
+      "status": "in_progress",
+      "priority": "high",
+      "tags": ["neurostimulation", "implantable", "pain management", "spinal cord"],
+      "user_email": "david.chen@neurotech.com"
+    },
+    {
+      "name": "Intraocular Lens",
+      "description": "Foldable acrylic intraocular lens for cataract surgery with enhanced optical design",
+      "device_type": "Intraocular Lens",
+      "intended_use": "For the replacement of the natural crystalline lens in patients undergoing cataract extraction",
+      "status": "completed",
+      "priority": "medium",
+      "tags": ["ophthalmology", "cataract", "IOL", "surgery"],
+      "user_email": "lisa.martinez@ophthalmics.com"
+    },
+    {
+      "name": "Dental Implant System",
+      "description": "Titanium dental implant system with enhanced surface treatment for improved osseointegration",
+      "device_type": "Dental Implant",
+      "intended_use": "For the replacement of missing teeth in edentulous or partially edentulous patients",
+      "status": "draft",
+      "priority": "medium",
+      "tags": ["dental", "implant", "titanium", "osseointegration"],
+      "user_email": "robert.taylor@dentaltech.com"
+    },
+    {
+      "name": "Ventilator",
+      "description": "Portable mechanical ventilator for critical care and emergency use with advanced monitoring capabilities",
+      "device_type": "Ventilator",
+      "intended_use": "For providing mechanical ventilatory support to patients with respiratory failure or insufficiency",
+      "status": "in_progress",
+      "priority": "high",
+      "tags": ["ventilation", "critical care", "respiratory", "emergency"],
+      "user_email": "emily.brown@respiratorycare.com"
+    },
+    {
+      "name": "AI Diagnostic Software",
+      "description": "Machine learning software for automated analysis of chest X-rays to detect pneumonia and other pulmonary conditions",
+      "device_type": "Diagnostic Software",
+      "intended_use": "For computer-aided detection of pneumonia and other pulmonary abnormalities in chest radiographs",
+      "status": "draft",
+      "priority": "high",
+      "tags": ["AI", "software", "radiology", "pneumonia", "chest X-ray"],
+      "user_email": "david.chen@neurotech.com"
+    },
+    {
+      "name": "Robotic Surgical System",
+      "description": "Minimally invasive robotic surgical system for laparoscopic procedures with haptic feedback",
+      "device_type": "Robotic Surgical System",
+      "intended_use": "To enable surgeons to perform minimally invasive laparoscopic surgical procedures with enhanced precision and control",
+      "status": "in_progress",
+      "priority": "high",
+      "tags": ["robotics", "surgery", "laparoscopic", "minimally invasive"],
+      "user_email": "mike.johnson@cardiotech.com"
+    },
+    {
+      "name": "Continuous Glucose Monitor",
+      "description": "Real-time continuous glucose monitoring system with smartphone integration and predictive alerts",
+      "device_type": "Continuous Glucose Monitor",
+      "intended_use": "For real-time measurement of glucose levels in interstitial fluid for diabetes management",
+      "status": "completed",
+      "priority": "high",
+      "tags": ["diabetes", "CGM", "real-time", "smartphone", "alerts"],
+      "user_email": "jane.smith@deviceco.com"
+    },
+    {
+      "name": "Bone Graft Substitute",
+      "description": "Synthetic bone graft substitute material for spinal fusion procedures",
+      "device_type": "Bone Graft Substitute",
+      "intended_use": "For use as a bone void filler in spinal fusion procedures where autograft is not available",
+      "status": "draft",
+      "priority": "low",
+      "tags": ["orthopedic", "bone graft", "spinal fusion", "synthetic"],
+      "user_email": "sarah.wilson@orthomed.com"
+    },
+    {
+      "name": "Contact Lens",
+      "description": "Daily disposable soft contact lens with UV protection and enhanced comfort",
+      "device_type": "Contact Lens",
+      "intended_use": "For the correction of refractive errors including myopia, hyperopia, and astigmatism",
+      "status": "in_progress",
+      "priority": "low",
+      "tags": ["ophthalmology", "contact lens", "refractive error", "UV protection"],
+      "user_email": "lisa.martinez@ophthalmics.com"
+    },
+    {
+      "name": "Defibrillator",
+      "description": "Automated external defibrillator with advanced ECG analysis and voice prompts for emergency use",
+      "device_type": "Automated External Defibrillator",
+      "intended_use": "For the treatment of life-threatening cardiac arrhythmias through delivery of electrical shock",
+      "status": "completed",
+      "priority": "high",
+      "tags": ["defibrillator", "emergency", "cardiac", "AED", "life-saving"],
+      "user_email": "john.doe@medtech.com"
+    },
+    {
+      "name": "Hemodialysis Machine",
+      "description": "Advanced hemodialysis system with integrated water treatment and patient monitoring",
+      "device_type": "Hemodialysis System",
+      "intended_use": "For the treatment of patients with acute or chronic kidney failure through extracorporeal blood purification",
+      "status": "in_progress",
+      "priority": "high",
+      "tags": ["dialysis", "kidney", "blood purification", "chronic kidney disease"],
+      "user_email": "emily.brown@respiratorycare.com"
+    },
+    {
+      "name": "Ultrasound System",
+      "description": "Portable ultrasound imaging system with advanced Doppler capabilities for point-of-care diagnostics",
+      "device_type": "Ultrasound System",
+      "intended_use": "For non-invasive diagnostic ultrasound imaging of internal body structures and blood flow",
+      "status": "draft",
+      "priority": "medium",
+      "tags": ["ultrasound", "imaging", "Doppler", "point-of-care", "diagnostics"],
+      "user_email": "david.chen@neurotech.com"
+    },
+    {
+      "name": "Pacemaker",
+      "description": "Dual-chamber implantable cardiac pacemaker with MRI compatibility and remote monitoring",
+      "device_type": "Cardiac Pacemaker",
+      "intended_use": "For the treatment of bradycardia and other cardiac rhythm disorders through electrical stimulation",
+      "status": "in_progress",
+      "priority": "high",
+      "tags": ["pacemaker", "cardiac", "implantable", "MRI compatible", "remote monitoring"],
+      "user_email": "john.doe@medtech.com"
+    },
+    {
+      "name": "Surgical Mesh",
+      "description": "Bioabsorbable surgical mesh for hernia repair with enhanced tissue integration properties",
+      "device_type": "Surgical Mesh",
+      "intended_use": "For reinforcement of soft tissue where weakness exists in patients requiring hernia repair",
+      "status": "completed",
+      "priority": "medium",
+      "tags": ["surgery", "hernia", "mesh", "bioabsorbable", "tissue integration"],
+      "user_email": "mike.johnson@cardiotech.com"
+    }
+  ]
+},
+ 
+ "device_classifications": [
+    {
+      "project_name": "Cardiac Monitoring Device",
+      "device_class": "II",
+      "product_code": "DPS",
+      "regulatory_pathway": "510k",
+      "cfr_sections": ["21 CFR 870.2300"],
+      "confidence_score": 0.92,
+      "reasoning": "Device is substantially equivalent to existing cardiac monitors with similar intended use and technological characteristics"
+    },
+    {
+      "project_name": "Blood Glucose Meter",
+      "device_class": "II",
+      "product_code": "NBW",
+      "regulatory_pathway": "510k",
+      "cfr_sections": ["21 CFR 862.1345"],
+      "confidence_score": 0.95,
+      "reasoning": "Standard glucose meter with established predicate devices and well-defined regulatory pathway"
+    },
+    {
+      "project_name": "Surgical Navigation System",
+      "device_class": "II",
+      "product_code": "IYE",
+      "regulatory_pathway": "510k",
+      "cfr_sections": ["21 CFR 888.1720"],
+      "confidence_score": 0.88,
+      "reasoning": "Computer-assisted surgical system with established predicate devices in orthopedic applications"
+    },
+    {
+      "project_name": "Wound Care Dressing",
+      "device_class": "II",
+      "product_code": "NAE",
+      "regulatory_pathway": "510k",
+      "cfr_sections": ["21 CFR 878.4018"],
+      "confidence_score": 0.85,
+      "reasoning": "Antimicrobial wound dressing with silver, similar to existing cleared devices"
+    },
+    {
+      "project_name": "Pulse Oximeter",
+      "device_class": "II",
+      "product_code": "DQA",
+      "regulatory_pathway": "510k",
+      "cfr_sections": ["21 CFR 870.2700"],
+      "confidence_score": 0.98,
+      "reasoning": "Well-established device type with numerous predicate devices available"
+    },
+    {
+      "project_name": "Insulin Pump",
+      "device_class": "II",
+      "product_code": "LZG",
+      "regulatory_pathway": "510k",
+      "cfr_sections": ["21 CFR 880.5725"],
+      "confidence_score": 0.90,
+      "reasoning": "Insulin infusion pump with established regulatory pathway and predicate devices"
+    },
+    {
+      "project_name": "Neural Stimulator",
+      "device_class": "III",
+      "product_code": "GZF",
+      "regulatory_pathway": "PMA",
+      "cfr_sections": ["21 CFR 882.5800"],
+      "confidence_score": 0.87,
+      "reasoning": "Implantable neurostimulator classified as Class III due to high risk and life-sustaining nature"
+    },
+    {
+      "project_name": "Intraocular Lens",
+      "device_class": "III",
+      "product_code": "VHA",
+      "regulatory_pathway": "PMA",
+      "cfr_sections": ["21 CFR 886.3400"],
+      "confidence_score": 0.93,
+      "reasoning": "Intraocular lens classified as Class III, but may qualify for 510(k) if substantially equivalent to predicate"
+    },
+    {
+      "project_name": "Dental Implant System",
+      "device_class": "II",
+      "product_code": "EHA",
+      "regulatory_pathway": "510k",
+      "cfr_sections": ["21 CFR 872.3640"],
+      "confidence_score": 0.91,
+      "reasoning": "Dental implant system with established predicate devices and standard materials"
+    },
+    {
+      "project_name": "Ventilator",
+      "device_class": "II",
+      "product_code": "BYG",
+      "regulatory_pathway": "510k",
+      "cfr_sections": ["21 CFR 868.5895"],
+      "confidence_score": 0.89,
+      "reasoning": "Mechanical ventilator with established regulatory pathway and predicate devices"
+    },
+    {
+      "project_name": "AI Diagnostic Software",
+      "device_class": "II",
+      "product_code": "MYN",
+      "regulatory_pathway": "De Novo",
+      "cfr_sections": ["21 CFR 892.2080"],
+      "confidence_score": 0.75,
+      "reasoning": "AI/ML diagnostic software may require De Novo pathway due to novel technology, but could potentially use 510(k) with appropriate predicate"
+    },
+    {
+      "project_name": "Robotic Surgical System",
+      "device_class": "II",
+      "product_code": "IYE",
+      "regulatory_pathway": "510k",
+      "cfr_sections": ["21 CFR 888.1720"],
+      "confidence_score": 0.82,
+      "reasoning": "Robotic surgical system with established predicate devices in minimally invasive surgery"
+    },
+    {
+      "project_name": "Continuous Glucose Monitor",
+      "device_class": "II",
+      "product_code": "NBW",
+      "regulatory_pathway": "510k",
+      "cfr_sections": ["21 CFR 862.1355"],
+      "confidence_score": 0.94,
+      "reasoning": "Continuous glucose monitor with well-established regulatory pathway and predicate devices"
+    },
+    {
+      "project_name": "Bone Graft Substitute",
+      "device_class": "II",
+      "product_code": "HRS",
+      "regulatory_pathway": "510k",
+      "cfr_sections": ["21 CFR 888.3027"],
+      "confidence_score": 0.86,
+      "reasoning": "Bone graft substitute with established predicate devices and standard materials"
+    },
+    {
+      "project_name": "Contact Lens",
+      "device_class": "II",
+      "product_code": "HTO",
+      "regulatory_pathway": "510k",
+      "cfr_sections": ["21 CFR 886.3200"],
+      "confidence_score": 0.97,
+      "reasoning": "Daily disposable contact lens with numerous predicate devices and well-established pathway"
+    },
+    {
+      "project_name": "Defibrillator",
+      "device_class": "III",
+      "product_code": "MKJ",
+      "regulatory_pathway": "PMA",
+      "cfr_sections": ["21 CFR 870.5300"],
+      "confidence_score": 0.91,
+      "reasoning": "Automated external defibrillator classified as Class III due to life-sustaining nature"
+    },
+    {
+      "project_name": "Hemodialysis Machine",
+      "device_class": "II",
+      "product_code": "KDI",
+      "regulatory_pathway": "510k",
+      "cfr_sections": ["21 CFR 876.5665"],
+      "confidence_score": 0.88,
+      "reasoning": "Hemodialysis system with established predicate devices and regulatory pathway"
+    },
+    {
+      "project_name": "Ultrasound System",
+      "device_class": "II",
+      "product_code": "IYN",
+      "regulatory_pathway": "510k",
+      "cfr_sections": ["21 CFR 892.1550"],
+      "confidence_score": 0.95,
+      "reasoning": "Ultrasound imaging system with numerous predicate devices and well-established pathway"
+    },
+    {
+      "project_name": "Pacemaker",
+      "device_class": "III",
+      "product_code": "MHX",
+      "regulatory_pathway": "PMA",
+      "cfr_sections": ["21 CFR 870.3610"],
+      "confidence_score": 0.93,
+      "reasoning": "Implantable cardiac pacemaker classified as Class III due to life-sustaining nature"
+    },
+    {
+      "project_name": "Surgical Mesh",
+      "device_class": "II",
+      "product_code": "FTL",
+      "regulatory_pathway": "510k",
+      "cfr_sections": ["21 CFR 878.3300"],
+      "confidence_score": 0.89,
+      "reasoning": "Surgical mesh for hernia repair with established predicate devices"
+    }
+  ],
+  "pre
+dicate_devices": [
+    {
+      "project_name": "Cardiac Monitoring Device",
+      "k_number": "K193456",
+      "device_name": "CardioWatch Pro",
+      "intended_use": "Continuous cardiac rhythm monitoring for ambulatory patients",
+      "product_code": "DPS",
+      "clearance_date": "2019-08-15",
+      "confidence_score": 0.89,
+      "is_selected": true,
+      "comparison_data": {
+        "similarities": [
+          "Similar intended use for cardiac rhythm monitoring",
+          "Same product code (DPS)",
+          "Ambulatory monitoring capability",
+          "ECG signal acquisition and processing"
+        ],
+        "differences": [
+          "AI-powered arrhythmia detection (new feature)",
+          "Enhanced battery life",
+          "Improved sensor technology",
+          "Cloud connectivity features"
+        ],
+        "risk_assessment": "low",
+        "testing_recommendations": [
+          "Software validation for AI algorithms",
+          "Cybersecurity testing for cloud connectivity",
+          "Clinical validation of arrhythmia detection accuracy",
+          "Biocompatibility testing for skin contact materials"
+        ]
+      }
+    },
+    {
+      "project_name": "Blood Glucose Meter",
+      "k_number": "K201234",
+      "device_name": "GlucoSmart Pro",
+      "intended_use": "Blood glucose measurement for diabetes management",
+      "product_code": "NBW",
+      "clearance_date": "2020-11-10",
+      "confidence_score": 0.94,
+      "is_selected": true,
+      "comparison_data": {
+        "similarities": [
+          "Capillary blood glucose measurement",
+          "Same product code (NBW)",
+          "Smartphone connectivity",
+          "Similar accuracy requirements"
+        ],
+        "differences": [
+          "Enhanced data analytics",
+          "Cloud storage integration",
+          "Improved user interface"
+        ],
+        "risk_assessment": "low",
+        "testing_recommendations": [
+          "Accuracy and precision testing",
+          "Cybersecurity assessment",
+          "Software validation",
+          "Clinical evaluation"
+        ]
+      }
+    },
+    {
+      "project_name": "Neural Stimulator",
+      "k_number": "K183456",
+      "device_name": "NeuroStim Advanced",
+      "intended_use": "Spinal cord stimulation for chronic pain management",
+      "product_code": "GZF",
+      "clearance_date": "2018-05-22",
+      "confidence_score": 0.85,
+      "is_selected": true,
+      "comparison_data": {
+        "similarities": [
+          "Spinal cord stimulation mechanism",
+          "Chronic pain indication",
+          "Implantable design",
+          "Similar electrode configuration"
+        ],
+        "differences": [
+          "Enhanced programming capabilities",
+          "Improved battery technology",
+          "MRI compatibility features",
+          "Advanced waveform options"
+        ],
+        "risk_assessment": "medium",
+        "testing_recommendations": [
+          "Biocompatibility testing for implantable components",
+          "Electrical safety testing",
+          "MRI compatibility validation",
+          "Clinical efficacy studies",
+          "Long-term reliability testing"
+        ]
+      }
+    },
+    {
+      "project_name": "AI Diagnostic Software",
+      "k_number": "K210987",
+      "device_name": "ChestAI Pro",
+      "intended_use": "Computer-aided detection of pulmonary nodules in chest radiographs",
+      "product_code": "MYN",
+      "clearance_date": "2021-03-18",
+      "confidence_score": 0.78,
+      "is_selected": true,
+      "comparison_data": {
+        "similarities": [
+          "AI-based image analysis",
+          "Chest radiograph application",
+          "Computer-aided detection",
+          "Similar imaging modality"
+        ],
+        "differences": [
+          "Pneumonia detection vs nodule detection",
+          "Enhanced machine learning algorithms",
+          "Broader pathology coverage",
+          "Improved sensitivity and specificity"
+        ],
+        "risk_assessment": "medium",
+        "testing_recommendations": [
+          "Algorithm validation with diverse datasets",
+          "Clinical validation studies",
+          "Software verification and validation",
+          "Cybersecurity assessment",
+          "Performance testing across demographics"
+        ]
+      }
+    },
+    {
+      "project_name": "Robotic Surgical System",
+      "k_number": "K195678",
+      "device_name": "SurgiBot Elite",
+      "intended_use": "Robot-assisted laparoscopic surgical procedures",
+      "product_code": "IYE",
+      "clearance_date": "2019-12-08",
+      "confidence_score": 0.83,
+      "is_selected": true,
+      "comparison_data": {
+        "similarities": [
+          "Robot-assisted surgery capability",
+          "Laparoscopic procedure support",
+          "Similar surgical applications",
+          "Surgeon console interface"
+        ],
+        "differences": [
+          "Enhanced haptic feedback system",
+          "Improved instrument articulation",
+          "Advanced imaging integration",
+          "Reduced system footprint"
+        ],
+        "risk_assessment": "medium",
+        "testing_recommendations": [
+          "Surgical performance validation",
+          "Safety system testing",
+          "Electromagnetic compatibility testing",
+          "Software verification and validation",
+          "Clinical evaluation studies"
+        ]
+      }
+    },
+    {
+      "project_name": "Continuous Glucose Monitor",
+      "k_number": "K202345",
+      "device_name": "GlucoTrack Continuous",
+      "intended_use": "Real-time glucose monitoring in interstitial fluid",
+      "product_code": "NBW",
+      "clearance_date": "2020-07-14",
+      "confidence_score": 0.92,
+      "is_selected": true,
+      "comparison_data": {
+        "similarities": [
+          "Continuous glucose monitoring",
+          "Interstitial fluid measurement",
+          "Real-time data transmission",
+          "Similar sensor technology"
+        ],
+        "differences": [
+          "Predictive alert algorithms",
+          "Enhanced sensor accuracy",
+          "Longer wear time",
+          "Improved smartphone integration"
+        ],
+        "risk_assessment": "low",
+        "testing_recommendations": [
+          "Accuracy validation against reference method",
+          "Clinical evaluation studies",
+          "Biocompatibility testing",
+          "Software validation",
+          "Cybersecurity assessment"
+        ]
+      }
+    },
+    {
+      "project_name": "Ventilator",
+      "k_number": "K198765",
+      "device_name": "VentMaster Pro",
+      "intended_use": "Mechanical ventilation for critical care patients",
+      "product_code": "BYG",
+      "clearance_date": "2019-04-30",
+      "confidence_score": 0.88,
+      "is_selected": true,
+      "comparison_data": {
+        "similarities": [
+          "Mechanical ventilation capability",
+          "Critical care application",
+          "Similar ventilation modes",
+          "Patient monitoring features"
+        ],
+        "differences": [
+          "Enhanced portability",
+          "Advanced monitoring algorithms",
+          "Improved user interface",
+          "Battery backup system"
+        ],
+        "risk_assessment": "medium",
+        "testing_recommendations": [
+          "Ventilation performance testing",
+          "Safety system validation",
+          "Alarm system testing",
+          "Software verification and validation",
+          "Clinical evaluation"
+        ]
+      }
+    },
+    {
+      "project_name": "Defibrillator",
+      "k_number": "K187654",
+      "device_name": "LifeSaver AED",
+      "intended_use": "Automated external defibrillation for cardiac arrest",
+      "product_code": "MKJ",
+      "clearance_date": "2018-11-20",
+      "confidence_score": 0.90,
+      "is_selected": true,
+      "comparison_data": {
+        "similarities": [
+          "Automated external defibrillation",
+          "Cardiac arrest treatment",
+          "ECG analysis capability",
+          "Voice prompt guidance"
+        ],
+        "differences": [
+          "Advanced ECG analysis algorithms",
+          "Enhanced shock delivery system",
+          "Improved user interface",
+          "Real-time CPR feedback"
+        ],
+        "risk_assessment": "low",
+        "testing_recommendations": [
+          "Defibrillation efficacy testing",
+          "ECG analysis validation",
+          "Safety system testing",
+          "Clinical evaluation",
+          "Electromagnetic compatibility testing"
+        ]
+      }
+    },
+    {
+      "project_name": "Pacemaker",
+      "k_number": "K191234",
+      "device_name": "CardiacPace Dual",
+      "intended_use": "Dual-chamber cardiac pacing for bradycardia",
+      "product_code": "MHX",
+      "clearance_date": "2019-09-12",
+      "confidence_score": 0.91,
+      "is_selected": true,
+      "comparison_data": {
+        "similarities": [
+          "Dual-chamber pacing capability",
+          "Bradycardia treatment",
+          "Similar pacing algorithms",
+          "Implantable design"
+        ],
+        "differences": [
+          "MRI compatibility features",
+          "Remote monitoring capability",
+          "Enhanced battery technology",
+          "Advanced programming options"
+        ],
+        "risk_assessment": "medium",
+        "testing_recommendations": [
+          "Pacing performance validation",
+          "MRI compatibility testing",
+          "Biocompatibility testing",
+          "Long-term reliability testing",
+          "Clinical evaluation studies"
+        ]
+      }
+    },
+    {
+      "project_name": "Ultrasound System",
+      "k_number": "K203456",
+      "device_name": "UltraView Portable",
+      "intended_use": "Diagnostic ultrasound imaging",
+      "product_code": "IYN",
+      "clearance_date": "2020-02-28",
+      "confidence_score": 0.93,
+      "is_selected": true,
+      "comparison_data": {
+        "similarities": [
+          "Diagnostic ultrasound capability",
+          "Similar imaging applications",
+          "Doppler functionality",
+          "Portable design"
+        ],
+        "differences": [
+          "Enhanced image processing",
+          "Advanced Doppler algorithms",
+          "Improved portability",
+          "AI-assisted measurements"
+        ],
+        "risk_assessment": "low",
+        "testing_recommendations": [
+          "Image quality validation",
+          "Acoustic output testing",
+          "Software verification and validation",
+          "Clinical evaluation",
+          "Electromagnetic compatibility testing"
+        ]
+      }
+    }
+  ],
+  
+"agent_interactions": [
+    {
+      "project_name": "Cardiac Monitoring Device",
+      "user_email": "john.doe@medtech.com",
+      "agent_action": "device_classification",
+      "input_data": {
+        "device_description": "A wearable device for continuous cardiac rhythm monitoring with AI-powered arrhythmia detection",
+        "intended_use": "For continuous monitoring of cardiac rhythm in ambulatory patients"
+      },
+      "output_data": {
+        "device_class": "II",
+        "product_code": "DPS",
+        "regulatory_pathway": "510k",
+        "cfr_sections": ["21 CFR 870.2300"]
+      },
+      "confidence_score": 0.92,
+      "reasoning": "Device classified as Class II based on intended use for cardiac monitoring. Product code DPS applies to cardiac monitors. 510(k) pathway appropriate due to substantial equivalence to existing devices.",
+      "execution_time_ms": 2150
+    },
+    {
+      "project_name": "Neural Stimulator",
+      "user_email": "david.chen@neurotech.com",
+      "agent_action": "device_classification",
+      "input_data": {
+        "device_description": "Implantable neurostimulation device for chronic pain management",
+        "intended_use": "For the management of chronic intractable pain through spinal cord stimulation"
+      },
+      "output_data": {
+        "device_class": "III",
+        "product_code": "GZF",
+        "regulatory_pathway": "PMA",
+        "cfr_sections": ["21 CFR 882.5800"]
+      },
+      "confidence_score": 0.87,
+      "reasoning": "Implantable neurostimulator classified as Class III due to high risk profile and life-sustaining nature. PMA pathway required for Class III devices.",
+      "execution_time_ms": 3200
+    },
+    {
+      "project_name": "AI Diagnostic Software",
+      "user_email": "david.chen@neurotech.com",
+      "agent_action": "device_classification",
+      "input_data": {
+        "device_description": "Machine learning software for automated analysis of chest X-rays",
+        "intended_use": "For computer-aided detection of pneumonia in chest radiographs"
+      },
+      "output_data": {
+        "device_class": "II",
+        "product_code": "MYN",
+        "regulatory_pathway": "De Novo",
+        "cfr_sections": ["21 CFR 892.2080"]
+      },
+      "confidence_score": 0.75,
+      "reasoning": "AI diagnostic software may require De Novo pathway due to novel technology. Classification as Class II with special controls likely appropriate.",
+      "execution_time_ms": 4500
+    },
+    {
+      "project_name": "Robotic Surgical System",
+      "user_email": "mike.johnson@cardiotech.com",
+      "agent_action": "predicate_search",
+      "input_data": {
+        "device_type": "Robotic Surgical System",
+        "product_code": "IYE",
+        "intended_use": "minimally invasive laparoscopic surgical procedures"
+      },
+      "output_data": {
+        "predicates_found": 6,
+        "top_matches": ["K195678", "K187432", "K203456"],
+        "search_criteria": "product_code:IYE AND intended_use:laparoscopic surgery"
+      },
+      "confidence_score": 0.83,
+      "reasoning": "Found multiple suitable predicate devices for robotic surgical systems. Top matches show good similarity in intended use and technological approach.",
+      "execution_time_ms": 5200
+    },
+    {
+      "project_name": "Continuous Glucose Monitor",
+      "user_email": "jane.smith@deviceco.com",
+      "agent_action": "predicate_comparison",
+      "input_data": {
+        "user_device": "Real-time continuous glucose monitoring system with smartphone integration",
+        "predicate_k_number": "K202345"
+      },
+      "output_data": {
+        "similarity_score": 0.92,
+        "key_similarities": ["continuous glucose monitoring", "real-time data", "smartphone connectivity"],
+        "key_differences": ["predictive alerts", "enhanced accuracy", "longer wear time"],
+        "substantial_equivalence": "highly likely"
+      },
+      "confidence_score": 0.89,
+      "reasoning": "Very high similarity in core functionality and intended use. Differences appear to be enhancements that maintain substantial equivalence.",
+      "execution_time_ms": 3800
+    },
+    {
+      "project_name": "Ventilator",
+      "user_email": "emily.brown@respiratorycare.com",
+      "agent_action": "fda_guidance_search",
+      "input_data": {
+        "device_type": "Ventilator",
+        "keywords": ["mechanical ventilation", "critical care", "emergency use"]
+      },
+      "output_data": {
+        "guidance_documents": [
+          {
+            "title": "Enforcement Policy for Ventilators and Accessories During COVID-19",
+            "url": "https://www.fda.gov/regulatory-information/search-fda-guidance-documents/enforcement-policy-ventilators-and-accessories-during-coronavirus-disease-2019-covid-19-public-health",
+            "effective_date": "2020-03-22",
+            "relevance_score": 0.95
+          },
+          {
+            "title": "Premarket Notification 510(k) Guidance Document for Ventilator Accessories",
+            "url": "https://www.fda.gov/regulatory-information/search-fda-guidance-documents/premarket-notification-510k-guidance-document-ventilator-accessories",
+            "effective_date": "2019-08-15",
+            "relevance_score": 0.88
+          }
+        ]
+      },
+      "confidence_score": 0.91,
+      "reasoning": "Found relevant FDA guidance documents for ventilators including recent emergency use policies and standard 510(k) guidance.",
+      "execution_time_ms": 2800
+    },
+    {
+      "project_name": "Defibrillator",
+      "user_email": "john.doe@medtech.com",
+      "agent_action": "regulatory_pathway_analysis",
+      "input_data": {
+        "device_class": "III",
+        "product_code": "MKJ",
+        "intended_use": "automated external defibrillation"
+      },
+      "output_data": {
+        "recommended_pathway": "PMA",
+        "alternative_pathways": ["510(k) if substantially equivalent predicate exists"],
+        "special_considerations": ["Life-sustaining device", "FDA priority review possible"],
+        "estimated_timeline": "12-18 months for PMA"
+      },
+      "confidence_score": 0.88,
+      "reasoning": "Class III device typically requires PMA pathway. However, AEDs may have established predicates allowing 510(k) pathway in some cases.",
+      "execution_time_ms": 3500
+    },
+    {
+      "project_name": "Pacemaker",
+      "user_email": "john.doe@medtech.com",
+      "agent_action": "special_controls_identification",
+      "input_data": {
+        "device_class": "III",
+        "product_code": "MHX",
+        "device_type": "Cardiac Pacemaker"
+      },
+      "output_data": {
+        "special_controls": [
+          "Clinical data demonstrating safety and effectiveness",
+          "Non-clinical testing including electrical safety",
+          "Software validation and verification",
+          "Biocompatibility testing",
+          "Sterilization validation",
+          "Shelf life testing"
+        ],
+        "applicable_standards": [
+          "ISO 14708-2 (Implants for surgery - Active implantable medical devices - Part 2: Cardiac pacemakers)",
+          "ISO 10993 (Biological evaluation of medical devices)",
+          "IEC 60601-1 (Medical electrical equipment - General requirements for basic safety)"
+        ]
+      },
+      "confidence_score": 0.93,
+      "reasoning": "Identified comprehensive special controls and standards applicable to cardiac pacemakers based on FDA requirements.",
+      "execution_time_ms": 4200
+    },
+    {
+      "project_name": "Ultrasound System",
+      "user_email": "david.chen@neurotech.com",
+      "agent_action": "testing_requirements_analysis",
+      "input_data": {
+        "device_type": "Ultrasound System",
+        "product_code": "IYN",
+        "key_features": ["Doppler capability", "portable design", "point-of-care use"]
+      },
+      "output_data": {
+        "required_testing": [
+          "Acoustic output measurements per IEC 60601-2-37",
+          "Image quality assessment",
+          "Electrical safety testing per IEC 60601-1",
+          "Electromagnetic compatibility testing",
+          "Software verification and validation",
+          "Usability testing"
+        ],
+        "optional_testing": [
+          "Clinical evaluation for new indications",
+          "Comparative performance studies"
+        ],
+        "estimated_cost": "$150,000 - $300,000",
+        "estimated_timeline": "6-9 months"
+      },
+      "confidence_score": 0.90,
+      "reasoning": "Comprehensive testing requirements identified based on FDA guidance and applicable standards for ultrasound systems.",
+      "execution_time_ms": 3900
+    },
+    {
+      "project_name": "Surgical Mesh",
+      "user_email": "mike.johnson@cardiotech.com",
+      "agent_action": "biocompatibility_assessment",
+      "input_data": {
+        "device_type": "Surgical Mesh",
+        "materials": ["bioabsorbable polymer"],
+        "contact_duration": "permanent implant",
+        "tissue_contact": "connective tissue"
+      },
+      "output_data": {
+        "required_tests": [
+          "Cytotoxicity (ISO 10993-5)",
+          "Sensitization (ISO 10993-10)",
+          "Irritation or intracutaneous reactivity (ISO 10993-10)",
+          "Systemic toxicity (ISO 10993-11)",
+          "Implantation (ISO 10993-6)",
+          "Genotoxicity (ISO 10993-3)",
+          "Carcinogenicity (ISO 10993-3)"
+        ],
+        "additional_considerations": [
+          "Degradation product analysis",
+          "Tissue response evaluation",
+          "Long-term biocompatibility"
+        ]
+      },
+      "confidence_score": 0.94,
+      "reasoning": "Comprehensive biocompatibility testing requirements identified for permanent implant with tissue contact per ISO 10993 standards.",
+      "execution_time_ms": 2600
+    }
+  ]
+}

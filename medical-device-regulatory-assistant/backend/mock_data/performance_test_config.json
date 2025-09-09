@@ -1,0 +1,70 @@
+{
+  "users": [
+    {
+      "google_id": "perf_user_001",
+      "email": "performance.test@medtech.com",
+      "name": "Performance Test User",
+      "avatar_url": "https://example.com/avatar.jpg"
+    }
+  ],
+  "projects": [
+    {
+      "name": "Performance Test Project 1",
+      "description": "High-volume cardiac monitoring device for performance testing with extensive feature set and complex regulatory requirements",
+      "device_type": "Cardiac Monitor",
+      "intended_use": "For continuous monitoring of cardiac rhythm in ambulatory patients with advanced analytics",
+      "status": "in_progress",
+      "priority": "high",
+      "tags": ["performance", "cardiac", "monitoring", "analytics", "high-volume"],
+      "user_email": "performance.test@medtech.com"
+    },
+    {
+      "name": "Performance Test Project 2",
+      "description": "Large-scale glucose monitoring system for performance testing with multiple device configurations",
+      "device_type": "Glucose Monitor",
+      "intended_use": "For quantitative measurement of glucose in various sample types with high throughput",
+      "status": "completed",
+      "priority": "medium",
+      "tags": ["performance", "glucose", "high-throughput", "multiple-configs"],
+      "user_email": "performance.test@medtech.com"
+    },
+    {
+      "name": "Performance Test Project 3",
+      "description": "Complex surgical navigation system for stress testing database relationships and queries",
+      "device_type": "Surgical Navigation",
+      "intended_use": "For real-time guidance during complex surgical procedures with multiple instrument tracking",
+      "status": "draft",
+      "priority": "high",
+      "tags": ["performance", "surgery", "navigation", "complex", "multi-instrument"],
+      "user_email": "performance.test@medtech.com"
+    }
+  ],
+  "device_classifications": [
+    {
+      "project_name": "Performance Test Project 1",
+      "device_class": "II",
+      "product_code": "DPS",
+      "regulatory_pathway": "510k",
+      "cfr_sections": ["21 CFR 870.2300"],
+      "confidence_score": 0.92,
+      "reasoning": "Standard cardiac monitor classification with high confidence"
+    },
+    {
+      "project_name": "Performance Test Project 2",
+      "device_class": "II",
+      "product_code": "NBW",
+      "regulatory_pathway": "510k",
+      "cfr_sections": ["21 CFR 862.1345"],
+      "confidence_score": 0.95,
+      "reasoning": "Well-established glucose monitor classification"
+    },
+    {
+      "project_name": "Performance Test Project 3",
+      "device_class": "II",
+      "product_code": "IYE",
+      "regulatory_pathway": "510k",
+      "cfr_sections": ["21 CFR 888.1720"],
+      "confidence_score": 0.88,
+      "reasoning": "Surgical navigation system with established pathway"
+    }
+  ]

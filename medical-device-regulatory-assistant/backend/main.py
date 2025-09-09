@@ -17,17 +17,9 @@ from middleware.logging import RequestLoggingMiddleware
 from middleware.compression import CompressionMiddleware
 from middleware.rate_limit import RateLimitMiddleware
 from middleware.security_headers import SecurityHeadersMiddleware
-from middleware.error_handling import (
-    RegulatoryAssistantError,
-    FDAAPIError,
-    AuthenticationError,
-    regulatory_assistant_exception_handler,
-    fda_api_exception_handler,
-    authentication_exception_handler,
-    validation_exception_handler,
-    http_exception_handler,
-    general_exception_handler,
-)
+
+# Import enhanced exception handling system
+from exceptions import register_exception_handlers
 
 # Import API routes
 from api.health import router as health_router
@@ -252,13 +244,8 @@ app.add_middleware(RateLimitMiddleware, max_requests=100, window_seconds=60)
 # Security headers middleware (last to execute, closest to response)
 app.add_middleware(SecurityHeadersMiddleware)
 
-# Register exception handlers
-app.add_exception_handler(RegulatoryAssistantError, regulatory_assistant_exception_handler)
-app.add_exception_handler(FDAAPIError, fda_api_exception_handler)
-app.add_exception_handler(AuthenticationError, authentication_exception_handler)
-app.add_exception_handler(RequestValidationError, validation_exception_handler)
-app.add_exception_handler(StarletteHTTPException, http_exception_handler)
-app.add_exception_handler(Exception, general_exception_handler)
+# Register enhanced exception handlers
+register_exception_handlers(app)
 
 # Include API routers
 app.include_router(health_router, prefix="/api")
