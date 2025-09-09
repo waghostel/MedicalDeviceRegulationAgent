@@ -7,6 +7,8 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Loader2, Save, X } from 'lucide-react';
+import { useFormSubmissionState } from '@/hooks/use-loading-state';
+import { FormSubmissionProgress } from '@/components/loading';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -104,8 +106,8 @@ export function ProjectForm({
   onSubmit,
   loading = false,
 }: ProjectFormProps) {
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const isEditing = !!project;
+  const formSubmission = useFormSubmissionState();
 
   const form = useForm<ProjectFormData>({
     resolver: zodResolver(projectFormSchema),
@@ -142,8 +144,6 @@ export function ProjectForm({
   }, [project, open, form]);
 
   const handleSubmit = async (data: ProjectFormData) => {
-    setIsSubmitting(true);
-
     try {
       // Clean up empty strings to undefined for backend
       const cleanData = {
@@ -157,45 +157,49 @@ export function ProjectForm({
         ? (cleanData as ProjectUpdateRequest)
         : (cleanData as ProjectCreateRequest);
 
-      const result = await onSubmit(submitData);
+      const result = await formSubmission.submitForm(
+        () => onSubmit(submitData),
+        {
+          steps: [
+            'Validating project data',
+            isEditing ? 'Updating project' : 'Creating project',
+            'Refreshing interface',
+          ],
+          onSuccess: (result) => {
+            if (result) {
+              contextualToast.success(
+                isEditing ? 'Project Updated' : 'Project Created',
+                `Project "${result.name}" has been ${isEditing ? 'updated' : 'created'} successfully.`
+              );
 
-      if (result) {
-        contextualToast.success(
-          isEditing ? 'Project Updated' : 'Project Created',
-          `Project "${result.name}" has been ${isEditing ? 'updated' : 'created'} successfully.`
-        );
-
-        onOpenChange(false);
-        form.reset();
-      }
-    } catch (error: any) {
-      // Handle backend validation errors
-      if (error.message.includes('Invalid project data')) {
-        contextualToast.validationError(
-          'Please check your input and try again.'
-        );
-      } else if (error.message.includes('Authentication required')) {
-        contextualToast.authExpired(() => {
-          // Redirect to sign in or trigger auth flow
-          window.location.href = '/api/auth/signin';
-        });
-      } else if (
-        error.message.includes('Network') ||
-        error.message.includes('fetch')
-      ) {
-        contextualToast.networkError(() => {
-          // Retry the form submission
-          handleSubmit(onFormSubmit)();
-        });
-      } else {
-        // For project save failures, use the contextual toast with retry
-        contextualToast.projectSaveFailed(() => {
-          // Retry the form submission
-          handleSubmit(onFormSubmit)();
-        });
-      }
-    } finally {
-      setIsSubmitting(false);
+              onOpenChange(false);
+              form.reset();
+            }
+          },
+          onError: (error) => {
+            // Handle backend validation errors
+            if (error.includes('Invalid project data')) {
+              contextualToast.validationError(
+                'Please check your input and try again.'
+              );
+            } else if (error.includes('Authentication required')) {
+              contextualToast.authExpired(() => {
+                window.location.href = '/api/auth/signin';
+              });
+            } else if (error.includes('Network') || error.includes('fetch')) {
+              contextualToast.networkError(() => {
+                handleSubmit(data);
+              });
+            } else {
+              contextualToast.projectSaveFailed(() => {
+                handleSubmit(data);
+              });
+            }
+          },
+        }
+      );
+    } catch (error) {
+      // Error is already handled in the submitForm function
     }
   };
 
@@ -223,6 +227,12 @@ export function ProjectForm({
             onSubmit={form.handleSubmit(handleSubmit)}
             className="space-y-6"
           >
+            {/* Form Submission Progress */}
+            <FormSubmissionProgress
+              isSubmitting={formSubmission.isLoading}
+              progress={formSubmission.progress}
+              currentStep={formSubmission.currentStep}
+            />
             {/* Project Name */}
             <FormField
               control={form.control}
@@ -234,7 +244,7 @@ export function ProjectForm({
                     <Input
                       placeholder="Enter project name (e.g., Cardiac Monitor X1)"
                       {...field}
-                      disabled={isSubmitting || loading}
+                      disabled={formSubmission.isLoading || loading}
                     />
                   </FormControl>
                   <FormDescription>
@@ -257,7 +267,7 @@ export function ProjectForm({
                       placeholder="Brief description of the project and device..."
                       className="min-h-[80px]"
                       {...field}
-                      disabled={isSubmitting || loading}
+                      disabled={formSubmission.isLoading || loading}
                     />
                   </FormControl>
                   <FormDescription>
@@ -279,7 +289,7 @@ export function ProjectForm({
                   <Select
                     onValueChange={field.onChange}
                     value={field.value}
-                    disabled={isSubmitting || loading}
+                    disabled={formSubmission.isLoading || loading}
                   >
                     <FormControl>
                       <SelectTrigger>
@@ -314,7 +324,7 @@ export function ProjectForm({
                       placeholder="Describe the intended use and clinical purpose of the device..."
                       className="min-h-[100px]"
                       {...field}
-                      disabled={isSubmitting || loading}
+                      disabled={formSubmission.isLoading || loading}
                     />
                   </FormControl>
                   <FormDescription>
@@ -337,7 +347,7 @@ export function ProjectForm({
                     <Select
                       onValueChange={field.onChange}
                       value={field.value}
-                      disabled={isSubmitting || loading}
+                      disabled={formSubmission.isLoading || loading}
                     >
                       <FormControl>
                         <SelectTrigger>
@@ -370,21 +380,23 @@ export function ProjectForm({
                 type="button"
                 variant="outline"
                 onClick={handleCancel}
-                disabled={isSubmitting || loading}
+                disabled={formSubmission.isLoading || loading}
               >
                 <X className="h-4 w-4 mr-2" />
                 Cancel
               </Button>
-              <Button type="submit" disabled={isSubmitting || loading}>
-                {isSubmitting ? (
+              <Button
+                type="submit"
+                disabled={formSubmission.isLoading || loading}
+              >
+                {formSubmission.isLoading ? (
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                 ) : (
                   <Save className="h-4 w-4 mr-2" />
                 )}
-                {isSubmitting
-                  ? isEditing
-                    ? 'Updating...'
-                    : 'Creating...'
+                {formSubmission.isLoading
+                  ? formSubmission.currentStep ||
+                    (isEditing ? 'Updating...' : 'Creating...')
                   : isEditing
                     ? 'Update Project'
                     : 'Create Project'}

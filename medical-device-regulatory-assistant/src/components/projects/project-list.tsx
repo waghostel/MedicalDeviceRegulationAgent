@@ -16,6 +16,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ProjectCard, ProjectCardSkeleton } from './project-card';
+import { ProjectListSkeleton, DataLoadingProgress } from '@/components/loading';
 import { useProjects } from '@/hooks/use-projects';
 import { useProjectWebSocket } from '@/hooks/use-websocket';
 import { useOffline } from '@/hooks/use-offline';
@@ -36,9 +37,13 @@ export function ProjectList({
   className,
 }: ProjectListProps) {
   const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState<ProjectStatus | 'all'>('all');
+  const [statusFilter, setStatusFilter] = useState<ProjectStatus | 'all'>(
+    'all'
+  );
   const [deviceTypeFilter, setDeviceTypeFilter] = useState<string>('all');
-  const [searchTimeout, setSearchTimeout] = useState<NodeJS.Timeout | null>(null);
+  const [searchTimeout, setSearchTimeout] = useState<NodeJS.Timeout | null>(
+    null
+  );
 
   const {
     projects,
@@ -57,12 +62,15 @@ export function ProjectList({
   const { isOffline, pendingActions } = useOffline();
 
   // WebSocket for real-time updates
-  const handleWebSocketMessage = useCallback((message: WebSocketMessage) => {
-    if (message.type === 'project_updated') {
-      // Refresh projects when updates come through WebSocket
-      refreshProjects();
-    }
-  }, [refreshProjects]);
+  const handleWebSocketMessage = useCallback(
+    (message: WebSocketMessage) => {
+      if (message.type === 'project_updated') {
+        // Refresh projects when updates come through WebSocket
+        refreshProjects();
+      }
+    },
+    [refreshProjects]
+  );
 
   useProjectWebSocket(null, handleWebSocketMessage);
 
@@ -88,11 +96,11 @@ export function ProjectList({
   // Filter changes
   useEffect(() => {
     const filters: any = {};
-    
+
     if (statusFilter !== 'all') {
       filters.status = statusFilter;
     }
-    
+
     if (deviceTypeFilter !== 'all') {
       filters.device_type = deviceTypeFilter;
     }
@@ -111,10 +119,10 @@ export function ProjectList({
 
   // Get unique device types for filter
   const deviceTypes = Array.from(
-    new Set(projects.map(p => p.device_type).filter(Boolean))
+    new Set(projects.map((p) => p.device_type).filter(Boolean))
   );
 
-  const pendingProjectActions = pendingActions.filter(action => 
+  const pendingProjectActions = pendingActions.filter((action) =>
     action.endpoint.includes('/projects')
   );
 
@@ -128,24 +136,26 @@ export function ProjectList({
             Manage your medical device regulatory projects
           </p>
         </div>
-        
+
         <div className="flex items-center gap-2">
           {isOffline && (
             <Badge variant="destructive" className="mr-2">
               Offline ({pendingProjectActions.length} pending)
             </Badge>
           )}
-          
+
           <Button
             variant="outline"
             size="sm"
             onClick={refreshProjects}
             disabled={loading}
           >
-            <RefreshCw className={cn('h-4 w-4 mr-2', loading && 'animate-spin')} />
+            <RefreshCw
+              className={cn('h-4 w-4 mr-2', loading && 'animate-spin')}
+            />
             Refresh
           </Button>
-          
+
           <Button onClick={onCreateProject}>
             <Plus className="h-4 w-4 mr-2" />
             New Project
@@ -171,11 +181,13 @@ export function ProjectList({
                 />
               </div>
             </div>
-            
+
             <div className="flex gap-2">
               <Select
                 value={statusFilter}
-                onValueChange={(value) => setStatusFilter(value as ProjectStatus | 'all')}
+                onValueChange={(value) =>
+                  setStatusFilter(value as ProjectStatus | 'all')
+                }
               >
                 <SelectTrigger className="w-32">
                   <Filter className="h-4 w-4 mr-2" />
@@ -184,11 +196,15 @@ export function ProjectList({
                 <SelectContent>
                   <SelectItem value="all">All Status</SelectItem>
                   <SelectItem value={ProjectStatus.DRAFT}>Draft</SelectItem>
-                  <SelectItem value={ProjectStatus.IN_PROGRESS}>In Progress</SelectItem>
-                  <SelectItem value={ProjectStatus.COMPLETED}>Completed</SelectItem>
+                  <SelectItem value={ProjectStatus.IN_PROGRESS}>
+                    In Progress
+                  </SelectItem>
+                  <SelectItem value={ProjectStatus.COMPLETED}>
+                    Completed
+                  </SelectItem>
                 </SelectContent>
               </Select>
-              
+
               <Select
                 value={deviceTypeFilter}
                 onValueChange={setDeviceTypeFilter}
@@ -230,16 +246,18 @@ export function ProjectList({
         </Card>
       )}
 
+      {/* Loading State */}
+      {loading && projects.length === 0 && (
+        <DataLoadingProgress
+          isLoading={true}
+          loadingMessage="Loading your projects..."
+          progress={undefined}
+        />
+      )}
+
       {/* Project Grid */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {/* Loading Skeletons */}
-        {loading && projects.length === 0 && (
-          <>
-            {Array.from({ length: 6 }).map((_, i) => (
-              <ProjectCardSkeleton key={i} />
-            ))}
-          </>
-        )}
+      {!loading || projects.length > 0 ? (
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
 
         {/* Project Cards */}
         {projects.map((project) => (
@@ -254,6 +272,15 @@ export function ProjectList({
           />
         ))}
 
+        {/* Loading more projects */}
+        {loading && projects.length > 0 && (
+          <>
+            {Array.from({ length: 3 }).map((_, i) => (
+              <ProjectCardSkeleton key={`loading-${i}`} />
+            ))}
+          </>
+        )}
+
         {/* Empty State */}
         {!loading && projects.length === 0 && (
           <div className="col-span-full">
@@ -262,16 +289,20 @@ export function ProjectList({
                 <div className="text-center space-y-2">
                   <h3 className="text-lg font-medium">No projects found</h3>
                   <p className="text-muted-foreground">
-                    {searchQuery || statusFilter !== 'all' || deviceTypeFilter !== 'all'
+                    {searchQuery ||
+                    statusFilter !== 'all' ||
+                    deviceTypeFilter !== 'all'
                       ? 'Try adjusting your search or filters'
                       : 'Get started by creating your first project'}
                   </p>
-                  {!searchQuery && statusFilter === 'all' && deviceTypeFilter === 'all' && (
-                    <Button onClick={onCreateProject} className="mt-4">
-                      <Plus className="h-4 w-4 mr-2" />
-                      Create Your First Project
-                    </Button>
-                  )}
+                  {!searchQuery &&
+                    statusFilter === 'all' &&
+                    deviceTypeFilter === 'all' && (
+                      <Button onClick={onCreateProject} className="mt-4">
+                        <Plus className="h-4 w-4 mr-2" />
+                        Create Your First Project
+                      </Button>
+                    )}
                 </div>
               </CardContent>
             </Card>
@@ -282,11 +313,7 @@ export function ProjectList({
       {/* Load More */}
       {hasMore && !loading && (
         <div className="flex justify-center">
-          <Button
-            variant="outline"
-            onClick={loadMore}
-            disabled={loading}
-          >
+          <Button variant="outline" onClick={loadMore} disabled={loading}>
             Load More Projects
           </Button>
         </div>

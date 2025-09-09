@@ -6,6 +6,10 @@ export {
   AgentChatSkeleton,
   TableSkeleton,
   FormSkeleton,
+  EnhancedFormSkeleton,
+  ProjectListSkeleton,
+  BulkOperationsSkeleton,
+  ExportProgressSkeleton,
   PageLoadingSkeleton
 } from './LoadingSkeleton';
 
@@ -15,5 +19,10 @@ export {
   LoadingSpinner,
   InlineLoader,
   LoadingOverlay,
+  EnhancedProgressBar,
+  FormSubmissionProgress,
+  BulkOperationsProgress,
+  ExportProgress,
+  DataLoadingProgress,
   type ProgressStep
 } from './ProgressIndicator';
