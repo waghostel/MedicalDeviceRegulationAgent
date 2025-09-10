@@ -205,7 +205,6 @@ Before committing a tasks.md file, verify:
 
 ## Example Template
 
-````markdown
 # Implementation Plan
 
 Convert the [Your Spec Name] requirements into a series of prompts for a code-generation LLM that will implement each step in a test-driven manner. Prioritize best practices, incremental progress, and early testing, ensuring no big jumps in complexity at any stage. Make sure that each prompt builds on the previous prompts, and ends with wiring things together. There should be no hanging or orphaned code that isn't integrated into a previous step. Focus ONLY on tasks that involve writing, modifying, or testing code.
@@ -224,7 +223,7 @@ Example 1(Windows):
 cls
 <command>
 ```
-````
+
 
 Example 2 (Mac and Linux)
 

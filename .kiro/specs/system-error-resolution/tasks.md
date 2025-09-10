@@ -2,6 +2,71 @@
 
 Convert the system error resolution design into a series of prompts for a code-generation LLM that will implement each step in a test-driven manner. Prioritize best practices, incremental progress, and early testing, ensuring no big jumps in complexity at any stage. Make sure that each prompt builds on the previous prompts, and ends with wiring things together. There should be no hanging or orphaned code that isn't integrated into a previous step. Focus ONLY on tasks that involve writing, modifying, or testing code.
 
+## Development Rules
+
+- Use **`pnpm`** instead of npm for JavaScript/TypeScript.
+- Use **`poetry`** for Python commands (e.g. `poetry run python test_document_tool.py`).
+- Create the test script and run it instead of run it directly with `poetry run python -c`
+- Follow **Test-Driven Development (TDD)**.
+- Always clear the terminal before running a new command. Type the clear command first, press Enter, then type the actual command and press Enter again.
+
+Example 1(Windows):
+
+```bash
+cls
+<command>
+```
+
+Example 2 (Mac and Linux)
+
+```bash
+clear
+<command>
+```
+
+- After reading this file, say: **"I will use poetry and pnpm"**.
+
+## Workflow
+
+1. Create a code-writing plan for the task.
+2. Define the testing criteria.
+3. Fetch related documentation (context7) if needed.
+4. Implement the task/code.
+5. Run tests after completing the task.
+   - If tests fail, fetch additional documentation (context7).
+6. Write a **task report** in `./.kiro/specs/[your-spec-name]/task-execute-history/` (e.g. `task-1.1.md`).
+   - Be transparent about test results, especially if some tests require future verification.
+
+## Test-Driven Development (TDD)
+
+- **Pre-Development**: Clearly define expected test outcomes before coding.
+- **Post-Development**: Document all test results in the `./.kiro/specs/[your-spec-name]/task-execute-history/` folder to ensure traceability.
+- If the test script has been modified to skip some tests, make sure to document the skipped tests in **Undone tests/Skipped test**.
+
+### Task Report Format
+
+Each completed task requires a report:
+
+#### Task Report Template
+
+- **Task**: [Task ID and Title]
+- **Summary of Changes**
+  - [Brief description of change #1]
+  - [Brief description of change #2]
+- **Test Plan & Results**
+  - **Unit Tests**: [Description]
+    - [Test command]
+      - Result: [✔ All tests passed / ✘ Failures]
+  - **Integration Tests**: [Description]
+    - [Test command]
+      - Result: [✔ Passed / ✘ Failures]
+  - **Manual Verification**: [Steps & findings]
+    - Result: [✔ Works as expected]
+  - **Undone tests/Skipped test**:
+    - [ ][Test name]
+      - [Test command]
+- **Code Snippets (Optional)**: Show relevant diffs or highlights.
+
 ## Phase 1: Critical Infrastructure Fixes
 
 - [ ] 1. Fix React Testing Library Integration Issues
