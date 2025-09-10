@@ -1,7 +1,19 @@
 # Medical Device Regulatory Assistant - Backend Startup Script (PowerShell)
 # This script starts the FastAPI backend development server
 
-Write-Host "Starting Medical Device Regulatory Assistant Backend..." -ForegroundColor Green
+param(
+    [Parameter(HelpMessage="Custom port (default: 8000)")]
+    [int]$Port = 8000,
+    
+    [Parameter(HelpMessage="Show detailed output")]
+    [switch]$ShowDetails,
+    
+    [Parameter(HelpMessage="Skip health checks for faster startup")]
+    [switch]$Fast
+)
+
+Write-Host "🔧 Medical Device Regulatory Assistant - Backend Service" -ForegroundColor Cyan
+Write-Host "=" * 55 -ForegroundColor Cyan
 Write-Host ""
 
 # Navigate to the medical-device-regulatory-assistant directory if it exists
@@ -29,9 +41,11 @@ if (-not (Test-Path "backend\pyproject.toml")) {
 # Check if poetry is installed
 try {
     $poetryVersion = poetry --version 2>$null
-    Write-Host "Found Poetry: $poetryVersion" -ForegroundColor Cyan
+    if ($ShowDetails) {
+        Write-Host "✓ Found Poetry: $poetryVersion" -ForegroundColor Green
+    }
 } catch {
-    Write-Host "Error: Poetry is not installed or not in PATH." -ForegroundColor Red
+    Write-Host "❌ Poetry is not installed or not in PATH." -ForegroundColor Red
     Write-Host "Please install Poetry first: https://python-poetry.org/docs/#installation" -ForegroundColor Yellow
     Read-Host "Press Enter to exit"
     exit 1
@@ -43,12 +57,14 @@ Set-Location backend
 # Check if virtual environment exists, if not install dependencies
 try {
     poetry env info | Out-Null
-    Write-Host "Poetry environment found." -ForegroundColor Cyan
+    if ($ShowDetails) {
+        Write-Host "✅ Poetry environment found." -ForegroundColor Green
+    }
 } catch {
-    Write-Host "Installing backend dependencies..." -ForegroundColor Yellow
+    Write-Host "⏳ Installing backend dependencies..." -ForegroundColor Yellow
     poetry install
     if ($LASTEXITCODE -ne 0) {
-        Write-Host "Error: Failed to install backend dependencies." -ForegroundColor Red
+        Write-Host "❌ Failed to install backend dependencies." -ForegroundColor Red
         # Return to original directory
         if ((Split-Path -Leaf (Get-Location)) -eq "backend") {
             Set-Location ..
@@ -59,33 +75,47 @@ try {
         Read-Host "Press Enter to exit"
         exit 1
     }
+    Write-Host "✅ Dependencies installed successfully" -ForegroundColor Green
 }
 
-# Check Redis availability (optional service)
-Write-Host "Checking optional services..." -ForegroundColor Yellow
-try {
-    $redisTest = Test-NetConnection -ComputerName "localhost" -Port 6379 -InformationLevel Quiet -WarningAction SilentlyContinue
-    if ($redisTest) {
-        Write-Host "Redis: Available on port 6379" -ForegroundColor Green
-    } else {
-        Write-Host "Redis: Not available (optional - health checks may show warnings)" -ForegroundColor Yellow
+# Set optimized environment variables
+$env:PYTHONPATH = "."
+$env:UVICORN_LOG_LEVEL = if ($ShowDetails) { "info" } else { "warning" }
+
+if ($Fast) {
+    $env:SKIP_HEALTH_CHECKS = "true"
+    $env:DISABLE_FDA_API_CHECK = "true"
+    $env:DISABLE_REDIS = "true"
+}
+
+# Check Redis availability (optional service) - only if not in fast mode
+if (-not $Fast) {
+    Write-Host "⏳ Checking optional services..." -ForegroundColor Yellow
+    try {
+        $redisTest = Test-NetConnection -ComputerName "localhost" -Port 6379 -InformationLevel Quiet -WarningAction SilentlyContinue
+        if ($redisTest) {
+            Write-Host "✅ Redis: Available on port 6379" -ForegroundColor Green
+        } else {
+            Write-Host "⚠️  Redis: Not available (optional - health checks may show warnings)" -ForegroundColor Yellow
+        }
+    } catch {
+        Write-Host "⚠️  Redis: Not available (optional - health checks may show warnings)" -ForegroundColor Yellow
     }
-} catch {
-    Write-Host "Redis: Not available (optional - health checks may show warnings)" -ForegroundColor Yellow
 }
 
 # Start the FastAPI development server
-Write-Host "Starting FastAPI development server..." -ForegroundColor Green
-Write-Host "Backend will be available at: http://localhost:8000" -ForegroundColor Cyan
-Write-Host "API documentation at: http://localhost:8000/docs" -ForegroundColor Cyan
-Write-Host "Health check at: http://localhost:8000/health" -ForegroundColor Cyan
+Write-Host "🚀 Starting FastAPI development server..." -ForegroundColor Green
+Write-Host "Backend will be available at: http://localhost:$Port" -ForegroundColor Cyan
+Write-Host "📚 API documentation at: http://localhost:$Port/docs" -ForegroundColor Cyan
+Write-Host "🏥 Health check at: http://localhost:$Port/health" -ForegroundColor Cyan
 Write-Host "Press Ctrl+C to stop the server" -ForegroundColor Yellow
 Write-Host ""
 
 try {
-    poetry run uvicorn main:app --reload --host 0.0.0.0 --port 8000
+    $logLevel = if ($ShowDetails) { "info" } else { "warning" }
+    poetry run uvicorn main:app --reload --host 0.0.0.0 --port $Port --log-level $logLevel
 } catch {
-    Write-Host "Backend server encountered an error." -ForegroundColor Red
+    Write-Host "❌ Backend server encountered an error." -ForegroundColor Red
 } finally {
     # Return to parent directory if we navigated into medical-device-regulatory-assistant
     if ((Split-Path -Leaf (Get-Location)) -eq "backend") {
@@ -94,6 +124,6 @@ try {
             Set-Location ..
         }
     }
-    Write-Host "Backend server stopped." -ForegroundColor Yellow
+    Write-Host "🛑 Backend server stopped." -ForegroundColor Yellow
     Read-Host "Press Enter to exit"
 }
