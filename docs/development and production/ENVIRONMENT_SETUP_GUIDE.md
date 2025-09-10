@@ -159,9 +159,10 @@ openssl rand -base64 32
    
    ```
    Navigation Menu → APIs & Services → Library
-   Search for "Google+ API" → Enable
-   Search for "People API" → Enable (optional, for profile info)
+   Search for "People API" → Enable
    ```
+   
+   **Note**: The "Google+ API" is deprecated and no longer required. The "People API" is used by NextAuth.js to fetch user profile information (like name and profile picture). In many modern Google Cloud projects, this API is enabled by default when you create OAuth credentials.
 
 ### Step 2: Configure OAuth Consent Screen
 
@@ -886,12 +887,14 @@ Error 400: redirect_uri_mismatch
 **Solution:**
 
 1. Check Google Cloud Console → Credentials
+
 2. Ensure redirect URIs match exactly:
    
    ```
    Development: http://localhost:3000/api/auth/callback/google
    Production: https://your-domain.com/api/auth/callback/google
    ```
+
 3. No trailing slashes, exact protocol match
 
 #### 3. Database Connection Issues
