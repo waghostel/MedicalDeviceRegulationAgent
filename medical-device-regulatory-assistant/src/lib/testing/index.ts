@@ -7,9 +7,16 @@
 export * from './test-utils';
 export { default as testUtils } from './test-utils';
 
-// MSW utilities
-export * from './msw-utils';
-export { default as mswUtils } from './msw-utils';
+// Enhanced React testing utilities
+export * from './react-test-utils';
+export { default as enhancedTestUtils } from './react-test-utils';
+
+// Mock toast system
+export * from './mock-toast-system';
+
+// MSW utilities (simplified)
+export * from './msw-utils-simple';
+export { default as mswUtils } from './msw-utils-simple';
 
 // Database utilities
 export * from './database-utils';
@@ -57,7 +64,7 @@ export const setupTestSuite = async (config: Partial<TestConfig> = {}) => {
   const finalConfig = { ...defaultTestConfig, ...config };
   
   if (finalConfig.enableMSW) {
-    const { setupMockAPI } = await import('./msw-utils');
+    const { setupMockAPI } = await import('./msw-utils-simple');
     setupMockAPI();
   }
   
@@ -72,7 +79,7 @@ export const setupTestSuite = async (config: Partial<TestConfig> = {}) => {
 // Test cleanup helper
 export const cleanupTestSuite = async (config: TestConfig) => {
   if (config.enableMSW) {
-    const { teardownMockAPI } = await import('./msw-utils');
+    const { teardownMockAPI } = await import('./msw-utils-simple');
     teardownMockAPI();
   }
   

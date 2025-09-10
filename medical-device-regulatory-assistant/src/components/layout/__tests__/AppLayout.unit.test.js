@@ -5,27 +5,40 @@
 
 import React from 'react';
 import { screen, fireEvent, waitFor } from '@testing-library/react';
-import { renderWithProviders, createMockSession } from '@/lib/testing/test-utils';
+import { 
+  renderWithProviders, 
+  createMockSession,
+  setupTestEnvironment,
+  cleanupTestEnvironment,
+  waitForAsyncUpdates,
+  fireEventWithAct
+} from '@/lib/testing/react-test-utils';
 import { AppLayout } from '../AppLayout';
 
 // Mock the child components
 jest.mock('../Header', () => ({
-  Header: (props) => React.createElement('div', {
-    'data-testid': 'mock-header'
-  }, [
-    props.showMenuButton && React.createElement('button', {
-      key: 'menu-toggle',
-      onClick: props.onMenuToggle,
-      'data-testid': 'menu-toggle'
-    }, 'Menu'),
-    'Header Component'
-  ])
+  Header: (props) => {
+    const mockReact = require('react');
+    return mockReact.createElement('div', {
+      'data-testid': 'mock-header'
+    }, [
+      props.showMenuButton && mockReact.createElement('button', {
+        key: 'menu-toggle',
+        onClick: props.onMenuToggle,
+        'data-testid': 'menu-toggle'
+      }, 'Menu'),
+      'Header Component'
+    ]);
+  }
 }));
 
 jest.mock('../Sidebar', () => ({
-  Sidebar: () => React.createElement('div', {
-    'data-testid': 'mock-sidebar'
-  }, 'Sidebar Component')
+  Sidebar: () => {
+    const mockReact = require('react');
+    return mockReact.createElement('div', {
+      'data-testid': 'mock-sidebar'
+    }, 'Sidebar Component');
+  }
 }));
 
 jest.mock('../QuickActionsToolbar', () => ({

@@ -3,8 +3,9 @@
  * Provides setupMockAPI and teardownMockAPI utilities
  */
 
-import { setupServer } from 'msw/node';
-import { http, HttpResponse, delay } from 'msw';
+// Temporarily disable MSW imports to fix parsing issues
+// import { setupServer } from 'msw/node';
+// import { http, HttpResponse, delay } from 'msw';
 import { 
   generateMockProject, 
   generateMockDeviceClassification, 

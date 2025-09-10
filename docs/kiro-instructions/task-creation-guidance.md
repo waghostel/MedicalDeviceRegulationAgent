@@ -224,7 +224,6 @@ cls
 <command>
 ```
 
-
 Example 2 (Mac and Linux)
 
 ```bash

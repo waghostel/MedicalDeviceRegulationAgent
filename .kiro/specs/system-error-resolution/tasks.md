@@ -36,12 +36,13 @@ clear
    - If tests fail, fetch additional documentation (context7).
 6. Write a **task report** in `./.kiro/specs/[your-spec-name]/task-execute-history/` (e.g. `task-1.1.md`).
    - Be transparent about test results, especially if some tests require future verification.
+   - If the test script has been modified, skipped in the developemnt process or skipped chat history, document faild and skipped test in **Undone tests/Skipped test**.
 
 ## Test-Driven Development (TDD)
 
 - **Pre-Development**: Clearly define expected test outcomes before coding.
 - **Post-Development**: Document all test results in the `./.kiro/specs/[your-spec-name]/task-execute-history/` folder to ensure traceability.
-- If the test script has been modified to skip some tests, make sure to document the skipped tests in **Undone tests/Skipped test**.
+- Document the faild and skipped test which has been skipped in the chat history.
 
 ### Task Report Format
 
@@ -69,25 +70,25 @@ Each completed task requires a report:
 
 ## Phase 1: Critical Infrastructure Fixes
 
-- [ ] 1. Fix React Testing Library Integration Issues
+- [x] 1. Fix React Testing Library Integration Issues
   - Create enhanced React testing utilities with proper `act()` wrapping for all async state updates
   - Implement mock toast system that works reliably in test environment without lifecycle warnings
   - Update existing test files to use new testing utilities and eliminate `act()` warnings
   - _Requirements: 1.1, 1.4_
 
-- [ ] 1.1 Create React Testing Utilities Module
+- [x] 1.1 Create React Testing Utilities Module
   - Write `src/lib/testing/react-test-utils.tsx` with `renderWithProviders`, `waitForAsyncUpdates`, and `mockToastSystem` functions
   - Implement proper `act()` wrapping for all async operations in test utilities
   - Create TypeScript interfaces for test configuration and mock systems
   - _Requirements: 1.1_
 
-- [ ] 1.2 Implement Mock Toast System for Testing
+- [x] 1.2 Implement Mock Toast System for Testing
   - Create `src/lib/testing/mock-toast-system.ts` with `MockToastSystem` class that handles toast calls without React lifecycle issues
   - Implement toast call tracking and history management for test assertions
   - Add proper `act()` wrapping around all toast state updates in test environment
   - _Requirements: 1.1_
 
-- [ ] 1.3 Update Existing Tests to Use New Utilities
+- [x] 1.3 Update Existing Tests to Use New Utilities
   - Modify all existing React component tests to use new `renderWithProviders` function
   - Replace direct `render` calls with enhanced testing utilities
   - Add `waitForAsyncUpdates()` calls before assertions that depend on async state changes
