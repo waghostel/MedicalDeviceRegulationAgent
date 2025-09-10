@@ -276,6 +276,8 @@ Each completed task requires a report:
       - [Test command]
 - **Code Snippets (Optional)**: Show relevant diffs or highlights.
 
+## Task format
+
 ```markdown
 ## 1. Your First Phase
 

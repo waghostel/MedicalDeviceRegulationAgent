@@ -36,7 +36,7 @@ clear
    - If tests fail, fetch additional documentation (context7).
 6. Write a **task report** in `./.kiro/specs/project-frontend-backend-integration/task-execute-history/` (e.g. `task-1.1.md`).
    - Be transparent about test results, especially if some tests require future verification.
-   - If the test script has been modified to skip some tests, make sure to document the skipped tests in **Undone tests/Skipped test**. 
+   - If the test script has been modified to skip some tests, make sure to document the skipped tests in **Undone tests/Skipped test**.
 
 ## Test-Driven Development (TDD)
 
@@ -66,7 +66,6 @@ Each completed task requires a report:
     - [ ][Test name]
       - [Test command]
       - [Description(Faild reason and what need to be modified)]
-    - 
 - **Code Snippets (Optional)**: Show relevant diffs or highlights.
 
 ## Task 1. Enhanced Database Models and Schema
@@ -293,7 +292,7 @@ Each completed task requires a report:
   - Add usage analytics for feature optimization
   - _Requirements: 7.4, 8.5, 9.4_
 
-- [x] Task 8.4 Perform final integration testing and validation
+- [ ] Task 8.4 Perform final integration testing and validation
   - Test complete frontend-to-database workflow with existing components
   - Verify all CRUD operations work correctly through the UI
   - Test mock data seeding and display in frontend

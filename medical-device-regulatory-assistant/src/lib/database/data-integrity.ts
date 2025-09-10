@@ -86,9 +86,8 @@ export class DataIntegrityValidator {
       // Format validation rules
       ...this.createFormatValidationRules()
     ];
-  }
+  }  /**
 
-  /**
    * Create schema validation rules
    */
   private createSchemaValidationRules(): DataIntegrityRule[] {
@@ -254,9 +253,8 @@ export class DataIntegrityValidator {
         fixSuggestion: 'Ensure all agent interactions reference valid user IDs'
       }
     ];
-  }
-
-  /**
+  }  /
+**
    * Create business rule validation rules
    */
   private createBusinessRuleValidationRules(): DataIntegrityRule[] {
@@ -366,9 +364,8 @@ export class DataIntegrityValidator {
         fixSuggestion: 'Ensure all JSON fields contain valid JSON data'
       }
     ];
-  }
+  }  /**
 
-  /**
    * Validate data integrity
    */
   async validateDataIntegrity(databaseInstance: string): Promise<IntegrityReport> {
@@ -510,9 +507,8 @@ export class DataIntegrityValidator {
     }
     
     return details;
-  }
-
-  /**
+  } 
+ /**
    * Generate integrity report
    */
   private generateIntegrityReport(

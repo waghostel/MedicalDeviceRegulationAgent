@@ -7,6 +7,7 @@
 - If the test script has been modified to skip some tests, make sure to document the skipped tests in **Undone tests/Skipped test**.
 
 ## Task Report Template
+
 Each completed task requires a report:
 
 - **Task**: [Task ID and Title]
