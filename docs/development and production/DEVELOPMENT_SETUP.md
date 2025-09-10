@@ -54,6 +54,10 @@ AUTO_SEED_ON_STARTUP=true
 CLEAR_BEFORE_SEED=false
 ```
 
+**📖 For detailed instructions on generating secrets and setting up OAuth credentials, see:**
+
+- **[Environment Setup Guide](./ENVIRONMENT_SETUP_GUIDE.md)** - Complete guide for all platforms and cloud providers
+
 ## Development Commands
 
 ```bash
@@ -81,16 +85,16 @@ pnpm start
 
 ## Development vs Production
 
-| Aspect | Development | Production |
-|--------|-------------|------------|
-| Environment File | `.env.local` | `.env.production` |
-| NextAuth Secret | Can be simple | Must be secure (32+ chars) |
-| Google OAuth | Optional | Required |
-| Debug Mode | `true` | `false` |
-| Auto Seeding | `true` | `false` |
-| Hot Reload | Enabled | Disabled |
-| Source Maps | Enabled | Disabled |
-| Minification | Disabled | Enabled |
+| Aspect           | Development   | Production                 |
+| ---------------- | ------------- | -------------------------- |
+| Environment File | `.env.local`  | `.env.production`          |
+| NextAuth Secret  | Can be simple | Must be secure (32+ chars) |
+| Google OAuth     | Optional      | Required                   |
+| Debug Mode       | `true`        | `false`                    |
+| Auto Seeding     | `true`        | `false`                    |
+| Hot Reload       | Enabled       | Disabled                   |
+| Source Maps      | Enabled       | Disabled                   |
+| Minification     | Disabled      | Enabled                    |
 
 ## Troubleshooting Development Issues
 

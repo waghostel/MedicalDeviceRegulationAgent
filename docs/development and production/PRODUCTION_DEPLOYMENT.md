@@ -218,57 +218,34 @@ docker run -p 3000:3000 --env-file .env.production medical-device-assistant
 
 ### Required Variables
 
-| Variable | Description | Example |
-|----------|-------------|---------|
-| `NEXTAUTH_URL` | Full URL of your application | `https://your-domain.com` |
-| `NEXTAUTH_SECRET` | Secret key for NextAuth.js (32+ characters) | `your-super-secure-random-string` |
-| `GOOGLE_CLIENT_ID` | Google OAuth Client ID | `123456789-abc.apps.googleusercontent.com` |
-| `GOOGLE_CLIENT_SECRET` | Google OAuth Client Secret | `GOCSPX-your-secret` |
+| Variable               | Description                                 | Example                                    |
+| ---------------------- | ------------------------------------------- | ------------------------------------------ |
+| `NEXTAUTH_URL`         | Full URL of your application                | `https://your-domain.com`                  |
+| `NEXTAUTH_SECRET`      | Secret key for NextAuth.js (32+ characters) | `your-super-secure-random-string`          |
+| `GOOGLE_CLIENT_ID`     | Google OAuth Client ID                      | `123456789-abc.apps.googleusercontent.com` |
+| `GOOGLE_CLIENT_SECRET` | Google OAuth Client Secret                  | `GOCSPX-your-secret`                       |
 
 ### Optional Variables
 
-| Variable | Description | Default | Notes |
-|----------|-------------|---------|-------|
-| `FDA_API_KEY` | FDA API access key | None | Improves rate limits |
-| `REDIS_URL` | Redis connection string | None | For caching |
+| Variable       | Description                | Default     | Notes                            |
+| -------------- | -------------------------- | ----------- | -------------------------------- |
+| `FDA_API_KEY`  | FDA API access key         | None        | Improves rate limits             |
+| `REDIS_URL`    | Redis connection string    | None        | For caching                      |
 | `DATABASE_URL` | Database connection string | SQLite file | Can use PostgreSQL in production |
-| `LOG_LEVEL` | Logging verbosity | `INFO` | `DEBUG`, `INFO`, `WARN`, `ERROR` |
-| `DEBUG` | Enable debug mode | `false` | Should be `false` in production |
+| `LOG_LEVEL`    | Logging verbosity          | `INFO`      | `DEBUG`, `INFO`, `WARN`, `ERROR` |
+| `DEBUG`        | Enable debug mode          | `false`     | Should be `false` in production  |
 
 ### How to Obtain Required Keys
 
-#### Google OAuth Setup
+**📖 For comprehensive step-by-step instructions on generating all keys and secrets, see:**
 
-1. Go to [Google Cloud Console](https://console.cloud.google.com/)
-2. Create a new project or select existing one
-3. Enable the Google+ API
-4. Go to "Credentials" → "Create Credentials" → "OAuth 2.0 Client IDs"
-5. Set application type to "Web application"
-6. Add authorized redirect URIs:
-   - `http://localhost:3000/api/auth/callback/google` (development)
-   - `https://your-domain.com/api/auth/callback/google` (production)
-7. Copy the Client ID and Client Secret
+- **[Environment Setup Guide](./ENVIRONMENT_SETUP_GUIDE.md)** - Complete guide covering all platforms, cloud providers, and Docker configurations
 
-#### FDA API Key (Optional)
+#### Quick Reference
 
-1. Visit [openFDA](https://open.fda.gov/apis/authentication/)
-2. Register for an API key
-3. The key increases rate limits from 240 to 1000 requests per minute
-
-#### NextAuth Secret Generation
-
-Generate a secure random string:
-
-```bash
-# Using OpenSSL
-openssl rand -base64 32
-
-# Using Node.js
-node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
-
-# Using online generator
-# Visit: https://generate-secret.vercel.app/32
-```
+- **Google OAuth Setup**: Google Cloud Console → APIs & Services → Credentials
+- **FDA API Key**: [openFDA Authentication](https://open.fda.gov/apis/authentication/) (optional, increases rate limits)
+- **NextAuth Secret**: Generate with `openssl rand -base64 32` (minimum 32 characters)
 
 ## Security Considerations
 

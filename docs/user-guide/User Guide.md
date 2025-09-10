@@ -35,6 +35,7 @@ The Medical Device Regulatory Assistant is a comprehensive project management sy
 ### Dashboard Overview
 
 The main dashboard provides:
+
 - **Project Overview**: Summary of all your projects
 - **Recent Activity**: Latest project updates and interactions
 - **Quick Actions**: Fast access to common tasks
@@ -53,6 +54,7 @@ Projects in the system follow a standard lifecycle:
 ### Project Components
 
 Each project contains:
+
 - **Basic Information**: Name, description, device type, intended use
 - **Device Classifications**: FDA device class, product codes, regulatory pathways
 - **Predicate Devices**: Comparable devices for 510(k) submissions
@@ -65,11 +67,13 @@ Each project contains:
 ### Creating a New Project
 
 1. **Access Creation Form**:
+   
    - Click "New Project" button on the dashboard
    - Or use the "+" icon in the projects list
    - Or press `Ctrl+N` (Windows) / `Cmd+N` (Mac)
 
 2. **Fill Required Information**:
+   
    ```
    Project Name*: Enter a descriptive name (1-255 characters)
    Description: Detailed project description (optional, up to 2000 characters)
@@ -80,6 +84,7 @@ Each project contains:
    ```
 
 3. **Save Project**:
+   
    - Click "Create Project" to save
    - The system will validate all fields
    - You'll be redirected to the project details page
@@ -87,6 +92,7 @@ Each project contains:
 ### Project Creation Examples
 
 **Example 1: Cardiac Monitor**
+
 ```
 Name: "Wireless ECG Monitoring System"
 Description: "A portable, wireless electrocardiogram monitoring device for continuous cardiac rhythm assessment in ambulatory patients"
@@ -97,6 +103,7 @@ Tags: ["cardiac", "wireless", "monitoring", "ECG", "ambulatory"]
 ```
 
 **Example 2: Blood Glucose Meter**
+
 ```
 Name: "Smart Glucose Monitoring Device"
 Description: "An intelligent blood glucose meter with smartphone connectivity and AI-powered trend analysis"
@@ -109,6 +116,7 @@ Tags: ["diabetes", "glucose", "smart", "connectivity", "AI"]
 ### Validation Rules
 
 The system enforces the following validation:
+
 - **Name**: Required, must be unique per user, 1-255 characters
 - **Description**: Optional, maximum 2000 characters
 - **Device Type**: Optional, maximum 255 characters
@@ -121,16 +129,19 @@ The system enforces the following validation:
 ### Project Status Management
 
 **Draft Status**:
+
 - New projects start in draft status
 - Use for initial planning and information gathering
 - No restrictions on editing
 
 **In Progress Status**:
+
 - Active projects under development
 - Indicates regulatory work is ongoing
 - May have associated deadlines and milestones
 
 **Completed Status**:
+
 - Finished projects
 - Typically ready for submission or archived
 - Can still be edited if needed
@@ -138,16 +149,19 @@ The system enforces the following validation:
 ### Priority Levels
 
 **High Priority**:
+
 - Critical projects with tight deadlines
 - Regulatory submissions with FDA meetings scheduled
 - Projects with significant business impact
 
 **Medium Priority**:
+
 - Standard development timeline projects
 - Regular regulatory pathway submissions
 - Balanced resource allocation
 
 **Low Priority**:
+
 - Research and development projects
 - Future planning initiatives
 - Non-critical updates
@@ -176,12 +190,14 @@ Use tags to organize and categorize projects:
 The search feature allows you to find projects quickly:
 
 **Search Scope**:
+
 - Project names
 - Descriptions
 - Device types
 - Tag content
 
 **Search Examples**:
+
 - `cardiac` - Finds all cardiac-related projects
 - `"510k submission"` - Exact phrase search
 - `glucose meter` - Multiple word search
@@ -190,23 +206,27 @@ The search feature allows you to find projects quickly:
 ### Filtering Options
 
 **Status Filter**:
+
 - Draft projects only
 - In progress projects only
 - Completed projects only
 - All statuses (default)
 
 **Device Type Filter**:
+
 - Select from existing device types
 - Automatically populated from your projects
 - Multiple selections allowed
 
 **Priority Filter**:
+
 - High priority projects
 - Medium priority projects
 - Low priority projects
 - All priorities (default)
 
 **Date Range Filter**:
+
 - Created in last 7 days
 - Created in last 30 days
 - Created in last 90 days
@@ -233,18 +253,21 @@ The search feature allows you to find projects quickly:
 Click any project to view detailed information:
 
 **Project Information Panel**:
+
 - Basic project data
 - Creation and modification timestamps
 - Current status and priority
 - Associated tags
 
 **Progress Indicators**:
+
 - Overall completion percentage
 - Classification status
 - Predicate analysis progress
 - Document upload status
 
 **Activity Timeline**:
+
 - Recent project changes
 - Agent interactions
 - Document uploads
@@ -253,16 +276,19 @@ Click any project to view detailed information:
 ### Editing Projects
 
 **Inline Editing**:
+
 - Click any editable field to modify
 - Changes save automatically after 2 seconds
 - Visual feedback shows save status
 
 **Form Editing**:
+
 - Click "Edit Project" button for full form
 - Modify multiple fields simultaneously
 - Manual save required
 
 **Bulk Operations**:
+
 - Select multiple projects using checkboxes
 - Apply status changes to multiple projects
 - Bulk tag management
@@ -271,6 +297,7 @@ Click any project to view detailed information:
 ### Auto-save Features
 
 The system automatically saves changes:
+
 - **Debounced Saving**: Waits 2 seconds after typing stops
 - **Visual Indicators**: Shows "Saving..." and "Saved" status
 - **Error Handling**: Displays errors and allows retry
@@ -279,6 +306,7 @@ The system automatically saves changes:
 ### Version History
 
 Track all project changes:
+
 - **Change Log**: Complete history of modifications
 - **User Attribution**: Shows who made each change
 - **Timestamps**: Precise timing of all changes
@@ -289,18 +317,21 @@ Track all project changes:
 ### Export Formats
 
 **JSON Export**:
+
 - Complete project data with metadata
 - Includes validation information
 - Machine-readable format
 - Suitable for data migration
 
 **PDF Export**:
+
 - Formatted project report
 - Professional presentation
 - Includes charts and summaries
 - Ready for stakeholder sharing
 
 **CSV Export**:
+
 - Tabular data format
 - Suitable for spreadsheet analysis
 - Includes all project fields
@@ -309,6 +340,7 @@ Track all project changes:
 ### Export Options
 
 **Individual Project Export**:
+
 1. Open project details
 2. Click "Export" button
 3. Select desired format (JSON/PDF/CSV)
@@ -318,6 +350,7 @@ Track all project changes:
    - Include audit trail
 
 **Bulk Export**:
+
 1. Select multiple projects using checkboxes
 2. Click "Export Selected" button
 3. Choose format and options
@@ -326,6 +359,7 @@ Track all project changes:
 ### Export Content
 
 **Standard Export Includes**:
+
 - Project basic information
 - Device classifications
 - Predicate devices with comparison data
@@ -334,6 +368,7 @@ Track all project changes:
 - Audit trail entries
 
 **Enhanced Export Includes**:
+
 - Validation metadata and integrity checks
 - Performance metrics and timing data
 - Complete interaction details
@@ -343,18 +378,21 @@ Track all project changes:
 ### Backup System
 
 **Automatic Backups**:
+
 - Daily backups of all project data
 - Incremental backups every 4 hours
 - 30-day retention policy
 - Integrity verification included
 
 **Manual Backups**:
+
 1. Navigate to project settings
 2. Click "Create Backup"
 3. Choose backup type (full or incremental)
 4. Download backup file when ready
 
 **Backup Restoration**:
+
 1. Contact system administrator
 2. Provide backup file or timestamp
 3. Specify restoration scope
@@ -363,12 +401,14 @@ Track all project changes:
 ### Data Integrity
 
 **Validation Checks**:
+
 - Data completeness verification
 - Relationship integrity validation
 - Format compliance checking
 - Checksum verification
 
 **Error Detection**:
+
 - Missing required fields
 - Invalid data formats
 - Broken relationships
@@ -379,12 +419,14 @@ Track all project changes:
 ### Multi-user Support
 
 **Concurrent Editing**:
+
 - Multiple users can view projects simultaneously
 - Real-time updates via WebSocket connections
 - Conflict resolution for simultaneous edits
 - User presence indicators
 
 **Change Notifications**:
+
 - Instant notifications of project updates
 - Visual indicators for modified fields
 - User attribution for all changes
@@ -393,12 +435,14 @@ Track all project changes:
 ### Collaboration Features
 
 **Activity Feed**:
+
 - Real-time stream of project activities
 - Filter by user, action type, or date range
 - Subscribe to specific project updates
 - Email notifications for important changes
 
 **User Presence**:
+
 - See who else is viewing a project
 - Active user indicators
 - Last seen timestamps
@@ -407,12 +451,14 @@ Track all project changes:
 ### Conflict Resolution
 
 **Optimistic Updates**:
+
 - Changes appear immediately in UI
 - Background synchronization with server
 - Automatic conflict detection
 - User notification of conflicts
 
 **Conflict Handling**:
+
 - Last-write-wins for simple fields
 - Merge strategies for complex data
 - User choice for conflicting changes
@@ -423,6 +469,7 @@ Track all project changes:
 ### Common Issues
 
 **Login Problems**:
+
 - **Issue**: Cannot sign in with Google
 - **Solution**: 
   1. Clear browser cache and cookies
@@ -431,6 +478,7 @@ Track all project changes:
   4. Check Google account permissions
 
 **Project Loading Issues**:
+
 - **Issue**: Projects not loading or displaying incorrectly
 - **Solution**:
   1. Refresh the page (F5 or Ctrl+R)
@@ -439,6 +487,7 @@ Track all project changes:
   4. Try different browser
 
 **Save Failures**:
+
 - **Issue**: Changes not saving automatically
 - **Solution**:
   1. Check network connectivity
@@ -447,6 +496,7 @@ Track all project changes:
   4. Refresh page and re-enter changes
 
 **Export Problems**:
+
 - **Issue**: Export downloads fail or produce empty files
 - **Solution**:
   1. Check browser download settings
@@ -457,6 +507,7 @@ Track all project changes:
 ### Performance Issues
 
 **Slow Loading**:
+
 - **Causes**: Large number of projects, slow internet, browser issues
 - **Solutions**:
   1. Use search and filters to reduce data load
@@ -465,6 +516,7 @@ Track all project changes:
   4. Close unnecessary browser tabs
 
 **Memory Issues**:
+
 - **Symptoms**: Browser becomes unresponsive, crashes
 - **Solutions**:
   1. Reduce number of open projects
@@ -475,38 +527,48 @@ Track all project changes:
 ### Error Messages
 
 **Validation Errors**:
+
 ```
 "Name is required and must be between 1 and 255 characters"
 ```
+
 - **Solution**: Ensure project name meets length requirements
 
 **Permission Errors**:
+
 ```
 "Access denied to project"
 ```
+
 - **Solution**: Verify you have permission to access the project
 
 **Network Errors**:
+
 ```
 "Failed to connect to server"
 ```
+
 - **Solution**: Check internet connection and try again
 
 **Rate Limit Errors**:
+
 ```
 "Too many requests. Please try again later."
 ```
+
 - **Solution**: Wait a few minutes before making more requests
 
 ### Getting Help
 
 **Self-Service Options**:
+
 1. Check this user guide
 2. Review API documentation
 3. Search knowledge base
 4. Check system status page
 
 **Contact Support**:
+
 - Email: support@medicaldeviceassistant.com
 - Include: Error messages, browser version, steps to reproduce
 - Response time: 24 hours for standard issues, 4 hours for critical
@@ -516,6 +578,7 @@ Track all project changes:
 ### Project Management
 
 **Organization**:
+
 1. Use consistent naming conventions
 2. Apply meaningful tags and categories
 3. Keep project descriptions up to date
@@ -523,6 +586,7 @@ Track all project changes:
 5. Regular status updates and reviews
 
 **Data Quality**:
+
 1. Complete all relevant fields during project creation
 2. Use standardized device type terminology
 3. Write clear, detailed intended use statements
@@ -532,6 +596,7 @@ Track all project changes:
 ### Workflow Optimization
 
 **Efficiency Tips**:
+
 1. Use keyboard shortcuts for common actions
 2. Set up saved searches for frequent queries
 3. Utilize bulk operations for multiple projects
@@ -539,6 +604,7 @@ Track all project changes:
 5. Organize projects with consistent tagging
 
 **Collaboration**:
+
 1. Communicate changes to team members
 2. Use descriptive commit messages for changes
 3. Regular project reviews and updates
@@ -548,6 +614,7 @@ Track all project changes:
 ### Data Management
 
 **Backup Strategy**:
+
 1. Regular manual backups of critical projects
 2. Verify backup integrity periodically
 3. Store backups in multiple locations
@@ -555,6 +622,7 @@ Track all project changes:
 5. Test restoration process regularly
 
 **Security**:
+
 1. Use strong, unique passwords for Google account
 2. Enable two-factor authentication
 3. Log out when using shared computers
@@ -564,6 +632,7 @@ Track all project changes:
 ### Performance
 
 **System Performance**:
+
 1. Use search and filters to limit data loading
 2. Close unused browser tabs
 3. Regular browser cache clearing
@@ -571,6 +640,7 @@ Track all project changes:
 5. Report performance issues promptly
 
 **Data Performance**:
+
 1. Keep project descriptions concise but informative
 2. Use tags efficiently (avoid over-tagging)
 3. Regular cleanup of completed projects

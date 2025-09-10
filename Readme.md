@@ -226,6 +226,9 @@ DATABASE_URL=sqlite:./dev.db
 REDIS_URL=redis://localhost:6379
 ```
 
+**📖 For detailed instructions on generating these keys and secrets, see:**
+- **[Environment Setup Guide](medical-device-regulatory-assistant/docs/ENVIRONMENT_SETUP_GUIDE.md)** - Complete guide for all platforms and cloud providers
+
 #### Frontend (Next.js)
 
 ```bash
@@ -433,7 +436,14 @@ For detailed production deployment instructions, see:
 
 ## 10. Additional Resources
 
+### Documentation
+
+- **[Environment Setup Guide](medical-device-regulatory-assistant/docs/ENVIRONMENT_SETUP_GUIDE.md)** - Complete guide for generating keys, secrets, and configuring environment variables across all platforms
+- **[Production Deployment Guide](medical-device-regulatory-assistant/docs/PRODUCTION_DEPLOYMENT.md)** - Detailed deployment instructions
+- **[Development Setup Guide](medical-device-regulatory-assistant/docs/DEVELOPMENT_SETUP.md)** - Quick development environment setup
+
+### External Resources
+
 - [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API
 - [FastAPI Documentation](https://fastapi.tiangolo.com/) - learn about FastAPI features
 - [LangGraph Documentation](https://langchain-ai.github.io/langgraph/) - learn about agent workflows
-- [Production Deployment Guide](medical-device-regulatory-assistant/docs/PRODUCTION_DEPLOYMENT.md) - detailed deployment instructions

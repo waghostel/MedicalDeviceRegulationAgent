@@ -64,6 +64,7 @@ The Medical Device Regulatory Assistant follows a modern full-stack architecture
 ### Technology Stack
 
 **Frontend**:
+
 - **Next.js 14**: React framework with App Router
 - **React 18**: UI library with hooks and context
 - **TypeScript**: Type-safe JavaScript
@@ -72,6 +73,7 @@ The Medical Device Regulatory Assistant follows a modern full-stack architecture
 - **Zustand**: State management
 
 **Backend**:
+
 - **FastAPI**: Modern Python web framework
 - **SQLAlchemy**: ORM for database operations
 - **Pydantic**: Data validation and serialization
@@ -80,6 +82,7 @@ The Medical Device Regulatory Assistant follows a modern full-stack architecture
 - **WebSocket**: Real-time communication
 
 **Development Tools**:
+
 - **Poetry**: Python dependency management
 - **pnpm**: Node.js package manager
 - **Jest**: JavaScript testing framework
@@ -102,77 +105,91 @@ The Medical Device Regulatory Assistant follows a modern full-stack architecture
 ### Backend Setup
 
 1. **Navigate to backend directory**:
-```bash
-cd medical-device-regulatory-assistant/backend
-```
+   
+   ```bash
+   cd medical-device-regulatory-assistant/backend
+   ```
 
 2. **Install Poetry** (if not already installed):
-```bash
-curl -sSL https://install.python-poetry.org | python3 -
-```
+   
+   ```bash
+   curl -sSL https://install.python-poetry.org | python3 -
+   ```
 
 3. **Install dependencies**:
-```bash
-poetry install
-```
+   
+   ```bash
+   poetry install
+   ```
 
 4. **Set up environment variables**:
-```bash
-cp .env.example .env.development
-# Edit .env.development with your configuration
-```
+   
+   ```bash
+   cp .env.example .env.development
+   # Edit .env.development with your configuration
+   ```
 
 5. **Initialize database**:
-```bash
-poetry run python -m alembic upgrade head
-```
+   
+   ```bash
+   poetry run python -m alembic upgrade head
+   ```
 
 6. **Seed database with mock data**:
-```bash
-poetry run python database/integrated_seeder.py --config mock_data/comprehensive_mock_data_config.json
-```
+   
+   ```bash
+   poetry run python database/integrated_seeder.py --config mock_data/comprehensive_mock_data_config.json
+   ```
 
 7. **Start development server**:
-```bash
-poetry run uvicorn main:app --reload --host 0.0.0.0 --port 8000
-```
+   
+   ```bash
+   poetry run uvicorn main:app --reload --host 0.0.0.0 --port 8000
+   ```
 
 ### Frontend Setup
 
 1. **Navigate to frontend directory**:
-```bash
-cd medical-device-regulatory-assistant
-```
+   
+   ```bash
+   cd medical-device-regulatory-assistant
+   ```
 
 2. **Install dependencies**:
-```bash
-pnpm install
-```
+   
+   ```bash
+   pnpm install
+   ```
 
 3. **Set up environment variables**:
-```bash
-cp .env.example .env.local
-# Edit .env.local with your configuration
-```
+   
+   ```bash
+   cp .env.example .env.local
+   # Edit .env.local with your configuration
+   ```
 
 4. **Start development server**:
-```bash
-pnpm dev
-```
+   
+   ```bash
+   pnpm dev
+   ```
 
 ### Development Workflow
 
 1. **Start both servers**:
-```bash
-# Terminal 1 - Backend
-cd medical-device-regulatory-assistant/backend
-poetry run uvicorn main:app --reload
+   
+   ```bash
+   # Terminal 1 - Backend
+   cd medical-device-regulatory-assistant/backend
+   poetry run uvicorn main:app --reload
+   ```
 
 # Terminal 2 - Frontend
+
 cd medical-device-regulatory-assistant
 pnpm dev
-```
 
+```
 2. **Access application**:
 - Frontend: http://localhost:3000
 - Backend API: http://localhost:8000
@@ -246,6 +263,7 @@ Located in `medical-device-regulatory-assistant/backend/mock_data/`:
 ### Using the Database Seeder
 
 **Basic Usage**:
+
 ```bash
 # Clear database and seed with comprehensive data
 poetry run python database/integrated_seeder.py --config mock_data/comprehensive_mock_data_config.json --clear
@@ -258,6 +276,7 @@ poetry run python database/integrated_seeder.py --clear-only
 ```
 
 **Advanced Options**:
+
 ```bash
 # Seed with validation
 poetry run python database/integrated_seeder.py \
@@ -274,22 +293,24 @@ poetry run python database/integrated_seeder.py \
 ### Creating Custom Mock Data
 
 1. **Create configuration file**:
-```bash
-cp mock_data/sample_mock_data_config.json mock_data/my_custom_config.json
-```
+   
+   ```bash
+   cp mock_data/sample_mock_data_config.json mock_data/my_custom_config.json
+   ```
 
 2. **Edit configuration**:
-```json
-{
-  "users": [
+   
+   ```json
+   {
+   "users": [
     {
       "google_id": "custom_user_001",
       "email": "developer@company.com",
       "name": "Developer User",
       "avatar_url": null
     }
-  ],
-  "projects": [
+   ],
+   "projects": [
     {
       "name": "My Test Project",
       "description": "Custom project for testing",
@@ -300,19 +321,21 @@ cp mock_data/sample_mock_data_config.json mock_data/my_custom_config.json
       "tags": ["test", "development"],
       "user_email": "developer@company.com"
     }
-  ]
-}
-```
+   ]
+   }
+   ```
 
 3. **Validate configuration**:
-```bash
-poetry run python mock_data/validate_config.py my_custom_config.json
-```
+   
+   ```bash
+   poetry run python mock_data/validate_config.py my_custom_config.json
+   ```
 
 4. **Seed database**:
-```bash
-poetry run python database/integrated_seeder.py --config mock_data/my_custom_config.json
-```
+   
+   ```bash
+   poetry run python database/integrated_seeder.py --config mock_data/my_custom_config.json
+   ```
 
 ### Configuration Validation
 
@@ -338,29 +361,29 @@ poetry run python mock_data/validate_config.py --generate-docs
 ```python
 class Project(Base):
     __tablename__ = "projects"
-    
+
     # Primary key
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    
+
     # Foreign keys
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False, index=True)
-    
+
     # Core fields
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     device_type: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
     intended_use: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     status: Mapped[ProjectStatus] = mapped_column(Enum(ProjectStatus), default=ProjectStatus.DRAFT)
-    
+
     # Enhanced fields
     priority: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
     tags: Mapped[Optional[str]] = mapped_column(Text, nullable=True)  # JSON array
     metadata: Mapped[Optional[str]] = mapped_column(Text, nullable=True)  # JSON object
-    
+
     # Timestamps
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=func.now())
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=func.now(), onupdate=func.now())
-    
+
     # Relationships
     user: Mapped["User"] = relationship("User", back_populates="projects")
     device_classifications: Mapped[List["DeviceClassification"]] = relationship(
@@ -382,17 +405,17 @@ class Project(Base):
 ```python
 class User(Base):
     __tablename__ = "users"
-    
+
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     google_id: Mapped[str] = mapped_column(String(255), unique=True, nullable=False, index=True)
     email: Mapped[str] = mapped_column(String(255), unique=True, nullable=False, index=True)
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     avatar_url: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
-    
+
     # Timestamps
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=func.now())
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=func.now(), onupdate=func.now())
-    
+
     # Relationships
     projects: Mapped[List["Project"]] = relationship("Project", back_populates="user", cascade="all, delete-orphan")
 ```
@@ -400,21 +423,25 @@ class User(Base):
 ### Database Migrations
 
 **Create Migration**:
+
 ```bash
 poetry run alembic revision --autogenerate -m "Add enhanced project fields"
 ```
 
 **Apply Migrations**:
+
 ```bash
 poetry run alembic upgrade head
 ```
 
 **Rollback Migration**:
+
 ```bash
 poetry run alembic downgrade -1
 ```
 
 **Migration History**:
+
 ```bash
 poetry run alembic history
 ```
@@ -451,12 +478,12 @@ CREATE INDEX idx_agent_interactions_project_id ON agent_interactions(project_id)
 ```python
 class ProjectService:
     """Enhanced service class for project management operations"""
-    
+
     def __init__(self):
         self.db_manager = get_database_manager()
         self.cache = get_cache_manager()
         self.websocket_manager = get_websocket_manager()
-    
+
     async def create_project(self, project_data: ProjectCreateRequest, user_id: str) -> ProjectResponse:
         """Create a new project with validation and caching"""
         async with self.db_manager.get_session() as session:
@@ -464,7 +491,7 @@ class ProjectService:
             user = await self._get_user_by_id(session, user_id)
             if not user:
                 raise UserNotFoundError(user_id)
-            
+
             # Create project
             project = Project(
                 user_id=user.id,
@@ -475,17 +502,17 @@ class ProjectService:
                 priority=project_data.priority,
                 tags=json.dumps(project_data.tags) if project_data.tags else None
             )
-            
+
             session.add(project)
             await session.commit()
             await session.refresh(project)
-            
+
             # Cache the project
             await self.cache.set_project(project.id, project)
-            
+
             # Notify via WebSocket
             await self.websocket_manager.broadcast_project_created(project)
-            
+
             return ProjectResponse.from_orm(project)
 ```
 
@@ -534,7 +561,7 @@ class ProjectCreateRequest(BaseModel):
     intended_use: Optional[str] = Field(None, max_length=5000, description="Clinical indication")
     priority: Optional[str] = Field(None, pattern="^(high|medium|low)$", description="Project priority")
     tags: Optional[List[str]] = Field(None, max_items=10, description="Project tags")
-    
+
     @validator('tags')
     def validate_tags(cls, v):
         if v:
@@ -542,7 +569,7 @@ class ProjectCreateRequest(BaseModel):
                 if len(tag) > 50:
                     raise ValueError('Tag length must not exceed 50 characters')
         return v
-    
+
     class Config:
         schema_extra = {
             "example": {
@@ -573,7 +600,7 @@ export function ProjectList({ onCreateProject, onSelectProject, onEditProject, c
   const { projects, loading, error, createProject, updateProject, deleteProject } = useProjects();
   const [searchTerm, setSearchTerm] = useState('');
   const [filters, setFilters] = useState<ProjectSearchFilters>({});
-  
+
   // Real-time updates via WebSocket
   useWebSocket('/ws/projects', {
     onMessage: (event) => {
@@ -584,15 +611,15 @@ export function ProjectList({ onCreateProject, onSelectProject, onEditProject, c
       }
     }
   });
-  
+
   // Optimistic updates
   const handleCreateProject = async (projectData: ProjectCreateRequest) => {
     const tempId = Date.now();
     const optimisticProject = { ...projectData, id: tempId, status: 'draft' };
-    
+
     // Add optimistic project to UI
     addOptimisticProject(optimisticProject);
-    
+
     try {
       const createdProject = await createProject(projectData);
       // Replace optimistic project with real project
@@ -603,7 +630,7 @@ export function ProjectList({ onCreateProject, onSelectProject, onEditProject, c
       showError('Failed to create project');
     }
   };
-  
+
   return (
     <div className={cn("space-y-4", className)}>
       <ProjectSearchBar 
@@ -612,7 +639,7 @@ export function ProjectList({ onCreateProject, onSelectProject, onEditProject, c
         filters={filters}
         onFiltersChange={setFilters}
       />
-      
+
       <ProjectGrid 
         projects={projects}
         loading={loading}
@@ -621,7 +648,7 @@ export function ProjectList({ onCreateProject, onSelectProject, onEditProject, c
         onEdit={onEditProject}
         onDelete={deleteProject}
       />
-      
+
       <ProjectPagination 
         currentPage={filters.page || 1}
         totalPages={Math.ceil(totalCount / (filters.limit || 50))}
@@ -641,7 +668,7 @@ interface ProjectStore {
   loading: boolean;
   error: string | null;
   filters: ProjectSearchFilters;
-  
+
   // Actions
   setProjects: (projects: Project[]) => void;
   addProject: (project: Project) => void;
@@ -650,7 +677,7 @@ interface ProjectStore {
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
   setFilters: (filters: ProjectSearchFilters) => void;
-  
+
   // Async actions
   fetchProjects: () => Promise<void>;
   createProject: (data: ProjectCreateRequest) => Promise<Project>;
@@ -663,7 +690,7 @@ export const useProjectStore = create<ProjectStore>((set, get) => ({
   loading: false,
   error: null,
   filters: {},
-  
+
   setProjects: (projects) => set({ projects }),
   addProject: (project) => set((state) => ({ 
     projects: [...state.projects, project] 
@@ -677,7 +704,7 @@ export const useProjectStore = create<ProjectStore>((set, get) => ({
   setLoading: (loading) => set({ loading }),
   setError: (error) => set({ error }),
   setFilters: (filters) => set({ filters }),
-  
+
   fetchProjects: async () => {
     set({ loading: true, error: null });
     try {
@@ -688,7 +715,7 @@ export const useProjectStore = create<ProjectStore>((set, get) => ({
       set({ error: error.message, loading: false });
     }
   },
-  
+
   createProject: async (data) => {
     try {
       const project = await projectApi.createProject(data);
@@ -699,7 +726,7 @@ export const useProjectStore = create<ProjectStore>((set, get) => ({
       throw error;
     }
   },
-  
+
   updateProjectAsync: async (id, data) => {
     try {
       const project = await projectApi.updateProject(id, data);
@@ -710,7 +737,7 @@ export const useProjectStore = create<ProjectStore>((set, get) => ({
       throw error;
     }
   },
-  
+
   deleteProject: async (id) => {
     try {
       await projectApi.deleteProject(id);
@@ -730,38 +757,38 @@ export const useProjectStore = create<ProjectStore>((set, get) => ({
 export function useProjects() {
   const store = useProjectStore();
   const [optimisticProjects, setOptimisticProjects] = useState<Project[]>([]);
-  
+
   // Combine real and optimistic projects
   const allProjects = useMemo(() => {
     return [...store.projects, ...optimisticProjects];
   }, [store.projects, optimisticProjects]);
-  
+
   const addOptimisticProject = useCallback((project: Project) => {
     setOptimisticProjects(prev => [...prev, project]);
   }, []);
-  
+
   const removeOptimisticProject = useCallback((id: number) => {
     setOptimisticProjects(prev => prev.filter(p => p.id !== id));
   }, []);
-  
+
   const replaceOptimisticProject = useCallback((tempId: number, realProject: Project) => {
     setOptimisticProjects(prev => prev.filter(p => p.id !== tempId));
     store.addProject(realProject);
   }, [store]);
-  
+
   return {
     projects: allProjects,
     loading: store.loading,
     error: store.error,
     filters: store.filters,
-    
+
     // Actions
     fetchProjects: store.fetchProjects,
     createProject: store.createProject,
     updateProject: store.updateProjectAsync,
     deleteProject: store.deleteProject,
     setFilters: store.setFilters,
-    
+
     // Optimistic update helpers
     addOptimisticProject,
     removeOptimisticProject,
@@ -775,6 +802,7 @@ export function useProjects() {
 ### Backend Testing
 
 **Unit Tests**:
+
 ```python
 # test_project_service.py
 import pytest
@@ -791,14 +819,14 @@ async def test_create_project_success():
         device_type="Medical Device",
         intended_use="Test indication"
     )
-    
+
     with patch.object(service, '_get_user_by_id') as mock_get_user:
         mock_user = AsyncMock()
         mock_user.id = 1
         mock_get_user.return_value = mock_user
-        
+
         project = await service.create_project(project_data, "test_user_id")
-        
+
         assert project.name == "Test Project"
         assert project.description == "Test description"
         assert project.status == "draft"
@@ -808,15 +836,16 @@ async def test_create_project_user_not_found():
     """Test project creation with non-existent user"""
     service = ProjectService()
     project_data = ProjectCreateRequest(name="Test Project")
-    
+
     with patch.object(service, '_get_user_by_id') as mock_get_user:
         mock_get_user.return_value = None
-        
+
         with pytest.raises(UserNotFoundError):
             await service.create_project(project_data, "invalid_user_id")
 ```
 
 **Integration Tests**:
+
 ```python
 # test_project_api.py
 import pytest
@@ -833,13 +862,13 @@ async def test_create_project_endpoint(auth_headers):
             "device_type": "Medical Device",
             "intended_use": "Test indication"
         }
-        
+
         response = await client.post(
             "/api/projects",
             json=project_data,
             headers=auth_headers
         )
-        
+
         assert response.status_code == 201
         data = response.json()
         assert data["name"] == "Test Project"
@@ -853,7 +882,7 @@ async def test_list_projects_with_search(auth_headers):
             "/api/projects?search=test&limit=10",
             headers=auth_headers
         )
-        
+
         assert response.status_code == 200
         data = response.json()
         assert isinstance(data, list)
@@ -862,6 +891,7 @@ async def test_list_projects_with_search(auth_headers):
 ### Frontend Testing
 
 **Component Tests**:
+
 ```typescript
 // ProjectList.test.tsx
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
@@ -886,34 +916,34 @@ describe('ProjectList Component', () => {
         <ProjectList />
       </ProjectProvider>
     );
-    
+
     expect(screen.getByText('Test Project')).toBeInTheDocument();
     expect(screen.getByText('Test description')).toBeInTheDocument();
   });
-  
+
   it('should handle project creation', async () => {
     const mockCreateProject = jest.fn();
-    
+
     render(
       <ProjectProvider mockCreateProject={mockCreateProject}>
         <ProjectList onCreateProject={mockCreateProject} />
       </ProjectProvider>
     );
-    
+
     fireEvent.click(screen.getByText('New Project'));
     expect(mockCreateProject).toHaveBeenCalled();
   });
-  
+
   it('should handle search functionality', async () => {
     render(
       <ProjectProvider mockData={mockProjects}>
         <ProjectList />
       </ProjectProvider>
     );
-    
+
     const searchInput = screen.getByPlaceholderText('Search projects...');
     fireEvent.change(searchInput, { target: { value: 'test' } });
-    
+
     await waitFor(() => {
       expect(screen.getByText('Test Project')).toBeInTheDocument();
     });
@@ -922,6 +952,7 @@ describe('ProjectList Component', () => {
 ```
 
 **Hook Tests**:
+
 ```typescript
 // useProjects.test.tsx
 import { renderHook, act } from '@testing-library/react';
@@ -933,17 +964,17 @@ describe('useProjects Hook', () => {
     const { result } = renderHook(() => useProjects(), {
       wrapper: ProjectProvider
     });
-    
+
     await waitFor(() => {
       expect(result.current.loading).toBe(false);
     });
-    
+
     expect(result.current.projects).toHaveLength(1);
   });
-  
+
   it('should handle project creation with optimistic updates', async () => {
     const { result } = renderHook(() => useProjects());
-    
+
     await act(async () => {
       const project = await result.current.createProject({
         name: 'New Project',
@@ -951,7 +982,7 @@ describe('useProjects Hook', () => {
       });
       expect(project).toBeDefined();
     });
-    
+
     expect(result.current.projects).toContainEqual(
       expect.objectContaining({ name: 'New Project' })
     );
@@ -962,6 +993,7 @@ describe('useProjects Hook', () => {
 ### Test Configuration
 
 **Jest Configuration** (`jest.config.js`):
+
 ```javascript
 module.exports = {
   testEnvironment: 'jsdom',
@@ -987,6 +1019,7 @@ module.exports = {
 ```
 
 **Pytest Configuration** (`pyproject.toml`):
+
 ```toml
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -1011,6 +1044,7 @@ markers = [
 ### Running Tests
 
 **Backend Tests**:
+
 ```bash
 # Run all tests
 poetry run python -m pytest tests/ -v
@@ -1029,6 +1063,7 @@ poetry run python -m pytest tests/ -n auto
 ```
 
 **Frontend Tests**:
+
 ```bash
 # Run all tests
 pnpm test
@@ -1051,6 +1086,7 @@ pnpm test:ci
 ### Backend Optimization
 
 **Database Query Optimization**:
+
 ```python
 # Efficient project loading with relationships
 async def get_projects_with_relationships(user_id: str, filters: ProjectSearchFilters):
@@ -1063,7 +1099,7 @@ async def get_projects_with_relationships(user_id: str, filters: ProjectSearchFi
         )
         .where(Project.user_id == user_id)
     )
-    
+
     # Apply filters
     if filters.search:
         query = query.where(
@@ -1073,30 +1109,31 @@ async def get_projects_with_relationships(user_id: str, filters: ProjectSearchFi
                 Project.device_type.ilike(f"%{filters.search}%")
             )
         )
-    
+
     if filters.status:
         query = query.where(Project.status == filters.status)
-    
+
     # Apply pagination
     query = query.offset(filters.offset).limit(filters.limit)
-    
+
     return await session.execute(query)
 ```
 
 **Caching Strategy**:
+
 ```python
 class ProjectCache:
     def __init__(self, redis_client):
         self.redis = redis_client
         self.default_ttl = 3600  # 1 hour
-    
+
     async def get_project(self, project_id: int) -> Optional[Project]:
         """Get cached project"""
         cached = await self.redis.get(f"project:{project_id}")
         if cached:
             return Project.parse_raw(cached)
         return None
-    
+
     async def set_project(self, project_id: int, project: Project):
         """Cache project"""
         await self.redis.setex(
@@ -1104,11 +1141,11 @@ class ProjectCache:
             self.default_ttl,
             project.json()
         )
-    
+
     async def invalidate_project(self, project_id: int):
         """Remove project from cache"""
         await self.redis.delete(f"project:{project_id}")
-    
+
     async def get_user_projects(self, user_id: str) -> Optional[List[Project]]:
         """Get cached user projects"""
         cached = await self.redis.get(f"user_projects:{user_id}")
@@ -1120,17 +1157,18 @@ class ProjectCache:
 ### Frontend Optimization
 
 **Component Optimization**:
+
 ```typescript
 // Memoized project card component
 const ProjectCard = memo(({ project, onEdit, onDelete }: ProjectCardProps) => {
   const handleEdit = useCallback(() => {
     onEdit(project);
   }, [project, onEdit]);
-  
+
   const handleDelete = useCallback(async () => {
     await onDelete(project.id);
   }, [project.id, onDelete]);
-  
+
   return (
     <Card className="hover:shadow-md transition-shadow">
       <CardHeader>
@@ -1158,6 +1196,7 @@ const ProjectCard = memo(({ project, onEdit, onDelete }: ProjectCardProps) => {
 ```
 
 **Virtual Scrolling**:
+
 ```typescript
 // Virtual scrolling for large project lists
 import { FixedSizeList as List } from 'react-window';
@@ -1171,7 +1210,7 @@ const VirtualizedProjectList = ({ projects, onSelectProject }: VirtualizedProjec
       />
     </div>
   );
-  
+
   return (
     <List
       height={600}
@@ -1186,6 +1225,7 @@ const VirtualizedProjectList = ({ projects, onSelectProject }: VirtualizedProjec
 ```
 
 **Bundle Optimization**:
+
 ```typescript
 // Dynamic imports for code splitting
 const ProjectForm = lazy(() => import('./ProjectForm'));
@@ -1202,6 +1242,7 @@ const ProjectExport = lazy(() => import('./ProjectExport'));
 ### Comprehensive Error Strategy
 
 **Error Types**:
+
 ```typescript
 // Frontend error types
 export enum ErrorType {
@@ -1225,27 +1266,28 @@ export interface AppError {
 ```
 
 **Error Boundary**:
+
 ```typescript
 class ProjectErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
   constructor(props: ErrorBoundaryProps) {
     super(props);
     this.state = { hasError: false, error: null };
   }
-  
+
   static getDerivedStateFromError(error: Error): ErrorBoundaryState {
     return { hasError: true, error };
   }
-  
+
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     console.error('Project error boundary caught an error:', error, errorInfo);
-    
+
     // Send to error reporting service
     errorReportingService.captureException(error, {
       extra: errorInfo,
       tags: { component: 'ProjectErrorBoundary' }
     });
   }
-  
+
   render() {
     if (this.state.hasError) {
       return (
@@ -1255,13 +1297,14 @@ class ProjectErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
         />
       );
     }
-    
+
     return this.props.children;
   }
 }
 ```
 
 **Error Recovery**:
+
 ```typescript
 // Retry mechanism for failed operations
 const useRetryableOperation = <T>(
@@ -1271,11 +1314,11 @@ const useRetryableOperation = <T>(
 ) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
-  
+
   const execute = useCallback(async (): Promise<T | null> => {
     setIsLoading(true);
     setError(null);
-    
+
     for (let attempt = 0; attempt <= maxRetries; attempt++) {
       try {
         const result = await operation();
@@ -1287,15 +1330,15 @@ const useRetryableOperation = <T>(
           setIsLoading(false);
           return null;
         }
-        
+
         // Wait before retry
         await new Promise(resolve => setTimeout(resolve, delay * Math.pow(2, attempt)));
       }
     }
-    
+
     return null;
   }, [operation, maxRetries, delay]);
-  
+
   return { execute, isLoading, error };
 };
 ```
@@ -1305,6 +1348,7 @@ const useRetryableOperation = <T>(
 ### Docker Configuration
 
 **Backend Dockerfile**:
+
 ```dockerfile
 FROM python:3.11-slim
 
@@ -1333,6 +1377,7 @@ CMD ["poetry", "run", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "800
 ```
 
 **Frontend Dockerfile**:
+
 ```dockerfile
 FROM node:18-alpine AS builder
 
@@ -1371,6 +1416,7 @@ CMD ["pnpm", "start"]
 ```
 
 **Docker Compose**:
+
 ```yaml
 version: '3.8'
 
@@ -1388,7 +1434,7 @@ services:
       - ./data:/app/data
     depends_on:
       - redis
-  
+
   frontend:
     build:
       context: .
@@ -1399,7 +1445,7 @@ services:
       - NEXT_PUBLIC_API_URL=http://backend:8000
     depends_on:
       - backend
-  
+
   redis:
     image: redis:7-alpine
     ports:
@@ -1426,66 +1472,66 @@ on:
 jobs:
   test-backend:
     runs-on: ubuntu-latest
-    
+
     steps:
     - uses: actions/checkout@v3
-    
+
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: '3.11'
-    
+
     - name: Install Poetry
       uses: snok/install-poetry@v1
-    
+
     - name: Install dependencies
       run: |
         cd backend
         poetry install
-    
+
     - name: Run tests
       run: |
         cd backend
         poetry run pytest tests/ --cov=. --cov-report=xml
-    
+
     - name: Upload coverage
       uses: codecov/codecov-action@v3
       with:
         file: ./backend/coverage.xml
-  
+
   test-frontend:
     runs-on: ubuntu-latest
-    
+
     steps:
     - uses: actions/checkout@v3
-    
+
     - name: Set up Node.js
       uses: actions/setup-node@v3
       with:
         node-version: '18'
-    
+
     - name: Install pnpm
       uses: pnpm/action-setup@v2
       with:
         version: 8
-    
+
     - name: Install dependencies
       run: pnpm install --frozen-lockfile
-    
+
     - name: Run tests
       run: pnpm test:ci
-    
+
     - name: Build application
       run: pnpm build
-  
+
   deploy:
     needs: [test-backend, test-frontend]
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
-    
+
     steps:
     - uses: actions/checkout@v3
-    
+
     - name: Deploy to production
       run: |
         # Add deployment steps here
@@ -1497,6 +1543,7 @@ jobs:
 ### Common Development Issues
 
 **Database Connection Issues**:
+
 ```bash
 # Check database file permissions
 ls -la medical_device_assistant.db
@@ -1510,6 +1557,7 @@ poetry run python database/integrated_seeder.py --config mock_data/comprehensive
 ```
 
 **Frontend Build Issues**:
+
 ```bash
 # Clear Next.js cache
 pnpm clean
@@ -1524,6 +1572,7 @@ pnpm type-check
 ```
 
 **API Connection Issues**:
+
 ```bash
 # Check backend server status
 curl http://localhost:8000/health
@@ -1538,6 +1587,7 @@ curl -H "Authorization: Bearer <token>" http://localhost:8000/api/projects
 ### Performance Issues
 
 **Slow Database Queries**:
+
 ```sql
 -- Check query performance
 EXPLAIN QUERY PLAN SELECT * FROM projects WHERE user_id = 1;
@@ -1547,6 +1597,7 @@ CREATE INDEX idx_projects_user_status ON projects(user_id, status);
 ```
 
 **Memory Leaks**:
+
 ```bash
 # Monitor memory usage
 poetry run python -m memory_profiler backend/main.py
@@ -1565,6 +1616,7 @@ asyncio.run(check_connections())
 ### Testing Issues
 
 **Test Database Setup**:
+
 ```python
 # conftest.py
 @pytest.fixture
@@ -1572,17 +1624,18 @@ async def test_db():
     # Create test database
     test_db_url = "sqlite:///test.db"
     engine = create_async_engine(test_db_url)
-    
+
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
-    
+
     yield engine
-    
+
     # Cleanup
     os.remove("test.db")
 ```
 
 **Mock Data Issues**:
+
 ```bash
 # Validate mock data configuration
 poetry run python mock_data/validate_config.py mock_data/test_config.json
@@ -1594,6 +1647,7 @@ poetry run python database/integrated_seeder.py --config mock_data/test_config.j
 ### Production Issues
 
 **Monitoring and Logging**:
+
 ```python
 # Add structured logging
 import structlog
@@ -1613,6 +1667,7 @@ async def create_project(project_data: ProjectCreateRequest):
 ```
 
 **Health Checks**:
+
 ```python
 @router.get("/health")
 async def health_check():
@@ -1622,10 +1677,10 @@ async def health_check():
         "disk_space": check_disk_space(),
         "memory": check_memory_usage()
     }
-    
+
     healthy = all(checks.values())
     status_code = 200 if healthy else 503
-    
+
     return JSONResponse(
         status_code=status_code,
         content={
@@ -1639,16 +1694,19 @@ async def health_check():
 ### Getting Help
 
 **Documentation Resources**:
+
 - [API Documentation](../api/README.md)
 - [User Guide](../user-guide/README.md)
 - [Troubleshooting Guide](../troubleshooting/README.md)
 
 **Development Support**:
+
 - GitHub Issues: Report bugs and feature requests
 - Development Chat: Join the development Slack channel
 - Code Reviews: Submit pull requests for review
 
 **Emergency Contacts**:
+
 - Production Issues: ops@medicaldeviceassistant.com
 - Security Issues: security@medicaldeviceassistant.com
 - General Support: dev-support@medicaldeviceassistant.com

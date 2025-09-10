@@ -38,6 +38,7 @@ Content-Type: application/json
 Creates a new medical device regulatory project.
 
 **Request Body:**
+
 ```json
 {
   "name": "Cardiac Monitoring Device",
@@ -50,6 +51,7 @@ Creates a new medical device regulatory project.
 ```
 
 **Response (201 Created):**
+
 ```json
 {
   "id": 1,
@@ -68,6 +70,7 @@ Creates a new medical device regulatory project.
 ```
 
 **Validation Rules:**
+
 - `name`: Required, 1-255 characters
 - `description`: Optional, max 2000 characters
 - `device_type`: Optional, max 255 characters
@@ -82,6 +85,7 @@ Creates a new medical device regulatory project.
 Retrieves a paginated list of projects with optional search and filtering.
 
 **Query Parameters:**
+
 - `search` (string, optional): Search in name, description, device_type
 - `status` (string, optional): Filter by status (draft, in_progress, completed)
 - `device_type` (string, optional): Filter by device type
@@ -89,11 +93,13 @@ Retrieves a paginated list of projects with optional search and filtering.
 - `offset` (integer, optional): Skip results (default: 0)
 
 **Example Request:**
+
 ```http
 GET /api/projects?search=cardiac&status=draft&limit=10&offset=0
 ```
 
 **Response (200 OK):**
+
 ```json
 [
   {
@@ -120,9 +126,11 @@ GET /api/projects?search=cardiac&status=draft&limit=10&offset=0
 Retrieves detailed information about a specific project.
 
 **Path Parameters:**
+
 - `project_id` (integer): Project ID
 
 **Response (200 OK):**
+
 ```json
 {
   "id": 1,
@@ -147,9 +155,11 @@ Retrieves detailed information about a specific project.
 Updates an existing project. Only provided fields will be updated.
 
 **Path Parameters:**
+
 - `project_id` (integer): Project ID
 
 **Request Body:**
+
 ```json
 {
   "name": "Advanced Cardiac Monitoring Device",
@@ -160,6 +170,7 @@ Updates an existing project. Only provided fields will be updated.
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "id": 1,
@@ -184,9 +195,11 @@ Updates an existing project. Only provided fields will be updated.
 Deletes a project and all associated data (classifications, predicates, documents, interactions).
 
 **Path Parameters:**
+
 - `project_id` (integer): Project ID
 
 **Response (200 OK):**
+
 ```json
 {
   "message": "Project deleted successfully"
@@ -200,9 +213,11 @@ Deletes a project and all associated data (classifications, predicates, document
 Retrieves aggregated dashboard data for a project.
 
 **Path Parameters:**
+
 - `project_id` (integer): Project ID
 
 **Response (200 OK):**
+
 ```json
 {
   "project": {
@@ -250,14 +265,17 @@ Retrieves aggregated dashboard data for a project.
 Exports complete project data in various formats with validation and integrity checks.
 
 **Path Parameters:**
+
 - `project_id` (integer): Project ID
 
 **Query Parameters:**
+
 - `format_type` (string): Export format - "json", "pdf", or "csv" (default: "json")
 - `include_validation` (boolean): Include validation metadata (default: true)
 - `include_performance` (boolean): Include performance metrics (default: false)
 
 **Example Requests:**
+
 ```http
 GET /api/projects/1/export?format_type=json&include_validation=true
 GET /api/projects/1/export?format_type=pdf
@@ -265,6 +283,7 @@ GET /api/projects/1/export?format_type=csv
 ```
 
 **JSON Export Response (200 OK):**
+
 ```json
 {
   "export_metadata": {
@@ -349,11 +368,13 @@ GET /api/projects/1/export?format_type=csv
 ```
 
 **PDF Export Response:**
+
 - Content-Type: `application/pdf`
 - Content-Disposition: `attachment; filename=project_1_enhanced_report.pdf`
 - Binary PDF data with formatted project report
 
 **CSV Export Response:**
+
 - Content-Type: `text/csv`
 - Content-Disposition: `attachment; filename=project_1_export.csv`
 - Structured CSV data with project information
@@ -365,12 +386,15 @@ GET /api/projects/1/export?format_type=csv
 Creates a comprehensive backup of project data with integrity verification.
 
 **Path Parameters:**
+
 - `project_id` (integer): Project ID
 
 **Query Parameters:**
+
 - `backup_type` (string): "full" or "incremental" (default: "full")
 
 **Response (200 OK):**
+
 ```json
 {
   "success": true,
@@ -402,9 +426,11 @@ Creates a comprehensive backup of project data with integrity verification.
 Validates project export data for integrity and completeness.
 
 **Path Parameters:**
+
 - `project_id` (integer): Project ID
 
 **Response (200 OK):**
+
 ```json
 {
   "project_id": 1,
@@ -451,6 +477,7 @@ All API errors follow a consistent format:
 ### Error Examples
 
 **400 Bad Request - Validation Error:**
+
 ```json
 {
   "error": {
@@ -465,6 +492,7 @@ All API errors follow a consistent format:
 ```
 
 **404 Not Found - Project Not Found:**
+
 ```json
 {
   "error": {
@@ -478,6 +506,7 @@ All API errors follow a consistent format:
 ```
 
 **403 Forbidden - Access Denied:**
+
 ```json
 {
   "error": {
@@ -500,6 +529,7 @@ All API errors follow a consistent format:
   - `X-RateLimit-Reset`: Unix timestamp when rate limit resets
 
 **429 Too Many Requests:**
+
 ```json
 {
   "error": {
@@ -521,6 +551,7 @@ All API errors follow a consistent format:
 **Authentication**: Include JWT token in connection headers or query parameter
 
 **Message Format:**
+
 ```json
 {
   "type": "project_updated",
@@ -536,6 +567,7 @@ All API errors follow a consistent format:
 ```
 
 **Event Types:**
+
 - `project_updated`: Project data changed
 - `project_deleted`: Project was deleted
 - `classification_added`: New device classification
@@ -609,7 +641,7 @@ class ProjectAPI:
             'Authorization': f'Bearer {jwt_token}',
             'Content-Type': 'application/json'
         }
-    
+
     def create_project(self, project_data: dict):
         """Create a new project"""
         response = requests.post(
@@ -619,13 +651,13 @@ class ProjectAPI:
         )
         response.raise_for_status()
         return response.json()
-    
+
     def list_projects(self, search: str = None, limit: int = 50):
         """List projects with optional search"""
         params = {'limit': limit}
         if search:
             params['search'] = search
-        
+
         response = requests.get(
             f'{self.base_url}/projects',
             headers=self.headers,
@@ -633,7 +665,7 @@ class ProjectAPI:
         )
         response.raise_for_status()
         return response.json()
-    
+
     def export_project(self, project_id: int, format_type: str = 'json'):
         """Export project data"""
         response = requests.get(
@@ -642,7 +674,7 @@ class ProjectAPI:
             params={'format_type': format_type}
         )
         response.raise_for_status()
-        
+
         if format_type == 'json':
             return response.json()
         else:
@@ -714,6 +746,7 @@ curl -X DELETE http://localhost:8000/api/projects/1 \
 ## Changelog
 
 ### Version 1.0.0 (2024-01-16)
+
 - Initial API release
 - Complete CRUD operations for projects
 - Enhanced export functionality with validation
