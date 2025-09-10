@@ -180,17 +180,39 @@ function Initialize-Environment {
     # Store original directory
     $script:OriginalDir = Get-Location
     
-    # Navigate to project directory
-    if (Test-Path "medical-device-regulatory-assistant") {
+    # Try to find the project directory
+    $projectFound = $false
+    
+    # Check if we're already in the project directory
+    if ((Test-Path "package.json") -and (Test-Path "backend\pyproject.toml")) {
+        $projectFound = $true
+        if ($ShowProgress) {
+            Write-Host "  ✓ Already in medical-device-regulatory-assistant directory" -ForegroundColor Green
+        }
+    }
+    # Check if project directory exists in current location
+    elseif (Test-Path "medical-device-regulatory-assistant") {
         Set-Location "medical-device-regulatory-assistant"
+        $projectFound = $true
         if ($ShowProgress) {
             Write-Host "  ✓ Navigated to medical-device-regulatory-assistant directory" -ForegroundColor Green
         }
-    } elseif (-not (Test-Path "package.json") -or -not (Test-Path "backend\pyproject.toml")) {
+    }
+    # Check if project directory exists in parent directory (for scripts in subdirectories)
+    elseif (Test-Path "..\medical-device-regulatory-assistant") {
+        Set-Location "..\medical-device-regulatory-assistant"
+        $projectFound = $true
+        if ($ShowProgress) {
+            Write-Host "  ✓ Navigated to ../medical-device-regulatory-assistant directory" -ForegroundColor Green
+        }
+    }
+    
+    if (-not $projectFound) {
         Write-Host "❌ Project files not found." -ForegroundColor Red
         Write-Host "Please run this script from either:" -ForegroundColor Yellow
         Write-Host "  1. The parent directory containing 'medical-device-regulatory-assistant' folder" -ForegroundColor Yellow
         Write-Host "  2. The 'medical-device-regulatory-assistant' directory itself" -ForegroundColor Yellow
+        Write-Host "  3. A subdirectory (like 'windows script') of the parent directory" -ForegroundColor Yellow
         Write-Host "Current directory: $(Get-Location)" -ForegroundColor Yellow
         return $false
     }

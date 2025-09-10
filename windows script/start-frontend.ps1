@@ -16,16 +16,37 @@ Write-Host "🎨 Medical Device Regulatory Assistant - Frontend Service" -Foregr
 Write-Host "=" * 55 -ForegroundColor Cyan
 Write-Host ""
 
-# Navigate to the medical-device-regulatory-assistant directory if it exists
-if (Test-Path "medical-device-regulatory-assistant") {
+# Store original directory for cleanup
+$originalDir = Get-Location
+
+# Try to find and navigate to the project directory
+$projectFound = $false
+
+# Check if we're already in the project directory
+if (Test-Path "package.json") {
+    $projectFound = $true
+    Write-Host "✓ Already in medical-device-regulatory-assistant directory" -ForegroundColor Green
+}
+# Check if project directory exists in current location
+elseif (Test-Path "medical-device-regulatory-assistant") {
     Set-Location "medical-device-regulatory-assistant"
-    Write-Host "Navigated to medical-device-regulatory-assistant directory" -ForegroundColor Cyan
-} elseif (-not (Test-Path "package.json")) {
-    Write-Host "Error: package.json not found." -ForegroundColor Red
+    $projectFound = $true
+    Write-Host "✓ Navigated to medical-device-regulatory-assistant directory" -ForegroundColor Green
+}
+# Check if project directory exists in parent directory (for scripts in subdirectories)
+elseif (Test-Path "..\medical-device-regulatory-assistant") {
+    Set-Location "..\medical-device-regulatory-assistant"
+    $projectFound = $true
+    Write-Host "✓ Navigated to ../medical-device-regulatory-assistant directory" -ForegroundColor Green
+}
+
+if (-not $projectFound) {
+    Write-Host "❌ Project files not found." -ForegroundColor Red
     Write-Host "Please run this script from either:" -ForegroundColor Yellow
     Write-Host "  1. The parent directory containing 'medical-device-regulatory-assistant' folder" -ForegroundColor Yellow
     Write-Host "  2. The 'medical-device-regulatory-assistant' directory itself" -ForegroundColor Yellow
-    Write-Host "Current directory: $(Get-Location)" -ForegroundColor Yellow
+    Write-Host "  3. A subdirectory (like 'windows script') of the parent directory" -ForegroundColor Yellow
+    Write-Host "Current directory: $originalDir" -ForegroundColor Yellow
     Read-Host "Press Enter to exit"
     exit 1
 }
@@ -91,10 +112,8 @@ try {
 } catch {
     Write-Host "❌ Frontend server encountered an error." -ForegroundColor Red
 } finally {
-    # Return to original directory if we navigated
-    if ((Split-Path -Leaf (Get-Location)) -eq "medical-device-regulatory-assistant") {
-        Set-Location ..
-    }
+    # Return to original directory
+    Set-Location $originalDir
     Write-Host "🛑 Frontend server stopped." -ForegroundColor Yellow
     Read-Host "Press Enter to exit"
 }

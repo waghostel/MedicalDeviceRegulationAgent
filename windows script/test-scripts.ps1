@@ -53,10 +53,20 @@ function Test-ScriptHelp {
 function Test-PackageJsonTurbopack {
     Write-Host "Testing package.json Turbopack configuration..." -ForegroundColor Yellow
     
-    $packageJsonPath = "medical-device-regulatory-assistant/package.json"
+    # Try to find package.json in different locations
+    $packageJsonPath = $null
     
-    if (-not (Test-Path $packageJsonPath)) {
-        Write-Host "❌ package.json not found at $packageJsonPath" -ForegroundColor Red
+    if (Test-Path "medical-device-regulatory-assistant/package.json") {
+        $packageJsonPath = "medical-device-regulatory-assistant/package.json"
+    } elseif (Test-Path "../medical-device-regulatory-assistant/package.json") {
+        $packageJsonPath = "../medical-device-regulatory-assistant/package.json"
+    } elseif (Test-Path "package.json") {
+        $packageJsonPath = "package.json"
+    }
+    
+    if (-not $packageJsonPath -or -not (Test-Path $packageJsonPath)) {
+        Write-Host "❌ package.json not found in expected locations" -ForegroundColor Red
+        Write-Host "  Searched: medical-device-regulatory-assistant/package.json, ../medical-device-regulatory-assistant/package.json, package.json" -ForegroundColor Gray
         return $false
     }
     

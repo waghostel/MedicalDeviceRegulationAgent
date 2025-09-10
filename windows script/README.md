@@ -10,6 +10,11 @@ This folder contains optimized PowerShell scripts for developing the Medical Dev
 
 **Unified development startup script** that combines the best features from the original `start-dev.ps1` and `start-dev-optimized.ps1`.
 
+**✨ Smart Path Resolution**: Can be run from multiple locations:
+- The parent directory containing `medical-device-regulatory-assistant` folder
+- The `medical-device-regulatory-assistant` directory itself  
+- Any subdirectory (like `windows script`) of the parent directory
+
 #### Key Features:
 - **Turbopack enabled by default** for faster frontend builds
 - **Performance timing** and optimization tips
@@ -65,6 +70,7 @@ This folder contains optimized PowerShell scripts for developing the Medical Dev
 - Webpack fallback option
 - Custom port support
 - Optimized environment variables
+- **Smart path resolution** - works from multiple directories
 
 #### Usage:
 ```powershell
@@ -90,6 +96,7 @@ This folder contains optimized PowerShell scripts for developing the Medical Dev
 - Optional Redis service detection
 - Custom port support
 - Fast mode for development
+- **Smart path resolution** - works from multiple directories
 
 #### Usage:
 ```powershell
@@ -115,6 +122,7 @@ This folder contains optimized PowerShell scripts for developing the Medical Dev
 - Help functionality testing
 - Turbopack configuration verification
 - Comprehensive test reporting
+- **Smart path resolution** testing
 
 #### Usage:
 ```powershell
@@ -211,6 +219,7 @@ Run the test script to verify everything is working:
 2. **Removed**: `start-dev-optimized.ps1` (functionality merged into main script)
 3. **Enhanced**: All scripts now have better error handling and performance optimizations
 4. **Turbopack**: Enabled by default with Webpack fallback option
+5. **Smart Path Resolution**: All scripts can now be run from multiple directory locations
 
 ### Backward Compatibility
 
