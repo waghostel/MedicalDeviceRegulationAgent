@@ -173,6 +173,7 @@
   - _Requirements: 5.1, 5.2, 5.3, 6.1_
 
 - [x] 5.1 Develop comprehensive migration strategy and planning tools
+
   - Create migration priority matrix ranking components by impact and complexity
   - Implement migration phase planning with dependency analysis
   - Create rollback strategy documentation and automation scripts
@@ -181,6 +182,7 @@
   - _Requirements: 5.1, 5.5_
 
 - [x] 5.2 Create database integration and seeding infrastructure
+
   - Convert existing mock data generators to database seed scripts
   - Set up test database schema matching production database structure
   - Implement database migration scripts for test data management
@@ -189,6 +191,7 @@
   - _Requirements: 5.3, 6.1, 6.2_
 
 - [x] 5.3 Implement gradual component migration framework
+
   - Create feature flags system for gradual rollout of real data connections
   - Implement backward compatibility layer for components during migration
   - Set up A/B testing framework to compare mock vs real data performance
@@ -444,8 +447,27 @@
   - In the medical-device-regulatory-assistant directory, run the Playwright end-to-end tests: pnpm test:e2e
   - This will launch a browser and simulate user journeys, testing the full application stack from the frontend to the backend and the database.
 
+- [x] 21. Fix merge conflict in authentication configuration
+
+  - Identify and resolve Git merge conflict markers in auth.ts file
+  - Verify NextAuth.js configuration remains intact after conflict resolution
+  - Test application build process to ensure no syntax errors remain
+  - Validate authentication system functionality
+  - _Requirements: Authentication system stability, build process integrity_
+
 - [ ] 20. Manually test the application
   - If all automated tests pass, you can manually test the application to get a feel for the user experience:
   - Start the backend server: cd medical-device-regulatory-assistant/backend && poetry run uvicorn main:app --reload
   - In a new terminal, start the frontend server: cd medical-device-regulatory-assistant && pnpm dev
   - Open <http://localhost:3000/projects> in your browser and interact with the application.
+
+- [x] 22. Fix Hydration Mismatch Error Caused by Browser Extensions
+  - Add suppressHydrationWarning to the root <html> element in src/app/layout.tsx.
+  - Verify that the hydration mismatch error no longer appears in the browser console.
+  - Ensure that the application still renders correctly with and without the Dark Reader extension enabled.
+
+- [ ] Task 23. Fix SSR Error in Frontend Performance Monitor
+  - Analyze the root cause of the `window is not defined` error in `src/lib/performance/optimization.ts`.
+  - Modify `initializeObservers` to prevent server-side execution of browser-only code.
+  - Ensure `FrontendPerformanceMonitor` initializes without crashing during server-side rendering.
+  - Verify the fix by running the application and checking for the absence of the error.

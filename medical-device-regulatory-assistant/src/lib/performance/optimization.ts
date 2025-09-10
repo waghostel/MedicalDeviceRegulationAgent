@@ -25,6 +25,11 @@ class FrontendPerformanceMonitor {
   }
 
   private initializeObservers() {
+    // Check if we're in a browser environment
+    if (typeof window === 'undefined') {
+      return;
+    }
+
     // Navigation timing observer
     if ('PerformanceObserver' in window) {
       const navObserver = new PerformanceObserver((list) => {
@@ -96,6 +101,11 @@ class FrontendPerformanceMonitor {
   }
 
   recordMetric(name: string, value: number, tags?: Record<string, string>) {
+    // Skip recording metrics during SSR
+    if (typeof window === 'undefined') {
+      return;
+    }
+
     const metric: PerformanceMetric = {
       name,
       value,
@@ -179,8 +189,10 @@ class FrontendPerformanceMonitor {
   }
 }
 
-// Global performance monitor instance
-export const performanceMonitor = new FrontendPerformanceMonitor();
+// Global performance monitor instance - only initialize in browser
+export const performanceMonitor = typeof window !== 'undefined' 
+  ? new FrontendPerformanceMonitor() 
+  : null;
 
 // React hooks for performance optimization
 export function usePerformanceMonitor() {
@@ -188,7 +200,9 @@ export function usePerformanceMonitor() {
 
   useEffect(() => {
     const updateMetrics = () => {
-      setMetrics(performanceMonitor.getPerformanceReport());
+      if (performanceMonitor) {
+        setMetrics(performanceMonitor.getPerformanceReport());
+      }
     };
 
     // Update metrics every 30 seconds
@@ -199,7 +213,7 @@ export function usePerformanceMonitor() {
   }, []);
 
   const recordMetric = useCallback((name: string, value: number, tags?: Record<string, string>) => {
-    performanceMonitor.recordMetric(name, value, tags);
+    performanceMonitor?.recordMetric(name, value, tags);
   }, []);
 
   return { metrics, recordMetric };
@@ -212,13 +226,18 @@ export function useApiPerformance() {
     endpoint: string,
     method: string = 'GET'
   ): Promise<T> => {
+    // Skip performance monitoring during SSR
+    if (typeof window === 'undefined' || typeof performance === 'undefined') {
+      return await requestFn();
+    }
+
     const startTime = performance.now();
     
     try {
       const result = await requestFn();
       const duration = performance.now() - startTime;
       
-      performanceMonitor.recordMetric('api_request', duration, {
+      performanceMonitor?.recordMetric('api_request', duration, {
         endpoint,
         method,
         status: 'success'
@@ -226,13 +245,15 @@ export function useApiPerformance() {
       
       return result;
     } catch (error) {
-      const duration = performance.now() - startTime;
-      
-      performanceMonitor.recordMetric('api_request', duration, {
-        endpoint,
-        method,
-        status: 'error'
-      });
+      if (typeof performance !== 'undefined') {
+        const duration = performance.now() - startTime;
+        
+        performanceMonitor?.recordMetric('api_request', duration, {
+          endpoint,
+          method,
+          status: 'error'
+        });
+      }
       
       throw error;
     }
@@ -244,11 +265,16 @@ export function useApiPerformance() {
 // Component render performance monitoring
 export function useRenderPerformance(componentName: string) {
   useEffect(() => {
+    // Skip performance monitoring during SSR
+    if (typeof window === 'undefined' || typeof performance === 'undefined') {
+      return;
+    }
+
     const startTime = performance.now();
     
     return () => {
       const renderTime = performance.now() - startTime;
-      performanceMonitor.recordMetric('component_render', renderTime, {
+      performanceMonitor?.recordMetric('component_render', renderTime, {
         component: componentName
       });
     };
@@ -279,6 +305,11 @@ export function useIntersectionObserver(
   const [hasIntersected, setHasIntersected] = useState(false);
 
   useEffect(() => {
+    // Skip intersection observer during SSR
+    if (typeof window === 'undefined' || typeof IntersectionObserver === 'undefined') {
+      return;
+    }
+
     const element = elementRef.current;
     if (!element) return;
 
@@ -348,6 +379,11 @@ export function useMemoryMonitoring() {
   const [memoryInfo, setMemoryInfo] = useState<any>(null);
 
   useEffect(() => {
+    // Skip memory monitoring during SSR
+    if (typeof window === 'undefined' || typeof performance === 'undefined') {
+      return;
+    }
+
     const updateMemoryInfo = () => {
       if ('memory' in performance) {
         const memory = (performance as any).memory;
@@ -359,7 +395,7 @@ export function useMemoryMonitoring() {
         });
 
         // Record memory usage metric
-        performanceMonitor.recordMetric('memory_usage', memory.usedJSHeapSize / 1024 / 1024, {
+        performanceMonitor?.recordMetric('memory_usage', memory.usedJSHeapSize / 1024 / 1024, {
           unit: 'MB'
         });
       }
@@ -376,6 +412,11 @@ export function useMemoryMonitoring() {
 
 // Bundle size analysis
 export function analyzeBundleSize() {
+  // Skip bundle analysis during SSR
+  if (typeof window === 'undefined' || typeof performance === 'undefined') {
+    return null;
+  }
+
   if ('getEntriesByType' in performance) {
     const resources = performance.getEntriesByType('resource') as PerformanceResourceTiming[];
     
@@ -421,6 +462,12 @@ export function analyzeBundleSize() {
 // Performance optimization recommendations
 export function getPerformanceRecommendations(): string[] {
   const recommendations: string[] = [];
+  
+  // Return empty recommendations during SSR
+  if (!performanceMonitor) {
+    return recommendations;
+  }
+  
   const report = performanceMonitor.getPerformanceReport();
 
   // Check page load time
@@ -459,7 +506,19 @@ export function getPerformanceRecommendations(): string[] {
 
 // Export performance data for backend reporting
 export function exportPerformanceData() {
-  const report = performanceMonitor.getPerformanceReport();
+  // Return minimal data during SSR
+  if (typeof window === 'undefined' || typeof navigator === 'undefined') {
+    return {
+      timestamp: Date.now(),
+      metrics: {},
+      bundleAnalysis: null,
+      recommendations: [],
+      userAgent: 'SSR',
+      connection: null
+    };
+  }
+
+  const report = performanceMonitor?.getPerformanceReport() || {};
   const bundleAnalysis = analyzeBundleSize();
   const recommendations = getPerformanceRecommendations();
 
