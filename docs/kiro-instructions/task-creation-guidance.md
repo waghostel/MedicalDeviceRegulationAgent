@@ -250,12 +250,13 @@ clear
 
 - **Pre-Development**: Clearly define expected test outcomes before coding.
 - **Post-Development**: Document all test results in the `./.kiro/specs/[your-spec-name]/task-execute-history/` folder to ensure traceability.
+- If the test script has been modified to skip some tests, make sure to document the skipped tests in **Undone tests/Skipped test**.
 
-## Task Report Format
+### Task Report Format
 
 Each completed task requires a report:
 
-### Task Report
+#### Task Report Template
 
 - **Task**: [Task ID and Title]
 - **Summary of Changes**
@@ -270,12 +271,12 @@ Each completed task requires a report:
       - Result: [✔ Passed / ✘ Failures]
   - **Manual Verification**: [Steps & findings]
     - Result: [✔ Works as expected]
-  - **Undone tests**:
+  - **Undone tests/Skipped test**:
     - [ ][Test name]
       - [Test command]
-      - [Description(Faild reason and what need to be modified)]
 - **Code Snippets (Optional)**: Show relevant diffs or highlights.
 
+```markdown
 ## 1. Your First Phase
 
 - [ ] 1.1 Your First Task
@@ -290,8 +291,8 @@ Each completed task requires a report:
   - Ensure integration with existing code
   - Include testing requirements
   - _Requirements: 1.3, 2.1_
-
 ```
+
 
 ## Best Practices
 
