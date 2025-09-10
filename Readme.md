@@ -345,8 +345,95 @@ To learn more about the technologies used in this project:
 
 You can check out the [Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
-## 10. Deployment
+## 9. Production Deployment
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Automated Production Setup
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+For quick production deployment, use the automated setup script:
+
+```bash
+cd medical-device-regulatory-assistant
+chmod +x scripts/setup-production.sh
+./scripts/setup-production.sh
+```
+
+The `setup-production.sh` script will:
+
+1. **Check Dependencies**: Verify Node.js and pnpm are installed
+2. **Generate Secure Secrets**: Create a cryptographically secure `NEXTAUTH_SECRET`
+3. **Create Environment File**: Generate `.env.production` with proper configuration
+4. **Install Dependencies**: Run `pnpm install` for all packages
+5. **Build Application**: Create optimized production build
+6. **Setup Process Management**: Create PM2 ecosystem configuration
+7. **Create Log Directories**: Setup logging infrastructure
+
+### Manual Production Setup
+
+If you prefer manual setup or need custom configuration:
+
+#### 1. Environment Configuration
+
+Create `.env.production` with your production values:
+
+```bash
+# Copy example and customize
+cp .env.example .env.production
+
+# Required variables for production:
+ENVIRONMENT=production
+NEXTAUTH_URL=https://your-domain.com
+NEXTAUTH_SECRET=your-super-secure-random-string-at-least-32-characters
+GOOGLE_CLIENT_ID=your-google-oauth-client-id
+GOOGLE_CLIENT_SECRET=your-google-oauth-client-secret
+```
+
+#### 2. Build and Deploy
+
+```bash
+# Install dependencies
+pnpm install
+
+# Build for production
+pnpm build
+
+# Start production server
+pnpm start
+
+# Or use PM2 for process management
+pm2 start ecosystem.config.js
+```
+
+### Production Requirements
+
+Before deploying to production, ensure you have:
+
+- **Google OAuth 2.0 Credentials**: Required for user authentication
+- **Secure NEXTAUTH_SECRET**: 32+ character random string
+- **HTTPS Certificate**: For production domains
+- **Process Manager**: PM2 or similar for production reliability
+
+### Deployment Options
+
+1. **Simple Start**: `pnpm start` (basic production server)
+2. **PM2 Process Manager**: `pm2 start ecosystem.config.js` (recommended)
+3. **Docker**: Use provided Dockerfile for containerized deployment
+4. **Vercel/Netlify**: Deploy directly to cloud platforms
+
+For detailed production deployment instructions, see:
+- `docs/PRODUCTION_DEPLOYMENT.md` - Complete deployment guide
+- `docs/DEVELOPMENT_SETUP.md` - Development environment setup
+
+### Security Considerations
+
+- Never commit `.env.production` to version control
+- Use environment variable injection in your deployment platform
+- Rotate secrets regularly
+- Always use HTTPS in production
+- Consider upgrading from SQLite to PostgreSQL for production databases
+
+## 10. Additional Resources
+
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API
+- [FastAPI Documentation](https://fastapi.tiangolo.com/) - learn about FastAPI features
+- [LangGraph Documentation](https://langchain-ai.github.io/langgraph/) - learn about agent workflows
+- [Production Deployment Guide](medical-device-regulatory-assistant/docs/PRODUCTION_DEPLOYMENT.md) - detailed deployment instructions
