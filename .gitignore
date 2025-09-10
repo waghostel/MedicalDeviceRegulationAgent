@@ -75,4 +75,4 @@ ignore/
 .DS_Store
 
 *.db-shm
-*.db-wal
+*.db-wal.DS_Store

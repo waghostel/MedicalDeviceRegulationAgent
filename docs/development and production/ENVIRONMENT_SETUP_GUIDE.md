@@ -173,6 +173,16 @@ openssl rand -base64 32
    User Type: External (for public use) or Internal (for organization only)
    Click "Create"
    ```
+   
+   **Choosing Your User Type:**
+   
+   - **Internal**: Choose this **only if** your application is for users within your own Google Workspace organization (e.g., an internal company tool). It does not require app verification.
+   
+   - **External**: Choose this if you want **anyone with a Google account** to be able to use your application. This is the correct choice for public-facing apps.
+     
+     ```
+     
+     ```
 
 2. **Fill Required Information**
    
@@ -1079,4 +1089,57 @@ If you encounter issues not covered in this guide:
    - Google OAuth Documentation: https://developers.google.com/identity/protocols/oauth2
    - Next.js Environment Variables: https://nextjs.org/docs/basic-features/environment-variables
 
-Remember: When asking for help, never share actual secret values. Share only the configuration structure and error messages.
+Remember: When asking for help, never share actual secret values. Share only the configuration structure and error messages.## Appendix: OAuth Application Verification
+
+### A.1 Google OAuth 2.0 Verification Process
+
+Submitting an application that utilizes Google OAuth 2.0 is a multi-step process within the **Google Cloud Console**. This procedure, formally known as **OAuth verification**, is a security measure to ensure the application is legitimate and handles user data in a secure and transparent manner.
+
+#### A.1.1 Initial Setup and Configuration
+
+Prior to submission, the project and its credentials must be properly configured.
+
+* **Google Cloud Project**: All application settings and API credentials are required to be contained within a Google Cloud Project.
+* **OAuth Consent Screen**: This screen is displayed to users when they are prompted to grant permissions to the application. It must be configured with the following:
+  * **App Name**: The official name of the application.
+  * **User Support Email**: A contact email for user inquiries.
+  * **Authorized Domains**: The domains where the application is hosted.
+  * **Privacy Policy Link**: A publicly accessible URL to the application's privacy policy, which must clearly disclose how user data is handled.
+* **OAuth Client ID**: This credential identifies the application to Google's OAuth 2.0 servers. It is created in the **Credentials** section and requires the selection of the appropriate application type (e.g., web application) and the configuration of authorized redirect URIs.
+
+#### A.1.2 Verification Submission and Requirements
+
+Applications intended for public use by any Google account holder must be submitted for verification.
+
+* **Submission**: The verification process is initiated from the OAuth consent screen dashboard by selecting "Submit for Verification."
+* **Demonstration Video**: A screen recording that demonstrates the complete user authentication flow is a standard requirement. The video must clearly display the client ID in the URL bar and show how the application's features utilize the requested scopes.
+* **Verified Domain Assets**: The application's homepage and privacy policy must be hosted on a domain that has been verified and is owned by the developer.
+
+#### A.1.3 Scope Justification
+
+A critical component of the verification process is the justification for each **scope** requested. Scopes define the extent of access an application has to a user's Google Account data.
+
+* **Sensitive and Restricted Scopes**: Applications requesting access to sensitive user data (e.g., `https://www.googleapis.com/auth/gmail.readonly`) are subject to a more stringent review, which may include a security assessment.
+* **Justification**: A clear and compelling rationale must be provided for each requested scope, detailing why the application requires that specific level of access to function correctly.
+
+### A.2 Confidentiality and Data Privacy during Verification
+
+The Google OAuth verification process is designed to audit an application's functionality and data handling practices, not to inspect its source code. The review is focused on:
+
+* **User Safety**: Ensuring the application is not deceptive or harmful.
+* **Policy Compliance**: Verifying that a comprehensive privacy policy is in place and that the application adheres to Google's data usage policies.
+* **Transparent Consent**: Confirming that the user is provided with a clear and accurate consent screen.
+
+While the application's source code is not submitted, Google may request additional information or, in rare cases, a security audit if the application is found to be non-compliant or to pose a security risk.
+
+### A.3 Comparison with Other OAuth 2.0 Providers
+
+The level of scrutiny in the app verification process varies among identity providers (IdPs), typically correlating with the sensitivity of the data they manage.
+
+* **Microsoft (Azure/Microsoft Entra ID)**: Microsoft's identity platform requires app registration and consent, similar to Google. It also features a "Publisher Verification" process, which acts as a trust signal for users and administrators.
+* **GitHub**: GitHub's OAuth process is generally less formal. It relies on the transparency of the requested scopes and the user's trust in the application, without a separate verification submission step.
+* **Facebook (Meta for Developers)**: Facebook's "App Review" process is comparable to Google's, especially for applications requesting "advanced access" to sensitive user data. It often requires a demo video and detailed justifications for each permission.
+
+### A.4 Summary of Verification Requirements
+
+The necessity of a formal submission and review process is directly proportional to the level of access an application requires to user data. Providers like Google and Facebook, which handle highly personal data, enforce a rigorous verification process as a core component of their security strategy. Conversely, for internal-use applications or platforms where the data is less sensitive, the verification requirements are often less stringent.
