@@ -1,0 +1,122 @@
+{
+  "timestamp": "2025-09-11T09:40:38.719Z",
+  "duration": 14327,
+  "summary": {
+    "overallScore": 66,
+    "passedChecks": 4,
+    "totalChecks": 6,
+    "criticalIssues": 4,
+    "warnings": 6
+  },
+  "results": {
+    "codeQuality": {
+      "passed": false,
+      "score": 70,
+      "issues": [
+        {
+          "type": "typescript",
+          "severity": "error",
+          "message": "TypeScript type checking failed",
+          "details": "undefined\n ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command \"type-check\" not found\n\nDid you mean \"pnpm node-which\"?\n"
+        },
+        {
+          "type": "formatting",
+          "severity": "warning",
+          "message": "Code formatting issues found",
+          "details": "Run `pnpm format` to fix formatting issues"
+        },
+        {
+          "type": "python-formatting",
+          "severity": "warning",
+          "message": "Python code formatting issues found",
+          "details": "Run `poetry run black .` to fix formatting"
+        },
+        {
+          "type": "python-imports",
+          "severity": "warning",
+          "message": "Python import sorting issues found",
+          "details": "Run `poetry run isort .` to fix import sorting"
+        },
+        {
+          "type": "python-linting",
+          "severity": "warning",
+          "message": "Python linting issues found",
+          "details": "spawnSync /bin/sh ENOENT"
+        },
+        {
+          "type": "python-types",
+          "severity": "error",
+          "message": "Python type checking issues found",
+          "details": "spawnSync /bin/sh ENOENT"
+        }
+      ]
+    },
+    "testCoverage": {
+      "passed": false,
+      "coverage": {},
+      "issues": [
+        {
+          "type": "frontend-coverage",
+          "severity": "error",
+          "message": "Frontend test coverage analysis failed",
+          "details": "undefined\n ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command \"test:coverage\" not found\n\nDid you mean \"pnpm escodegen\"?\n"
+        },
+        {
+          "type": "backend-coverage",
+          "severity": "error",
+          "message": "Backend test coverage analysis failed",
+          "details": "spawnSync /bin/sh ENOENT"
+        }
+      ]
+    },
+    "performance": {
+      "passed": true,
+      "metrics": {
+        "testExecutionTime": 847,
+        "memoryUsage": 0
+      },
+      "issues": []
+    },
+    "antiPatterns": {
+      "passed": true,
+      "patterns": [],
+      "issues": []
+    },
+    "security": {
+      "passed": true,
+      "vulnerabilities": [
+        {
+          "package": "unknown",
+          "severity": "unknown",
+          "title": "│ moderate            │ PrismJS DOM Clobbering vulnerability                   │",
+          "url": ""
+        }
+      ],
+      "issues": [
+        {
+          "type": "security-frontend",
+          "severity": "warning",
+          "message": "Found 1 security vulnerabilities",
+          "details": "Run `pnpm audit fix` to resolve"
+        },
+        {
+          "type": "security-backend",
+          "severity": "warning",
+          "message": "Python security vulnerabilities found",
+          "details": "spawnSync /bin/sh ENOENT"
+        }
+      ]
+    },
+    "dependencies": {
+      "passed": true,
+      "outdated": [],
+      "issues": []
+    }
+  },
+  "recommendations": [
+    "Fix TypeScript and ESLint errors to improve code quality",
+    "Run `pnpm lint:fix` and `pnpm format` to auto-fix issues",
+    "Increase test coverage by adding more unit and integration tests",
+    "Focus on testing critical business logic and error paths"
+  ]
+}

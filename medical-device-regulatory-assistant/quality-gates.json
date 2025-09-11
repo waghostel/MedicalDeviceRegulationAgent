@@ -1,0 +1,152 @@
+{
+  "version": "1.0.0",
+  "description": "Quality gates configuration for Medical Device Regulatory Assistant",
+  "gates": {
+    "overall_quality": {
+      "name": "Overall Quality Score",
+      "description": "Minimum overall quality score required to pass",
+      "threshold": 75,
+      "operator": ">=",
+      "severity": "blocker",
+      "enabled": true
+    },
+    "frontend_coverage": {
+      "name": "Frontend Test Coverage",
+      "description": "Minimum frontend test coverage percentage",
+      "threshold": 85,
+      "operator": ">=",
+      "severity": "major",
+      "enabled": true
+    },
+    "backend_coverage": {
+      "name": "Backend Test Coverage",
+      "description": "Minimum backend test coverage percentage",
+      "threshold": 90,
+      "operator": ">=",
+      "severity": "major",
+      "enabled": true
+    },
+    "critical_issues": {
+      "name": "Critical Issues",
+      "description": "Maximum number of critical issues allowed",
+      "threshold": 0,
+      "operator": "<=",
+      "severity": "blocker",
+      "enabled": true
+    },
+    "high_severity_issues": {
+      "name": "High Severity Issues",
+      "description": "Maximum number of high severity issues allowed",
+      "threshold": 5,
+      "operator": "<=",
+      "severity": "major",
+      "enabled": true
+    },
+    "security_vulnerabilities": {
+      "name": "Security Vulnerabilities",
+      "description": "Maximum number of critical/high security vulnerabilities",
+      "threshold": 0,
+      "operator": "<=",
+      "severity": "blocker",
+      "enabled": true
+    },
+    "test_execution_time": {
+      "name": "Test Execution Time",
+      "description": "Maximum test execution time in seconds",
+      "threshold": 30,
+      "operator": "<=",
+      "severity": "minor",
+      "enabled": true
+    },
+    "bundle_size": {
+      "name": "Bundle Size",
+      "description": "Maximum bundle size in KB",
+      "threshold": 500,
+      "operator": "<=",
+      "severity": "minor",
+      "enabled": true
+    },
+    "code_quality_score": {
+      "name": "Code Quality Score",
+      "description": "Minimum code quality score",
+      "threshold": 80,
+      "operator": ">=",
+      "severity": "major",
+      "enabled": true
+    },
+    "dependency_freshness": {
+      "name": "Dependency Freshness",
+      "description": "Maximum number of significantly outdated dependencies",
+      "threshold": 10,
+      "operator": "<=",
+      "severity": "minor",
+      "enabled": true
+    }
+  },
+  "environments": {
+    "development": {
+      "description": "Development environment - relaxed gates for faster iteration",
+      "overrides": {
+        "overall_quality": { "threshold": 60 },
+        "frontend_coverage": { "threshold": 70 },
+        "backend_coverage": { "threshold": 80 },
+        "high_severity_issues": { "threshold": 10 },
+        "test_execution_time": { "threshold": 60 }
+      }
+    },
+    "staging": {
+      "description": "Staging environment - production-like gates",
+      "overrides": {
+        "overall_quality": { "threshold": 80 },
+        "frontend_coverage": { "threshold": 90 },
+        "backend_coverage": { "threshold": 95 }
+      }
+    },
+    "production": {
+      "description": "Production environment - strictest gates",
+      "overrides": {
+        "overall_quality": { "threshold": 85 },
+        "frontend_coverage": { "threshold": 95 },
+        "backend_coverage": { "threshold": 98 },
+        "critical_issues": { "threshold": 0 },
+        "security_vulnerabilities": { "threshold": 0 }
+      }
+    }
+  },
+  "notifications": {
+    "gate_failure": {
+      "enabled": true,
+      "channels": ["console", "file"],
+      "severity_levels": ["blocker", "major"]
+    },
+    "regression_detection": {
+      "enabled": true,
+      "channels": ["console", "file"],
+      "threshold_percentage": 5
+    }
+  },
+  "reporting": {
+    "formats": ["json", "html", "junit"],
+    "retention_days": 90,
+    "trend_analysis": {
+      "enabled": true,
+      "lookback_builds": 10
+    }
+  },
+  "integrations": {
+    "github_actions": {
+      "enabled": true,
+      "fail_on_gate_failure": true,
+      "create_check_runs": true
+    },
+    "sonarqube": {
+      "enabled": false,
+      "server_url": "",
+      "project_key": ""
+    },
+    "codecov": {
+      "enabled": true,
+      "upload_coverage": true
+    }
+  }
+}
