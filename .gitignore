@@ -78,4 +78,5 @@ ignore/
 *.db-wal.DS_Store
 
 .gemini/
+# GitHub App credentials
 gha-creds-*.json
