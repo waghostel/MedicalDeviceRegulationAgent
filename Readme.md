@@ -85,18 +85,81 @@ This project includes a suite of scripts to automate common development, testing
 -   **`monitor-startup-performance.ps1`**: Measures and compares the startup times of different development scripts to identify performance bottlenecks.
 -   **`maintenance-scripts.ps1`**: A collection of maintenance tasks such as log rotation, temporary file cleanup, and database backups.
 
-## 5. Getting Started
+## 5. Package Manager Standards
+
+This project uses **standardized package managers** to ensure consistent development environments:
+
+### Frontend: pnpm Only
+- **Use**: `pnpm` for all frontend package management
+- **Don't use**: `npm`, `yarn`, or other package managers
+- **Why**: Better performance, disk space efficiency, and strict dependency resolution
+
+### Backend: Poetry Only
+- **Use**: `poetry` for all Python dependency management
+- **Don't use**: `pip`, `conda`, `pipenv`, or other Python package managers
+- **Why**: Deterministic builds, better dependency resolution, and integrated virtual environment management
+
+### Validation
+Run the validation script to check your setup:
+```bash
+./scripts/validate-package-managers.sh
+```
+
+### Installation Commands
+If you need to install the required package managers:
+
+**pnpm:**
+```bash
+# Using npm (if you have Node.js)
+npm install -g pnpm
+
+# Using Homebrew (macOS)
+brew install pnpm
+
+# Using curl
+curl -fsSL https://get.pnpm.io/install.sh | sh -
+```
+
+**Poetry:**
+```bash
+# Using pip
+pip install poetry
+
+# Using curl
+curl -sSL https://install.python-poetry.org | python3 -
+
+# Using Homebrew (macOS)
+brew install poetry
+```
+
+## 6. Getting Started
 
 ### Prerequisites
 
 The startup scripts will automatically check for and guide you through installing:
 
 - **Node.js** (v18 or higher)
-- **pnpm** (package manager for frontend)
+- **pnpm** (package manager for frontend) - **Required, do not use npm or yarn**
 - **Python** (3.11 or higher)
-- **Poetry** (package manager for backend)
+- **Poetry** (package manager for backend) - **Required, do not use pip or conda**
 - **Google OAuth 2.0 Credentials**
 - **FDA API Key**
+
+#### Package Manager Validation
+
+Before starting development, run the package manager validation script to ensure your environment is properly configured:
+
+```bash
+# Validate package managers and environment setup
+./scripts/validate-package-managers.sh
+```
+
+This script will:
+- Check Node.js and Python versions
+- Verify pnpm and Poetry installations
+- Validate project configuration files
+- Check for dependency consistency
+- Provide setup instructions for any issues found
 
 ### Quick Start
 
@@ -231,9 +294,11 @@ REDIS_URL=redis://localhost:6379
 
 #### Frontend (Next.js)
 
+**Important**: Only use `pnpm` for frontend package management. Do not use `npm` or `yarn`.
+
 ```bash
 cd medical-device-regulatory-assistant
-# Install dependencies
+# Install dependencies (pnpm only)
 pnpm install
 # Start development server with Turbopack (default)
 pnpm dev
@@ -247,9 +312,11 @@ pnpm test
 
 #### Backend (FastAPI)
 
+**Important**: Only use `poetry` for backend package management. Do not use `pip`, `conda`, or other Python package managers.
+
 ```bash
 cd medical-device-regulatory-assistant/backend
-# Install dependencies
+# Install dependencies (poetry only)
 poetry install
 # Start development server
 poetry run uvicorn main:app --reload --host 0.0.0.0 --port 8000
@@ -284,7 +351,7 @@ Or use the `--webpack` flag with the shell scripts:
 ./start-frontend.sh --webpack
 ```
 
-## 5. Project Structure
+## 7. Project Structure
 
 The repository is organized into a main application folder, `medical-device-regulatory-assistant`, which contains the frontend and backend services.
 
@@ -322,13 +389,13 @@ project-root/
 └── docs/                   # Technical documentation
 ```
 
-## 6. Testing
+## 8. Testing
 
 The project includes a comprehensive testing strategy using `pytest` for the backend and `React Testing Library` with `Jest` for the frontend.
 
 To run the tests, please see the commands provided in the **Manual Development Setup** section above.
 
-## 7. Compliance and Safety
+## 9. Compliance and Safety
 
 This tool is designed with regulatory compliance at its core.
 
@@ -336,7 +403,7 @@ This tool is designed with regulatory compliance at its core.
 - **Auditable Traceability**: Every action taken by the agent is logged in a transparent, human-readable format, providing a full "reasoning trace."
 - **Confidence & Citation**: Every piece of information the agent provides is accompanied by a confidence score (0-1) and a direct citation to the source URL or document.
 
-## 8. Learn More
+## 10. Learn More
 
 To learn more about the technologies used in this project:
 
@@ -348,7 +415,7 @@ To learn more about the technologies used in this project:
 
 You can check out the [Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
-## 9. Production Deployment
+## 11. Production Deployment
 
 ### Automated Production Setup
 
@@ -434,7 +501,7 @@ For detailed production deployment instructions, see:
 - Always use HTTPS in production
 - Consider upgrading from SQLite to PostgreSQL for production databases
 
-## 10. Additional Resources
+## 12. Additional Resources
 
 ### Documentation
 
