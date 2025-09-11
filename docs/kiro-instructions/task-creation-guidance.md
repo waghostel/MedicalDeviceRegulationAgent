@@ -243,12 +243,29 @@ clear
    - If tests fail, fetch additional documentation (context7).
 6. Write a **task report** in `./.kiro/specs/[your-spec-name]/task-execute-history/` (e.g. `task-1.1.md`).
    - Be transparent about test results, especially if some tests require future verification.
+   - If the test script has been modified, skipped in the developemnt process or skipped chat history, document faild and skipped test in **Undone tests/Skipped test**.
+7. Re-check if any failed tests were skipped in the chat history, and document them under Undone Tests / Skipped Tests.
 
 ## Test-Driven Development (TDD)
 
-- **Pre-Development**: Clearly define expected test outcomes before coding.
-- **Post-Development**: Document all test results in the `./.kiro/specs/[your-spec-name]/task-execute-history/` folder to ensure traceability.
-- If the test script has been modified to skip some tests, make sure to document the skipped tests in **Undone tests/Skipped test**.
+### Testing Guidelines
+
+1. **Pre-Development**
+   - Clearly define the **expected test outcomes** before coding begins.
+2. **Post-Development**
+   - Document **all test results** in:
+
+     ```shell
+     ./.kiro/specs/[your-spec-name]/task-execute-history/
+     ```
+
+   - This ensures full **traceability** of test executions.
+3. **Failed Tests**
+   - **Definition**: Tests that did not pass in the latest test run.
+   - **Action**: Record the test name, the failure reason, and provide a reference to the related test report.
+4. **Skipped Tests**
+   - **Definition**: Tests that are skipped because the problem is either too complex or outside the current project scope.
+   - **Action**: Identify them from the development process or chat history, and clearly document the reason for skipping.
 
 ### Task Report Format
 
