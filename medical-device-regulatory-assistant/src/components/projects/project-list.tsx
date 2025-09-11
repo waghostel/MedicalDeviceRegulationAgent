@@ -251,7 +251,7 @@ export const ProjectList = memo(function ProjectList({
 
   // Filter changes
   useEffect(() => {
-    const filters: unknown = {};
+    const filters: Record<string, unknown> = {};
 
     if (statusFilter !== 'all') {
       filters.status = statusFilter;
@@ -276,7 +276,9 @@ export const ProjectList = memo(function ProjectList({
   // Memoize expensive computations
   const deviceTypes = useMemo(
     () =>
-      Array.from(new Set(projects.map((p) => p.device_type).filter(Boolean))),
+      Array.from(
+        new Set(projects.map((p) => p.device_type).filter(Boolean))
+      ) as string[],
     [projects]
   );
 
