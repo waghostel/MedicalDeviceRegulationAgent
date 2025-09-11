@@ -76,3 +76,6 @@ ignore/
 
 *.db-shm
 *.db-wal.DS_Store
+
+.gemini/
+gha-creds-*.json
