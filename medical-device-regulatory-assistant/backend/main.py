@@ -20,6 +20,8 @@ from middleware.security_headers import SecurityHeadersMiddleware
 
 # Import enhanced exception handling system
 from exceptions import register_exception_handlers
+from core.error_handler import setup_error_handlers
+from core.error_tracker import init_error_tracker
 
 # Import API routes
 from api.health import router as health_router
@@ -27,6 +29,7 @@ from api.projects import router as projects_router
 from api.websocket import router as websocket_router
 from api.agent_integration import router as agent_router
 from api.audit import router as audit_router
+from api.error_tracking import router as error_tracking_router
 
 
 # Configure logging
@@ -74,7 +77,19 @@ async def lifespan(app: FastAPI):
         # Startup phase
         print("Starting Medical Device Regulatory Assistant API...")
         
-        # 1. Initialize database connections (required)
+        # 1. Initialize error tracking system (required)
+        try:
+            error_tracker = await init_error_tracker()
+            app.state.error_tracker = error_tracker
+            initialized_services.append("error_tracker")
+            print("[OK] Error tracking system initialized")
+        except Exception as e:
+            error_msg = f"Error tracking initialization failed: {e}"
+            print(f"[ERROR] {error_msg}")
+            startup_errors.append(("error_tracker", error_msg))
+            # Continue without error tracking for now
+        
+        # 2. Initialize database connections (required)
         try:
             from database.connection import init_database
             from database.integrated_seeder import auto_seed_on_startup, get_seeder_config
@@ -83,7 +98,7 @@ async def lifespan(app: FastAPI):
             db_manager = await init_database(database_url)
             app.state.db_manager = db_manager
             initialized_services.append("database")
-            print("Database connection initialized")
+            print("[OK] Database connection initialized")
             
             # Auto-seed database if configured
             try:
@@ -125,7 +140,7 @@ async def lifespan(app: FastAPI):
             # Database is critical - fail startup
             raise RuntimeError(f"Critical service initialization failed: {error_msg}")
         
-        # 2. Initialize Redis connection (optional)
+        # 3. Initialize Redis connection (optional)
         try:
             from services.cache import init_redis, get_redis_client
             await init_redis()
@@ -143,7 +158,7 @@ async def lifespan(app: FastAPI):
             app.state.redis_client = None
             # Redis is optional, continue without it
         
-        # 3. Initialize FDA API client (required)
+        # 4. Initialize FDA API client (required)
         try:
             from services.openfda import create_openfda_service
             # Pass Redis client if available for caching
@@ -205,7 +220,7 @@ async def lifespan(app: FastAPI):
                 print(f"[WARNING] {error_msg}")
                 shutdown_errors.append(("redis", error_msg))
         
-        # Close database connections last
+        # Close database connections
         if "database" in initialized_services:
             try:
                 from database.connection import close_database
@@ -215,6 +230,17 @@ async def lifespan(app: FastAPI):
                 error_msg = f"Error closing database: {e}"
                 print(f"[WARNING] {error_msg}")
                 shutdown_errors.append(("database", error_msg))
+        
+        # Close error tracker last
+        if "error_tracker" in initialized_services:
+            try:
+                from core.error_tracker import cleanup_error_tracking
+                await cleanup_error_tracking()
+                print("[OK] Error tracking system closed")
+            except Exception as e:
+                error_msg = f"Error closing error tracker: {e}"
+                print(f"[WARNING] {error_msg}")
+                shutdown_errors.append(("error_tracker", error_msg))
         
         # Log shutdown summary
         if shutdown_errors:
@@ -282,12 +308,16 @@ app.add_middleware(SecurityHeadersMiddleware)
 # Register enhanced exception handlers
 register_exception_handlers(app)
 
+# Set up comprehensive error handling system
+setup_error_handlers(app)
+
 # Include API routers
 app.include_router(health_router, prefix="/api")
 app.include_router(projects_router, prefix="/api")
 app.include_router(websocket_router)
 app.include_router(agent_router)
 app.include_router(audit_router)
+app.include_router(error_tracking_router)
 
 # Root endpoint
 @app.get("/", tags=["root"])
