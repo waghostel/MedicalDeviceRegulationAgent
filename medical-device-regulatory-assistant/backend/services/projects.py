@@ -18,6 +18,7 @@ from core.exceptions import (
     DatabaseError,
     AuthorizationError,
 )
+from exceptions.project_exceptions import ProjectValidationError
 from pydantic import BaseModel, Field
 
 from models.project import Project, ProjectStatus
