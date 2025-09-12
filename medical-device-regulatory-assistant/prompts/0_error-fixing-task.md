@@ -1,17 +1,18 @@
 # Crete error fixing step 
 
-Analyze the cause the error, propose a fixing solution and create a new task at the bottom of task in `task.md` follow the task format provided below. Do not fix error at this stage.
+Analyze the cause the error, propose a fixing solution and create a new task list `new_tasks.md` follow the task format provided below. Do not fix error at this stage.
 
 ## Execute Steps
 
 1. **Read Related Files**: First, examine the error file and any related source files to understand the context
-2. **Root Cause Analysis**: Identify the underlying cause of the problem by reviewing relevant code, configuration, or documentation files
+2. **Root Cause Analysis**: Identify the underlying cause of the problem by reviewing relevant code, configuration, or documentation files, divided them into several root cause categories if needed.
 3. **Run Simple Tests**: If possible, suggest or run basic tests to verify the issue
 4. **Use Additional Tools**: If the problem is complex, use the `sequentialthinking` MCP. For additional information, use the `Context7`, `fetch`, `deepwiki`, or `sentry` MCP as needed
-5. **Create Task**: Create a task execution plan following this format in  SPEC_FOLDER
+5. **Create Task**: Create a task execution plan following named `new-tasks.md`
 
 ### Requirements**
 
+* Do not fix error, focusing on the root causese analysis and solution proposing.
 * Ask user to provide error message if you don't know what to fix
 * Analyze the root causes thoroughly before writing the task
 * Include at least one sub-task under each major task
@@ -19,8 +20,11 @@ Analyze the cause the error, propose a fixing solution and create a new task at 
 * Focus on actionable solutions
 * Ensure the task addresses the underlying problem, not just the symptoms
 * Read specs and steering document if need more detail about the project
-* Try to create only one task, however, create multiple tasks is allowed if the error belong to different root causes
-  
+* Creating multiple tasks is allowed if the error belong to different root causes
+* If there are many error provided, categorize them into several categories when creating the task lists.
+* Creaee the task to build spcific feature if the root cause is comming from the missing feature.
+* Describe it as a syssmte setup issue if the root cause is because it cannot be test in current system setup environment.
+
 ## File Path
 
 * `SPEC_FOLDER` = .kiro/specs/[Spec Folder]
@@ -45,35 +49,11 @@ Analyze the cause the error, propose a fixing solution and create a new task at 
   - [Sub-task description 2]
   - [Sub-task description 3]
   - [Additional sub-tasks as needed]
+  - Potentional root cause: [Potentional root cause]
+  - Potentional solution: [Potentional solution]
+  - Test command:[Test command]
+  - Code snippet: [Code snippet of the error code and propose fixing solution]
 ```
-
-### Task format example
-
-```markdown
-- [ ] 23. Testing and Quality Assurance
-  - Achieve >90% code coverage with unit and integration tests
-  - Create end-to-end test suite covering all critical user journeys
-  - Implement automated testing pipeline with GitHub Actions or similar
-  - Add performance regression testing and monitoring
-  - Create load testing for concurrent users and agent workflows
-  - Implement security testing for authentication and data protection
-  - Write user acceptance tests based on success metrics from requirements
-```
-
-### Major task example
-
-```markdown
-- [ ] 23. Testing and Quality Assurance
-```
-
-### Sub-task example
-
-```markdown
-  - Achieve >90% code coverage with unit and integration tests
-  - Create end-to-end test suite covering all critical user journeys
-  - Implement automated testing pipeline with GitHub Actions or similar
-```  
-
 -------------------------------------------------------------------------
 
 ## 　Error message
