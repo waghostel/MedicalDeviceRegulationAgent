@@ -28,7 +28,8 @@
         "find *",
         "rmdir *",
         "find *",
-        "grep *"
+        "grep *",
+        "git checkout *"
     ],
     "typescript.autoClosingTags": false
 }

@@ -1,6 +1,6 @@
 /**
  * Migration Strategy and Planning Tools
- * Comprehensive framework for migrating from mock data to real backend connections
+ * Provides comprehensive migration planning from mock data to real backend connections 
  */
 
 export interface ComponentMockUsage {
@@ -31,24 +31,24 @@ export interface MockDataUsage {
 }
 
 export interface ComponentDependency {
-  type: 'component' | 'hook' | 'utility' | 'type';
+  type: 'component' | 'hook' | 'utility' | 'api';
   name: string;
   path: string;
-  mockDataRelated: boolean;
+  hasMockData: boolean;
 }
 
 export interface HookUsage {
   hookName: string;
   path: string;
-  mockDataRelated: boolean;
-  apiCalls: string[];
+  usesMockData: boolean;
+  apiEndpoints: string[];
 }
 
 export interface ContextUsage {
   contextName: string;
   path: string;
-  mockDataRelated: boolean;
-  providedValues: string[];
+  providesData: boolean;
+  consumesData: boolean;
 }
 
 export interface CodeLocation {
@@ -71,61 +71,90 @@ export interface MigrationReadiness {
   blockers: string[];
   warnings: string[];
   recommendations: string[];
+  estimatedEffort: number; // hours
+  riskLevel: 'low' | 'medium' | 'high';
 }
 
-export enum MigrationPriority {
-  CRITICAL = 'critical',
-  HIGH = 'high',
-  MEDIUM = 'medium',
-  LOW = 'low'
+export interface MigrationPriority {
+  componentPath: string;
+  priority: 'high' | 'medium' | 'low';
+  userImpact: 'critical' | 'high' | 'medium' | 'low';
+  technicalComplexity: 'simple' | 'moderate' | 'complex' | 'very-complex';
+  dependencies: string[];
+  blockedBy: string[];
+  blocks: string[];
+  estimatedEffort: number;
+  riskFactors: RiskFactor[];
 }
 
-export enum RiskLevel {
-  VERY_LOW = 'very_low',
-  LOW = 'low',
-  MEDIUM = 'medium',
-  HIGH = 'high',
-  VERY_HIGH = 'very_high'
+export interface RiskFactor {
+  type: 'data-integrity' | 'user-experience' | 'performance' | 'security' | 'compatibility';
+  severity: 'low' | 'medium' | 'high' | 'critical';
+  description: string;
+  mitigation: string;
 }
 
 export interface MigrationPhase {
-  id: string;
   name: string;
   description: string;
-  components: ComponentMigrationItem[];
+  components: string[];
   dependencies: string[];
-  estimatedDuration: number; // hours
-  riskLevel: RiskLevel;
-  priority: MigrationPriority;
-  prerequisites: string[];
-  deliverables: string[];
+  estimatedDuration: number; // days
+  riskLevel: 'low' | 'medium' | 'high';
   rollbackStrategy: RollbackStrategy;
-  validationCriteria: ValidationCriteria[];
+  preMigrationTests: TestSuite[];
+  migrationSteps: MigrationStep[];
+  postMigrationTests: TestSuite[];
+  validationSteps: ValidationStep[];
+  successCriteria: SuccessCriteria[];
 }
 
-export interface ComponentMigrationItem {
-  componentPath: string;
-  componentName: string;
-  migrationPriority: MigrationPriority;
-  complexity: number; // 1-10
-  userImpact: number; // 1-10
-  testCoverage: number; // 0-100
-  mockDataDependencies: string[];
-  estimatedEffort: number; // hours
-  riskFactors: string[];
-  migrationSteps: MigrationStep[];
+export interface RollbackStrategy {
+  type: 'automatic' | 'manual' | 'hybrid';
+  triggers: RollbackTrigger[];
+  steps: RollbackStep[];
+  dataRecovery: DataRecoveryPlan;
+  estimatedTime: number; // minutes
+}
+
+export interface RollbackTrigger {
+  type: 'error-rate' | 'performance' | 'user-feedback' | 'manual';
+  threshold: number;
+  timeWindow: number; // minutes
+  description: string;
+}
+
+export interface RollbackStep {
+  order: number;
+  description: string;
+  action: string;
+  validation: string;
+  estimatedTime: number; // minutes
+}
+
+export interface DataRecoveryPlan {
+  backupStrategy: 'snapshot' | 'incremental' | 'continuous';
+  recoveryTime: number; // minutes
+  dataLossRisk: 'none' | 'minimal' | 'moderate' | 'high';
+  validationSteps: string[];
+}
+
+export interface TestSuite {
+  name: string;
+  type: 'unit' | 'integration' | 'e2e' | 'performance' | 'accessibility';
+  testFiles: string[];
+  estimatedRuntime: number; // minutes
+  passingThreshold: number; // percentage
 }
 
 export interface MigrationStep {
-  id: string;
+  order: number;
   description: string;
   action: MigrationAction;
   parameters: Record<string, any>;
   rollbackAction: MigrationAction;
-  rollbackParameters: Record<string, any>;
+  validation: ValidationStep;
   estimatedTime: number; // minutes
-  riskLevel: RiskLevel;
-  validationSteps: string[];
 }
 
 export enum MigrationAction {
@@ -139,82 +168,69 @@ export enum MigrationAction {
   MIGRATE_STATE_MANAGEMENT = 'migrate_state_management'
 }
 
-export interface RollbackStrategy {
-  type: 'automatic' | 'manual' | 'hybrid';
-  triggers: RollbackTrigger[];
-  steps: RollbackStep[];
-  dataRecovery: DataRecoveryPlan;
-  estimatedTime: number; // minutes
-}
-
-export interface RollbackTrigger {
-  type: 'error_rate' | 'performance' | 'user_feedback' | 'manual';
-  threshold: number;
-  timeWindow: number; // minutes
-}
-
-export interface RollbackStep {
+export interface ValidationStep {
+  name: string;
+  type: 'automated' | 'manual';
   description: string;
-  action: string;
-  parameters: Record<string, any>;
-  order: number;
-}
-
-export interface DataRecoveryPlan {
-  backupStrategy: string;
-  recoverySteps: string[];
-  dataValidation: string[];
+  criteria: ValidationCriteria[];
+  timeout: number; // minutes
 }
 
 export interface ValidationCriteria {
-  type: 'functional' | 'performance' | 'accessibility' | 'security';
-  description: string;
-  testCases: string[];
-  acceptanceCriteria: string[];
-  automatedTests: string[];
+  name: string;
+  type: 'functional' | 'performance' | 'data-integrity' | 'user-experience';
+  expected: any;
+  tolerance?: number;
+  critical: boolean;
+}
+
+export interface SuccessCriteria {
+  name: string;
+  metric: string;
+  target: number;
+  tolerance: number;
+  measurement: 'automated' | 'manual';
+  frequency: 'continuous' | 'daily' | 'weekly';
 }
 
 export interface MigrationPlan {
-  id: string;
-  name: string;
-  description: string;
   phases: MigrationPhase[];
-  totalEstimatedDuration: number; // hours
-  totalComponents: number;
+  totalEstimatedDuration: number; // days
+  totalEstimatedEffort: number; // hours
   riskAssessment: RiskAssessment;
   resourceRequirements: ResourceRequirements;
   timeline: MigrationTimeline;
-  successMetrics: SuccessMetrics;
+  contingencyPlans: ContingencyPlan[];
 }
 
 export interface RiskAssessment {
-  overallRisk: RiskLevel;
+  overallRisk: 'low' | 'medium' | 'high' | 'critical';
   riskFactors: RiskFactor[];
   mitigationStrategies: MitigationStrategy[];
-}
-
-export interface RiskFactor {
-  category: string;
-  description: string;
-  impact: number; // 1-10
-  probability: number; // 0-1
-  mitigation: string;
+  contingencyTriggers: string[];
 }
 
 export interface MitigationStrategy {
-  riskCategory: string;
+  riskType: string;
   strategy: string;
   implementation: string[];
   effectiveness: number; // 0-1
+  cost: 'low' | 'medium' | 'high';
 }
 
 export interface ResourceRequirements {
   developers: number;
   testers: number;
-  devOpsEngineers: number;
-  totalHours: number;
-  toolsRequired: string[];
-  infrastructureNeeds: string[];
+  devops: number;
+  estimatedCost: number;
+  infrastructure: InfrastructureRequirement[];
+}
+
+export interface InfrastructureRequirement {
+  type: 'database' | 'api' | 'monitoring' | 'testing';
+  description: string;
+  setup: string[];
+  maintenance: string[];
 }
 
 export interface MigrationTimeline {
@@ -222,742 +238,684 @@ export interface MigrationTimeline {
   endDate: string;
   milestones: Milestone[];
   criticalPath: string[];
+  bufferTime: number; // days
 }
 
 export interface Milestone {
-  id: string;
   name: string;
-  description: string;
-  targetDate: string;
+  date: string;
   deliverables: string[];
   dependencies: string[];
+  riskLevel: 'low' | 'medium' | 'high';
 }
 
-export interface SuccessMetrics {
-  functionalityPreserved: number; // percentage
-  performanceImprovement: number; // percentage
-  testCoverageTarget: number; // percentage
-  errorRateThreshold: number; // percentage
-  userSatisfactionTarget: number; // 1-5 scale
+export interface ContingencyPlan {
+  trigger: string;
+  description: string;
+  actions: string[];
+  impact: 'schedule' | 'scope' | 'quality' | 'cost';
+  probability: number; // 0-1
 }
 
 /**
- * Component Migration Priority Matrix
- * Calculates migration priority based on complexity and user impact
+ * Migration Strategy Analyzer
+ * Analyzes components and creates migration priority matrix
  */
-export class MigrationPriorityMatrix {
-  /**
-   * Calculate migration priority based on multiple factors
-   */
-  static calculatePriority(
-    userImpact: number, // 1-10 scale
-    complexity: number, // 1-10 scale
-    testCoverage: number, // 0-100 percentage
-    mockDataDependencies: number, // count
-    currentUsage: number // frequency of use
-  ): MigrationPriority {
-    // Normalize inputs
-    const normalizedImpact = userImpact / 10;
-    const normalizedComplexity = complexity / 10;
-    const normalizedCoverage = testCoverage / 100;
-    const normalizedDependencies = Math.min(mockDataDependencies / 5, 1);
-    const normalizedUsage = Math.min(currentUsage / 100, 1);
-
-    // Calculate weighted score
-    const impactWeight = 0.3;
-    const complexityWeight = 0.25;
-    const coverageWeight = 0.2;
-    const dependencyWeight = 0.15;
-    const usageWeight = 0.1;
-
-    const score = (
-      normalizedImpact * impactWeight +
-      (1 - normalizedComplexity) * complexityWeight + // Lower complexity = higher priority
-      normalizedCoverage * coverageWeight +
-      normalizedDependencies * dependencyWeight +
-      normalizedUsage * usageWeight
-    );
-
-    // Determine priority based on score
-    if (score >= 0.8) return MigrationPriority.CRITICAL;
-    if (score >= 0.6) return MigrationPriority.HIGH;
-    if (score >= 0.4) return MigrationPriority.MEDIUM;
-    return MigrationPriority.LOW;
-  }
+export class MigrationStrategyAnalyzer {
+  private components: ComponentMockUsage[] = [];
+  private priorities: MigrationPriority[] = [];
 
   /**
-   * Generate priority matrix for all components
+   * Analyze component for mock data usage and migration readiness
    */
-  static generateMatrix(): ComponentMigrationItem[] {
-    const components: ComponentMigrationItem[] = [
-      // Dashboard Components (High Impact)
-      {
-        componentPath: 'src/components/dashboard/classification-widget.tsx',
-        componentName: 'ClassificationWidget',
-        migrationPriority: MigrationPriority.CRITICAL,
-        complexity: 6,
-        userImpact: 9,
-        testCoverage: 85,
-        mockDataDependencies: ['generateMockDeviceClassification'],
-        estimatedEffort: 8,
-        riskFactors: [
-          'Core FDA functionality',
-          'Complex state management',
-          'Real-time updates required'
-        ],
-        migrationSteps: []
-      },
-      {
-        componentPath: 'src/components/dashboard/predicate-widget.tsx',
-        componentName: 'PredicateWidget',
-        migrationPriority: MigrationPriority.CRITICAL,
-        complexity: 8,
-        userImpact: 10,
-        testCoverage: 80,
-        mockDataDependencies: ['generateMockPredicateDevice', 'generateMockPredicateDevices'],
-        estimatedEffort: 12,
-        riskFactors: [
-          'Core 510k functionality',
-          'Complex tab state management',
-          'Selection logic',
-          'FDA API integration'
-        ],
-        migrationSteps: []
-      },
-      {
-        componentPath: 'src/components/dashboard/progress-widget.tsx',
-        componentName: 'ProgressWidget',
-        migrationPriority: MigrationPriority.HIGH,
-        complexity: 4,
-        userImpact: 7,
-        testCoverage: 90,
-        mockDataDependencies: ['generateMockProjectProgress'],
-        estimatedEffort: 4,
-        riskFactors: [
-          'Progress calculation logic',
-          'Real-time updates'
-        ],
-        migrationSteps: []
-      },
-
-      // Project Components (Medium-High Impact)
-      {
-        componentPath: 'src/components/projects/project-card.tsx',
-        componentName: 'ProjectCard',
-        migrationPriority: MigrationPriority.HIGH,
-        complexity: 5,
-        userImpact: 8,
-        testCoverage: 75,
-        mockDataDependencies: ['generateMockProject'],
-        estimatedEffort: 6,
-        riskFactors: [
-          'Optimistic updates',
-          'State synchronization',
-          'User interactions'
-        ],
-        migrationSteps: []
-      },
-      {
-        componentPath: 'src/components/projects/project-list.tsx',
-        componentName: 'ProjectList',
-        migrationPriority: MigrationPriority.HIGH,
-        complexity: 6,
-        userImpact: 8,
-        testCoverage: 70,
-        mockDataDependencies: ['generateMockProjects', 'generateMockProject'],
-        estimatedEffort: 8,
-        riskFactors: [
-          'Pagination logic',
-          'Filtering and sorting',
-          'Bulk operations'
-        ],
-        migrationSteps: []
-      },
-      {
-        componentPath: 'src/components/projects/project-form.tsx',
-        componentName: 'ProjectForm',
-        migrationPriority: MigrationPriority.MEDIUM,
-        complexity: 7,
-        userImpact: 6,
-        testCoverage: 65,
-        mockDataDependencies: ['generateMockProject'],
-        estimatedEffort: 10,
-        riskFactors: [
-          'Form validation',
-          'File uploads',
-          'Error handling'
-        ],
-        migrationSteps: []
-      },
-
-      // Agent Components (High Impact)
-      {
-        componentPath: 'src/components/agent/AgentWorkflowPage.tsx',
-        componentName: 'AgentWorkflowPage',
-        migrationPriority: MigrationPriority.CRITICAL,
-        complexity: 9,
-        userImpact: 9,
-        testCoverage: 60,
-        mockDataDependencies: ['generateMockAgentInteraction'],
-        estimatedEffort: 16,
-        riskFactors: [
-          'Complex agent integration',
-          'Real-time chat functionality',
-          'Context management',
-          'WebSocket connections'
-        ],
-        migrationSteps: []
-      },
-
-      // Citation Components (Medium Impact)
-      {
-        componentPath: 'src/components/citations/citation-panel.tsx',
-        componentName: 'CitationPanel',
-        migrationPriority: MigrationPriority.MEDIUM,
-        complexity: 5,
-        userImpact: 6,
-        testCoverage: 80,
-        mockDataDependencies: ['generateMockSourceCitation'],
-        estimatedEffort: 6,
-        riskFactors: [
-          'External link validation',
-          'Citation formatting'
-        ],
-        migrationSteps: []
-      },
-
-      // Layout Components (Low-Medium Impact)
-      {
-        componentPath: 'src/components/layout/AppLayout.tsx',
-        componentName: 'AppLayout',
-        migrationPriority: MigrationPriority.LOW,
-        complexity: 3,
-        userImpact: 4,
-        testCoverage: 95,
-        mockDataDependencies: ['generateMockSession', 'generateMockUser'],
-        estimatedEffort: 3,
-        riskFactors: [
-          'Authentication state',
-          'Navigation consistency'
-        ],
-        migrationSteps: []
-      },
-      {
-        componentPath: 'src/components/layout/Header.tsx',
-        componentName: 'Header',
-        migrationPriority: MigrationPriority.LOW,
-        complexity: 2,
-        userImpact: 3,
-        testCoverage: 90,
-        mockDataDependencies: ['generateMockUser', 'generateMockSession'],
-        estimatedEffort: 2,
-        riskFactors: [
-          'User session display',
-          'Authentication status'
-        ],
-        migrationSteps: []
-      },
-      {
-        componentPath: 'src/components/layout/Sidebar.tsx',
-        componentName: 'Sidebar',
-        migrationPriority: MigrationPriority.LOW,
-        complexity: 3,
-        userImpact: 4,
-        testCoverage: 85,
-        mockDataDependencies: ['generateMockProject'],
-        estimatedEffort: 3,
-        riskFactors: [
-          'Navigation state',
-          'Project context'
-        ],
-        migrationSteps: []
-      },
-
-      // Audit Components (Medium Impact)
-      {
-        componentPath: 'src/components/audit/AuditLogPage.tsx',
-        componentName: 'AuditLogPage',
-        migrationPriority: MigrationPriority.MEDIUM,
-        complexity: 6,
-        userImpact: 5,
-        testCoverage: 70,
-        mockDataDependencies: ['generateMockAuditLog'],
-        estimatedEffort: 8,
-        riskFactors: [
-          'Audit trail integrity',
-          'Compliance requirements',
-          'Data filtering'
-        ],
-        migrationSteps: []
-      }
-    ];
-
-    return components.sort((a, b) => {
-      const priorityOrder = {
-        [MigrationPriority.CRITICAL]: 4,
-        [MigrationPriority.HIGH]: 3,
-        [MigrationPriority.MEDIUM]: 2,
-        [MigrationPriority.LOW]: 1
-      };
-      
-      const aPriority = priorityOrder[a.migrationPriority];
-      const bPriority = priorityOrder[b.migrationPriority];
-      
-      if (aPriority !== bPriority) {
-        return bPriority - aPriority;
-      }
-      
-      // If same priority, sort by user impact
-      return b.userImpact - a.userImpact;
-    });
-  }
-}
-
-/**
- * Migration Phase Planner
- * Creates migration phases based on dependencies and priorities
- */
-export class MigrationPhasePlanner {
-  static createMigrationPhases(components: ComponentMigrationItem[]): MigrationPhase[] {
-    const phases: MigrationPhase[] = [
-      {
-        id: 'phase-1-infrastructure',
-        name: 'Infrastructure and Foundation',
-        description: 'Set up database connections, API endpoints, and core infrastructure',
-        components: [],
-        dependencies: [],
-        estimatedDuration: 16,
-        riskLevel: RiskLevel.MEDIUM,
-        priority: MigrationPriority.CRITICAL,
-        prerequisites: [
-          'Database schema finalized',
-          'API endpoints designed',
-          'Authentication system ready'
-        ],
-        deliverables: [
-          'Database connection utilities',
-          'API client setup',
-          'Authentication integration',
-          'Error handling framework'
-        ],
-        rollbackStrategy: {
-          type: 'automatic',
-          triggers: [
-            { type: 'error_rate', threshold: 5, timeWindow: 10 }
-          ],
-          steps: [
-            { description: 'Revert to mock data', action: 'rollback_to_mock', parameters: {}, order: 1 }
-          ],
-          dataRecovery: {
-            backupStrategy: 'Mock data fallback',
-            recoverySteps: ['Switch feature flags', 'Clear cache'],
-            dataValidation: ['Verify mock data integrity']
-          },
-          estimatedTime: 5
-        },
-        validationCriteria: [
-          {
-            type: 'functional',
-            description: 'Database connections work correctly',
-            testCases: ['Connection establishment', 'Query execution', 'Error handling'],
-            acceptanceCriteria: ['All connections successful', 'Queries return expected data'],
-            automatedTests: ['test-database-connection.spec.ts']
-          }
-        ]
-      },
-      {
-        id: 'phase-2-display-components',
-        name: 'Display-Only Components',
-        description: 'Migrate components that only display data without user interactions',
-        components: components.filter(c => 
-          ['ClassificationWidget', 'ProgressWidget', 'CitationPanel', 'Header', 'Sidebar'].includes(c.componentName)
-        ),
-        dependencies: ['phase-1-infrastructure'],
-        estimatedDuration: 24,
-        riskLevel: RiskLevel.LOW,
-        priority: MigrationPriority.HIGH,
-        prerequisites: [
-          'Phase 1 completed successfully',
-          'API endpoints available',
-          'Test data seeded'
-        ],
-        deliverables: [
-          'Migrated display components',
-          'Updated unit tests',
-          'Performance benchmarks'
-        ],
-        rollbackStrategy: {
-          type: 'automatic',
-          triggers: [
-            { type: 'error_rate', threshold: 3, timeWindow: 15 }
-          ],
-          steps: [
-            { description: 'Revert component changes', action: 'rollback_components', parameters: {}, order: 1 }
-          ],
-          dataRecovery: {
-            backupStrategy: 'Component version control',
-            recoverySteps: ['Git revert', 'Redeploy previous version'],
-            dataValidation: ['Visual regression tests']
-          },
-          estimatedTime: 10
-        },
-        validationCriteria: [
-          {
-            type: 'functional',
-            description: 'Components display real data correctly',
-            testCases: ['Data rendering', 'Loading states', 'Error states'],
-            acceptanceCriteria: ['Data matches API responses', 'No visual regressions'],
-            automatedTests: ['classification-widget.spec.ts', 'progress-widget.spec.ts']
-          }
-        ]
-      },
-      {
-        id: 'phase-3-interactive-components',
-        name: 'Interactive Components',
-        description: 'Migrate components with user interactions and state management',
-        components: components.filter(c => 
-          ['PredicateWidget', 'ProjectCard', 'ProjectList'].includes(c.componentName)
-        ),
-        dependencies: ['phase-2-display-components'],
-        estimatedDuration: 32,
-        riskLevel: RiskLevel.MEDIUM,
-        priority: MigrationPriority.CRITICAL,
-        prerequisites: [
-          'Phase 2 completed successfully',
-          'Interactive API endpoints ready',
-          'State management patterns established'
-        ],
-        deliverables: [
-          'Migrated interactive components',
-          'Updated integration tests',
-          'User interaction validation'
-        ],
-        rollbackStrategy: {
-          type: 'manual',
-          triggers: [
-            { type: 'user_feedback', threshold: 2, timeWindow: 60 }
-          ],
-          steps: [
-            { description: 'Disable real data features', action: 'disable_features', parameters: {}, order: 1 },
-            { description: 'Revert to mock interactions', action: 'enable_mock_mode', parameters: {}, order: 2 }
-          ],
-          dataRecovery: {
-            backupStrategy: 'Feature flag rollback',
-            recoverySteps: ['Toggle feature flags', 'Clear user sessions'],
-            dataValidation: ['User interaction tests']
-          },
-          estimatedTime: 15
-        },
-        validationCriteria: [
-          {
-            type: 'functional',
-            description: 'User interactions work with real data',
-            testCases: ['Selection logic', 'State updates', 'Optimistic updates'],
-            acceptanceCriteria: ['All interactions functional', 'State consistency maintained'],
-            automatedTests: ['predicate-widget.spec.ts', 'project-card.spec.ts']
-          }
-        ]
-      },
-      {
-        id: 'phase-4-complex-workflows',
-        name: 'Complex Workflows and Forms',
-        description: 'Migrate complex components with forms, file uploads, and agent interactions',
-        components: components.filter(c => 
-          ['AgentWorkflowPage', 'ProjectForm', 'AuditLogPage'].includes(c.componentName)
-        ),
-        dependencies: ['phase-3-interactive-components'],
-        estimatedDuration: 40,
-        riskLevel: RiskLevel.HIGH,
-        priority: MigrationPriority.HIGH,
-        prerequisites: [
-          'Phase 3 completed successfully',
-          'Agent backend integration ready',
-          'File upload infrastructure ready'
-        ],
-        deliverables: [
-          'Migrated complex workflows',
-          'End-to-end tests',
-          'Performance optimization'
-        ],
-        rollbackStrategy: {
-          type: 'hybrid',
-          triggers: [
-            { type: 'error_rate', threshold: 5, timeWindow: 30 },
-            { type: 'performance', threshold: 2000, timeWindow: 60 }
-          ],
-          steps: [
-            { description: 'Gradual rollback by feature', action: 'selective_rollback', parameters: {}, order: 1 }
-          ],
-          dataRecovery: {
-            backupStrategy: 'Incremental rollback',
-            recoverySteps: ['Identify failing components', 'Selective feature disable'],
-            dataValidation: ['Component-level validation']
-          },
-          estimatedTime: 20
-        },
-        validationCriteria: [
-          {
-            type: 'functional',
-            description: 'Complex workflows function correctly',
-            testCases: ['Form submissions', 'Agent interactions', 'File uploads'],
-            acceptanceCriteria: ['All workflows complete successfully', 'Data persistence verified'],
-            automatedTests: ['agent-workflow.spec.ts', 'project-form.spec.ts']
-          }
-        ]
-      },
-      {
-        id: 'phase-5-optimization',
-        name: 'Optimization and Cleanup',
-        description: 'Remove unused mock data, optimize performance, and finalize migration',
-        components: components.filter(c => 
-          ['AppLayout'].includes(c.componentName)
-        ),
-        dependencies: ['phase-4-complex-workflows'],
-        estimatedDuration: 16,
-        riskLevel: RiskLevel.LOW,
-        priority: MigrationPriority.MEDIUM,
-        prerequisites: [
-          'All previous phases completed',
-          'Performance benchmarks established',
-          'User acceptance testing completed'
-        ],
-        deliverables: [
-          'Removed unused mock data',
-          'Performance optimizations',
-          'Final documentation',
-          'Migration report'
-        ],
-        rollbackStrategy: {
-          type: 'manual',
-          triggers: [],
-          steps: [
-            { description: 'Restore mock data if needed', action: 'restore_mock_data', parameters: {}, order: 1 }
-          ],
-          dataRecovery: {
-            backupStrategy: 'Full system backup',
-            recoverySteps: ['System restore', 'Data verification'],
-            dataValidation: ['Full system test']
-          },
-          estimatedTime: 30
-        },
-        validationCriteria: [
-          {
-            type: 'performance',
-            description: 'System performance meets requirements',
-            testCases: ['Load testing', 'Memory usage', 'Response times'],
-            acceptanceCriteria: ['Performance targets met', 'No memory leaks'],
-            automatedTests: ['performance.spec.ts']
-          }
-        ]
-      }
-    ];
-
-    return phases;
-  }
-}
-
-/**
- * Migration Timeline Generator
- * Creates detailed timeline with milestones and dependencies
- */
-export class MigrationTimelineGenerator {
-  static generateTimeline(phases: MigrationPhase[], startDate: Date): MigrationTimeline {
-    const milestones: Milestone[] = [];
-    let currentDate = new Date(startDate);
-
-    phases.forEach((phase, index) => {
-      const phaseStartDate = new Date(currentDate);
-      const phaseEndDate = new Date(currentDate.getTime() + phase.estimatedDuration * 60 * 60 * 1000);
-
-      milestones.push({
-        id: `${phase.id}-start`,
-        name: `${phase.name} - Start`,
-        description: `Begin ${phase.description}`,
-        targetDate: phaseStartDate.toISOString(),
-        deliverables: [`${phase.name} kickoff meeting`, 'Phase planning completed'],
-        dependencies: phase.dependencies
-      });
-
-      milestones.push({
-        id: `${phase.id}-end`,
-        name: `${phase.name} - Complete`,
-        description: `Complete ${phase.description}`,
-        targetDate: phaseEndDate.toISOString(),
-        deliverables: phase.deliverables,
-        dependencies: [`${phase.id}-start`]
-      });
-
-      currentDate = phaseEndDate;
-    });
-
-    return {
-      startDate: startDate.toISOString(),
-      endDate: currentDate.toISOString(),
-      milestones,
-      criticalPath: phases
-        .filter(p => p.priority === MigrationPriority.CRITICAL)
-        .map(p => p.id)
-    };
-  }
-}
-
-/**
- * Risk Assessment Calculator
- * Evaluates migration risks and suggests mitigation strategies
- */
-export class RiskAssessmentCalculator {
-  static assessRisks(phases: MigrationPhase[]): RiskAssessment {
-    const riskFactors: RiskFactor[] = [
-      {
-        category: 'Technical Complexity',
-        description: 'High complexity components may have integration issues',
-        impact: 8,
-        probability: 0.6,
-        mitigation: 'Thorough testing and gradual rollout'
-      },
-      {
-        category: 'Data Consistency',
-        description: 'Risk of data inconsistency during migration',
-        impact: 9,
-        probability: 0.4,
-        mitigation: 'Database transactions and rollback procedures'
-      },
-      {
-        category: 'User Experience',
-        description: 'Potential disruption to user workflows',
-        impact: 7,
-        probability: 0.5,
-        mitigation: 'Feature flags and A/B testing'
-      },
-      {
-        category: 'Performance',
-        description: 'Real data may impact application performance',
-        impact: 6,
-        probability: 0.7,
-        mitigation: 'Performance monitoring and optimization'
-      },
-      {
-        category: 'Dependencies',
-        description: 'External API dependencies may cause failures',
-        impact: 8,
-        probability: 0.3,
-        mitigation: 'Fallback mechanisms and error handling'
-      }
-    ];
-
-    const mitigationStrategies: MitigationStrategy[] = [
-      {
-        riskCategory: 'Technical Complexity',
-        strategy: 'Incremental Migration',
-        implementation: [
-          'Migrate components in phases',
-          'Maintain backward compatibility',
-          'Comprehensive testing at each phase'
-        ],
-        effectiveness: 0.8
-      },
-      {
-        riskCategory: 'Data Consistency',
-        strategy: 'Transaction Management',
-        implementation: [
-          'Use database transactions',
-          'Implement data validation',
-          'Create rollback procedures'
-        ],
-        effectiveness: 0.9
-      },
-      {
-        riskCategory: 'User Experience',
-        strategy: 'Feature Flags',
-        implementation: [
-          'Implement feature flag system',
-          'Gradual user rollout',
-          'Real-time monitoring'
-        ],
-        effectiveness: 0.85
-      }
-    ];
-
-    // Calculate overall risk
-    const totalRiskScore = riskFactors.reduce((sum, factor) => 
-      sum + (factor.impact * factor.probability), 0
-    ) / riskFactors.length;
-
-    let overallRisk: RiskLevel;
-    if (totalRiskScore >= 7) overallRisk = RiskLevel.VERY_HIGH;
-    else if (totalRiskScore >= 5.5) overallRisk = RiskLevel.HIGH;
-    else if (totalRiskScore >= 4) overallRisk = RiskLevel.MEDIUM;
-    else if (totalRiskScore >= 2.5) overallRisk = RiskLevel.LOW;
-    else overallRisk = RiskLevel.VERY_LOW;
-
-    return {
-      overallRisk,
-      riskFactors,
-      mitigationStrategies
-    };
-  }
-}
-
-/**
- * Resource Requirements Calculator
- * Estimates resource needs for migration
- */
-export class ResourceRequirementsCalculator {
-  static calculateRequirements(phases: MigrationPhase[]): ResourceRequirements {
-    const totalHours = phases.reduce((sum, phase) => sum + phase.estimatedDuration, 0);
+  analyzeComponent(componentPath: string): ComponentMockUsage {
+    // This would be implemented with actual AST parsing
+    // For now, return a mock analysis based on known components
+    const componentName = this.extractComponentName(componentPath);
     
     return {
-      developers: 2, // Frontend and backend developers
-      testers: 1,
-      devOpsEngineers: 1,
-      totalHours,
-      toolsRequired: [
-        'Feature flag system',
-        'Database migration tools',
-        'Performance monitoring',
-        'A/B testing framework',
-        'Automated testing tools'
+      componentPath,
+      componentName,
+      mockDataImports: this.analyzeMockDataImports(componentPath),
+      mockDataUsage: this.analyzeMockDataUsage(componentPath),
+      dependencies: this.analyzeDependencies(componentPath),
+      hooks: this.analyzeHooks(componentPath),
+      contextUsage: this.analyzeContextUsage(componentPath),
+      testFiles: this.findTestFiles(componentPath),
+      coverageMetrics: this.getCoverageMetrics(componentPath),
+      migrationReadiness: this.assessMigrationReadiness(componentPath)
+    };
+  }
+
+  /**
+   * Generate migration priority matrix
+   */
+  generatePriorityMatrix(): MigrationPriority[] {
+    const knownComponents = [
+      'src/components/dashboard/classification-widget.tsx',
+      'src/components/dashboard/predicate-widget.tsx',
+      'src/components/dashboard/progress-widget.tsx',
+      'src/components/projects/project-card.tsx',
+      'src/components/projects/project-list.tsx',
+      'src/components/projects/project-form.tsx',
+      'src/components/agent/copilot-sidebar.tsx',
+      'src/components/citations/citation-panel.tsx',
+      'src/components/layout/app-layout.tsx',
+      'src/components/layout/header.tsx',
+      'src/components/layout/sidebar.tsx'
+    ];
+
+    return knownComponents.map(componentPath => {
+      const analysis = this.analyzeComponent(componentPath);
+      return this.calculatePriority(analysis);
+    });
+  }
+
+  /**
+   * Create comprehensive migration plan
+   */
+  createMigrationPlan(): MigrationPlan {
+    const priorities = this.generatePriorityMatrix();
+    const phases = this.createMigrationPhases(priorities);
+    
+    return {
+      phases,
+      totalEstimatedDuration: phases.reduce((sum, phase) => sum + phase.estimatedDuration, 0),
+      totalEstimatedEffort: priorities.reduce((sum, priority) => sum + priority.estimatedEffort, 0),
+      riskAssessment: this.assessOverallRisk(priorities),
+      resourceRequirements: this.calculateResourceRequirements(phases),
+      timeline: this.createTimeline(phases),
+      contingencyPlans: this.createContingencyPlans(phases)
+    };
+  }
+
+  private extractComponentName(componentPath: string): string {
+    return componentPath.split('/').pop()?.replace('.tsx', '').replace('.ts', '') || '';
+  }
+
+  private analyzeMockDataImports(componentPath: string): MockDataImport[] {
+    // Mock implementation - would use AST parsing in real implementation
+    const componentName = this.extractComponentName(componentPath);
+    
+    if (componentName.includes('classification-widget')) {
+      return [{
+        importPath: 'src/lib/mock-data.ts',
+        importedFunctions: ['generateMockDeviceClassification'],
+        usageCount: 3,
+        lineNumbers: [15, 45, 78]
+      }];
+    }
+    
+    if (componentName.includes('predicate-widget')) {
+      return [{
+        importPath: 'src/lib/mock-data.ts',
+        importedFunctions: ['generateMockPredicateDevices'],
+        usageCount: 5,
+        lineNumbers: [20, 35, 67, 89, 112]
+      }];
+    }
+    
+    return [];
+  }
+
+  private analyzeMockDataUsage(componentPath: string): MockDataUsage[] {
+    const componentName = this.extractComponentName(componentPath);
+    
+    if (componentName.includes('classification-widget')) {
+      return [{
+        functionName: 'generateMockDeviceClassification',
+        usageContext: 'hook',
+        frequency: 3,
+        locations: [
+          { file: componentPath, line: 15, column: 10, context: 'useEffect hook' },
+          { file: componentPath, line: 45, column: 20, context: 'event handler' },
+          { file: componentPath, line: 78, column: 15, context: 'render method' }
+        ]
+      }];
+    }
+    
+    return [];
+  }
+
+  private analyzeDependencies(componentPath: string): ComponentDependency[] {
+    // Mock implementation
+    return [
+      {
+        type: 'component',
+        name: 'Card',
+        path: '@/components/ui/card',
+        hasMockData: false
+      },
+      {
+        type: 'hook',
+        name: 'useClassification',
+        path: '@/hooks/use-classification',
+        hasMockData: true
+      }
+    ];
+  }
+
+  private analyzeHooks(componentPath: string): HookUsage[] {
+    const componentName = this.extractComponentName(componentPath);
+    
+    if (componentName.includes('classification-widget')) {
+      return [{
+        hookName: 'useClassification',
+        path: '@/hooks/use-classification',
+        usesMockData: true,
+        apiEndpoints: ['/api/classification']
+      }];
+    }
+    
+    return [];
+  }
+
+  private analyzeContextUsage(componentPath: string): ContextUsage[] {
+    return [
+      {
+        contextName: 'ProjectContext',
+        path: '@/contexts/project-context',
+        providesData: false,
+        consumesData: true
+      }
+    ];
+  }
+
+  private findTestFiles(componentPath: string): string[] {
+    const componentName = this.extractComponentName(componentPath);
+    return [
+      `src/__tests__/components/${componentName}.test.tsx`,
+      `src/__tests__/integration/${componentName}.integration.test.tsx`
+    ];
+  }
+
+  private getCoverageMetrics(componentPath: string): CoverageMetrics {
+    // Mock implementation - would integrate with actual coverage tools
+    return {
+      statements: 85,
+      branches: 78,
+      functions: 92,
+      lines: 88,
+      testCount: 12
+    };
+  }
+
+  private assessMigrationReadiness(componentPath: string): MigrationReadiness {
+    const componentName = this.extractComponentName(componentPath);
+    
+    if (componentName.includes('classification-widget')) {
+      return {
+        score: 0.7,
+        blockers: ['Missing API endpoint', 'Database schema not finalized'],
+        warnings: ['High complexity component', 'Multiple mock data dependencies'],
+        recommendations: [
+          'Create API endpoint first',
+          'Update database schema',
+          'Add integration tests'
+        ],
+        estimatedEffort: 16,
+        riskLevel: 'medium'
+      };
+    }
+    
+    if (componentName.includes('project-card')) {
+      return {
+        score: 0.9,
+        blockers: [],
+        warnings: ['Minor prop interface changes needed'],
+        recommendations: ['Update prop types', 'Add error handling'],
+        estimatedEffort: 4,
+        riskLevel: 'low'
+      };
+    }
+    
+    return {
+      score: 0.5,
+      blockers: ['Analysis needed'],
+      warnings: ['Component not analyzed'],
+      recommendations: ['Perform detailed analysis'],
+      estimatedEffort: 8,
+      riskLevel: 'medium'
+    };
+  }
+
+  private calculatePriority(analysis: ComponentMockUsage): MigrationPriority {
+    const userImpact = this.calculateUserImpact(analysis);
+    const technicalComplexity = this.calculateTechnicalComplexity(analysis);
+    const priority = this.determinePriority(userImpact, technicalComplexity);
+    
+    return {
+      componentPath: analysis.componentPath,
+      priority,
+      userImpact,
+      technicalComplexity,
+      dependencies: analysis.dependencies.map(d => d.path),
+      blockedBy: this.findBlockingDependencies(analysis),
+      blocks: this.findBlockedComponents(analysis),
+      estimatedEffort: analysis.migrationReadiness.estimatedEffort,
+      riskFactors: this.identifyRiskFactors(analysis)
+    };
+  }
+
+  private calculateUserImpact(analysis: ComponentMockUsage): 'critical' | 'high' | 'medium' | 'low' {
+    const componentName = analysis.componentName;
+    
+    if (componentName.includes('classification-widget') || componentName.includes('predicate-widget')) {
+      return 'critical';
+    }
+    
+    if (componentName.includes('project-card') || componentName.includes('dashboard')) {
+      return 'high';
+    }
+    
+    if (componentName.includes('layout') || componentName.includes('navigation')) {
+      return 'medium';
+    }
+    
+    return 'low';
+  }
+
+  private calculateTechnicalComplexity(analysis: ComponentMockUsage): 'simple' | 'moderate' | 'complex' | 'very-complex' {
+    const mockDataUsage = analysis.mockDataUsage.length;
+    const dependencies = analysis.dependencies.length;
+    const hooks = analysis.hooks.length;
+    
+    const complexityScore = mockDataUsage * 2 + dependencies + hooks * 1.5;
+    
+    if (complexityScore > 15) return 'very-complex';
+    if (complexityScore > 10) return 'complex';
+    if (complexityScore > 5) return 'moderate';
+    return 'simple';
+  }
+
+  private determinePriority(
+    userImpact: 'critical' | 'high' | 'medium' | 'low',
+    technicalComplexity: 'simple' | 'moderate' | 'complex' | 'very-complex'
+  ): 'high' | 'medium' | 'low' {
+    if (userImpact === 'critical') return 'high';
+    if (userImpact === 'high' && (technicalComplexity === 'simple' || technicalComplexity === 'moderate')) return 'high';
+    if (userImpact === 'high' || (userImpact === 'medium' && technicalComplexity === 'simple')) return 'medium';
+    return 'low';
+  }
+
+  private findBlockingDependencies(analysis: ComponentMockUsage): string[] {
+    return analysis.dependencies
+      .filter(dep => dep.hasMockData)
+      .map(dep => dep.path);
+  }
+
+  private findBlockedComponents(analysis: ComponentMockUsage): string[] {
+    // Mock implementation - would analyze dependency graph
+    return [];
+  }
+
+  private identifyRiskFactors(analysis: ComponentMockUsage): RiskFactor[] {
+    const risks: RiskFactor[] = [];
+    
+    if (analysis.mockDataUsage.length > 3) {
+      risks.push({
+        type: 'data-integrity',
+        severity: 'medium',
+        description: 'Multiple mock data dependencies increase data consistency risk',
+        mitigation: 'Implement comprehensive data validation and testing'
+      });
+    }
+    
+    if (analysis.migrationReadiness.score < 0.6) {
+      risks.push({
+        type: 'compatibility',
+        severity: 'high',
+        description: 'Low migration readiness score indicates potential compatibility issues',
+        mitigation: 'Address blockers and warnings before migration'
+      });
+    }
+    
+    return risks;
+  }
+
+  private createMigrationPhases(priorities: MigrationPriority[]): MigrationPhase[] {
+    const highPriority = priorities.filter(p => p.priority === 'high');
+    const mediumPriority = priorities.filter(p => p.priority === 'medium');
+    const lowPriority = priorities.filter(p => p.priority === 'low');
+    
+    return [
+      this.createPhase('Phase 1: Critical Components', highPriority, 1),
+      this.createPhase('Phase 2: High Impact Components', mediumPriority, 2),
+      this.createPhase('Phase 3: Remaining Components', lowPriority, 3)
+    ];
+  }
+
+  private createPhase(name: string, priorities: MigrationPriority[], phaseNumber: number): MigrationPhase {
+    return {
+      name,
+      description: `Migration phase ${phaseNumber} focusing on ${priorities.length} components`,
+      components: priorities.map(p => p.componentPath),
+      dependencies: this.calculatePhaseDependencies(priorities),
+      estimatedDuration: Math.ceil(priorities.reduce((sum, p) => sum + p.estimatedEffort, 0) / 8), // 8 hours per day
+      riskLevel: this.calculatePhaseRisk(priorities),
+      rollbackStrategy: this.createRollbackStrategy(priorities),
+      preMigrationTests: this.createTestSuites('pre-migration', priorities),
+      migrationSteps: this.createMigrationSteps(priorities),
+      postMigrationTests: this.createTestSuites('post-migration', priorities),
+      validationSteps: this.createValidationSteps(priorities),
+      successCriteria: this.createSuccessCriteria(priorities)
+    };
+  }
+
+  private calculatePhaseDependencies(priorities: MigrationPriority[]): string[] {
+    const allDependencies = priorities.flatMap(p => p.dependencies);
+    return [...new Set(allDependencies)];
+  }
+
+  private calculatePhaseRisk(priorities: MigrationPriority[]): 'low' | 'medium' | 'high' {
+    const riskScores = priorities.flatMap(p => p.riskFactors.map(rf => rf.severity));
+    const hasHighRisk = riskScores.includes('critical') || riskScores.includes('high');
+    const hasMediumRisk = riskScores.includes('medium');
+    
+    if (hasHighRisk) return 'high';
+    if (hasMediumRisk) return 'medium';
+    return 'low';
+  }
+
+  private createRollbackStrategy(priorities: MigrationPriority[]): RollbackStrategy {
+    return {
+      type: 'hybrid',
+      triggers: [
+        {
+          type: 'error-rate',
+          threshold: 5, // 5% error rate
+          timeWindow: 15, // 15 minutes
+          description: 'Automatic rollback if error rate exceeds 5% for 15 minutes'
+        },
+        {
+          type: 'performance',
+          threshold: 2000, // 2 second response time
+          timeWindow: 10, // 10 minutes
+          description: 'Automatic rollback if response time exceeds 2s for 10 minutes'
+        }
       ],
-      infrastructureNeeds: [
-        'Test database instances',
-        'Staging environment',
-        'Monitoring dashboards',
-        'Backup systems',
-        'Rollback mechanisms'
+      steps: [
+        {
+          order: 1,
+          description: 'Switch feature flags to disable new implementation',
+          action: 'toggle_feature_flags',
+          validation: 'verify_mock_data_active',
+          estimatedTime: 2
+        },
+        {
+          order: 2,
+          description: 'Restore database to pre-migration state',
+          action: 'restore_database_snapshot',
+          validation: 'verify_data_integrity',
+          estimatedTime: 10
+        }
+      ],
+      dataRecovery: {
+        backupStrategy: 'snapshot',
+        recoveryTime: 15,
+        dataLossRisk: 'minimal',
+        validationSteps: [
+          'Verify all components render correctly',
+          'Test critical user workflows',
+          'Validate data consistency'
+        ]
+      },
+      estimatedTime: 15
+    };
+  }
+
+  private createTestSuites(phase: 'pre-migration' | 'post-migration', priorities: MigrationPriority[]): TestSuite[] {
+    return [
+      {
+        name: `${phase}-unit-tests`,
+        type: 'unit',
+        testFiles: priorities.flatMap(p => [`${p.componentPath.replace('.tsx', '.test.tsx')}`]),
+        estimatedRuntime: 5,
+        passingThreshold: 95
+      },
+      {
+        name: `${phase}-integration-tests`,
+        type: 'integration',
+        testFiles: priorities.flatMap(p => [`${p.componentPath.replace('.tsx', '.integration.test.tsx')}`]),
+        estimatedRuntime: 15,
+        passingThreshold: 90
+      }
+    ];
+  }
+
+  private createMigrationSteps(priorities: MigrationPriority[]): MigrationStep[] {
+    const steps: MigrationStep[] = [];
+    let order = 1;
+    
+    for (const priority of priorities) {
+      steps.push({
+        order: order++,
+        description: `Migrate ${priority.componentPath} from mock data to real API`,
+        action: MigrationAction.REPLACE_MOCK_HOOK,
+        parameters: { componentPath: priority.componentPath },
+        rollbackAction: MigrationAction.REPLACE_MOCK_HOOK,
+        validation: {
+          name: `Validate ${priority.componentPath} migration`,
+          type: 'automated',
+          description: 'Verify component works with real data',
+          criteria: [
+            {
+              name: 'Component renders without errors',
+              type: 'functional',
+              expected: true,
+              critical: true
+            },
+            {
+              name: 'Data loads correctly',
+              type: 'data-integrity',
+              expected: true,
+              critical: true
+            }
+          ],
+          timeout: 10
+        },
+        estimatedTime: priority.estimatedEffort * 60 // convert hours to minutes
+      });
+    }
+    
+    return steps;
+  }
+
+  private createValidationSteps(priorities: MigrationPriority[]): ValidationStep[] {
+    return [
+      {
+        name: 'Functional Validation',
+        type: 'automated',
+        description: 'Verify all migrated components function correctly',
+        criteria: [
+          {
+            name: 'All components render',
+            type: 'functional',
+            expected: true,
+            critical: true
+          },
+          {
+            name: 'Data loads within acceptable time',
+            type: 'performance',
+            expected: 2000, // 2 seconds
+            tolerance: 500, // 500ms tolerance
+            critical: false
+          }
+        ],
+        timeout: 30
+      },
+      {
+        name: 'User Experience Validation',
+        type: 'manual',
+        description: 'Manual testing of critical user workflows',
+        criteria: [
+          {
+            name: 'User can complete primary workflows',
+            type: 'user-experience',
+            expected: true,
+            critical: true
+          }
+        ],
+        timeout: 60
+      }
+    ];
+  }
+
+  private createSuccessCriteria(priorities: MigrationPriority[]): SuccessCriteria[] {
+    return [
+      {
+        name: 'Zero Critical Errors',
+        metric: 'error_rate',
+        target: 0,
+        tolerance: 0.01, // 1%
+        measurement: 'automated',
+        frequency: 'continuous'
+      },
+      {
+        name: 'Performance Maintained',
+        metric: 'response_time_p95',
+        target: 2000, // 2 seconds
+        tolerance: 500, // 500ms
+        measurement: 'automated',
+        frequency: 'continuous'
+      },
+      {
+        name: 'Test Coverage Maintained',
+        metric: 'test_coverage',
+        target: 85,
+        tolerance: 5,
+        measurement: 'automated',
+        frequency: 'daily'
+      }
+    ];
+  }
+
+  private assessOverallRisk(priorities: MigrationPriority[]): RiskAssessment {
+    const allRisks = priorities.flatMap(p => p.riskFactors);
+    const criticalRisks = allRisks.filter(r => r.severity === 'critical');
+    const highRisks = allRisks.filter(r => r.severity === 'high');
+    
+    let overallRisk: 'low' | 'medium' | 'high' | 'critical' = 'low';
+    
+    if (criticalRisks.length > 0) overallRisk = 'critical';
+    else if (highRisks.length > 2) overallRisk = 'high';
+    else if (highRisks.length > 0 || allRisks.length > 5) overallRisk = 'medium';
+    
+    return {
+      overallRisk,
+      riskFactors: allRisks,
+      mitigationStrategies: this.createMitigationStrategies(allRisks),
+      contingencyTriggers: [
+        'Error rate exceeds 5%',
+        'Performance degrades by more than 50%',
+        'Critical functionality breaks',
+        'User complaints increase significantly'
       ]
     };
   }
-}
 
-/**
- * Main Migration Strategy Generator
- * Orchestrates the creation of a complete migration plan
- */
-export class MigrationStrategyGenerator {
-  static generateComprehensiveStrategy(): MigrationPlan {
-    const components = MigrationPriorityMatrix.generateMatrix();
-    const phases = MigrationPhasePlanner.createMigrationPhases(components);
-    const timeline = MigrationTimelineGenerator.generateTimeline(phases, new Date());
-    const riskAssessment = RiskAssessmentCalculator.assessRisks(phases);
-    const resourceRequirements = ResourceRequirementsCalculator.calculateRequirements(phases);
+  private createMitigationStrategies(risks: RiskFactor[]): MitigationStrategy[] {
+    const strategies: MitigationStrategy[] = [];
+    
+    const dataIntegrityRisks = risks.filter(r => r.type === 'data-integrity');
+    if (dataIntegrityRisks.length > 0) {
+      strategies.push({
+        riskType: 'data-integrity',
+        strategy: 'Comprehensive data validation and testing',
+        implementation: [
+          'Implement schema validation at API boundaries',
+          'Add data integrity tests for all components',
+          'Create data migration validation scripts',
+          'Set up monitoring for data consistency'
+        ],
+        effectiveness: 0.8,
+        cost: 'medium'
+      });
+    }
+    
+    return strategies;
+  }
 
+  private calculateResourceRequirements(phases: MigrationPhase[]): ResourceRequirements {
+    const totalEffort = phases.reduce((sum, phase) => sum + phase.estimatedDuration, 0);
+    
     return {
-      id: 'frontend-migration-strategy-v1',
-      name: 'Frontend Testing Comprehensive Migration Strategy',
-      description: 'Complete migration from mock data to real backend connections',
-      phases,
-      totalEstimatedDuration: phases.reduce((sum, phase) => sum + phase.estimatedDuration, 0),
-      totalComponents: components.length,
-      riskAssessment,
-      resourceRequirements,
-      timeline,
-      successMetrics: {
-        functionalityPreserved: 100,
-        performanceImprovement: 15,
-        testCoverageTarget: 85,
-        errorRateThreshold: 1,
-        userSatisfactionTarget: 4.5
-      }
+      developers: Math.ceil(totalEffort / 10), // Assume 10 days per developer
+      testers: Math.ceil(totalEffort / 15), // Assume 15 days per tester
+      devops: 1,
+      estimatedCost: totalEffort * 1000, // $1000 per day
+      infrastructure: [
+        {
+          type: 'database',
+          description: 'Test database instances for migration testing',
+          setup: ['Create isolated test databases', 'Set up data seeding scripts'],
+          maintenance: ['Regular backup and cleanup', 'Performance monitoring']
+        },
+        {
+          type: 'monitoring',
+          description: 'Enhanced monitoring during migration',
+          setup: ['Set up error tracking', 'Configure performance monitoring'],
+          maintenance: ['Monitor dashboards', 'Alert management']
+        }
+      ]
     };
+  }
+
+  private createTimeline(phases: MigrationPhase[]): MigrationTimeline {
+    const startDate = new Date();
+    const totalDays = phases.reduce((sum, phase) => sum + phase.estimatedDuration, 0);
+    const endDate = new Date(startDate.getTime() + (totalDays + 5) * 24 * 60 * 60 * 1000); // Add 5 days buffer
+    
+    const milestones: Milestone[] = [];
+    let currentDate = new Date(startDate);
+    
+    for (const phase of phases) {
+      milestones.push({
+        name: `${phase.name} Complete`,
+        date: new Date(currentDate.getTime() + phase.estimatedDuration * 24 * 60 * 60 * 1000).toISOString(),
+        deliverables: [`All components in ${phase.name} migrated`, 'Tests passing', 'Validation complete'],
+        dependencies: phase.dependencies,
+        riskLevel: phase.riskLevel
+      });
+      
+      currentDate = new Date(currentDate.getTime() + phase.estimatedDuration * 24 * 60 * 60 * 1000);
+    }
+    
+    return {
+      startDate: startDate.toISOString(),
+      endDate: endDate.toISOString(),
+      milestones,
+      criticalPath: phases.map(p => p.name),
+      bufferTime: 5
+    };
+  }
+
+  private createContingencyPlans(phases: MigrationPhase[]): ContingencyPlan[] {
+    return [
+      {
+        trigger: 'Migration phase takes 50% longer than estimated',
+        description: 'Reduce scope of remaining phases or add resources',
+        actions: [
+          'Reassess remaining component priorities',
+          'Consider parallel development streams',
+          'Add additional developer resources',
+          'Defer low-priority components to future release'
+        ],
+        impact: 'schedule',
+        probability: 0.3
+      },
+      {
+        trigger: 'Critical component migration fails',
+        description: 'Implement temporary workaround and reschedule',
+        actions: [
+          'Implement feature flag to revert to mock data',
+          'Analyze root cause of failure',
+          'Develop alternative migration approach',
+          'Update timeline and communicate to stakeholders'
+        ],
+        impact: 'scope',
+        probability: 0.2
+      }
+    ];
   }
 }
