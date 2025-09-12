@@ -9,35 +9,42 @@ Create a comprehensive error fixing report that combines detailed root cause ana
 The final report should follow this integrated format:
 
 ### 1. Executive Summary
+
 - Brief overview of the error scope and impact
 - Total number of affected components/tests/features
 - High-level categorization of issues
 - Priority assessment
 
 ### 2. Error Analysis by Category
+
 For each major error category, include:
 
 #### Category Header
+
 - **Category Name** (with priority level)
 - **Affected Components**: List of files, tests, or features impacted
 
 #### Analysis Section
+
 - **Error Patterns**: Specific error messages and symptoms
 - **Root Cause Investigation**: Deep technical analysis of underlying issues
 - **Evidence from Codebase**: References to actual code, configuration, or documentation
 - **Impact Assessment**: How this category affects the overall system
 
 #### Resolution Tasks Section
+
 - **Task List**: Following the specified task format
 - **Implementation Strategy**: Suggested approach and order
 - **Success Criteria**: How to verify the fix works
 
 ### 3. Implementation Strategy
+
 - **Phase-based approach**: Organize tasks by priority and dependencies
 - **Resource requirements**: Time estimates and skill requirements
 - **Risk assessment**: Potential complications and mitigation strategies
 
 ### 4. Success Metrics and Validation
+
 - **Quantifiable targets**: Specific metrics to measure success
 - **Testing strategy**: How to validate fixes
 - **Monitoring approach**: Ongoing verification methods
@@ -53,6 +60,7 @@ For each major error category, include:
 ## Requirements
 
 ### Analysis Requirements
+
 - **Do not fix errors** - Focus on root cause analysis and solution proposing only
 - Ask user to provide error message if you don't know what to fix
 - Analyze the root causes thoroughly before writing tasks
@@ -62,6 +70,7 @@ For each major error category, include:
 - Distinguish between symptoms and underlying causes
 
 ### Task Requirements
+
 - Include at least one sub-task under each major task
 - Follow the exact task format specified below
 - Focus on actionable solutions that address root causes, not just symptoms
@@ -71,6 +80,7 @@ For each major error category, include:
 - Mark as system setup issue if the root cause is environmental/configuration
 
 ### Documentation Requirements
+
 - Read specs and steering documents for project context
 - Reference architectural patterns and design decisions
 - Include code snippets showing both problematic code and proposed fixes
@@ -112,18 +122,21 @@ Each task must follow this exact format:
 ## Integration Guidelines
 
 ### Combining Analysis with Tasks
+
 - Each error category should contain both analysis and resolution tasks
 - Tasks should directly address the root causes identified in the analysis
 - Include cross-references between analysis findings and task solutions
 - Maintain traceability from symptoms to root causes to solutions
 
 ### Evidence-Based Approach
+
 - Include actual error messages and stack traces
 - Reference specific files, line numbers, and code patterns
 - Cite relevant documentation or architectural decisions
 - Provide before/after code examples
 
 ### Actionable Solutions
+
 - Tasks should be specific and implementable
 - Include validation steps and success criteria
 - Provide implementation guidance and best practices
@@ -147,6 +160,7 @@ Before finalizing the report, ensure:
 ## Output Format
 
 Create a single comprehensive markdown file that integrates:
+
 1. Detailed technical analysis of error categories
 2. Evidence-based root cause investigation
 3. Actionable task lists with proper formatting

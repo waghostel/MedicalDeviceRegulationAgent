@@ -4,55 +4,95 @@
 
 The Medical Device Regulatory Assistant backend test suite is experiencing widespread failures across 227 test cases, with only 395 passing. This comprehensive analysis identifies root causes and provides actionable tasks to resolve the systemic issues affecting the test infrastructure.
 
-## Test Failure Overview
+**Overarching Recommendation: Dependency Injection and Test Fixture Factories**
 
-**Total Tests**: 632  
-**Failed**: 227  
-**Passed**: 395  
-**Skipped**: 10  
-
-The failures fall into distinct categories requiring targeted architectural fixes rather than individual test patches.
+A recurring theme in these failures is the lack of a consistent dependency injection (DI) pattern, which makes mocking and service isolation difficult. As we fix these issues, we should establish a pattern of creating "test fixture factories." This means creating a set of reusable fixtures that provide services (like the `ProjectService` or `OpenFDAService`) with their dependencies (like the database) already mocked or configured for a test environment. This will make writing robust and isolated tests for new features much easier in the future.
 
 ---
 
-## Category 1: Database Infrastructure Issues (Critical Priority)
+## Category 1: Test Environment and Database Infrastructure (Critical Priority)
 
 ### Analysis
 
-**Affected Tests**: 45+ tests including all `test_database_*`, `test_project_*`, and `test_auth_*` files
+**Affected Tests**: 45+ tests including all `test_database_*`, `test_project_*`, `test_auth_*`, and health check tests.
 
 **Error Patterns**:
+
 ```
 database.exceptions.DatabaseError: Database error in connection_initialize: Database initialization failed: Connection...
 RuntimeError: Critical service initialization failed: Database initialization failed: Connection...
+assert 500 == 503  # Health check failures
+KeyError: 'service'  # Missing configuration
 ```
 
 **Root Cause Investigation**:
-- The `DatabaseManager` class fails to initialize properly in test environments
-- SQLite async connection setup conflicts with test isolation requirements
-- Global database manager pattern creates state conflicts between tests
-- Connection pooling configuration is incompatible with in-memory SQLite testing
+
+- **Lack of a Centralized Test Environment:** Tests fail because they are running without a consistent and predictable environment configuration. Critical environment variables like `DATABASE_URL` are not set, and services requiring external dependencies (like Redis) are not disabled or mocked.
+- **Global State and Lack of Isolation:** The codebase relies on a global `db_manager` instance (`database/connection.py`). This is an anti-pattern for testing as it creates shared state between tests, leading to unpredictable failures. One test can affect the outcome of another.
+- **Incorrect Async Database Setup for Tests:** The current test fixtures do not correctly set up and tear down the async database engine and sessions for an in-memory SQLite database, which has specific connection requirements for testing.
 
 **Evidence from Codebase**:
-- `database/connection.py` uses global state management unsuitable for testing
-- Test fixtures in `conftest.py` don't properly isolate database instances
-- `get_database_manager()` function returns uninitialized instances in test context
+
+- No centralized test environment setup is present in `conftest.py`.
+- `database/connection.py` uses a global `db_manager` that is initialized once and shared.
+- Test fixtures in `conftest.py` do not properly isolate database instances for each test function.
 
 ### Resolution Tasks
 
-- [ ] 1. Fix Database Testing Infrastructure
-  - Refactor database test fixtures to use proper async session management with isolated in-memory databases
-  - Implement test-specific database configuration that bypasses the global database manager pattern
-  - Create isolated database instances for each test function to ensure proper test isolation
-  - Fix SQLite async connection pooling configuration for test environments
-  - Update all database-dependent test fixtures to use the new pattern
-  - Update `conftest.py` to properly manage database lifecycle in tests
-  - Potential root cause: DatabaseManager class initialization fails in test environments due to improper async connection setup and global state conflicts
-  - Potential solution: Create test-specific database fixtures using create_async_engine with StaticPool and proper async session management
-  - Test command: `cd medical-device-regulatory-assistant/backend && poetry run python -m pytest tests/test_database_integration.py -v`
+- [ ] 1. Test File Organization and Consolidation (Prerequisite)
+  - **Audit and Categorize Existing Test Files:** Review all 227+ test files in the backend directory and categorize them by functionality (database, API, services, integration, performance)
+  
+  - **Consolidate Redundant Test Files:** Merge duplicate or overlapping test files that test the same functionality to reduce maintenance overhead
+  
+  - **Create Organized Test Directory Structure:** Establish clear directory structure: `tests/unit/`, `tests/integration/`, `tests/fixtures/`, `tests/utils/`
+  
+  - **Remove Obsolete Test Files:** Delete test files that are no longer relevant or have been superseded by newer implementations
+  
+  - **Create Test File Naming Convention:** Establish consistent naming patterns for test files to improve discoverability and organization
+  
+  - Dependencies: None (prerequisite task)
+  
+  - Test command: `cd medical-device-regulatory-assistant/backend && find . -name "test_*.py" | wc -l` (should show reduced count)
+
+- [ ] 2. Establish a Centralized Test Environment and Fix Database Fixtures
+  - **Create a Centralized Test Environment:** In `conftest.py`, create a session-scoped, autouse fixture to set all necessary environment variables (`TESTING`, `DATABASE_URL`, `REDIS_URL`, `JWT_SECRET`, etc.) before any tests run. This ensures all tests run with a consistent configuration.
+  
+  - **Eliminate Global State in Tests:** Refactor the database fixtures to create a new, isolated in-memory database for each test function. This fixture should bypass the global `db_manager` entirely.
+  
+  - **Implement Correct Async Session Management:** The new fixture must use `create_async_engine` with `StaticPool` and correctly manage the lifecycle of the engine and session, yielding a session to the test and then cleaning up properly.
+  
+  - **Update All Database-Dependent Tests:** All tests that interact with the database must be updated to use the new, reliable session fixture.
+  
+  - **Add Development Guidelines:** Add a note to the project's development guide discouraging the use of global state and requiring the use of the new database fixture for all database-related tests.
+  
+  - Dependencies: Task 1 (Test File Organization)
+  
+  - Potential root cause: A combination of missing test environment configuration and a global database manager that is not isolated between tests.
+  
+  - Potential solution: Create a single, session-scoped fixture in `conftest.py` to configure the environment, and a separate function-scoped fixture to provide an isolated, in-memory database session for each test.
+  
+  - Test command: `cd medical-device-regulatory-assistant/backend && poetry run python -m pytest tests/test_database_integration.py -v && poetry run python -m pytest tests/test_health_check_service.py -v`
+  
   - Code snippet:
+    
     ```python
     # Fix in conftest.py
+    import os
+    import pytest
+    from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
+    from sqlalchemy.pool import StaticPool
+    
+    @pytest.fixture(scope="session", autouse=True)
+    def setup_test_environment():
+        os.environ["TESTING"] = "true"
+        os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
+        os.environ["REDIS_URL"] = ""  # Disable Redis for testing
+        os.environ["JWT_SECRET"] = "test_secret"
+        yield
+        # Cleanup
+        for key in ["TESTING", "DATABASE_URL", "REDIS_URL", "JWT_SECRET"]:
+            os.environ.pop(key, None)
+    
     @pytest_asyncio.fixture(scope="function")
     async def test_db_session():
         engine = create_async_engine(
@@ -60,22 +100,16 @@ RuntimeError: Critical service initialization failed: Database initialization fa
             poolclass=StaticPool,
             connect_args={"check_same_thread": False}
         )
-        
+    
         async with engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
-        
+    
         async_session = async_sessionmaker(engine, expire_on_commit=False)
-        
+    
         async with async_session() as session:
             yield session
-        
-        await engine.dispose()
     
-    # Fix in database/connection.py - Add test mode
-    class DatabaseManager:
-        def __init__(self, database_config: Union[str, DatabaseConfig], test_mode: bool = False):
-            self.test_mode = test_mode
-            # ... rest of initialization
+        await engine.dispose()
     ```
 
 ---
@@ -87,6 +121,7 @@ RuntimeError: Critical service initialization failed: Database initialization fa
 **Affected Tests**: All API endpoint tests, security tests, performance tests
 
 **Error Patterns**:
+
 ```
 httpx.ConnectError: All connection attempts failed
 TypeError: AsyncClient.__init__() got an unexpected keyword argument 'app'
@@ -94,27 +129,37 @@ AttributeError: 'async_generator' object has no attribute 'post'
 ```
 
 **Root Cause Investigation**:
-- Incorrect usage of `httpx.AsyncClient` with FastAPI applications
-- Test fixtures creating async generators instead of proper client instances
-- Missing proper async context management in test setup
-- FastAPI documentation recommends `TestClient` for most testing scenarios, not `AsyncClient`
 
-**Evidence from FastAPI Documentation**:
-According to FastAPI's official testing documentation, `TestClient` should be used for synchronous tests, while `AsyncClient` is only needed for specific async testing scenarios where you need to call other async functions within the test.
+- Incorrect usage of `httpx.AsyncClient` with FastAPI applications.
+- Test fixtures creating async generators instead of proper client instances.
+- Missing proper async context management in test setup.
+- **Misunderstanding of FastAPI Testing Patterns:** The team is not using the recommended `TestClient`. According to FastAPI's official documentation, `TestClient` is the preferred tool for most testing scenarios. It runs in the same thread as the test function, which simplifies debugging and allows for synchronous test code (i.e., no `async`/`await`), making tests cleaner and easier to read. `AsyncClient` is only necessary for advanced cases where you need to call other async functions within the test itself.
 
 ### Resolution Tasks
 
-- [ ] 2. Fix HTTP Client Testing Patterns
+- [ ] 3. Fix HTTP Client Testing Patterns
   - Replace incorrect AsyncClient(app=app) usage with proper TestClient pattern as recommended by FastAPI documentation
+  
   - Fix async generator issues in test fixtures that are returning generators instead of client instances
+  
   - Implement proper async context management for HTTP tests using TestClient with context managers
+  
   - Update all API endpoint tests to use synchronous TestClient pattern instead of AsyncClient
+  
   - Remove httpx.AsyncClient usage from test files where TestClient should be used
+  
   - Update test fixtures to return proper client instances instead of async generators
+  
+  - Dependencies: Task 2 (Database Fixtures)
+  
   - Potential root cause: Incorrect usage of httpx.AsyncClient with FastAPI applications and async generators being returned instead of client objects
+  
   - Potential solution: Use FastAPI's TestClient with proper context management for all API testing
-  - Test command: `cd medical-device-regulatory-assistant/backend && poetry run python -m pytest tests/test_project_api.py -v`
+  
+  - Test command: `cd medical-device-regulatory-assistant/backend && poetry run python -m pytest tests/integration/api/test_project_api.py -v`
+  
   - Code snippet:
+    
     ```python
     # Fix in conftest.py - Replace AsyncClient with TestClient
     from fastapi.testclient import TestClient
@@ -148,16 +193,19 @@ According to FastAPI's official testing documentation, `TestClient` should be us
 **Affected Tests**: Dashboard and project status tests
 
 **Error Patterns**:
+
 ```
 AttributeError: type object 'ProjectStatus' has no attribute 'ACTIVE'
 ```
 
 **Root Cause Investigation**:
+
 - Mismatch between expected enum values and actual enum definitions
 - The `ProjectStatus` enum in `models/project.py` defines `DRAFT`, `IN_PROGRESS`, `COMPLETED` but tests expect `ACTIVE`
 - Inconsistent enum usage across the codebase
 
 **Evidence from Code Review**:
+
 ```python
 # Current definition in models/project.py
 class ProjectStatus(enum.Enum):
@@ -169,17 +217,29 @@ class ProjectStatus(enum.Enum):
 
 ### Resolution Tasks
 
-- [ ] 3. Fix Model Enum Definitions and Consistency
+- [ ] 4. Fix Model Enum Definitions and Consistency
   - Standardize ProjectStatus enum values across the entire codebase to include missing ACTIVE status
+  
   - Update all test files to use correct enum values that match the model definitions
+  
   - Review and fix any database schema inconsistencies related to enum values
-  - Add database migration if schema updates are required for enum changes
+  
+  - **Add and Verify Database Migration:** Add a database migration for the enum change. **Note:** Modifying an `Enum` in an existing database with Alembic can be complex. The `autogenerate` command may not produce a correct script. This will likely require a custom-written migration script to `ALTER TYPE` correctly on PostgreSQL or handle the equivalent change in SQLite. This must be tested carefully.
+  
   - Ensure consistent enum usage in services, models, and API responses
+  
   - Update API documentation to reflect correct enum values
+  
+  - Dependencies: Task 2 (Database Fixtures), Task 3 (HTTP Client Patterns)
+  
   - Potential root cause: Mismatch between expected enum values in tests (ACTIVE) and actual enum definitions (DRAFT, IN_PROGRESS, COMPLETED)
+  
   - Potential solution: Add missing ACTIVE status to ProjectStatus enum and update all references
-  - Test command: `cd medical-device-regulatory-assistant/backend && poetry run python -m pytest tests/test_dashboard_integration.py::TestDashboardIntegration::test_get_dashboard_data_success -v`
+  
+  - Test command: `cd medical-device-regulatory-assistant/backend && poetry run python -m pytest tests/integration/test_dashboard_integration.py::TestDashboardIntegration::test_get_dashboard_data_success -v`
+  
   - Code snippet:
+    
     ```python
     # Fix in models/project.py
     class ProjectStatus(enum.Enum):
@@ -205,12 +265,14 @@ class ProjectStatus(enum.Enum):
 **Affected Tests**: All OpenFDA integration tests (10 skipped tests)
 
 **Error Patterns**:
+
 ```
 SKIPPED: FDA API not available: 'async_generator' object has no attribute 'search_predicates'
 services.openfda.FDAAPIError: Failed to search adverse events: 'coroutine' object has no attribute...
 ```
 
 **Root Cause Investigation**:
+
 - The OpenFDA service is returning async generators instead of proper service instances
 - Mock setup for FDA API testing is incorrect
 - Service instantiation pattern is not compatible with test fixtures
@@ -221,17 +283,29 @@ The `services/openfda.py` file shows the service class exists but test fixtures 
 
 ### Resolution Tasks
 
-- [ ] 4. Fix OpenFDA Service Integration and Mocking
+- [ ] 5. Fix OpenFDA Service Integration and Mocking
   - Create proper mock OpenFDA service instances for testing instead of async generators
+  
   - Fix service instantiation pattern to return proper service objects with expected methods
+  
   - Implement comprehensive async service testing fixtures with proper mocking
+  
   - Update OpenFDA service class to ensure methods like search_predicates are properly defined and accessible
+  
   - Create test-specific OpenFDA client configuration that doesn't require actual API access
+  
   - Implement proper error handling for service unavailability scenarios
+  
+  - Dependencies: Task 3 (HTTP Client Patterns)
+  
   - Potential root cause: OpenFDA service returning async generators instead of service instances and missing expected methods
+  
   - Potential solution: Implement proper service mocking with all required methods and fix service instantiation
-  - Test command: `cd medical-device-regulatory-assistant/backend && poetry run python -m pytest tests/test_openfda_integration.py -v`
+  
+  - Test command: `cd medical-device-regulatory-assistant/backend && poetry run python -m pytest tests/integration/services/test_openfda_integration.py -v`
+  
   - Code snippet:
+    
     ```python
     # Fix in conftest.py - Add proper OpenFDA service fixture
     @pytest.fixture
@@ -266,12 +340,14 @@ The `services/openfda.py` file shows the service class exists but test fixtures 
 **Affected Tests**: All authentication-related tests
 
 **Error Patterns**:
+
 ```
 assert 500 == 201  # Expected success, got server error
 assert 500 == 401  # Expected unauthorized, got server error
 ```
 
 **Root Cause Investigation**:
+
 - Authentication middleware is causing server errors instead of proper auth validation
 - JWT token generation and validation is not working in test environment
 - Mock authentication setup is incomplete or misconfigured
@@ -282,27 +358,45 @@ All authentication tests return 500 status codes regardless of whether tokens ar
 
 ### Resolution Tasks
 
-- [ ] 5. Fix Authentication and JWT Token Testing
+- [ ] 6. Fix Authentication and JWT Token Testing
   - Create proper JWT token generation and validation mocking for test environments
+  
   - Fix authentication middleware configuration to work correctly in test scenarios
-  - Implement comprehensive auth test fixtures with valid and invalid token scenarios
+  
+  - **Create Clear Authentication Fixtures:** Create two separate, clearly named fixtures: one that provides headers for a valid, authenticated user, and another that provides empty headers for unauthenticated requests. This will make the security context of each test explicit and easier to understand.
+  
   - Update authentication service to handle test environment properly without causing server errors
+  
   - Create mock user authentication that bypasses actual OAuth flow for testing
+  
   - Add proper error handling in authentication middleware to prevent 500 errors
+  
+  - Dependencies: Task 3 (HTTP Client Patterns), Task 5 (Service Integration)
+  
   - Potential root cause: Authentication middleware causing 500 server errors instead of proper auth validation responses
+  
   - Potential solution: Implement test-specific authentication mocking and fix middleware error handling
-  - Test command: `cd medical-device-regulatory-assistant/backend && poetry run python -m pytest tests/test_auth_endpoints.py::TestProjectsAuthentication::test_create_project_valid_auth -v`
+  
+  - Test command: `cd medical-device-regulatory-assistant/backend && poetry run python -m pytest tests/integration/auth/test_auth_endpoints.py::TestProjectsAuthentication::test_create_project_valid_auth -v`
+  
   - Code snippet:
+    
     ```python
     # Fix in conftest.py - Add auth fixtures
     @pytest.fixture
-    def auth_headers():
+    def authenticated_headers():
+        """Provides headers for a valid, authenticated user."""
         token = create_test_jwt_token({
             "sub": "test_user", 
             "email": "test@example.com",
             "name": "Test User"
         })
         return {"Authorization": f"Bearer {token}"}
+    
+    @pytest.fixture
+    def unauthenticated_headers():
+        """Provides empty headers for an unauthenticated user."""
+        return {}
     
     @pytest.fixture
     def mock_auth_service():
@@ -336,38 +430,65 @@ All authentication tests return 500 status codes regardless of whether tokens ar
 **Affected Tests**: Project service tests
 
 **Error Patterns**:
+
 ```
 AttributeError: property 'db_manager' of 'ProjectService' object has no setter
 ```
 
 **Root Cause Investigation**:
+
 - Service classes have read-only properties that tests are trying to modify
 - Dependency injection pattern is not compatible with test mocking
 - Service initialization requires proper database manager injection
 
 ### Resolution Tasks
 
-- [ ] 6. Fix Service Property and Dependency Injection Issues
+- [ ] 7. Fix Service Property and Dependency Injection Issues
   - Refactor service classes to use proper dependency injection instead of read-only properties
+  
   - Update service initialization to accept database manager injection for testing
+  
   - Create service factory functions that can be easily mocked in test environments
+  
   - Fix property setter issues by implementing proper service configuration patterns
+  
   - Update all service tests to use proper mocking and dependency injection
+  
   - Implement constructor-based dependency injection for all services
+  
+  - Dependencies: Task 2 (Database Fixtures), Task 5 (Service Integration)
+
+- [ ] 8. Test Infrastructure Validation and Performance Optimization
+  - **Validate Test Isolation:** Run tests multiple times to ensure no cross-test contamination or race conditions
+  
+  - **Performance Benchmarking:** Measure test execution time and ensure full suite completes within 60 seconds
+  
+  - **Memory Leak Detection:** Monitor memory usage during test execution to identify and fix memory leaks
+  
+  - **CI/CD Integration Testing:** Ensure all fixes work correctly in automated CI/CD environments
+  
+  - **Create Test Maintenance Documentation:** Document new testing patterns and best practices for future development
+  
+  - Dependencies: All previous tasks (1-7)
+  
   - Potential root cause: Service classes have read-only properties that tests cannot modify and improper dependency injection patterns
+  
   - Potential solution: Implement constructor-based dependency injection and remove read-only property constraints
-  - Test command: `cd medical-device-regulatory-assistant/backend && poetry run python -m pytest tests/test_project_service.py -v`
+  
+  - Test command: `cd medical-device-regulatory-assistant/backend && poetry run python -m pytest tests/unit/services/test_project_service.py -v`
+  
   - Code snippet:
+    
     ```python
     # Fix in services/projects.py
     class ProjectService:
         def __init__(self, db_manager: DatabaseManager = None):
             self._db_manager = db_manager or get_database_manager()
-        
+    
         @property
         def db_manager(self):
             return self._db_manager
-        
+    
         # Remove read-only constraint, allow injection
         def set_db_manager(self, db_manager: DatabaseManager):
             self._db_manager = db_manager
@@ -380,76 +501,35 @@ AttributeError: property 'db_manager' of 'ProjectService' object has no setter
 
 ---
 
-## Category 7: System Environment and Configuration (System Setup Issue)
-
-### Analysis
-
-**Affected Tests**: Health check and system integration tests
-
-**Error Patterns**:
-```
-assert 500 == 503  # Health check failures
-KeyError: 'service'  # Missing configuration
-```
-
-**Root Cause Investigation**:
-- Missing or incorrect environment variable configuration for testing
-- Some services require external dependencies (Redis, etc.) that aren't available in test environment
-- Test environment doesn't match production environment constraints
-
-### Resolution Tasks
-
-- [ ] 7. System Environment and Configuration Setup
-  - Configure proper test environment variables and settings for all test scenarios
-  - Set up test-specific configuration that doesn't require external services like Redis
-  - Create comprehensive test environment setup documentation and scripts
-  - Implement proper test database seeding and cleanup procedures
-  - Configure CI/CD environment to match test requirements and dependencies
-  - Add environment validation for test scenarios
-  - Potential root cause: Missing or incorrect environment configuration causing service initialization failures
-  - Potential solution: Create comprehensive test environment setup with proper configuration management
-  - Test command: `cd medical-device-regulatory-assistant/backend && poetry run python -m pytest tests/test_health_check_service.py -v`
-  - Code snippet:
-    ```python
-    # Fix in conftest.py - Add environment setup
-    @pytest.fixture(scope="session", autouse=True)
-    def setup_test_environment():
-        os.environ["TESTING"] = "true"
-        os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
-        os.environ["REDIS_URL"] = ""  # Disable Redis for testing
-        os.environ["FDA_API_KEY"] = "test_key"
-        os.environ["JWT_SECRET"] = "test_secret"
-        yield
-        # Cleanup environment
-        for key in ["TESTING", "DATABASE_URL", "REDIS_URL", "FDA_API_KEY", "JWT_SECRET"]:
-            os.environ.pop(key, None)
-    
-    # Add configuration validation
-    def validate_test_environment():
-        required_vars = ["TESTING", "DATABASE_URL"]
-        missing = [var for var in required_vars if not os.getenv(var)]
-        if missing:
-            raise EnvironmentError(f"Missing test environment variables: {missing}")
-    ```
-
----
-
 ## Implementation Strategy
 
-### Phase 1: Critical Infrastructure (Days 1-3)
-1. Fix database testing infrastructure (Task 1)
-2. Fix HTTP client testing patterns (Task 2)
+### Phase 1: Foundation and Organization (Days 1-2)
 
-### Phase 2: Core Functionality (Days 4-5)
-3. Fix model enum definitions (Task 3)
-4. Fix OpenFDA service integration (Task 4)
+1. **Test File Organization and Consolidation (Task 1)**
+2. **Establish Test Environment and Fix Database Infrastructure (Task 2)**
 
-### Phase 3: Authentication and Services (Days 6-7)
-5. Fix authentication testing (Task 5)
-6. Fix service dependency injection (Task 6)
+**Verification for Phase 1:** After completion, test file count should be reduced by 30-50%, and database connectivity tests should pass. Run `find . -name "test_*.py" | wc -l` to verify file count reduction and `pytest tests/unit/database/ -v` to verify database fixes.
 
-### Phase 4: Environment and Optimization (Day 8)
-7. System environment setup (Task 7)
+### Phase 2: Core Infrastructure (Days 3-4)
+
+3. **Fix HTTP client testing patterns (Task 3)**
+4. **Fix model enum definitions (Task 4)**
+
+**Verification for Phase 2:** All API endpoint tests should use TestClient pattern and enum-related tests should pass. Run `pytest tests/integration/api/ -v` and `pytest tests/unit/models/ -v` to verify.
+
+### Phase 3: Service Integration (Days 5-6)
+
+5. **Fix OpenFDA service integration (Task 5)**
+6. **Fix authentication testing (Task 6)**
+
+**Verification for Phase 3:** All service integration and authentication tests should pass. Run `pytest tests/integration/services/ -v` and `pytest tests/integration/auth/ -v` to verify.
+
+### Phase 4: Final Integration and Optimization (Days 7-8)
+
+7. **Fix service dependency injection (Task 7)**
+8. **Test infrastructure validation and performance optimization (Task 8)**
+
+**Verification for Phase 4:** Run the entire test suite (`pytest`). The target is to reduce the failed test count from 227 to fewer than 20, with full suite completing in <60 seconds. Any remaining failures should be addressed individually.
 
 ## Success Metrics
 
