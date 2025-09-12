@@ -29,7 +29,9 @@
         "rmdir *",
         "find *",
         "grep *",
-        "git checkout *"
+        "git checkout *",
+        "git stash *",
+        "git status"
     ],
     "typescript.autoClosingTags": false
 }
