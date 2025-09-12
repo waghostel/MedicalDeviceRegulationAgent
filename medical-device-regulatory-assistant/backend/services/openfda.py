@@ -407,6 +407,9 @@ class OpenFDAService:
         except PredicateNotFoundError:
             logger.info("No predicate devices found for search criteria")
             return []
+        except FDAAPIError:
+            # Re-raise FDA API errors as-is
+            raise
         except Exception as e:
             logger.error(f"Error searching predicates: {e}")
             raise FDAAPIError(f"Failed to search predicates: {str(e)}")

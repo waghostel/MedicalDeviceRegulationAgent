@@ -6,6 +6,7 @@ to avoid hitting rate limits. They can be skipped in CI/CD pipelines.
 """
 
 import pytest
+import pytest_asyncio
 import asyncio
 import os
 from typing import List
@@ -32,7 +33,7 @@ pytestmark = pytest.mark.integration
 class TestOpenFDAIntegration:
     """Integration tests with real FDA API"""
     
-    @pytest.fixture(scope="class")
+    @pytest_asyncio.fixture(scope="class")
     async def openfda_service(self):
         """Create OpenFDA service for integration testing"""
         # Use API key from environment if available
@@ -273,7 +274,7 @@ class TestOpenFDAIntegration:
 class TestOpenFDAPerformance:
     """Performance tests for OpenFDA service"""
     
-    @pytest.fixture(scope="class")
+    @pytest_asyncio.fixture(scope="class")
     async def openfda_service(self):
         """Create OpenFDA service for performance testing"""
         api_key = os.getenv("FDA_API_KEY")

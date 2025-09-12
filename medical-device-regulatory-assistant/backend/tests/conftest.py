@@ -330,6 +330,76 @@ async def mock_services():
     }
 
 
+@pytest.fixture
+def mock_openfda_service():
+    """
+    Create proper mock OpenFDA service instance for testing.
+    
+    This fixture creates a real OpenFDAService instance but mocks its
+    _make_request method to return test data instead of making actual API calls.
+    
+    Returns:
+        OpenFDAService: Service instance with mocked API calls
+    """
+    from services.openfda import OpenFDAService, FDASearchResult
+    from unittest.mock import patch
+    
+    service = OpenFDAService(api_key="test_key")
+    
+    with patch.object(service, '_make_request') as mock_request:
+        mock_request.return_value = {
+            "results": [
+                {
+                    "k_number": "K123456",
+                    "device_name": "Test Device",
+                    "statement_or_summary": "Test intended use",
+                    "product_code": "ABC",
+                    "date_received": "2023-01-01",
+                    "applicant": "Test Company",
+                    "contact": "Test Contact",
+                    "decision_description": "Substantially Equivalent"
+                }
+            ]
+        }
+        yield service
+
+
+@pytest.fixture
+def mock_openfda_service_empty():
+    """
+    Create mock OpenFDA service that returns empty results.
+    
+    Returns:
+        OpenFDAService: Service instance that returns no results
+    """
+    from services.openfda import OpenFDAService
+    from unittest.mock import patch
+    
+    service = OpenFDAService(api_key="test_key")
+    
+    with patch.object(service, '_make_request') as mock_request:
+        mock_request.return_value = {"results": []}
+        yield service
+
+
+@pytest.fixture
+def mock_openfda_service_error():
+    """
+    Create mock OpenFDA service that raises API errors.
+    
+    Returns:
+        OpenFDAService: Service instance that raises FDAAPIError
+    """
+    from services.openfda import OpenFDAService, FDAAPIError
+    from unittest.mock import patch
+    
+    service = OpenFDAService(api_key="test_key")
+    
+    with patch.object(service, '_make_request') as mock_request:
+        mock_request.side_effect = FDAAPIError("Test API error")
+        yield service
+
+
 # Legacy compatibility fixtures (deprecated - use new fixtures above)
 @pytest_asyncio.fixture(scope="function")
 async def test_session(test_db_session):
