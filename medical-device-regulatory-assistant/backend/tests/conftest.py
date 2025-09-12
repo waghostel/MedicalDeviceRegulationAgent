@@ -341,17 +341,3 @@ async def test_session(test_db_session):
         stacklevel=2
     )
     yield test_db_session
-
-
-@pytest_asyncio.fixture(scope="function")
-async def async_client():
-    """Legacy compatibility fixture - use test_client instead"""
-    import warnings
-    warnings.warn(
-        "async_client fixture is deprecated. Use test_client instead for API testing.",
-        DeprecationWarning,
-        stacklevel=2
-    )
-    import httpx
-    async with httpx.AsyncClient() as client:
-        yield client

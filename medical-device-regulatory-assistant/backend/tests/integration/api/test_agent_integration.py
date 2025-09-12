@@ -8,26 +8,19 @@ import asyncio
 import json
 from unittest.mock import AsyncMock, patch, MagicMock
 from fastapi.testclient import TestClient
-from httpx import AsyncClient
 
-from ..main import app
-from ..agents.regulatory_agent import RegulatoryAgent
-from ..agents.regulatory_agent_state import AgentTaskType, AgentStatus
-from ..services.session_manager import SessionManager
-from ..api.agent_integration import get_session_manager
+from main import app
+from agents.regulatory_agent import RegulatoryAgent
+from agents.regulatory_agent_state import AgentTaskType, AgentStatus
+from services.session_manager import SessionManager
+from api.agent_integration import get_session_manager
 
 
 @pytest.fixture
 def client():
     """Test client for FastAPI app"""
-    return TestClient(app)
-
-
-@pytest.fixture
-async def async_client():
-    """Async test client for FastAPI app"""
-    async with AsyncClient(app=app, base_url="http://test") as ac:
-        yield ac
+    with TestClient(app) as client:
+        yield client
 
 
 @pytest.fixture
@@ -86,8 +79,7 @@ def mock_session_manager():
 class TestAgentIntegration:
     """Test agent integration endpoints"""
     
-    @pytest.mark.asyncio
-    async def test_execute_agent_task_success(self, async_client, mock_agent):
+    def test_execute_agent_task_success(self, client, mock_agent):
         """Test successful agent task execution"""
         
         with patch('backend.api.agent_integration.session_manager') as mock_sm:
@@ -104,7 +96,7 @@ class TestAgentIntegration:
                     "parameters": {"product_code": "DQK"}
                 }
                 
-                response = await async_client.post(
+                response = client.post(
                     "/api/agent/execute",
                     json=request_data,
                     headers={"Authorization": "Bearer test-token"}
@@ -119,8 +111,7 @@ class TestAgentIntegration:
                 assert data["confidence"] == 0.85
                 assert "result" in data
     
-    @pytest.mark.asyncio
-    async def test_execute_agent_task_invalid_task_type(self, async_client):
+    def test_execute_agent_task_invalid_task_type(self, client):
         """Test agent task execution with invalid task type"""
         
         request_data = {
@@ -130,7 +121,7 @@ class TestAgentIntegration:
             "intended_use": "Test use"
         }
         
-        response = await async_client.post(
+        response = client.post(
             "/api/agent/execute",
             json=request_data,
             headers={"Authorization": "Bearer test-token"}
@@ -139,14 +130,13 @@ class TestAgentIntegration:
         assert response.status_code == 400
         assert "Invalid task type" in response.json()["detail"]
     
-    @pytest.mark.asyncio
-    async def test_get_session_status(self, async_client, mock_agent):
+    def test_get_session_status(self, client, mock_agent):
         """Test getting session status"""
         
         with patch('backend.api.agent_integration.session_manager') as mock_sm:
             mock_sm.get_session.return_value = mock_agent
             
-            response = await async_client.get(
+            response = client.get(
                 "/api/agent/session/test-session-123/status",
                 headers={"Authorization": "Bearer test-token"}
             )
@@ -158,22 +148,20 @@ class TestAgentIntegration:
             assert data["status"] == "completed"
             assert "completed_tasks" in data
     
-    @pytest.mark.asyncio
-    async def test_get_session_status_not_found(self, async_client):
+    def test_get_session_status_not_found(self, client):
         """Test getting status for non-existent session"""
         
         with patch('backend.api.agent_integration.session_manager') as mock_sm:
             mock_sm.get_session.return_value = None
             
-            response = await async_client.get(
+            response = client.get(
                 "/api/agent/session/nonexistent/status",
                 headers={"Authorization": "Bearer test-token"}
             )
             
             assert response.status_code == 404
     
-    @pytest.mark.asyncio
-    async def test_cancel_session_task(self, async_client, mock_agent):
+    def test_cancel_session_task(self, client, mock_agent):
         """Test cancelling a session task"""
         
         with patch('backend.api.agent_integration.session_manager') as mock_sm:
@@ -191,7 +179,7 @@ class TestAgentIntegration:
                 "reason": "User requested cancellation"
             }
             
-            response = await async_client.post(
+            response = client.post(
                 "/api/agent/session/test-session-123/cancel",
                 json=request_data,
                 headers={"Authorization": "Bearer test-token"}
@@ -203,14 +191,13 @@ class TestAgentIntegration:
             assert data["session_id"] == "test-session-123"
             assert data["status"] == "cancelled"
     
-    @pytest.mark.asyncio
-    async def test_health_check(self, async_client):
+    def test_health_check(self, client):
         """Test agent integration health check"""
         
         with patch('backend.api.agent_integration.session_manager') as mock_sm:
             mock_sm.get_active_session_count.return_value = 5
             
-            response = await async_client.get("/api/agent/health")
+            response = client.get("/api/agent/health")
             
             assert response.status_code == 200
             data = response.json()
@@ -267,8 +254,7 @@ class TestCopilotKitIntegration:
 class TestRealTimeUpdates:
     """Test real-time status updates via Server-Sent Events"""
     
-    @pytest.mark.asyncio
-    async def test_session_stream_events(self, async_client, mock_agent):
+    def test_session_stream_events(self, client, mock_agent):
         """Test SSE stream for session updates"""
         
         with patch('backend.api.agent_integration.session_manager') as mock_sm:
@@ -289,7 +275,7 @@ class TestRealTimeUpdates:
             ]
             
             # Test SSE endpoint
-            response = await async_client.get(
+            response = client.get(
                 "/api/agent/session/test-session/stream",
                 headers={"Authorization": "Bearer test-token"}
             )
@@ -301,8 +287,7 @@ class TestRealTimeUpdates:
 class TestErrorHandling:
     """Test error handling in agent integration"""
     
-    @pytest.mark.asyncio
-    async def test_agent_execution_error(self, async_client):
+    def test_agent_execution_error(self, client):
         """Test handling of agent execution errors"""
         
         with patch('backend.api.agent_integration.RegulatoryAgent') as mock_agent_class:
@@ -317,7 +302,7 @@ class TestErrorHandling:
                 "intended_use": "Test use"
             }
             
-            response = await async_client.post(
+            response = client.post(
                 "/api/agent/execute",
                 json=request_data,
                 headers={"Authorization": "Bearer test-token"}
@@ -326,8 +311,7 @@ class TestErrorHandling:
             assert response.status_code == 500
             assert "Agent task execution failed" in response.json()["detail"]
     
-    @pytest.mark.asyncio
-    async def test_unauthorized_access(self, async_client):
+    def test_unauthorized_access(self, client):
         """Test unauthorized access to agent endpoints"""
         
         request_data = {
@@ -338,7 +322,7 @@ class TestErrorHandling:
         }
         
         # No authorization header
-        response = await async_client.post("/api/agent/execute", json=request_data)
+        response = client.post("/api/agent/execute", json=request_data)
         
         # Should still work with default test user in MVP
         # In production, this would return 401

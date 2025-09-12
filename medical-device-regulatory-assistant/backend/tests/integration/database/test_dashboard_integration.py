@@ -7,7 +7,6 @@ import pytest
 import json
 from datetime import datetime, timezone
 from unittest.mock import AsyncMock, patch, MagicMock
-from httpx import AsyncClient
 from fastapi.testclient import TestClient
 
 from main import app
@@ -27,10 +26,10 @@ class TestDashboardIntegration:
         return TestClient(app)
 
     @pytest.fixture
-    async def async_client(self):
-        """Async test client for FastAPI app."""
-        async with AsyncClient(app=app, base_url="http://test") as ac:
-            yield ac
+    def test_client(self):
+        """Test client for FastAPI app."""
+        with TestClient(app) as client:
+            yield client
 
     @pytest.fixture
     def mock_project_service(self):
@@ -186,12 +185,11 @@ class TestDashboardIntegration:
         
         return service
 
-    @pytest.mark.asyncio
-    async def test_get_dashboard_data_success(self, async_client, mock_project_service):
+    def test_get_dashboard_data_success(self, test_client, mock_project_service):
         """Test successful dashboard data retrieval."""
         
         with patch('api.projects.project_service', mock_project_service):
-            response = await async_client.get(
+            response = test_client.get(
                 "/api/projects/1/dashboard",
                 headers={"Authorization": "Bearer test-token"}
             )
@@ -228,19 +226,18 @@ class TestDashboardIntegration:
             assert data["recent_activity"][0]["type"] == "classification"
             assert data["recent_activity"][0]["title"] == "Device Classification Completed"
 
-    @pytest.mark.asyncio
-    async def test_dashboard_data_caching(self, async_client, mock_project_service):
+    def test_dashboard_data_caching(self, test_client, mock_project_service):
         """Test dashboard data caching functionality."""
         
         with patch('api.projects.project_service', mock_project_service):
             # First request
-            response1 = await async_client.get(
+            response1 = test_client.get(
                 "/api/projects/1/dashboard",
                 headers={"Authorization": "Bearer test-token"}
             )
             
             # Second request (should use cache)
-            response2 = await async_client.get(
+            response2 = test_client.get(
                 "/api/projects/1/dashboard",
                 headers={"Authorization": "Bearer test-token"}
             )
@@ -251,24 +248,22 @@ class TestDashboardIntegration:
             # Service should be called only once due to caching
             assert mock_project_service.get_dashboard_data.call_count == 2  # Called for each request in test
 
-    @pytest.mark.asyncio
-    async def test_dashboard_data_unauthorized(self, async_client):
+    def test_dashboard_data_unauthorized(self, test_client):
         """Test dashboard data access without authentication."""
         
-        response = await async_client.get("/api/projects/1/dashboard")
+        response = test_client.get("/api/projects/1/dashboard")
         
         # Should return 401 or redirect to auth
         assert response.status_code in [401, 422]  # 422 for missing auth header
 
-    @pytest.mark.asyncio
-    async def test_dashboard_data_project_not_found(self, async_client):
+    def test_dashboard_data_project_not_found(self, test_client):
         """Test dashboard data for non-existent project."""
         
         mock_service = AsyncMock(spec=ProjectService)
         mock_service.get_dashboard_data.side_effect = Exception("Project not found")
         
         with patch('api.projects.project_service', mock_service):
-            response = await async_client.get(
+            response = test_client.get(
                 "/api/projects/999/dashboard",
                 headers={"Authorization": "Bearer test-token"}
             )

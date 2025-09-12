@@ -7,11 +7,17 @@ import json
 from datetime import datetime, timezone, timedelta
 from unittest.mock import AsyncMock, patch, MagicMock
 from fastapi.testclient import TestClient
-from httpx import AsyncClient
 
-from ..main import app
-from ..services.audit_logger import AuditLogger, AuditLogEntry
-from ..models.user import User
+from main import app
+from services.audit_logger import AuditLogger, AuditLogEntry
+from models.user import User
+
+
+@pytest.fixture
+def client():
+    """Test client for FastAPI app"""
+    with TestClient(app) as client:
+        yield client
 
 
 @pytest.fixture
@@ -88,9 +94,9 @@ def sample_audit_summary():
 class TestAuditTrailAPI:
     """Test audit trail API endpoints"""
     
-    @pytest.mark.asyncio
-    async def test_get_audit_trail_success(
+    def test_get_audit_trail_success(
         self,
+        client,
         mock_user,
         mock_audit_logger,
         sample_audit_entries,
@@ -104,8 +110,7 @@ class TestAuditTrailAPI:
         
         with patch('backend.api.audit.get_current_user', return_value=mock_user):
             with patch('backend.api.audit.get_audit_logger', return_value=mock_audit_logger):
-                async with AsyncClient(app=app, base_url="http://test") as ac:
-                    response = await ac.get("/api/audit/trail/1")
+                response = client.get("/api/audit/trail/1")
         
         assert response.status_code == 200
         data = response.json()
@@ -125,9 +130,9 @@ class TestAuditTrailAPI:
             limit=100
         )
     
-    @pytest.mark.asyncio
-    async def test_get_audit_trail_with_filters(
+    def test_get_audit_trail_with_filters(
         self,
+        client,
         mock_user,
         mock_audit_logger,
         sample_audit_entries,
@@ -140,15 +145,14 @@ class TestAuditTrailAPI:
         
         with patch('backend.api.audit.get_current_user', return_value=mock_user):
             with patch('backend.api.audit.get_audit_logger', return_value=mock_audit_logger):
-                async with AsyncClient(app=app, base_url="http://test") as ac:
-                    response = await ac.get(
-                        "/api/audit/trail/1",
-                        params={
-                            "user_id": 1,
-                            "action_filter": "predicate",
-                            "limit": 50
-                        }
-                    )
+                response = client.get(
+                    "/api/audit/trail/1",
+                    params={
+                        "user_id": 1,
+                        "action_filter": "predicate",
+                        "limit": 50
+                    }
+                )
         
         assert response.status_code == 200
         data = response.json()
@@ -157,10 +161,7 @@ class TestAuditTrailAPI:
         assert data["filters_applied"]["action_filter"] == "predicate"
         assert data["filters_applied"]["limit"] == 50
     
-    @pytest.mark.asyncio
-    async def test_export_audit_trail_json(
-        self,
-        mock_user,
+    def test_export_audit_trail_json(self, client, mock_user,
         mock_audit_logger
     ):
         """Test audit trail export in JSON format"""
@@ -170,8 +171,7 @@ class TestAuditTrailAPI:
         
         with patch('backend.api.audit.get_current_user', return_value=mock_user):
             with patch('backend.api.audit.get_audit_logger', return_value=mock_audit_logger):
-                async with AsyncClient(app=app, base_url="http://test") as ac:
-                    response = await ac.post(
+                response = client.post(
                         "/api/audit/export",
                         json={
                             "project_id": 1,
@@ -192,10 +192,7 @@ class TestAuditTrailAPI:
             end_date=None
         )
     
-    @pytest.mark.asyncio
-    async def test_export_audit_trail_csv(
-        self,
-        mock_user,
+    def test_export_audit_trail_csv(self, client, mock_user,
         mock_audit_logger
     ):
         """Test audit trail export in CSV format"""
@@ -205,8 +202,7 @@ class TestAuditTrailAPI:
         
         with patch('backend.api.audit.get_current_user', return_value=mock_user):
             with patch('backend.api.audit.get_audit_logger', return_value=mock_audit_logger):
-                async with AsyncClient(app=app, base_url="http://test") as ac:
-                    response = await ac.post(
+                response = client.post(
                         "/api/audit/export",
                         json={
                             "project_id": 1,
@@ -218,10 +214,7 @@ class TestAuditTrailAPI:
         assert response.headers["content-type"] == "text/csv; charset=utf-8"
         assert "attachment" in response.headers["content-disposition"]
     
-    @pytest.mark.asyncio
-    async def test_generate_compliance_report(
-        self,
-        mock_user,
+    def test_generate_compliance_report(self, client, mock_user,
         mock_audit_logger,
         sample_audit_entries,
         sample_audit_summary
@@ -239,8 +232,7 @@ class TestAuditTrailAPI:
                         "integrity_score": 1.0
                     }
                     
-                    async with AsyncClient(app=app, base_url="http://test") as ac:
-                        response = await ac.post(
+                    response = client.post(
                             "/api/audit/compliance-report",
                             json={
                                 "project_id": 1,
@@ -262,10 +254,7 @@ class TestAuditTrailAPI:
         compliance = data["regulatory_compliance"]
         assert compliance["fda_traceability"] is True
     
-    @pytest.mark.asyncio
-    async def test_verify_audit_integrity(
-        self,
-        mock_user,
+    def test_verify_audit_integrity(self, client, mock_user,
         mock_audit_logger,
         sample_audit_entries
     ):
@@ -276,8 +265,7 @@ class TestAuditTrailAPI:
         with patch('backend.api.audit.get_current_user', return_value=mock_user):
             with patch('backend.api.audit.get_audit_logger', return_value=mock_audit_logger):
                 with patch('backend.api.audit._verify_entry_integrity', return_value=True):
-                    async with AsyncClient(app=app, base_url="http://test") as ac:
-                        response = await ac.get("/api/audit/integrity/1")
+                    response = client.get("/api/audit/integrity/1")
         
         assert response.status_code == 200
         data = response.json()
@@ -289,18 +277,14 @@ class TestAuditTrailAPI:
         assert data["integrity_score"] == 1.0
         assert data["hash_algorithm"] == "SHA-256"
     
-    @pytest.mark.asyncio
-    async def test_log_audit_entry(
-        self,
-        mock_user,
+    def test_log_audit_entry(self, client, mock_user,
         mock_audit_logger
     ):
         """Test logging new audit entry"""
         
         with patch('backend.api.audit.get_current_user', return_value=mock_user):
             with patch('backend.api.audit.get_audit_logger', return_value=mock_audit_logger):
-                async with AsyncClient(app=app, base_url="http://test") as ac:
-                    response = await ac.post(
+                response = client.post(
                         "/api/audit/log",
                         params={"project_id": 1, "action": "test_action"},
                         json={
@@ -321,18 +305,14 @@ class TestAuditTrailAPI:
         # Verify audit logger was called
         mock_audit_logger.log_agent_action.assert_called_once()
     
-    @pytest.mark.asyncio
-    async def test_apply_retention_policy(
-        self,
-        mock_user,
+    def test_apply_retention_policy(self, client, mock_user,
         mock_audit_logger
     ):
         """Test applying retention policy"""
         
         with patch('backend.api.audit.get_current_user', return_value=mock_user):
             with patch('backend.api.audit.get_audit_logger', return_value=mock_audit_logger):
-                async with AsyncClient(app=app, base_url="http://test") as ac:
-                    response = await ac.post(
+                response = client.post(
                         "/api/audit/retention-policy",
                         json={
                             "retention_days": 365,
@@ -432,28 +412,24 @@ class TestAuditHelperFunctions:
 class TestAuditAPIErrorHandling:
     """Test error handling in audit API"""
     
-    @pytest.mark.asyncio
-    async def test_get_audit_trail_error(self, mock_user, mock_audit_logger):
+    def test_get_audit_trail_error(self, client, mock_user, mock_audit_logger):
         """Test error handling in get_audit_trail"""
         
         mock_audit_logger.get_audit_trail.side_effect = Exception("Database error")
         
         with patch('backend.api.audit.get_current_user', return_value=mock_user):
             with patch('backend.api.audit.get_audit_logger', return_value=mock_audit_logger):
-                async with AsyncClient(app=app, base_url="http://test") as ac:
-                    response = await ac.get("/api/audit/trail/1")
+                response = client.get("/api/audit/trail/1")
         
         assert response.status_code == 500
         assert "Failed to retrieve audit trail" in response.json()["detail"]
     
-    @pytest.mark.asyncio
-    async def test_export_unsupported_format(self, mock_user, mock_audit_logger):
+    def test_export_unsupported_format(self, client, mock_user, mock_audit_logger):
         """Test export with unsupported format"""
         
         with patch('backend.api.audit.get_current_user', return_value=mock_user):
             with patch('backend.api.audit.get_audit_logger', return_value=mock_audit_logger):
-                async with AsyncClient(app=app, base_url="http://test") as ac:
-                    response = await ac.post(
+                response = client.post(
                         "/api/audit/export",
                         json={
                             "project_id": 1,
