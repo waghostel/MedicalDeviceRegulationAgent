@@ -21,6 +21,7 @@ if TYPE_CHECKING:
 class ProjectStatus(enum.Enum):
     """Project status enumeration"""
     DRAFT = "draft"
+    ACTIVE = "active"
     IN_PROGRESS = "in_progress"
     COMPLETED = "completed"
 
