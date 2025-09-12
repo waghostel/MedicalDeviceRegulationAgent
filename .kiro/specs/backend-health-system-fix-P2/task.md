@@ -4,7 +4,93 @@
 
 The Medical Device Regulatory Assistant backend test suite is experiencing widespread failures across 227 test cases, with only 395 passing. This comprehensive analysis identifies root causes and provides actionable tasks to resolve the systemic issues affecting the test infrastructure.
 
-**Overarching Recommendation: Dependency Injection and Test Fixture Factories**
+
+## Development Rules
+
+- Use **`pnpm`** instead of npm for JavaScript/TypeScript.
+- Use **`poetry`** for Python commands (e.g. `poetry run python test_document_tool.py`).
+- Create the test script and run it instead of run it directly with `poetry run python -c`
+- Follow **Test-Driven Development (TDD)**.
+- Always clear the terminal before running a new command. Type the clear command first, press Enter, then type the actual command and press Enter again.
+- Document the faild and skipped test in the from chat history into **Undone tests/Skipped test**.
+
+Example 1(Windows):
+
+```bash
+cls
+<command>
+```
+
+Example 2 (Mac and Linux)
+
+```bash
+clear
+<command>
+```
+
+- After reading this file, say: **"I will use poetry and pnpm"**.
+
+## Workflow
+
+1. Create a code-writing plan for the task.
+2. Define the testing criteria.
+3. Fetch related documentation (context7) if needed.
+4. Implement the task/code.
+5. Run tests after completing the task.
+   - If tests fail, fetch additional documentation (context7).
+6. Write a **task report** in `./.kiro/specs/[your-spec-name]/task-execute-history/` (e.g. `task-1.1.md`).
+   - Be transparent about test results, especially if some tests require future verification.
+   - If the test script has been modified, skipped in the developemnt process or skipped chat history, document faild and skipped test in **Undone tests/Skipped test**.
+7. Check previous chat history and verify again if there is any test being pass or simplified from our development process, make sure to document them follow our task report format.
+
+## Test-Driven Development (TDD)
+
+### Testing Guidelines
+
+1. **Pre-Development**
+   - Clearly define the **expected test outcomes** before coding begins.
+2. **Post-Development**
+
+   - Document **all test results** in:
+
+     ```shell
+     ./.kiro/specs/[your-spec-name]/task-execute-history/
+     ```
+
+   - This ensures full **traceability** of test executions.
+
+3. **Failed Tests**
+   - **Definition**: Tests that did not pass in the latest test run.
+   - **Action**: Record the test name, the failure reason, and provide a reference to the related test report.
+4. **Skipped and Simplified Tests**
+   - **Definition**: Tests that are skipped or simplified because the problem is either too complex or outside the current project scope.
+   - **Action**: Identify them from the development process or chat history, and clearly document the reason for skipping.
+
+### Task Report Format
+
+Each completed task requires a report:
+
+#### Task Report Template
+
+- **Task**: [Task ID and Title]
+- **Summary of Changes**
+  - [Brief description of change #1]
+  - [Brief description of change #2]
+- **Test Plan & Results**
+  - **Unit Tests**: [Description]
+    - [Test command]
+      - Result: [✔ All tests passed / ✘ Failures]
+  - **Integration Tests**: [Description]
+    - [Test command]
+      - Result: [✔ Passed / ✘ Failures]
+  - **Manual Verification**: [Steps & findings]
+    - Result: [✔ Works as expected]
+  - **Undone tests/Skipped test**:
+    - [ ][Test name]
+      - [Test command]
+- **Code Snippets (Optional)**: Show relevant diffs or highlights.
+
+### **Overarching Recommendation: Dependency Injection and Test Fixture Factories**
 
 A recurring theme in these failures is the lack of a consistent dependency injection (DI) pattern, which makes mocking and service isolation difficult. As we fix these issues, we should establish a pattern of creating "test fixture factories." This means creating a set of reusable fixtures that provide services (like the `ProjectService` or `OpenFDAService`) with their dependencies (like the database) already mocked or configured for a test environment. This will make writing robust and isolated tests for new features much easier in the future.
 
@@ -39,7 +125,7 @@ KeyError: 'service'  # Missing configuration
 
 ### Resolution Tasks
 
-- [ ] 1. Test File Organization and Consolidation (Prerequisite)
+- [x] 1. Test File Organization and Consolidation (Prerequisite)
   - **Audit and Categorize Existing Test Files:** Review all 227+ test files in the backend directory and categorize them by functionality (database, API, services, integration, performance)
   
   - **Consolidate Redundant Test Files:** Merge duplicate or overlapping test files that test the same functionality to reduce maintenance overhead
@@ -74,7 +160,7 @@ KeyError: 'service'  # Missing configuration
   - Test command: `cd medical-device-regulatory-assistant/backend && poetry run python -m pytest tests/test_database_integration.py -v && poetry run python -m pytest tests/test_health_check_service.py -v`
   
   - Code snippet:
-    
+
     ```python
     # Fix in conftest.py
     import os
@@ -159,7 +245,7 @@ AttributeError: 'async_generator' object has no attribute 'post'
   - Test command: `cd medical-device-regulatory-assistant/backend && poetry run python -m pytest tests/integration/api/test_project_api.py -v`
   
   - Code snippet:
-    
+
     ```python
     # Fix in conftest.py - Replace AsyncClient with TestClient
     from fastapi.testclient import TestClient
@@ -239,7 +325,7 @@ class ProjectStatus(enum.Enum):
   - Test command: `cd medical-device-regulatory-assistant/backend && poetry run python -m pytest tests/integration/test_dashboard_integration.py::TestDashboardIntegration::test_get_dashboard_data_success -v`
   
   - Code snippet:
-    
+
     ```python
     # Fix in models/project.py
     class ProjectStatus(enum.Enum):
@@ -305,7 +391,7 @@ The `services/openfda.py` file shows the service class exists but test fixtures 
   - Test command: `cd medical-device-regulatory-assistant/backend && poetry run python -m pytest tests/integration/services/test_openfda_integration.py -v`
   
   - Code snippet:
-    
+
     ```python
     # Fix in conftest.py - Add proper OpenFDA service fixture
     @pytest.fixture
@@ -380,7 +466,7 @@ All authentication tests return 500 status codes regardless of whether tokens ar
   - Test command: `cd medical-device-regulatory-assistant/backend && poetry run python -m pytest tests/integration/auth/test_auth_endpoints.py::TestProjectsAuthentication::test_create_project_valid_auth -v`
   
   - Code snippet:
-    
+
     ```python
     # Fix in conftest.py - Add auth fixtures
     @pytest.fixture
@@ -478,7 +564,7 @@ AttributeError: property 'db_manager' of 'ProjectService' object has no setter
   - Test command: `cd medical-device-regulatory-assistant/backend && poetry run python -m pytest tests/unit/services/test_project_service.py -v`
   
   - Code snippet:
-    
+
     ```python
     # Fix in services/projects.py
     class ProjectService:
