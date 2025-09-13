@@ -22,7 +22,7 @@ from sqlalchemy import select, and_, or_, desc
 from sqlalchemy.orm import selectinload
 
 # Internal imports
-from backend.models.document_models import (
+from models.document_models import (
     ProcessedDocument,
     DocumentMetadata,
     DocumentVersion,

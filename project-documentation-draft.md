@@ -17,16 +17,19 @@ I was inspired to build InventA after recognizing that this regulatory complexit
 Building InventA taught me several key lessons about developing AI-powered regulatory tools:
 
 **Technical Architecture Insights:**
+
 - **Agent-Based Design**: Implementing LangGraph for state-based agent workflows proved essential for handling complex, multi-step regulatory processes that can be interrupted and resumed
 - **Real-time Data Integration**: Working with the openFDA API taught me the importance of robust rate limiting (240 requests/minute), circuit breaker patterns, and comprehensive error handling for external API dependencies
 - **Compliance-First Development**: Building for regulatory use cases requires extensive audit trails, confidence scoring, and human-in-the-loop validation at every step
 
 **Domain-Specific Challenges:**
+
 - **Regulatory Complexity**: Understanding FDA product codes, CFR sections, and substantial equivalence criteria required deep domain research
 - **Data Quality**: FDA data varies significantly in completeness and format, requiring sophisticated parsing and confidence scoring algorithms
 - **User Experience**: Regulatory professionals need both conversational AI interfaces and structured data exports for formal submissions
 
 **Performance and Scalability:**
+
 - **Caching Strategy**: Implementing Redis caching reduced API response times by 80% for repeated queries
 - **Database Design**: SQLite proved sufficient for MVP development while maintaining audit trail requirements
 - **Testing Infrastructure**: Achieving 95%+ test success rates required comprehensive mock systems and database isolation strategies
@@ -34,6 +37,7 @@ Building InventA taught me several key lessons about developing AI-powered regul
 ### How I Built the Project
 
 **Frontend Architecture (Next.js + React):**
+
 ```typescript
 // Core technology stack
 - Next.js 15 with App Router for modern React development
@@ -44,6 +48,7 @@ Building InventA taught me several key lessons about developing AI-powered regul
 ```
 
 **Backend Services (FastAPI + Python):**
+
 ```python
 # Agent-based architecture
 - LangGraph for state-managed regulatory workflows
@@ -55,6 +60,7 @@ Building InventA taught me several key lessons about developing AI-powered regul
 
 **AI Integration Strategy:**
 The system uses a "human-in-the-loop" philosophy where AI suggests and automates, but human experts make final decisions. Every AI output includes:
+
 - Confidence scores (0-1) with detailed reasoning
 - Complete source citations with URLs and effective dates
 - Exportable audit trails for regulatory inspections
@@ -62,34 +68,36 @@ The system uses a "human-in-the-loop" philosophy where AI suggests and automates
 **Key Technical Innovations:**
 
 1. **Intelligent Predicate Matching Algorithm:**
-```python
-# Advanced FDA API query building
-def build_predicate_query(device_description, intended_use, product_code=None):
+   
+   ```python
+   # Advanced FDA API query building
+   def build_predicate_query(device_description, intended_use, product_code=None):
     query_parts = []
-    
+   
     # Semantic matching for device characteristics
     for term in extract_key_terms(device_description):
         query_parts.append(f'device_name:"{term}" OR statement_or_summary:"{term}"')
-    
+   
     # Regulatory pathway filtering
     if product_code:
         query_parts.append(f'product_code:"{product_code}"')
-    
+   
     return " AND ".join(query_parts)
-```
+   ```
 
 2. **Real-time Regulatory Dashboard:**
-```typescript
-// Project-based workspace management
-interface RegulatoryProject {
-  deviceName: string;
-  intendedUse: string;
-  classificationStatus: DeviceClass;
-  predicateDevices: PredicateDevice[];
-  complianceChecklist: ChecklistItem[];
-  auditTrail: AgentInteraction[];
-}
-```
+   
+   ```typescript
+   // Project-based workspace management
+   interface RegulatoryProject {
+   deviceName: string;
+   intendedUse: string;
+   classificationStatus: DeviceClass;
+   predicateDevices: PredicateDevice[];
+   complianceChecklist: ChecklistItem[];
+   auditTrail: AgentInteraction[];
+   }
+   ```
 
 3. **Comprehensive Testing Infrastructure:**
 - **95%+ Frontend Test Success Rate**: Enhanced React Testing Library with proper `act()` wrapping
@@ -100,6 +108,7 @@ interface RegulatoryProject {
 
 **1. FDA API Complexity and Rate Limiting**
 The openFDA API has strict rate limits (240 requests/minute) and inconsistent data formats. I solved this by implementing:
+
 - Intelligent caching with Redis (80% cache hit rate)
 - Circuit breaker patterns for API resilience
 - Exponential backoff with retry logic
@@ -107,6 +116,7 @@ The openFDA API has strict rate limits (240 requests/minute) and inconsistent da
 
 **2. Regulatory Compliance Requirements**
 Building for regulatory use requires extensive audit trails and human oversight. My solutions included:
+
 - Complete reasoning traces for all AI decisions
 - Confidence scoring with detailed justification
 - Exportable audit logs for regulatory inspections
@@ -114,6 +124,7 @@ Building for regulatory use requires extensive audit trails and human oversight.
 
 **3. Complex State Management for Agent Workflows**
 Regulatory processes are multi-step and can be interrupted. I addressed this with:
+
 - LangGraph state-based agent architecture
 - Checkpoint system for long-running processes
 - Conversation context preservation across sessions
@@ -121,6 +132,7 @@ Regulatory processes are multi-step and can be interrupted. I addressed this wit
 
 **4. Testing Reliability in Complex Systems**
 Achieving consistent test results across frontend and backend required:
+
 - Mock FDA API responses with realistic data
 - Database transaction isolation for each test
 - Comprehensive error resolution systems
@@ -128,6 +140,7 @@ Achieving consistent test results across frontend and backend required:
 
 **5. User Experience for Domain Experts**
 Regulatory professionals need both AI assistance and traditional data exports:
+
 - Conversational UI with CopilotKit for natural interactions
 - Structured data tables for formal analysis
 - PDF export capabilities for submission materials
@@ -136,6 +149,7 @@ Regulatory professionals need both AI assistance and traditional data exports:
 ### Technical Architecture Highlights
 
 **Microservices Design:**
+
 ```text
 ┌─────────────────────────────────────────────────────────────┐
 │                    Frontend (Next.js)                       │
@@ -162,6 +176,7 @@ Regulatory professionals need both AI assistance and traditional data exports:
 ```
 
 **Performance Optimizations:**
+
 - Turbopack for 10x faster frontend development builds
 - Redis caching reducing API response times by 80%
 - Database indexing for sub-second regulatory queries
@@ -172,6 +187,7 @@ Regulatory professionals need both AI assistance and traditional data exports:
 ### Core Technologies
 
 **Frontend Stack:**
+
 - **Next.js 15** - React framework with App Router for modern development
 - **React 19** - Latest React with concurrent features and improved performance
 - **TypeScript** - Type-safe development with strict mode enabled
@@ -180,6 +196,7 @@ Regulatory professionals need both AI assistance and traditional data exports:
 - **CopilotKit** - AI-powered conversational interfaces and chat components
 
 **Backend Stack:**
+
 - **FastAPI** - High-performance Python web framework with automatic OpenAPI docs
 - **Python 3.11+** - Modern Python with enhanced performance and type hints
 - **SQLAlchemy** - Powerful ORM with async support for database operations
@@ -187,6 +204,7 @@ Regulatory professionals need both AI assistance and traditional data exports:
 - **Redis** - In-memory caching and session storage for performance optimization
 
 **AI & Agent Framework:**
+
 - **LangGraph** - State-based agent workflows for complex regulatory processes
 - **LangChain** - LLM integration and tool orchestration
 - **OpenAI API** - GPT models for natural language processing and analysis
@@ -194,10 +212,12 @@ Regulatory professionals need both AI assistance and traditional data exports:
 ### Development Tools & Infrastructure
 
 **Package Management:**
+
 - **pnpm** - Fast, disk-efficient package manager for frontend dependencies
 - **Poetry** - Deterministic Python dependency management with virtual environments
 
 **Testing & Quality Assurance:**
+
 - **Jest** - JavaScript testing framework with comprehensive coverage reporting
 - **React Testing Library** - Component testing with accessibility-first approach
 - **pytest** - Python testing framework with async support and fixtures
@@ -205,6 +225,7 @@ Regulatory professionals need both AI assistance and traditional data exports:
 - **ESLint & Prettier** - Code linting and formatting for consistent style
 
 **Performance & Monitoring:**
+
 - **Lighthouse CI** - Automated performance auditing and regression detection
 - **Bundle Analyzer** - JavaScript bundle size optimization and monitoring
 - **Sentry** - Error tracking and performance monitoring in production
@@ -212,10 +233,12 @@ Regulatory professionals need both AI assistance and traditional data exports:
 ### External APIs & Services
 
 **Regulatory Data Sources:**
+
 - **openFDA API** - Real-time access to FDA device databases (510k, classifications, adverse events)
 - **FDA Guidance Documents** - Automated retrieval and parsing of regulatory guidance
 
 **Authentication & Security:**
+
 - **NextAuth.js** - Secure authentication with Google OAuth 2.0 integration
 - **JWT Tokens** - Stateless authentication for API security
 - **CORS Middleware** - Cross-origin request security configuration
@@ -223,6 +246,7 @@ Regulatory professionals need both AI assistance and traditional data exports:
 ### Database & Storage
 
 **Data Architecture:**
+
 ```sql
 -- Core project management
 CREATE TABLE projects (
@@ -259,11 +283,13 @@ CREATE TABLE agent_interactions (
 ### Development Environment
 
 **Cross-Platform Support:**
+
 - **macOS/Linux**: Shell scripts with proper permissions and error handling
 - **Windows**: Both PowerShell (.ps1) and Command Prompt (.bat) scripts
 - **Docker**: Containerized deployment for consistent environments
 
 **Environment Management:**
+
 ```bash
 # Automated environment validation
 ./scripts/validate-package-managers.sh
@@ -277,11 +303,13 @@ scripts\windows\start-all.bat  # Windows Command Prompt
 ### Production Deployment
 
 **Deployment Options:**
+
 - **Vercel/Netlify** - Serverless deployment for frontend with automatic CI/CD
 - **Docker Compose** - Multi-container deployment with nginx reverse proxy
 - **Traditional VPS** - PM2 process management with automated SSL certificates
 
 **Production Features:**
+
 - **Health Check Endpoints** - Comprehensive system monitoring and alerting
 - **Error Tracking** - Sentry integration for production error monitoring
 - **Performance Monitoring** - Real-time metrics and performance optimization
@@ -290,12 +318,14 @@ scripts\windows\start-all.bat  # Windows Command Prompt
 ### Key Integrations
 
 **Regulatory Workflow Automation:**
+
 - Automated device classification with FDA product codes
 - Intelligent predicate search with confidence scoring
 - Real-time FDA guidance document mapping
 - Comprehensive 510(k) submission checklist generation
 
 **Compliance & Audit Features:**
+
 - Complete audit trails for all AI decisions
 - Exportable reports for regulatory submissions
 - Human-in-the-loop approval workflows

@@ -12,6 +12,7 @@
   - Potential root cause: DatabaseManager class initialization fails in test environments due to improper async connection setup and global state conflicts
   - Potential solution: Create test-specific database fixtures using create_async_engine with StaticPool and proper async session management
   - Code snippet: 
+    
     ```python
     @pytest_asyncio.fixture(scope="function")
     async def test_db_session():
@@ -30,14 +31,23 @@
 
 - [ ] 2. Fix HTTP Client Testing Patterns (High Priority)
   - Test command: `cd medical-device-regulatory-assistant/backend && poetry run python -m pytest tests/test_project_api.py -v`
+  
   - Replace incorrect AsyncClient(app=app) usage with proper TestClient pattern as recommended by FastAPI documentation
+  
   - Fix async generator issues in test fixtures that are returning generators instead of client instances
+  
   - Implement proper async context management for HTTP tests using TestClient with context managers
+  
   - Update all API endpoint tests to use synchronous TestClient pattern instead of AsyncClient
+  
   - Remove httpx.AsyncClient usage from test files where TestClient should be used
+  
   - Potential root cause: Incorrect usage of httpx.AsyncClient with FastAPI applications and async generators being returned instead of client objects
+  
   - Potential solution: Use FastAPI's TestClient with proper context management for all API testing
+  
   - Code snippet:
+    
     ```python
     from fastapi.testclient import TestClient
     
@@ -61,6 +71,7 @@
   - Potential root cause: Mismatch between expected enum values in tests (ACTIVE) and actual enum definitions (DRAFT, IN_PROGRESS, COMPLETED)
   - Potential solution: Add missing ACTIVE status to ProjectStatus enum and update all references
   - Code snippet:
+    
     ```python
     class ProjectStatus(enum.Enum):
         DRAFT = "draft"
@@ -79,6 +90,7 @@
   - Potential root cause: OpenFDA service returning async generators instead of service instances and missing expected methods
   - Potential solution: Implement proper service mocking with all required methods and fix service instantiation
   - Code snippet:
+    
     ```python
     @pytest.fixture
     def mock_openfda_service():
@@ -90,14 +102,23 @@
 
 - [ ] 5. Fix Authentication and JWT Token Testing (Medium Priority)
   - Test command: `cd medical-device-regulatory-assistant/backend && poetry run python -m pytest tests/test_auth_endpoints.py::TestProjectsAuthentication::test_create_project_valid_auth -v`
+  
   - Create proper JWT token generation and validation mocking for test environments
+  
   - Fix authentication middleware configuration to work correctly in test scenarios
+  
   - Implement comprehensive auth test fixtures with valid and invalid token scenarios
+  
   - Update authentication service to handle test environment properly without causing server errors
+  
   - Create mock user authentication that bypasses actual OAuth flow for testing
+  
   - Potential root cause: Authentication middleware causing 500 server errors instead of proper auth validation responses
+  
   - Potential solution: Implement test-specific authentication mocking and fix middleware error handling
+  
   - Code snippet:
+    
     ```python
     @pytest.fixture
     def auth_headers():
@@ -113,19 +134,28 @@
 
 - [ ] 6. Fix Service Property and Dependency Injection Issues (Low Priority)
   - Test command: `cd medical-device-regulatory-assistant/backend && poetry run python -m pytest tests/test_project_service.py -v`
+  
   - Refactor service classes to use proper dependency injection instead of read-only properties
+  
   - Update service initialization to accept database manager injection for testing
+  
   - Create service factory functions that can be easily mocked in test environments
+  
   - Fix property setter issues by implementing proper service configuration patterns
+  
   - Update all service tests to use proper mocking and dependency injection
+  
   - Potential root cause: Service classes have read-only properties that tests cannot modify and improper dependency injection patterns
+  
   - Potential solution: Implement constructor-based dependency injection and remove read-only property constraints
+  
   - Code snippet:
+    
     ```python
     class ProjectService:
         def __init__(self, db_manager: DatabaseManager = None):
             self._db_manager = db_manager or get_database_manager()
-        
+    
         @property
         def db_manager(self):
             return self._db_manager
@@ -141,6 +171,7 @@
   - Potential root cause: Missing or incorrect environment configuration causing service initialization failures
   - Potential solution: Create comprehensive test environment setup with proper configuration management
   - Code snippet:
+    
     ```python
     # conftest.py
     @pytest.fixture(scope="session", autouse=True)
