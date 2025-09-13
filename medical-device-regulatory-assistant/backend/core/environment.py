@@ -9,10 +9,15 @@ import sys
 import subprocess
 import importlib
 import platform
+import os
 from pathlib import Path
 from typing import List, Dict, Any, Optional, Tuple
 from dataclasses import dataclass
 import json
+
+# FDA API Configuration
+FDA_API_KEY = os.getenv("FDA_API_KEY")
+USE_REAL_FDA_API = os.getenv("USE_REAL_FDA_API", "false").lower() == "true"
 
 
 @dataclass
@@ -72,6 +77,7 @@ class EnvironmentValidator:
     OPTIONAL_ENV_VARS = [
         'REDIS_URL',
         'FDA_API_KEY',
+        'USE_REAL_FDA_API',
         'OPENAI_API_KEY'
     ]
 

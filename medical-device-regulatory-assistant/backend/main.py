@@ -161,19 +161,18 @@ async def lifespan(app: FastAPI):
         
         # 4. Initialize FDA API client (required)
         try:
-            from services.openfda import create_openfda_service
-            # Pass Redis client if available for caching
-            redis_url = os.getenv("REDIS_URL") if hasattr(app.state, 'redis_client') and app.state.redis_client else None
-            fda_api_key = os.getenv("FDA_API_KEY")
+            from services.openfda import create_production_openfda_service, create_successful_openfda_mock
             
-            fda_service = await create_openfda_service(
-                api_key=fda_api_key,
-                redis_url=redis_url,
-                cache_ttl=3600  # 1 hour cache
-            )
+            # Use real API in production, mock API in testing
+            if not os.getenv("TESTING"):
+                fda_service = await create_production_openfda_service()
+                print("[OK] FDA API client initialized with real API")
+            else:
+                fda_service = create_successful_openfda_mock()
+                print("[OK] FDA API client initialized with mock service for testing")
+            
             app.state.fda_service = fda_service
             initialized_services.append("fda_service")
-            print("[OK] FDA API client initialized")
         except Exception as e:
             error_msg = f"FDA API client initialization failed: {e}"
             print(f"[ERROR] {error_msg}")
