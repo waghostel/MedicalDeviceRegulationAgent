@@ -1089,4 +1089,13 @@ async def init_error_tracker(db_path: Optional[str] = None) -> ErrorTracker:
     """Initialize the global error tracker"""
     global _error_tracker
     _error_tracker = ErrorTracker(db_path)
+    await _error_tracker._init_database()
     return _error_tracker
+
+
+async def cleanup_error_tracking():
+    """Cleanup the global error tracker"""
+    global _error_tracker
+    if _error_tracker:
+        # Close any open connections if needed
+        _error_tracker = None

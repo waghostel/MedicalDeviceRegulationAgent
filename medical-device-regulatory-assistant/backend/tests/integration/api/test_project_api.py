@@ -15,7 +15,6 @@ from services.projects import ProjectCreateRequest, ProjectResponse, ProjectStat
 def client(mock_user):
     """Create test client with mocked authentication"""
     from api.projects import get_current_user
-    from services.projects import ProjectService
     
     # Override dependencies
     def override_get_current_user():
@@ -60,13 +59,11 @@ def mock_project_response():
 class TestProjectAPI:
     """Test cases for Project API endpoints"""
     
-    @patch('services.projects.ProjectService')
-    def test_create_project_success(self, mock_service_class, client, mock_user, mock_project_response):
+    @patch('api.projects.project_service')
+    def test_create_project_success(self, mock_service, client, mock_user, mock_project_response):
         """Test successful project creation via API"""
-        # Setup mocks
-        mock_service = AsyncMock()
-        mock_service.create_project.return_value = mock_project_response
-        mock_service_class.return_value = mock_service
+        # Setup mocks - use AsyncMock for async service methods
+        mock_service.create_project = AsyncMock(return_value=mock_project_response)
         
         # Make request
         response = client.post(
@@ -86,15 +83,11 @@ class TestProjectAPI:
         assert data["device_type"] == "Class II"
         assert data["status"] == "draft"
     
-    @patch('api.projects.get_current_user')
-    @patch('api.projects.ProjectService')
-    def test_get_project_success(self, mock_service_class, mock_get_user, client, mock_user, mock_project_response):
+    @patch('api.projects.project_service')
+    def test_get_project_success(self, mock_service, client, mock_user, mock_project_response):
         """Test successful project retrieval via API"""
         # Setup mocks
-        mock_get_user.return_value = mock_user
-        mock_service = AsyncMock()
-        mock_service.get_project.return_value = mock_project_response
-        mock_service_class.return_value = mock_service
+        mock_service.get_project = AsyncMock(return_value=mock_project_response)
         
         # Make request
         response = client.get("/api/projects/1")
@@ -105,15 +98,11 @@ class TestProjectAPI:
         assert data["id"] == 1
         assert data["name"] == "Test Device"
     
-    @patch('api.projects.get_current_user')
-    @patch('api.projects.ProjectService')
-    def test_list_projects_success(self, mock_service_class, mock_get_user, client, mock_user, mock_project_response):
+    @patch('api.projects.project_service')
+    def test_list_projects_success(self, mock_service, client, mock_user, mock_project_response):
         """Test successful project listing via API"""
         # Setup mocks
-        mock_get_user.return_value = mock_user
-        mock_service = AsyncMock()
-        mock_service.list_projects.return_value = [mock_project_response]
-        mock_service_class.return_value = mock_service
+        mock_service.list_projects = AsyncMock(return_value=[mock_project_response])
         
         # Make request
         response = client.get("/api/projects/")
@@ -124,16 +113,12 @@ class TestProjectAPI:
         assert len(data) == 1
         assert data[0]["name"] == "Test Device"
     
-    @patch('api.projects.get_current_user')
-    @patch('api.projects.ProjectService')
-    def test_update_project_success(self, mock_service_class, mock_get_user, client, mock_user, mock_project_response):
+    @patch('api.projects.project_service')
+    def test_update_project_success(self, mock_service, client, mock_user, mock_project_response):
         """Test successful project update via API"""
         # Setup mocks
-        mock_get_user.return_value = mock_user
-        mock_service = AsyncMock()
         updated_response = mock_project_response.model_copy(update={"name": "Updated Device"})
-        mock_service.update_project.return_value = updated_response
-        mock_service_class.return_value = mock_service
+        mock_service.update_project = AsyncMock(return_value=updated_response)
         
         # Make request
         response = client.put(
@@ -146,15 +131,11 @@ class TestProjectAPI:
         data = response.json()
         assert data["name"] == "Updated Device"
     
-    @patch('api.projects.get_current_user')
-    @patch('api.projects.ProjectService')
-    def test_delete_project_success(self, mock_service_class, mock_get_user, client, mock_user):
+    @patch('api.projects.project_service')
+    def test_delete_project_success(self, mock_service, client, mock_user):
         """Test successful project deletion via API"""
         # Setup mocks
-        mock_get_user.return_value = mock_user
-        mock_service = AsyncMock()
-        mock_service.delete_project.return_value = {"message": "Project deleted successfully"}
-        mock_service_class.return_value = mock_service
+        mock_service.delete_project = AsyncMock(return_value={"message": "Project deleted successfully"})
         
         # Make request
         response = client.delete("/api/projects/1")
@@ -173,10 +154,11 @@ class TestProjectAPI:
         
         assert response.status_code == 422  # Validation error
     
-    @patch('api.projects.get_current_user')
-    def test_unauthorized_access(self, mock_get_user, client):
+    def test_unauthorized_access(self, client):
         """Test unauthorized access to protected endpoints"""
-        mock_get_user.side_effect = Exception("Unauthorized")
+        # Clear the dependency override to test unauthorized access
+        from main import app
+        app.dependency_overrides.clear()
         
         response = client.get("/api/projects/")
         

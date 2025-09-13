@@ -286,6 +286,15 @@ async def close_database() -> None:
             )
 
 
+def initialize_database_manager():
+    """Initialize database manager for current environment"""
+    global db_manager
+    if db_manager is None:
+        database_url = os.getenv("DATABASE_URL", "sqlite+aiosqlite:///./medical_device_assistant.db")
+        db_manager = DatabaseManager(database_url)
+        logger.info(f"Database manager initialized for environment: {database_url}")
+
+
 @asynccontextmanager
 async def get_db_session():
     """Get database session context manager for transactions"""

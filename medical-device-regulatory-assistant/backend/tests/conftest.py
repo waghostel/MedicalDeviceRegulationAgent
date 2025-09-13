@@ -72,6 +72,31 @@ def setup_test_environment():
             os.environ[key] = original_value
 
 
+@pytest_asyncio.fixture(scope="session", autouse=True)
+async def initialize_database_manager():
+    """
+    Initialize database manager for test environment.
+    
+    This fixture ensures the database manager is properly initialized before
+    API tests run, preventing "Database manager not initialized" errors.
+    
+    Also initializes the error tracking system to create the error_reports table.
+    """
+    from database.connection import initialize_database_manager
+    from core.error_tracker import init_error_tracker, cleanup_error_tracking
+    
+    # Initialize database manager for test environment
+    initialize_database_manager()
+    
+    # Initialize error tracker with in-memory database
+    await init_error_tracker("error_tracking_test.db")
+    
+    yield
+    
+    # Cleanup error tracking
+    await cleanup_error_tracking()
+
+
 @pytest_asyncio.fixture(scope="function")
 async def test_db_session() -> AsyncGenerator[AsyncSession, None]:
     """
