@@ -448,7 +448,7 @@ All authentication tests return 500 status codes regardless of whether tokens ar
 
 ### Resolution Tasks
 
-- [ ] 6. Fix Authentication and JWT Token Testing
+- [x] 6. Fix Authentication and JWT Token Testing
 
   - Create proper JWT token generation and validation mocking for test environments
 
@@ -576,7 +576,7 @@ AttributeError: property 'db_manager' of 'ProjectService' object has no setter
             asyncio.run(db_manager.create_error_tracking_tables())
     ```
 
-- [ ] 7. Fix Service Property and Dependency Injection Issues
+- [x] 7. Fix Service Property and Dependency Injection Issues
 
   - Refactor service classes to use proper dependency injection instead of read-only properties
 

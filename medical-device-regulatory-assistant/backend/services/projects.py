@@ -102,15 +102,25 @@ class ProjectExportData(BaseModel):
 class ProjectService:
     """Service class for project management operations."""
     
-    def __init__(self):
-        self._db_manager = None
+    def __init__(self, db_manager=None):
+        """
+        Initialize ProjectService with dependency injection.
+        
+        Args:
+            db_manager: Database manager instance. If None, will use global instance.
+        """
+        self._db_manager = db_manager
     
     @property
     def db_manager(self):
-        """Lazy initialization of database manager"""
+        """Get database manager instance"""
         if self._db_manager is None:
             self._db_manager = get_database_manager()
         return self._db_manager
+    
+    def set_db_manager(self, db_manager):
+        """Set database manager for testing purposes"""
+        self._db_manager = db_manager
     
     async def create_project(
         self, 

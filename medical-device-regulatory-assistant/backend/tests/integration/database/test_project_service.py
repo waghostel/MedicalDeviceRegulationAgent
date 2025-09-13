@@ -1,5 +1,5 @@
 """
-Tests for project service functionality
+Tests for project service functionality with dependency injection
 """
 
 import pytest
@@ -14,25 +14,19 @@ from services.projects import (
     ProjectSearchFilters,
     ProjectStatus
 )
+from services.factories import create_project_service
 from models.user import User
 
 
 @pytest.mark.asyncio
-async def test_create_project_success(test_db_manager, test_session):
+async def test_create_project_success(test_data_factory, sample_user):
     """Test successful project creation"""
-    # Create test user
-    user = User(
-        email="test@example.com",
-        name="Test User",
-        google_id="google_test_123"
-    )
-    test_session.add(user)
-    await test_session.commit()
-    await test_session.refresh(user)
+    # Use the sample user from fixture
+    user = sample_user
     
-    # Create project service
-    service = ProjectService()
-    service.db_manager = test_db_manager
+    # Create project service with dependency injection
+    from services.factories import create_project_service
+    service = create_project_service()
     
     # Create project
     project_data = ProjectCreateRequest(

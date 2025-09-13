@@ -182,7 +182,8 @@ class OpenFDAService:
         redis_client: Optional[redis.Redis] = None,
         cache_ttl: int = 3600,  # 1 hour default cache
         max_retries: int = 3,
-        timeout: int = 30
+        timeout: int = 30,
+        http_client: Optional[httpx.AsyncClient] = None
     ):
         self.api_key = api_key
         self.base_url = "https://api.fda.gov"
@@ -198,6 +199,9 @@ class OpenFDAService:
         
         # Redis cache client
         self.redis_client = redis_client
+        
+        # HTTP client (can be injected for testing)
+        self.http_client = http_client
         
         # HTTP client configuration
         self.client_config = {

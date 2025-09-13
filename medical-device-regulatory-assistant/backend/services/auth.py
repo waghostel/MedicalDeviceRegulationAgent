@@ -59,13 +59,24 @@ def validate_jwt_token(token: str, secret_key: str = None) -> Dict[str, Any]:
 class AuthService:
     """Authentication service for JWT token validation."""
     
-    def __init__(self):
-        # Use test secret key in testing environment
-        if os.getenv("TESTING", "false").lower() == "true":
-            self.secret_key = os.getenv("JWT_SECRET", "test_secret_key_for_testing_only")
+    def __init__(self, secret_key: Optional[str] = None, algorithm: str = "HS256"):
+        """
+        Initialize AuthService with dependency injection.
+        
+        Args:
+            secret_key: JWT secret key. If None, will use environment variables.
+            algorithm: JWT algorithm to use.
+        """
+        if secret_key is None:
+            # Use test secret key in testing environment
+            if os.getenv("TESTING", "false").lower() == "true":
+                self.secret_key = os.getenv("JWT_SECRET", "test_secret_key_for_testing_only")
+            else:
+                self.secret_key = os.getenv("NEXTAUTH_SECRET", "your-secret-key")
         else:
-            self.secret_key = os.getenv("NEXTAUTH_SECRET", "your-secret-key")
-        self.algorithm = "HS256"
+            self.secret_key = secret_key
+            
+        self.algorithm = algorithm
         self.security = HTTPBearer()
     
     def verify_token(self, token: str) -> TokenData:

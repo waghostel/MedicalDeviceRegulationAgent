@@ -54,11 +54,28 @@ class DocumentService:
     Service for managing document processing operations
     """
     
-    def __init__(self, db_session: AsyncSession, config: Optional[DocumentProcessingConfig] = None):
+    def __init__(
+        self, 
+        db_session: AsyncSession = None, 
+        config: Optional[DocumentProcessingConfig] = None,
+        processing_tool: Optional[DocumentProcessingTool] = None
+    ):
+        """
+        Initialize DocumentService with dependency injection.
+        
+        Args:
+            db_session: Database session. If None, will need to be set later.
+            config: Document processing configuration.
+            processing_tool: Document processing tool instance.
+        """
         self.db = db_session
         self.config = config or DocumentProcessingConfig()
-        self.processing_tool = DocumentProcessingTool(self.config)
+        self.processing_tool = processing_tool or DocumentProcessingTool(self.config)
         self._cache = {}  # Simple in-memory cache
+    
+    def set_db_session(self, db_session: AsyncSession):
+        """Set database session for testing purposes"""
+        self.db = db_session
     
     async def process_document(
         self,

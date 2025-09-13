@@ -30,9 +30,16 @@ class SystemHealth(BaseModel):
 class HealthChecker:
     """Health checker service."""
     
-    def __init__(self):
-        self.database_path = "medical_device_assistant.db"
-        self.fda_api_url = "https://api.fda.gov/device/510k.json"
+    def __init__(self, database_path: str = None, fda_api_url: str = None):
+        """
+        Initialize HealthChecker with dependency injection.
+        
+        Args:
+            database_path: Path to database file. If None, uses default.
+            fda_api_url: FDA API URL. If None, uses default.
+        """
+        self.database_path = database_path or "medical_device_assistant.db"
+        self.fda_api_url = fda_api_url or "https://api.fda.gov/device/510k.json"
     
     async def check_database(self) -> HealthStatus:
         """Check database connectivity."""
