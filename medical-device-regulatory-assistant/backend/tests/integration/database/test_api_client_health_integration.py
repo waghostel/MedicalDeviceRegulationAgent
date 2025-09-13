@@ -19,10 +19,10 @@ from pathlib import Path
 # Add backend to path
 sys.path.insert(0, str(Path(__file__).parent))
 
-from testing.api_client import (
+from tests.utils.testing_framework.api_client import (
     TestAPIClient, 
-    TestEnvironmentManager,
-    setup_test_environment,
+    RetryConfig,
+    create_test_client,
     skip_if_server_offline,
     skip_if_services_not_ready,
     check_server_availability

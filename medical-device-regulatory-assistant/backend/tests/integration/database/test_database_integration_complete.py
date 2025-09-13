@@ -18,9 +18,9 @@ from pathlib import Path
 backend_dir = Path(__file__).parent
 sys.path.insert(0, str(backend_dir))
 
-from testing.database_isolation import DatabaseTestIsolation
-from testing.test_data_factory import TestDataFactory
-from testing.connection_manager import TestConnectionManager, RetryConfig, create_memory_test_manager
+from tests.utils.testing_framework.database_isolation import DatabaseTestIsolation
+from tests.fixtures.database.test_data_factory import TestDataFactory
+from tests.utils.testing_framework.connection_manager import TestConnectionManager, RetryConfig, create_memory_test_manager
 from database.connection import DatabaseManager
 from models.user import User
 from models.project import Project
