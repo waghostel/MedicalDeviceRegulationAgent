@@ -60,7 +60,11 @@ class AuthService:
     """Authentication service for JWT token validation."""
     
     def __init__(self):
-        self.secret_key = os.getenv("NEXTAUTH_SECRET", "your-secret-key")
+        # Use test secret key in testing environment
+        if os.getenv("TESTING", "false").lower() == "true":
+            self.secret_key = os.getenv("JWT_SECRET", "test_secret_key_for_testing_only")
+        else:
+            self.secret_key = os.getenv("NEXTAUTH_SECRET", "your-secret-key")
         self.algorithm = "HS256"
         self.security = HTTPBearer()
     
@@ -124,7 +128,18 @@ async def get_current_user(
     credentials: HTTPAuthorizationCredentials = Depends(HTTPBearer())
 ) -> TokenData:
     """Dependency to get current authenticated user."""
-    return auth_service.verify_token(credentials.credentials)
+    try:
+        return auth_service.verify_token(credentials.credentials)
+    except HTTPException:
+        # Re-raise HTTPExceptions as-is (proper 401 responses)
+        raise
+    except Exception as e:
+        # Convert any other exceptions to proper 401 responses
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Authentication failed",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
 
 
 async def get_optional_user(
@@ -137,6 +152,9 @@ async def get_optional_user(
     try:
         return auth_service.verify_token(credentials.credentials)
     except HTTPException:
+        return None
+    except Exception:
+        # Silently return None for any other exceptions in optional auth
         return None
 
 

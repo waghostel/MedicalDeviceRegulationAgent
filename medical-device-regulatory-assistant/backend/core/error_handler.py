@@ -64,8 +64,14 @@ class GlobalErrorHandler:
         # Track the error
         error_id = await self._track_error(exc, request, context)
         
-        # Map exception to HTTP response
-        http_exception = self.exception_mapper.map_to_http_exception(exc)
+        # Determine the appropriate status code
+        if isinstance(exc, HTTPException):
+            # Preserve the original HTTP status code for HTTPExceptions
+            status_code = exc.status_code
+        else:
+            # Map other exceptions to HTTP response
+            http_exception = self.exception_mapper.map_to_http_exception(exc)
+            status_code = http_exception.status_code
         
         # Generate diagnostic information
         diagnostics = self._generate_diagnostics(exc, request, context)
@@ -91,7 +97,7 @@ class GlobalErrorHandler:
         await self._log_error(exc, request, context, error_id)
         
         return JSONResponse(
-            status_code=http_exception.status_code,
+            status_code=status_code,
             content=response_content,
             headers=self._get_response_headers(exc)
         )

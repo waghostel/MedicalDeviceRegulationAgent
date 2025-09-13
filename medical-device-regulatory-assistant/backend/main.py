@@ -17,6 +17,7 @@ from middleware.logging import RequestLoggingMiddleware
 from middleware.compression import CompressionMiddleware
 from middleware.rate_limit import RateLimitMiddleware
 from middleware.security_headers import SecurityHeadersMiddleware
+from middleware.auth import auth_middleware
 
 # Import enhanced exception handling system
 from exceptions import register_exception_handlers
@@ -295,6 +296,9 @@ app.add_middleware(
 # Add middleware in order (last added = first executed)
 # Request logging middleware (first to execute)
 app.add_middleware(RequestLoggingMiddleware)
+
+# Authentication middleware (handle auth errors properly)
+app.middleware("http")(auth_middleware)
 
 # Performance middleware
 app.add_middleware(CompressionMiddleware, minimum_size=1024, compression_level=6)

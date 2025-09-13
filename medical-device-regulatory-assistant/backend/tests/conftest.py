@@ -17,6 +17,7 @@ import asyncio
 import pytest
 import pytest_asyncio
 import uuid
+from datetime import datetime, timezone, timedelta
 from typing import AsyncGenerator, Dict, Any
 from pathlib import Path
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
@@ -272,6 +273,79 @@ def test_client():
         yield client
 
 
+def create_test_jwt_token(user_data: Dict[str, Any]) -> str:
+    """
+    Create a test JWT token for authentication testing.
+    
+    Args:
+        user_data: User data to include in token
+        
+    Returns:
+        str: JWT token string
+    """
+    import jwt
+    import os
+    from datetime import datetime, timedelta, timezone
+    
+    # Default user data
+    default_data = {
+        "sub": "test_user_id",
+        "email": "test@example.com",
+        "name": "Test User"
+    }
+    default_data.update(user_data)
+    
+    # Add timestamp claims
+    now = datetime.now(timezone.utc)
+    payload = {
+        **default_data,
+        "iat": int(now.timestamp()),
+        "exp": int((now + timedelta(hours=1)).timestamp())
+    }
+    
+    # Use the same secret key that the auth service will use in testing
+    secret_key = os.getenv("JWT_SECRET", "test_secret_key_for_testing_only")
+    return jwt.encode(payload, secret_key, algorithm="HS256")
+
+
+@pytest.fixture
+def authenticated_headers():
+    """Provides headers for a valid, authenticated user."""
+    token = create_test_jwt_token({
+        "sub": "test_user",
+        "email": "test@example.com",
+        "name": "Test User"
+    })
+    return {"Authorization": f"Bearer {token}"}
+
+
+@pytest.fixture
+def unauthenticated_headers():
+    """Provides empty headers for an unauthenticated user."""
+    return {}
+
+
+@pytest.fixture
+def mock_auth_service():
+    """Mock authentication service for testing."""
+    from unittest.mock import patch
+    from services.auth import TokenData
+    
+    # Create mock token data
+    mock_token_data = TokenData(
+        sub="test_user",
+        email="test@example.com",
+        name="Test User",
+        exp=datetime.now(timezone.utc) + timedelta(hours=1),
+        iat=datetime.now(timezone.utc)
+    )
+    
+    # Simple patch for basic mocking needs
+    with patch('services.auth.get_current_user') as mock_auth:
+        mock_auth.return_value = mock_token_data
+        yield mock_auth
+
+
 @pytest.fixture(scope="function")
 def authenticated_test_client():
     """
@@ -284,18 +358,12 @@ def authenticated_test_client():
         TestClient: Test client with authentication headers
     """
     from main import app
-    import jwt
-    from datetime import datetime, timedelta, timezone
     
-    # Create test JWT token
-    payload = {
+    token = create_test_jwt_token({
         "sub": "test_user_id",
         "email": "test@example.com",
-        "name": "Test User",
-        "exp": datetime.now(tz=timezone.utc) + timedelta(hours=1)
-    }
-    
-    token = jwt.encode(payload, "test_secret_key_for_testing_only", algorithm="HS256")
+        "name": "Test User"
+    })
     
     with TestClient(app) as client:
         client.headers.update({"Authorization": f"Bearer {token}"})
