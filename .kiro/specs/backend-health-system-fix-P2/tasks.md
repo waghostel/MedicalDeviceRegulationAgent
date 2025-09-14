@@ -1078,3 +1078,83 @@ The following services are currently using mock implementations for testing and 
 4. **Phase 4** (Future): Advanced features like ML-based predicate matching
 
 This approach ensures a smooth transition from development to production while maintaining test reliability and development velocity.
+
+---
+
+## Phase 6: OpenFDA API Direct Testing (New Task)
+
+### Analysis
+
+**Current Status**: Tasks 10-14 are completed with comprehensive FDA API integration testing, but all testing has been done through the application layer. Direct API testing using curl commands would provide additional validation of the FDA API endpoints and help troubleshoot any connectivity or authentication issues.
+
+**Enhancement Opportunities**:
+- Direct FDA API endpoint validation using curl commands
+- Network connectivity and response time testing
+- API key validation and rate limiting verification
+- Raw response format validation
+- Troubleshooting support for production issues
+
+### Resolution Tasks
+
+- [ ] 15. Direct OpenFDA API Testing with Curl Commands
+
+  - **Create Curl Test Suite**: Develop comprehensive curl commands to test FDA API endpoints directly
+
+  - **Test Basic Connectivity**: Validate network connectivity to api.fda.gov without authentication
+
+  - **Test API Key Authentication**: Verify FDA API key functionality and rate limit improvements
+
+  - **Test Core Endpoints**: Validate device/510k, device/classification, and device/event endpoints
+
+  - **Response Format Validation**: Verify JSON response structure and data quality
+
+  - **Rate Limiting Verification**: Test rate limiting behavior with and without API keys
+
+  - **Error Scenario Testing**: Test various error conditions (invalid queries, malformed requests)
+
+  - **Performance Benchmarking**: Measure response times and data transfer rates
+
+  - **Create Troubleshooting Scripts**: Develop curl-based diagnostic scripts for production support
+
+  - Dependencies: None (independent testing approach)
+
+  - Potential benefits: Direct API validation, network troubleshooting, authentication verification
+
+  - Potential solution: Create comprehensive curl test script with multiple FDA API endpoints
+
+  - Test command: `cd medical-device-regulatory-assistant/backend && bash test_openfda_curl.sh`
+
+  - Code snippet:
+
+    ```bash
+    #!/bin/bash
+    # OpenFDA API Curl Test Suite
+    
+    echo "=== OpenFDA API Direct Testing ==="
+    
+    # Test 1: Basic connectivity (no API key required)
+    echo "1. Testing basic connectivity..."
+    curl -s "https://api.fda.gov/device/510k.json?limit=1" | jq '.meta.results.total'
+    
+    # Test 2: Device search with API key (if available)
+    if [ ! -z "$FDA_API_KEY" ]; then
+        echo "2. Testing with API key..."
+        curl -s "https://api.fda.gov/device/510k.json?api_key=$FDA_API_KEY&search=device_name:pacemaker&limit=5" | jq '.results[0].device_name'
+    else
+        echo "2. Skipping API key test (FDA_API_KEY not set)"
+    fi
+    
+    # Test 3: Rate limiting test
+    echo "3. Testing rate limiting..."
+    for i in {1..3}; do
+        response=$(curl -s -w "%{http_code}" "https://api.fda.gov/device/510k.json?limit=1")
+        echo "Request $i: HTTP Status ${response: -3}"
+        sleep 1
+    done
+    
+    # Test 4: Error handling
+    echo "4. Testing error handling..."
+    curl -s "https://api.fda.gov/device/510k.json?search=invalid_field:test" | jq '.error.message'
+    
+    echo "=== OpenFDA API Testing Complete ==="
+    ```
