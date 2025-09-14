@@ -187,6 +187,7 @@ export const ProjectForm = memo(function ProjectForm({
             }
           },
           onError: (error) => {
+            console.error("Form submission error:", error); // Log the actual error
             // Handle backend validation errors
             if (error.includes('Invalid project data')) {
               contextualToast.validationError(
@@ -209,6 +210,7 @@ export const ProjectForm = memo(function ProjectForm({
         }
       );
     } catch (error) {
+      console.error("Caught in handleSubmit:", error); // Log unexpected errors
       // Error is already handled in the submitForm function
     }
   };
