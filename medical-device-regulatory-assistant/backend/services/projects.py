@@ -9,16 +9,16 @@ from pathlib import Path
 
 from sqlalchemy.orm import Session, selectinload
 from sqlalchemy import select, and_, or_, func
-from fastapi import HTTPException, status
+from fastapi import status
 
-# Import custom exceptions
-from exceptions.project_exceptions import (
+# Import standardized exceptions
+from core.exceptions import (
     ProjectNotFoundError,
-    ProjectAccessDeniedError,
-    ProjectValidationError,
-    ProjectStateError,
-    ProjectExportError,
+    ValidationError,
+    DatabaseError,
+    AuthorizationError,
 )
+from exceptions.project_exceptions import ProjectValidationError
 from pydantic import BaseModel, Field
 
 from models.project import Project, ProjectStatus
@@ -102,15 +102,25 @@ class ProjectExportData(BaseModel):
 class ProjectService:
     """Service class for project management operations."""
     
-    def __init__(self):
-        self._db_manager = None
+    def __init__(self, db_manager=None):
+        """
+        Initialize ProjectService with dependency injection.
+        
+        Args:
+            db_manager: Database manager instance. If None, will use global instance.
+        """
+        self._db_manager = db_manager
     
     @property
     def db_manager(self):
-        """Lazy initialization of database manager"""
+        """Get database manager instance"""
         if self._db_manager is None:
             self._db_manager = get_database_manager()
         return self._db_manager
+    
+    def set_db_manager(self, db_manager):
+        """Set database manager for testing purposes"""
+        self._db_manager = db_manager
     
     async def create_project(
         self, 
@@ -128,32 +138,59 @@ class ProjectService:
             ProjectResponse: Created project data
             
         Raises:
-            HTTPException: If user not found or creation fails
+            ProjectNotFoundError: If user not found
+            ValidationError: If project data is invalid
+            DatabaseError: If database operation fails
         """
-        async with self.db_manager.get_session() as session:
-            # Verify user exists
-            user_stmt = select(User).where(User.google_id == user_id)
-            user_result = await session.execute(user_stmt)
-            user = user_result.scalar_one_or_none()
+        try:
+            async with self.db_manager.get_session() as session:
+                # Verify user exists
+                user_stmt = select(User).where(User.google_id == user_id)
+                user_result = await session.execute(user_stmt)
+                user = user_result.scalar_one_or_none()
+                
+                if not user:
+                    raise ProjectNotFoundError(
+                        project_id=0, 
+                        user_id=user_id,
+                        additional_context={"operation": "create_project", "reason": "user_not_found"}
+                    )
             
-            if not user:
-                raise ProjectNotFoundError(project_id=0, user_id=user_id)
-            
-            # Create new project
-            project = Project(
-                user_id=user.id,
-                name=project_data.name,
-                description=project_data.description,
-                device_type=project_data.device_type,
-                intended_use=project_data.intended_use,
-                status=ProjectStatus.DRAFT
+                # Validate project data
+                if not project_data.name or len(project_data.name.strip()) == 0:
+                    raise ValidationError(
+                        field="name",
+                        value=project_data.name,
+                        constraint="Project name is required and cannot be empty"
+                    )
+                
+                # Create new project
+                project = Project(
+                    user_id=user.id,
+                    name=project_data.name,
+                    description=project_data.description,
+                    device_type=project_data.device_type,
+                    intended_use=project_data.intended_use,
+                    status=ProjectStatus.DRAFT
+                )
+                
+                session.add(project)
+                await session.commit()
+                await session.refresh(project)
+                
+                return ProjectResponse.model_validate(project)
+                
+        except (ProjectNotFoundError, ValidationError):
+            # Re-raise application exceptions
+            raise
+        except Exception as e:
+            # Wrap database and other errors
+            raise DatabaseError(
+                operation="create_project",
+                table="projects",
+                original_error=e,
+                query_info={"user_id": user_id, "project_name": project_data.name}
             )
-            
-            session.add(project)
-            await session.commit()
-            await session.refresh(project)
-            
-            return ProjectResponse.model_validate(project)
     
     async def get_project(
         self, 
@@ -171,28 +208,46 @@ class ProjectService:
             ProjectResponse: Project data
             
         Raises:
-            HTTPException: If project not found or access denied
+            ProjectNotFoundError: If project not found or access denied
+            DatabaseError: If database operation fails
         """
-        async with self.db_manager.get_session() as session:
-            # Get project with user verification
-            stmt = (
-                select(Project)
-                .join(User)
-                .where(
-                    and_(
-                        Project.id == project_id,
-                        User.google_id == user_id
+        try:
+            async with self.db_manager.get_session() as session:
+                # Get project with user verification
+                stmt = (
+                    select(Project)
+                    .join(User)
+                    .where(
+                        and_(
+                            Project.id == project_id,
+                            User.google_id == user_id
+                        )
                     )
                 )
+                
+                result = await session.execute(stmt)
+                project = result.scalar_one_or_none()
+                
+                if not project:
+                    raise ProjectNotFoundError(
+                        project_id=project_id, 
+                        user_id=user_id,
+                        additional_context={"operation": "get_project"}
+                    )
+                
+                return ProjectResponse.model_validate(project)
+                
+        except ProjectNotFoundError:
+            # Re-raise application exceptions
+            raise
+        except Exception as e:
+            # Wrap database and other errors
+            raise DatabaseError(
+                operation="get_project",
+                table="projects",
+                original_error=e,
+                query_info={"project_id": project_id, "user_id": user_id}
             )
-            
-            result = await session.execute(stmt)
-            project = result.scalar_one_or_none()
-            
-            if not project:
-                raise ProjectNotFoundError(project_id=project_id, user_id=user_id)
-            
-            return ProjectResponse.model_validate(project)
     
     async def update_project(
         self, 
@@ -212,57 +267,81 @@ class ProjectService:
             ProjectResponse: Updated project data
             
         Raises:
-            HTTPException: If project not found or access denied
+            ProjectNotFoundError: If project not found or access denied
+            ValidationError: If project data is invalid
+            DatabaseError: If database operation fails
         """
-        async with self.db_manager.get_session() as session:
-            # Get project with user verification
-            stmt = (
-                select(Project)
-                .join(User)
-                .where(
-                    and_(
-                        Project.id == project_id,
-                        User.google_id == user_id
+        try:
+            async with self.db_manager.get_session() as session:
+                # Get project with user verification
+                stmt = (
+                    select(Project)
+                    .join(User)
+                    .where(
+                        and_(
+                            Project.id == project_id,
+                            User.google_id == user_id
+                        )
                     )
                 )
+                
+                result = await session.execute(stmt)
+                project = result.scalar_one_or_none()
+                
+                if not project:
+                    raise ProjectNotFoundError(
+                        project_id=project_id,
+                        user_id=user_id,
+                        additional_context={"operation": "update_project"}
+                    )
+            
+                # Validate update data
+                update_data = project_data.model_dump(exclude_unset=True)
+                if "name" in update_data and (not update_data["name"] or len(update_data["name"].strip()) == 0):
+                    raise ValidationError(
+                        field="name",
+                        value=update_data["name"],
+                        constraint="Project name cannot be empty"
+                    )
+                
+                # Update project fields
+                for field, value in update_data.items():
+                    setattr(project, field, value)
+                
+                project.updated_at = datetime.now(timezone.utc)
+                
+                await session.commit()
+                await session.refresh(project)
+                
+                # Send WebSocket notification
+                try:
+                    from api.websocket import notify_project_updated
+                    project_response = ProjectResponse.model_validate(project)
+                    await notify_project_updated(
+                        project_id=project.id,
+                        user_id=user_id,
+                        data=project_response.model_dump()
+                    )
+                except ImportError:
+                    # WebSocket module not available, skip notification
+                    pass
+                except Exception as e:
+                    # Log error but don't fail the update
+                    print(f"Failed to send WebSocket notification: {e}")
+                
+                return ProjectResponse.model_validate(project)
+                
+        except (ProjectNotFoundError, ValidationError):
+            # Re-raise application exceptions
+            raise
+        except Exception as e:
+            # Wrap database and other errors
+            raise DatabaseError(
+                operation="update_project",
+                table="projects",
+                original_error=e,
+                query_info={"project_id": project_id, "user_id": user_id}
             )
-            
-            result = await session.execute(stmt)
-            project = result.scalar_one_or_none()
-            
-            if not project:
-                raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND,
-                    detail="Project not found or access denied"
-                )
-            
-            # Update project fields
-            update_data = project_data.model_dump(exclude_unset=True)
-            for field, value in update_data.items():
-                setattr(project, field, value)
-            
-            project.updated_at = datetime.now(timezone.utc)
-            
-            await session.commit()
-            await session.refresh(project)
-            
-            # Send WebSocket notification
-            try:
-                from api.websocket import notify_project_updated
-                project_response = ProjectResponse.model_validate(project)
-                await notify_project_updated(
-                    project_id=project.id,
-                    user_id=user_id,
-                    data=project_response.model_dump()
-                )
-            except ImportError:
-                # WebSocket module not available, skip notification
-                pass
-            except Exception as e:
-                # Log error but don't fail the update
-                print(f"Failed to send WebSocket notification: {e}")
-            
-            return ProjectResponse.model_validate(project)
     
     async def delete_project(
         self, 
@@ -280,34 +359,50 @@ class ProjectService:
             Dict: Deletion confirmation message
             
         Raises:
-            HTTPException: If project not found or access denied
+            ProjectNotFoundError: If project not found or access denied
+            DatabaseError: If database operation fails
         """
-        async with self.db_manager.get_session() as session:
-            # Get project with user verification
-            stmt = (
-                select(Project)
-                .join(User)
-                .where(
-                    and_(
-                        Project.id == project_id,
-                        User.google_id == user_id
+        try:
+            async with self.db_manager.get_session() as session:
+                # Get project with user verification
+                stmt = (
+                    select(Project)
+                    .join(User)
+                    .where(
+                        and_(
+                            Project.id == project_id,
+                            User.google_id == user_id
+                        )
                     )
                 )
+                
+                result = await session.execute(stmt)
+                project = result.scalar_one_or_none()
+                
+                if not project:
+                    raise ProjectNotFoundError(
+                        project_id=project_id,
+                        user_id=user_id,
+                        additional_context={"operation": "delete_project"}
+                    )
+                
+                project_name = project.name
+                await session.delete(project)
+                await session.commit()
+                
+                return {"message": f"Project '{project_name}' deleted successfully"}
+                
+        except ProjectNotFoundError:
+            # Re-raise application exceptions
+            raise
+        except Exception as e:
+            # Wrap database and other errors
+            raise DatabaseError(
+                operation="delete_project",
+                table="projects",
+                original_error=e,
+                query_info={"project_id": project_id, "user_id": user_id}
             )
-            
-            result = await session.execute(stmt)
-            project = result.scalar_one_or_none()
-            
-            if not project:
-                raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND,
-                    detail="Project not found or access denied"
-                )
-            
-            await session.delete(project)
-            await session.commit()
-            
-            return {"message": f"Project '{project.name}' deleted successfully"}
     
     async def list_projects(
         self, 
@@ -380,35 +475,38 @@ class ProjectService:
             ProjectDashboardData: Enhanced dashboard data
             
         Raises:
-            HTTPException: If project not found or access denied
+            ProjectNotFoundError: If project not found or access denied
+            DatabaseError: If database operation fails
         """
-        async with self.db_manager.get_session() as session:
-            # Get project with all related data
-            stmt = (
-                select(Project)
-                .options(
-                    selectinload(Project.device_classifications),
-                    selectinload(Project.predicate_devices),
-                    selectinload(Project.documents),
-                    selectinload(Project.agent_interactions)
-                )
-                .join(User)
-                .where(
-                    and_(
-                        Project.id == project_id,
-                        User.google_id == user_id
+        try:
+            async with self.db_manager.get_session() as session:
+                # Get project with all related data
+                stmt = (
+                    select(Project)
+                    .options(
+                        selectinload(Project.device_classifications),
+                        selectinload(Project.predicate_devices),
+                        selectinload(Project.documents),
+                        selectinload(Project.agent_interactions)
+                    )
+                    .join(User)
+                    .where(
+                        and_(
+                            Project.id == project_id,
+                            User.google_id == user_id
+                        )
                     )
                 )
-            )
-            
-            result = await session.execute(stmt)
-            project = result.scalar_one_or_none()
-            
-            if not project:
-                raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND,
-                    detail="Project not found or access denied"
-                )
+                
+                result = await session.execute(stmt)
+                project = result.scalar_one_or_none()
+                
+                if not project:
+                    raise ProjectNotFoundError(
+                        project_id=project_id,
+                        user_id=user_id,
+                        additional_context={"operation": "get_dashboard_data"}
+                    )
             
             # Build comprehensive classification data
             classification = None
@@ -512,21 +610,33 @@ class ProjectService:
                     key=lambda x: x.created_at
                 ).created_at
             
-            return ProjectDashboardData(
-                project=ProjectResponse.model_validate(project),
-                classification=classification,
-                predicate_devices=predicate_devices,
-                progress=progress,
-                recent_activity=recent_activity,
-                statistics=statistics,
-                # Legacy fields
-                classification_status=classification_status,
-                predicate_count=predicate_count,
-                selected_predicates=selected_predicates,
-                document_count=len(project.documents),
-                interaction_count=len(project.agent_interactions),
-                last_activity=last_activity,
-                completion_percentage=progress["overallProgress"]
+                return ProjectDashboardData(
+                    project=ProjectResponse.model_validate(project),
+                    classification=classification,
+                    predicate_devices=predicate_devices,
+                    progress=progress,
+                    recent_activity=recent_activity,
+                    statistics=statistics,
+                    # Legacy fields
+                    classification_status=classification_status,
+                    predicate_count=predicate_count,
+                    selected_predicates=selected_predicates,
+                    document_count=len(project.documents),
+                    interaction_count=len(project.agent_interactions),
+                    last_activity=last_activity,
+                    completion_percentage=progress["overallProgress"]
+                )
+                
+        except ProjectNotFoundError:
+            # Re-raise application exceptions
+            raise
+        except Exception as e:
+            # Wrap database and other errors
+            raise DatabaseError(
+                operation="get_dashboard_data",
+                table="projects",
+                original_error=e,
+                query_info={"project_id": project_id, "user_id": user_id}
             )
     
     async def export_project(
@@ -547,35 +657,38 @@ class ProjectService:
             ProjectExportData: Complete project data
             
         Raises:
-            HTTPException: If project not found or access denied
+            ProjectNotFoundError: If project not found or access denied
+            DatabaseError: If database operation fails
         """
-        async with self.db_manager.get_session() as session:
-            # Get project with all related data
-            stmt = (
-                select(Project)
-                .options(
-                    selectinload(Project.device_classifications),
-                    selectinload(Project.predicate_devices),
-                    selectinload(Project.documents),
-                    selectinload(Project.agent_interactions)
-                )
-                .join(User)
-                .where(
-                    and_(
-                        Project.id == project_id,
-                        User.google_id == user_id
+        try:
+            async with self.db_manager.get_session() as session:
+                # Get project with all related data
+                stmt = (
+                    select(Project)
+                    .options(
+                        selectinload(Project.device_classifications),
+                        selectinload(Project.predicate_devices),
+                        selectinload(Project.documents),
+                        selectinload(Project.agent_interactions)
+                    )
+                    .join(User)
+                    .where(
+                        and_(
+                            Project.id == project_id,
+                            User.google_id == user_id
+                        )
                     )
                 )
-            )
-            
-            result = await session.execute(stmt)
-            project = result.scalar_one_or_none()
-            
-            if not project:
-                raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND,
-                    detail="Project not found or access denied"
-                )
+                
+                result = await session.execute(stmt)
+                project = result.scalar_one_or_none()
+                
+                if not project:
+                    raise ProjectNotFoundError(
+                        project_id=project_id,
+                        user_id=user_id,
+                        additional_context={"operation": "export_project", "format_type": format_type}
+                    )
             
             # Convert related data to dictionaries
             classifications = []
@@ -633,12 +746,24 @@ class ProjectService:
                     "created_at": interaction.created_at.isoformat()
                 })
             
-            return ProjectExportData(
-                project=ProjectResponse.model_validate(project),
-                classifications=classifications,
-                predicates=predicates,
-                documents=documents,
-                interactions=interactions
+                return ProjectExportData(
+                    project=ProjectResponse.model_validate(project),
+                    classifications=classifications,
+                    predicates=predicates,
+                    documents=documents,
+                    interactions=interactions
+                )
+                
+        except ProjectNotFoundError:
+            # Re-raise application exceptions
+            raise
+        except Exception as e:
+            # Wrap database and other errors
+            raise DatabaseError(
+                operation="export_project",
+                table="projects",
+                original_error=e,
+                query_info={"project_id": project_id, "user_id": user_id, "format_type": format_type}
             )
     
     def _calculate_project_progress(

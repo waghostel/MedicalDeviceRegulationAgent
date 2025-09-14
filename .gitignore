@@ -75,4 +75,9 @@ ignore/
 .DS_Store
 
 *.db-shm
-*.db-wal
+*.db-wal.DS_Store
+
+.gemini/
+# GitHub App credentials
+gha-creds-*.json.DS_Store
+medical-device-regulatory-assistant/backend/error_tracking.db

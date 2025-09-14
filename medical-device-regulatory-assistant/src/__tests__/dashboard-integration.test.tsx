@@ -4,11 +4,18 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { screen, fireEvent, waitFor } from '@testing-library/react';
 import { jest } from '@jest/globals';
 import { RegulatoryDashboard } from '@/components/dashboard/regulatory-dashboard';
 import { useDashboard } from '@/hooks/use-dashboard';
 import { DashboardData } from '@/types/dashboard';
+import {
+  renderWithProviders,
+  waitForAsyncUpdates,
+  fireEventWithAct,
+  setupTestEnvironment,
+  cleanupTestEnvironment,
+} from '@/lib/testing/react-test-utils';
 
 // Mock the dashboard hook
 const mockUseDashboard = jest.fn();
@@ -33,7 +40,7 @@ const mockDashboardData: DashboardData = {
     intendedUse: 'For diagnostic purposes',
     status: 'active',
     createdAt: '2024-01-01T00:00:00Z',
-    updatedAt: '2024-01-01T12:00:00Z'
+    updatedAt: '2024-01-01T12:00:00Z',
   },
   classification: {
     id: '1',
@@ -50,11 +57,11 @@ const mockDashboardData: DashboardData = {
         title: 'FDA Classification Database',
         effectiveDate: '2024-01-01',
         documentType: 'FDA_DATABASE',
-        accessedDate: '2024-01-01'
-      }
+        accessedDate: '2024-01-01',
+      },
     ],
     createdAt: '2024-01-01T10:00:00Z',
-    updatedAt: '2024-01-01T10:00:00Z'
+    updatedAt: '2024-01-01T10:00:00Z',
   },
   predicateDevices: [
     {
@@ -71,34 +78,37 @@ const mockDashboardData: DashboardData = {
         differences: [],
         riskAssessment: 'low',
         testingRecommendations: [],
-        substantialEquivalenceAssessment: 'Substantially equivalent'
+        substantialEquivalenceAssessment: 'Substantially equivalent',
       },
       isSelected: true,
       createdAt: '2024-01-01T11:00:00Z',
-      updatedAt: '2024-01-01T11:00:00Z'
-    }
+      updatedAt: '2024-01-01T11:00:00Z',
+    },
   ],
   progress: {
     projectId: '1',
     classification: {
       status: 'completed',
       confidenceScore: 0.85,
-      completedAt: '2024-01-01T10:00:00Z'
+      completedAt: '2024-01-01T10:00:00Z',
     },
     predicateSearch: {
       status: 'completed',
       confidenceScore: 0.9,
-      completedAt: '2024-01-01T11:00:00Z'
+      completedAt: '2024-01-01T11:00:00Z',
     },
     comparisonAnalysis: {
-      status: 'in-progress'
+      status: 'in-progress',
     },
     submissionReadiness: {
-      status: 'pending'
+      status: 'pending',
     },
     overallProgress: 50,
-    nextActions: ['Complete comparison analysis', 'Prepare submission documents'],
-    lastUpdated: '2024-01-01T12:00:00Z'
+    nextActions: [
+      'Complete comparison analysis',
+      'Prepare submission documents',
+    ],
+    lastUpdated: '2024-01-01T12:00:00Z',
   },
   recentActivity: [
     {
@@ -110,9 +120,9 @@ const mockDashboardData: DashboardData = {
       status: 'success',
       metadata: {
         confidence_score: 0.85,
-        execution_time_ms: 2500
-      }
-    }
+        execution_time_ms: 2500,
+      },
+    },
   ],
   statistics: {
     totalPredicates: 1,
@@ -120,17 +130,28 @@ const mockDashboardData: DashboardData = {
     averageConfidence: 0.9,
     completionPercentage: 50,
     documentsCount: 0,
-    agentInteractions: 2
-  }
+    agentInteractions: 2,
+  },
 };
 
 describe('Dashboard Integration Tests', () => {
+  let testEnv: ReturnType<typeof setupTestEnvironment>;
+
   beforeEach(() => {
+    testEnv = setupTestEnvironment({
+      mockToasts: true,
+      skipActWarnings: false,
+    });
     jest.clearAllMocks();
   });
 
+  afterEach(() => {
+    testEnv.cleanup();
+    cleanupTestEnvironment();
+  });
+
   describe('Dashboard Data Loading', () => {
-    it('should display loading state initially', () => {
+    it('should display loading state initially', async () => {
       mockUseDashboard.mockReturnValue({
         data: undefined,
         loading: true,
@@ -144,7 +165,7 @@ describe('Dashboard Integration Tests', () => {
         handleStepClick: jest.fn(),
       });
 
-      render(<RegulatoryDashboard projectId="1" />);
+      await renderWithProviders(<RegulatoryDashboard projectId="1" />);
 
       expect(screen.getByText('Loading project data...')).toBeInTheDocument();
       expect(screen.getByRole('status')).toBeInTheDocument(); // Loading spinner
@@ -164,7 +185,7 @@ describe('Dashboard Integration Tests', () => {
         handleStepClick: jest.fn(),
       });
 
-      render(<RegulatoryDashboard projectId="1" />);
+      await renderWithProviders(<RegulatoryDashboard projectId="1" />);
 
       await waitFor(() => {
         expect(screen.getByText('Test Medical Device')).toBeInTheDocument();
@@ -191,7 +212,9 @@ describe('Dashboard Integration Tests', () => {
 
       render(<RegulatoryDashboard projectId="1" />);
 
-      expect(screen.getByText(`Failed to load dashboard data: ${errorMessage}`)).toBeInTheDocument();
+      expect(
+        screen.getByText(`Failed to load dashboard data: ${errorMessage}`)
+      ).toBeInTheDocument();
       expect(screen.getByText('Retry')).toBeInTheDocument();
     });
   });
@@ -257,7 +280,7 @@ describe('Dashboard Integration Tests', () => {
 
         expect(mockHandlers.selectPredicate).toHaveBeenCalledWith(
           expect.objectContaining({
-            kNumber: 'K123456'
+            kNumber: 'K123456',
           })
         );
       });
@@ -351,7 +374,9 @@ describe('Dashboard Integration Tests', () => {
       render(<RegulatoryDashboard projectId="1" />);
 
       expect(screen.getByText('Recent Activity')).toBeInTheDocument();
-      expect(screen.getByText('Device Classification Completed')).toBeInTheDocument();
+      expect(
+        screen.getByText('Device Classification Completed')
+      ).toBeInTheDocument();
     });
   });
 
@@ -375,14 +400,18 @@ describe('Dashboard Integration Tests', () => {
       render(<RegulatoryDashboard projectId="1" />);
 
       // Should start on overview tab
-      expect(screen.getByRole('tab', { selected: true })).toHaveTextContent('Overview');
+      expect(screen.getByRole('tab', { selected: true })).toHaveTextContent(
+        'Overview'
+      );
 
       // Switch to detailed tab
       const detailedTab = screen.getByText('Detailed View');
       fireEvent.click(detailedTab);
 
       await waitFor(() => {
-        expect(screen.getByRole('tab', { selected: true })).toHaveTextContent('Detailed View');
+        expect(screen.getByRole('tab', { selected: true })).toHaveTextContent(
+          'Detailed View'
+        );
       });
     });
   });
@@ -391,7 +420,7 @@ describe('Dashboard Integration Tests', () => {
 describe('Dashboard Hook Tests', () => {
   // Note: These would be more comprehensive unit tests for the useDashboard hook
   // For now, we're testing through the component integration
-  
+
   it('should handle dashboard data loading lifecycle', () => {
     // This would test the hook directly with proper mocking
     // of the project service and WebSocket connections

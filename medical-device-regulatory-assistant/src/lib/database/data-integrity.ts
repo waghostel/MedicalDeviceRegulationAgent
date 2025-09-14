@@ -3,647 +3,856 @@
  * Validates data consistency between mock data and database schema
  */
 
-export interface DataIntegrityRule {
+import { DatabaseConnection } from './seeder';
+import { DatabaseSeed } from '../mock-data/generators';
+import { 
+  Project, 
+  DeviceClassification, 
+  PredicateDevice, 
+  AgentInteraction,
+  ProjectDocument 
+} from '@/types/project';
+
+export interface IntegrityValidationResult {
+  valid: boolean;
+  summary: ValidationSummary;
+  violations: IntegrityViolation[];
+  recommendations: IntegrityRecommendation[];
+  timestamp: string;
+}
+
+export interface ValidationSummary {
+  totalChecks: number;
+  passed: number;
+  failed: number;
+  warnings: number;
+  criticalIssues: number;
+  score: number; // 0-100
+}
+
+export interface IntegrityViolation {
+  id: string;
+  type: ViolationType;
+  severity: 'low' | 'medium' | 'high' | 'critical';
+  table: string;
+  column?: string;
+  recordId?: string | number;
+  description: string;
+  expectedValue?: any;
+  actualValue?: any;
+  constraint: string;
+  impact: string;
+}
+
+export enum ViolationType {
+  FOREIGN_KEY_VIOLATION = 'foreign_key_violation',
+  NULL_CONSTRAINT_VIOLATION = 'null_constraint_violation',
+  UNIQUE_CONSTRAINT_VIOLATION = 'unique_constraint_violation',
+  CHECK_CONSTRAINT_VIOLATION = 'check_constraint_violation',
+  DATA_TYPE_MISMATCH = 'data_type_mismatch',
+  RANGE_VIOLATION = 'range_violation',
+  FORMAT_VIOLATION = 'format_violation',
+  BUSINESS_RULE_VIOLATION = 'business_rule_violation',
+  ORPHANED_RECORD = 'orphaned_record',
+  MISSING_REQUIRED_DATA = 'missing_required_data'
+}
+
+export interface IntegrityRecommendation {
+  type: 'fix' | 'warning' | 'optimization';
+  priority: 'low' | 'medium' | 'high' | 'critical';
+  title: string;
+  description: string;
+  actions: string[];
+  sqlFix?: string;
+  impact: string;
+}
+
+export interface ValidationRule {
   id: string;
   name: string;
   description: string;
-  type: 'schema' | 'constraint' | 'relationship' | 'business' | 'format';
-  severity: 'error' | 'warning' | 'info';
+  type: ViolationType;
+  severity: 'low' | 'medium' | 'high' | 'critical';
   table: string;
   column?: string;
-  validationQuery: string;
-  expectedResult: any;
-  errorMessage: string;
-  fixSuggestion: string;
+  constraint: string;
+  validationSql: string;
+  fixSql?: string;
+  enabled: boolean;
 }
 
-export interface DataIntegrityResult {
-  ruleId: string;
-  passed: boolean;
-  actualResult: any;
-  expectedResult: any;
-  errorMessage?: string;
-  affectedRecords: number;
-  executionTime: number;
-  details: ValidationDetail[];
+export interface SchemaValidation {
+  table: string;
+  expectedSchema: TableSchema;
+  actualSchema?: TableSchema;
+  issues: SchemaIssue[];
 }
 
-export interface ValidationDetail {
-  recordId: any;
-  field: string;
-  currentValue: any;
-  expectedValue?: any;
-  issue: string;
+export interface TableSchema {
+  name: string;
+  columns: ColumnDefinition[];
+  constraints: ConstraintDefinition[];
+  indexes: IndexDefinition[];
 }
 
-export interface IntegrityReport {
-  timestamp: string;
-  databaseInstance: string;
-  totalRules: number;
-  passedRules: number;
-  failedRules: number;
-  warningRules: number;
-  overallScore: number;
-  results: DataIntegrityResult[];
-  summary: IntegritySummary;
-  recommendations: string[];
+export interface ColumnDefinition {
+  name: string;
+  type: string;
+  nullable: boolean;
+  defaultValue?: string;
+  primaryKey: boolean;
+  foreignKey?: ForeignKeyDefinition;
 }
 
-export interface IntegritySummary {
-  schemaIssues: number;
-  constraintViolations: number;
-  relationshipIssues: number;
-  businessRuleViolations: number;
-  formatIssues: number;
-  criticalIssues: number;
-  totalAffectedRecords: number;
+export interface ConstraintDefinition {
+  name: string;
+  type: 'PRIMARY KEY' | 'FOREIGN KEY' | 'UNIQUE' | 'CHECK' | 'NOT NULL';
+  columns: string[];
+  definition: string;
+}
+
+export interface IndexDefinition {
+  name: string;
+  columns: string[];
+  unique: boolean;
+}
+
+export interface ForeignKeyDefinition {
+  referencedTable: string;
+  referencedColumn: string;
+  onDelete?: 'CASCADE' | 'SET NULL' | 'RESTRICT';
+  onUpdate?: 'CASCADE' | 'SET NULL' | 'RESTRICT';
+}
+
+export interface SchemaIssue {
+  type: 'missing_table' | 'missing_column' | 'type_mismatch' | 'missing_constraint' | 'missing_index';
+  severity: 'low' | 'medium' | 'high' | 'critical';
+  description: string;
+  expected?: string;
+  actual?: string;
 }
 
 /**
  * Data Integrity Validator
- * Validates data integrity between mock data and database
+ * Validates data integrity and consistency
  */
 export class DataIntegrityValidator {
-  private rules: DataIntegrityRule[] = [];
+  private connection: DatabaseConnection;
+  private rules: Map<string, ValidationRule> = new Map();
 
-  constructor() {
-    this.initializeRules();
+  constructor(connection: DatabaseConnection) {
+    this.connection = connection;
+    this.initializeValidationRules();
   }
 
   /**
-   * Initialize validation rules
+   * Initialize built-in validation rules
    */
-  private initializeRules(): void {
-    this.rules = [
-      // Schema validation rules
-      ...this.createSchemaValidationRules(),
-      // Constraint validation rules
-      ...this.createConstraintValidationRules(),
-      // Relationship validation rules
-      ...this.createRelationshipValidationRules(),
-      // Business rule validation rules
-      ...this.createBusinessRuleValidationRules(),
-      // Format validation rules
-      ...this.createFormatValidationRules()
-    ];
-  }  /**
+  private initializeValidationRules(): void {
+    // Foreign key validation rules
+    this.addRule({
+      id: 'fk_projects_user_id',
+      name: 'Projects User ID Foreign Key',
+      description: 'Validate that all projects reference valid users',
+      type: ViolationType.FOREIGN_KEY_VIOLATION,
+      severity: 'critical',
+      table: 'projects',
+      column: 'user_id',
+      constraint: 'FOREIGN KEY (user_id) REFERENCES users(id)',
+      validationSql: `
+        SELECT p.id, p.user_id 
+        FROM projects p 
+        LEFT JOIN users u ON p.user_id = u.id 
+        WHERE u.id IS NULL
+      `,
+      fixSql: `DELETE FROM projects WHERE user_id NOT IN (SELECT id FROM users)`,
+      enabled: true
+    });
 
-   * Create schema validation rules
-   */
-  private createSchemaValidationRules(): DataIntegrityRule[] {
-    return [
-      {
-        id: 'schema-users-required-fields',
-        name: 'Users Required Fields',
-        description: 'Validate that all required fields in users table are populated',
-        type: 'schema',
-        severity: 'error',
-        table: 'users',
-        validationQuery: 'SELECT COUNT(*) FROM users WHERE email IS NULL OR email = \'\' OR name IS NULL OR name = \'\' OR google_id IS NULL OR google_id = \'\'',
-        expectedResult: 0,
-        errorMessage: 'Found users with missing required fields',
-        fixSuggestion: 'Ensure all users have email, name, and google_id populated'
-      },
-      {
-        id: 'schema-projects-required-fields',
-        name: 'Projects Required Fields',
-        description: 'Validate that all required fields in projects table are populated',
-        type: 'schema',
-        severity: 'error',
-        table: 'projects',
-        validationQuery: 'SELECT COUNT(*) FROM projects WHERE name IS NULL OR name = \'\' OR user_id IS NULL OR status IS NULL',
-        expectedResult: 0,
-        errorMessage: 'Found projects with missing required fields',
-        fixSuggestion: 'Ensure all projects have name, user_id, and status populated'
-      },
-      {
-        id: 'schema-predicate-devices-k-number',
-        name: 'Predicate Devices K-Number Format',
-        description: 'Validate that all predicate devices have properly formatted K-numbers',
-        type: 'schema',
-        severity: 'error',
-        table: 'predicate_devices',
-        validationQuery: 'SELECT COUNT(*) FROM predicate_devices WHERE k_number IS NULL OR k_number = \'\' OR LENGTH(k_number) < 7',
-        expectedResult: 0,
-        errorMessage: 'Found predicate devices with invalid K-numbers',
-        fixSuggestion: 'Ensure all predicate devices have valid K-numbers (format: K######)'
-      }
-    ];
+    this.addRule({
+      id: 'fk_classifications_project_id',
+      name: 'Classifications Project ID Foreign Key',
+      description: 'Validate that all classifications reference valid projects',
+      type: ViolationType.FOREIGN_KEY_VIOLATION,
+      severity: 'critical',
+      table: 'device_classifications',
+      column: 'project_id',
+      constraint: 'FOREIGN KEY (project_id) REFERENCES projects(id)',
+      validationSql: `
+        SELECT dc.id, dc.project_id 
+        FROM device_classifications dc 
+        LEFT JOIN projects p ON dc.project_id = p.id 
+        WHERE p.id IS NULL
+      `,
+      fixSql: `DELETE FROM device_classifications WHERE project_id NOT IN (SELECT id FROM projects)`,
+      enabled: true
+    });
+
+    // Data type and range validation rules
+    this.addRule({
+      id: 'confidence_score_range',
+      name: 'Confidence Score Range',
+      description: 'Validate that confidence scores are between 0 and 1',
+      type: ViolationType.RANGE_VIOLATION,
+      severity: 'high',
+      table: 'device_classifications',
+      column: 'confidence_score',
+      constraint: 'CHECK (confidence_score >= 0 AND confidence_score <= 1)',
+      validationSql: `
+        SELECT id, confidence_score 
+        FROM device_classifications 
+        WHERE confidence_score < 0 OR confidence_score > 1
+      `,
+      fixSql: `
+        UPDATE device_classifications 
+        SET confidence_score = CASE 
+          WHEN confidence_score < 0 THEN 0 
+          WHEN confidence_score > 1 THEN 1 
+          ELSE confidence_score 
+        END
+      `,
+      enabled: true
+    });
+
+    this.addRule({
+      id: 'predicate_confidence_range',
+      name: 'Predicate Confidence Score Range',
+      description: 'Validate that predicate confidence scores are between 0 and 1',
+      type: ViolationType.RANGE_VIOLATION,
+      severity: 'high',
+      table: 'predicate_devices',
+      column: 'confidence_score',
+      constraint: 'CHECK (confidence_score >= 0 AND confidence_score <= 1)',
+      validationSql: `
+        SELECT id, confidence_score 
+        FROM predicate_devices 
+        WHERE confidence_score < 0 OR confidence_score > 1
+      `,
+      enabled: true
+    });
+
+    // Business rule validation
+    this.addRule({
+      id: 'valid_device_class',
+      name: 'Valid Device Class',
+      description: 'Validate that device class is I, II, or III',
+      type: ViolationType.CHECK_CONSTRAINT_VIOLATION,
+      severity: 'high',
+      table: 'device_classifications',
+      column: 'device_class',
+      constraint: 'CHECK (device_class IN ("I", "II", "III"))',
+      validationSql: `
+        SELECT id, device_class 
+        FROM device_classifications 
+        WHERE device_class NOT IN ('I', 'II', 'III')
+      `,
+      enabled: true
+    });
+
+    this.addRule({
+      id: 'valid_project_status',
+      name: 'Valid Project Status',
+      description: 'Validate that project status is valid',
+      type: ViolationType.CHECK_CONSTRAINT_VIOLATION,
+      severity: 'medium',
+      table: 'projects',
+      column: 'status',
+      constraint: 'CHECK (status IN ("draft", "in_progress", "completed"))',
+      validationSql: `
+        SELECT id, status 
+        FROM projects 
+        WHERE status NOT IN ('draft', 'in_progress', 'completed')
+      `,
+      enabled: true
+    });
+
+    // Required data validation
+    this.addRule({
+      id: 'required_project_name',
+      name: 'Required Project Name',
+      description: 'Validate that all projects have names',
+      type: ViolationType.NULL_CONSTRAINT_VIOLATION,
+      severity: 'critical',
+      table: 'projects',
+      column: 'name',
+      constraint: 'NOT NULL',
+      validationSql: `
+        SELECT id FROM projects WHERE name IS NULL OR name = ''
+      `,
+      enabled: true
+    });
+
+    this.addRule({
+      id: 'required_user_email',
+      name: 'Required User Email',
+      description: 'Validate that all users have email addresses',
+      type: ViolationType.NULL_CONSTRAINT_VIOLATION,
+      severity: 'critical',
+      table: 'users',
+      column: 'email',
+      constraint: 'NOT NULL',
+      validationSql: `
+        SELECT id FROM users WHERE email IS NULL OR email = ''
+      `,
+      enabled: true
+    });
+
+    // Format validation
+    this.addRule({
+      id: 'email_format',
+      name: 'Email Format',
+      description: 'Validate email format',
+      type: ViolationType.FORMAT_VIOLATION,
+      severity: 'medium',
+      table: 'users',
+      column: 'email',
+      constraint: 'Valid email format',
+      validationSql: `
+        SELECT id, email 
+        FROM users 
+        WHERE email NOT LIKE '%@%.%'
+      `,
+      enabled: true
+    });
+
+    this.addRule({
+      id: 'k_number_format',
+      name: 'K-Number Format',
+      description: 'Validate K-number format (K followed by 6 digits)',
+      type: ViolationType.FORMAT_VIOLATION,
+      severity: 'medium',
+      table: 'predicate_devices',
+      column: 'k_number',
+      constraint: 'K-number format: K######',
+      validationSql: `
+        SELECT id, k_number 
+        FROM predicate_devices 
+        WHERE k_number NOT GLOB 'K[0-9][0-9][0-9][0-9][0-9][0-9]'
+      `,
+      enabled: true
+    });
+
+    // Orphaned records
+    this.addRule({
+      id: 'orphaned_classifications',
+      name: 'Orphaned Classifications',
+      description: 'Find classifications without projects',
+      type: ViolationType.ORPHANED_RECORD,
+      severity: 'high',
+      table: 'device_classifications',
+      constraint: 'Must reference existing project',
+      validationSql: `
+        SELECT dc.id, dc.project_id 
+        FROM device_classifications dc 
+        LEFT JOIN projects p ON dc.project_id = p.id 
+        WHERE p.id IS NULL
+      `,
+      enabled: true
+    });
   }
 
   /**
-   * Create constraint validation rules
+   * Add validation rule
    */
-  private createConstraintValidationRules(): DataIntegrityRule[] {
-    return [
-      {
-        id: 'constraint-confidence-scores-range',
-        name: 'Confidence Scores Range',
-        description: 'Validate that confidence scores are within valid range (0-1)',
-        type: 'constraint',
-        severity: 'error',
-        table: 'device_classifications',
-        validationQuery: 'SELECT COUNT(*) FROM device_classifications WHERE confidence_score IS NOT NULL AND (confidence_score < 0 OR confidence_score > 1)',
-        expectedResult: 0,
-        errorMessage: 'Found confidence scores outside valid range (0-1)',
-        fixSuggestion: 'Ensure all confidence scores are between 0 and 1'
-      },
-      {
-        id: 'constraint-predicate-confidence-range',
-        name: 'Predicate Confidence Scores Range',
-        description: 'Validate that predicate confidence scores are within valid range (0-1)',
-        type: 'constraint',
-        severity: 'error',
-        table: 'predicate_devices',
-        validationQuery: 'SELECT COUNT(*) FROM predicate_devices WHERE confidence_score IS NOT NULL AND (confidence_score < 0 OR confidence_score > 1)',
-        expectedResult: 0,
-        errorMessage: 'Found predicate confidence scores outside valid range (0-1)',
-        fixSuggestion: 'Ensure all predicate confidence scores are between 0 and 1'
-      },
-      {
-        id: 'constraint-project-status-values',
-        name: 'Project Status Values',
-        description: 'Validate that project status values are from allowed set',
-        type: 'constraint',
-        severity: 'error',
-        table: 'projects',
-        validationQuery: 'SELECT COUNT(*) FROM projects WHERE status NOT IN (\'draft\', \'in_progress\', \'completed\')',
-        expectedResult: 0,
-        errorMessage: 'Found projects with invalid status values',
-        fixSuggestion: 'Ensure project status is one of: draft, in_progress, completed'
-      },
-      {
-        id: 'constraint-device-class-values',
-        name: 'Device Class Values',
-        description: 'Validate that device class values are from allowed set',
-        type: 'constraint',
-        severity: 'error',
-        table: 'device_classifications',
-        validationQuery: 'SELECT COUNT(*) FROM device_classifications WHERE device_class IS NOT NULL AND device_class NOT IN (\'I\', \'II\', \'III\')',
-        expectedResult: 0,
-        errorMessage: 'Found device classifications with invalid class values',
-        fixSuggestion: 'Ensure device class is one of: I, II, III'
-      }
-    ];
+  addRule(rule: ValidationRule): void {
+    this.rules.set(rule.id, rule);
   }
 
   /**
-   * Create relationship validation rules
+   * Get validation rule
    */
-  private createRelationshipValidationRules(): DataIntegrityRule[] {
-    return [
-      {
-        id: 'relationship-projects-users',
-        name: 'Projects-Users Relationship',
-        description: 'Validate that all projects reference existing users',
-        type: 'relationship',
-        severity: 'error',
-        table: 'projects',
-        validationQuery: 'SELECT COUNT(*) FROM projects p LEFT JOIN users u ON p.user_id = u.id WHERE u.id IS NULL',
-        expectedResult: 0,
-        errorMessage: 'Found projects referencing non-existent users',
-        fixSuggestion: 'Ensure all projects reference valid user IDs'
-      },
-      {
-        id: 'relationship-classifications-projects',
-        name: 'Classifications-Projects Relationship',
-        description: 'Validate that all device classifications reference existing projects',
-        type: 'relationship',
-        severity: 'error',
-        table: 'device_classifications',
-        validationQuery: 'SELECT COUNT(*) FROM device_classifications dc LEFT JOIN projects p ON dc.project_id = p.id WHERE p.id IS NULL',
-        expectedResult: 0,
-        errorMessage: 'Found device classifications referencing non-existent projects',
-        fixSuggestion: 'Ensure all device classifications reference valid project IDs'
-      },
-      {
-        id: 'relationship-predicates-projects',
-        name: 'Predicates-Projects Relationship',
-        description: 'Validate that all predicate devices reference existing projects',
-        type: 'relationship',
-        severity: 'error',
-        table: 'predicate_devices',
-        validationQuery: 'SELECT COUNT(*) FROM predicate_devices pd LEFT JOIN projects p ON pd.project_id = p.id WHERE p.id IS NULL',
-        expectedResult: 0,
-        errorMessage: 'Found predicate devices referencing non-existent projects',
-        fixSuggestion: 'Ensure all predicate devices reference valid project IDs'
-      },
-      {
-        id: 'relationship-interactions-projects',
-        name: 'Interactions-Projects Relationship',
-        description: 'Validate that all agent interactions reference existing projects',
-        type: 'relationship',
-        severity: 'error',
-        table: 'agent_interactions',
-        validationQuery: 'SELECT COUNT(*) FROM agent_interactions ai LEFT JOIN projects p ON ai.project_id = p.id WHERE p.id IS NULL',
-        expectedResult: 0,
-        errorMessage: 'Found agent interactions referencing non-existent projects',
-        fixSuggestion: 'Ensure all agent interactions reference valid project IDs'
-      },
-      {
-        id: 'relationship-interactions-users',
-        name: 'Interactions-Users Relationship',
-        description: 'Validate that all agent interactions reference existing users',
-        type: 'relationship',
-        severity: 'error',
-        table: 'agent_interactions',
-        validationQuery: 'SELECT COUNT(*) FROM agent_interactions ai LEFT JOIN users u ON ai.user_id = u.id WHERE u.id IS NULL',
-        expectedResult: 0,
-        errorMessage: 'Found agent interactions referencing non-existent users',
-        fixSuggestion: 'Ensure all agent interactions reference valid user IDs'
-      }
-    ];
-  }  /
-**
-   * Create business rule validation rules
-   */
-  private createBusinessRuleValidationRules(): DataIntegrityRule[] {
-    return [
-      {
-        id: 'business-project-has-classification',
-        name: 'Projects Should Have Classifications',
-        description: 'Validate that active projects have device classifications',
-        type: 'business',
-        severity: 'warning',
-        table: 'projects',
-        validationQuery: 'SELECT COUNT(*) FROM projects p LEFT JOIN device_classifications dc ON p.id = dc.project_id WHERE p.status = \'in_progress\' AND dc.id IS NULL',
-        expectedResult: 0,
-        errorMessage: 'Found in-progress projects without device classifications',
-        fixSuggestion: 'Consider adding device classifications for in-progress projects'
-      },
-      {
-        id: 'business-classification-has-confidence',
-        name: 'Classifications Should Have Confidence Scores',
-        description: 'Validate that device classifications have confidence scores',
-        type: 'business',
-        severity: 'warning',
-        table: 'device_classifications',
-        validationQuery: 'SELECT COUNT(*) FROM device_classifications WHERE confidence_score IS NULL',
-        expectedResult: 0,
-        errorMessage: 'Found device classifications without confidence scores',
-        fixSuggestion: 'Add confidence scores to device classifications'
-      },
-      {
-        id: 'business-predicate-selection-limit',
-        name: 'Predicate Selection Limit',
-        description: 'Validate that projects don\'t have too many selected predicates',
-        type: 'business',
-        severity: 'warning',
-        table: 'predicate_devices',
-        validationQuery: 'SELECT COUNT(*) FROM (SELECT project_id FROM predicate_devices WHERE is_selected = true GROUP BY project_id HAVING COUNT(*) > 5)',
-        expectedResult: 0,
-        errorMessage: 'Found projects with more than 5 selected predicates',
-        fixSuggestion: 'Consider limiting predicate selection to 3-5 devices per project'
-      },
-      {
-        id: 'business-recent-activity',
-        name: 'Recent User Activity',
-        description: 'Validate that users have recent activity',
-        type: 'business',
-        severity: 'info',
-        table: 'users',
-        validationQuery: 'SELECT COUNT(*) FROM users u LEFT JOIN agent_interactions ai ON u.id = ai.user_id WHERE ai.created_at < datetime(\'now\', \'-30 days\') OR ai.id IS NULL',
-        expectedResult: 0,
-        errorMessage: 'Found users without recent activity',
-        fixSuggestion: 'Consider user engagement strategies for inactive users'
-      }
-    ];
-  }
-
-  /**
-   * Create format validation rules
-   */
-  private createFormatValidationRules(): DataIntegrityRule[] {
-    return [
-      {
-        id: 'format-email-validation',
-        name: 'Email Format Validation',
-        description: 'Validate that user emails are properly formatted',
-        type: 'format',
-        severity: 'error',
-        table: 'users',
-        validationQuery: 'SELECT COUNT(*) FROM users WHERE email NOT LIKE \'%@%.%\'',
-        expectedResult: 0,
-        errorMessage: 'Found users with invalid email formats',
-        fixSuggestion: 'Ensure all user emails follow proper email format'
-      },
-      {
-        id: 'format-k-number-pattern',
-        name: 'K-Number Pattern Validation',
-        description: 'Validate that K-numbers follow FDA format (K followed by 6 digits)',
-        type: 'format',
-        severity: 'error',
-        table: 'predicate_devices',
-        validationQuery: 'SELECT COUNT(*) FROM predicate_devices WHERE k_number NOT GLOB \'K[0-9][0-9][0-9][0-9][0-9][0-9]\'',
-        expectedResult: 0,
-        errorMessage: 'Found K-numbers that don\'t follow FDA format',
-        fixSuggestion: 'Ensure K-numbers follow format: K followed by 6 digits'
-      },
-      {
-        id: 'format-product-code-pattern',
-        name: 'Product Code Pattern Validation',
-        description: 'Validate that product codes are 3-letter uppercase codes',
-        type: 'format',
-        severity: 'warning',
-        table: 'device_classifications',
-        validationQuery: 'SELECT COUNT(*) FROM device_classifications WHERE product_code IS NOT NULL AND (LENGTH(product_code) != 3 OR product_code != UPPER(product_code))',
-        expectedResult: 0,
-        errorMessage: 'Found product codes that don\'t follow FDA format',
-        fixSuggestion: 'Ensure product codes are 3-letter uppercase codes'
-      },
-      {
-        id: 'format-json-validity',
-        name: 'JSON Field Validity',
-        description: 'Validate that JSON fields contain valid JSON',
-        type: 'format',
-        severity: 'error',
-        table: 'device_classifications',
-        validationQuery: 'SELECT COUNT(*) FROM device_classifications WHERE cfr_sections IS NOT NULL AND json_valid(cfr_sections) = 0',
-        expectedResult: 0,
-        errorMessage: 'Found invalid JSON in cfr_sections field',
-        fixSuggestion: 'Ensure all JSON fields contain valid JSON data'
-      }
-    ];
-  }  /**
-
-   * Validate data integrity
-   */
-  async validateDataIntegrity(databaseInstance: string): Promise<IntegrityReport> {
-    const startTime = Date.now();
-    const results: DataIntegrityResult[] = [];
-    
-    console.log(`Starting data integrity validation for ${databaseInstance}`);
-
-    // Execute all validation rules
-    for (const rule of this.rules) {
-      const result = await this.executeValidationRule(rule);
-      results.push(result);
-    }
-
-    // Generate report
-    const report = this.generateIntegrityReport(databaseInstance, results, Date.now() - startTime);
-    
-    console.log(`Data integrity validation completed in ${report.summary.totalAffectedRecords}ms`);
-    return report;
-  }
-
-  /**
-   * Validate specific rule category
-   */
-  async validateRuleCategory(category: string, databaseInstance: string): Promise<IntegrityReport> {
-    const categoryRules = this.rules.filter(rule => rule.type === category);
-    const results: DataIntegrityResult[] = [];
-
-    for (const rule of categoryRules) {
-      const result = await this.executeValidationRule(rule);
-      results.push(result);
-    }
-
-    return this.generateIntegrityReport(databaseInstance, results, 0);
-  }
-
-  /**
-   * Execute validation rule
-   */
-  private async executeValidationRule(rule: DataIntegrityRule): Promise<DataIntegrityResult> {
-    const startTime = Date.now();
-    
-    try {
-      console.log(`Executing validation rule: ${rule.name}`);
-      
-      // In real implementation, would execute SQL query
-      // const queryResult = await this.executeSQL(rule.validationQuery);
-      // const actualResult = queryResult.rows[0][0];
-      
-      // Simulate query execution
-      const actualResult = this.simulateQueryResult(rule);
-      
-      const passed = this.compareResults(actualResult, rule.expectedResult);
-      
-      const result: DataIntegrityResult = {
-        ruleId: rule.id,
-        passed,
-        actualResult,
-        expectedResult: rule.expectedResult,
-        affectedRecords: passed ? 0 : (actualResult as number),
-        executionTime: Date.now() - startTime,
-        details: []
-      };
-
-      if (!passed) {
-        result.errorMessage = rule.errorMessage;
-        result.details = await this.getValidationDetails(rule, actualResult);
-      }
-
-      return result;
-
-    } catch (error) {
-      return {
-        ruleId: rule.id,
-        passed: false,
-        actualResult: null,
-        expectedResult: rule.expectedResult,
-        errorMessage: `Validation rule execution failed: ${error}`,
-        affectedRecords: 0,
-        executionTime: Date.now() - startTime,
-        details: []
-      };
-    }
-  }
-
-  /**
-   * Simulate query result for testing
-   */
-  private simulateQueryResult(rule: DataIntegrityRule): any {
-    // Simulate different scenarios based on rule type
-    switch (rule.type) {
-      case 'schema':
-        return Math.random() > 0.9 ? 1 : 0; // 10% chance of schema issues
-      case 'constraint':
-        return Math.random() > 0.95 ? 2 : 0; // 5% chance of constraint violations
-      case 'relationship':
-        return Math.random() > 0.98 ? 1 : 0; // 2% chance of relationship issues
-      case 'business':
-        return Math.random() > 0.8 ? 3 : 0; // 20% chance of business rule violations
-      case 'format':
-        return Math.random() > 0.92 ? 1 : 0; // 8% chance of format issues
-      default:
-        return 0;
-    }
-  }
-
-  /**
-   * Compare actual and expected results
-   */
-  private compareResults(actual: any, expected: any): boolean {
-    if (typeof expected === 'number') {
-      return actual === expected;
-    }
-    if (typeof expected === 'string') {
-      return actual === expected;
-    }
-    if (Array.isArray(expected)) {
-      return JSON.stringify(actual) === JSON.stringify(expected);
-    }
-    return actual === expected;
-  }
-
-  /**
-   * Get validation details for failed rules
-   */
-  private async getValidationDetails(rule: DataIntegrityRule, actualResult: any): Promise<ValidationDetail[]> {
-    // In real implementation, would query specific records that failed validation
-    const details: ValidationDetail[] = [];
-    
-    // Simulate getting details for failed records
-    for (let i = 0; i < Math.min(actualResult as number, 5); i++) {
-      details.push({
-        recordId: `record_${i + 1}`,
-        field: rule.column || 'unknown',
-        currentValue: 'invalid_value',
-        expectedValue: 'valid_value',
-        issue: rule.errorMessage
-      });
-    }
-    
-    return details;
-  } 
- /**
-   * Generate integrity report
-   */
-  private generateIntegrityReport(
-    databaseInstance: string, 
-    results: DataIntegrityResult[], 
-    executionTime: number
-  ): IntegrityReport {
-    const passedRules = results.filter(r => r.passed).length;
-    const failedRules = results.filter(r => !r.passed && this.getRuleSeverity(r.ruleId) === 'error').length;
-    const warningRules = results.filter(r => !r.passed && this.getRuleSeverity(r.ruleId) === 'warning').length;
-    
-    const summary: IntegritySummary = {
-      schemaIssues: results.filter(r => !r.passed && this.getRuleType(r.ruleId) === 'schema').length,
-      constraintViolations: results.filter(r => !r.passed && this.getRuleType(r.ruleId) === 'constraint').length,
-      relationshipIssues: results.filter(r => !r.passed && this.getRuleType(r.ruleId) === 'relationship').length,
-      businessRuleViolations: results.filter(r => !r.passed && this.getRuleType(r.ruleId) === 'business').length,
-      formatIssues: results.filter(r => !r.passed && this.getRuleType(r.ruleId) === 'format').length,
-      criticalIssues: failedRules,
-      totalAffectedRecords: results.reduce((sum, r) => sum + r.affectedRecords, 0)
-    };
-
-    const overallScore = Math.round((passedRules / results.length) * 100);
-
-    const recommendations = this.generateRecommendations(results, summary);
-
-    return {
-      timestamp: new Date().toISOString(),
-      databaseInstance,
-      totalRules: results.length,
-      passedRules,
-      failedRules,
-      warningRules,
-      overallScore,
-      results,
-      summary,
-      recommendations
-    };
-  }
-
-  /**
-   * Generate recommendations based on validation results
-   */
-  private generateRecommendations(results: DataIntegrityResult[], summary: IntegritySummary): string[] {
-    const recommendations: string[] = [];
-
-    if (summary.criticalIssues > 0) {
-      recommendations.push(`Address ${summary.criticalIssues} critical data integrity issues immediately`);
-    }
-
-    if (summary.schemaIssues > 0) {
-      recommendations.push('Review and fix schema validation issues - ensure all required fields are populated');
-    }
-
-    if (summary.constraintViolations > 0) {
-      recommendations.push('Fix constraint violations - check data ranges and allowed values');
-    }
-
-    if (summary.relationshipIssues > 0) {
-      recommendations.push('Resolve relationship integrity issues - ensure all foreign keys reference valid records');
-    }
-
-    if (summary.formatIssues > 0) {
-      recommendations.push('Correct data format issues - validate email formats, K-numbers, and JSON fields');
-    }
-
-    if (summary.businessRuleViolations > 0) {
-      recommendations.push('Review business rule violations - consider updating business logic or data');
-    }
-
-    if (summary.totalAffectedRecords > 100) {
-      recommendations.push('Large number of affected records detected - consider bulk data correction');
-    }
-
-    if (recommendations.length === 0) {
-      recommendations.push('All data integrity checks passed - database is in good condition');
-    }
-
-    return recommendations;
-  }
-
-  /**
-   * Get rule severity by ID
-   */
-  private getRuleSeverity(ruleId: string): string {
-    const rule = this.rules.find(r => r.id === ruleId);
-    return rule?.severity || 'error';
-  }
-
-  /**
-   * Get rule type by ID
-   */
-  private getRuleType(ruleId: string): string {
-    const rule = this.rules.find(r => r.id === ruleId);
-    return rule?.type || 'unknown';
+  getRule(id: string): ValidationRule | undefined {
+    return this.rules.get(id);
   }
 
   /**
    * Get all validation rules
    */
-  getAllRules(): DataIntegrityRule[] {
-    return [...this.rules];
+  getRules(): ValidationRule[] {
+    return Array.from(this.rules.values()).filter(rule => rule.enabled);
   }
 
   /**
-   * Get rules by type
+   * Validate database integrity
    */
-  getRulesByType(type: string): DataIntegrityRule[] {
-    return this.rules.filter(rule => rule.type === type);
-  }
+  async validateIntegrity(): Promise<IntegrityValidationResult> {
+    const startTime = Date.now();
+    const violations: IntegrityViolation[] = [];
+    const rules = this.getRules();
 
-  /**
-   * Get rules by severity
-   */
-  getRulesBySeverity(severity: string): DataIntegrityRule[] {
-    return this.rules.filter(rule => rule.severity === severity);
-  }
-
-  /**
-   * Add custom validation rule
-   */
-  addCustomRule(rule: DataIntegrityRule): void {
-    this.rules.push(rule);
-  }
-
-  /**
-   * Remove validation rule
-   */
-  removeRule(ruleId: string): boolean {
-    const index = this.rules.findIndex(rule => rule.id === ruleId);
-    if (index !== -1) {
-      this.rules.splice(index, 1);
-      return true;
+    // Run all validation rules
+    for (const rule of rules) {
+      try {
+        const ruleViolations = await this.validateRule(rule);
+        violations.push(...ruleViolations);
+      } catch (error) {
+        console.error(`Failed to validate rule ${rule.id}:`, error);
+        violations.push({
+          id: `rule_error_${rule.id}`,
+          type: ViolationType.BUSINESS_RULE_VIOLATION,
+          severity: 'critical',
+          table: rule.table,
+          column: rule.column,
+          description: `Validation rule failed: ${error}`,
+          constraint: rule.constraint,
+          impact: 'Unable to validate data integrity for this rule'
+        });
+      }
     }
-    return false;
+
+    // Generate summary
+    const summary = this.generateSummary(violations, rules.length);
+    
+    // Generate recommendations
+    const recommendations = this.generateRecommendations(violations);
+
+    return {
+      valid: violations.length === 0,
+      summary,
+      violations,
+      recommendations,
+      timestamp: new Date().toISOString()
+    };
+  }
+
+  /**
+   * Validate specific rule
+   */
+  private async validateRule(rule: ValidationRule): Promise<IntegrityViolation[]> {
+    const violations: IntegrityViolation[] = [];
+    
+    try {
+      const results = await this.connection.execute(rule.validationSql);
+      
+      for (const result of results || []) {
+        violations.push({
+          id: `${rule.id}_${result.id || Date.now()}`,
+          type: rule.type,
+          severity: rule.severity,
+          table: rule.table,
+          column: rule.column,
+          recordId: result.id,
+          description: `${rule.description}: ${this.formatViolationDetails(rule, result)}`,
+          constraint: rule.constraint,
+          impact: this.getViolationImpact(rule.type, rule.severity),
+          actualValue: rule.column ? result[rule.column] : undefined
+        });
+      }
+    } catch (error) {
+      throw new Error(`Rule validation failed: ${error}`);
+    }
+
+    return violations;
+  }
+
+  /**
+   * Format violation details
+   */
+  private formatViolationDetails(rule: ValidationRule, result: any): string {
+    switch (rule.type) {
+      case ViolationType.FOREIGN_KEY_VIOLATION:
+        return `Record ${result.id} references non-existent ${rule.column}: ${result[rule.column!]}`;
+      case ViolationType.RANGE_VIOLATION:
+        return `Value ${result[rule.column!]} is outside valid range`;
+      case ViolationType.FORMAT_VIOLATION:
+        return `Value "${result[rule.column!]}" does not match expected format`;
+      case ViolationType.NULL_CONSTRAINT_VIOLATION:
+        return `Required field ${rule.column} is null or empty`;
+      case ViolationType.CHECK_CONSTRAINT_VIOLATION:
+        return `Value "${result[rule.column!]}" violates check constraint`;
+      default:
+        return `Constraint violation detected`;
+    }
+  }
+
+  /**
+   * Get violation impact description
+   */
+  private getViolationImpact(type: ViolationType, severity: string): string {
+    const impacts = {
+      [ViolationType.FOREIGN_KEY_VIOLATION]: {
+        critical: 'Data corruption, application crashes, broken relationships',
+        high: 'Data inconsistency, potential application errors',
+        medium: 'Minor data inconsistency',
+        low: 'Minimal impact on functionality'
+      },
+      [ViolationType.RANGE_VIOLATION]: {
+        critical: 'Invalid calculations, system failures',
+        high: 'Incorrect business logic, data corruption',
+        medium: 'Display issues, minor calculation errors',
+        low: 'Cosmetic issues only'
+      },
+      [ViolationType.FORMAT_VIOLATION]: {
+        critical: 'System integration failures',
+        high: 'Data processing errors',
+        medium: 'Display formatting issues',
+        low: 'Minor presentation problems'
+      }
+    };
+
+    return impacts[type]?.[severity as keyof typeof impacts[ViolationType.FOREIGN_KEY_VIOLATION]] || 
+           'Unknown impact';
+  }
+
+  /**
+   * Generate validation summary
+   */
+  private generateSummary(violations: IntegrityViolation[], totalChecks: number): ValidationSummary {
+    const failed = violations.length;
+    const passed = totalChecks - failed;
+    const criticalIssues = violations.filter(v => v.severity === 'critical').length;
+    const warnings = violations.filter(v => v.severity === 'low' || v.severity === 'medium').length;
+    
+    // Calculate score (0-100)
+    const score = totalChecks > 0 ? Math.round((passed / totalChecks) * 100) : 100;
+
+    return {
+      totalChecks,
+      passed,
+      failed,
+      warnings,
+      criticalIssues,
+      score
+    };
+  }
+
+  /**
+   * Generate recommendations
+   */
+  private generateRecommendations(violations: IntegrityViolation[]): IntegrityRecommendation[] {
+    const recommendations: IntegrityRecommendation[] = [];
+    
+    // Group violations by type
+    const violationsByType = new Map<ViolationType, IntegrityViolation[]>();
+    for (const violation of violations) {
+      if (!violationsByType.has(violation.type)) {
+        violationsByType.set(violation.type, []);
+      }
+      violationsByType.get(violation.type)!.push(violation);
+    }
+
+    // Generate recommendations for each type
+    for (const [type, typeViolations] of violationsByType) {
+      const recommendation = this.generateTypeRecommendation(type, typeViolations);
+      if (recommendation) {
+        recommendations.push(recommendation);
+      }
+    }
+
+    // Add general recommendations
+    if (violations.length > 0) {
+      recommendations.push({
+        type: 'warning',
+        priority: 'medium',
+        title: 'Regular Integrity Monitoring',
+        description: 'Set up regular data integrity validation to catch issues early',
+        actions: [
+          'Schedule automated integrity checks',
+          'Set up alerts for critical violations',
+          'Create data quality dashboard',
+          'Implement data validation in application code'
+        ],
+        impact: 'Prevents data corruption and maintains system reliability'
+      });
+    }
+
+    return recommendations.sort((a, b) => {
+      const priorityOrder = { critical: 4, high: 3, medium: 2, low: 1 };
+      return priorityOrder[b.priority] - priorityOrder[a.priority];
+    });
+  }
+
+  /**
+   * Generate recommendation for specific violation type
+   */
+  private generateTypeRecommendation(
+    type: ViolationType, 
+    violations: IntegrityViolation[]
+  ): IntegrityRecommendation | null {
+    const count = violations.length;
+    const maxSeverity = violations.reduce((max, v) => 
+      v.severity === 'critical' ? 'critical' : 
+      v.severity === 'high' && max !== 'critical' ? 'high' : max, 'low');
+
+    switch (type) {
+      case ViolationType.FOREIGN_KEY_VIOLATION:
+        return {
+          type: 'fix',
+          priority: maxSeverity as any,
+          title: `Fix Foreign Key Violations (${count} found)`,
+          description: 'Foreign key violations can cause data corruption and application errors',
+          actions: [
+            'Review and fix orphaned records',
+            'Ensure proper cascade delete rules',
+            'Add foreign key constraints if missing',
+            'Validate data before insertion'
+          ],
+          sqlFix: violations[0] ? this.getRule(violations[0].id.split('_')[0])?.fixSql : undefined,
+          impact: 'Critical for data integrity and application stability'
+        };
+
+      case ViolationType.RANGE_VIOLATION:
+        return {
+          type: 'fix',
+          priority: maxSeverity as any,
+          title: `Fix Range Violations (${count} found)`,
+          description: 'Values outside expected ranges can cause calculation errors',
+          actions: [
+            'Update out-of-range values',
+            'Add check constraints to prevent future violations',
+            'Implement input validation in application',
+            'Review business rules for valid ranges'
+          ],
+          impact: 'Ensures accurate calculations and business logic'
+        };
+
+      case ViolationType.FORMAT_VIOLATION:
+        return {
+          type: 'fix',
+          priority: maxSeverity as any,
+          title: `Fix Format Violations (${count} found)`,
+          description: 'Invalid formats can cause integration and display issues',
+          actions: [
+            'Standardize data formats',
+            'Implement format validation',
+            'Clean up existing invalid data',
+            'Add format constraints to database'
+          ],
+          impact: 'Improves data quality and system integration'
+        };
+
+      default:
+        return null;
+    }
+  }
+
+  /**
+   * Validate mock data against database schema
+   */
+  async validateMockDataCompatibility(mockData: DatabaseSeed): Promise<IntegrityValidationResult> {
+    const violations: IntegrityViolation[] = [];
+
+    // Validate projects
+    for (const project of mockData.projects) {
+      const projectViolations = await this.validateProjectData(project);
+      violations.push(...projectViolations);
+    }
+
+    // Validate classifications
+    for (const classification of mockData.classifications) {
+      const classificationViolations = await this.validateClassificationData(classification);
+      violations.push(...classificationViolations);
+    }
+
+    // Validate predicate devices
+    for (const predicate of mockData.predicateDevices) {
+      const predicateViolations = await this.validatePredicateData(predicate);
+      violations.push(...predicateViolations);
+    }
+
+    const summary = this.generateSummary(violations, mockData.projects.length + 
+      mockData.classifications.length + mockData.predicateDevices.length);
+    const recommendations = this.generateRecommendations(violations);
+
+    return {
+      valid: violations.length === 0,
+      summary,
+      violations,
+      recommendations,
+      timestamp: new Date().toISOString()
+    };
+  }
+
+  /**
+   * Validate project data
+   */
+  private async validateProjectData(project: Project): Promise<IntegrityViolation[]> {
+    const violations: IntegrityViolation[] = [];
+
+    // Required fields
+    if (!project.name || project.name.trim() === '') {
+      violations.push({
+        id: `project_${project.id}_name`,
+        type: ViolationType.NULL_CONSTRAINT_VIOLATION,
+        severity: 'critical',
+        table: 'projects',
+        column: 'name',
+        recordId: project.id,
+        description: 'Project name is required',
+        constraint: 'NOT NULL',
+        impact: 'Project cannot be displayed or managed properly'
+      });
+    }
+
+    // Status validation
+    const validStatuses = ['draft', 'in_progress', 'completed'];
+    if (!validStatuses.includes(project.status)) {
+      violations.push({
+        id: `project_${project.id}_status`,
+        type: ViolationType.CHECK_CONSTRAINT_VIOLATION,
+        severity: 'high',
+        table: 'projects',
+        column: 'status',
+        recordId: project.id,
+        description: `Invalid project status: ${project.status}`,
+        actualValue: project.status,
+        constraint: 'CHECK (status IN ("draft", "in_progress", "completed"))',
+        impact: 'Project status filtering and workflow will not work correctly'
+      });
+    }
+
+    return violations;
+  }
+
+  /**
+   * Validate classification data
+   */
+  private async validateClassificationData(classification: DeviceClassification): Promise<IntegrityViolation[]> {
+    const violations: IntegrityViolation[] = [];
+
+    // Device class validation
+    const validClasses = ['I', 'II', 'III'];
+    if (classification.device_class && !validClasses.includes(classification.device_class)) {
+      violations.push({
+        id: `classification_${classification.id}_device_class`,
+        type: ViolationType.CHECK_CONSTRAINT_VIOLATION,
+        severity: 'high',
+        table: 'device_classifications',
+        column: 'device_class',
+        recordId: classification.id,
+        description: `Invalid device class: ${classification.device_class}`,
+        actualValue: classification.device_class,
+        constraint: 'CHECK (device_class IN ("I", "II", "III"))',
+        impact: 'Classification logic and regulatory pathway determination will fail'
+      });
+    }
+
+    // Confidence score validation
+    if (classification.confidence_score !== undefined && 
+        (classification.confidence_score < 0 || classification.confidence_score > 1)) {
+      violations.push({
+        id: `classification_${classification.id}_confidence`,
+        type: ViolationType.RANGE_VIOLATION,
+        severity: 'high',
+        table: 'device_classifications',
+        column: 'confidence_score',
+        recordId: classification.id,
+        description: `Confidence score out of range: ${classification.confidence_score}`,
+        actualValue: classification.confidence_score,
+        constraint: 'CHECK (confidence_score >= 0 AND confidence_score <= 1)',
+        impact: 'Confidence calculations and UI display will be incorrect'
+      });
+    }
+
+    return violations;
+  }
+
+  /**
+   * Validate predicate device data
+   */
+  private async validatePredicateData(predicate: PredicateDevice): Promise<IntegrityViolation[]> {
+    const violations: IntegrityViolation[] = [];
+
+    // K-number format validation
+    const kNumberPattern = /^K\d{6}$/;
+    if (!kNumberPattern.test(predicate.k_number)) {
+      violations.push({
+        id: `predicate_${predicate.id}_k_number`,
+        type: ViolationType.FORMAT_VIOLATION,
+        severity: 'medium',
+        table: 'predicate_devices',
+        column: 'k_number',
+        recordId: predicate.id,
+        description: `Invalid K-number format: ${predicate.k_number}`,
+        actualValue: predicate.k_number,
+        constraint: 'K-number format: K######',
+        impact: 'FDA database lookups and regulatory references will fail'
+      });
+    }
+
+    // Confidence score validation
+    if (predicate.confidence_score !== undefined && 
+        (predicate.confidence_score < 0 || predicate.confidence_score > 1)) {
+      violations.push({
+        id: `predicate_${predicate.id}_confidence`,
+        type: ViolationType.RANGE_VIOLATION,
+        severity: 'high',
+        table: 'predicate_devices',
+        column: 'confidence_score',
+        recordId: predicate.id,
+        description: `Confidence score out of range: ${predicate.confidence_score}`,
+        actualValue: predicate.confidence_score,
+        constraint: 'CHECK (confidence_score >= 0 AND confidence_score <= 1)',
+        impact: 'Predicate ranking and selection logic will be incorrect'
+      });
+    }
+
+    return violations;
+  }
+
+  /**
+   * Fix violations automatically where possible
+   */
+  async fixViolations(violationIds: string[]): Promise<{ fixed: string[]; failed: string[] }> {
+    const fixed: string[] = [];
+    const failed: string[] = [];
+
+    for (const violationId of violationIds) {
+      try {
+        // Extract rule ID from violation ID
+        const ruleId = violationId.split('_')[0];
+        const rule = this.getRule(ruleId);
+        
+        if (rule?.fixSql) {
+          await this.connection.execute(rule.fixSql);
+          fixed.push(violationId);
+        } else {
+          failed.push(violationId);
+        }
+      } catch (error) {
+        console.error(`Failed to fix violation ${violationId}:`, error);
+        failed.push(violationId);
+      }
+    }
+
+    return { fixed, failed };
   }
 }
 
-export default DataIntegrityValidator;
+/**
+ * Export utility functions for data integrity validation
+ */
+export async function validateDatabaseIntegrity(connection: DatabaseConnection): Promise<IntegrityValidationResult> {
+  const validator = new DataIntegrityValidator(connection);
+  return await validator.validateIntegrity();
+}
+
+export async function validateMockDataIntegrity(
+  connection: DatabaseConnection, 
+  mockData: DatabaseSeed
+): Promise<IntegrityValidationResult> {
+  const validator = new DataIntegrityValidator(connection);
+  return await validator.validateMockDataCompatibility(mockData);
+}
+
+export function createCustomValidationRule(
+  id: string,
+  name: string,
+  description: string,
+  table: string,
+  validationSql: string,
+  options?: Partial<ValidationRule>
+): ValidationRule {
+  return {
+    id,
+    name,
+    description,
+    type: ViolationType.BUSINESS_RULE_VIOLATION,
+    severity: 'medium',
+    table,
+    constraint: 'Custom validation rule',
+    validationSql,
+    enabled: true,
+    ...options
+  };
+}

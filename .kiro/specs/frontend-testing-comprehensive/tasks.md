@@ -466,7 +466,7 @@
   - Verify that the hydration mismatch error no longer appears in the browser console.
   - Ensure that the application still renders correctly with and without the Dark Reader extension enabled.
 
-- [ ] Task 23. Fix SSR Error in Frontend Performance Monitor
+- [x] Task 23. Fix SSR Error in Frontend Performance Monitor
   - Analyze the root cause of the `window is not defined` error in `src/lib/performance/optimization.ts`.
   - Modify `initializeObservers` to prevent server-side execution of browser-only code.
   - Ensure `FrontendPerformanceMonitor` initializes without crashing during server-side rendering.

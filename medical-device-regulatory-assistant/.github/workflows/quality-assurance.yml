@@ -1,0 +1,592 @@
+name: Quality Assurance Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  schedule:
+    # Run quality checks daily at 2 AM UTC
+    - cron: '0 2 * * *'
+
+env:
+  NODE_VERSION: '18'
+  PYTHON_VERSION: '3.11'
+  PNPM_VERSION: '9.0.0'
+
+jobs:
+  environment-validation:
+    name: Environment Validation
+    runs-on: ubuntu-latest
+    outputs:
+      frontend-valid: ${{ steps.frontend-validation.outputs.valid }}
+      backend-valid: ${{ steps.backend-validation.outputs.valid }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: latest
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+
+      - name: Validate Frontend Environment
+        id: frontend-validation
+        run: |
+          node scripts/validate-frontend-environment.js
+          echo "valid=true" >> $GITHUB_OUTPUT
+        continue-on-error: true
+
+      - name: Validate Backend Environment
+        id: backend-validation
+        working-directory: backend
+        run: |
+          poetry install --no-dev
+          poetry run python -c "import sys; print(f'Python {sys.version}')"
+          echo "valid=true" >> $GITHUB_OUTPUT
+        continue-on-error: true
+
+      - name: Environment Validation Summary
+        run: |
+          echo "Frontend Valid: ${{ steps.frontend-validation.outputs.valid }}"
+          echo "Backend Valid: ${{ steps.backend-validation.outputs.valid }}"
+
+  frontend-quality:
+    name: Frontend Quality Checks
+    runs-on: ubuntu-latest
+    needs: environment-validation
+    if: needs.environment-validation.outputs.frontend-valid == 'true'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: TypeScript type checking
+        run: pnpm type-check
+
+      - name: ESLint analysis
+        run: pnpm lint
+
+      - name: Prettier format check
+        run: pnpm format:check
+
+      - name: Unit tests with coverage
+        run: pnpm test:coverage
+
+      - name: Upload frontend coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./coverage/lcov.info
+          flags: frontend
+          name: frontend-coverage
+
+      - name: Build application
+        run: pnpm build
+
+      - name: Bundle size analysis
+        run: pnpm bundlesize
+
+  backend-quality:
+    name: Backend Quality Checks
+    runs-on: ubuntu-latest
+    needs: environment-validation
+    if: needs.environment-validation.outputs.backend-valid == 'true'
+    
+    services:
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: latest
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+
+      - name: Load cached venv
+        id: cached-poetry-dependencies
+        uses: actions/cache@v3
+        with:
+          path: backend/.venv
+          key: venv-${{ runner.os }}-${{ env.PYTHON_VERSION }}-${{ hashFiles('**/poetry.lock') }}
+
+      - name: Install dependencies
+        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+        working-directory: backend
+        run: poetry install --no-interaction --no-root
+
+      - name: Install project
+        working-directory: backend
+        run: poetry install --no-interaction
+
+      - name: Code formatting check (Black)
+        working-directory: backend
+        run: poetry run black --check .
+
+      - name: Import sorting check (isort)
+        working-directory: backend
+        run: poetry run isort --check-only .
+
+      - name: Linting (Flake8)
+        working-directory: backend
+        run: poetry run flake8 .
+
+      - name: Type checking (MyPy)
+        working-directory: backend
+        run: poetry run mypy .
+
+      - name: Security check (Safety)
+        working-directory: backend
+        run: poetry run safety check
+        continue-on-error: true
+
+      - name: Unit tests with coverage
+        working-directory: backend
+        run: poetry run python -m pytest tests/ -v --cov=backend --cov-report=xml --cov-report=html --cov-fail-under=85
+
+      - name: Upload backend coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./backend/coverage.xml
+          flags: backend
+          name: backend-coverage
+
+  integration-tests:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    needs: [frontend-quality, backend-quality]
+    
+    services:
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: latest
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+
+      - name: Install frontend dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install backend dependencies
+        working-directory: backend
+        run: poetry install --no-interaction
+
+      - name: Start backend server
+        working-directory: backend
+        run: |
+          poetry run uvicorn main:app --host 0.0.0.0 --port 8000 &
+          sleep 10
+        env:
+          DATABASE_URL: sqlite:///./test.db
+          REDIS_URL: redis://localhost:6379
+
+      - name: Wait for backend health check
+        run: |
+          timeout 30 bash -c 'until curl -f http://localhost:8000/health; do sleep 1; done'
+
+      - name: Run integration tests
+        run: pnpm test:integration
+
+      - name: Run API integration tests
+        working-directory: backend
+        run: poetry run python -m pytest tests/integration/ -v
+
+  e2e-tests:
+    name: End-to-End Tests
+    runs-on: ubuntu-latest
+    needs: integration-tests
+    
+    services:
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install backend dependencies
+        working-directory: backend
+        run: poetry install --no-interaction
+
+      - name: Install Playwright browsers
+        run: pnpm exec playwright install --with-deps
+
+      - name: Build frontend
+        run: pnpm build
+
+      - name: Start backend server
+        working-directory: backend
+        run: |
+          poetry run uvicorn main:app --host 0.0.0.0 --port 8000 &
+          sleep 10
+        env:
+          DATABASE_URL: sqlite:///./test.db
+          REDIS_URL: redis://localhost:6379
+
+      - name: Start frontend server
+        run: |
+          pnpm start &
+          sleep 15
+        env:
+          NEXTAUTH_URL: http://localhost:3000
+          NEXTAUTH_SECRET: test-secret
+
+      - name: Run E2E tests
+        run: pnpm test:e2e
+
+      - name: Upload E2E test results
+        uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 30
+
+  performance-tests:
+    name: Performance Tests
+    runs-on: ubuntu-latest
+    needs: [frontend-quality, backend-quality]
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install backend dependencies
+        working-directory: backend
+        run: poetry install --no-interaction
+
+      - name: Run frontend performance tests
+        run: pnpm test:performance
+
+      - name: Run backend performance tests
+        working-directory: backend
+        run: poetry run python -m pytest tests/performance/ -v -m "not slow"
+
+      - name: Lighthouse CI
+        run: |
+          pnpm build
+          pnpm start &
+          sleep 15
+          pnpm lighthouse:collect
+        continue-on-error: true
+
+  quality-gates:
+    name: Quality Gates Validation
+    runs-on: ubuntu-latest
+    needs: [frontend-quality, backend-quality, integration-tests, performance-tests]
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install backend dependencies
+        working-directory: backend
+        run: poetry install --no-interaction
+
+      - name: Run comprehensive quality checks
+        run: pnpm quality:check
+
+      - name: Generate quality metrics report
+        run: pnpm quality:report
+
+      - name: Upload quality reports
+        uses: actions/upload-artifact@v3
+        with:
+          name: quality-reports
+          path: quality-reports/
+          retention-days: 90
+
+      - name: Quality Gates Summary
+        run: |
+          echo "## Quality Gates Summary" >> $GITHUB_STEP_SUMMARY
+          echo "Quality checks completed. See artifacts for detailed reports." >> $GITHUB_STEP_SUMMARY
+
+  regression-detection:
+    name: Regression Detection
+    runs-on: ubuntu-latest
+    needs: quality-gates
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Fetch full history for comparison
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Download previous quality reports
+        uses: actions/download-artifact@v3
+        with:
+          name: quality-reports
+          path: previous-reports/
+        continue-on-error: true
+
+      - name: Compare quality metrics
+        run: |
+          node scripts/regression-detector.js
+        continue-on-error: true
+
+      - name: Create regression report
+        if: failure()
+        run: |
+          echo "## ⚠️ Quality Regression Detected" >> $GITHUB_STEP_SUMMARY
+          echo "Quality metrics have decreased compared to the previous build." >> $GITHUB_STEP_SUMMARY
+          echo "Please review the quality reports and address any regressions." >> $GITHUB_STEP_SUMMARY
+
+  security-scan:
+    name: Security Scanning
+    runs-on: ubuntu-latest
+    needs: environment-validation
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install backend dependencies
+        working-directory: backend
+        run: poetry install --no-interaction
+
+      - name: Frontend security audit
+        run: pnpm audit --audit-level moderate
+        continue-on-error: true
+
+      - name: Backend security check
+        working-directory: backend
+        run: poetry run safety check
+        continue-on-error: true
+
+      - name: CodeQL Analysis
+        uses: github/codeql-action/init@v2
+        with:
+          languages: javascript, python
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v2
+
+  deployment-readiness:
+    name: Deployment Readiness Check
+    runs-on: ubuntu-latest
+    needs: [quality-gates, security-scan, regression-detection]
+    if: always()
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check deployment readiness
+        run: |
+          echo "## Deployment Readiness Report" >> $GITHUB_STEP_SUMMARY
+          
+          # Check if all required jobs passed
+          if [[ "${{ needs.quality-gates.result }}" == "success" && "${{ needs.security-scan.result }}" == "success" ]]; then
+            echo "✅ **READY FOR DEPLOYMENT**" >> $GITHUB_STEP_SUMMARY
+            echo "All quality gates passed and security checks completed successfully." >> $GITHUB_STEP_SUMMARY
+            echo "deployment-ready=true" >> $GITHUB_OUTPUT
+          else
+            echo "❌ **NOT READY FOR DEPLOYMENT**" >> $GITHUB_STEP_SUMMARY
+            echo "Some quality gates failed or security issues were found." >> $GITHUB_STEP_SUMMARY
+            echo "deployment-ready=false" >> $GITHUB_OUTPUT
+          fi
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Job Results:" >> $GITHUB_STEP_SUMMARY
+          echo "- Quality Gates: ${{ needs.quality-gates.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Security Scan: ${{ needs.security-scan.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Regression Detection: ${{ needs.regression-detection.result }}" >> $GITHUB_STEP_SUMMARY
+
+      - name: Notify deployment status
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          if [[ "${{ steps.check-deployment-readiness.outputs.deployment-ready }}" == "true" ]]; then
+            echo "🚀 System is ready for production deployment"
+          else
+            echo "🛑 System is not ready for deployment - quality gates failed"
+            exit 1
+          fi

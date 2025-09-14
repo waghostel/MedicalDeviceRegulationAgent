@@ -4,7 +4,7 @@
 
 - **Pre-Development**: Clearly define expected test outcomes before coding.
 - **Post-Development**: Document all test results in the `./.kiro/specs/[your-spec-name]/task-execute-history/` folder to ensure traceability.
-- If the test script has been modified to skip some tests, make sure to document the skipped tests in **Undone tests/Skipped test**.
+- In the devopment process or chat history, if the test script has been modified to skip or simplify some tests, make sure to honestly document these tests in **Undone tests/Skipped test**.
 
 ## Task Report Template
 

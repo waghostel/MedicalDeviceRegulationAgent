@@ -28,7 +28,12 @@
         "find *",
         "rmdir *",
         "find *",
-        "grep *"
+        "grep *",
+        "git checkout *",
+        "git stash *",
+        "git status",
+        "find . -name \"__pycache__\" -type d -exec rm -rf {} + 2>/dev/null || true",
+        "echo *"
     ],
     "typescript.autoClosingTags": false
 }

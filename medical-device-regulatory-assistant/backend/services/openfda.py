@@ -182,7 +182,8 @@ class OpenFDAService:
         redis_client: Optional[redis.Redis] = None,
         cache_ttl: int = 3600,  # 1 hour default cache
         max_retries: int = 3,
-        timeout: int = 30
+        timeout: int = 30,
+        http_client: Optional[httpx.AsyncClient] = None
     ):
         self.api_key = api_key
         self.base_url = "https://api.fda.gov"
@@ -198,6 +199,9 @@ class OpenFDAService:
         
         # Redis cache client
         self.redis_client = redis_client
+        
+        # HTTP client (can be injected for testing)
+        self.http_client = http_client
         
         # HTTP client configuration
         self.client_config = {
@@ -289,8 +293,27 @@ class OpenFDAService:
                             # Rate limit exceeded
                             retry_after = int(response.headers.get("Retry-After", 60))
                             logger.warning(f"Rate limit exceeded, waiting {retry_after} seconds")
+                            if attempt == self.max_retries:
+                                raise RateLimitExceededError(
+                                    f"Rate limit exceeded after {self.max_retries + 1} attempts",
+                                    status_code=429
+                                )
                             await asyncio.sleep(retry_after)
                             continue
+                        
+                        elif response.status_code == 401:
+                            # Authentication error
+                            raise FDAAPIError(
+                                "Authentication failed - check FDA_API_KEY",
+                                status_code=401
+                            )
+                        
+                        elif response.status_code == 403:
+                            # Forbidden - API key may be invalid or expired
+                            raise FDAAPIError(
+                                "Access forbidden - API key may be invalid or expired",
+                                status_code=403
+                            )
                         
                         elif response.status_code == 404:
                             raise PredicateNotFoundError(
@@ -407,6 +430,9 @@ class OpenFDAService:
         except PredicateNotFoundError:
             logger.info("No predicate devices found for search criteria")
             return []
+        except FDAAPIError:
+            # Re-raise FDA API errors as-is
+            raise
         except Exception as e:
             logger.error(f"Error searching predicates: {e}")
             raise FDAAPIError(f"Failed to search predicates: {str(e)}")
@@ -619,6 +645,48 @@ class OpenFDAService:
             logger.error(f"Error getting product code info for {product_code}: {e}")
             raise FDAAPIError(f"Failed to get product code info: {str(e)}")
     
+    async def validate_api_configuration(self) -> Dict[str, Any]:
+        """
+        Validate API configuration and connectivity
+        
+        Returns:
+            Configuration validation results
+        """
+        validation_result = {
+            "api_key_configured": bool(self.api_key),
+            "base_url_accessible": False,
+            "rate_limiter_configured": True,
+            "circuit_breaker_configured": True,
+            "cache_configured": bool(self.redis_client),
+            "errors": [],
+            "warnings": []
+        }
+        
+        # Check API key
+        if not self.api_key:
+            validation_result["warnings"].append(
+                "FDA_API_KEY not configured - API requests may be rate limited"
+            )
+        
+        # Test basic connectivity
+        try:
+            params = {"search": "device_class:II", "limit": 1}
+            await self._make_request("device/510k.json", params, use_cache=False)
+            validation_result["base_url_accessible"] = True
+        except RateLimitExceededError:
+            validation_result["errors"].append("Rate limit exceeded during validation")
+        except FDAAPIError as e:
+            if e.status_code == 401:
+                validation_result["errors"].append("Authentication failed - invalid API key")
+            elif e.status_code == 403:
+                validation_result["errors"].append("Access forbidden - API key may be expired")
+            else:
+                validation_result["errors"].append(f"API error: {e}")
+        except Exception as e:
+            validation_result["errors"].append(f"Connectivity test failed: {e}")
+        
+        return validation_result
+
     async def health_check(self) -> Dict[str, Any]:
         """
         Perform health check on FDA API
@@ -642,14 +710,34 @@ class OpenFDAService:
                 "response_time_seconds": response_time,
                 "circuit_breaker_state": self.circuit_breaker.state,
                 "rate_limiter_requests": len(self.rate_limiter.requests),
+                "api_key_configured": bool(self.api_key),
                 "timestamp": datetime.now().isoformat()
             }
         
+        except RateLimitExceededError as e:
+            return {
+                "status": "rate_limited",
+                "error": str(e),
+                "circuit_breaker_state": self.circuit_breaker.state,
+                "api_key_configured": bool(self.api_key),
+                "timestamp": datetime.now().isoformat()
+            }
+        except FDAAPIError as e:
+            status = "authentication_error" if e.status_code in [401, 403] else "api_error"
+            return {
+                "status": status,
+                "error": str(e),
+                "status_code": e.status_code,
+                "circuit_breaker_state": self.circuit_breaker.state,
+                "api_key_configured": bool(self.api_key),
+                "timestamp": datetime.now().isoformat()
+            }
         except Exception as e:
             return {
                 "status": "unhealthy",
                 "error": str(e),
                 "circuit_breaker_state": self.circuit_breaker.state,
+                "api_key_configured": bool(self.api_key),
                 "timestamp": datetime.now().isoformat()
             }
     
@@ -660,6 +748,27 @@ class OpenFDAService:
 
 
 # Utility functions for common operations
+async def create_production_openfda_service() -> OpenFDAService:
+    """
+    Create OpenFDA service for production use with real API
+    
+    Returns:
+        Configured OpenFDA service instance for production
+    """
+    import os
+    
+    api_key = os.getenv("FDA_API_KEY")
+    if not api_key:
+        logger.warning("FDA_API_KEY not set, some features may be limited")
+
+    redis_url = os.getenv("REDIS_URL")
+    return await create_openfda_service(
+        api_key=api_key,
+        redis_url=redis_url,
+        cache_ttl=3600
+    )
+
+
 async def create_openfda_service(
     api_key: Optional[str] = None,
     redis_url: Optional[str] = None,
@@ -692,6 +801,99 @@ async def create_openfda_service(
         redis_client=redis_client,
         cache_ttl=cache_ttl
     )
+
+
+def create_successful_openfda_mock() -> OpenFDAService:
+    """
+    Create a mock OpenFDA service for testing with successful responses
+    
+    Returns:
+        Mock OpenFDA service instance
+    """
+    from unittest.mock import Mock, AsyncMock
+    
+    mock_service = Mock(spec=OpenFDAService)
+    
+    # Mock search_predicates method
+    mock_service.search_predicates = AsyncMock(return_value=[
+        FDASearchResult(
+            k_number="K123456",
+            device_name="Test Device",
+            intended_use="Test indication for medical device",
+            product_code="ABC",
+            clearance_date="2023-01-01",
+            applicant="Test Company",
+            contact="test@example.com",
+            decision_description="Substantially Equivalent",
+            statement_or_summary="Test device for regulatory testing",
+            confidence_score=0.85
+        )
+    ])
+    
+    # Mock get_device_details method
+    mock_service.get_device_details = AsyncMock(return_value=FDASearchResult(
+        k_number="K123456",
+        device_name="Test Device",
+        intended_use="Test indication for medical device",
+        product_code="ABC",
+        clearance_date="2023-01-01",
+        applicant="Test Company",
+        contact="test@example.com",
+        decision_description="Substantially Equivalent",
+        statement_or_summary="Detailed test device information for regulatory testing",
+        confidence_score=0.85
+    ))
+    
+    # Mock lookup_device_classification method
+    mock_service.lookup_device_classification = AsyncMock(return_value=[
+        DeviceClassificationResult(
+            device_class="II",
+            product_code="ABC",
+            device_name="Test Device Classification",
+            regulation_number="21 CFR 123.456",
+            medical_specialty_description="Test Medical Specialty",
+            device_class_description="Class II Medical Device",
+            confidence_score=0.90
+        )
+    ])
+    
+    # Mock search_adverse_events method
+    mock_service.search_adverse_events = AsyncMock(return_value=[
+        AdverseEventResult(
+            report_number="12345678",
+            event_date="2023-01-01",
+            device_name="Test Device",
+            manufacturer_name="Test Manufacturer",
+            event_type="Malfunction",
+            patient_outcome="No Adverse Outcome",
+            device_problem_flag="Y"
+        )
+    ])
+    
+    # Mock get_product_code_info method
+    mock_service.get_product_code_info = AsyncMock(return_value=DeviceClassificationResult(
+        device_class="II",
+        product_code="ABC",
+        device_name="Test Product Code Device",
+        regulation_number="21 CFR 123.456",
+        medical_specialty_description="Test Medical Specialty",
+        device_class_description="Class II Medical Device",
+        confidence_score=0.90
+    ))
+    
+    # Mock health_check method
+    mock_service.health_check = AsyncMock(return_value={
+        "status": "healthy",
+        "response_time_seconds": 0.1,
+        "circuit_breaker_state": "CLOSED",
+        "rate_limiter_requests": 0,
+        "timestamp": "2023-01-01T00:00:00"
+    })
+    
+    # Mock close method
+    mock_service.close = AsyncMock()
+    
+    return mock_service
 
 
 def calculate_predicate_confidence(

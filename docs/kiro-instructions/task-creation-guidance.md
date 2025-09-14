@@ -205,7 +205,6 @@ Before committing a tasks.md file, verify:
 
 ## Example Template
 
-````markdown
 # Implementation Plan
 
 Convert the [Your Spec Name] requirements into a series of prompts for a code-generation LLM that will implement each step in a test-driven manner. Prioritize best practices, incremental progress, and early testing, ensuring no big jumps in complexity at any stage. Make sure that each prompt builds on the previous prompts, and ends with wiring things together. There should be no hanging or orphaned code that isn't integrated into a previous step. Focus ONLY on tasks that involve writing, modifying, or testing code.
@@ -224,7 +223,6 @@ Example 1(Windows):
 cls
 <command>
 ```
-````
 
 Example 2 (Mac and Linux)
 
@@ -245,12 +243,29 @@ clear
    - If tests fail, fetch additional documentation (context7).
 6. Write a **task report** in `./.kiro/specs/[your-spec-name]/task-execute-history/` (e.g. `task-1.1.md`).
    - Be transparent about test results, especially if some tests require future verification.
+   - If the test script has been modified, skipped in the developemnt process or skipped chat history, document faild and skipped test in **Undone tests/Skipped test**.
+7. Re-check if any failed tests were skipped in the chat history, and document them under Undone Tests / Skipped Tests.
 
 ## Test-Driven Development (TDD)
 
-- **Pre-Development**: Clearly define expected test outcomes before coding.
-- **Post-Development**: Document all test results in the `./.kiro/specs/[your-spec-name]/task-execute-history/` folder to ensure traceability.
-- If the test script has been modified to skip some tests, make sure to document the skipped tests in **Undone tests/Skipped test**.
+### Testing Guidelines
+
+1. **Pre-Development**
+   - Clearly define the **expected test outcomes** before coding begins.
+2. **Post-Development**
+   - Document **all test results** in:
+
+     ```shell
+     ./.kiro/specs/[your-spec-name]/task-execute-history/
+     ```
+
+   - This ensures full **traceability** of test executions.
+3. **Failed Tests**
+   - **Definition**: Tests that did not pass in the latest test run.
+   - **Action**: Record the test name, the failure reason, and provide a reference to the related test report.
+4. **Skipped Tests**
+   - **Definition**: Tests that are skipped because the problem is either too complex or outside the current project scope.
+   - **Action**: Identify them from the development process or chat history, and clearly document the reason for skipping.
 
 ### Task Report Format
 

@@ -1,952 +1,1184 @@
 /**
  * Migration Validation Criteria and Success Metrics
- * Comprehensive validation framework for migration success measurement
+ * Defines comprehensive validation criteria for migration success
  */
 
-export interface ValidationSuite {
-  id: string;
-  name: string;
-  description: string;
-  categories: ValidationCategory[];
-  executionOrder: string[];
-  dependencies: ValidationDependency[];
-  reportingConfig: ReportingConfiguration;
+export interface ValidationFramework {
+  criteria: ValidationCriteria[];
+  metrics: SuccessMetrics;
+  benchmarks: PerformanceBenchmarks;
+  compliance: ComplianceRequirements;
+  monitoring: MonitoringConfig;
 }
 
-export interface ValidationCategory {
+export interface ValidationCriteria {
   id: string;
   name: string;
+  category: ValidationCategory;
+  type: ValidationType;
   description: string;
-  weight: number; // 0-1, for weighted scoring
-  criteria: ValidationCriterion[];
-  passThreshold: number; // percentage required to pass category
-}
-
-export interface ValidationCriterion {
-  id: string;
-  name: string;
-  description: string;
-  type: 'functional' | 'performance' | 'accessibility' | 'security' | 'usability' | 'data_integrity';
+  acceptance: AcceptanceCriteria;
+  measurement: MeasurementConfig;
   priority: 'critical' | 'high' | 'medium' | 'low';
-  testCases: TestCase[];
-  acceptanceCriteria: AcceptanceCriterion[];
-  automatedTests: AutomatedTest[];
-  manualTests: ManualTest[];
-  metrics: ValidationMetric[];
+  phase: ValidationPhase[];
+  dependencies: string[];
 }
 
-export interface TestCase {
-  id: string;
-  name: string;
-  description: string;
-  steps: TestStep[];
-  expectedResult: string;
-  actualResult?: string;
-  status?: 'passed' | 'failed' | 'skipped' | 'pending';
-  executionTime?: number;
-  screenshots?: string[];
-  logs?: string[];
+export enum ValidationCategory {
+  FUNCTIONAL = 'functional',
+  PERFORMANCE = 'performance',
+  DATA_INTEGRITY = 'data_integrity',
+  USER_EXPERIENCE = 'user_experience',
+  SECURITY = 'security',
+  COMPLIANCE = 'compliance',
+  RELIABILITY = 'reliability'
 }
 
-export interface TestStep {
-  order: number;
-  action: string;
-  expectedOutcome: string;
-  data?: Record<string, any>;
+export enum ValidationType {
+  AUTOMATED_TEST = 'automated_test',
+  MANUAL_TEST = 'manual_test',
+  METRIC_THRESHOLD = 'metric_threshold',
+  USER_FEEDBACK = 'user_feedback',
+  COMPLIANCE_CHECK = 'compliance_check',
+  PERFORMANCE_BENCHMARK = 'performance_benchmark'
 }
 
-export interface AcceptanceCriterion {
-  id: string;
-  description: string;
-  measurable: boolean;
-  target: number | string;
-  tolerance?: number;
-  unit?: string;
+export enum ValidationPhase {
+  PRE_MIGRATION = 'pre_migration',
+  DURING_MIGRATION = 'during_migration',
+  POST_MIGRATION = 'post_migration',
+  CONTINUOUS = 'continuous'
 }
 
-export interface AutomatedTest {
-  id: string;
-  name: string;
-  testFile: string;
-  command: string;
-  timeout: number;
-  retries: number;
-  environment: string[];
-}
-
-export interface ManualTest {
-  id: string;
-  name: string;
-  instructions: string[];
-  checkpoints: string[];
-  estimatedTime: number;
-  requiredRole: string;
-}
-
-export interface ValidationMetric {
-  id: string;
-  name: string;
-  description: string;
-  type: 'counter' | 'gauge' | 'histogram' | 'timer';
-  unit: string;
-  target: number;
+export interface AcceptanceCriteria {
   threshold: number;
-  query: string;
+  operator: 'gt' | 'lt' | 'eq' | 'gte' | 'lte' | 'between';
+  unit: string;
+  tolerance?: number;
+  baseline?: number;
+  target?: number;
 }
 
-export interface ValidationDependency {
-  criterionId: string;
-  dependsOn: string[];
-  type: 'prerequisite' | 'parallel' | 'sequential';
+export interface MeasurementConfig {
+  method: MeasurementMethod;
+  frequency: MeasurementFrequency;
+  duration: number; // minutes
+  sampleSize?: number;
+  aggregation: 'avg' | 'max' | 'min' | 'p95' | 'p99' | 'sum' | 'count';
+  tools: string[];
 }
 
-export interface ReportingConfiguration {
-  formats: ('html' | 'json' | 'pdf' | 'csv')[];
-  recipients: string[];
-  schedule: string;
-  dashboardUrl?: string;
+export enum MeasurementMethod {
+  AUTOMATED_MONITORING = 'automated_monitoring',
+  SYNTHETIC_TESTING = 'synthetic_testing',
+  REAL_USER_MONITORING = 'real_user_monitoring',
+  LOAD_TESTING = 'load_testing',
+  MANUAL_TESTING = 'manual_testing',
+  CODE_ANALYSIS = 'code_analysis'
 }
 
-export interface ValidationExecution {
+export enum MeasurementFrequency {
+  CONTINUOUS = 'continuous',
+  EVERY_MINUTE = 'every_minute',
+  EVERY_5_MINUTES = 'every_5_minutes',
+  EVERY_15_MINUTES = 'every_15_minutes',
+  HOURLY = 'hourly',
+  DAILY = 'daily',
+  ON_DEMAND = 'on_demand'
+}
+
+export interface SuccessMetrics {
+  primary: PrimaryMetric[];
+  secondary: SecondaryMetric[];
+  kpis: KeyPerformanceIndicator[];
+  slas: ServiceLevelAgreement[];
+}
+
+export interface PrimaryMetric {
   id: string;
-  suiteId: string;
-  startTime: string;
-  endTime?: string;
-  status: 'running' | 'completed' | 'failed' | 'cancelled';
-  results: ValidationResult[];
-  summary: ValidationSummary;
-  artifacts: ValidationArtifact[];
+  name: string;
+  description: string;
+  target: number;
+  current?: number;
+  unit: string;
+  trend: 'higher_better' | 'lower_better' | 'stable_better';
+  weight: number; // 0-1 for overall success calculation
+}
+
+export interface SecondaryMetric {
+  id: string;
+  name: string;
+  description: string;
+  target: number;
+  current?: number;
+  unit: string;
+  category: string;
+}
+
+export interface KeyPerformanceIndicator {
+  id: string;
+  name: string;
+  description: string;
+  formula: string;
+  target: number;
+  current?: number;
+  unit: string;
+  reportingFrequency: 'real_time' | 'hourly' | 'daily' | 'weekly';
+}
+
+export interface ServiceLevelAgreement {
+  id: string;
+  name: string;
+  description: string;
+  metric: string;
+  threshold: number;
+  timeWindow: number; // minutes
+  consequences: string[];
+}
+
+export interface PerformanceBenchmarks {
+  baseline: BenchmarkData;
+  targets: BenchmarkData;
+  thresholds: ThresholdConfig;
+}
+
+export interface BenchmarkData {
+  responseTime: {
+    p50: number;
+    p95: number;
+    p99: number;
+  };
+  throughput: {
+    requestsPerSecond: number;
+    transactionsPerMinute: number;
+  };
+  resources: {
+    cpuUtilization: number;
+    memoryUtilization: number;
+    diskUtilization: number;
+  };
+  availability: {
+    uptime: number;
+    errorRate: number;
+  };
+}
+
+export interface ThresholdConfig {
+  critical: BenchmarkData;
+  warning: BenchmarkData;
+  acceptable: BenchmarkData;
+}
+
+export interface ComplianceRequirements {
+  regulations: ComplianceRegulation[];
+  auditTrail: AuditTrailRequirements;
+  dataProtection: DataProtectionRequirements;
+  accessControl: AccessControlRequirements;
+}
+
+export interface ComplianceRegulation {
+  name: string;
+  requirements: string[];
+  validationMethods: string[];
+  documentation: string[];
+  penalties: string[];
+}
+
+export interface AuditTrailRequirements {
+  retention: number; // days
+  completeness: number; // percentage
+  integrity: string[];
+  accessibility: string[];
+}
+
+export interface DataProtectionRequirements {
+  encryption: string[];
+  anonymization: string[];
+  retention: string[];
+  deletion: string[];
+}
+
+export interface AccessControlRequirements {
+  authentication: string[];
+  authorization: string[];
+  monitoring: string[];
+  reporting: string[];
+}
+
+export interface MonitoringConfig {
+  dashboards: DashboardConfig[];
+  alerts: AlertConfig[];
+  reports: ReportConfig[];
+  integrations: IntegrationConfig[];
+}
+
+export interface DashboardConfig {
+  name: string;
+  metrics: string[];
+  refreshRate: number; // seconds
+  audience: string[];
+  layout: string;
+}
+
+export interface AlertConfig {
+  name: string;
+  condition: string;
+  severity: 'info' | 'warning' | 'critical';
+  channels: string[];
+  escalation: EscalationConfig;
+}
+
+export interface EscalationConfig {
+  levels: EscalationLevel[];
+  timeouts: number[]; // minutes
+}
+
+export interface EscalationLevel {
+  level: number;
+  contacts: string[];
+  actions: string[];
+}
+
+export interface ReportConfig {
+  name: string;
+  frequency: 'daily' | 'weekly' | 'monthly';
+  recipients: string[];
+  format: 'pdf' | 'html' | 'json';
+  sections: string[];
+}
+
+export interface IntegrationConfig {
+  type: 'monitoring' | 'logging' | 'alerting' | 'reporting';
+  service: string;
+  config: Record<string, any>;
+  enabled: boolean;
 }
 
 export interface ValidationResult {
-  criterionId: string;
-  status: 'passed' | 'failed' | 'warning' | 'skipped';
-  score: number; // 0-100
-  details: ValidationDetail[];
-  metrics: MetricResult[];
-  duration: number;
-  timestamp: string;
-}
-
-export interface ValidationDetail {
-  testCaseId: string;
-  status: 'passed' | 'failed' | 'skipped';
-  message: string;
-  evidence?: string[];
-  recommendations?: string[];
-}
-
-export interface MetricResult {
-  metricId: string;
+  criteriaId: string;
+  status: ValidationStatus;
   value: number;
-  target: number;
-  status: 'passed' | 'failed' | 'warning';
+  expected: number;
   timestamp: string;
+  details: ValidationDetails;
+}
+
+export enum ValidationStatus {
+  PASSED = 'passed',
+  FAILED = 'failed',
+  WARNING = 'warning',
+  PENDING = 'pending',
+  SKIPPED = 'skipped'
+}
+
+export interface ValidationDetails {
+  measurement: number;
+  baseline?: number;
+  deviation?: number;
+  trend?: 'improving' | 'degrading' | 'stable';
+  confidence?: number;
+  notes?: string;
+}
+
+export interface ValidationReport {
+  id: string;
+  timestamp: string;
+  phase: ValidationPhase;
+  summary: ValidationSummary;
+  results: ValidationResult[];
+  recommendations: ValidationRecommendation[];
+  nextSteps: string[];
 }
 
 export interface ValidationSummary {
-  overallScore: number;
-  categoryScores: CategoryScore[];
-  passedCriteria: number;
   totalCriteria: number;
-  criticalIssues: Issue[];
-  recommendations: string[];
+  passed: number;
+  failed: number;
+  warnings: number;
+  pending: number;
+  overallScore: number; // 0-100
+  riskLevel: 'low' | 'medium' | 'high' | 'critical';
 }
 
-export interface CategoryScore {
-  categoryId: string;
-  score: number;
-  weight: number;
-  status: 'passed' | 'failed' | 'warning';
-}
-
-export interface Issue {
-  severity: 'critical' | 'high' | 'medium' | 'low';
-  category: string;
+export interface ValidationRecommendation {
+  type: 'fix' | 'optimize' | 'monitor' | 'investigate';
+  priority: 'critical' | 'high' | 'medium' | 'low';
+  title: string;
   description: string;
+  actions: string[];
   impact: string;
-  recommendation: string;
-  criterionId: string;
-}
-
-export interface ValidationArtifact {
-  type: 'screenshot' | 'log' | 'report' | 'video' | 'data';
-  name: string;
-  path: string;
-  size: number;
-  timestamp: string;
+  effort: 'low' | 'medium' | 'high';
 }
 
 /**
- * Migration Validation Suite Generator
- * Creates comprehensive validation suites for migration testing
+ * Migration Validation Manager
+ * Manages validation criteria and success metrics for migration
  */
-export class MigrationValidationSuiteGenerator {
-  static generateComprehensiveValidationSuite(): ValidationSuite {
-    return {
-      id: 'migration-validation-suite-v1',
-      name: 'Frontend Migration Comprehensive Validation',
-      description: 'Complete validation suite for frontend migration from mock data to real backend',
-      categories: [
-        this.generateFunctionalValidation(),
-        this.generatePerformanceValidation(),
-        this.generateAccessibilityValidation(),
-        this.generateSecurityValidation(),
-        this.generateUsabilityValidation(),
-        this.generateDataIntegrityValidation()
-      ],
-      executionOrder: [
-        'functional-validation',
-        'data-integrity-validation',
-        'performance-validation',
-        'security-validation',
-        'accessibility-validation',
-        'usability-validation'
-      ],
-      dependencies: [
-        {
-          criterionId: 'performance-validation',
-          dependsOn: ['functional-validation'],
-          type: 'prerequisite'
+export class MigrationValidationManager {
+  private framework: ValidationFramework;
+  private results: Map<string, ValidationResult[]> = new Map();
+
+  constructor(framework?: Partial<ValidationFramework>) {
+    this.framework = this.createDefaultFramework(framework);
+  }
+
+  /**
+   * Create default validation framework
+   */
+  private createDefaultFramework(overrides?: Partial<ValidationFramework>): ValidationFramework {
+    const defaultFramework: ValidationFramework = {
+      criteria: this.createDefaultCriteria(),
+      metrics: this.createDefaultMetrics(),
+      benchmarks: this.createDefaultBenchmarks(),
+      compliance: this.createDefaultCompliance(),
+      monitoring: this.createDefaultMonitoring()
+    };
+
+    return { ...defaultFramework, ...overrides };
+  }
+
+  /**
+   * Create default validation criteria
+   */
+  private createDefaultCriteria(): ValidationCriteria[] {
+    return [
+      // Functional Criteria
+      {
+        id: 'component-rendering',
+        name: 'Component Rendering Success',
+        category: ValidationCategory.FUNCTIONAL,
+        type: ValidationType.AUTOMATED_TEST,
+        description: 'All migrated components render without errors',
+        acceptance: {
+          threshold: 100,
+          operator: 'eq',
+          unit: 'percentage'
         },
-        {
-          criterionId: 'usability-validation',
-          dependsOn: ['functional-validation', 'accessibility-validation'],
-          type: 'prerequisite'
-        }
-      ],
-      reportingConfig: {
-        formats: ['html', 'json', 'pdf'],
-        recipients: ['team@medtech.com', 'qa@medtech.com'],
-        schedule: 'after_each_execution',
-        dashboardUrl: 'https://dashboard.medtech.com/migration-validation'
-      }
-    };
-  }
-
-  private static generateFunctionalValidation(): ValidationCategory {
-    return {
-      id: 'functional-validation',
-      name: 'Functional Validation',
-      description: 'Validates that all functionality works correctly with real data',
-      weight: 0.35,
-      passThreshold: 95,
-      criteria: [
-        {
-          id: 'classification-widget-functionality',
-          name: 'Classification Widget Functionality',
-          description: 'Validates classification widget works with real FDA data',
-          type: 'functional',
-          priority: 'critical',
-          testCases: [
-            {
-              id: 'classification-display-test',
-              name: 'Classification Data Display',
-              description: 'Test that classification widget displays real FDA classification data',
-              steps: [
-                { order: 1, action: 'Navigate to project dashboard', expectedOutcome: 'Dashboard loads successfully' },
-                { order: 2, action: 'Click Start Classification Analysis', expectedOutcome: 'Classification process begins' },
-                { order: 3, action: 'Wait for classification completion', expectedOutcome: 'Classification results displayed' },
-                { order: 4, action: 'Verify device class is shown', expectedOutcome: 'Device class (I, II, or III) is displayed' },
-                { order: 5, action: 'Verify product code is shown', expectedOutcome: 'FDA product code is displayed' },
-                { order: 6, action: 'Verify regulatory pathway', expectedOutcome: 'Correct pathway (510k, PMA, De Novo) shown' }
-              ],
-              expectedResult: 'Classification widget displays real FDA data with confidence score > 0.7'
-            },
-            {
-              id: 'classification-refresh-test',
-              name: 'Classification Refresh Functionality',
-              description: 'Test that classification can be refreshed and updated',
-              steps: [
-                { order: 1, action: 'Complete initial classification', expectedOutcome: 'Classification results shown' },
-                { order: 2, action: 'Click refresh button', expectedOutcome: 'Refresh process starts' },
-                { order: 3, action: 'Wait for refresh completion', expectedOutcome: 'Updated results displayed' }
-              ],
-              expectedResult: 'Classification refreshes successfully with updated data'
-            }
-          ],
-          acceptanceCriteria: [
-            { id: 'ac-1', description: 'Classification completes within 30 seconds', measurable: true, target: 30, unit: 'seconds' },
-            { id: 'ac-2', description: 'Confidence score is above 70%', measurable: true, target: 0.7, unit: 'percentage' },
-            { id: 'ac-3', description: 'All FDA data fields are populated', measurable: true, target: 100, unit: 'percentage' }
-          ],
-          automatedTests: [
-            {
-              id: 'classification-widget-test',
-              name: 'Classification Widget Automated Test',
-              testFile: 'src/components/dashboard/__tests__/classification-widget.spec.ts',
-              command: 'pnpm test classification-widget.spec.ts',
-              timeout: 60,
-              retries: 2,
-              environment: ['test', 'staging']
-            }
-          ],
-          manualTests: [
-            {
-              id: 'classification-visual-test',
-              name: 'Classification Widget Visual Validation',
-              instructions: [
-                'Open project dashboard',
-                'Verify classification widget layout',
-                'Check color coding for confidence scores',
-                'Validate external links work'
-              ],
-              checkpoints: [
-                'Widget displays correctly on all screen sizes',
-                'Colors match design system',
-                'Links open in new tabs'
-              ],
-              estimatedTime: 15,
-              requiredRole: 'QA Tester'
-            }
-          ],
-          metrics: [
-            {
-              id: 'classification-success-rate',
-              name: 'Classification Success Rate',
-              description: 'Percentage of successful classifications',
-              type: 'gauge',
-              unit: 'percentage',
-              target: 95,
-              threshold: 90,
-              query: 'classification_success_rate'
-            },
-            {
-              id: 'classification-response-time',
-              name: 'Classification Response Time',
-              description: 'Average time for classification completion',
-              type: 'timer',
-              unit: 'seconds',
-              target: 15,
-              threshold: 30,
-              query: 'avg(classification_duration)'
-            }
-          ]
+        measurement: {
+          method: MeasurementMethod.AUTOMATED_MONITORING,
+          frequency: MeasurementFrequency.CONTINUOUS,
+          duration: 60,
+          aggregation: 'avg',
+          tools: ['Jest', 'React Testing Library']
         },
-        {
-          id: 'predicate-widget-functionality',
-          name: 'Predicate Widget Functionality',
-          description: 'Validates predicate widget works with real FDA 510k data',
-          type: 'functional',
-          priority: 'critical',
-          testCases: [
-            {
-              id: 'predicate-search-test',
-              name: 'Predicate Search Functionality',
-              description: 'Test predicate search returns real FDA 510k data',
-              steps: [
-                { order: 1, action: 'Navigate to predicate widget', expectedOutcome: 'Widget loads in pending state' },
-                { order: 2, action: 'Click Search Predicates', expectedOutcome: 'Search process begins' },
-                { order: 3, action: 'Wait for search completion', expectedOutcome: 'Predicate results displayed' },
-                { order: 4, action: 'Verify K-numbers are valid', expectedOutcome: 'All K-numbers follow FDA format' },
-                { order: 5, action: 'Verify confidence scores', expectedOutcome: 'Confidence scores between 0-1' }
-              ],
-              expectedResult: 'Predicate search returns valid FDA 510k devices with confidence scores'
-            },
-            {
-              id: 'predicate-selection-test',
-              name: 'Predicate Selection Functionality',
-              description: 'Test predicate selection and comparison features',
-              steps: [
-                { order: 1, action: 'Complete predicate search', expectedOutcome: 'Predicates displayed' },
-                { order: 2, action: 'Select top predicate', expectedOutcome: 'Predicate marked as selected' },
-                { order: 3, action: 'Navigate to Selected tab', expectedOutcome: 'Selected predicates shown' },
-                { order: 4, action: 'Deselect predicate', expectedOutcome: 'Predicate removed from selection' }
-              ],
-              expectedResult: 'Predicate selection works correctly with state persistence'
-            }
-          ],
-          acceptanceCriteria: [
-            { id: 'ac-4', description: 'Search returns at least 5 predicates', measurable: true, target: 5, unit: 'count' },
-            { id: 'ac-5', description: 'Search completes within 60 seconds', measurable: true, target: 60, unit: 'seconds' },
-            { id: 'ac-6', description: 'All K-numbers are valid FDA format', measurable: true, target: 100, unit: 'percentage' }
-          ],
-          automatedTests: [
-            {
-              id: 'predicate-widget-test',
-              name: 'Predicate Widget Automated Test',
-              testFile: 'src/components/dashboard/__tests__/predicate-widget.spec.ts',
-              command: 'pnpm test predicate-widget.spec.ts',
-              timeout: 120,
-              retries: 2,
-              environment: ['test', 'staging']
-            }
-          ],
-          manualTests: [
-            {
-              id: 'predicate-tab-navigation-test',
-              name: 'Predicate Tab Navigation Test',
-              instructions: [
-                'Complete predicate search',
-                'Navigate between Overview, Top Matches, and Selected tabs',
-                'Verify state persistence across tabs',
-                'Test selection/deselection in different tabs'
-              ],
-              checkpoints: [
-                'Tab navigation works smoothly',
-                'State is preserved across tabs',
-                'Selection counts are accurate'
-              ],
-              estimatedTime: 20,
-              requiredRole: 'QA Tester'
-            }
-          ],
-          metrics: [
-            {
-              id: 'predicate-search-success-rate',
-              name: 'Predicate Search Success Rate',
-              description: 'Percentage of successful predicate searches',
-              type: 'gauge',
-              unit: 'percentage',
-              target: 90,
-              threshold: 85,
-              query: 'predicate_search_success_rate'
-            }
-          ]
-        }
-      ]
-    };
-  }
-
-  private static generatePerformanceValidation(): ValidationCategory {
-    return {
-      id: 'performance-validation',
-      name: 'Performance Validation',
-      description: 'Validates performance metrics meet requirements with real data',
-      weight: 0.25,
-      passThreshold: 90,
-      criteria: [
-        {
-          id: 'page-load-performance',
-          name: 'Page Load Performance',
-          description: 'Validates page load times meet performance requirements',
-          type: 'performance',
-          priority: 'high',
-          testCases: [
-            {
-              id: 'dashboard-load-test',
-              name: 'Dashboard Load Performance',
-              description: 'Test dashboard loads within performance targets',
-              steps: [
-                { order: 1, action: 'Clear browser cache', expectedOutcome: 'Cache cleared' },
-                { order: 2, action: 'Navigate to dashboard', expectedOutcome: 'Dashboard starts loading' },
-                { order: 3, action: 'Measure time to interactive', expectedOutcome: 'TTI recorded' },
-                { order: 4, action: 'Measure largest contentful paint', expectedOutcome: 'LCP recorded' }
-              ],
-              expectedResult: 'Dashboard loads within 3 seconds with LCP < 2.5s'
-            }
-          ],
-          acceptanceCriteria: [
-            { id: 'ac-7', description: 'Time to Interactive < 3 seconds', measurable: true, target: 3, unit: 'seconds' },
-            { id: 'ac-8', description: 'Largest Contentful Paint < 2.5 seconds', measurable: true, target: 2.5, unit: 'seconds' },
-            { id: 'ac-9', description: 'Cumulative Layout Shift < 0.1', measurable: true, target: 0.1, unit: 'score' }
-          ],
-          automatedTests: [
-            {
-              id: 'lighthouse-performance-test',
-              name: 'Lighthouse Performance Test',
-              testFile: 'e2e/performance/lighthouse.spec.ts',
-              command: 'pnpm test:e2e lighthouse.spec.ts',
-              timeout: 180,
-              retries: 1,
-              environment: ['staging', 'production']
-            }
-          ],
-          manualTests: [],
-          metrics: [
-            {
-              id: 'core-web-vitals',
-              name: 'Core Web Vitals',
-              description: 'Google Core Web Vitals metrics',
-              type: 'histogram',
-              unit: 'seconds',
-              target: 2.5,
-              threshold: 4,
-              query: 'core_web_vitals_lcp'
-            }
-          ]
-        }
-      ]
-    };
-  }
-
-  private static generateAccessibilityValidation(): ValidationCategory {
-    return {
-      id: 'accessibility-validation',
-      name: 'Accessibility Validation',
-      description: 'Validates WCAG 2.1 AA compliance and accessibility features',
-      weight: 0.15,
-      passThreshold: 95,
-      criteria: [
-        {
-          id: 'wcag-compliance',
-          name: 'WCAG 2.1 AA Compliance',
-          description: 'Validates compliance with WCAG 2.1 AA standards',
-          type: 'accessibility',
-          priority: 'high',
-          testCases: [
-            {
-              id: 'keyboard-navigation-test',
-              name: 'Keyboard Navigation Test',
-              description: 'Test all interactive elements are keyboard accessible',
-              steps: [
-                { order: 1, action: 'Navigate using only Tab key', expectedOutcome: 'All elements reachable' },
-                { order: 2, action: 'Test Enter/Space activation', expectedOutcome: 'Elements activate correctly' },
-                { order: 3, action: 'Test Escape key functionality', expectedOutcome: 'Modals close, menus collapse' }
-              ],
-              expectedResult: 'All interactive elements are keyboard accessible'
-            }
-          ],
-          acceptanceCriteria: [
-            { id: 'ac-10', description: 'Zero critical accessibility violations', measurable: true, target: 0, unit: 'count' },
-            { id: 'ac-11', description: 'Color contrast ratio > 4.5:1', measurable: true, target: 4.5, unit: 'ratio' }
-          ],
-          automatedTests: [
-            {
-              id: 'axe-accessibility-test',
-              name: 'Axe Accessibility Test',
-              testFile: 'src/components/**/__tests__/*.accessibility.spec.ts',
-              command: 'pnpm test:accessibility',
-              timeout: 120,
-              retries: 1,
-              environment: ['test', 'staging']
-            }
-          ],
-          manualTests: [
-            {
-              id: 'screen-reader-test',
-              name: 'Screen Reader Compatibility Test',
-              instructions: [
-                'Use NVDA or JAWS screen reader',
-                'Navigate through all components',
-                'Verify proper ARIA labels',
-                'Test form field announcements'
-              ],
-              checkpoints: [
-                'All content is announced correctly',
-                'Navigation landmarks work',
-                'Form fields have proper labels'
-              ],
-              estimatedTime: 45,
-              requiredRole: 'Accessibility Specialist'
-            }
-          ],
-          metrics: [
-            {
-              id: 'accessibility-violations',
-              name: 'Accessibility Violations',
-              description: 'Count of accessibility violations',
-              type: 'counter',
-              unit: 'count',
-              target: 0,
-              threshold: 5,
-              query: 'accessibility_violations_count'
-            }
-          ]
-        }
-      ]
-    };
-  }
-
-  private static generateSecurityValidation(): ValidationCategory {
-    return {
-      id: 'security-validation',
-      name: 'Security Validation',
-      description: 'Validates security measures and data protection',
-      weight: 0.1,
-      passThreshold: 100,
-      criteria: [
-        {
-          id: 'data-security',
-          name: 'Data Security Validation',
-          description: 'Validates secure handling of sensitive data',
-          type: 'security',
-          priority: 'critical',
-          testCases: [
-            {
-              id: 'authentication-test',
-              name: 'Authentication Security Test',
-              description: 'Test authentication and authorization work correctly',
-              steps: [
-                { order: 1, action: 'Access protected route without auth', expectedOutcome: 'Redirected to login' },
-                { order: 2, action: 'Login with valid credentials', expectedOutcome: 'Access granted' },
-                { order: 3, action: 'Test session timeout', expectedOutcome: 'Session expires correctly' }
-              ],
-              expectedResult: 'Authentication and authorization work securely'
-            }
-          ],
-          acceptanceCriteria: [
-            { id: 'ac-12', description: 'No sensitive data in client-side logs', measurable: true, target: 0, unit: 'count' },
-            { id: 'ac-13', description: 'All API calls use HTTPS', measurable: true, target: 100, unit: 'percentage' }
-          ],
-          automatedTests: [
-            {
-              id: 'security-scan-test',
-              name: 'Security Vulnerability Scan',
-              testFile: 'security/vulnerability-scan.spec.ts',
-              command: 'pnpm test:security',
-              timeout: 300,
-              retries: 1,
-              environment: ['staging']
-            }
-          ],
-          manualTests: [],
-          metrics: [
-            {
-              id: 'security-vulnerabilities',
-              name: 'Security Vulnerabilities',
-              description: 'Count of security vulnerabilities',
-              type: 'counter',
-              unit: 'count',
-              target: 0,
-              threshold: 0,
-              query: 'security_vulnerabilities_count'
-            }
-          ]
-        }
-      ]
-    };
-  }
-
-  private static generateUsabilityValidation(): ValidationCategory {
-    return {
-      id: 'usability-validation',
-      name: 'Usability Validation',
-      description: 'Validates user experience and interface usability',
-      weight: 0.1,
-      passThreshold: 85,
-      criteria: [
-        {
-          id: 'user-workflow-validation',
-          name: 'User Workflow Validation',
-          description: 'Validates complete user workflows function intuitively',
-          type: 'usability',
-          priority: 'medium',
-          testCases: [
-            {
-              id: 'new-user-onboarding-test',
-              name: 'New User Onboarding Test',
-              description: 'Test new user can complete first project setup',
-              steps: [
-                { order: 1, action: 'Login as new user', expectedOutcome: 'Welcome screen shown' },
-                { order: 2, action: 'Create first project', expectedOutcome: 'Project creation guided' },
-                { order: 3, action: 'Complete device classification', expectedOutcome: 'Classification completes' },
-                { order: 4, action: 'Search for predicates', expectedOutcome: 'Predicates found' }
-              ],
-              expectedResult: 'New user can complete full workflow without assistance'
-            }
-          ],
-          acceptanceCriteria: [
-            { id: 'ac-14', description: 'Task completion rate > 90%', measurable: true, target: 90, unit: 'percentage' },
-            { id: 'ac-15', description: 'Average task time < 10 minutes', measurable: true, target: 10, unit: 'minutes' }
-          ],
-          automatedTests: [],
-          manualTests: [
-            {
-              id: 'user-experience-test',
-              name: 'User Experience Test',
-              instructions: [
-                'Recruit 5 regulatory professionals',
-                'Have them complete key workflows',
-                'Record task completion times',
-                'Collect satisfaction feedback'
-              ],
-              checkpoints: [
-                'Users complete tasks successfully',
-                'No major usability issues found',
-                'Satisfaction score > 4/5'
-              ],
-              estimatedTime: 240,
-              requiredRole: 'UX Researcher'
-            }
-          ],
-          metrics: [
-            {
-              id: 'user-satisfaction',
-              name: 'User Satisfaction Score',
-              description: 'Average user satisfaction rating',
-              type: 'gauge',
-              unit: 'score',
-              target: 4.5,
-              threshold: 4.0,
-              query: 'avg(user_satisfaction_score)'
-            }
-          ]
-        }
-      ]
-    };
-  }
-
-  private static generateDataIntegrityValidation(): ValidationCategory {
-    return {
-      id: 'data-integrity-validation',
-      name: 'Data Integrity Validation',
-      description: 'Validates data consistency and integrity between mock and real data',
-      weight: 0.05,
-      passThreshold: 100,
-      criteria: [
-        {
-          id: 'data-consistency',
-          name: 'Data Consistency Validation',
-          description: 'Validates data remains consistent during migration',
-          type: 'data_integrity',
-          priority: 'critical',
-          testCases: [
-            {
-              id: 'data-migration-test',
-              name: 'Data Migration Consistency Test',
-              description: 'Test data integrity during migration from mock to real data',
-              steps: [
-                { order: 1, action: 'Record mock data state', expectedOutcome: 'Baseline established' },
-                { order: 2, action: 'Execute migration', expectedOutcome: 'Migration completes' },
-                { order: 3, action: 'Compare real data output', expectedOutcome: 'Data matches expected format' },
-                { order: 4, action: 'Validate data relationships', expectedOutcome: 'Relationships preserved' }
-              ],
-              expectedResult: 'Data integrity maintained throughout migration'
-            }
-          ],
-          acceptanceCriteria: [
-            { id: 'ac-16', description: 'Zero data corruption incidents', measurable: true, target: 0, unit: 'count' },
-            { id: 'ac-17', description: 'Data format consistency 100%', measurable: true, target: 100, unit: 'percentage' }
-          ],
-          automatedTests: [
-            {
-              id: 'data-integrity-test',
-              name: 'Data Integrity Test',
-              testFile: 'tests/integration/data-integrity.spec.ts',
-              command: 'pnpm test:integration data-integrity',
-              timeout: 180,
-              retries: 1,
-              environment: ['test', 'staging']
-            }
-          ],
-          manualTests: [],
-          metrics: [
-            {
-              id: 'data-corruption-rate',
-              name: 'Data Corruption Rate',
-              description: 'Rate of data corruption incidents',
-              type: 'gauge',
-              unit: 'percentage',
-              target: 0,
-              threshold: 0.1,
-              query: 'data_corruption_rate'
-            }
-          ]
-        }
-      ]
-    };
-  }
-}
-
-/**
- * Validation Executor
- * Executes validation suites and generates reports
- */
-export class ValidationExecutor {
-  async executeValidationSuite(suite: ValidationSuite): Promise<ValidationExecution> {
-    const execution: ValidationExecution = {
-      id: `validation-${Date.now()}`,
-      suiteId: suite.id,
-      startTime: new Date().toISOString(),
-      status: 'running',
-      results: [],
-      summary: {
-        overallScore: 0,
-        categoryScores: [],
-        passedCriteria: 0,
-        totalCriteria: 0,
-        criticalIssues: [],
-        recommendations: []
+        priority: 'critical',
+        phase: [ValidationPhase.POST_MIGRATION, ValidationPhase.CONTINUOUS],
+        dependencies: []
       },
-      artifacts: []
+      {
+        id: 'api-integration',
+        name: 'API Integration Success',
+        category: ValidationCategory.FUNCTIONAL,
+        type: ValidationType.AUTOMATED_TEST,
+        description: 'All API integrations work correctly with real backend',
+        acceptance: {
+          threshold: 99,
+          operator: 'gte',
+          unit: 'percentage',
+          tolerance: 1
+        },
+        measurement: {
+          method: MeasurementMethod.SYNTHETIC_TESTING,
+          frequency: MeasurementFrequency.EVERY_5_MINUTES,
+          duration: 30,
+          aggregation: 'avg',
+          tools: ['Playwright', 'API Tests']
+        },
+        priority: 'critical',
+        phase: [ValidationPhase.POST_MIGRATION, ValidationPhase.CONTINUOUS],
+        dependencies: ['component-rendering']
+      },
+
+      // Performance Criteria
+      {
+        id: 'response-time',
+        name: 'Response Time Performance',
+        category: ValidationCategory.PERFORMANCE,
+        type: ValidationType.PERFORMANCE_BENCHMARK,
+        description: 'API response times meet performance requirements',
+        acceptance: {
+          threshold: 2000,
+          operator: 'lte',
+          unit: 'milliseconds',
+          tolerance: 500,
+          baseline: 1500
+        },
+        measurement: {
+          method: MeasurementMethod.REAL_USER_MONITORING,
+          frequency: MeasurementFrequency.CONTINUOUS,
+          duration: 60,
+          aggregation: 'p95',
+          tools: ['Application Performance Monitoring']
+        },
+        priority: 'high',
+        phase: [ValidationPhase.POST_MIGRATION, ValidationPhase.CONTINUOUS],
+        dependencies: ['api-integration']
+      },
+      {
+        id: 'page-load-time',
+        name: 'Page Load Time',
+        category: ValidationCategory.PERFORMANCE,
+        type: ValidationType.PERFORMANCE_BENCHMARK,
+        description: 'Page load times remain within acceptable limits',
+        acceptance: {
+          threshold: 3000,
+          operator: 'lte',
+          unit: 'milliseconds',
+          tolerance: 1000,
+          baseline: 2500
+        },
+        measurement: {
+          method: MeasurementMethod.SYNTHETIC_TESTING,
+          frequency: MeasurementFrequency.EVERY_15_MINUTES,
+          duration: 15,
+          aggregation: 'p95',
+          tools: ['Lighthouse', 'WebPageTest']
+        },
+        priority: 'high',
+        phase: [ValidationPhase.POST_MIGRATION, ValidationPhase.CONTINUOUS],
+        dependencies: []
+      },
+
+      // Data Integrity Criteria
+      {
+        id: 'data-consistency',
+        name: 'Data Consistency',
+        category: ValidationCategory.DATA_INTEGRITY,
+        type: ValidationType.AUTOMATED_TEST,
+        description: 'Data remains consistent between mock and real implementations',
+        acceptance: {
+          threshold: 100,
+          operator: 'eq',
+          unit: 'percentage'
+        },
+        measurement: {
+          method: MeasurementMethod.AUTOMATED_MONITORING,
+          frequency: MeasurementFrequency.HOURLY,
+          duration: 30,
+          aggregation: 'avg',
+          tools: ['Database Validation Scripts']
+        },
+        priority: 'critical',
+        phase: [ValidationPhase.POST_MIGRATION, ValidationPhase.CONTINUOUS],
+        dependencies: ['api-integration']
+      },
+      {
+        id: 'data-completeness',
+        name: 'Data Completeness',
+        category: ValidationCategory.DATA_INTEGRITY,
+        type: ValidationType.AUTOMATED_TEST,
+        description: 'All required data fields are populated correctly',
+        acceptance: {
+          threshold: 95,
+          operator: 'gte',
+          unit: 'percentage',
+          tolerance: 2
+        },
+        measurement: {
+          method: MeasurementMethod.AUTOMATED_MONITORING,
+          frequency: MeasurementFrequency.HOURLY,
+          duration: 30,
+          aggregation: 'avg',
+          tools: ['Data Quality Checks']
+        },
+        priority: 'high',
+        phase: [ValidationPhase.POST_MIGRATION, ValidationPhase.CONTINUOUS],
+        dependencies: ['data-consistency']
+      },
+
+      // User Experience Criteria
+      {
+        id: 'user-workflow-completion',
+        name: 'User Workflow Completion',
+        category: ValidationCategory.USER_EXPERIENCE,
+        type: ValidationType.AUTOMATED_TEST,
+        description: 'Users can complete critical workflows successfully',
+        acceptance: {
+          threshold: 95,
+          operator: 'gte',
+          unit: 'percentage',
+          tolerance: 3
+        },
+        measurement: {
+          method: MeasurementMethod.SYNTHETIC_TESTING,
+          frequency: MeasurementFrequency.EVERY_15_MINUTES,
+          duration: 45,
+          aggregation: 'avg',
+          tools: ['Playwright E2E Tests']
+        },
+        priority: 'critical',
+        phase: [ValidationPhase.POST_MIGRATION, ValidationPhase.CONTINUOUS],
+        dependencies: ['component-rendering', 'api-integration']
+      },
+      {
+        id: 'error-rate',
+        name: 'User-Facing Error Rate',
+        category: ValidationCategory.USER_EXPERIENCE,
+        type: ValidationType.METRIC_THRESHOLD,
+        description: 'User-facing errors remain below acceptable threshold',
+        acceptance: {
+          threshold: 1,
+          operator: 'lte',
+          unit: 'percentage',
+          tolerance: 0.5,
+          baseline: 0.5
+        },
+        measurement: {
+          method: MeasurementMethod.REAL_USER_MONITORING,
+          frequency: MeasurementFrequency.CONTINUOUS,
+          duration: 60,
+          aggregation: 'avg',
+          tools: ['Error Tracking', 'User Analytics']
+        },
+        priority: 'critical',
+        phase: [ValidationPhase.POST_MIGRATION, ValidationPhase.CONTINUOUS],
+        dependencies: []
+      },
+
+      // Security Criteria
+      {
+        id: 'authentication-security',
+        name: 'Authentication Security',
+        category: ValidationCategory.SECURITY,
+        type: ValidationType.COMPLIANCE_CHECK,
+        description: 'Authentication mechanisms remain secure after migration',
+        acceptance: {
+          threshold: 100,
+          operator: 'eq',
+          unit: 'percentage'
+        },
+        measurement: {
+          method: MeasurementMethod.CODE_ANALYSIS,
+          frequency: MeasurementFrequency.DAILY,
+          duration: 60,
+          aggregation: 'avg',
+          tools: ['Security Scanning', 'Penetration Testing']
+        },
+        priority: 'critical',
+        phase: [ValidationPhase.POST_MIGRATION, ValidationPhase.CONTINUOUS],
+        dependencies: []
+      },
+
+      // Reliability Criteria
+      {
+        id: 'system-availability',
+        name: 'System Availability',
+        category: ValidationCategory.RELIABILITY,
+        type: ValidationType.METRIC_THRESHOLD,
+        description: 'System maintains high availability during and after migration',
+        acceptance: {
+          threshold: 99.9,
+          operator: 'gte',
+          unit: 'percentage',
+          tolerance: 0.1,
+          baseline: 99.5
+        },
+        measurement: {
+          method: MeasurementMethod.AUTOMATED_MONITORING,
+          frequency: MeasurementFrequency.CONTINUOUS,
+          duration: 1440, // 24 hours
+          aggregation: 'avg',
+          tools: ['Uptime Monitoring', 'Health Checks']
+        },
+        priority: 'critical',
+        phase: [ValidationPhase.DURING_MIGRATION, ValidationPhase.POST_MIGRATION, ValidationPhase.CONTINUOUS],
+        dependencies: []
+      }
+    ];
+  }
+
+  /**
+   * Create default success metrics
+   */
+  private createDefaultMetrics(): SuccessMetrics {
+    return {
+      primary: [
+        {
+          id: 'migration-success-rate',
+          name: 'Migration Success Rate',
+          description: 'Percentage of components successfully migrated',
+          target: 100,
+          unit: 'percentage',
+          trend: 'higher_better',
+          weight: 0.3
+        },
+        {
+          id: 'zero-critical-errors',
+          name: 'Critical Error Count',
+          description: 'Number of critical errors after migration',
+          target: 0,
+          unit: 'count',
+          trend: 'lower_better',
+          weight: 0.25
+        },
+        {
+          id: 'performance-maintained',
+          name: 'Performance Maintenance',
+          description: 'Performance maintained or improved compared to baseline',
+          target: 100,
+          unit: 'percentage',
+          trend: 'higher_better',
+          weight: 0.2
+        },
+        {
+          id: 'user-satisfaction',
+          name: 'User Satisfaction Score',
+          description: 'User satisfaction with migrated functionality',
+          target: 4.5,
+          unit: 'score (1-5)',
+          trend: 'higher_better',
+          weight: 0.25
+        }
+      ],
+      secondary: [
+        {
+          id: 'test-coverage',
+          name: 'Test Coverage',
+          description: 'Code coverage of migrated components',
+          target: 85,
+          unit: 'percentage',
+          category: 'Quality'
+        },
+        {
+          id: 'documentation-completeness',
+          name: 'Documentation Completeness',
+          description: 'Completeness of migration documentation',
+          target: 100,
+          unit: 'percentage',
+          category: 'Documentation'
+        }
+      ],
+      kpis: [
+        {
+          id: 'migration-velocity',
+          name: 'Migration Velocity',
+          description: 'Components migrated per day',
+          formula: 'components_migrated / days_elapsed',
+          target: 2,
+          unit: 'components/day',
+          reportingFrequency: 'daily'
+        },
+        {
+          id: 'defect-density',
+          name: 'Defect Density',
+          description: 'Defects per migrated component',
+          formula: 'total_defects / migrated_components',
+          target: 0.1,
+          unit: 'defects/component',
+          reportingFrequency: 'weekly'
+        }
+      ],
+      slas: [
+        {
+          id: 'response-time-sla',
+          name: 'Response Time SLA',
+          description: '95% of requests must complete within 2 seconds',
+          metric: 'response_time_p95',
+          threshold: 2000,
+          timeWindow: 60,
+          consequences: ['Performance optimization required', 'Rollback consideration']
+        },
+        {
+          id: 'availability-sla',
+          name: 'Availability SLA',
+          description: 'System must maintain 99.9% uptime',
+          metric: 'availability',
+          threshold: 99.9,
+          timeWindow: 1440, // 24 hours
+          consequences: ['Incident response activation', 'Root cause analysis required']
+        }
+      ]
     };
+  }
 
+  /**
+   * Create default performance benchmarks
+   */
+  private createDefaultBenchmarks(): PerformanceBenchmarks {
+    return {
+      baseline: {
+        responseTime: { p50: 800, p95: 1500, p99: 3000 },
+        throughput: { requestsPerSecond: 100, transactionsPerMinute: 1000 },
+        resources: { cpuUtilization: 60, memoryUtilization: 70, diskUtilization: 50 },
+        availability: { uptime: 99.5, errorRate: 0.5 }
+      },
+      targets: {
+        responseTime: { p50: 600, p95: 1200, p99: 2500 },
+        throughput: { requestsPerSecond: 120, transactionsPerMinute: 1200 },
+        resources: { cpuUtilization: 50, memoryUtilization: 60, diskUtilization: 40 },
+        availability: { uptime: 99.9, errorRate: 0.1 }
+      },
+      thresholds: {
+        critical: {
+          responseTime: { p50: 2000, p95: 5000, p99: 10000 },
+          throughput: { requestsPerSecond: 50, transactionsPerMinute: 500 },
+          resources: { cpuUtilization: 90, memoryUtilization: 90, diskUtilization: 85 },
+          availability: { uptime: 95, errorRate: 5 }
+        },
+        warning: {
+          responseTime: { p50: 1200, p95: 2500, p99: 5000 },
+          throughput: { requestsPerSecond: 80, transactionsPerMinute: 800 },
+          resources: { cpuUtilization: 75, memoryUtilization: 80, diskUtilization: 70 },
+          availability: { uptime: 99, errorRate: 2 }
+        },
+        acceptable: {
+          responseTime: { p50: 800, p95: 1500, p99: 3000 },
+          throughput: { requestsPerSecond: 100, transactionsPerMinute: 1000 },
+          resources: { cpuUtilization: 60, memoryUtilization: 70, diskUtilization: 50 },
+          availability: { uptime: 99.5, errorRate: 0.5 }
+        }
+      }
+    };
+  }
+
+  /**
+   * Create default compliance requirements
+   */
+  private createDefaultCompliance(): ComplianceRequirements {
+    return {
+      regulations: [
+        {
+          name: 'FDA 21 CFR Part 820 (Quality System Regulation)',
+          requirements: [
+            'Maintain design controls',
+            'Document all changes',
+            'Validate software changes',
+            'Maintain traceability'
+          ],
+          validationMethods: [
+            'Design review documentation',
+            'Change control records',
+            'Validation test results',
+            'Traceability matrix'
+          ],
+          documentation: [
+            'Design history file',
+            'Change control procedures',
+            'Validation protocols',
+            'Risk management file'
+          ],
+          penalties: [
+            'Warning letters',
+            'Consent decrees',
+            'Product recalls',
+            'Criminal prosecution'
+          ]
+        }
+      ],
+      auditTrail: {
+        retention: 365, // 1 year
+        completeness: 100,
+        integrity: ['Digital signatures', 'Checksums', 'Timestamps'],
+        accessibility: ['Searchable', 'Exportable', 'Human readable']
+      },
+      dataProtection: {
+        encryption: ['Data at rest', 'Data in transit', 'Database encryption'],
+        anonymization: ['PII removal', 'Data masking', 'Pseudonymization'],
+        retention: ['Data lifecycle management', 'Automated deletion', 'Retention policies'],
+        deletion: ['Secure deletion', 'Verification of deletion', 'Deletion logs']
+      },
+      accessControl: {
+        authentication: ['Multi-factor authentication', 'Strong passwords', 'Session management'],
+        authorization: ['Role-based access', 'Principle of least privilege', 'Access reviews'],
+        monitoring: ['Access logging', 'Anomaly detection', 'Real-time alerts'],
+        reporting: ['Access reports', 'Compliance dashboards', 'Audit summaries']
+      }
+    };
+  }
+
+  /**
+   * Create default monitoring configuration
+   */
+  private createDefaultMonitoring(): MonitoringConfig {
+    return {
+      dashboards: [
+        {
+          name: 'Migration Progress Dashboard',
+          metrics: ['migration-success-rate', 'component-rendering', 'api-integration'],
+          refreshRate: 30,
+          audience: ['Development Team', 'Project Managers'],
+          layout: 'grid'
+        },
+        {
+          name: 'Performance Monitoring Dashboard',
+          metrics: ['response-time', 'page-load-time', 'system-availability'],
+          refreshRate: 60,
+          audience: ['Operations Team', 'Performance Engineers'],
+          layout: 'timeline'
+        }
+      ],
+      alerts: [
+        {
+          name: 'Critical Error Alert',
+          condition: 'error_rate > 1%',
+          severity: 'critical',
+          channels: ['email', 'slack', 'sms'],
+          escalation: {
+            levels: [
+              { level: 1, contacts: ['on-call-engineer'], actions: ['investigate'] },
+              { level: 2, contacts: ['tech-lead'], actions: ['escalate'] },
+              { level: 3, contacts: ['engineering-manager'], actions: ['emergency-response'] }
+            ],
+            timeouts: [15, 30, 60] // minutes
+          }
+        }
+      ],
+      reports: [
+        {
+          name: 'Daily Migration Report',
+          frequency: 'daily',
+          recipients: ['project-team'],
+          format: 'html',
+          sections: ['progress', 'issues', 'metrics', 'next-steps']
+        }
+      ],
+      integrations: [
+        {
+          type: 'monitoring',
+          service: 'Prometheus',
+          config: { endpoint: 'http://prometheus:9090' },
+          enabled: true
+        },
+        {
+          type: 'alerting',
+          service: 'Slack',
+          config: { webhook: 'https://hooks.slack.com/...' },
+          enabled: true
+        }
+      ]
+    };
+  }
+
+  /**
+   * Validate criteria against current state
+   */
+  async validateCriteria(phase: ValidationPhase): Promise<ValidationReport> {
+    const phaseCriteria = this.framework.criteria.filter(c => c.phase.includes(phase));
+    const results: ValidationResult[] = [];
+
+    for (const criteria of phaseCriteria) {
+      const result = await this.validateSingleCriteria(criteria);
+      results.push(result);
+    }
+
+    const summary = this.calculateValidationSummary(results);
+    const recommendations = this.generateRecommendations(results);
+
+    return {
+      id: `validation_${Date.now()}`,
+      timestamp: new Date().toISOString(),
+      phase,
+      summary,
+      results,
+      recommendations,
+      nextSteps: this.generateNextSteps(summary, recommendations)
+    };
+  }
+
+  /**
+   * Validate single criteria
+   */
+  private async validateSingleCriteria(criteria: ValidationCriteria): Promise<ValidationResult> {
     try {
-      // Execute validation categories in order
-      for (const categoryId of suite.executionOrder) {
-        const category = suite.categories.find(c => c.id === categoryId);
-        if (!category) continue;
-
-        await this.executeValidationCategory(category, execution);
-      }
-
-      // Calculate summary
-      this.calculateValidationSummary(execution, suite);
-
-      execution.status = 'completed';
-      execution.endTime = new Date().toISOString();
-
-    } catch (error) {
-      execution.status = 'failed';
-      execution.endTime = new Date().toISOString();
-      console.error('Validation execution failed:', error);
-    }
-
-    return execution;
-  }
-
-  private async executeValidationCategory(
-    category: ValidationCategory,
-    execution: ValidationExecution
-  ): Promise<void> {
-    for (const criterion of category.criteria) {
-      const result: ValidationResult = {
-        criterionId: criterion.id,
-        status: 'passed',
-        score: 0,
-        details: [],
-        metrics: [],
-        duration: 0,
-        timestamp: new Date().toISOString()
-      };
-
-      const startTime = Date.now();
-
-      try {
-        // Execute automated tests
-        for (const test of criterion.automatedTests) {
-          await this.executeAutomatedTest(test, result);
-        }
-
-        // Execute test cases
-        for (const testCase of criterion.testCases) {
-          await this.executeTestCase(testCase, result);
-        }
-
-        // Collect metrics
-        for (const metric of criterion.metrics) {
-          await this.collectMetric(metric, result);
-        }
-
-        // Calculate criterion score
-        result.score = this.calculateCriterionScore(result);
-        
-        if (result.score < 70) {
-          result.status = 'failed';
-        } else if (result.score < 85) {
-          result.status = 'warning';
-        }
-
-      } catch (error) {
-        result.status = 'failed';
-        result.details.push({
-          testCaseId: 'execution-error',
-          status: 'failed',
-          message: `Execution failed: ${error}`,
-          recommendations: ['Review test configuration', 'Check environment setup']
-        });
-      }
-
-      result.duration = Date.now() - startTime;
-      execution.results.push(result);
-    }
-  }
-
-  private async executeAutomatedTest(test: AutomatedTest, result: ValidationResult): Promise<void> {
-    console.log(`Executing automated test: ${test.name}`);
-    // In real implementation, this would execute the actual test
-    // const testResult = await testRunner.run(test.command, test.timeout);
-    
-    result.details.push({
-      testCaseId: test.id,
-      status: 'passed',
-      message: `Automated test passed: ${test.name}`,
-      evidence: [`Test file: ${test.testFile}`]
-    });
-  }
-
-  private async executeTestCase(testCase: TestCase, result: ValidationResult): Promise<void> {
-    console.log(`Executing test case: ${testCase.name}`);
-    // In real implementation, this would execute the test case steps
-    
-    result.details.push({
-      testCaseId: testCase.id,
-      status: 'passed',
-      message: `Test case passed: ${testCase.name}`,
-      evidence: [`Expected: ${testCase.expectedResult}`]
-    });
-  }
-
-  private async collectMetric(metric: ValidationMetric, result: ValidationResult): Promise<void> {
-    console.log(`Collecting metric: ${metric.name}`);
-    // In real implementation, this would query the monitoring system
-    
-    const mockValue = metric.target * (0.9 + Math.random() * 0.2); // Simulate metric value
-    
-    result.metrics.push({
-      metricId: metric.id,
-      value: mockValue,
-      target: metric.target,
-      status: mockValue <= metric.threshold ? 'passed' : 'failed',
-      timestamp: new Date().toISOString()
-    });
-  }
-
-  private calculateCriterionScore(result: ValidationResult): number {
-    const passedTests = result.details.filter(d => d.status === 'passed').length;
-    const totalTests = result.details.length;
-    const passedMetrics = result.metrics.filter(m => m.status === 'passed').length;
-    const totalMetrics = result.metrics.length;
-
-    if (totalTests === 0 && totalMetrics === 0) return 0;
-
-    const testScore = totalTests > 0 ? (passedTests / totalTests) * 100 : 100;
-    const metricScore = totalMetrics > 0 ? (passedMetrics / totalMetrics) * 100 : 100;
-
-    return (testScore + metricScore) / 2;
-  }
-
-  private calculateValidationSummary(execution: ValidationExecution, suite: ValidationSuite): void {
-    const totalCriteria = execution.results.length;
-    const passedCriteria = execution.results.filter(r => r.status === 'passed').length;
-
-    // Calculate category scores
-    const categoryScores: CategoryScore[] = suite.categories.map(category => {
-      const categoryResults = execution.results.filter(r => 
-        category.criteria.some(c => c.id === r.criterionId)
-      );
-      
-      const avgScore = categoryResults.length > 0 
-        ? categoryResults.reduce((sum, r) => sum + r.score, 0) / categoryResults.length
-        : 0;
+      // Simulate measurement based on criteria type
+      const measurement = await this.performMeasurement(criteria);
+      const status = this.evaluateResult(measurement, criteria.acceptance);
 
       return {
-        categoryId: category.id,
-        score: avgScore,
-        weight: category.weight,
-        status: avgScore >= category.passThreshold ? 'passed' : 'failed'
+        criteriaId: criteria.id,
+        status,
+        value: measurement,
+        expected: criteria.acceptance.threshold,
+        timestamp: new Date().toISOString(),
+        details: {
+          measurement,
+          baseline: criteria.acceptance.baseline,
+          deviation: criteria.acceptance.baseline ? 
+            Math.abs(measurement - criteria.acceptance.baseline) : undefined,
+          trend: this.calculateTrend(criteria.id, measurement),
+          confidence: 0.95,
+          notes: `Measured using ${criteria.measurement.method}`
+        }
       };
-    });
+    } catch (error) {
+      return {
+        criteriaId: criteria.id,
+        status: ValidationStatus.FAILED,
+        value: 0,
+        expected: criteria.acceptance.threshold,
+        timestamp: new Date().toISOString(),
+        details: {
+          measurement: 0,
+          notes: `Measurement failed: ${error}`
+        }
+      };
+    }
+  }
 
-    // Calculate overall score (weighted average)
-    const overallScore = categoryScores.reduce((sum, cs) => sum + (cs.score * cs.weight), 0);
+  /**
+   * Perform measurement for criteria
+   */
+  private async performMeasurement(criteria: ValidationCriteria): Promise<number> {
+    // Simulate different measurement methods
+    switch (criteria.measurement.method) {
+      case MeasurementMethod.AUTOMATED_MONITORING:
+        return this.simulateAutomatedMeasurement(criteria);
+      case MeasurementMethod.SYNTHETIC_TESTING:
+        return this.simulateSyntheticTesting(criteria);
+      case MeasurementMethod.REAL_USER_MONITORING:
+        return this.simulateRealUserMonitoring(criteria);
+      case MeasurementMethod.PERFORMANCE_BENCHMARK:
+        return this.simulatePerformanceBenchmark(criteria);
+      default:
+        return this.simulateGenericMeasurement(criteria);
+    }
+  }
 
-    // Identify critical issues
-    const criticalIssues: Issue[] = execution.results
-      .filter(r => r.status === 'failed')
-      .map(r => ({
-        severity: 'high' as const,
-        category: 'functional',
-        description: `Criterion failed: ${r.criterionId}`,
-        impact: 'Migration may not function correctly',
-        recommendation: 'Review and fix failing tests',
-        criterionId: r.criterionId
-      }));
+  private simulateAutomatedMeasurement(criteria: ValidationCriteria): number {
+    // Simulate based on criteria category
+    switch (criteria.category) {
+      case ValidationCategory.FUNCTIONAL:
+        return Math.random() > 0.05 ? 100 : 95; // 95% success rate
+      case ValidationCategory.DATA_INTEGRITY:
+        return Math.random() > 0.02 ? 100 : 98; // 98% success rate
+      default:
+        return 95 + Math.random() * 5; // 95-100%
+    }
+  }
 
-    execution.summary = {
+  private simulateSyntheticTesting(criteria: ValidationCriteria): number {
+    switch (criteria.category) {
+      case ValidationCategory.PERFORMANCE:
+        return 1000 + Math.random() * 1000; // 1-2 seconds
+      case ValidationCategory.USER_EXPERIENCE:
+        return Math.random() > 0.1 ? 95 : 85; // 85-95% success
+      default:
+        return 90 + Math.random() * 10; // 90-100%
+    }
+  }
+
+  private simulateRealUserMonitoring(criteria: ValidationCriteria): number {
+    switch (criteria.category) {
+      case ValidationCategory.PERFORMANCE:
+        return 800 + Math.random() * 700; // 0.8-1.5 seconds
+      case ValidationCategory.USER_EXPERIENCE:
+        return Math.random() * 2; // 0-2% error rate
+      default:
+        return 95 + Math.random() * 5; // 95-100%
+    }
+  }
+
+  private simulatePerformanceBenchmark(criteria: ValidationCriteria): number {
+    return 1200 + Math.random() * 800; // 1.2-2.0 seconds
+  }
+
+  private simulateGenericMeasurement(criteria: ValidationCriteria): number {
+    return 90 + Math.random() * 10; // 90-100%
+  }
+
+  /**
+   * Evaluate measurement result against acceptance criteria
+   */
+  private evaluateResult(measurement: number, acceptance: AcceptanceCriteria): ValidationStatus {
+    const { threshold, operator, tolerance = 0 } = acceptance;
+
+    let passed = false;
+    switch (operator) {
+      case 'gt':
+        passed = measurement > threshold;
+        break;
+      case 'gte':
+        passed = measurement >= threshold;
+        break;
+      case 'lt':
+        passed = measurement < threshold;
+        break;
+      case 'lte':
+        passed = measurement <= threshold;
+        break;
+      case 'eq':
+        passed = Math.abs(measurement - threshold) <= tolerance;
+        break;
+      case 'between':
+        // Assuming threshold is lower bound and tolerance is range
+        passed = measurement >= threshold && measurement <= (threshold + tolerance);
+        break;
+    }
+
+    if (passed) {
+      return ValidationStatus.PASSED;
+    } else if (tolerance > 0 && Math.abs(measurement - threshold) <= tolerance * 2) {
+      return ValidationStatus.WARNING;
+    } else {
+      return ValidationStatus.FAILED;
+    }
+  }
+
+  /**
+   * Calculate trend for criteria
+   */
+  private calculateTrend(criteriaId: string, currentValue: number): 'improving' | 'degrading' | 'stable' {
+    const history = this.results.get(criteriaId) || [];
+    if (history.length < 2) return 'stable';
+
+    const previousValue = history[history.length - 1].value;
+    const difference = currentValue - previousValue;
+    const threshold = previousValue * 0.05; // 5% threshold
+
+    if (Math.abs(difference) <= threshold) return 'stable';
+    return difference > 0 ? 'improving' : 'degrading';
+  }
+
+  /**
+   * Calculate validation summary
+   */
+  private calculateValidationSummary(results: ValidationResult[]): ValidationSummary {
+    const passed = results.filter(r => r.status === ValidationStatus.PASSED).length;
+    const failed = results.filter(r => r.status === ValidationStatus.FAILED).length;
+    const warnings = results.filter(r => r.status === ValidationStatus.WARNING).length;
+    const pending = results.filter(r => r.status === ValidationStatus.PENDING).length;
+
+    const overallScore = (passed / results.length) * 100;
+    
+    let riskLevel: 'low' | 'medium' | 'high' | 'critical' = 'low';
+    if (failed > 0) riskLevel = 'critical';
+    else if (warnings > results.length * 0.2) riskLevel = 'high';
+    else if (warnings > 0) riskLevel = 'medium';
+
+    return {
+      totalCriteria: results.length,
+      passed,
+      failed,
+      warnings,
+      pending,
       overallScore,
-      categoryScores,
-      passedCriteria,
-      totalCriteria,
-      criticalIssues,
-      recommendations: [
-        'Address all critical issues before proceeding',
-        'Monitor performance metrics closely',
-        'Conduct user acceptance testing'
-      ]
+      riskLevel
     };
+  }
+
+  /**
+   * Generate recommendations based on results
+   */
+  private generateRecommendations(results: ValidationResult[]): ValidationRecommendation[] {
+    const recommendations: ValidationRecommendation[] = [];
+    const failedResults = results.filter(r => r.status === ValidationStatus.FAILED);
+    const warningResults = results.filter(r => r.status === ValidationStatus.WARNING);
+
+    // Critical fixes for failed criteria
+    for (const result of failedResults) {
+      const criteria = this.framework.criteria.find(c => c.id === result.criteriaId);
+      if (criteria) {
+        recommendations.push({
+          type: 'fix',
+          priority: 'critical',
+          title: `Fix Failed Criteria: ${criteria.name}`,
+          description: `${criteria.name} failed validation and requires immediate attention`,
+          actions: [
+            'Investigate root cause of failure',
+            'Implement corrective measures',
+            'Re-run validation tests',
+            'Monitor for stability'
+          ],
+          impact: 'Critical for migration success',
+          effort: 'high'
+        });
+      }
+    }
+
+    // Optimization recommendations for warnings
+    for (const result of warningResults) {
+      const criteria = this.framework.criteria.find(c => c.id === result.criteriaId);
+      if (criteria) {
+        recommendations.push({
+          type: 'optimize',
+          priority: 'medium',
+          title: `Optimize: ${criteria.name}`,
+          description: `${criteria.name} shows warning status and could be improved`,
+          actions: [
+            'Analyze performance bottlenecks',
+            'Implement optimizations',
+            'Monitor improvements'
+          ],
+          impact: 'Improved performance and reliability',
+          effort: 'medium'
+        });
+      }
+    }
+
+    return recommendations;
+  }
+
+  /**
+   * Generate next steps based on validation results
+   */
+  private generateNextSteps(summary: ValidationSummary, recommendations: ValidationRecommendation[]): string[] {
+    const nextSteps: string[] = [];
+
+    if (summary.failed > 0) {
+      nextSteps.push('Address all failed validation criteria immediately');
+      nextSteps.push('Conduct root cause analysis for failures');
+      nextSteps.push('Implement corrective actions');
+    }
+
+    if (summary.warnings > 0) {
+      nextSteps.push('Review warning criteria and plan optimizations');
+      nextSteps.push('Monitor warning criteria for degradation');
+    }
+
+    if (summary.overallScore >= 95) {
+      nextSteps.push('Proceed with next migration phase');
+      nextSteps.push('Continue monitoring all criteria');
+    } else if (summary.overallScore >= 85) {
+      nextSteps.push('Address remaining issues before proceeding');
+      nextSteps.push('Increase monitoring frequency');
+    } else {
+      nextSteps.push('Consider rollback if issues cannot be resolved quickly');
+      nextSteps.push('Escalate to technical leadership');
+    }
+
+    return nextSteps;
+  }
+
+  /**
+   * Store validation result
+   */
+  storeResult(result: ValidationResult): void {
+    const history = this.results.get(result.criteriaId) || [];
+    history.push(result);
+    
+    // Keep only last 100 results per criteria
+    if (history.length > 100) {
+      history.splice(0, history.length - 100);
+    }
+    
+    this.results.set(result.criteriaId, history);
+  }
+
+  /**
+   * Get validation history for criteria
+   */
+  getValidationHistory(criteriaId: string): ValidationResult[] {
+    return this.results.get(criteriaId) || [];
+  }
+
+  /**
+   * Get framework configuration
+   */
+  getFramework(): ValidationFramework {
+    return this.framework;
+  }
+
+  /**
+   * Update framework configuration
+   */
+  updateFramework(updates: Partial<ValidationFramework>): void {
+    this.framework = { ...this.framework, ...updates };
   }
 }
 
-export default MigrationValidationSuiteGenerator;
+/**
+ * Export utility function for creating validation manager
+ */
+export function createMigrationValidationManager(config?: Partial<ValidationFramework>): MigrationValidationManager {
+  return new MigrationValidationManager(config);
+}

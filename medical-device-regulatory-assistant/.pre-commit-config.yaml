@@ -1,0 +1,141 @@
+# Pre-commit hooks configuration for Medical Device Regulatory Assistant
+# See https://pre-commit.com for more information
+
+repos:
+  # Frontend hooks
+  - repo: local
+    hooks:
+      - id: frontend-type-check
+        name: Frontend TypeScript Type Check
+        entry: pnpm type-check
+        language: system
+        files: \.(ts|tsx)$
+        pass_filenames: false
+
+      - id: frontend-lint
+        name: Frontend ESLint
+        entry: pnpm lint
+        language: system
+        files: \.(ts|tsx|js|jsx)$
+        pass_filenames: false
+
+      - id: frontend-format
+        name: Frontend Prettier Format
+        entry: pnpm format
+        language: system
+        files: \.(ts|tsx|js|jsx|json|md|yml|yaml)$
+        pass_filenames: false
+
+      - id: frontend-test
+        name: Frontend Unit Tests
+        entry: pnpm test --passWithNoTests --watchAll=false
+        language: system
+        files: \.(ts|tsx)$
+        pass_filenames: false
+
+  # Backend hooks
+  - repo: local
+    hooks:
+      - id: backend-black
+        name: Backend Black Formatting
+        entry: bash -c 'cd backend && poetry run black .'
+        language: system
+        files: \.py$
+        pass_filenames: false
+
+      - id: backend-isort
+        name: Backend Import Sorting
+        entry: bash -c 'cd backend && poetry run isort .'
+        language: system
+        files: \.py$
+        pass_filenames: false
+
+      - id: backend-flake8
+        name: Backend Flake8 Linting
+        entry: bash -c 'cd backend && poetry run flake8 .'
+        language: system
+        files: \.py$
+        pass_filenames: false
+
+      - id: backend-mypy
+        name: Backend MyPy Type Check
+        entry: bash -c 'cd backend && poetry run mypy .'
+        language: system
+        files: \.py$
+        pass_filenames: false
+
+      - id: backend-test
+        name: Backend Unit Tests
+        entry: bash -c 'cd backend && poetry run python -m pytest tests/ -x -q'
+        language: system
+        files: \.py$
+        pass_filenames: false
+
+  # Security hooks
+  - repo: local
+    hooks:
+      - id: frontend-audit
+        name: Frontend Security Audit
+        entry: pnpm audit --audit-level moderate
+        language: system
+        files: package\.json|pnpm-lock\.yaml
+        pass_filenames: false
+
+      - id: backend-safety
+        name: Backend Security Check
+        entry: bash -c 'cd backend && poetry run safety check'
+        language: system
+        files: pyproject\.toml|poetry\.lock
+        pass_filenames: false
+
+  # Quality gates
+  - repo: local
+    hooks:
+      - id: quality-check
+        name: Comprehensive Quality Check
+        entry: node scripts/quality-check-system.js
+        language: system
+        stages: [manual]
+        pass_filenames: false
+
+  # Git hooks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.4.0
+    hooks:
+      - id: trailing-whitespace
+        exclude: \.md$
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-json
+      - id: check-merge-conflict
+      - id: check-added-large-files
+        args: ['--maxkb=1000']
+      - id: detect-private-key
+
+  # Commit message hooks
+  - repo: https://github.com/commitizen-tools/commitizen
+    rev: v3.12.0
+    hooks:
+      - id: commitizen
+        stages: [commit-msg]
+
+  # Documentation hooks
+  - repo: https://github.com/igorshubovych/markdownlint-cli
+    rev: v0.37.0
+    hooks:
+      - id: markdownlint
+        args: ['--fix']
+        exclude: node_modules/
+
+# Configuration for specific hooks
+ci:
+  autofix_commit_msg: |
+    [pre-commit.ci] auto fixes from pre-commit hooks
+
+    for more information, see https://pre-commit.ci
+  autofix_prs: true
+  autoupdate_branch: ''
+  autoupdate_commit_msg: '[pre-commit.ci] pre-commit autoupdate'
+  autoupdate_schedule: weekly
+  skip: []
+  submodules: false

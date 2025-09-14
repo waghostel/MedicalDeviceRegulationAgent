@@ -29,6 +29,39 @@ JWT_ALGORITHM = "HS256"
 security = HTTPBearer(auto_error=False)
 
 
+async def auth_middleware(request: Request, call_next):
+    """
+    Authentication middleware to handle authentication errors properly.
+    
+    This middleware catches authentication exceptions and converts them
+    to proper HTTP responses instead of letting them bubble up as 500 errors.
+    """
+    try:
+        response = await call_next(request)
+        return response
+    except HTTPException as e:
+        # Re-raise HTTPExceptions as-is (they're already proper HTTP responses)
+        raise
+    except Exception as e:
+        # Log unexpected errors but don't expose internal details
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"Unexpected error in auth middleware: {e}")
+        
+        # Check if this looks like an authentication error
+        error_str = str(e).lower()
+        if any(keyword in error_str for keyword in ['token', 'auth', 'credential', 'jwt']):
+            # Convert to proper 401 response
+            from fastapi.responses import JSONResponse
+            return JSONResponse(
+                status_code=401,
+                content={"detail": "Authentication failed"}
+            )
+        
+        # Re-raise other exceptions
+        raise
+
+
 async def get_current_user(
     request: Request,
     credentials: Optional[HTTPAuthorizationCredentials] = Depends(security)
@@ -53,37 +86,48 @@ async def get_current_user(
     
     token = credentials.credentials
     
-    # Try JWT validation first
-    jwt_payload = validate_jwt_token(token)
-    if jwt_payload:
-        return User(
-            id=jwt_payload.get("sub", "unknown"),
-            email=jwt_payload.get("email", "unknown@example.com"),
-            name=jwt_payload.get("name", "Unknown User"),
-            sub=jwt_payload.get("sub")
-        )
-    
-    # Simple token validation for MVP
-    if token == "test-token":
-        return User(
-            id="test-user-1",
-            email="test@example.com",
-            name="Test User",
-            sub="test-user-1"
-        )
-    elif token.startswith("user-"):
-        # Extract user ID from token for testing
-        user_id = token.replace("user-", "")
-        return User(
-            id=user_id,
-            email=f"{user_id}@example.com",
-            name=f"User {user_id}",
-            sub=user_id
-        )
-    else:
+    try:
+        # Try JWT validation first
+        jwt_payload = validate_jwt_token(token)
+        if jwt_payload:
+            return User(
+                id=jwt_payload.get("sub", "unknown"),
+                email=jwt_payload.get("email", "unknown@example.com"),
+                name=jwt_payload.get("name", "Unknown User"),
+                sub=jwt_payload.get("sub")
+            )
+        
+        # Simple token validation for MVP
+        if token == "test-token":
+            return User(
+                id="test-user-1",
+                email="test@example.com",
+                name="Test User",
+                sub="test-user-1"
+            )
+        elif token.startswith("user-"):
+            # Extract user ID from token for testing
+            user_id = token.replace("user-", "")
+            return User(
+                id=user_id,
+                email=f"{user_id}@example.com",
+                name=f"User {user_id}",
+                sub=user_id
+            )
+        else:
+            raise HTTPException(
+                status_code=401,
+                detail="Invalid authentication credentials",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+    except HTTPException:
+        # Re-raise HTTPExceptions as-is
+        raise
+    except Exception as e:
+        # Convert any other exceptions to proper 401 responses
         raise HTTPException(
             status_code=401,
-            detail="Invalid authentication credentials",
+            detail="Authentication failed",
             headers={"WWW-Authenticate": "Bearer"},
         )
 

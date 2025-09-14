@@ -3,9 +3,20 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Toast, ToastProvider, ToastViewport } from '../toast';
+import {
+  renderWithProvidersSync,
+  waitForAsyncUpdates,
+  fireEventWithAct,
+  setupTestEnvironment,
+  cleanupTestEnvironment,
+} from '@/lib/testing/react-test-utils';
+import {
+  setupMockToastSystem,
+  cleanupMockToastSystem,
+} from '@/lib/testing/mock-toast-system';
 
 // Mock lucide-react icons
 jest.mock('lucide-react', () => ({
@@ -60,7 +71,7 @@ jest.mock('@/components/ui/button', () => ({
   },
 }));
 
-const renderToast = (props: any = {}) => {
+const renderToast = (props: unknown = {}) => {
   const defaultProps = {
     title: 'Test Toast',
     description: 'This is a test toast',
@@ -69,7 +80,7 @@ const renderToast = (props: any = {}) => {
     ...props,
   };
 
-  return render(
+  return renderWithProvidersSync(
     <ToastProvider>
       <Toast {...defaultProps}>
         <div className="grid gap-1">
@@ -89,6 +100,21 @@ const renderToast = (props: any = {}) => {
 };
 
 describe('Toast Component', () => {
+  let testEnv: ReturnType<typeof setupTestEnvironment>;
+
+  beforeEach(() => {
+    testEnv = setupTestEnvironment({
+      mockToasts: true,
+      skipActWarnings: false,
+    });
+  });
+
+  afterEach(() => {
+    testEnv.cleanup();
+    // cleanupMockToastSystem(); // Disabled for now
+    cleanupTestEnvironment();
+  });
+
   describe('Basic Rendering', () => {
     it('should render toast with title and description', () => {
       renderToast({
@@ -313,14 +339,22 @@ describe('Toast Component', () => {
         onRetry: mockRetry,
       });
 
+      await waitForAsyncUpdates();
+
       const retryButton = screen.getByRole('button', { name: /retry/i });
 
-      // Focus the button
-      retryButton.focus();
+      // Focus the button with proper act wrapping
+      await fireEventWithAct(async () => {
+        retryButton.focus();
+      });
+
       expect(retryButton).toHaveFocus();
 
-      // Press Enter
-      await user.keyboard('{Enter}');
+      // Press Enter with proper act wrapping
+      await fireEventWithAct(async () => {
+        await user.keyboard('{Enter}');
+      });
+
       expect(mockRetry).toHaveBeenCalledTimes(1);
     });
 

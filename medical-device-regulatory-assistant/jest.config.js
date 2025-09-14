@@ -65,7 +65,7 @@ const customJestConfig = {
   ],
   testTimeout: 15000,
   maxWorkers: '75%', // Increased for better parallel execution
-  // Enhanced test categorization
+  // Simplified test categorization with consistent transform configuration
   projects: [
     {
       displayName: 'unit',
@@ -89,7 +89,7 @@ const customJestConfig = {
       displayName: 'integration',
       testMatch: ['<rootDir>/src/**/*.integration.{test,spec}.{js,jsx,ts,tsx}'],
       testEnvironment: 'jsdom',
-      setupFilesAfterEnv: ['<rootDir>/jest.setup.js', '<rootDir>/src/lib/testing/integration-setup.js'],
+      setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
       moduleNameMapper: {
         '^@/(.*)$': '<rootDir>/src/$1',
       },

@@ -106,7 +106,7 @@ class ProjectUpdateRequest(BaseModel):
     )
     status: Optional[ProjectStatus] = Field(
         None,
-        description="Project status (draft, in_progress, completed)"
+        description="Project status (draft, active, in_progress, completed)"
     )
     priority: Optional[ProjectPriority] = Field(
         None,
