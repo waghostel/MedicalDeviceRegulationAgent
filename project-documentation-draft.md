@@ -14,7 +14,7 @@ I was inspired to build InventA after recognizing that this regulatory complexit
 
 ### What I Learned
 
-Building InventA taught me several key lessons about developing AI-powered regulatory tools:
+Building MedevAI taught me several key lessons about developing AI-powered regulatory tools:
 
 **Technical Architecture Insights:**
 

@@ -1,0 +1,111 @@
+{
+  "test_configuration": {
+    "base_url": "https://api.fda.gov",
+    "timeout": 30,
+    "max_retries": 3,
+    "rate_limit_delay": 0.5,
+    "performance_thresholds": {
+      "excellent": 2.0,
+      "good": 5.0,
+      "acceptable": 10.0
+    }
+  },
+  "test_endpoints": {
+    "device_510k": {
+      "path": "/device/510k.json",
+      "description": "510(k) premarket notifications",
+      "test_queries": [
+        "?limit=1",
+        "?search=device_name:pacemaker&limit=5",
+        "?search=device_name:insulin&limit=3",
+        "?search=product_code:DQA&limit=2"
+      ]
+    },
+    "device_classification": {
+      "path": "/device/classification.json",
+      "description": "Device classification database",
+      "test_queries": [
+        "?limit=1",
+        "?search=product_code:DQA&limit=1",
+        "?search=device_class:2&limit=5"
+      ]
+    },
+    "device_event": {
+      "path": "/device/event.json",
+      "description": "Medical device adverse events",
+      "test_queries": [
+        "?limit=1",
+        "?search=device.generic_name:pacemaker&limit=2",
+        "?search=event_type:malfunction&limit=3"
+      ]
+    },
+    "device_enforcement": {
+      "path": "/device/enforcement.json",
+      "description": "Device enforcement reports",
+      "test_queries": [
+        "?limit=1",
+        "?search=status:ongoing&limit=2"
+      ]
+    },
+    "device_recall": {
+      "path": "/device/recall.json",
+      "description": "Device recall information",
+      "test_queries": [
+        "?limit=1",
+        "?search=status:ongoing&limit=2"
+      ]
+    }
+  },
+  "error_test_cases": [
+    {
+      "name": "Invalid Field",
+      "query": "?search=invalid_field_name:test",
+      "expected_status": [400, 404]
+    },
+    {
+      "name": "Malformed Query",
+      "query": "?search=device_name:",
+      "expected_status": [400]
+    },
+    {
+      "name": "Empty Search",
+      "query": "?search=",
+      "expected_status": [400]
+    },
+    {
+      "name": "Invalid Limit",
+      "query": "?limit=abc",
+      "expected_status": [400]
+    },
+    {
+      "name": "Excessive Limit",
+      "query": "?limit=10000",
+      "expected_status": [400, 413]
+    }
+  ],
+  "performance_test_cases": [
+    {
+      "name": "Small Response",
+      "query": "?limit=1",
+      "expected_max_time": 5.0
+    },
+    {
+      "name": "Medium Response",
+      "query": "?limit=10",
+      "expected_max_time": 10.0
+    },
+    {
+      "name": "Large Response",
+      "query": "?limit=100",
+      "expected_max_time": 30.0
+    }
+  ],
+  "data_validation_rules": {
+    "required_meta_fields": ["results", "disclaimer", "terms", "license"],
+    "required_result_fields": {
+      "510k": ["k_number", "device_name"],
+      "classification": ["product_code", "device_name"],
+      "event": ["report_number", "event_type"]
+    }
+  }
+}
