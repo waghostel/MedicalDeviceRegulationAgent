@@ -40,8 +40,8 @@ clear
 6. Write a **task report** in `./.kiro/specs/[your-spec-name]/task-execute-history/` (e.g. `task-1.1.md`).
    - Be transparent about test results, especially if some tests require future verification.
    - If the test script has been modified, skipped in the developemnt process or skipped chat history, document faild and skipped test in **Undone tests/Skipped test**.
-7. Check previous chat history and confirm if any tests were passed, simplified, or skipped during development. Ensure they are documented according to our task report format.
-
+7. Check previous chat history and verify whether any tests were passed, simplified, or skipped during development. Ensure all are documented following our task report format. Provide the exact test command for each test, starting from the root of the codebase.
+8. 
 ## Test-Driven Development (TDD)
 
 ### Testing Guidelines
@@ -822,7 +822,7 @@ AttributeError: property 'db_manager' of 'ProjectService' object has no setter
             await self.metrics_client.increment(f"fda_api.status.{status_code}")
     ```
 
-- [ ] 13. Enhanced Error Handling and Resilience
+- [x] 13. Enhanced Error Handling and Resilience
 
   - **Implement Advanced Retry Logic:** Add exponential backoff with jitter for failed requests
 
