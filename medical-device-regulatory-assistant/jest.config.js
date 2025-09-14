@@ -23,7 +23,7 @@ const customJestConfig = {
     }]
   },
   transformIgnorePatterns: [
-    'node_modules/(?!(.*\\.mjs$))'
+    'node_modules/(?!(.*\\.mjs$|@radix-ui|@testing-library))'
   ],
   collectCoverageFrom: [
     'src/**/*.{js,jsx,ts,tsx}',

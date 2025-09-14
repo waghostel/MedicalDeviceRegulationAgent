@@ -293,10 +293,32 @@ const setupRadixUIMocks = () => {
   // Mock other commonly used Radix UI components
   jest.doMock('@radix-ui/react-dropdown-menu', () => ({
     Root: ({ children }) => React.createElement('div', { 'data-testid': 'dropdown-root' }, children),
-    Trigger: ({ children, ...props }) => React.createElement('button', { 'data-testid': 'dropdown-trigger', ...props }, children),
+    Trigger: ({ children, asChild, ...props }) => {
+      if (asChild && React.isValidElement(children)) {
+        return React.cloneElement(children, {
+          'data-testid': 'dropdown-trigger',
+          ...props,
+        });
+      }
+      return React.createElement('button', { 'data-testid': 'dropdown-trigger', ...props }, children);
+    },
     Content: ({ children }) => React.createElement('div', { 'data-testid': 'dropdown-content' }, children),
     Item: ({ children, ...props }) => React.createElement('div', { 'data-testid': 'dropdown-item', ...props }, children),
     Portal: ({ children }) => children,
+    Sub: ({ children }) => React.createElement('div', { 'data-testid': 'dropdown-sub' }, children),
+    SubTrigger: Object.assign(
+      ({ children, ...props }) => React.createElement('button', { 'data-testid': 'dropdown-sub-trigger', ...props }, children),
+      { displayName: 'DropdownMenuSubTrigger' }
+    ),
+    SubContent: ({ children }) => React.createElement('div', { 'data-testid': 'dropdown-sub-content' }, children),
+    Group: ({ children }) => React.createElement('div', { 'data-testid': 'dropdown-group' }, children),
+    Label: ({ children, ...props }) => React.createElement('div', { 'data-testid': 'dropdown-label', ...props }, children),
+    Separator: () => React.createElement('div', { 'data-testid': 'dropdown-separator' }),
+    CheckboxItem: ({ children, ...props }) => React.createElement('div', { 'data-testid': 'dropdown-checkbox-item', ...props }, children),
+    RadioGroup: ({ children }) => React.createElement('div', { 'data-testid': 'dropdown-radio-group' }, children),
+    RadioItem: ({ children, ...props }) => React.createElement('div', { 'data-testid': 'dropdown-radio-item', ...props }, children),
+    ItemIndicator: ({ children }) => React.createElement('span', { 'data-testid': 'dropdown-item-indicator' }, children),
+    Arrow: () => React.createElement('div', { 'data-testid': 'dropdown-arrow' }),
   }));
 
   jest.doMock('@radix-ui/react-tooltip', () => ({

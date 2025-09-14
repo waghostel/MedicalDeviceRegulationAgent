@@ -17,6 +17,13 @@ import { ProjectList } from '@/components/projects/project-list';
 import { ProjectCard } from '@/components/projects/project-card';
 import { Project, ProjectStatus } from '@/types/project';
 
+// Define mock project status constants
+const mockProjectStatus = {
+  DRAFT: 'draft',
+  IN_PROGRESS: 'in_progress',
+  COMPLETED: 'completed',
+} as const;
+
 // Mock the useProjects hook
 jest.mock('@/hooks/use-projects', () => ({
   useProjects: () => ({
@@ -29,7 +36,7 @@ jest.mock('@/hooks/use-projects', () => ({
         device_type: 'Cardiac Monitor',
         intended_use:
           'For continuous monitoring of cardiac rhythm in ambulatory patients',
-        status: ProjectStatus.IN_PROGRESS,
+        status: mockProjectStatus.IN_PROGRESS,
         created_at: '2024-01-15T10:00:00Z',
         updated_at: '2024-01-15T10:00:00Z',
       },
@@ -40,7 +47,7 @@ jest.mock('@/hooks/use-projects', () => ({
         device_type: 'Glucose Meter',
         intended_use:
           'For quantitative measurement of glucose in capillary blood',
-        status: ProjectStatus.DRAFT,
+        status: mockProjectStatus.DRAFT,
         created_at: '2024-01-14T09:00:00Z',
         updated_at: '2024-01-14T09:00:00Z',
       },
@@ -51,7 +58,7 @@ jest.mock('@/hooks/use-projects', () => ({
     createProject: jest.fn().mockResolvedValue({
       id: 3,
       name: 'New Project',
-      status: ProjectStatus.DRAFT,
+      status: mockProjectStatus.DRAFT,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     }),

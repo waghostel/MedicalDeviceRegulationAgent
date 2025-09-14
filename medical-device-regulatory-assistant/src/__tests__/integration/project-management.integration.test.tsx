@@ -4,15 +4,37 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
+import {
+  render,
+  screen,
+  fireEvent,
+  waitFor,
+  within,
+} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { setupMockAPI, teardownMockAPI, addMockHandlers } from '@/lib/testing/msw-utils';
-import { renderWithProviders, createMockSession } from '@/lib/testing/test-utils';
-import { generateMockProject, generateMockUser, generateMockProjects } from '@/lib/mock-data';
+import {
+  setupTestMocks,
+  teardownTestMocks,
+  addMockHandlers,
+} from '@/lib/testing/test-setup';
+import {
+  renderWithProviders,
+  createMockSession,
+} from '@/lib/testing/test-utils';
+import {
+  generateMockProject,
+  generateMockUser,
+  generateMockProjects,
+} from '@/lib/mock-data';
 import { ProjectList } from '@/components/projects/project-list';
 import { ProjectForm } from '@/components/projects/project-form';
 import { ProjectCard } from '@/components/projects/project-card';
-import { Project, ProjectStatus, ProjectCreateRequest, ProjectUpdateRequest } from '@/types/project';
+import {
+  Project,
+  ProjectStatus,
+  ProjectCreateRequest,
+  ProjectUpdateRequest,
+} from '@/types/project';
 
 // Mock hooks
 jest.mock('@/hooks/use-projects', () => ({
@@ -37,13 +59,17 @@ jest.mock('@/hooks/use-toast', () => ({
 // Test wrapper component for project management
 const ProjectManagementTestWrapper: React.FC = () => {
   const [projects, setProjects] = React.useState<Project[]>([]);
-  const [selectedProject, setSelectedProject] = React.useState<Project | null>(null);
+  const [selectedProject, setSelectedProject] = React.useState<Project | null>(
+    null
+  );
   const [showCreateForm, setShowCreateForm] = React.useState(false);
   const [showEditForm, setShowEditForm] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
 
   // Mock project operations
-  const createProject = async (data: ProjectCreateRequest): Promise<Project | null> => {
+  const createProject = async (
+    data: ProjectCreateRequest
+  ): Promise<Project | null> => {
     setLoading(true);
     try {
       const response = await fetch('/api/projects', {
@@ -51,11 +77,11 @@ const ProjectManagementTestWrapper: React.FC = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
-      
+
       if (!response.ok) throw new Error('Failed to create project');
-      
+
       const newProject = await response.json();
-      setProjects(prev => [newProject, ...prev]);
+      setProjects((prev) => [newProject, ...prev]);
       return newProject;
     } catch (error) {
       throw error;
@@ -64,9 +90,11 @@ const ProjectManagementTestWrapper: React.FC = () => {
     }
   };
 
-  const updateProject = async (data: ProjectUpdateRequest): Promise<Project | null> => {
+  const updateProject = async (
+    data: ProjectUpdateRequest
+  ): Promise<Project | null> => {
     if (!selectedProject) return null;
-    
+
     setLoading(true);
     try {
       const response = await fetch(`/api/projects/${selectedProject.id}`, {
@@ -74,11 +102,13 @@ const ProjectManagementTestWrapper: React.FC = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
-      
+
       if (!response.ok) throw new Error('Failed to update project');
-      
+
       const updatedProject = await response.json();
-      setProjects(prev => prev.map(p => p.id === updatedProject.id ? updatedProject : p));
+      setProjects((prev) =>
+        prev.map((p) => (p.id === updatedProject.id ? updatedProject : p))
+      );
       return updatedProject;
     } catch (error) {
       throw error;
@@ -93,10 +123,10 @@ const ProjectManagementTestWrapper: React.FC = () => {
       const response = await fetch(`/api/projects/${project.id}`, {
         method: 'DELETE',
       });
-      
+
       if (!response.ok) throw new Error('Failed to delete project');
-      
-      setProjects(prev => prev.filter(p => p.id !== project.id));
+
+      setProjects((prev) => prev.filter((p) => p.id !== project.id));
     } catch (error) {
       throw error;
     } finally {
@@ -138,14 +168,14 @@ const ProjectManagementTestWrapper: React.FC = () => {
               Create Project
             </button>
           </div>
-          
+
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {loading && projects.length === 0 ? (
               <div data-testid="loading-projects">Loading projects...</div>
             ) : projects.length === 0 ? (
               <div data-testid="empty-projects">No projects found</div>
             ) : (
-              projects.map(project => (
+              projects.map((project) => (
                 <ProjectCard
                   key={project.id}
                   project={project}
@@ -205,12 +235,12 @@ describe('Project Management Integration Tests', () => {
   const mockSession = createMockSession(mockUser);
 
   beforeEach(() => {
-    setupMockAPI();
+    setupTestMocks();
     jest.clearAllMocks();
   });
 
   afterEach(() => {
-    teardownMockAPI();
+    teardownTestMocks();
   });
 
   describe('Complete Project Creation Flow', () => {
@@ -249,12 +279,17 @@ describe('Project Management Integration Tests', () => {
       // Fill out the form
       const nameInput = screen.getByLabelText(/project name/i);
       const descriptionInput = screen.getByLabelText(/description/i);
-      const deviceTypeSelect = screen.getByRole('combobox', { name: /device type/i });
+      const deviceTypeSelect = screen.getByRole('combobox', {
+        name: /device type/i,
+      });
       const intendedUseInput = screen.getByLabelText(/intended use/i);
 
       await user.type(nameInput, 'Test Cardiac Monitor');
-      await user.type(descriptionInput, 'A new cardiac monitoring device for testing');
-      
+      await user.type(
+        descriptionInput,
+        'A new cardiac monitoring device for testing'
+      );
+
       // Select device type
       await user.click(deviceTypeSelect);
       await waitFor(() => {
@@ -262,7 +297,10 @@ describe('Project Management Integration Tests', () => {
         user.click(option);
       });
 
-      await user.type(intendedUseInput, 'For continuous monitoring of cardiac rhythm in hospital settings');
+      await user.type(
+        intendedUseInput,
+        'For continuous monitoring of cardiac rhythm in hospital settings'
+      );
 
       // Mock successful project creation
       const newProject = generateMockProject({
@@ -270,7 +308,8 @@ describe('Project Management Integration Tests', () => {
         name: 'Test Cardiac Monitor',
         description: 'A new cardiac monitoring device for testing',
         device_type: 'Cardiovascular Device',
-        intended_use: 'For continuous monitoring of cardiac rhythm in hospital settings',
+        intended_use:
+          'For continuous monitoring of cardiac rhythm in hospital settings',
         status: ProjectStatus.DRAFT,
       });
 
@@ -288,9 +327,14 @@ describe('Project Management Integration Tests', () => {
       await user.click(submitBtn);
 
       // Wait for project to be created and form to close
-      await waitFor(() => {
-        expect(screen.queryByText('Create New Project')).not.toBeInTheDocument();
-      }, { timeout: 3000 });
+      await waitFor(
+        () => {
+          expect(
+            screen.queryByText('Create New Project')
+          ).not.toBeInTheDocument();
+        },
+        { timeout: 3000 }
+      );
 
       // Verify the new project appears in the list
       await waitFor(() => {
@@ -377,9 +421,12 @@ describe('Project Management Integration Tests', () => {
       });
 
       // Wait for completion
-      await waitFor(() => {
-        expect(screen.queryByText(/creating/i)).not.toBeInTheDocument();
-      }, { timeout: 2000 });
+      await waitFor(
+        () => {
+          expect(screen.queryByText(/creating/i)).not.toBeInTheDocument();
+        },
+        { timeout: 2000 }
+      );
     });
   });
 
@@ -411,7 +458,9 @@ describe('Project Management Integration Tests', () => {
 
       // Click edit on the project card
       const projectCard = screen.getByTestId('project-card');
-      const moreButton = within(projectCard).getByRole('button', { name: /open menu/i });
+      const moreButton = within(projectCard).getByRole('button', {
+        name: /open menu/i,
+      });
       await user.click(moreButton);
 
       const editButton = screen.getByText('Edit Project');
@@ -428,7 +477,10 @@ describe('Project Management Integration Tests', () => {
       await user.type(nameInput, 'Updated Project Name');
 
       // Mock successful update
-      const updatedProject = { ...existingProject, name: 'Updated Project Name' };
+      const updatedProject = {
+        ...existingProject,
+        name: 'Updated Project Name',
+      };
       addMockHandlers([
         {
           method: 'PUT',
@@ -443,9 +495,12 @@ describe('Project Management Integration Tests', () => {
       await user.click(updateBtn);
 
       // Wait for update to complete
-      await waitFor(() => {
-        expect(screen.getByText('Updated Project Name')).toBeInTheDocument();
-      }, { timeout: 1000 });
+      await waitFor(
+        () => {
+          expect(screen.getByText('Updated Project Name')).toBeInTheDocument();
+        },
+        { timeout: 1000 }
+      );
     });
 
     it('should handle edit conflicts and resolution', async () => {
@@ -482,7 +537,9 @@ describe('Project Management Integration Tests', () => {
 
       // Simulate edit attempt that results in conflict
       const projectCard = screen.getByTestId('project-card');
-      const moreButton = within(projectCard).getByRole('button', { name: /open menu/i });
+      const moreButton = within(projectCard).getByRole('button', {
+        name: /open menu/i,
+      });
       await user.click(moreButton);
 
       const editButton = screen.getByText('Edit Project');
@@ -539,16 +596,23 @@ describe('Project Management Integration Tests', () => {
 
       // Open dropdown menu and click delete
       const projectCard = screen.getByTestId('project-card');
-      const moreButton = within(projectCard).getByRole('button', { name: /open menu/i });
+      const moreButton = within(projectCard).getByRole('button', {
+        name: /open menu/i,
+      });
       await user.click(moreButton);
 
       const deleteButton = screen.getByText('Delete Project');
       await user.click(deleteButton);
 
       // Wait for deletion to complete
-      await waitFor(() => {
-        expect(screen.queryByText('Project to Delete')).not.toBeInTheDocument();
-      }, { timeout: 1000 });
+      await waitFor(
+        () => {
+          expect(
+            screen.queryByText('Project to Delete')
+          ).not.toBeInTheDocument();
+        },
+        { timeout: 1000 }
+      );
 
       // Should show empty state
       expect(screen.getByTestId('empty-projects')).toBeInTheDocument();
@@ -570,7 +634,9 @@ describe('Project Management Integration Tests', () => {
         {
           method: 'DELETE',
           path: `/api/projects/${protectedProject.id}`,
-          response: { error: 'Cannot delete project with active classifications' },
+          response: {
+            error: 'Cannot delete project with active classifications',
+          },
           error: true,
           statusCode: 400,
         },
@@ -586,7 +652,9 @@ describe('Project Management Integration Tests', () => {
 
       // Attempt deletion
       const projectCard = screen.getByTestId('project-card');
-      const moreButton = within(projectCard).getByRole('button', { name: /open menu/i });
+      const moreButton = within(projectCard).getByRole('button', {
+        name: /open menu/i,
+      });
       await user.click(moreButton);
 
       const deleteButton = screen.getByText('Delete Project');
@@ -635,11 +703,15 @@ describe('Project Management Integration Tests', () => {
       const FilterableProjectList: React.FC = () => {
         const [projects, setProjects] = React.useState<Project[]>(mockProjects);
         const [statusFilter, setStatusFilter] = React.useState<string>('all');
-        const [deviceTypeFilter, setDeviceTypeFilter] = React.useState<string>('all');
+        const [deviceTypeFilter, setDeviceTypeFilter] =
+          React.useState<string>('all');
 
-        const filteredProjects = projects.filter(project => {
-          const statusMatch = statusFilter === 'all' || project.status === statusFilter;
-          const deviceMatch = deviceTypeFilter === 'all' || project.device_type === deviceTypeFilter;
+        const filteredProjects = projects.filter((project) => {
+          const statusMatch =
+            statusFilter === 'all' || project.status === statusFilter;
+          const deviceMatch =
+            deviceTypeFilter === 'all' ||
+            project.device_type === deviceTypeFilter;
           return statusMatch && deviceMatch;
         });
 
@@ -656,20 +728,22 @@ describe('Project Management Integration Tests', () => {
                 <option value={ProjectStatus.IN_PROGRESS}>In Progress</option>
                 <option value={ProjectStatus.COMPLETED}>Completed</option>
               </select>
-              
+
               <select
                 data-testid="device-type-filter"
                 value={deviceTypeFilter}
                 onChange={(e) => setDeviceTypeFilter(e.target.value)}
               >
                 <option value="all">All Types</option>
-                <option value="Cardiovascular Device">Cardiovascular Device</option>
+                <option value="Cardiovascular Device">
+                  Cardiovascular Device
+                </option>
                 <option value="Neurological Device">Neurological Device</option>
               </select>
             </div>
-            
+
             <div data-testid="filtered-projects">
-              {filteredProjects.map(project => (
+              {filteredProjects.map((project) => (
                 <div key={project.id} data-testid={`project-${project.id}`}>
                   {project.name} - {project.status} - {project.device_type}
                 </div>
@@ -720,13 +794,15 @@ describe('Project Management Integration Tests', () => {
 
       // Mock search component
       const SearchableProjectList: React.FC = () => {
-        const [projects, setProjects] = React.useState<Project[]>(searchableProjects);
+        const [projects, setProjects] =
+          React.useState<Project[]>(searchableProjects);
         const [searchQuery, setSearchQuery] = React.useState('');
-        const [searchResults, setSearchResults] = React.useState<Project[]>(searchableProjects);
+        const [searchResults, setSearchResults] =
+          React.useState<Project[]>(searchableProjects);
 
         React.useEffect(() => {
           const timeout = setTimeout(() => {
-            const filtered = projects.filter(project =>
+            const filtered = projects.filter((project) =>
               project.name.toLowerCase().includes(searchQuery.toLowerCase())
             );
             setSearchResults(filtered);
@@ -744,10 +820,13 @@ describe('Project Management Integration Tests', () => {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
-            
+
             <div data-testid="search-results">
-              {searchResults.map(project => (
-                <div key={project.id} data-testid={`search-result-${project.id}`}>
+              {searchResults.map((project) => (
+                <div
+                  key={project.id}
+                  data-testid={`search-result-${project.id}`}
+                >
                   {project.name}
                 </div>
               ))}
@@ -770,11 +849,16 @@ describe('Project Management Integration Tests', () => {
       await user.type(searchInput, 'cardiac');
 
       // Wait for debounced search
-      await waitFor(() => {
-        expect(screen.getByTestId('search-result-1')).toBeInTheDocument();
-        expect(screen.queryByTestId('search-result-2')).not.toBeInTheDocument();
-        expect(screen.getByTestId('search-result-3')).toBeInTheDocument();
-      }, { timeout: 500 });
+      await waitFor(
+        () => {
+          expect(screen.getByTestId('search-result-1')).toBeInTheDocument();
+          expect(
+            screen.queryByTestId('search-result-2')
+          ).not.toBeInTheDocument();
+          expect(screen.getByTestId('search-result-3')).toBeInTheDocument();
+        },
+        { timeout: 500 }
+      );
     });
   });
 
@@ -813,7 +897,7 @@ describe('Project Management Integration Tests', () => {
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ ...project, name: newName }),
             });
-            
+
             if (response.ok) {
               const updated = await response.json();
               setProject(updated);
@@ -849,7 +933,9 @@ describe('Project Management Integration Tests', () => {
         session: mockSession,
       });
 
-      expect(screen.getByTestId('project-name')).toHaveTextContent('Shared Project');
+      expect(screen.getByTestId('project-name')).toHaveTextContent(
+        'Shared Project'
+      );
 
       // Simulate concurrent update
       const updateBtn1 = screen.getByTestId('update-btn-1');
@@ -859,9 +945,14 @@ describe('Project Management Integration Tests', () => {
         expect(screen.getByTestId('updating')).toBeInTheDocument();
       });
 
-      await waitFor(() => {
-        expect(screen.getByTestId('project-name')).toHaveTextContent('Updated by User 1');
-      }, { timeout: 1000 });
+      await waitFor(
+        () => {
+          expect(screen.getByTestId('project-name')).toHaveTextContent(
+            'Updated by User 1'
+          );
+        },
+        { timeout: 1000 }
+      );
     });
 
     it('should synchronize state across multiple project views', async () => {
@@ -878,7 +969,7 @@ describe('Project Management Integration Tests', () => {
         // Simulate WebSocket update
         React.useEffect(() => {
           const timeout = setTimeout(() => {
-            setProject(prev => ({ ...prev, name: 'Updated via WebSocket' }));
+            setProject((prev) => ({ ...prev, name: 'Updated via WebSocket' }));
           }, 1000);
 
           return () => clearTimeout(timeout);
@@ -898,16 +989,31 @@ describe('Project Management Integration Tests', () => {
       });
 
       // Initially all views show same data
-      expect(screen.getByTestId('view-1')).toHaveTextContent('Sync Test Project');
-      expect(screen.getByTestId('view-2')).toHaveTextContent('Sync Test Project');
-      expect(screen.getByTestId('view-3')).toHaveTextContent('Sync Test Project');
+      expect(screen.getByTestId('view-1')).toHaveTextContent(
+        'Sync Test Project'
+      );
+      expect(screen.getByTestId('view-2')).toHaveTextContent(
+        'Sync Test Project'
+      );
+      expect(screen.getByTestId('view-3')).toHaveTextContent(
+        'Sync Test Project'
+      );
 
       // Wait for simulated WebSocket update
-      await waitFor(() => {
-        expect(screen.getByTestId('view-1')).toHaveTextContent('Updated via WebSocket');
-        expect(screen.getByTestId('view-2')).toHaveTextContent('Updated via WebSocket');
-        expect(screen.getByTestId('view-3')).toHaveTextContent('Updated via WebSocket');
-      }, { timeout: 1500 });
+      await waitFor(
+        () => {
+          expect(screen.getByTestId('view-1')).toHaveTextContent(
+            'Updated via WebSocket'
+          );
+          expect(screen.getByTestId('view-2')).toHaveTextContent(
+            'Updated via WebSocket'
+          );
+          expect(screen.getByTestId('view-3')).toHaveTextContent(
+            'Updated via WebSocket'
+          );
+        },
+        { timeout: 1500 }
+      );
     });
   });
 });

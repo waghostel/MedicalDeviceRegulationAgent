@@ -170,3 +170,15 @@ try {
 } catch (error) {
   console.warn('Could not setup Radix UI mocks:', error.message);
 }
+
+// Setup consolidated test environment
+try {
+  const { setupTestEnvironment } = require('./src/lib/testing/test-setup');
+  setupTestEnvironment({
+    mockAPI: true,
+    mockWebSocket: true,
+    mockComponents: true,
+  });
+} catch (error) {
+  console.warn('Could not setup test environment:', error.message);
+}

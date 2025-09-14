@@ -14,9 +14,9 @@ export { default as enhancedTestUtils } from './react-test-utils';
 // Mock toast system
 export * from './mock-toast-system';
 
-// MSW utilities (simplified)
-export * from './msw-utils-simple';
-export { default as mswUtils } from './msw-utils-simple';
+// Consolidated test setup
+export * from './test-setup';
+export { default as testSetup } from './test-setup';
 
 // Database utilities
 export * from './database-utils';
@@ -64,8 +64,8 @@ export const setupTestSuite = async (config: Partial<TestConfig> = {}) => {
   const finalConfig = { ...defaultTestConfig, ...config };
   
   if (finalConfig.enableMSW) {
-    const { setupMockAPI } = await import('./msw-utils-simple');
-    setupMockAPI();
+    const { setupTestMocks } = await import('./test-setup');
+    setupTestMocks();
   }
   
   if (finalConfig.enableDatabase) {
@@ -79,8 +79,8 @@ export const setupTestSuite = async (config: Partial<TestConfig> = {}) => {
 // Test cleanup helper
 export const cleanupTestSuite = async (config: TestConfig) => {
   if (config.enableMSW) {
-    const { teardownMockAPI } = await import('./msw-utils-simple');
-    teardownMockAPI();
+    const { teardownTestMocks } = await import('./test-setup');
+    teardownTestMocks();
   }
   
   if (config.enableDatabase) {
