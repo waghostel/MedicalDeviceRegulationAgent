@@ -41,7 +41,7 @@ clear
    - Be transparent about test results, especially if some tests require future verification.
    - If the test script has been modified, skipped in the developemnt process or skipped chat history, document faild and skipped test in **Undone tests/Skipped test**.
 7. Check previous chat history and verify whether any tests were passed, simplified, or skipped during development. Ensure all are documented following our task report format. Provide the exact test command for each test, starting from the root of the codebase.
-8. 
+ 
 ## Test-Driven Development (TDD)
 
 ### Testing Guidelines
@@ -140,7 +140,7 @@ KeyError: 'service'  # Missing configuration
 
   - Test command: `cd medical-device-regulatory-assistant/backend && find . -name "test_*.py" | wc -l` (should show reduced count)
 
-- [x] 2. Establish a Centralized Test Environment and Fix Database Fixtures
+- [ ] 2. Establish a Centralized Test Environment and Fix Database Fixtures
 
   - **Create a Centralized Test Environment:** In `conftest.py`, create a session-scoped, autouse fixture to set all necessary environment variables (`TESTING`, `DATABASE_URL`, `REDIS_URL`, `JWT_SECRET`, etc.) before any tests run. This ensures all tests run with a consistent configuration.
 

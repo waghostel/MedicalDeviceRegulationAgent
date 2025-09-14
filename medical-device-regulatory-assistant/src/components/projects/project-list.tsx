@@ -55,6 +55,8 @@ const SearchInput = memo(
         onChange={(e) => onChange(e.target.value)}
         className="pl-10"
         disabled={disabled}
+        aria-label="Search projects"
+        role="searchbox"
       />
     </div>
   )
@@ -72,7 +74,7 @@ const StatusFilter = memo(
     disabled: boolean;
   }) => (
     <Select value={value} onValueChange={onChange} disabled={disabled}>
-      <SelectTrigger className="w-32">
+      <SelectTrigger className="w-32" aria-label="Filter by status">
         <Filter className="h-4 w-4 mr-2" />
         <SelectValue />
       </SelectTrigger>
@@ -100,7 +102,7 @@ const DeviceTypeFilter = memo(
     disabled: boolean;
   }) => (
     <Select value={value} onValueChange={onChange} disabled={disabled}>
-      <SelectTrigger className="w-40">
+      <SelectTrigger className="w-40" aria-label="Filter by device type">
         <SelectValue placeholder="Device Type" />
       </SelectTrigger>
       <SelectContent>
