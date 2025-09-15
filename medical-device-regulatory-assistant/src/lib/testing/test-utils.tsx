@@ -52,7 +52,7 @@ export const createMockRouter = (initialRoute: string = '/'): MockRouter => ({
 export const createMockSession = (userOverrides?: Partial<any>): Session => {
   const mockUser = generateMockUser(userOverrides);
   const mockSession = generateMockSession({ userId: mockUser.id });
-  
+
   return {
     user: {
       id: mockUser.id,
@@ -72,24 +72,20 @@ interface TestProvidersProps {
   router?: Partial<MockRouter>;
 }
 
-const TestProviders: React.FC<TestProvidersProps> = ({ 
-  children, 
+const TestProviders: React.FC<TestProvidersProps> = ({
+  children,
   session = null,
-  router = {}
+  router = {},
 }) => {
   // Mock Next.js router
   const mockRouter = { ...createMockRouter(), ...router };
-  
+
   // Mock useRouter hook
   jest.doMock('next/router', () => ({
     useRouter: () => mockRouter,
   }));
 
-  return (
-    <SessionProvider session={session}>
-      {children}
-    </SessionProvider>
-  );
+  return <SessionProvider session={session}>{children}</SessionProvider>;
 };
 
 // Enhanced render options
@@ -108,17 +104,18 @@ export const renderWithProviders = (
   options: CustomRenderOptions = {}
 ): RenderResult & { mockRouter: MockRouter } => {
   const { session, router, ...renderOptions } = options;
-  
+
   const mockRouter = { ...createMockRouter(), ...router };
-  
+
   const Wrapper = ({ children }: { children: ReactNode }) => (
     <TestProviders session={session} router={router}>
       {children}
     </TestProviders>
   );
 
+  // Use React 19 compatible rendering
   const result = render(ui, { wrapper: Wrapper, ...renderOptions });
-  
+
   return {
     ...result,
     mockRouter,
@@ -159,13 +156,13 @@ export const testDataManager = new TestDataManager();
 export const setupTest = (testName: string) => {
   // Clear any existing mocks
   jest.clearAllMocks();
-  
+
   // Clear test data
   testDataManager.clearTestStates();
-  
+
   // Setup console spy to catch errors
   const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-  
+
   return {
     consoleSpy,
     cleanup: () => {
@@ -178,28 +175,29 @@ export const setupTest = (testName: string) => {
 export const teardownTest = () => {
   // Clear all mocks
   jest.clearAllMocks();
-  
+
   // Clear test data
   testDataManager.clearTestStates();
-  
+
   // Reset modules
   jest.resetModules();
 };
 
 // Mock component factory for testing
-export const createMockComponent = (name: string, props: any = {}) => {
+export const createMockComponent = (name: string, props: unknown = {}) => {
   const MockComponent = jest.fn((componentProps) => (
     <div data-testid={`mock-${name.toLowerCase()}`} {...componentProps}>
       {name} Mock Component
     </div>
   ));
-  
+
   MockComponent.displayName = `Mock${name}`;
   return MockComponent;
 };
 
 // Async test utilities
-export const waitForNextTick = () => new Promise(resolve => setTimeout(resolve, 0));
+export const waitForNextTick = () =>
+  new Promise((resolve) => setTimeout(resolve, 0));
 
 export const waitForCondition = async (
   condition: () => boolean,
@@ -207,20 +205,23 @@ export const waitForCondition = async (
   interval: number = 100
 ): Promise<void> => {
   const startTime = Date.now();
-  
+
   while (!condition() && Date.now() - startTime < timeout) {
-    await new Promise(resolve => setTimeout(resolve, interval));
+    await new Promise((resolve) => setTimeout(resolve, interval));
   }
-  
+
   if (!condition()) {
     throw new Error(`Condition not met within ${timeout}ms`);
   }
 };
 
 // Form testing utilities
-export const fillForm = async (form: HTMLFormElement, data: Record<string, string>) => {
+export const fillForm = async (
+  form: HTMLFormElement,
+  data: Record<string, string>
+) => {
   const { fireEvent } = await import('@testing-library/react');
-  
+
   Object.entries(data).forEach(([name, value]) => {
     const input = form.querySelector(`[name="${name}"]`) as HTMLInputElement;
     if (input) {
@@ -235,24 +236,28 @@ export const submitForm = async (form: HTMLFormElement) => {
 };
 
 // Error boundary testing
-export const TestErrorBoundary: React.FC<{ children: ReactNode }> = ({ children }) => {
+export const TestErrorBoundary: React.FC<{ children: ReactNode }> = ({
+  children,
+}) => {
   const [hasError, setHasError] = React.useState(false);
-  
+
   React.useEffect(() => {
     const handleError = () => setHasError(true);
     window.addEventListener('error', handleError);
     return () => window.removeEventListener('error', handleError);
   }, []);
-  
+
   if (hasError) {
     return <div data-testid="error-boundary">Something went wrong</div>;
   }
-  
+
   return <>{children}</>;
 };
 
 // Performance testing utilities
-export const measureRenderTime = async (renderFn: () => void): Promise<number> => {
+export const measureRenderTime = async (
+  renderFn: () => void
+): Promise<number> => {
   const startTime = performance.now();
   renderFn();
   await waitForNextTick();
