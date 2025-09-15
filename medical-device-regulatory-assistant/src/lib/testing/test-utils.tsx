@@ -35,92 +35,7 @@ interface MockRegistry {
   utilities: Map<string, jest.MockedFunction<any>>;
 }
 
-// React 19 Error Handler Class
-class React19ErrorHandler {
-  static handleAggregateError(error: AggregateError): TestErrorReport {
-    const individualErrors = error.errors || [];
-    const categorizedErrors = this.categorizeErrors(individualErrors);
-
-    return {
-      type: 'AggregateError',
-      totalErrors: individualErrors.length,
-      categories: categorizedErrors,
-      suggestions: this.generateSuggestions(categorizedErrors),
-      recoverable: this.isRecoverable(categorizedErrors),
-    };
-  }
-
-  static categorizeErrors(errors: Error[]): ErrorCategory[] {
-    return errors.map((error) => ({
-      type: this.getErrorType(error),
-      message: error.message,
-      stack: error.stack,
-      component: this.extractComponent(error),
-      hook: this.extractHook(error),
-    }));
-  }
-
-  static getErrorType(error: Error): string {
-    // Check message content first for specific error types
-    if (error.message.includes('useToast')) return 'HookMockError';
-    if (error.message.includes('use') && error.message.includes('function'))
-      return 'HookMockError';
-    if (error.message.includes('Provider')) return 'ProviderError';
-    if (error.message.includes('render')) return 'RenderError';
-
-    // Fall back to error name if available
-    if (error.name && error.name !== 'Error') return error.name;
-
-    return 'UnknownError';
-  }
-
-  static extractComponent(error: Error): string | undefined {
-    const stack = error.stack || '';
-    const componentMatch = stack.match(/at (\w+Component|\w+Form|\w+Provider)/);
-    return componentMatch ? componentMatch[1] : undefined;
-  }
-
-  static extractHook(error: Error): string | undefined {
-    const message = error.message || '';
-    const hookMatch = message.match(/use\w+/);
-    return hookMatch ? hookMatch[0] : undefined;
-  }
-
-  static generateSuggestions(categories: ErrorCategory[]): string[] {
-    const suggestions: string[] = [];
-
-    categories.forEach((category) => {
-      switch (category.type) {
-        case 'HookMockError':
-          suggestions.push(
-            'Check hook mock configuration and ensure all required methods are mocked'
-          );
-          break;
-        case 'RenderError':
-          suggestions.push('Verify component props and provider setup');
-          break;
-        case 'ProviderError':
-          suggestions.push(
-            'Ensure all required providers are included in test wrapper'
-          );
-          break;
-        default:
-          suggestions.push(
-            'Review error stack trace for specific component issues'
-          );
-      }
-    });
-
-    return [...new Set(suggestions)]; // Remove duplicates
-  }
-
-  static isRecoverable(categories: ErrorCategory[]): boolean {
-    // Consider error recoverable if it's primarily mock-related
-    return categories.every((cat) =>
-      ['HookMockError', 'ProviderError'].includes(cat.type)
-    );
-  }
-}
+// React 19 Error Handler Class is imported from React19ErrorBoundary.tsx
 
 // Mock router for testing navigation
 export interface MockRouter {
@@ -366,7 +281,7 @@ export const renderWithProviders = (
 // Test data management utilities
 export interface TestState {
   id: string;
-  data: any;
+  data: unknown;
   timestamp: number;
   scenario: string;
 }
@@ -560,14 +475,9 @@ export const submitForm = async (form: HTMLFormElement) => {
   fireEvent.submit(form);
 };
 
-// Import the dedicated React19ErrorBoundary component
-import {
-  React19ErrorBoundary,
-  React19ErrorHandler,
-  type TestErrorReport,
-  type ErrorCategory,
-  type ErrorBoundaryState as React19ErrorBoundaryState,
-// Legacy error boundary for backward compatibility (imported from dedicated component)
+// React19ErrorBoundary components are imported at the top of the file
+
+// Legacy error boundary for backward compatibility (re-export from dedicated component)
 export { TestErrorBoundary } from './React19ErrorBoundary';
 
 // Performance testing utilities
@@ -603,8 +513,6 @@ export const testUtils = {
   measureRenderTime,
   checkAccessibility,
   testDataManager,
-  React19ErrorBoundary,
-  React19ErrorHandler,
 };
 
 // Export React 19 specific utilities (imported from dedicated component)

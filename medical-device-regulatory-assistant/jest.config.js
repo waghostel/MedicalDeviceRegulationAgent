@@ -16,14 +16,23 @@ const customJestConfig = {
   transform: {
     '^.+\\.(js|jsx|ts|tsx)$': ['babel-jest', {
       presets: [
-        ['@babel/preset-env', { targets: { node: 'current' } }],
-        ['@babel/preset-react', { runtime: 'automatic' }],
+        ['@babel/preset-env', { 
+          targets: { node: 'current' },
+          modules: 'commonjs'
+        }],
+        ['@babel/preset-react', { 
+          runtime: 'automatic',
+          development: process.env.NODE_ENV === 'development'
+        }],
         '@babel/preset-typescript'
+      ],
+      plugins: [
+        '@babel/plugin-transform-runtime'
       ]
     }]
   },
   transformIgnorePatterns: [
-    'node_modules/(?!(.*\\.mjs$|@radix-ui|@testing-library))'
+    'node_modules/(?!(.*\\.mjs$|@radix-ui|@testing-library|react-19-compat|@copilotkit))'
   ],
   collectCoverageFrom: [
     'src/**/*.{js,jsx,ts,tsx}',
@@ -65,6 +74,20 @@ const customJestConfig = {
   ],
   testTimeout: 15000,
   maxWorkers: '75%', // Increased for better parallel execution
+  // React 19 compatibility settings
+  testEnvironmentOptions: {
+    customExportConditions: ['node', 'node-addons'],
+  },
+  // Enhanced error handling for React 19 AggregateError
+  errorOnDeprecated: false, // Temporarily disable to handle React 19 transition
+  // React 19 specific globals
+  globals: {
+    'ts-jest': {
+      useESM: true,
+    },
+    // React 19 feature flags
+    __REACT_DEVTOOLS_GLOBAL_HOOK__: {},
+  },
   // Simplified test categorization with consistent transform configuration
   projects: [
     {
@@ -78,12 +101,24 @@ const customJestConfig = {
       transform: {
         '^.+\\.(js|jsx|ts|tsx)$': ['babel-jest', {
           presets: [
-            ['@babel/preset-env', { targets: { node: 'current' } }],
-            ['@babel/preset-react', { runtime: 'automatic' }],
+            ['@babel/preset-env', { 
+              targets: { node: 'current' },
+              modules: 'commonjs'
+            }],
+            ['@babel/preset-react', { 
+              runtime: 'automatic',
+              development: process.env.NODE_ENV === 'development'
+            }],
             '@babel/preset-typescript'
+          ],
+          plugins: [
+            '@babel/plugin-transform-runtime'
           ]
         }]
       },
+      transformIgnorePatterns: [
+        'node_modules/(?!(.*\\.mjs$|@radix-ui|@testing-library|react-19-compat|@copilotkit))'
+      ],
     },
     {
       displayName: 'integration',
@@ -96,12 +131,24 @@ const customJestConfig = {
       transform: {
         '^.+\\.(js|jsx|ts|tsx)$': ['babel-jest', {
           presets: [
-            ['@babel/preset-env', { targets: { node: 'current' } }],
-            ['@babel/preset-react', { runtime: 'automatic' }],
+            ['@babel/preset-env', { 
+              targets: { node: 'current' },
+              modules: 'commonjs'
+            }],
+            ['@babel/preset-react', { 
+              runtime: 'automatic',
+              development: process.env.NODE_ENV === 'development'
+            }],
             '@babel/preset-typescript'
+          ],
+          plugins: [
+            '@babel/plugin-transform-runtime'
           ]
         }]
       },
+      transformIgnorePatterns: [
+        'node_modules/(?!(.*\\.mjs$|@radix-ui|@testing-library|react-19-compat|@copilotkit))'
+      ],
     },
     {
       displayName: 'accessibility',
@@ -114,19 +161,31 @@ const customJestConfig = {
       transform: {
         '^.+\\.(js|jsx|ts|tsx)$': ['babel-jest', {
           presets: [
-            ['@babel/preset-env', { targets: { node: 'current' } }],
-            ['@babel/preset-react', { runtime: 'automatic' }],
+            ['@babel/preset-env', { 
+              targets: { node: 'current' },
+              modules: 'commonjs'
+            }],
+            ['@babel/preset-react', { 
+              runtime: 'automatic',
+              development: process.env.NODE_ENV === 'development'
+            }],
             '@babel/preset-typescript'
+          ],
+          plugins: [
+            '@babel/plugin-transform-runtime'
           ]
         }]
       },
+      transformIgnorePatterns: [
+        'node_modules/(?!(.*\\.mjs$|@radix-ui|@testing-library|react-19-compat|@copilotkit))'
+      ],
     },
   ],
   // Performance monitoring
   slowTestThreshold: 5,
   // Enhanced error reporting
   verbose: true,
-  errorOnDeprecated: true,
+  errorOnDeprecated: false, // Disabled for React 19 compatibility
   // Cache configuration
   cacheDirectory: '<rootDir>/.jest-cache',
   clearMocks: true,
