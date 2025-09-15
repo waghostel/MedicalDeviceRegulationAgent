@@ -19,8 +19,14 @@ class JestHealthReporter {
     this.testResults = [];
     this.suiteStartTime = Date.now();
     
-    // Ensure reports directory exists
-    this.reportsDir = this.options.outputDir || './test-reports';
+    // Resolve <rootDir> placeholder in output directory
+    let outputDir = this.options.outputDir || './test-reports';
+    if (outputDir.includes('<rootDir>')) {
+      const rootDir = globalConfig.rootDir || process.cwd();
+      outputDir = outputDir.replace('<rootDir>', rootDir);
+    }
+    
+    this.reportsDir = outputDir;
     if (!existsSync(this.reportsDir)) {
       mkdirSync(this.reportsDir, { recursive: true });
     }
