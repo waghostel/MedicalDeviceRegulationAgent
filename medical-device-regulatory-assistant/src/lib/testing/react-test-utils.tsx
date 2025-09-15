@@ -4,7 +4,13 @@
  */
 
 import React, { ReactElement, ReactNode } from 'react';
-import { render, RenderOptions, RenderResult, act, waitFor } from '@testing-library/react';
+import {
+  render,
+  RenderOptions,
+  RenderResult,
+  act,
+  waitFor,
+} from '@testing-library/react';
 import { SessionProvider } from 'next-auth/react';
 import { Session } from 'next-auth';
 import { generateMockSession, generateMockUser } from '@/lib/mock-data';
@@ -58,10 +64,12 @@ export const createMockRouter = (initialRoute: string = '/'): MockRouter => ({
 });
 
 // Create mock session with proper typing
-export const createMockSession = (userOverrides?: Partial<any>): Session => {
+export const createMockSession = (
+  userOverrides?: Partial<unknown>
+): Session => {
   const mockUser = generateMockUser(userOverrides);
   const mockSession = generateMockSession({ userId: mockUser.id });
-  
+
   return {
     user: {
       id: mockUser.id,
@@ -81,24 +89,20 @@ interface TestProvidersProps {
   router?: Partial<MockRouter>;
 }
 
-const TestProviders: React.FC<TestProvidersProps> = ({ 
-  children, 
+const TestProviders: React.FC<TestProvidersProps> = ({
+  children,
   session = null,
-  router = {}
+  router = {},
 }) => {
   // Mock Next.js router
   const mockRouter = { ...createMockRouter(), ...router };
-  
+
   // Mock useRouter hook
   jest.doMock('next/router', () => ({
     useRouter: () => mockRouter,
   }));
 
-  return (
-    <SessionProvider session={session}>
-      {children}
-    </SessionProvider>
-  );
+  return <SessionProvider session={session}>{children}</SessionProvider>;
 };
 
 /**
@@ -108,10 +112,15 @@ export const renderWithProviders = async (
   ui: ReactElement,
   options: EnhancedRenderOptions = {}
 ): Promise<RenderResult & { mockRouter: MockRouter }> => {
-  const { session, router, skipActWarnings = false, ...renderOptions } = options;
-  
+  const {
+    session,
+    router,
+    skipActWarnings = false,
+    ...renderOptions
+  } = options;
+
   const mockRouter = { ...createMockRouter(), ...router };
-  
+
   const Wrapper = ({ children }: { children: ReactNode }) => (
     <TestProviders session={session} router={router}>
       {children}
@@ -141,9 +150,9 @@ export const renderWithProvidersSync = (
   options: EnhancedRenderOptions = {}
 ): RenderResult & { mockRouter: MockRouter } => {
   const { session, router, ...renderOptions } = options;
-  
+
   const mockRouter = { ...createMockRouter(), ...router };
-  
+
   const Wrapper = ({ children }: { children: ReactNode }) => (
     <TestProviders session={session} router={router}>
       {children}
@@ -151,7 +160,7 @@ export const renderWithProvidersSync = (
   );
 
   const result = render(ui, { wrapper: Wrapper, ...renderOptions });
-  
+
   return {
     ...result,
     mockRouter,
@@ -161,32 +170,37 @@ export const renderWithProvidersSync = (
 /**
  * Wait for async state updates to complete with proper act() wrapping
  */
-export const waitForAsyncUpdates = async (timeout: number = 1000): Promise<void> => {
+export const waitForAsyncUpdates = async (
+  timeout: number = 1000
+): Promise<void> => {
   await act(async () => {
     // Wait for next tick to allow state updates
-    await new Promise(resolve => setTimeout(resolve, 0));
+    await new Promise((resolve) => setTimeout(resolve, 0));
   });
-  
+
   // Additional wait for any pending async operations
-  await waitFor(() => {
-    // This will resolve immediately if no async operations are pending
-    return Promise.resolve();
-  }, { timeout });
+  await waitFor(
+    () => {
+      // This will resolve immediately if no async operations are pending
+      return Promise.resolve();
+    },
+    { timeout }
+  );
 };
 
 /**
  * Enhanced waitFor with proper act() wrapping
  */
-export const waitForWithAct = async <T>(
+export const waitForWithAct = async <T,>(
   callback: () => T | Promise<T>,
   options?: Parameters<typeof waitFor>[1]
 ): Promise<T> => {
   let result: T;
-  
+
   await act(async () => {
     result = await waitFor(callback, options);
   });
-  
+
   return result!;
 };
 
@@ -223,7 +237,7 @@ export const setupTestEnvironment = (config: TestConfig = {}) => {
     mockToasts = true,
     mockRouter,
     session,
-    timeout = 5000
+    timeout = 5000,
   } = config;
 
   // Setup console spy to catch act warnings if needed
@@ -257,7 +271,9 @@ export const setupTestEnvironment = (config: TestConfig = {}) => {
 
   return {
     cleanup,
-    mockRouter: mockRouter ? { ...createMockRouter(), ...mockRouter } : createMockRouter(),
+    mockRouter: mockRouter
+      ? { ...createMockRouter(), ...mockRouter }
+      : createMockRouter(),
     session: session || null,
   };
 };
@@ -269,10 +285,10 @@ export const cleanupTestEnvironment = () => {
   // Clear all mocks
   jest.clearAllMocks();
   jest.restoreAllMocks();
-  
+
   // Reset modules
   jest.resetModules();
-  
+
   // Clear any pending timers
   jest.clearAllTimers();
 };

@@ -19,7 +19,7 @@ const axe = configureAxe({
     'aria-valid-attr': { enabled: true },
     'aria-valid-attr-value': { enabled: true },
     'button-name': { enabled: true },
-    'bypass': { enabled: true },
+    bypass: { enabled: true },
     'document-title': { enabled: true },
     'duplicate-id': { enabled: true },
     'form-field-multiple-labels': { enabled: true },
@@ -28,10 +28,10 @@ const axe = configureAxe({
     'html-lang-valid': { enabled: true },
     'image-alt': { enabled: true },
     'input-image-alt': { enabled: true },
-    'label': { enabled: true },
+    label: { enabled: true },
     'link-name': { enabled: true },
-    'list': { enabled: true },
-    'listitem': { enabled: true },
+    list: { enabled: true },
+    listitem: { enabled: true },
     'meta-refresh': { enabled: true },
     'meta-viewport': { enabled: true },
     'object-alt': { enabled: true },
@@ -54,6 +54,47 @@ global.axe = axe;
 const { TextEncoder, TextDecoder } = require('util');
 global.TextEncoder = TextEncoder;
 global.TextDecoder = TextDecoder;
+
+// Add Response polyfill for MSW
+if (typeof global.Response === 'undefined') {
+  global.Response = class Response {
+    constructor(body, init = {}) {
+      this.body = body;
+      this.status = init.status || 200;
+      this.statusText = init.statusText || 'OK';
+      this.headers = new Map(Object.entries(init.headers || {}));
+    }
+
+    json() {
+      return Promise.resolve(JSON.parse(this.body));
+    }
+
+    text() {
+      return Promise.resolve(this.body);
+    }
+  };
+}
+
+// Add Request polyfill for MSW
+if (typeof global.Request === 'undefined') {
+  global.Request = class Request {
+    constructor(url, init = {}) {
+      this.url = url;
+      this.method = init.method || 'GET';
+      this.headers = new Map(Object.entries(init.headers || {}));
+      this.body = init.body;
+    }
+
+    json() {
+      return Promise.resolve(JSON.parse(this.body));
+    }
+  };
+}
+
+// Add Headers polyfill for MSW
+if (typeof global.Headers === 'undefined') {
+  global.Headers = Map;
+}
 
 // Mock fetch for tests
 global.fetch = jest.fn();
@@ -87,7 +128,7 @@ global.ResizeObserver = jest.fn().mockImplementation(() => ({
 // Mock matchMedia for responsive accessibility tests
 Object.defineProperty(window, 'matchMedia', {
   writable: true,
-  value: jest.fn().mockImplementation(query => ({
+  value: jest.fn().mockImplementation((query) => ({
     matches: false,
     media: query,
     onchange: null,

@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from 'next/font/google';
 import { getServerSession } from 'next-auth';
 import { SessionProvider } from '@/components/providers/SessionProvider';
 import { ProjectContextProvider } from '@/components/providers/ProjectContextProvider';
+import { WebSocketProvider } from '@/components/providers/WebSocketProvider';
 import { Toaster } from '@/components/ui/toaster';
 import { authOptions } from '@/lib/auth';
 import './globals.css';
@@ -36,8 +37,10 @@ export default async function RootLayout({
       >
         <SessionProvider session={session}>
           <ProjectContextProvider>
-            {children}
-            <Toaster />
+            <WebSocketProvider>
+              {children}
+              <Toaster />
+            </WebSocketProvider>
           </ProjectContextProvider>
         </SessionProvider>
       </body>

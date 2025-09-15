@@ -224,11 +224,58 @@ export interface ProjectFormErrors {
 }
 
 // WebSocket Message Types
-export interface WebSocketMessage {
-  type: 'project_updated' | 'classification_completed' | 'predicate_search_completed' | 'agent_interaction';
-  project_id: number;
-  data: any;
+export interface WebSocketMessage<T = any> {
+  type: string;
+  data: T;
   timestamp: string;
+  project_id?: number;
+  user_id?: string;
+  stream_id?: string;
+}
+
+// Specific WebSocket message types
+export interface ProjectUpdateMessage extends WebSocketMessage<Project> {
+  type: 'project_updated';
+  project_id: number;
+}
+
+export interface AgentResponseMessage extends WebSocketMessage<{
+  content: string;
+  confidence?: number;
+  sources?: SourceCitation[];
+  reasoning?: string;
+}> {
+  type: 'agent_response';
+  project_id: number;
+}
+
+export interface AgentStreamMessage extends WebSocketMessage<{
+  chunk: string;
+  streamId: string;
+}> {
+  type: 'agent_response_stream';
+  stream_id: string;
+}
+
+export interface TypingIndicatorMessage extends WebSocketMessage<{
+  userId: string;
+  userName?: string;
+  projectId?: number;
+}> {
+  type: 'user_typing_start' | 'user_typing_stop';
+  project_id?: number;
+}
+
+export interface ConnectionMessage extends WebSocketMessage<{
+  timestamp: string;
+}> {
+  type: 'ping' | 'pong';
+}
+
+export interface SubscriptionMessage extends WebSocketMessage<{
+  project_id: number;
+}> {
+  type: 'subscribe_project' | 'unsubscribe_project';
 }
 
 // Cache Types
@@ -255,7 +302,7 @@ export interface PaginatedResponse<T> {
 export interface ApiErrorResponse {
   error: string;
   message: string;
-  details?: any;
+  details?: unknown;
   suggestions?: string[];
 }
 

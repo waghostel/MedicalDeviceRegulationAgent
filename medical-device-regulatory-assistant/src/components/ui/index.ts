@@ -119,5 +119,19 @@ export { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from './tool
 export { LazyImage } from './lazy-image';
 export { SlashCommandCard } from './slash-command-card';
 
+// Real-time Components
+export { ConnectionStatus, DetailedConnectionStatus } from './connection-status';
+export { 
+  TypingIndicators, 
+  TypingAnimation, 
+  UserTypingIndicator, 
+  AgentTypingIndicator 
+} from './typing-indicators';
+export { 
+  StreamingResponse, 
+  CompactStreamingResponse, 
+  MarkdownStreamingResponse 
+} from './streaming-response';
+
 // Type definitions
 export type * from './types';
