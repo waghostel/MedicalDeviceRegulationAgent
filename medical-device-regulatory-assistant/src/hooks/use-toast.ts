@@ -149,7 +149,9 @@ const processQueue = () => {
 };
 
 // Process queue periodically
-setInterval(processQueue, QUEUE_PROCESS_INTERVAL);
+if (typeof window !== 'undefined') {
+  setInterval(processQueue, QUEUE_PROCESS_INTERVAL);
+}
 
 export const reducer = (state: ToastState, action: any): ToastState => {
   switch (action.type) {
