@@ -91,6 +91,16 @@ showcase-website/
 **/coverage/
 **/.jest-cache/
 
+# Jest test reports with problematic Windows paths
+**/test-reports/test-health-report-*.json
+test-health-report-*.json
+**/test-health-report.json
+test-health-report.json
+
+# Any files with <rootDir> in the path (Jest placeholder issues)
+**/*<rootDir>*
+*<rootDir>*
+
 # Next.js specific (for showcase-website and other Next.js projects)
 .next/
 out/
