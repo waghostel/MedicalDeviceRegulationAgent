@@ -226,7 +226,7 @@ describe('ProjectForm Component', () => {
     });
   });
 
-  describe('Form Validation', () => {
+  describe('Enhanced Form Validation', () => {
     it('shows validation error for empty project name', async () => {
       const user = userEvent.setup();
 
@@ -250,6 +250,141 @@ describe('ProjectForm Component', () => {
       });
 
       expect(mockOnSubmit).not.toHaveBeenCalled();
+    });
+
+    it('shows real-time validation for project name', async () => {
+      const user = userEvent.setup();
+
+      renderWithProviders(
+        <ProjectForm
+          open={true}
+          onOpenChange={mockOnOpenChange}
+          onSubmit={mockOnSubmit}
+        />
+      );
+
+      const nameInput = screen.getByLabelText(/project name/i);
+
+      // Type invalid characters
+      await user.type(nameInput, 'Invalid@Name!');
+
+      await waitFor(() => {
+        expect(
+          screen.getByText(/can only contain letters, numbers, spaces/i)
+        ).toBeInTheDocument();
+      });
+
+      // Clear and type valid name
+      await user.clear(nameInput);
+      await user.type(nameInput, 'Valid Project Name');
+
+      await waitFor(() => {
+        expect(
+          screen.queryByText(/can only contain letters, numbers, spaces/i)
+        ).not.toBeInTheDocument();
+      });
+    });
+
+    it('shows character count for fields with maxLength', async () => {
+      const user = userEvent.setup();
+
+      renderWithProviders(
+        <ProjectForm
+          open={true}
+          onOpenChange={mockOnOpenChange}
+          onSubmit={mockOnSubmit}
+        />
+      );
+
+      const nameInput = screen.getByLabelText(/project name/i);
+      await user.type(nameInput, 'Test Project');
+
+      expect(screen.getByText('12/255')).toBeInTheDocument();
+    });
+
+    it('validates minimum length for description when provided', async () => {
+      const user = userEvent.setup();
+
+      renderWithProviders(
+        <ProjectForm
+          open={true}
+          onOpenChange={mockOnOpenChange}
+          onSubmit={mockOnSubmit}
+        />
+      );
+
+      const nameInput = screen.getByLabelText(/project name/i);
+      const descriptionInput = screen.getByLabelText(/description/i);
+
+      await user.type(nameInput, 'Valid Project Name');
+      await user.type(descriptionInput, 'Short'); // Less than 10 characters
+
+      await waitFor(() => {
+        expect(
+          screen.getByText(
+            'Description must be at least 10 characters when provided'
+          )
+        ).toBeInTheDocument();
+      });
+    });
+
+    it('validates whitespace-only project names', async () => {
+      const user = userEvent.setup();
+
+      renderWithProviders(
+        <ProjectForm
+          open={true}
+          onOpenChange={mockOnOpenChange}
+          onSubmit={mockOnSubmit}
+        />
+      );
+
+      const nameInput = screen.getByLabelText(/project name/i);
+      await user.type(nameInput, '   '); // Only whitespace
+
+      const submitButton = screen.getByRole('button', {
+        name: /create project/i,
+      });
+      await user.click(submitButton);
+
+      await waitFor(() => {
+        expect(
+          screen.getByText('Project name cannot be only whitespace')
+        ).toBeInTheDocument();
+      });
+    });
+
+    it('validates project names starting or ending with whitespace', async () => {
+      const user = userEvent.setup();
+
+      renderWithProviders(
+        <ProjectForm
+          open={true}
+          onOpenChange={mockOnOpenChange}
+          onSubmit={mockOnSubmit}
+        />
+      );
+
+      const nameInput = screen.getByLabelText(/project name/i);
+
+      // Test leading whitespace
+      await user.type(nameInput, ' Leading Space');
+
+      await waitFor(() => {
+        expect(
+          screen.getByText('Project name cannot start with whitespace')
+        ).toBeInTheDocument();
+      });
+
+      // Clear and test trailing whitespace
+      await user.clear(nameInput);
+      await user.type(nameInput, 'Trailing Space ');
+
+      await waitFor(() => {
+        expect(
+          screen.getByText('Project name cannot end with whitespace')
+        ).toBeInTheDocument();
+      });
     });
 
     it('shows validation error for project name that is too long', async () => {
@@ -467,6 +602,148 @@ describe('ProjectForm Component', () => {
           device_type: undefined,
           intended_use: undefined,
         });
+      });
+    });
+  });
+
+  describe('Auto-save Functionality', () => {
+    beforeEach(() => {
+      // Clear localStorage before each test
+      localStorage.clear();
+    });
+
+    it('shows auto-save indicator when saving', async () => {
+      const user = userEvent.setup();
+
+      renderWithProviders(
+        <ProjectForm
+          open={true}
+          onOpenChange={mockOnOpenChange}
+          onSubmit={mockOnSubmit}
+        />
+      );
+
+      const nameInput = screen.getByLabelText(/project name/i);
+      await user.type(nameInput, 'Test Project');
+
+      // Auto-save should trigger after typing
+      await waitFor(
+        () => {
+          expect(screen.getByText(/saving/i)).toBeInTheDocument();
+        },
+        { timeout: 3000 }
+      );
+    });
+
+    it('saves form data to localStorage', async () => {
+      const user = userEvent.setup();
+
+      renderWithProviders(
+        <ProjectForm
+          open={true}
+          onOpenChange={mockOnOpenChange}
+          onSubmit={mockOnSubmit}
+        />
+      );
+
+      const nameInput = screen.getByLabelText(/project name/i);
+      const descriptionInput = screen.getByLabelText(/description/i);
+
+      await user.type(nameInput, 'Test Project');
+      await user.type(descriptionInput, 'Test description for auto-save');
+
+      // Wait for auto-save to complete
+      await waitFor(
+        () => {
+          const savedData = localStorage.getItem('project-form-new');
+          expect(savedData).toBeTruthy();
+
+          if (savedData) {
+            const parsedData = JSON.parse(savedData);
+            expect(parsedData.name).toBe('Test Project');
+            expect(parsedData.description).toBe(
+              'Test description for auto-save'
+            );
+          }
+        },
+        { timeout: 3000 }
+      );
+    });
+
+    it('restores form data from localStorage on open', async () => {
+      // Pre-populate localStorage with saved data
+      const savedData = {
+        name: 'Restored Project',
+        description: 'Restored description',
+        device_type: '',
+        intended_use: '',
+        status: 'DRAFT',
+      };
+      localStorage.setItem('project-form-new', JSON.stringify(savedData));
+      localStorage.setItem(
+        'project-form-new_timestamp',
+        new Date().toISOString()
+      );
+
+      renderWithProviders(
+        <ProjectForm
+          open={true}
+          onOpenChange={mockOnOpenChange}
+          onSubmit={mockOnSubmit}
+        />
+      );
+
+      // Form should be populated with restored data
+      expect(screen.getByDisplayValue('Restored Project')).toBeInTheDocument();
+      expect(
+        screen.getByDisplayValue('Restored description')
+      ).toBeInTheDocument();
+    });
+
+    it('clears auto-saved data on successful submission', async () => {
+      const user = userEvent.setup();
+      const mockSubmitForm = jest.fn((submitFn, options) => {
+        // Simulate successful submission
+        const result = { ...mockProject, name: 'Test Project' };
+        options.onSuccess(result);
+        return Promise.resolve(result);
+      });
+
+      mockUseFormSubmissionState.mockReturnValue({
+        ...defaultMockFormSubmission,
+        submitForm: mockSubmitForm,
+      });
+
+      mockOnSubmit.mockResolvedValue(mockProject);
+
+      renderWithProviders(
+        <ProjectForm
+          open={true}
+          onOpenChange={mockOnOpenChange}
+          onSubmit={mockOnSubmit}
+        />
+      );
+
+      const nameInput = screen.getByLabelText(/project name/i);
+      await user.type(nameInput, 'Test Project');
+
+      // Wait for auto-save
+      await waitFor(
+        () => {
+          expect(localStorage.getItem('project-form-new')).toBeTruthy();
+        },
+        { timeout: 3000 }
+      );
+
+      const submitButton = screen.getByRole('button', {
+        name: /create project/i,
+      });
+      await user.click(submitButton);
+
+      // Auto-saved data should be cleared after successful submission
+      await waitFor(() => {
+        expect(localStorage.getItem('project-form-new')).toBeNull();
+        expect(localStorage.getItem('project-form-new_timestamp')).toBeNull();
       });
     });
   });
@@ -833,7 +1110,7 @@ describe('ProjectForm Component', () => {
     });
   });
 
-  describe('Accessibility', () => {
+  describe('Enhanced Accessibility', () => {
     it('has proper form labels and descriptions', () => {
       renderWithProviders(
         <ProjectForm
@@ -850,6 +1127,118 @@ describe('ProjectForm Component', () => {
       expect(screen.getByLabelText(/description/i)).toBeInTheDocument();
       expect(screen.getByLabelText(/device type/i)).toBeInTheDocument();
       expect(screen.getByLabelText(/intended use/i)).toBeInTheDocument();
+    });
+
+    it('provides proper ARIA attributes for form fields', () => {
+      renderWithProviders(
+        <ProjectForm
+          open={true}
+          onOpenChange={mockOnOpenChange}
+          onSubmit={mockOnSubmit}
+        />
+      );
+
+      const nameInput = screen.getByLabelText(/project name/i);
+      expect(nameInput).toHaveAttribute('aria-required', 'true');
+      expect(nameInput).toHaveAttribute('aria-invalid', 'false');
+
+      const descriptionInput = screen.getByLabelText(/description/i);
+      expect(descriptionInput).toHaveAttribute('aria-required', 'false');
+    });
+
+    it('announces validation errors to screen readers', async () => {
+      const user = userEvent.setup();
+
+      renderWithProviders(
+        <ProjectForm
+          open={true}
+          onOpenChange={mockOnOpenChange}
+          onSubmit={mockOnSubmit}
+        />
+      );
+
+      const submitButton = screen.getByRole('button', {
+        name: /create project/i,
+      });
+      await user.click(submitButton);
+
+      await waitFor(() => {
+        const nameInput = screen.getByLabelText(/project name/i);
+        expect(nameInput).toHaveAttribute('aria-invalid', 'true');
+
+        const errorAlert = screen.getByRole('alert');
+        expect(errorAlert).toBeInTheDocument();
+        expect(errorAlert).toHaveTextContent('Project name is required');
+      });
+    });
+
+    it('provides help information with proper ARIA relationships', async () => {
+      const user = userEvent.setup();
+
+      renderWithProviders(
+        <ProjectForm
+          open={true}
+          onOpenChange={mockOnOpenChange}
+          onSubmit={mockOnSubmit}
+        />
+      );
+
+      // Help icons should be present
+      const helpIcons = screen.getAllByLabelText(/help information/i);
+      expect(helpIcons.length).toBeGreaterThan(0);
+
+      // Hover over help icon should show tooltip
+      await user.hover(helpIcons[0]);
+
+      await waitFor(() => {
+        const tooltip = screen.getByRole('tooltip');
+        expect(tooltip).toBeInTheDocument();
+      });
+    });
+
+    it('focuses first error field when validation fails', async () => {
+      const user = userEvent.setup();
+
+      renderWithProviders(
+        <ProjectForm
+          open={true}
+          onOpenChange={mockOnOpenChange}
+          onSubmit={mockOnSubmit}
+        />
+      );
+
+      const descriptionInput = screen.getByLabelText(/description/i);
+      await user.type(descriptionInput, 'Short'); // Invalid description
+
+      const submitButton = screen.getByRole('button', {
+        name: /create project/i,
+      });
+      await user.click(submitButton);
+
+      await waitFor(() => {
+        const nameInput = screen.getByLabelText(/project name/i);
+        expect(nameInput).toHaveFocus();
+      });
+    });
+
+    it('provides character count announcements', async () => {
+      const user = userEvent.setup();
+
+      renderWithProviders(
+        <ProjectForm
+          open={true}
+          onOpenChange={mockOnOpenChange}
+          onSubmit={mockOnSubmit}
+        />
+      );
+
+      const nameInput = screen.getByLabelText(/project name/i);
+      await user.type(nameInput, 'Test Project');
+
+      const characterCount = screen.getByLabelText(
+        /12 of 255 characters used/i
+      );
+      expect(characterCount).toBeInTheDocument();
     });
 
     it('associates error messages with form fields', async () => {

@@ -7,6 +7,12 @@
 import { useState, useEffect, memo, useMemo, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useEnhancedForm } from '@/hooks/use-enhanced-form';
+import {
+  EnhancedInput,
+  EnhancedTextarea,
+  AutoSaveIndicator,
+} from '@/components/forms/EnhancedFormField';
 import { z } from 'zod';
 import { Loader2, Save, X } from 'lucide-react';
 import { useFormSubmissionState } from '@/hooks/use-loading-state';
@@ -16,7 +22,6 @@ import {
 } from '@/hooks/use-focus-management';
 import { FormSubmissionProgress } from '@/components/loading';
 import { EnhancedButton } from '@/components/ui/enhanced-button';
-import { EnhancedInput } from '@/components/ui/enhanced-input';
 import { Textarea } from '@/components/ui/textarea';
 import {
   Select,
@@ -52,27 +57,62 @@ import {
 import { contextualToast } from '@/hooks/use-toast';
 import { useRenderPerformance } from '@/lib/performance/optimization';
 
-// Form validation schema - matches backend validation
+// Enhanced form validation schema with comprehensive rules
 const projectFormSchema = z.object({
   name: z
     .string()
     .min(1, 'Project name is required')
-    .max(255, 'Project name must be less than 255 characters'),
+    .min(3, 'Project name must be at least 3 characters')
+    .max(255, 'Project name must be less than 255 characters')
+    .regex(
+      /^[a-zA-Z0-9\s\-_().]+$/,
+      'Project name can only contain letters, numbers, spaces, hyphens, underscores, and parentheses'
+    )
+    .refine(
+      (val) => val.trim().length > 0,
+      'Project name cannot be only whitespace'
+    )
+    .refine(
+      (val) => !val.match(/^\s/),
+      'Project name cannot start with whitespace'
+    )
+    .refine(
+      (val) => !val.match(/\s$/),
+      'Project name cannot end with whitespace'
+    ),
   description: z
     .string()
-    .max(1000, 'Description must be less than 1000 characters')
     .optional()
-    .or(z.literal('')),
+    .refine(
+      (val) => !val || val.trim().length === 0 || val.trim().length >= 10,
+      'Description must be at least 10 characters when provided'
+    )
+    .refine(
+      (val) => !val || val.length <= 1000,
+      'Description must be less than 1000 characters'
+    ),
   device_type: z
     .string()
-    .max(255, 'Device type must be less than 255 characters')
     .optional()
-    .or(z.literal('')),
+    .refine(
+      (val) => !val || val.trim().length === 0 || val.trim().length >= 3,
+      'Device type must be at least 3 characters when provided'
+    )
+    .refine(
+      (val) => !val || val.length <= 255,
+      'Device type must be less than 255 characters'
+    ),
   intended_use: z
     .string()
-    .max(2000, 'Intended use must be less than 2000 characters')
     .optional()
-    .or(z.literal('')),
+    .refine(
+      (val) => !val || val.trim().length === 0 || val.trim().length >= 20,
+      'Intended use must be at least 20 characters when provided'
+    )
+    .refine(
+      (val) => !val || val.length <= 2000,
+      'Intended use must be less than 2000 characters'
+    ),
   status: z.nativeEnum(ProjectStatus).optional(),
 });
 
@@ -128,22 +168,37 @@ export const ProjectForm = memo(function ProjectForm({
   const nameInputRef = useRef<HTMLInputElement>(null);
   const cancelButtonRef = useRef<HTMLButtonElement>(null);
 
-  // Memoize form configuration
-  const formConfig = useMemo(
-    () => ({
-      resolver: zodResolver(projectFormSchema),
-      defaultValues: {
-        name: '',
-        description: '',
-        device_type: '',
-        intended_use: '',
-        status: ProjectStatus.DRAFT,
+  // Enhanced form with real-time validation and auto-save
+  const form = useEnhancedForm<ProjectFormData>({
+    schema: projectFormSchema,
+    defaultValues: {
+      name: '',
+      description: '',
+      device_type: '',
+      intended_use: '',
+      status: ProjectStatus.DRAFT,
+    },
+    mode: 'onChange',
+    autoSave: {
+      enabled: true,
+      interval: 2000,
+      onSave: async (data) => {
+        // Auto-save to localStorage
+        const storageKey = `project-form-${project?.id || 'new'}`;
+        localStorage.setItem(storageKey, JSON.stringify(data));
       },
-    }),
-    []
-  );
-
-  const form = useForm<ProjectFormData>(formConfig);
+      storageKey: `project-form-${project?.id || 'new'}`,
+    },
+    realTimeValidation: {
+      enabled: true,
+      debounceMs: 300,
+    },
+    accessibility: {
+      announceErrors: true,
+      focusFirstError: true,
+    },
+    formName: isEditing ? 'Edit Project' : 'Create Project',
+  });
 
   // Reset form when project changes or dialog opens/closes
   useEffect(() => {
@@ -182,13 +237,13 @@ export const ProjectForm = memo(function ProjectForm({
   }, [project, open, form, focusFirstInput, announce, isEditing]);
 
   const handleSubmit = async (data: ProjectFormData) => {
-    try {
+    await form.submitWithFeedback(async (validatedData) => {
       // Clean up empty strings to undefined for backend
       const cleanData = {
-        ...data,
-        description: data.description?.trim() || undefined,
-        device_type: data.device_type?.trim() || undefined,
-        intended_use: data.intended_use?.trim() || undefined,
+        ...validatedData,
+        description: validatedData.description?.trim() || undefined,
+        device_type: validatedData.device_type?.trim() || undefined,
+        intended_use: validatedData.intended_use?.trim() || undefined,
       };
 
       const submitData = isEditing
@@ -205,42 +260,23 @@ export const ProjectForm = memo(function ProjectForm({
           ],
           onSuccess: (result) => {
             if (result) {
-              contextualToast.success(
-                isEditing ? 'Project Updated' : 'Project Created',
-                `Project "${result.name}" has been ${isEditing ? 'updated' : 'created'} successfully.`
-              );
+              // Clear auto-saved data on successful submission
+              const storageKey = `project-form-${project?.id || 'new'}`;
+              localStorage.removeItem(storageKey);
+              localStorage.removeItem(`${storageKey}_timestamp`);
 
               onOpenChange(false);
               form.reset();
             }
           },
           onError: (error) => {
-            console.error('Form submission error:', error); // Log the actual error
-            // Handle backend validation errors
-            if (error.includes('Invalid project data')) {
-              contextualToast.validationError(
-                'Please check your input and try again.'
-              );
-            } else if (error.includes('Authentication required')) {
-              contextualToast.authExpired(() => {
-                window.location.href = '/api/auth/signin';
-              });
-            } else if (error.includes('Network') || error.includes('fetch')) {
-              contextualToast.networkError(() => {
-                handleSubmit(data);
-              });
-            } else {
-              contextualToast.projectSaveFailed(() => {
-                handleSubmit(data);
-              });
-            }
+            console.error('Form submission error:', error);
+            // Enhanced error handling is now handled by submitWithFeedback
+            throw error; // Re-throw to let submitWithFeedback handle it
           },
         }
       );
-    } catch (error) {
-      console.error('Caught in handleSubmit:', error); // Log unexpected errors
-      // Error is already handled in the submitForm function
-    }
+    });
   };
 
   const handleCancel = () => {
@@ -271,9 +307,16 @@ export const ProjectForm = memo(function ProjectForm({
         trapFocus={true}
       >
         <DialogHeader>
-          <DialogTitle>
-            {isEditing ? 'Edit Project' : 'Create New Project'}
-          </DialogTitle>
+          <div className="flex items-center justify-between">
+            <DialogTitle>
+              {isEditing ? 'Edit Project' : 'Create New Project'}
+            </DialogTitle>
+            <AutoSaveIndicator
+              isSaving={form.isSaving}
+              lastSaved={form.lastSaved}
+              className="text-xs"
+            />
+          </div>
           <DialogDescription>
             {isEditing
               ? 'Update your project information and settings.'
@@ -299,22 +342,22 @@ export const ProjectForm = memo(function ProjectForm({
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Project Name *</FormLabel>
-                  <FormControl>
-                    <EnhancedInput
-                      {...field}
-                      ref={nameInputRef}
-                      placeholder="Enter project name (e.g., Cardiac Monitor X1)"
-                      disabled={formSubmission.isLoading || loading}
-                      isFirstField={true}
-                      errorMessage={form.formState.errors.name?.message}
-                      aria-required="true"
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    A descriptive name for your medical device project
-                  </FormDescription>
-                  <FormMessage />
+                  <EnhancedInput
+                    {...field}
+                    ref={nameInputRef}
+                    label="Project Name"
+                    name="name"
+                    placeholder="Enter project name (e.g., Cardiac Monitor X1)"
+                    description="A descriptive name for your medical device project"
+                    required={true}
+                    disabled={formSubmission.isLoading || loading}
+                    error={form.formState.errors.name}
+                    validation={form.getFieldValidation('name')}
+                    maxLength={255}
+                    showCharacterCount={true}
+                    autoFocus={true}
+                    autoComplete="off"
+                  />
                 </FormItem>
               )}
             />
@@ -325,20 +368,20 @@ export const ProjectForm = memo(function ProjectForm({
               name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Description</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="Brief description of the project and device..."
-                      className="min-h-[80px]"
-                      {...field}
-                      disabled={formSubmission.isLoading || loading}
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    Optional description to help identify and organize your
-                    project
-                  </FormDescription>
-                  <FormMessage />
+                  <EnhancedTextarea
+                    {...field}
+                    label="Description"
+                    name="description"
+                    placeholder="Brief description of the project and device..."
+                    description="Optional description to help identify and organize your project"
+                    disabled={formSubmission.isLoading || loading}
+                    error={form.formState.errors.description}
+                    validation={form.getFieldValidation('description')}
+                    rows={3}
+                    maxLength={1000}
+                    showCharacterCount={true}
+                    resize={false}
+                  />
                 </FormItem>
               )}
             />
@@ -382,20 +425,20 @@ export const ProjectForm = memo(function ProjectForm({
               name="intended_use"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Intended Use</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="Describe the intended use and clinical purpose of the device..."
-                      className="min-h-[100px]"
-                      {...field}
-                      disabled={formSubmission.isLoading || loading}
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    Clear statement of the device&apos;s intended medical
-                    purpose and target patient population
-                  </FormDescription>
-                  <FormMessage />
+                  <EnhancedTextarea
+                    {...field}
+                    label="Intended Use"
+                    name="intended_use"
+                    placeholder="Describe the intended use and clinical purpose of the device..."
+                    description="Clear statement of the device's intended medical purpose and target patient population"
+                    disabled={formSubmission.isLoading || loading}
+                    error={form.formState.errors.intended_use}
+                    validation={form.getFieldValidation('intended_use')}
+                    rows={4}
+                    maxLength={2000}
+                    showCharacterCount={true}
+                    resize={false}
+                  />
                 </FormItem>
               )}
             />

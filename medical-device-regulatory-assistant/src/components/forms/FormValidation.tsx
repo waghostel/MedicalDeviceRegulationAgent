@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useForm, Controller, FieldError } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -9,55 +9,101 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { 
-  CheckCircle, 
-  AlertCircle, 
-  Info, 
-  Eye, 
+import {
+  CheckCircle,
+  AlertCircle,
+  Info,
+  Eye,
   EyeOff,
-  HelpCircle 
+  HelpCircle,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-// Validation schemas for different forms
+// Enhanced validation schemas with comprehensive rules
 export const projectFormSchema = z.object({
-  name: z.string()
+  name: z
+    .string()
     .min(1, 'Project name is required')
     .min(3, 'Project name must be at least 3 characters')
-    .max(100, 'Project name must be less than 100 characters')
-    .regex(/^[a-zA-Z0-9\s\-_]+$/, 'Project name can only contain letters, numbers, spaces, hyphens, and underscores'),
-  
-  description: z.string()
-    .min(1, 'Description is required')
-    .min(10, 'Description must be at least 10 characters')
-    .max(500, 'Description must be less than 500 characters'),
-  
-  deviceType: z.string()
-    .min(1, 'Device type is required')
-    .max(100, 'Device type must be less than 100 characters'),
-  
-  intendedUse: z.string()
-    .min(1, 'Intended use is required')
-    .min(20, 'Intended use must be at least 20 characters')
-    .max(1000, 'Intended use must be less than 1000 characters')
+    .max(255, 'Project name must be less than 255 characters')
+    .regex(
+      /^[a-zA-Z0-9\s\-_().]+$/,
+      'Project name can only contain letters, numbers, spaces, hyphens, underscores, and parentheses'
+    )
+    .refine(
+      (val) => val.trim().length > 0,
+      'Project name cannot be only whitespace'
+    )
+    .refine(
+      (val) => !val.match(/^\s/),
+      'Project name cannot start with whitespace'
+    )
+    .refine(
+      (val) => !val.match(/\s$/),
+      'Project name cannot end with whitespace'
+    ),
+
+  description: z
+    .string()
+    .optional()
+    .refine(
+      (val) => !val || val.trim().length === 0 || val.trim().length >= 10,
+      'Description must be at least 10 characters when provided'
+    )
+    .refine(
+      (val) => !val || val.length <= 1000,
+      'Description must be less than 1000 characters'
+    ),
+
+  device_type: z
+    .string()
+    .optional()
+    .refine(
+      (val) => !val || val.trim().length === 0 || val.trim().length >= 3,
+      'Device type must be at least 3 characters when provided'
+    )
+    .refine(
+      (val) => !val || val.length <= 255,
+      'Device type must be less than 255 characters'
+    ),
+
+  intended_use: z
+    .string()
+    .optional()
+    .refine(
+      (val) => !val || val.trim().length === 0 || val.trim().length >= 20,
+      'Intended use must be at least 20 characters when provided'
+    )
+    .refine(
+      (val) => !val || val.length <= 2000,
+      'Intended use must be less than 2000 characters'
+    ),
+
+  status: z.enum(['DRAFT', 'IN_PROGRESS', 'COMPLETED']).optional(),
 });
 
 export const deviceSearchSchema = z.object({
-  deviceDescription: z.string()
+  deviceDescription: z
+    .string()
     .min(1, 'Device description is required')
     .min(10, 'Device description must be at least 10 characters')
     .max(500, 'Device description must be less than 500 characters'),
-  
-  intendedUse: z.string()
+
+  intendedUse: z
+    .string()
     .min(1, 'Intended use is required')
     .min(20, 'Intended use must be at least 20 characters')
     .max(1000, 'Intended use must be less than 1000 characters'),
-  
-  productCode: z.string()
+
+  productCode: z
+    .string()
     .optional()
-    .refine(val => !val || /^[A-Z]{3}$/.test(val), 'Product code must be 3 uppercase letters'),
-  
-  deviceClass: z.enum(['I', 'II', 'III']).optional()
+    .refine(
+      (val) => !val || /^[A-Z]{3}$/.test(val),
+      'Product code must be 3 uppercase letters'
+    ),
+
+  deviceClass: z.enum(['I', 'II', 'III']).optional(),
 });
 
 // Enhanced input component with validation
@@ -98,17 +144,17 @@ export const ValidatedInput: React.FC<ValidatedInputProps> = ({
   className,
   showCharacterCount,
   maxLength,
-  validation
+  validation,
 }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
-  
+
   const hasError = !!error;
   const isValid = validation?.isValid && !hasError && value.length > 0;
   const isValidating = validation?.isValidating;
-  
+
   const inputType = type === 'password' && showPassword ? 'text' : type;
-  
+
   return (
     <div className={cn('space-y-2', className)}>
       <div className="flex items-center justify-between">
@@ -125,7 +171,7 @@ export const ValidatedInput: React.FC<ValidatedInputProps> = ({
           </div>
         )}
       </div>
-      
+
       <div className="relative">
         <Input
           id={name}
@@ -148,7 +194,7 @@ export const ValidatedInput: React.FC<ValidatedInputProps> = ({
             isValidating && 'border-blue-500'
           )}
         />
-        
+
         {/* Status icons */}
         <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center space-x-1">
           {type === 'password' && (
@@ -157,39 +203,43 @@ export const ValidatedInput: React.FC<ValidatedInputProps> = ({
               onClick={() => setShowPassword(!showPassword)}
               className="text-muted-foreground hover:text-foreground"
             >
-              {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              {showPassword ? (
+                <EyeOff className="w-4 h-4" />
+              ) : (
+                <Eye className="w-4 h-4" />
+              )}
             </button>
           )}
-          
+
           {isValidating && (
             <div className="animate-spin">
               <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full" />
             </div>
           )}
-          
-          {isValid && (
-            <CheckCircle className="w-4 h-4 text-green-500" />
-          )}
-          
-          {hasError && (
-            <AlertCircle className="w-4 h-4 text-destructive" />
-          )}
+
+          {isValid && <CheckCircle className="w-4 h-4 text-green-500" />}
+
+          {hasError && <AlertCircle className="w-4 h-4 text-destructive" />}
         </div>
       </div>
-      
+
       {/* Character count */}
       {showCharacterCount && maxLength && (
         <div className="flex justify-end">
-          <span className={cn(
-            'text-xs',
-            value.length > maxLength * 0.9 ? 'text-orange-500' : 'text-muted-foreground',
-            value.length >= maxLength && 'text-destructive'
-          )}>
+          <span
+            className={cn(
+              'text-xs',
+              value.length > maxLength * 0.9
+                ? 'text-orange-500'
+                : 'text-muted-foreground',
+              value.length >= maxLength && 'text-destructive'
+            )}
+          >
             {value.length}/{maxLength}
           </span>
         </div>
       )}
-      
+
       {/* Error message */}
       {hasError && (
         <Alert variant="destructive" className="py-2">
@@ -199,7 +249,7 @@ export const ValidatedInput: React.FC<ValidatedInputProps> = ({
           </AlertDescription>
         </Alert>
       )}
-      
+
       {/* Validation message */}
       {validation?.message && !hasError && (
         <Alert className="py-2">
@@ -235,12 +285,12 @@ export const ValidatedTextarea: React.FC<ValidatedTextareaProps> = ({
   maxLength,
   validation,
   rows = 4,
-  resize = true
+  resize = true,
 }) => {
   const hasError = !!error;
   const isValid = validation?.isValid && !hasError && value.length > 0;
   const isValidating = validation?.isValidating;
-  
+
   return (
     <div className={cn('space-y-2', className)}>
       <div className="flex items-center justify-between">
@@ -257,7 +307,7 @@ export const ValidatedTextarea: React.FC<ValidatedTextareaProps> = ({
           </div>
         )}
       </div>
-      
+
       <div className="relative">
         <Textarea
           id={name}
@@ -276,7 +326,7 @@ export const ValidatedTextarea: React.FC<ValidatedTextareaProps> = ({
             !resize && 'resize-none'
           )}
         />
-        
+
         {/* Status icon */}
         <div className="absolute right-3 top-3 flex items-center space-x-1">
           {isValidating && (
@@ -284,30 +334,30 @@ export const ValidatedTextarea: React.FC<ValidatedTextareaProps> = ({
               <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full" />
             </div>
           )}
-          
-          {isValid && (
-            <CheckCircle className="w-4 h-4 text-green-500" />
-          )}
-          
-          {hasError && (
-            <AlertCircle className="w-4 h-4 text-destructive" />
-          )}
+
+          {isValid && <CheckCircle className="w-4 h-4 text-green-500" />}
+
+          {hasError && <AlertCircle className="w-4 h-4 text-destructive" />}
         </div>
       </div>
-      
+
       {/* Character count */}
       {showCharacterCount && maxLength && (
         <div className="flex justify-end">
-          <span className={cn(
-            'text-xs',
-            value.length > maxLength * 0.9 ? 'text-orange-500' : 'text-muted-foreground',
-            value.length >= maxLength && 'text-destructive'
-          )}>
+          <span
+            className={cn(
+              'text-xs',
+              value.length > maxLength * 0.9
+                ? 'text-orange-500'
+                : 'text-muted-foreground',
+              value.length >= maxLength && 'text-destructive'
+            )}
+          >
             {value.length}/{maxLength}
           </span>
         </div>
       )}
-      
+
       {/* Error message */}
       {hasError && (
         <Alert variant="destructive" className="py-2">
@@ -317,7 +367,7 @@ export const ValidatedTextarea: React.FC<ValidatedTextareaProps> = ({
           </AlertDescription>
         </Alert>
       )}
-      
+
       {/* Validation message */}
       {validation?.message && !hasError && (
         <Alert className="py-2">
@@ -331,43 +381,159 @@ export const ValidatedTextarea: React.FC<ValidatedTextareaProps> = ({
   );
 };
 
-// Real-time validation hook
+// Enhanced real-time validation hook with debouncing and async validation
 export const useRealTimeValidation = (
   schema: z.ZodSchema,
   debounceMs: number = 300
 ) => {
-  const [validationState, setValidationState] = useState<Record<string, {
-    isValid: boolean;
-    isValidating: boolean;
-    message?: string;
-  }>>({});
-  
-  const validateField = async (fieldName: string, value: any) => {
-    setValidationState(prev => ({
-      ...prev,
-      [fieldName]: { ...prev[fieldName], isValidating: true }
-    }));
-    
-    try {
-      await schema.parseAsync({ [fieldName]: value });
-      setValidationState(prev => ({
-        ...prev,
-        [fieldName]: { isValid: true, isValidating: false }
-      }));
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        const fieldError = error.errors.find(e => e.path[0] === fieldName);
-        setValidationState(prev => ({
-          ...prev,
-          [fieldName]: { 
-            isValid: false, 
-            isValidating: false,
-            message: fieldError?.message 
-          }
-        }));
+  const [validationState, setValidationState] = useState<
+    Record<
+      string,
+      {
+        isValid: boolean;
+        isValidating: boolean;
+        message?: string;
+        hasBeenTouched?: boolean;
       }
+    >
+  >({});
+
+  const timeoutRefs = useRef<Record<string, NodeJS.Timeout>>({});
+
+  const validateField = useCallback(
+    async (fieldName: string, value: any, immediate = false) => {
+      // Clear existing timeout for this field
+      if (timeoutRefs.current[fieldName]) {
+        clearTimeout(timeoutRefs.current[fieldName]);
+      }
+
+      // Mark field as touched
+      setValidationState((prev) => ({
+        ...prev,
+        [fieldName]: {
+          ...prev[fieldName],
+          hasBeenTouched: true,
+          isValidating: !immediate,
+        },
+      }));
+
+      const performValidation = async () => {
+        try {
+          // Create a partial object for validation
+          const testObject = { [fieldName]: value };
+
+          // Use safeParse to avoid throwing
+          const result = await schema.safeParseAsync(testObject);
+
+          if (result.success) {
+            setValidationState((prev) => ({
+              ...prev,
+              [fieldName]: {
+                isValid: true,
+                isValidating: false,
+                hasBeenTouched: true,
+                message: undefined,
+              },
+            }));
+          } else {
+            const fieldError = result.error.issues.find(
+              (e: any) => e.path[0] === fieldName
+            );
+            setValidationState((prev) => ({
+              ...prev,
+              [fieldName]: {
+                isValid: false,
+                isValidating: false,
+                hasBeenTouched: true,
+                message: fieldError?.message,
+              },
+            }));
+          }
+        } catch (error) {
+          console.error('Validation error:', error);
+          setValidationState((prev) => ({
+            ...prev,
+            [fieldName]: {
+              isValid: false,
+              isValidating: false,
+              hasBeenTouched: true,
+              message: 'Validation error occurred',
+            },
+          }));
+        }
+      };
+
+      if (immediate) {
+        await performValidation();
+      } else {
+        // Debounce the validation
+        timeoutRefs.current[fieldName] = setTimeout(
+          performValidation,
+          debounceMs
+        );
+      }
+    },
+    [schema, debounceMs]
+  );
+
+  const validateAllFields = useCallback(
+    async (formData: Record<string, unknown>) => {
+      const promises = Object.entries(formData).map(([fieldName, value]) =>
+        validateField(fieldName, value, true)
+      );
+      await Promise.all(promises);
+    },
+    [validateField]
+  );
+
+  const clearValidation = useCallback((fieldName?: string) => {
+    if (fieldName) {
+      if (timeoutRefs.current[fieldName]) {
+        clearTimeout(timeoutRefs.current[fieldName]);
+      }
+      setValidationState((prev) => {
+        const newState = { ...prev };
+        delete newState[fieldName];
+        return newState;
+      });
+    } else {
+      // Clear all validations
+      Object.values(timeoutRefs.current).forEach((timeout) =>
+        clearTimeout(timeout)
+      );
+      timeoutRefs.current = {};
+      setValidationState({});
     }
+  }, []);
+
+  const getFieldValidation = useCallback(
+    (fieldName: string) => {
+      return (
+        validationState[fieldName] || {
+          isValid: false,
+          isValidating: false,
+          hasBeenTouched: false,
+          message: undefined,
+        }
+      );
+    },
+    [validationState]
+  );
+
+  // Cleanup timeouts on unmount
+  useEffect(() => {
+    return () => {
+      Object.values(timeoutRefs.current).forEach((timeout) =>
+        clearTimeout(timeout)
+      );
+    };
+  }, []);
+
+  return {
+    validationState,
+    validateField,
+    validateAllFields,
+    clearValidation,
+    getFieldValidation,
   };
-  
-  return { validationState, validateField };
 };

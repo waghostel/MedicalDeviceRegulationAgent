@@ -24,7 +24,7 @@ export interface UseFormToastReturn {
 }
 
 export function useFormToast(): UseFormToastReturn {
-  const { toast, dismissAll, getToastsByCategory } = useToast();
+  const { toast, getToastsByCategory, contextualToast } = useToast();
 
   const showValidationError = useCallback((
     field: string, 
@@ -46,7 +46,7 @@ export function useFormToast(): UseFormToastReturn {
     return contextualToast.validationError(
       formName ? `${formName}: ${message}` : message
     );
-  }, []);
+  }, [contextualToast]);
 
   const showSubmissionSuccess = useCallback((
     message: string, 
@@ -58,7 +58,7 @@ export function useFormToast(): UseFormToastReturn {
       formName ? `${formName} Saved` : 'Form Submitted',
       message
     );
-  }, []);
+  }, [contextualToast]);
 
   const showSubmissionError = useCallback((
     error: Error, 
@@ -82,7 +82,7 @@ export function useFormToast(): UseFormToastReturn {
         priority: 'high',
       });
     }
-  }, [toast]);
+  }, [toast, contextualToast]);
 
   const showSaveProgress = useCallback((
     initialProgress: number, 
@@ -109,7 +109,7 @@ export function useFormToast(): UseFormToastReturn {
         }, 500);
       }
     };
-  }, [showSubmissionSuccess]);
+  }, [contextualToast, showSubmissionSuccess]);
 
   const showAutoSaveSuccess = useCallback((options: FormToastOptions = {}) => {
     const { formName } = options;
@@ -129,14 +129,14 @@ export function useFormToast(): UseFormToastReturn {
     options: FormToastOptions = {}
   ) => {
     return contextualToast.networkError(onRetry);
-  }, []);
+  }, [contextualToast]);
 
   const showAuthError = useCallback((
     onSignIn: () => void, 
     options: FormToastOptions = {}
   ) => {
     return contextualToast.authExpired(onSignIn);
-  }, []);
+  }, [contextualToast]);
 
   const clearFormToasts = useCallback(() => {
     // Clear all form-related toasts
