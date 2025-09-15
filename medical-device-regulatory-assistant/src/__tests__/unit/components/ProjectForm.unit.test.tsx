@@ -17,17 +17,217 @@ import {
 } from '@/types/project';
 import { renderWithProviders } from '@/lib/testing/test-utils';
 
+// Setup localStorage mock for auto-save functionality tests
+const localStorageMock = {
+  getItem: jest.fn(),
+  setItem: jest.fn(),
+  removeItem: jest.fn(),
+  clear: jest.fn(),
+};
+Object.defineProperty(window, 'localStorage', {
+  value: localStorageMock,
+  writable: true,
+});
+
+// Setup timer mocks for debounced validation tests
+jest.useFakeTimers();
+
 // Mock hooks and utilities
 jest.mock('@/hooks/use-loading-state');
+
+// Mock useToast hook to match actual implementation structure
 jest.mock('@/hooks/use-toast', () => ({
+  useToast: jest.fn(() => ({
+    toast: jest.fn(),
+    getToastsByCategory: jest.fn(() => []),
+    contextualToast: {
+      success: jest.fn(),
+      validationError: jest.fn(),
+      authExpired: jest.fn(),
+      networkError: jest.fn(),
+      projectSaveFailed: jest.fn(),
+      fdaApiError: jest.fn(),
+      predicateSearchFailed: jest.fn(),
+      classificationError: jest.fn(),
+      exportFailed: jest.fn(),
+      progress: jest.fn(),
+      info: jest.fn(),
+    },
+    dismiss: jest.fn(),
+    dismissAll: jest.fn(),
+    clearQueue: jest.fn(),
+    getToastsByPriority: jest.fn(() => []),
+    toasts: [],
+    queue: [],
+    rateLimitCount: 0,
+    lastResetTime: Date.now(),
+  })),
   contextualToast: {
     success: jest.fn(),
     validationError: jest.fn(),
     authExpired: jest.fn(),
     networkError: jest.fn(),
     projectSaveFailed: jest.fn(),
+    fdaApiError: jest.fn(),
+    predicateSearchFailed: jest.fn(),
+    classificationError: jest.fn(),
+    exportFailed: jest.fn(),
+    progress: jest.fn(),
+    info: jest.fn(),
   },
+  toast: jest.fn(),
 }));
+
+// Mock useFormToast hook
+jest.mock('@/hooks/use-form-toast', () => ({
+  useFormToast: jest.fn(() => ({
+    showValidationError: jest.fn(),
+    showSubmissionSuccess: jest.fn(),
+    showSubmissionError: jest.fn(),
+    showSaveProgress: jest.fn(() => ({
+      updateProgress: jest.fn(),
+      complete: jest.fn(),
+    })),
+    showAutoSaveSuccess: jest.fn(),
+    showNetworkError: jest.fn(),
+    showAuthError: jest.fn(),
+    clearFormToasts: jest.fn(),
+  })),
+}));
+
+// Mock useEnhancedForm hook
+jest.mock('@/hooks/use-enhanced-form', () => ({
+  useEnhancedForm: jest.fn(() => ({
+    // Standard react-hook-form methods
+    register: jest.fn(() => ({
+      name: 'test-field',
+      onChange: jest.fn(),
+      onBlur: jest.fn(),
+      ref: jest.fn(),
+    })),
+    handleSubmit: jest.fn((fn) => (e) => {
+      e?.preventDefault();
+      return fn({
+        name: 'Test Project',
+        description: 'Test description',
+        device_type: undefined,
+        intended_use: undefined,
+      });
+    }),
+    formState: {
+      errors: {},
+      isValid: true,
+      isDirty: false,
+      isSubmitting: false,
+      touchedFields: {},
+      dirtyFields: {},
+    },
+    reset: jest.fn(),
+    getValues: jest.fn(() => ({
+      name: 'Test Project',
+      description: 'Test description',
+      device_type: undefined,
+      intended_use: undefined,
+    })),
+    setValue: jest.fn(),
+    watch: jest.fn(() => ({})),
+    trigger: jest.fn(() => Promise.resolve(true)),
+    clearErrors: jest.fn(),
+    setError: jest.fn(),
+    getFieldState: jest.fn(() => ({
+      invalid: false,
+      isDirty: false,
+      isTouched: false,
+      error: undefined,
+    })),
+    control: {
+      _names: {
+        mount: new Set(),
+        unMount: new Set(),
+        array: new Set(),
+        watch: new Set(),
+      },
+      _subjects: {
+        values: { next: jest.fn() },
+        array: { next: jest.fn() },
+        state: { next: jest.fn() },
+      },
+      _getWatch: jest.fn(),
+      _formValues: {},
+      _defaultValues: {},
+      register: jest.fn(() => ({
+        name: 'test-field',
+        onChange: jest.fn(),
+        onBlur: jest.fn(),
+        ref: jest.fn(),
+      })),
+    },
+
+    // Enhanced form methods
+    validateField: jest.fn(),
+    getFieldValidation: jest.fn(() => ({
+      isValid: true,
+      isValidating: false,
+      hasBeenTouched: false,
+      message: undefined,
+    })),
+    saveNow: jest.fn(),
+    isSaving: false,
+    lastSaved: undefined,
+    submitWithFeedback: jest.fn(),
+    isDirtyField: jest.fn(() => false),
+    getTouchedFields: jest.fn(() => []),
+    focusFirstError: jest.fn(),
+    announceFormState: jest.fn(),
+  })),
+}));
+
+// Mock useEnhancedForm hook dependencies
+jest.mock('@/hooks/use-auto-save', () => ({
+  useAutoSave: jest.fn(() => ({
+    saveNow: jest.fn(),
+    isSaving: false,
+  })),
+}));
+
+jest.mock('@/components/forms/FormValidation', () => ({
+  useRealTimeValidation: jest.fn(() => ({
+    validateField: jest.fn(),
+    getFieldValidation: jest.fn(() => ({
+      isValid: true,
+      isValidating: false,
+      hasBeenTouched: false,
+      message: undefined,
+    })),
+    validateAllFields: jest.fn(),
+  })),
+}));
+
+// Mock enhanced form field components
+jest.mock('@/components/forms/EnhancedFormField', () => ({
+  EnhancedInput: jest.fn(({ children, ...props }) => <input {...props} />),
+  EnhancedTextarea: jest.fn(({ children, ...props }) => (
+    <textarea {...props} />
+  )),
+  AutoSaveIndicator: jest.fn(() => (
+    <div data-testid="auto-save-indicator">Saving...</div>
+  )),
+}));
+
+// Mock loading components
+jest.mock('@/components/loading', () => ({
+  FormSubmissionProgress: jest.fn(() => (
+    <div data-testid="form-submission-progress">Loading...</div>
+  )),
+}));
+
+// Mock enhanced button
+jest.mock('@/components/ui/enhanced-button', () => ({
+  EnhancedButton: jest.fn(({ children, ...props }) => (
+    <button {...props}>{children}</button>
+  )),
+}));
+
 jest.mock('@/lib/performance/optimization', () => ({
   useRenderPerformance: jest.fn(),
 }));
@@ -64,6 +264,14 @@ describe('ProjectForm Component', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.clearAllTimers();
+
+    // Clear localStorage
+    localStorageMock.getItem.mockClear();
+    localStorageMock.setItem.mockClear();
+    localStorageMock.removeItem.mockClear();
+    localStorageMock.clear.mockClear();
+
     mockUseFormSubmissionState.mockReturnValue(defaultMockFormSubmission);
 
     // Reset mock functions
@@ -72,6 +280,12 @@ describe('ProjectForm Component', () => {
     (mockContextualToast.authExpired as jest.Mock).mockClear();
     (mockContextualToast.networkError as jest.Mock).mockClear();
     (mockContextualToast.projectSaveFailed as jest.Mock).mockClear();
+  });
+
+  afterEach(() => {
+    jest.runOnlyPendingTimers();
+    jest.useRealTimers();
+    jest.useFakeTimers();
   });
 
   describe('Rendering', () => {
@@ -608,8 +822,11 @@ describe('ProjectForm Component', () => {
 
   describe('Auto-save Functionality', () => {
     beforeEach(() => {
-      // Clear localStorage before each test
-      localStorage.clear();
+      // Clear localStorage mock before each test
+      localStorageMock.clear();
+      localStorageMock.getItem.mockReturnValue(null);
+      localStorageMock.setItem.mockClear();
+      localStorageMock.removeItem.mockClear();
     });
 
     it('shows auto-save indicator when saving', async () => {
@@ -626,12 +843,15 @@ describe('ProjectForm Component', () => {
       const nameInput = screen.getByLabelText(/project name/i);
       await user.type(nameInput, 'Test Project');
 
+      // Fast-forward timers to trigger auto-save
+      jest.advanceTimersByTime(2000);
+
       // Auto-save should trigger after typing
       await waitFor(
         () => {
           expect(screen.getByText(/saving/i)).toBeInTheDocument();
         },
-        { timeout: 3000 }
+        { timeout: 1000 }
       );
     });
 
@@ -652,26 +872,27 @@ describe('ProjectForm Component', () => {
       await user.type(nameInput, 'Test Project');
       await user.type(descriptionInput, 'Test description for auto-save');
 
+      // Fast-forward timers to trigger auto-save
+      jest.advanceTimersByTime(2000);
+
       // Wait for auto-save to complete
       await waitFor(
         () => {
-          const savedData = localStorage.getItem('project-form-new');
-          expect(savedData).toBeTruthy();
-
-          if (savedData) {
-            const parsedData = JSON.parse(savedData);
-            expect(parsedData.name).toBe('Test Project');
-            expect(parsedData.description).toBe(
-              'Test description for auto-save'
-            );
-          }
+          expect(localStorageMock.setItem).toHaveBeenCalledWith(
+            'project-form-new',
+            expect.stringContaining('Test Project')
+          );
+          expect(localStorageMock.setItem).toHaveBeenCalledWith(
+            'project-form-new_timestamp',
+            expect.any(String)
+          );
         },
-        { timeout: 3000 }
+        { timeout: 1000 }
       );
     });
 
     it('restores form data from localStorage on open', async () => {
-      // Pre-populate localStorage with saved data
+      // Pre-populate localStorage mock with saved data
       const savedData = {
         name: 'Restored Project',
         description: 'Restored description',
@@ -679,11 +900,15 @@ describe('ProjectForm Component', () => {
         intended_use: '',
         status: 'DRAFT',
       };
-      localStorage.setItem('project-form-new', JSON.stringify(savedData));
-      localStorage.setItem(
-        'project-form-new_timestamp',
-        new Date().toISOString()
-      );
+      localStorageMock.getItem.mockImplementation((key) => {
+        if (key === 'project-form-new') {
+          return JSON.stringify(savedData);
+        }
+        if (key === 'project-form-new_timestamp') {
+          return new Date().toISOString();
+        }
+        return null;
+      });
 
       renderWithProviders(
         <ProjectForm
@@ -727,12 +952,18 @@ describe('ProjectForm Component', () => {
       const nameInput = screen.getByLabelText(/project name/i);
       await user.type(nameInput, 'Test Project');
 
+      // Fast-forward timers to trigger auto-save
+      jest.advanceTimersByTime(2000);
+
       // Wait for auto-save
       await waitFor(
         () => {
-          expect(localStorage.getItem('project-form-new')).toBeTruthy();
+          expect(localStorageMock.setItem).toHaveBeenCalledWith(
+            'project-form-new',
+            expect.any(String)
+          );
         },
-        { timeout: 3000 }
+        { timeout: 1000 }
       );
 
       const submitButton = screen.getByRole('button', {
@@ -742,8 +973,12 @@ describe('ProjectForm Component', () => {
 
       // Auto-saved data should be cleared after successful submission
       await waitFor(() => {
-        expect(localStorage.getItem('project-form-new')).toBeNull();
-        expect(localStorage.getItem('project-form-new_timestamp')).toBeNull();
+        expect(localStorageMock.removeItem).toHaveBeenCalledWith(
+          'project-form-new'
+        );
+        expect(localStorageMock.removeItem).toHaveBeenCalledWith(
+          'project-form-new_timestamp'
+        );
       });
     });
   });

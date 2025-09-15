@@ -234,7 +234,7 @@ export const ProjectForm = memo(function ProjectForm({
         'polite'
       );
     }
-  }, [project, open, form, focusFirstInput, announce, isEditing]);
+  }, [project, open, focusFirstInput, announce, isEditing]);
 
   const handleSubmit = async (data: ProjectFormData) => {
     await form.submitWithFeedback(async (validatedData) => {
