@@ -1,17 +1,22 @@
 /**
  * Project Form Component for creating and editing projects
+ * Enhanced with proper keyboard navigation and focus management
  * Optimized with React.memo and useMemo for performance
  */
 
-import { useState, useEffect, memo, useMemo } from 'react';
+import { useState, useEffect, memo, useMemo, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Loader2, Save, X } from 'lucide-react';
 import { useFormSubmissionState } from '@/hooks/use-loading-state';
+import {
+  useFormFocusManagement,
+  useAccessibilityAnnouncements,
+} from '@/hooks/use-focus-management';
 import { FormSubmissionProgress } from '@/components/loading';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { EnhancedButton } from '@/components/ui/enhanced-button';
+import { EnhancedInput } from '@/components/ui/enhanced-input';
 import { Textarea } from '@/components/ui/textarea';
 import {
   Select,
@@ -28,7 +33,8 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form';
+  EnhancedForm,
+} from '@/components/ui/enhanced-form';
 import {
   Dialog,
   DialogContent,
@@ -36,7 +42,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
+} from '@/components/ui/enhanced-dialog';
 import {
   Project,
   ProjectCreateRequest,
@@ -113,6 +119,15 @@ export const ProjectForm = memo(function ProjectForm({
   const isEditing = useMemo(() => !!project, [project]);
   const formSubmission = useFormSubmissionState();
 
+  // Focus management
+  const { firstInputRef, focusFirstInput, focusFirstError, handleFormKeyDown } =
+    useFormFocusManagement();
+  const { announce } = useAccessibilityAnnouncements();
+
+  // Refs for focus management
+  const nameInputRef = useRef<HTMLInputElement>(null);
+  const cancelButtonRef = useRef<HTMLButtonElement>(null);
+
   // Memoize form configuration
   const formConfig = useMemo(
     () => ({
@@ -150,8 +165,21 @@ export const ProjectForm = memo(function ProjectForm({
           status: ProjectStatus.DRAFT,
         });
       }
+
+      // Focus the first input when dialog opens
+      setTimeout(() => {
+        focusFirstInput();
+      }, 100);
+
+      // Announce dialog opening
+      announce(
+        isEditing
+          ? 'Edit project dialog opened'
+          : 'Create new project dialog opened',
+        'polite'
+      );
     }
-  }, [project, open, form]);
+  }, [project, open, form, focusFirstInput, announce, isEditing]);
 
   const handleSubmit = async (data: ProjectFormData) => {
     try {
@@ -187,7 +215,7 @@ export const ProjectForm = memo(function ProjectForm({
             }
           },
           onError: (error) => {
-            console.error("Form submission error:", error); // Log the actual error
+            console.error('Form submission error:', error); // Log the actual error
             // Handle backend validation errors
             if (error.includes('Invalid project data')) {
               contextualToast.validationError(
@@ -210,7 +238,7 @@ export const ProjectForm = memo(function ProjectForm({
         }
       );
     } catch (error) {
-      console.error("Caught in handleSubmit:", error); // Log unexpected errors
+      console.error('Caught in handleSubmit:', error); // Log unexpected errors
       // Error is already handled in the submitForm function
     }
   };
@@ -218,11 +246,30 @@ export const ProjectForm = memo(function ProjectForm({
   const handleCancel = () => {
     onOpenChange(false);
     form.reset();
+    announce('Dialog closed', 'polite');
+  };
+
+  // Handle escape key to close dialog
+  const handleKeyDown = (event: React.KeyboardEvent) => {
+    if (event.key === 'Escape') {
+      handleCancel();
+    }
+    handleFormKeyDown(event);
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+      <DialogContent
+        className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto"
+        announceOnOpen={
+          isEditing
+            ? 'Edit project dialog opened'
+            : 'Create new project dialog opened'
+        }
+        announceOnClose="Dialog closed"
+        customFocusTarget={nameInputRef}
+        trapFocus={true}
+      >
         <DialogHeader>
           <DialogTitle>
             {isEditing ? 'Edit Project' : 'Create New Project'}
@@ -235,9 +282,10 @@ export const ProjectForm = memo(function ProjectForm({
         </DialogHeader>
 
         <Form {...form}>
-          <form
+          <EnhancedForm
             onSubmit={form.handleSubmit(handleSubmit)}
-            className="space-y-6"
+            onKeyDown={handleKeyDown}
+            announceErrors={true}
           >
             {/* Form Submission Progress */}
             <FormSubmissionProgress
@@ -253,10 +301,14 @@ export const ProjectForm = memo(function ProjectForm({
                 <FormItem>
                   <FormLabel>Project Name *</FormLabel>
                   <FormControl>
-                    <Input
-                      placeholder="Enter project name (e.g., Cardiac Monitor X1)"
+                    <EnhancedInput
                       {...field}
+                      ref={nameInputRef}
+                      placeholder="Enter project name (e.g., Cardiac Monitor X1)"
                       disabled={formSubmission.isLoading || loading}
+                      isFirstField={true}
+                      errorMessage={form.formState.errors.name?.message}
+                      aria-required="true"
                     />
                   </FormControl>
                   <FormDescription>
@@ -340,8 +392,8 @@ export const ProjectForm = memo(function ProjectForm({
                     />
                   </FormControl>
                   <FormDescription>
-                    Clear statement of the device's intended medical purpose and
-                    target patient population
+                    Clear statement of the device&apos;s intended medical
+                    purpose and target patient population
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -388,33 +440,32 @@ export const ProjectForm = memo(function ProjectForm({
             )}
 
             <DialogFooter className="gap-2">
-              <Button
+              <EnhancedButton
+                ref={cancelButtonRef}
                 type="button"
                 variant="outline"
                 onClick={handleCancel}
                 disabled={formSubmission.isLoading || loading}
+                announceClick={true}
               >
                 <X className="h-4 w-4 mr-2" />
                 Cancel
-              </Button>
-              <Button
+              </EnhancedButton>
+              <EnhancedButton
                 type="submit"
                 disabled={formSubmission.isLoading || loading}
+                loading={formSubmission.isLoading}
+                loadingText={
+                  formSubmission.currentStep ||
+                  (isEditing ? 'Updating...' : 'Creating...')
+                }
+                announceClick={true}
               >
-                {formSubmission.isLoading ? (
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                ) : (
-                  <Save className="h-4 w-4 mr-2" />
-                )}
-                {formSubmission.isLoading
-                  ? formSubmission.currentStep ||
-                    (isEditing ? 'Updating...' : 'Creating...')
-                  : isEditing
-                    ? 'Update Project'
-                    : 'Create Project'}
-              </Button>
+                {!formSubmission.isLoading && <Save className="h-4 w-4 mr-2" />}
+                {isEditing ? 'Update Project' : 'Create Project'}
+              </EnhancedButton>
             </DialogFooter>
-          </form>
+          </EnhancedForm>
         </Form>
       </DialogContent>
     </Dialog>
