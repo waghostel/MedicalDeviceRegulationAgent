@@ -127,12 +127,14 @@ interface AgentTypingIndicatorProps {
   isTyping: boolean;
   className?: string;
   agentName?: string;
+  showAvatar?: boolean;
 }
 
 export function AgentTypingIndicator({
   isTyping,
   className,
-  agentName = 'AI Assistant',
+  agentName = 'Agent',
+  showAvatar = true,
 }: AgentTypingIndicatorProps) {
   if (!isTyping) {
     return null;
@@ -145,10 +147,12 @@ export function AgentTypingIndicator({
         className
       )}
     >
-      <div className="h-6 w-6 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-xs text-white font-medium">
-        AI
-      </div>
-      <span>{agentName} is thinking</span>
+      {showAvatar && (
+        <div className="h-6 w-6 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-xs text-white font-medium">
+          AI
+        </div>
+      )}
+      <span>{agentName} is typing...</span>
       <TypingAnimation />
     </div>
   );

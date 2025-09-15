@@ -132,6 +132,11 @@ export {
   CompactStreamingResponse, 
   MarkdownStreamingResponse 
 } from './streaming-response';
+export { 
+  EnhancedStreamingResponse, 
+  CompactStreamingResponse as CompactEnhancedStreamingResponse,
+  useEnhancedStreamingResponse 
+} from './enhanced-streaming-response';
 
 // Type definitions
 export type * from './types';

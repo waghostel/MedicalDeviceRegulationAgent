@@ -3,13 +3,13 @@
  * Displays AI agent responses as they stream in real-time
  */
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { useStreamingResponse } from '@/hooks/use-websocket';
+import { useStreamingResponse, useWebSocket } from '@/hooks/use-websocket';
 import { AgentTypingIndicator } from './typing-indicators';
-import { StopCircle, RotateCcw } from 'lucide-react';
+import { StopCircle, RotateCcw, Loader2 } from 'lucide-react';
 
 interface StreamingResponseProps {
   streamId?: string;
@@ -39,13 +39,19 @@ export function StreamingResponse({
     });
 
   const contentRef = useRef<HTMLDivElement>(null);
+  const [displayContent, setDisplayContent] = useState('');
 
   // Auto-scroll to bottom when content updates
   useEffect(() => {
     if (autoScroll && contentRef.current) {
       contentRef.current.scrollTop = contentRef.current.scrollHeight;
     }
-  }, [content, autoScroll]);
+  }, [displayContent, autoScroll]);
+
+  // Update display content when streaming content changes
+  useEffect(() => {
+    setDisplayContent(content);
+  }, [content]);
 
   return (
     <div className={cn('space-y-2', className)}>
@@ -63,9 +69,9 @@ export function StreamingResponse({
             ref={contentRef}
             className="min-h-[100px] max-h-[400px] overflow-y-auto whitespace-pre-wrap text-sm leading-relaxed"
           >
-            {content || (
+            {displayContent || (
               <div className="text-muted-foreground italic">
-                Waiting for response...
+                {isStreaming ? 'AI is thinking...' : 'Waiting for response...'}
               </div>
             )}
           </div>
