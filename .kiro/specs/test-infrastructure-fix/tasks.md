@@ -178,14 +178,14 @@ Each completed task requires a report:
 
 ### Task B1: Hook Mock Configuration System
 
-- [ ] Task B1.1 Fix useToast hook mock structure
+- [x] Task B1.1 Fix useToast hook mock structure
 
   - Implement correct useToast mock matching actual implementation
   - Add all required methods and properties from design
   - Test mock structure against actual hook interface
   - _Requirements: 2.1, 2.2_
 
-- [ ] Task B1.2 Create enhanced form hook mock chain
+- [-] Task B1.2 Create enhanced form hook mock chain
 
   - Implement useEnhancedForm mock with complete react-hook-form compatibility
   - Add useFormToast mock with proper dependency structure

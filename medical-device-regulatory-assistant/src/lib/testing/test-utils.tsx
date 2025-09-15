@@ -9,6 +9,12 @@ import { render, RenderOptions, RenderResult } from '@testing-library/react';
 import { SessionProvider } from 'next-auth/react';
 import { Session } from 'next-auth';
 import { generateMockSession, generateMockUser } from '@/lib/mock-data';
+import { setupUseToastMock, toastMockUtils } from './setup-use-toast-mock';
+import {
+  setupEnhancedFormMocks,
+  enhancedFormMockUtils,
+} from './setup-enhanced-form-mocks';
+
 // Import the dedicated React19ErrorBoundary component
 import {
   React19ErrorBoundary,
@@ -19,8 +25,7 @@ import {
   type React19ErrorBoundaryProps,
 } from './React19ErrorBoundary';
 
-// React 19 Error Handling Types (imported from React19ErrorBoundary)
-
+// React 19 Error Handling Types and Mock Configuration
 interface MockConfiguration {
   useToast?: boolean;
   useEnhancedForm?: boolean;
@@ -36,7 +41,6 @@ interface MockRegistry {
 }
 
 // React 19 Error Handler Class is imported from React19ErrorBoundary.tsx
-
 // Mock router for testing navigation
 export interface MockRouter {
   push: jest.Mock;
@@ -121,6 +125,8 @@ interface RenderWithProvidersOptions extends Omit<RenderOptions, 'wrapper'> {
   session?: Session | null;
   router?: Partial<MockRouter>;
   initialProps?: Record<string, any>;
+  mockToast?: boolean; // Enable/disable toast mocking
+  mockEnhancedForm?: boolean; // Enable/disable enhanced form mocking
   mockConfig?: MockConfiguration;
   reactVersion?: 'react18' | 'react19';
   errorBoundary?: boolean;
@@ -137,11 +143,15 @@ export const renderWithProviders = (
 ): RenderResult & {
   mockRouter: MockRouter;
   mockRegistry: MockRegistry;
+  toastUtils: typeof toastMockUtils;
+  enhancedFormUtils: typeof enhancedFormMockUtils;
   cleanup: () => void;
 } => {
   const {
     session,
     router,
+    mockToast = true,
+    mockEnhancedForm = true,
     mockConfig = {},
     reactVersion = 'react19',
     errorBoundary = true,
@@ -159,10 +169,21 @@ export const renderWithProviders = (
     utilities: new Map(),
   };
 
+  // Setup toast mock if enabled
+  if (mockToast) {
+    setupUseToastMock();
+  }
+
+  // Setup enhanced form mocks if enabled
+  if (mockEnhancedForm) {
+    setupEnhancedFormMocks();
+  }
+
   // Setup mocks based on configuration
-  if (mockConfig.useToast) {
-    // Mock useToast hook (will be implemented in later tasks)
-    mockRegistry.hooks.set('useToast', jest.fn());
+  if (mockConfig.useToast || mockToast) {
+    // Mock useToast hook (enhanced with registry tracking)
+    const toastMock = jest.fn();
+    mockRegistry.hooks.set('useToast', toastMock);
   }
 
   if (mockConfig.localStorage) {
@@ -230,6 +251,10 @@ export const renderWithProviders = (
     mockRegistry.providers.clear();
     mockRegistry.utilities.clear();
 
+    // Clear toast and form mocks
+    toastMockUtils.clear();
+    enhancedFormMockUtils.resetAllMocks();
+
     // Restore timers if mocked
     if (mockConfig.timers) {
       jest.useRealTimers();
@@ -274,6 +299,8 @@ export const renderWithProviders = (
     ...result,
     mockRouter,
     mockRegistry,
+    toastUtils: toastMockUtils,
+    enhancedFormUtils: enhancedFormMockUtils,
     cleanup,
   };
 };
@@ -328,6 +355,13 @@ export const setupTest = (
 
   // Clear test data
   testDataManager.clearTestStates();
+
+  // Reset toast mock
+  toastMockUtils.clear();
+  toastMockUtils.resetMocks();
+
+  // Reset enhanced form mocks
+  enhancedFormMockUtils.resetAllMocks();
 
   // Setup console spy to catch errors (including AggregateError)
   const consoleSpy = captureErrors
@@ -392,6 +426,8 @@ export const setupTest = (
 
       // Clear test data
       testDataManager.clearTestStates();
+      toastMockUtils.clear();
+      enhancedFormMockUtils.resetAllMocks();
 
       // Restore timers
       if (mockTimers) {
@@ -400,7 +436,7 @@ export const setupTest = (
 
       // Restore localStorage
       if (mockLocalStorage) {
-        delete (window as unknown).localStorage;
+        delete (window as any).localStorage;
       }
 
       // Restore error handler
@@ -418,6 +454,12 @@ export const teardownTest = () => {
 
   // Clear test data
   testDataManager.clearTestStates();
+
+  // Clear toast mock
+  toastMockUtils.clear();
+
+  // Clear enhanced form mocks
+  enhancedFormMockUtils.resetAllMocks();
 
   // Reset modules
   jest.resetModules();
@@ -475,9 +517,7 @@ export const submitForm = async (form: HTMLFormElement) => {
   fireEvent.submit(form);
 };
 
-// React19ErrorBoundary components are imported at the top of the file
-
-// Legacy error boundary for backward compatibility (re-export from dedicated component)
+// Legacy error boundary for backward compatibility (imported from dedicated component)
 export { TestErrorBoundary } from './React19ErrorBoundary';
 
 // Performance testing utilities
@@ -513,6 +553,10 @@ export const testUtils = {
   measureRenderTime,
   checkAccessibility,
   testDataManager,
+  toastUtils: toastMockUtils,
+  enhancedFormUtils: enhancedFormMockUtils,
+  React19ErrorBoundary,
+  React19ErrorHandler,
 };
 
 // Export React 19 specific utilities (imported from dedicated component)
