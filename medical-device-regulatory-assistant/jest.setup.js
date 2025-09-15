@@ -232,3 +232,15 @@ try {
 } catch (error) {
   console.warn('Could not setup performance tracking:', error.message);
 }
+
+// Setup test health monitoring (Requirements 5.2 and 8.1)
+try {
+  const { createHealthReporter } = require('./src/lib/testing/test-health-monitor');
+  const healthReporter = createHealthReporter();
+  
+  // Make health reporter available globally for Jest integration
+  global.__testHealthReporter = healthReporter;
+  console.log('🏥 Test health monitoring enabled');
+} catch (error) {
+  console.warn('Could not setup test health monitoring:', error.message);
+}

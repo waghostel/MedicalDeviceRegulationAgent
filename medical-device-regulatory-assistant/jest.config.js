@@ -67,6 +67,17 @@ const customJestConfig = {
   },
   coverageReporters: ['text', 'text-summary', 'lcov', 'html', 'json'],
   coverageDirectory: '<rootDir>/coverage',
+  // Test health monitoring reporter (Requirements 5.2 and 8.1)
+  reporters: [
+    'default',
+    [
+      '<rootDir>/src/lib/testing/jest-health-reporter.js',
+      {
+        outputDir: '<rootDir>/test-reports',
+        failOnHealthIssues: process.env.CI === 'true' // Fail CI on health issues
+      }
+    ]
+  ],
   testMatch: [
     '<rootDir>/src/**/__tests__/**/*.{js,jsx,ts,tsx}',
     '<rootDir>/src/**/*.{test,spec}.{js,jsx,ts,tsx}',
