@@ -81,3 +81,6 @@ ignore/
 # GitHub App credentials
 gha-creds-*.json.DS_Store
 medical-device-regulatory-assistant/backend/error_tracking.db
+
+# Showcase website - to be committed separately
+showcase-website/
