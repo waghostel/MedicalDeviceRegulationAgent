@@ -118,6 +118,30 @@ export { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from './tool
 // Custom Components
 export { LazyImage } from './lazy-image';
 export { SlashCommandCard } from './slash-command-card';
+export { Avatar, AvatarImage, AvatarFallback } from './avatar';
+
+// Real-time Components
+export { ConnectionStatus, DetailedConnectionStatus } from './connection-status';
+export { 
+  TypingIndicators, 
+  TypingAnimation, 
+  UserTypingIndicator, 
+  AgentTypingIndicator 
+} from './typing-indicators';
+export { 
+  StreamingResponse, 
+  CompactStreamingResponse, 
+  MarkdownStreamingResponse 
+} from './streaming-response';
+export { 
+  EnhancedStreamingResponse, 
+  CompactStreamingResponse as CompactEnhancedStreamingResponse,
+  useEnhancedStreamingResponse 
+} from './enhanced-streaming-response';
 
 // Type definitions
 export type * from './types';
+
+// Export toast-related hooks
+export { useFormToast } from '../../hooks/use-form-toast';
+export { useAccessibilityAnnouncements, useAccessibleToast } from '../../hooks/use-accessibility-announcements';

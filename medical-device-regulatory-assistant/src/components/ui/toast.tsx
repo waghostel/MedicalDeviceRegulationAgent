@@ -1,6 +1,7 @@
 /**
  * Enhanced Toast UI Component with retry options and progress indicators
  * Based on shadcn/ui patterns with medical device regulatory context
+ * Includes comprehensive accessibility features and ARIA support
  */
 
 import * as React from 'react';
@@ -90,16 +91,35 @@ const Toast = React.forwardRef<
     const getIcon = () => {
       switch (variant) {
         case 'destructive':
-          return <AlertCircle className="h-4 w-4" />;
+          return <AlertCircle className="h-4 w-4" aria-hidden="true" />;
         case 'success':
-          return <CheckCircle className="h-4 w-4" />;
+          return <CheckCircle className="h-4 w-4" aria-hidden="true" />;
         case 'warning':
-          return <AlertTriangle className="h-4 w-4" />;
+          return <AlertTriangle className="h-4 w-4" aria-hidden="true" />;
         case 'info':
         case 'progress':
-          return <Info className="h-4 w-4" />;
+          return <Info className="h-4 w-4" aria-hidden="true" />;
         default:
           return null;
+      }
+    };
+
+    const getAriaRole = () => {
+      switch (variant) {
+        case 'destructive':
+        case 'warning':
+          return 'alert';
+        default:
+          return 'status';
+      }
+    };
+
+    const getAriaLive = () => {
+      switch (variant) {
+        case 'destructive':
+          return 'assertive';
+        default:
+          return 'polite';
       }
     };
 
@@ -107,6 +127,9 @@ const Toast = React.forwardRef<
       <ToastPrimitives.Root
         ref={ref}
         className={cn(toastVariants({ variant }), className)}
+        role={getAriaRole()}
+        aria-live={getAriaLive()}
+        aria-atomic="true"
         {...props}
       >
         <div className="flex items-start space-x-3 flex-1">
@@ -118,9 +141,15 @@ const Toast = React.forwardRef<
 
               {/* Progress bar for long-running operations */}
               {showProgress && typeof progress === 'number' && (
-                <div className="mt-2">
+                <div
+                  className="mt-2"
+                  role="progressbar"
+                  aria-valuenow={progress}
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                >
                   <Progress value={progress} className="h-2" />
-                  <div className="text-xs opacity-75 mt-1">
+                  <div className="text-xs opacity-75 mt-1" aria-live="polite">
                     {Math.round(progress)}% complete
                   </div>
                 </div>
@@ -128,15 +157,20 @@ const Toast = React.forwardRef<
 
               {/* Action buttons */}
               {(onRetry || onAction || actionUrl) && (
-                <div className="flex items-center space-x-2 mt-2">
+                <div
+                  className="flex items-center space-x-2 mt-2"
+                  role="group"
+                  aria-label="Toast actions"
+                >
                   {onRetry && (
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={onRetry}
                       className="h-7 px-2 text-xs"
+                      aria-label={`${retryLabel || 'Retry'} action`}
                     >
-                      <RotateCcw className="h-3 w-3 mr-1" />
+                      <RotateCcw className="h-3 w-3 mr-1" aria-hidden="true" />
                       {retryLabel || 'Retry'}
                     </Button>
                   )}
@@ -146,6 +180,7 @@ const Toast = React.forwardRef<
                       size="sm"
                       onClick={onAction}
                       className="h-7 px-2 text-xs"
+                      aria-label={`${actionLabel || 'Action'} button`}
                     >
                       {actionLabel || 'Action'}
                     </Button>
@@ -161,8 +196,12 @@ const Toast = React.forwardRef<
                         href={actionUrl}
                         target="_blank"
                         rel="noopener noreferrer"
+                        aria-label="Learn more (opens in new tab)"
                       >
-                        <ExternalLink className="h-3 w-3 mr-1" />
+                        <ExternalLink
+                          className="h-3 w-3 mr-1"
+                          aria-hidden="true"
+                        />
                         Learn More
                       </a>
                     </Button>
@@ -172,8 +211,11 @@ const Toast = React.forwardRef<
             </div>
           </div>
         </div>
-        <ToastPrimitives.Close className="absolute right-2 top-2 rounded-md p-1 text-foreground/50 opacity-0 transition-opacity hover:text-foreground focus:opacity-100 focus:outline-none focus:ring-2 group-hover:opacity-100 group-[.destructive]:text-red-300 group-[.destructive]:hover:text-red-50 group-[.destructive]:focus:ring-red-400 group-[.destructive]:focus:ring-offset-red-600">
-          <X className="h-4 w-4" />
+        <ToastPrimitives.Close
+          className="absolute right-2 top-2 rounded-md p-1 text-foreground/50 opacity-0 transition-opacity hover:text-foreground focus:opacity-100 focus:outline-none focus:ring-2 group-hover:opacity-100 group-[.destructive]:text-red-300 group-[.destructive]:hover:text-red-50 group-[.destructive]:focus:ring-red-400 group-[.destructive]:focus:ring-offset-red-600"
+          aria-label="Close notification"
+        >
+          <X className="h-4 w-4" aria-hidden="true" />
         </ToastPrimitives.Close>
       </ToastPrimitives.Root>
     );
