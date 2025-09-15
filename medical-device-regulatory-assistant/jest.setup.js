@@ -223,3 +223,12 @@ try {
 } catch (error) {
   console.warn('Could not setup test environment:', error.message);
 }
+
+// Setup performance tracking for all tests (Requirements 5.1 and 5.2)
+try {
+  const { setupJestPerformanceTracking } = require('./src/lib/testing/jest-performance-setup');
+  setupJestPerformanceTracking();
+  console.log('📊 Performance tracking enabled for all tests');
+} catch (error) {
+  console.warn('Could not setup performance tracking:', error.message);
+}

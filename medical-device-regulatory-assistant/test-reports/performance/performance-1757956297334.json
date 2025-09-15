@@ -1,0 +1,43 @@
+{
+  "timestamp": "2025-09-15T17:11:37.334Z",
+  "totalSuites": 1,
+  "totalTests": 1,
+  "overallExecutionTime": 248.11745800000062,
+  "overallPassRate": 100,
+  "thresholdCompliance": {
+    "suiteTimeCompliance": true,
+    "consistencyCompliance": true,
+    "memoryCompliance": true
+  },
+  "suiteMetrics": [
+    {
+      "suiteName": "regression-test",
+      "totalTests": 1,
+      "passedTests": 1,
+      "failedTests": 0,
+      "skippedTests": 0,
+      "totalExecutionTime": 248.11745800000062,
+      "averageTestTime": 244.66767199999958,
+      "slowestTest": {
+        "name": "baseline-test",
+        "time": 244.66767199999958
+      },
+      "fastestTest": {
+        "name": "baseline-test",
+        "time": 244.66767199999958
+      },
+      "memoryPeak": 0.002410888671875,
+      "memoryAverage": 0.002410888671875,
+      "consistencyScore": 1,
+      "thresholdViolations": []
+    }
+  ],
+  "recommendations": [],
+  "regressionAnalysis": {
+    "hasRegression": true,
+    "regressionPercentage": 121.40473414827177,
+    "affectedTests": [
+      "baseline-test"
+    ]
+  }
+}
