@@ -118,6 +118,7 @@ export { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from './tool
 // Custom Components
 export { LazyImage } from './lazy-image';
 export { SlashCommandCard } from './slash-command-card';
+export { Avatar, AvatarImage, AvatarFallback } from './avatar';
 
 // Real-time Components
 export { ConnectionStatus, DetailedConnectionStatus } from './connection-status';

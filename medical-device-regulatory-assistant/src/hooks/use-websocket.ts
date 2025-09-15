@@ -342,91 +342,221 @@ export function useStreamingResponse(options: { streamId?: string; onStreamStart
 }
 
 /**
- * Hook for typing indicators in collaborative editing
+ * Enhanced hook for typing indicators in collaborative editing with multi-user support
  */
 export function useTypingIndicators() {
-  const [typingUsers, setTypingUsers] = useState<Array<{ userId: string; userName: string; timestamp: number }>>([]);
+  const [typingUsers, setTypingUsers] = useState<Array<{ 
+    userId: string; 
+    userName: string; 
+    timestamp: number;
+    projectId?: number;
+  }>>([]);
+  const [userPresence, setUserPresence] = useState<Map<string, {
+    userId: string;
+    userName: string;
+    isOnline: boolean;
+    lastSeen: Date;
+  }>>(new Map());
+  
   const typingTimeoutRef = useRef<Map<string, NodeJS.Timeout>>(new Map());
+  const presenceTimeoutRef = useRef<Map<string, NodeJS.Timeout>>(new Map());
 
   const websocket = useWebSocket();
 
-  // Subscribe to typing events
+  // Subscribe to typing and presence events
   useEffect(() => {
     const unsubscribeTypingStart = websocket.subscribe('user_typing_start', (message) => {
-      const { userId, userName } = message.data || {};
+      const { userId, userName, projectId } = message.data || {};
       if (userId) {
         setTypingUsers(prev => {
-          const existing = prev.find(u => u.userId === userId);
+          const existing = prev.find(u => u.userId === userId && u.projectId === projectId);
           if (existing) {
-            return prev.map(u => u.userId === userId ? { ...u, timestamp: Date.now() } : u);
+            return prev.map(u => 
+              u.userId === userId && u.projectId === projectId 
+                ? { ...u, timestamp: Date.now() } 
+                : u
+            );
           }
-          return [...prev, { userId, userName: userName || userId, timestamp: Date.now() }];
+          return [...prev, { userId, userName: userName || userId, timestamp: Date.now(), projectId }];
+        });
+
+        // Update user presence
+        setUserPresence(prev => {
+          const newMap = new Map(prev);
+          newMap.set(userId, {
+            userId,
+            userName: userName || userId,
+            isOnline: true,
+            lastSeen: new Date(),
+          });
+          return newMap;
         });
 
         // Clear existing timeout for this user
-        const existingTimeout = typingTimeoutRef.current.get(userId);
+        const timeoutKey = `${userId}-${projectId || 'global'}`;
+        const existingTimeout = typingTimeoutRef.current.get(timeoutKey);
         if (existingTimeout) {
           clearTimeout(existingTimeout);
         }
 
         // Set new timeout to remove typing indicator
         const timeout = setTimeout(() => {
-          setTypingUsers(prev => prev.filter(u => u.userId !== userId));
-          typingTimeoutRef.current.delete(userId);
+          setTypingUsers(prev => prev.filter(u => 
+            !(u.userId === userId && u.projectId === projectId)
+          ));
+          typingTimeoutRef.current.delete(timeoutKey);
         }, 3000); // Remove after 3 seconds of inactivity
 
-        typingTimeoutRef.current.set(userId, timeout);
+        typingTimeoutRef.current.set(timeoutKey, timeout);
       }
     });
 
     const unsubscribeTypingStop = websocket.subscribe('user_typing_stop', (message) => {
-      const { userId } = message.data || {};
+      const { userId, projectId } = message.data || {};
       if (userId) {
-        setTypingUsers(prev => prev.filter(u => u.userId !== userId));
+        setTypingUsers(prev => prev.filter(u => 
+          !(u.userId === userId && u.projectId === projectId)
+        ));
         
-        const timeout = typingTimeoutRef.current.get(userId);
+        const timeoutKey = `${userId}-${projectId || 'global'}`;
+        const timeout = typingTimeoutRef.current.get(timeoutKey);
         if (timeout) {
           clearTimeout(timeout);
-          typingTimeoutRef.current.delete(userId);
+          typingTimeoutRef.current.delete(timeoutKey);
         }
+      }
+    });
+
+    const unsubscribeUserJoined = websocket.subscribe('user_joined', (message) => {
+      const { userId, userName } = message.data || {};
+      if (userId) {
+        setUserPresence(prev => {
+          const newMap = new Map(prev);
+          newMap.set(userId, {
+            userId,
+            userName: userName || userId,
+            isOnline: true,
+            lastSeen: new Date(),
+          });
+          return newMap;
+        });
+      }
+    });
+
+    const unsubscribeUserLeft = websocket.subscribe('user_left', (message) => {
+      const { userId } = message.data || {};
+      if (userId) {
+        setUserPresence(prev => {
+          const newMap = new Map(prev);
+          const user = newMap.get(userId);
+          if (user) {
+            newMap.set(userId, {
+              ...user,
+              isOnline: false,
+              lastSeen: new Date(),
+            });
+          }
+          return newMap;
+        });
+
+        // Remove from typing users
+        setTypingUsers(prev => prev.filter(u => u.userId !== userId));
+      }
+    });
+
+    const unsubscribePresenceUpdate = websocket.subscribe('presence_update', (message) => {
+      const { users } = message.data || {};
+      if (Array.isArray(users)) {
+        setUserPresence(prev => {
+          const newMap = new Map(prev);
+          users.forEach((user: unknown) => {
+            newMap.set(user.userId, {
+              userId: user.userId,
+              userName: user.userName || user.userId,
+              isOnline: user.isOnline,
+              lastSeen: new Date(user.lastSeen),
+            });
+          });
+          return newMap;
+        });
       }
     });
 
     return () => {
       unsubscribeTypingStart();
       unsubscribeTypingStop();
+      unsubscribeUserJoined();
+      unsubscribeUserLeft();
+      unsubscribePresenceUpdate();
       
       // Clear all timeouts
       typingTimeoutRef.current.forEach(timeout => clearTimeout(timeout));
       typingTimeoutRef.current.clear();
+      presenceTimeoutRef.current.forEach(timeout => clearTimeout(timeout));
+      presenceTimeoutRef.current.clear();
     };
   }, [websocket]);
 
-  const startTyping = useCallback((userId: string, userName?: string) => {
+  const startTyping = useCallback((userId: string, userName?: string, projectId?: number) => {
     websocket.sendMessage({
       type: 'user_typing_start',
-      data: { userId, userName },
+      data: { userId, userName, projectId },
       timestamp: new Date().toISOString(),
+      project_id: projectId,
     });
   }, [websocket]);
 
-  const stopTyping = useCallback((userId: string) => {
+  const stopTyping = useCallback((userId: string, projectId?: number) => {
     websocket.sendMessage({
       type: 'user_typing_stop',
-      data: { userId },
+      data: { userId, projectId },
       timestamp: new Date().toISOString(),
+      project_id: projectId,
     });
   }, [websocket]);
 
-  const isUserTyping = useCallback((userId: string): boolean => {
-    return typingUsers.some(u => u.userId === userId);
+  const joinProject = useCallback((userId: string, userName: string, projectId: number) => {
+    websocket.sendMessage({
+      type: 'user_joined',
+      data: { userId, userName, projectId },
+      timestamp: new Date().toISOString(),
+      project_id: projectId,
+    });
+  }, [websocket]);
+
+  const leaveProject = useCallback((userId: string, projectId: number) => {
+    websocket.sendMessage({
+      type: 'user_left',
+      data: { userId, projectId },
+      timestamp: new Date().toISOString(),
+      project_id: projectId,
+    });
+  }, [websocket]);
+
+  const isUserTyping = useCallback((userId: string, projectId?: number): boolean => {
+    return typingUsers.some(u => 
+      u.userId === userId && (projectId === undefined || u.projectId === projectId)
+    );
+  }, [typingUsers]);
+
+  const getOnlineUsers = useCallback(() => {
+    return Array.from(userPresence.values()).filter(user => user.isOnline);
+  }, [userPresence]);
+
+  const getUsersTypingInProject = useCallback((projectId: number) => {
+    return typingUsers.filter(u => u.projectId === projectId);
   }, [typingUsers]);
 
   return {
     typingUsers,
+    userPresence: Array.from(userPresence.values()),
     startTyping,
     stopTyping,
+    joinProject,
+    leaveProject,
     isUserTyping,
+    getOnlineUsers,
+    getUsersTypingInProject,
     connectionStatus: websocket.connectionStatus,
   };
 }
