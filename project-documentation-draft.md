@@ -1,334 +1,255 @@
-# InventA: An Agentic AI Medical Device Regulatory Pathway Planner
+# MedevAI: An Agentic Medical Device Regulatory Pathway Planner
 
 ## Elevator Pitch
 
-**Streamline FDA regulatory pathways for medical device startups with AI-powered predicate search and compliance automation - reducing 510(k) preparation time from weeks to hours.**
+**Streamline FDA regulatory pathway planning with AI-powered predicate search and compliance automation—reducing 510(k) preparation time from weeks to hours.**
 
 ## About the Project
 
-### What Inspired This Project
+* Inspiration
+* What it does
+* How we built it
+* Challenges we ran into
+* Accomplishments that we're proud of
+* What we learned
+* What's next for
 
-The medical device industry faces a critical bottleneck in regulatory approval processes. Regulatory Affairs Managers at medical device startups (10-50 employees) often spend 2-3 days manually searching for predicate devices and analyzing substantial equivalence for 510(k) submissions. This time-intensive process is not only costly but also error-prone, with 15% of submissions failing due to incorrect predicate selection.
+### Inspiration
 
-I was inspired to build InventA after recognizing that this regulatory complexity could be dramatically simplified through intelligent automation. The FDA's openFDA API provides a wealth of regulatory data, but accessing and analyzing it effectively requires specialized knowledge and significant time investment.
+Bringing a medical device to market is fraught with regulatory hurdles, where even a single misstep contributes to a 15% submission failure rate. We developed MedevAI after witnessing startups lose precious time and resources on the manual, error-prone search for predicate devices, reference guidance, and the setup of practical device tests and clinical trials. These bottlenecks aren’t caused by a lack of data, but by the lack of accessible tools to integrate it; the FDA’s open data is a treasure trove that remains locked for most. MedevAI is the key. It was created from the conviction that intelligent automation can transform this high-risk, multi-day ordeal into a streamlined, reliable process, empowering innovators to focus on what they do best: building the future of medical devices—while agentic AI clears the path.
 
-### What I Learned
+### What it does
 
-Building MedevAI taught me several key lessons about developing AI-powered regulatory tools:
+MedevAI is an intelligent regulatory assistant that transforms the complex FDA medical device approval process into a streamlined, AI-powered workflow. The platform serves as a comprehensive regulatory pathway planner that helps medical device companies navigate the intricate 510(k) submission process with unprecedented speed and accuracy.
 
-**Technical Architecture Insights:**
+**Core Capabilities:**
 
-- **Agent-Based Design**: Implementing LangGraph for state-based agent workflows proved essential for handling complex, multi-step regulatory processes that can be interrupted and resumed
-- **Real-time Data Integration**: Working with the openFDA API taught me the importance of robust rate limiting (240 requests/minute), circuit breaker patterns, and comprehensive error handling for external API dependencies
-- **Compliance-First Development**: Building for regulatory use cases requires extensive audit trails, confidence scoring, and human-in-the-loop validation at every step
+- **Intelligent Device Classification**: Automatically determines FDA device class (I, II, III) and identifies appropriate product codes based on device description and intended use
+- **AI-Powered Predicate Search**: Performs semantic analysis to find the most suitable predicate devices from the FDA database, ranking them by substantial equivalence potential
+- **Comparative Analysis Engine**: Generates detailed side-by-side comparisons between user devices and potential predicates, highlighting similarities and differences that impact regulatory strategy
+- **Regulatory Guidance Mapping**: Automatically identifies and retrieves relevant FDA guidance documents, special controls, and testing requirements specific to each device type
+- **Compliance Checklist Generation**: Creates customized 510(k) submission checklists based on device classification and predicate analysis
+- **Audit Trail Management**: Maintains comprehensive, exportable audit logs of all AI decisions and reasoning for regulatory compliance
 
-**Domain-Specific Challenges:**
+The system operates through an intuitive conversational interface powered by advanced AI agents, allowing regulatory professionals to interact naturally while maintaining the rigor and documentation standards required for FDA submissions.
 
-- **Regulatory Complexity**: Understanding FDA product codes, CFR sections, and substantial equivalence criteria required deep domain research
-- **Data Quality**: FDA data varies significantly in completeness and format, requiring sophisticated parsing and confidence scoring algorithms
-- **User Experience**: Regulatory professionals need both conversational AI interfaces and structured data exports for formal submissions
 
-**Performance and Scalability:**
+### How We Built it
 
-- **Caching Strategy**: Implementing Redis caching reduced API response times by 80% for repeated queries
-- **Database Design**: SQLite proved sufficient for MVP development while maintaining audit trail requirements
-- **Testing Infrastructure**: Achieving 95%+ test success rates required comprehensive mock systems and database isolation strategies
+The system's architecture is centered around a powerful AI agent designed to act as a specialized regulatory assistant. This agent is the core of the platform, automating and augmenting the complex work of regulatory professionals.
 
-### How I Built the Project
+The **frontend** is a modern web application built with `Next.js`, `React`, and `TypeScript`, leveraging the `App Router` for a seamless user experience. The interface is designed with `Shadcn UI` for consistency and accessibility, styled with `Tailwind CSS` for responsive layouts, and enhanced with `CopilotKit` to deliver an intuitive, AI-powered conversational interface. Authentication is securely managed by `NextAuth.js` using `Google OAuth 2.0`.  
 
-**Frontend Architecture (Next.js + React):**
+The **backend** services are built on the high-performance `FastAPI` framework in Python. The system adopts an agent-based architecture using `LangGraph` to create state-managed, auditable workflows for regulatory tasks. Data is temporarily stored in a `SQLite` database via the `SQLAlchemy ORM`, with `Redis` integrated for intelligent caching and session management to maintain high performance.
 
-```typescript
-// Core technology stack
-- Next.js 15 with App Router for modern React development
-- Shadcn UI components for consistent, accessible design
-- CopilotKit for AI-powered conversational interfaces
-- Tailwind CSS for responsive, mobile-first styling
-- NextAuth.js for Google OAuth 2.0 authentication
-```
+### Challenges we ran into
 
-**Backend Services (FastAPI + Python):**
+- **FDA API Complexity and Rate Limiting**: The openFDA API has strict rate limits and inconsistent data formats. We implemented intelligent caching with Redis, circuit breaker patterns for resilience, and exponential backoff logic to manage these constraints effectively.
+- **Regulatory Compliance Requirements**: To meet the need for auditability and human oversight, We designed the system to produce complete reasoning traces for all AI decisions, confidence scores with detailed justifications, and exportable audit logs.
+- **Complex State Management**: Regulatory processes are long-running and can be interrupted. We used the LangGraph framework to build a state-based agent architecture with checkpoints, allowing workflows to be paused and resumed seamlessly.
+- **Testing Reliability**: Achieving consistent test results required creating mock FDA API responses, isolating database transactions for each test, and implementing performance monitoring with automated alerts.
+- **User Experience for Domain Experts**: We designed a dual interface that provides both a conversational AI for quick analysis and structured data tables with PDF export for formal submission work.
 
-```python
-# Agent-based architecture
-- LangGraph for state-managed regulatory workflows
-- FastAPI for high-performance API endpoints
-- SQLAlchemy with SQLite for audit-compliant data storage
-- Redis for intelligent caching and session management
-- Comprehensive error handling and circuit breaker patterns
-```
+### Accomplishments that we're proud of
 
-**AI Integration Strategy:**
-The system uses a "human-in-the-loop" philosophy where AI suggests and automates, but human experts make final decisions. Every AI output includes:
+**Revolutionary Time Reduction**: Successfully reduced predicate device identification from 2-3 days of manual research to under 2 hours of AI-assisted analysis, representing a 90%+ time savings for regulatory teams.
 
-- Confidence scores (0-1) with detailed reasoning
-- Complete source citations with URLs and effective dates
-- Exportable audit trails for regulatory inspections
+**Regulatory-Grade AI Architecture**: Built the first LangGraph-based agent system specifically designed for FDA compliance, featuring complete audit trails, confidence scoring, and human-in-the-loop validation that meets regulatory inspection standards.
 
-**Key Technical Innovations:**
+**Intelligent Semantic Search**: Developed sophisticated predicate matching algorithms that go beyond keyword searches to perform semantic analysis of device descriptions and intended use statements, dramatically improving match quality and relevance.
 
-1. **Intelligent Predicate Matching Algorithm:**
-   
-   ```python
-   # Advanced FDA API query building
-   def build_predicate_query(device_description, intended_use, product_code=None):
-    query_parts = []
-   
-    # Semantic matching for device characteristics
-    for term in extract_key_terms(device_description):
-        query_parts.append(f'device_name:"{term}" OR statement_or_summary:"{term}"')
-   
-    # Regulatory pathway filtering
-    if product_code:
-        query_parts.append(f'product_code:"{product_code}"')
-   
-    return " AND ".join(query_parts)
-   ```
+**Real-Time FDA Integration**: Successfully integrated with the openFDA API to provide live, up-to-date regulatory data while implementing robust rate limiting, caching, and error handling to ensure system reliability.
 
-2. **Real-time Regulatory Dashboard:**
-   
-   ```typescript
-   // Project-based workspace management
-   interface RegulatoryProject {
-   deviceName: string;
-   intendedUse: string;
-   classificationStatus: DeviceClass;
-   predicateDevices: PredicateDevice[];
-   complianceChecklist: ChecklistItem[];
-   auditTrail: AgentInteraction[];
-   }
-   ```
+**Domain-Specific Expertise**: Created an AI system that demonstrates deep understanding of FDA regulatory concepts like substantial equivalence, product codes, and CFR sections - essentially encoding regulatory expertise into software.
 
-3. **Comprehensive Testing Infrastructure:**
-- **95%+ Frontend Test Success Rate**: Enhanced React Testing Library with proper `act()` wrapping
-- **100% Backend Integration Success**: Database isolation with automatic rollback
-- **Performance Monitoring**: <30 second test execution with memory leak detection
+**Comprehensive Testing Framework**: Achieved high test coverage across frontend, backend, and integration layers, with specialized testing for regulatory workflows and FDA API interactions.
 
-### Challenges I Faced
+**User-Centric Design**: Delivered a dual-interface system that provides both conversational AI for quick analysis and structured data exports for formal regulatory submissions, perfectly balancing ease of use with professional requirements.
 
-**1. FDA API Complexity and Rate Limiting**
-The openFDA API has strict rate limits (240 requests/minute) and inconsistent data formats. I solved this by implementing:
+### What we learned
 
-- Intelligent caching with Redis (80% cache hit rate)
-- Circuit breaker patterns for API resilience
-- Exponential backoff with retry logic
-- Comprehensive error handling for all FDA response codes
+Building MedevAI taught us several key lessons about developing AI-powered regulatory tools. On the technical side, we learned that an agent-based design using LangGraph can effectively manage complex, multi-step regulatory workflows in collaboration with humans. Integrating with the real-time openFDA API underscored the importance of robust engineering practices, including rate limiting, circuit breaker patterns, and comprehensive error handling. Most importantly, working in a regulated field requires a compliance-first mindset, which means embedding extensive audit trails, confidence scoring, and human-in-the-loop validation at every step.
 
-**2. Regulatory Compliance Requirements**
-Building for regulatory use requires extensive audit trails and human oversight. My solutions included:
+From a domain perspective, we gained a deep appreciation for the nuances of regulatory work—designing and maintaining medical devices is hard work. From understanding FDA product codes and substantial equivalence criteria to handling the variable quality of public data, the challenges are significant. This often required creating sophisticated paperwork involving patients. We also learned that the user experience for regulatory professionals must blend conversational AI for ease of use with structured data exports for formal submissions. Such an approach can significantly reduce the workload of regulatory affairs teams and enable device companies to make faster, more informed decisions.
 
-- Complete reasoning traces for all AI decisions
-- Confidence scoring with detailed justification
-- Exportable audit logs for regulatory inspections
-- Human approval gates for critical decisions
 
-**3. Complex State Management for Agent Workflows**
-Regulatory processes are multi-step and can be interrupted. I addressed this with:
+## What's next for MedevAI
 
-- LangGraph state-based agent architecture
-- Checkpoint system for long-running processes
-- Conversation context preservation across sessions
-- Resumable workflow execution
+**Enhanced AI Capabilities**: Expanding the agent system to handle more complex regulatory scenarios, including De Novo pathway analysis, PMA submissions, and post-market surveillance requirements.
 
-**4. Testing Reliability in Complex Systems**
-Achieving consistent test results across frontend and backend required:
+**Global Regulatory Expansion**: Extending beyond FDA to support EU MDR, Health Canada, and other international regulatory frameworks, creating a truly global regulatory intelligence platform.
 
-- Mock FDA API responses with realistic data
-- Database transaction isolation for each test
-- Comprehensive error resolution systems
-- Performance monitoring with automated alerts
+**Advanced Analytics Dashboard**: Developing predictive analytics to forecast submission success rates, identify potential regulatory risks, and provide strategic recommendations based on historical FDA decision patterns.
 
-**5. User Experience for Domain Experts**
-Regulatory professionals need both AI assistance and traditional data exports:
+**Integration Ecosystem**: Building APIs and integrations with popular QMS systems, PLM platforms, and regulatory databases to create a seamless regulatory workflow ecosystem.
 
-- Conversational UI with CopilotKit for natural interactions
-- Structured data tables for formal analysis
-- PDF export capabilities for submission materials
-- Quick action buttons for common regulatory tasks
+**Collaborative Features**: Adding multi-user support, team collaboration tools, and version control for regulatory documents to support larger regulatory teams and cross-functional projects.
+
+**Machine Learning Enhancement**: Implementing continuous learning capabilities that improve predicate matching accuracy and regulatory insights based on user feedback and FDA decision outcomes.
+
+**Mobile and Offline Capabilities**: Developing mobile applications and offline functionality to support regulatory professionals working in various environments and connectivity conditions.
+
+
+#### The Role of the AI Agent
+
+The **AI agent** is the core of MedevAI, built on a "human-in-the-loop" philosophy. It functions as an intelligent assistant rather than a final decision-maker. Its primary role is to execute complex, multi-step regulatory workflows—such as determining device classification, identifying predicate devices, and mapping relevant FDA guidance documents.
+
+The agent’s workflows are stateful, meaning they can be paused, resumed, and audited at any point. When a user initiates a task, like a **predicate search**, the agent leverages specialized tools to query the openFDA API, analyze results, and rank potential candidates.
+
+Crucially, every piece of information the agent provides is accompanied by a **confidence score**, detailed reasoning for its conclusions, and complete source citations with URLs and effective dates. This transparency is essential for regulatory compliance and allows human experts to validate the AI’s findings before making final decisions. All interactions are recorded in an immutable audit trail, ensuring full traceability for regulatory inspections.
+
+#### Key Technical Innovations
+
+One of the key innovations is the **Intelligent Predicate Matching Algorithm**. Instead of simple keyword searches, the system performs semantic analysis on the device's description and intended use. It constructs advanced queries for the FDA API, filtering by regulatory criteria like product codes to identify the most relevant predicate devices.
+
+This is presented to the user through a **Real-time Regulatory Dashboard**, which serves as a project-based workspace. For each medical device project, the system maintains its classification status, a list of potential predicate devices, a dynamic compliance checklist, and a complete, transparent audit trail of every interaction with the AI agent.
+
 
 ### Technical Architecture Highlights
 
-**Microservices Design:**
+The system is designed with a clear separation of concerns. The **Frontend**, built with Next.js, contains all UI components, including the project hub, regulatory dashboards, and the agent workflow interface. This layer communicates with the backend via a dedicated **API Layer** built into Next.js.
 
-```text
-┌─────────────────────────────────────────────────────────────┐
-│                    Frontend (Next.js)                       │
-├─────────────────────────────────────────────────────────────┤
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐          │
-│  │   Project   │  │ Regulatory  │  │   Agent     │          │
-│  │     Hub     │  │ Dashboard   │  │  Workflow   │          │
-│  └─────────────┘  └─────────────┘  └─────────────┘          │
-├─────────────────────────────────────────────────────────────┤
-│                 API Layer (Next.js API Routes)              │
-├─────────────────────────────────────────────────────────────┤
-│                    Backend Services (FastAPI)               │
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐          │
-│  │  LangGraph  │  │   openFDA   │  │  Document   │          │
-│  │   Agents    │  │ Integration │  │ Processing  │          │
-│  └─────────────┘  └─────────────┘  └─────────────┘          │
-├─────────────────────────────────────────────────────────────┤
-│                     Data Layer                              │
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐          │
-│  │   SQLite    │  │  Markdown   │  │    JSON     │          │
-│  │  Database   │  │    Files    │  │ Structured  │          │
-│  └─────────────┘  └─────────────┘  └─────────────┘          │
-└─────────────────────────────────────────────────────────────┘
-```
-
-**Performance Optimizations:**
-
-- Turbopack for 10x faster frontend development builds
-- Redis caching reducing API response times by 80%
-- Database indexing for sub-second regulatory queries
-- Lazy loading and code splitting for optimal bundle sizes
+The **Backend Services**, powered by FastAPI, house the core business logic and AI capabilities. This includes the LangGraph agents for executing regulatory tasks, the openFDA integration for real-time data, and document processing modules. This entire system rests on a **Data Layer** that uses a SQLite database for structured data and audit trails, while also managing Markdown files and JSON for storing project-specific information. Performance is enhanced across the stack with Turbopack for faster frontend builds, Redis caching for the backend, and database indexing for rapid queries.
 
 ## Built With
 
 ### Core Technologies
 
-**Frontend Stack:**
+The **frontend stack** is built on Next.js 15 and React 19, using TypeScript for type safety. The user interface is crafted with Tailwind CSS for utility-first styling and Shadcn UI for a high-quality, accessible component library. The conversational AI experience is powered by CopilotKit.
 
-- **Next.js 15** - React framework with App Router for modern development
-- **React 19** - Latest React with concurrent features and improved performance
-- **TypeScript** - Type-safe development with strict mode enabled
-- **Tailwind CSS** - Utility-first CSS framework for responsive design
-- **Shadcn UI** - High-quality, accessible component library
-- **CopilotKit** - AI-powered conversational interfaces and chat components
+The **backend stack** uses FastAPI, a high-performance Python web framework, running on Python 3.11+. It leverages SQLAlchemy as its ORM for database interactions with a SQLite database, and uses Redis for in-memory caching to boost performance.
 
-**Backend Stack:**
-
-- **FastAPI** - High-performance Python web framework with automatic OpenAPI docs
-- **Python 3.11+** - Modern Python with enhanced performance and type hints
-- **SQLAlchemy** - Powerful ORM with async support for database operations
-- **SQLite** - Lightweight, serverless database perfect for MVP development
-- **Redis** - In-memory caching and session storage for performance optimization
-
-**AI & Agent Framework:**
-
-- **LangGraph** - State-based agent workflows for complex regulatory processes
-- **LangChain** - LLM integration and tool orchestration
-- **OpenAI API** - GPT models for natural language processing and analysis
+The **AI and Agent Framework** is what makes the system intelligent. It uses LangGraph to orchestrate state-based agent workflows, allowing for complex and auditable task execution. LangChain is used for the broader integration of Large Language Models (LLMs) and tool orchestration, all powered by the OpenAI API for advanced natural language processing.
 
 ### Development Tools & Infrastructure
 
-**Package Management:**
-
-- **pnpm** - Fast, disk-efficient package manager for frontend dependencies
-- **Poetry** - Deterministic Python dependency management with virtual environments
-
-**Testing & Quality Assurance:**
-
-- **Jest** - JavaScript testing framework with comprehensive coverage reporting
-- **React Testing Library** - Component testing with accessibility-first approach
-- **pytest** - Python testing framework with async support and fixtures
-- **Playwright** - End-to-end testing across multiple browsers and devices
-- **ESLint & Prettier** - Code linting and formatting for consistent style
-
-**Performance & Monitoring:**
-
-- **Lighthouse CI** - Automated performance auditing and regression detection
-- **Bundle Analyzer** - JavaScript bundle size optimization and monitoring
-- **Sentry** - Error tracking and performance monitoring in production
-
-### External APIs & Services
-
-**Regulatory Data Sources:**
-
-- **openFDA API** - Real-time access to FDA device databases (510k, classifications, adverse events)
-- **FDA Guidance Documents** - Automated retrieval and parsing of regulatory guidance
-
-**Authentication & Security:**
-
-- **NextAuth.js** - Secure authentication with Google OAuth 2.0 integration
-- **JWT Tokens** - Stateless authentication for API security
-- **CORS Middleware** - Cross-origin request security configuration
+For package management, the project uses **pnpm** for the frontend and **Poetry** for the backend, ensuring fast and deterministic dependency management. The testing and quality assurance suite is comprehensive, utilizing **Jest** and **React Testing Library** for the frontend, **pytest** for the backend, and **Playwright** for end-to-end testing. Code quality is maintained with ESLint and Prettier. Performance is continuously monitored using Lighthouse CI and Sentry for error tracking.
 
 ### Database & Storage
 
-**Data Architecture:**
-
-```sql
--- Core project management
-CREATE TABLE projects (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL,
-    device_type TEXT,
-    intended_use TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- Predicate device analysis
-CREATE TABLE predicate_devices (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    project_id INTEGER REFERENCES projects(id),
-    k_number TEXT NOT NULL,
-    confidence_score REAL,
-    comparison_data JSON,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- Comprehensive audit trail
-CREATE TABLE agent_interactions (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    project_id INTEGER REFERENCES projects(id),
-    agent_action TEXT NOT NULL,
-    input_data JSON,
-    output_data JSON,
-    confidence_score REAL,
-    reasoning TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-```
+The data architecture is designed for compliance and auditability. The database schema consists of three core tables. A `projects` table manages the high-level details of each regulatory project. A `predicate_devices` table stores the results of the AI's analysis, including K-numbers, confidence scores, and comparison data. Most importantly, an `agent_interactions` table provides a-comprehensive audit trail, logging every action the agent takes, its inputs, outputs, confidence scores, and reasoning. This ensures full traceability for every decision made within the system.
 
 ### Development Environment
 
-**Cross-Platform Support:**
+The project is built to be cross-platform, with setup and startup scripts provided for macOS, Linux, and Windows (both PowerShell and Command Prompt). It also includes Docker configuration for containerized deployments, ensuring a consistent environment for development and production.
 
-- **macOS/Linux**: Shell scripts with proper permissions and error handling
-- **Windows**: Both PowerShell (.ps1) and Command Prompt (.bat) scripts
-- **Docker**: Containerized deployment for consistent environments
+## How was Kiro used in your project?
 
-**Environment Management:**
+Kiro was instrumental in building the entire Medical Device Regulatory Assistant MVP from the ground up. The development process leveraged Kiro's advanced capabilities across multiple dimensions:
 
-```bash
-# Automated environment validation
-./scripts/validate-package-managers.sh
+**Full-Stack Development**: Kiro generated the complete frontend built with React, TypeScript, and Next.js 15, including the conversational AI interface powered by CopilotKit. It also created the FastAPI backend with Python, implementing the LangGraph agent architecture for complex regulatory workflows.
 
-# Development startup (all platforms)
-./start-dev.sh  # macOS/Linux
-scripts\windows\start-all.ps1  # Windows PowerShell
-scripts\windows\start-all.bat  # Windows Command Prompt
-```
+**Intelligent Architecture Design**: Rather than just writing code, Kiro helped us design the entire system architecture, including the agent-based workflow system, database schema for audit trails, and the integration patterns between frontend and backend services.
 
-### Production Deployment
+**Regulatory Domain Expertise**: Kiro demonstrated deep understanding of FDA regulatory requirements, helping us implement features like predicate device search algorithms, substantial equivalence analysis, and compliance audit trails that meet regulatory standards.
 
-**Deployment Options:**
+**Testing and Quality Assurance**: Kiro created comprehensive test suites using Jest, React Testing Library, and pytest, ensuring the system meets the high reliability standards required for regulatory applications.
 
-- **Vercel/Netlify** - Serverless deployment for frontend with automatic CI/CD
-- **Docker Compose** - Multi-container deployment with nginx reverse proxy
-- **Traditional VPS** - PM2 process management with automated SSL certificates
 
-**Production Features:**
+## For building and vibe coding from scratch: How did you structure your conversations with Kiro to build your project?
 
-- **Health Check Endpoints** - Comprehensive system monitoring and alerting
-- **Error Tracking** - Sentry integration for production error monitoring
-- **Performance Monitoring** - Real-time metrics and performance optimization
-- **Automated Backups** - Database and file system backup strategies
+The development process with Kiro followed a structured, iterative approach:
 
-### Key Integrations
+**1. Requirements Discovery**: We started by defining user personas (regulatory affairs managers at medical device startups) and their specific jobs-to-be-done (finding predicate devices, navigating FDA regulations). This provided clear context for all subsequent development.
 
-**Regulatory Workflow Automation:**
+**2. Technical Foundation**: We outlined the preferred tech stack (Next.js, FastAPI, LangGraph) and core features (predicate search, device classification, compliance tracking) through collaborative discussions with Kiro in vibe mode.
 
-- Automated device classification with FDA product codes
-- Intelligent predicate search with confidence scoring
-- Real-time FDA guidance document mapping
-- Comprehensive 510(k) submission checklist generation
+**3. Architecture Refinement**: We conducted multiple iterative conversations to clarify technical specifications, user interface designs, and system integrations. Kiro's ability to understand regulatory domain requirements was crucial here.
 
-**Compliance & Audit Features:**
+**4. Steering Document Creation**: We consolidated all insights into comprehensive steering documents and MVP specifications, which became the foundation for all subsequent development tasks.
 
-- Complete audit trails for all AI decisions
-- Exportable reports for regulatory submissions
-- Human-in-the-loop approval workflows
-- Source citation with URLs and effective dates
+**5. Parallel Development**: We split work between frontend and backend development, leveraging Kiro's ability to maintain context across different technology stacks and run tests in parallel for maximum efficiency.
 
-This technology stack was specifically chosen to balance rapid MVP development with the stringent requirements of regulatory compliance, ensuring both developer productivity and end-user trust in a highly regulated industry.
+**6. Integration and Refinement**: We transitioned to unified development to resolve integration issues and replace mock data with real FDA API integrations.
+
+
+
+## For agent hooks: What specific workflows did you automate with Kiro hooks? How did these hooks improve your development process?
+
+Agent hooks transformed our routine development tasks into automated, consistent workflows. The hooks were primarily triggered manually via `Execute hook: [hook_name]` commands, functioning like intelligent slash commands.
+
+**Key Automated Workflows:**
+
+- **create-test**: Automatically creates new tasks in spec folders and appends them to task.md files with proper formatting
+- **fix_error**: Analyzes error logs, performs root cause analysis, creates detailed fix plans, and generates task execution reports
+- **fetch_content**: Creates learning materials from provided content or files, with comprehensive analysis and documentation
+- **find_redundant**: Identifies duplicate or unused files in the codebase with detailed analysis of their purpose and usage
+- **refactor_code**: Systematically analyzes code for refactoring opportunities and redundancies
+- **security_analysis**: Performs security analysis on error logs and system components with detailed reporting
+- **task_report**: Generates comprehensive task execution reports with test results, changes, and code snippets
+- **verify_test**: Validates test completion and documents results in standardized formats
+- **learning_material**: Creates educational content based on project context and user-provided materials
+
+
+
+## For spec-to-code: How did you structure your spec for Kiro to implement? How did the spec-driven approach improve your development process?
+
+**Spec Structure and Evolution:**
+
+We built the specification architecture in layers, starting with foundational steering documents that emerged from extensive collaborative sessions with multiple AI systems (Kiro, ChatGPT, Gemini, Claude). This multi-AI approach ensured comprehensive coverage of technical requirements and regulatory domain expertise.
+
+**Key Specification Components:**
+
+- **Steering Documents**: Core architectural guidelines, technical implementation standards, and regulatory compliance requirements
+- **MVP Specifications**: Detailed feature definitions, user workflows, and acceptance criteria
+- **Agent Instruction Templates**: Standardized patterns for regulatory workflows like predicate search and device classification
+- **Technical Implementation Guidelines**: Package management standards, testing requirements, and development workflows
+
+**Iterative Refinement Process:**
+
+The early stages required multiple rounds of discussion and modification to establish solid foundations. However, once we established the core steering documents, new specifications could organically grow from these foundations, creating a self-reinforcing development ecosystem.
+
+**Process Transformation:**
+
+The spec-driven approach fundamentally transformed our development from reactive "vibe coding" to proactive, autonomous execution. Key improvements included:
+
+- **Reduced Human Intervention**: Our focus shifted from implementation details to high-level strategy and spec design
+- **Autonomous Development**: Well-defined specs enabled Kiro to execute complex tasks independently
+- **Consistent Quality**: Standardized patterns ensured regulatory compliance and technical excellence
+- **Scalable Growth**: New features could be specified and implemented without disrupting existing systems
+
+This approach proved especially valuable for regulatory software, where consistency, auditability, and compliance are paramount. 
+
+
+#### Spec-driven development
+
+* Use special prompts in `task.md` or `design.md` to guide LLM in applying test-driven development (TDD).
+
+1. Generate a `task execution report` for each completed task, highlighting finished work and failed tests.
+2. Leverage reports to quickly identify issues and missing features during iterative development.
+
+
+#### Steering documents
+
+1. Keep steering documents lightweight but updated, linking to supporting references for specific jobs.
+2. For example, when creating error-fix tasks, follow a chain: error analysis → cause identification → error-fix task creation. Documents serve as references for error handling, not feature development.
+
+#### MCP servers
+
+1. Use `context7`, `fetch`, and `playwright` MCPs to retrieve relevant documents.
+2. Instruct LLM to consult these MCPs for solutions before attempting complex problem fixes.
+
+
+
+
+## What was the most impressive code generation Kiro helped you with?
+
+The most impressive aspect of Kiro was its ability to create sophisticated, domain-specific solutions from minimal and ambiguous requirements. Three standout achievements:
+
+**1. Intelligent Agent Architecture**: Kiro designed and implemented the entire LangGraph-based agent system that handles complex regulatory workflows. This included state management, checkpointing for long-running processes, and sophisticated error handling - all while maintaining audit trails required for regulatory compliance.
+
+**2. FDA API Integration with Intelligence**: Rather than simple API calls, Kiro created an intelligent predicate search system that performs semantic analysis on device descriptions, constructs advanced FDA database queries, and ranks results by substantial equivalence potential - essentially building regulatory expertise into the code.
+
+**3. Spec-Driven Development Transformation**: The transition from vibe coding to spec-driven development was revolutionary. With well-defined specifications, our development became like "driving on a highway with precise destinations" - each task became a waypoint that could be executed autonomously. This allowed for parallel development streams and enabled us to focus on high-level strategy while Kiro handled implementation details.
+
+The system's ability to self-evolve through iterative spec refinement meant that complex features could grow and refactor themselves with minimal human intervention, dramatically accelerating our development velocity.
+
+
+
+**Process Improvements:**
+
+These hooks dramatically improved our development velocity by standardizing error analysis, task creation, and documentation processes. Instead of manually writing task reports or analyzing errors, the hooks ensured consistent, thorough analysis with proper audit trails - essential for a regulatory compliance system.
+
+
+
+---
