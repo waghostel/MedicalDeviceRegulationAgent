@@ -1,0 +1,126 @@
+{
+  "reports": [
+    {
+      "timestamp": "2025-09-15T17:11:36.953Z",
+      "totalSuites": 1,
+      "totalTests": 3,
+      "overallExecutionTime": 218.51710000000094,
+      "overallPassRate": 66.66666666666666,
+      "thresholdCompliance": {
+        "suiteTimeCompliance": true,
+        "consistencyCompliance": true,
+        "memoryCompliance": true
+      },
+      "suiteMetrics": [
+        {
+          "suiteName": "report-test-suite",
+          "totalTests": 3,
+          "passedTests": 2,
+          "failedTests": 1,
+          "skippedTests": 0,
+          "totalExecutionTime": 218.51710000000094,
+          "averageTestTime": 70.65698700000091,
+          "slowestTest": {
+            "name": "test-2",
+            "time": 82.22190200000114
+          },
+          "fastestTest": {
+            "name": "test-0",
+            "time": 63.383755999999266
+          },
+          "memoryPeak": 0.0030517578125,
+          "memoryAverage": 0.0022125244140625,
+          "consistencyScore": 0.8829879007913847,
+          "thresholdViolations": []
+        }
+      ],
+      "recommendations": [
+        "Focus on improving test reliability to achieve >95% pass rate"
+      ]
+    },
+    {
+      "timestamp": "2025-09-15T17:11:37.083Z",
+      "totalSuites": 1,
+      "totalTests": 1,
+      "overallExecutionTime": 110.5069739999999,
+      "overallPassRate": 100,
+      "thresholdCompliance": {
+        "suiteTimeCompliance": true,
+        "consistencyCompliance": true,
+        "memoryCompliance": true
+      },
+      "suiteMetrics": [
+        {
+          "suiteName": "regression-test",
+          "totalTests": 1,
+          "passedTests": 1,
+          "failedTests": 0,
+          "skippedTests": 0,
+          "totalExecutionTime": 110.5069739999999,
+          "averageTestTime": 108.37733700000172,
+          "slowestTest": {
+            "name": "baseline-test",
+            "time": 108.37733700000172
+          },
+          "fastestTest": {
+            "name": "baseline-test",
+            "time": 108.37733700000172
+          },
+          "memoryPeak": 0.0030364990234375,
+          "memoryAverage": 0.0030364990234375,
+          "consistencyScore": 1,
+          "thresholdViolations": []
+        }
+      ],
+      "recommendations": [],
+      "regressionAnalysis": {
+        "hasRegression": false,
+        "regressionPercentage": -50.40326958393588,
+        "affectedTests": []
+      }
+    },
+    {
+      "timestamp": "2025-09-15T17:11:37.334Z",
+      "totalSuites": 1,
+      "totalTests": 1,
+      "overallExecutionTime": 248.11745800000062,
+      "overallPassRate": 100,
+      "thresholdCompliance": {
+        "suiteTimeCompliance": true,
+        "consistencyCompliance": true,
+        "memoryCompliance": true
+      },
+      "suiteMetrics": [
+        {
+          "suiteName": "regression-test",
+          "totalTests": 1,
+          "passedTests": 1,
+          "failedTests": 0,
+          "skippedTests": 0,
+          "totalExecutionTime": 248.11745800000062,
+          "averageTestTime": 244.66767199999958,
+          "slowestTest": {
+            "name": "baseline-test",
+            "time": 244.66767199999958
+          },
+          "fastestTest": {
+            "name": "baseline-test",
+            "time": 244.66767199999958
+          },
+          "memoryPeak": 0.002410888671875,
+          "memoryAverage": 0.002410888671875,
+          "consistencyScore": 1,
+          "thresholdViolations": []
+        }
+      ],
+      "recommendations": [],
+      "regressionAnalysis": {
+        "hasRegression": true,
+        "regressionPercentage": 121.40473414827177,
+        "affectedTests": [
+          "baseline-test"
+        ]
+      }
+    }
+  ]
+}
