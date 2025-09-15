@@ -9,31 +9,17 @@ import { render, RenderOptions, RenderResult } from '@testing-library/react';
 import { SessionProvider } from 'next-auth/react';
 import { Session } from 'next-auth';
 import { generateMockSession, generateMockUser } from '@/lib/mock-data';
+// Import the dedicated React19ErrorBoundary component
+import {
+  React19ErrorBoundary,
+  React19ErrorHandler,
+  type TestErrorReport,
+  type ErrorCategory,
+  type ErrorBoundaryState as React19ErrorBoundaryState,
+  type React19ErrorBoundaryProps,
+} from './React19ErrorBoundary';
 
-// React 19 Error Handling Types
-interface TestErrorReport {
-  type: 'AggregateError' | 'Error';
-  totalErrors?: number;
-  categories?: ErrorCategory[];
-  suggestions?: string[];
-  recoverable: boolean;
-}
-
-interface ErrorCategory {
-  type: string;
-  message: string;
-  stack?: string;
-  component?: string;
-  hook?: string;
-}
-
-interface ErrorBoundaryState {
-  hasError: boolean;
-  error?: Error | AggregateError;
-  errorInfo?: React.ErrorInfo;
-  retryCount: number;
-  maxRetries: number;
-}
+// React 19 Error Handling Types (imported from React19ErrorBoundary)
 
 interface MockConfiguration {
   useToast?: boolean;
@@ -297,18 +283,21 @@ export const renderWithProviders = (
     if (errorBoundary) {
       return (
         <React19ErrorBoundary
-          onError={(error, errorInfo) => {
+          onError={(error, errorInfo, report) => {
             // Enhanced error logging for React 19
             if (error instanceof AggregateError) {
               console.error('React 19 AggregateError in test:', {
                 totalErrors: error.errors?.length || 0,
                 errors: error.errors?.map((e) => e.message) || [],
-                component: ui.type?.name || 'Unknown',
+                component: (ui.type as any)?.name || 'Unknown',
+                report,
               });
             }
             onError?.(error, errorInfo);
           }}
           resetOnPropsChange={true}
+          debugMode={true}
+          testName="renderWithProviders"
         >
           {content}
         </React19ErrorBoundary>
@@ -571,142 +560,15 @@ export const submitForm = async (form: HTMLFormElement) => {
   fireEvent.submit(form);
 };
 
-// React 19 Compatible Error Boundary
-interface React19ErrorBoundaryProps {
-  children: ReactNode;
-  onError?: (error: Error | AggregateError, errorInfo: React.ErrorInfo) => void;
-  fallback?: React.ComponentType<{
-    error: Error | AggregateError;
-    retry: () => void;
-  }>;
-  resetOnPropsChange?: boolean;
-}
-
-interface React19ErrorBoundaryState extends ErrorBoundaryState {}
-
-export class React19ErrorBoundary extends React.Component<
-  React19ErrorBoundaryProps,
-  React19ErrorBoundaryState
-> {
-  constructor(props: React19ErrorBoundaryProps) {
-    super(props);
-    this.state = {
-      hasError: false,
-      error: undefined,
-      errorInfo: undefined,
-      retryCount: 0,
-      maxRetries: 3,
-    };
-  }
-
-  static getDerivedStateFromError(
-    error: Error | AggregateError
-  ): Partial<React19ErrorBoundaryState> {
-    return {
-      hasError: true,
-      error,
-    };
-  }
-
-  componentDidCatch(error: Error | AggregateError, errorInfo: React.ErrorInfo) {
-    this.setState({
-      errorInfo,
-    });
-
-    // Handle React 19 AggregateError specifically
-    if (error instanceof AggregateError) {
-      const errorReport = React19ErrorHandler.handleAggregateError(error);
-      console.error('React 19 AggregateError caught:', errorReport);
-
-      // Log individual errors for debugging
-      error.errors?.forEach((individualError, index) => {
-        console.error(`AggregateError[${index}]:`, individualError);
-      });
-    } else {
-      console.error('Test Error Boundary caught error:', error, errorInfo);
-    }
-
-    // Call custom error handler if provided
-    this.props.onError?.(error, errorInfo);
-  }
-
-  componentDidUpdate(prevProps: React19ErrorBoundaryProps) {
-    // Reset error boundary if props change and resetOnPropsChange is true
-    if (
-      this.props.resetOnPropsChange &&
-      this.state.hasError &&
-      prevProps.children !== this.props.children
-    ) {
-      this.setState({
-        hasError: false,
-        error: undefined,
-        errorInfo: undefined,
-        retryCount: 0,
-      });
-    }
-  }
-
-  retry = () => {
-    if (this.state.retryCount < this.state.maxRetries) {
-      this.setState({
-        hasError: false,
-        error: undefined,
-        errorInfo: undefined,
-        retryCount: this.state.retryCount + 1,
-      });
-    }
-  };
-
-  render() {
-    if (this.state.hasError && this.state.error) {
-      // Use custom fallback component if provided
-      if (this.props.fallback) {
-        const FallbackComponent = this.props.fallback;
-        return (
-          <FallbackComponent error={this.state.error} retry={this.retry} />
-        );
-      }
-
-      // Default fallback UI with retry option
-      return (
-        <div data-testid="error-boundary" role="alert">
-          <h2>Test Error Boundary</h2>
-          <details>
-            <summary>Error Details</summary>
-            <pre>{this.state.error.message}</pre>
-            {this.state.error instanceof AggregateError && (
-              <div>
-                <p>
-                  Individual Errors ({this.state.error.errors?.length || 0}):
-                </p>
-                <ul>
-                  {this.state.error.errors?.map((err, index) => (
-                    <li key={index}>{err.message}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
-          </details>
-          {this.state.retryCount < this.state.maxRetries && (
-            <button onClick={this.retry} data-testid="error-boundary-retry">
-              Retry ({this.state.maxRetries - this.state.retryCount} attempts
-              left)
-            </button>
-          )}
-        </div>
-      );
-    }
-
-    return this.props.children;
-  }
-}
-
-// Legacy error boundary for backward compatibility
-export const TestErrorBoundary: React.FC<{ children: ReactNode }> = ({
-  children,
-}) => {
-  return <React19ErrorBoundary>{children}</React19ErrorBoundary>;
-};
+// Import the dedicated React19ErrorBoundary component
+import {
+  React19ErrorBoundary,
+  React19ErrorHandler,
+  type TestErrorReport,
+  type ErrorCategory,
+  type ErrorBoundaryState as React19ErrorBoundaryState,
+// Legacy error boundary for backward compatibility (imported from dedicated component)
+export { TestErrorBoundary } from './React19ErrorBoundary';
 
 // Performance testing utilities
 export const measureRenderTime = async (
@@ -745,13 +607,14 @@ export const testUtils = {
   React19ErrorHandler,
 };
 
-// Export React 19 specific utilities
+// Export React 19 specific utilities (imported from dedicated component)
 export {
   React19ErrorBoundary,
   React19ErrorHandler,
   type TestErrorReport,
   type ErrorCategory,
-  type ErrorBoundaryState,
+  type React19ErrorBoundaryState as ErrorBoundaryState,
+  type React19ErrorBoundaryProps,
   type MockConfiguration,
   type MockRegistry,
   type RenderWithProvidersOptions,
