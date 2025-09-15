@@ -84,3 +84,22 @@ medical-device-regulatory-assistant/backend/error_tracking.db
 
 # Showcase website - to be committed separately
 showcase-website/
+
+# Test reports with unresolved Jest placeholders (prevent <rootDir> issues)
+**/<rootDir>/
+**/test-reports/
+**/coverage/
+**/.jest-cache/
+
+# Next.js specific (for showcase-website and other Next.js projects)
+.next/
+out/
+.vercel/
+*.tsbuildinfo
+next-env.d.ts
+
+# Showcase website build artifacts
+showcase-website/.next/
+showcase-website/out/
+showcase-website/.vercel/
+showcase-website/*.tsbuildinfo
