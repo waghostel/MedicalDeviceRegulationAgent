@@ -8,6 +8,8 @@ import { render, RenderOptions, RenderResult } from '@testing-library/react';
 import { SessionProvider } from 'next-auth/react';
 import { Session } from 'next-auth';
 import { generateMockSession, generateMockUser } from '@/lib/mock-data';
+import { setupUseToastMock, toastMockUtils } from './setup-use-toast-mock';
+import { setupEnhancedFormMocks, enhancedFormMockUtils } from './setup-enhanced-form-mocks';
 
 // Mock router for testing navigation
 export interface MockRouter {
@@ -93,6 +95,8 @@ interface CustomRenderOptions extends Omit<RenderOptions, 'wrapper'> {
   session?: Session | null;
   router?: Partial<MockRouter>;
   initialProps?: Record<string, any>;
+  mockToast?: boolean; // Enable/disable toast mocking
+  mockEnhancedForm?: boolean; // Enable/disable enhanced form mocking
 }
 
 /**
@@ -102,10 +106,24 @@ interface CustomRenderOptions extends Omit<RenderOptions, 'wrapper'> {
 export const renderWithProviders = (
   ui: ReactElement,
   options: CustomRenderOptions = {}
-): RenderResult & { mockRouter: MockRouter } => {
-  const { session, router, ...renderOptions } = options;
+): RenderResult & { 
+  mockRouter: MockRouter; 
+  toastUtils: typeof toastMockUtils;
+  enhancedFormUtils: typeof enhancedFormMockUtils;
+} => {
+  const { session, router, mockToast = true, mockEnhancedForm = true, ...renderOptions } = options;
 
   const mockRouter = { ...createMockRouter(), ...router };
+
+  // Setup toast mock if enabled
+  if (mockToast) {
+    setupUseToastMock();
+  }
+
+  // Setup enhanced form mocks if enabled
+  if (mockEnhancedForm) {
+    setupEnhancedFormMocks();
+  }
 
   const Wrapper = ({ children }: { children: ReactNode }) => (
     <TestProviders session={session} router={router}>
@@ -119,6 +137,8 @@ export const renderWithProviders = (
   return {
     ...result,
     mockRouter,
+    toastUtils: toastMockUtils,
+    enhancedFormUtils: enhancedFormMockUtils,
   };
 };
 
@@ -160,6 +180,13 @@ export const setupTest = (testName: string) => {
   // Clear test data
   testDataManager.clearTestStates();
 
+  // Reset toast mock
+  toastMockUtils.clear();
+  toastMockUtils.resetMocks();
+
+  // Reset enhanced form mocks
+  enhancedFormMockUtils.resetAllMocks();
+
   // Setup console spy to catch errors
   const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
 
@@ -168,6 +195,8 @@ export const setupTest = (testName: string) => {
     cleanup: () => {
       consoleSpy.mockRestore();
       testDataManager.clearTestStates();
+      toastMockUtils.clear();
+      enhancedFormMockUtils.resetAllMocks();
     },
   };
 };
@@ -178,6 +207,12 @@ export const teardownTest = () => {
 
   // Clear test data
   testDataManager.clearTestStates();
+
+  // Clear toast mock
+  toastMockUtils.clear();
+
+  // Clear enhanced form mocks
+  enhancedFormMockUtils.resetAllMocks();
 
   // Reset modules
   jest.resetModules();
@@ -287,6 +322,8 @@ export const testUtils = {
   measureRenderTime,
   checkAccessibility,
   testDataManager,
+  toastUtils: toastMockUtils,
+  enhancedFormUtils: enhancedFormMockUtils,
 };
 
 export default testUtils;
