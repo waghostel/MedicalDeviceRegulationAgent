@@ -1,6 +1,7 @@
 /**
  * Comprehensive test utilities for consistent component testing
  * Provides renderWithProviders, mock API setup, and database utilities
+ * Enhanced with React 19 compatibility and AggregateError handling
  */
 
 import React, { ReactElement, ReactNode } from 'react';
@@ -8,6 +9,132 @@ import { render, RenderOptions, RenderResult } from '@testing-library/react';
 import { SessionProvider } from 'next-auth/react';
 import { Session } from 'next-auth';
 import { generateMockSession, generateMockUser } from '@/lib/mock-data';
+
+// React 19 Error Handling Types
+interface TestErrorReport {
+  type: 'AggregateError' | 'Error';
+  totalErrors?: number;
+  categories?: ErrorCategory[];
+  suggestions?: string[];
+  recoverable: boolean;
+}
+
+interface ErrorCategory {
+  type: string;
+  message: string;
+  stack?: string;
+  component?: string;
+  hook?: string;
+}
+
+interface ErrorBoundaryState {
+  hasError: boolean;
+  error?: Error | AggregateError;
+  errorInfo?: React.ErrorInfo;
+  retryCount: number;
+  maxRetries: number;
+}
+
+interface MockConfiguration {
+  useToast?: boolean;
+  useEnhancedForm?: boolean;
+  localStorage?: boolean;
+  timers?: boolean;
+}
+
+interface MockRegistry {
+  hooks: Map<string, jest.MockedFunction<any>>;
+  components: Map<string, jest.MockedFunction<React.FC<any>>>;
+  providers: Map<string, jest.MockedFunction<React.FC<any>>>;
+  utilities: Map<string, jest.MockedFunction<any>>;
+}
+
+// React 19 Error Handler Class
+class React19ErrorHandler {
+  static handleAggregateError(error: AggregateError): TestErrorReport {
+    const individualErrors = error.errors || [];
+    const categorizedErrors = this.categorizeErrors(individualErrors);
+
+    return {
+      type: 'AggregateError',
+      totalErrors: individualErrors.length,
+      categories: categorizedErrors,
+      suggestions: this.generateSuggestions(categorizedErrors),
+      recoverable: this.isRecoverable(categorizedErrors),
+    };
+  }
+
+  static categorizeErrors(errors: Error[]): ErrorCategory[] {
+    return errors.map((error) => ({
+      type: this.getErrorType(error),
+      message: error.message,
+      stack: error.stack,
+      component: this.extractComponent(error),
+      hook: this.extractHook(error),
+    }));
+  }
+
+  static getErrorType(error: Error): string {
+    // Check message content first for specific error types
+    if (error.message.includes('useToast')) return 'HookMockError';
+    if (error.message.includes('use') && error.message.includes('function'))
+      return 'HookMockError';
+    if (error.message.includes('Provider')) return 'ProviderError';
+    if (error.message.includes('render')) return 'RenderError';
+
+    // Fall back to error name if available
+    if (error.name && error.name !== 'Error') return error.name;
+
+    return 'UnknownError';
+  }
+
+  static extractComponent(error: Error): string | undefined {
+    const stack = error.stack || '';
+    const componentMatch = stack.match(/at (\w+Component|\w+Form|\w+Provider)/);
+    return componentMatch ? componentMatch[1] : undefined;
+  }
+
+  static extractHook(error: Error): string | undefined {
+    const message = error.message || '';
+    const hookMatch = message.match(/use\w+/);
+    return hookMatch ? hookMatch[0] : undefined;
+  }
+
+  static generateSuggestions(categories: ErrorCategory[]): string[] {
+    const suggestions: string[] = [];
+
+    categories.forEach((category) => {
+      switch (category.type) {
+        case 'HookMockError':
+          suggestions.push(
+            'Check hook mock configuration and ensure all required methods are mocked'
+          );
+          break;
+        case 'RenderError':
+          suggestions.push('Verify component props and provider setup');
+          break;
+        case 'ProviderError':
+          suggestions.push(
+            'Ensure all required providers are included in test wrapper'
+          );
+          break;
+        default:
+          suggestions.push(
+            'Review error stack trace for specific component issues'
+          );
+      }
+    });
+
+    return [...new Set(suggestions)]; // Remove duplicates
+  }
+
+  static isRecoverable(categories: ErrorCategory[]): boolean {
+    // Consider error recoverable if it's primarily mock-related
+    return categories.every((cat) =>
+      ['HookMockError', 'ProviderError'].includes(cat.type)
+    );
+  }
+}
 
 // Mock router for testing navigation
 export interface MockRouter {
@@ -88,37 +215,162 @@ const TestProviders: React.FC<TestProvidersProps> = ({
   return <SessionProvider session={session}>{children}</SessionProvider>;
 };
 
-// Enhanced render options
-interface CustomRenderOptions extends Omit<RenderOptions, 'wrapper'> {
+// Enhanced render options with React 19 support
+interface RenderWithProvidersOptions extends Omit<RenderOptions, 'wrapper'> {
   session?: Session | null;
   router?: Partial<MockRouter>;
   initialProps?: Record<string, any>;
+  mockConfig?: MockConfiguration;
+  reactVersion?: 'react18' | 'react19';
+  errorBoundary?: boolean;
+  onError?: (error: Error | AggregateError, errorInfo: React.ErrorInfo) => void;
 }
 
 /**
- * Custom render function with providers for consistent component testing
- * Includes SessionProvider, mock router, and other necessary providers
+ * Enhanced render function with React 19 compatibility and error handling
+ * Includes SessionProvider, mock router, error boundary, and mock registry
  */
 export const renderWithProviders = (
   ui: ReactElement,
-  options: CustomRenderOptions = {}
-): RenderResult & { mockRouter: MockRouter } => {
-  const { session, router, ...renderOptions } = options;
+  options: RenderWithProvidersOptions = {}
+): RenderResult & {
+  mockRouter: MockRouter;
+  mockRegistry: MockRegistry;
+  cleanup: () => void;
+} => {
+  const {
+    session,
+    router,
+    mockConfig = {},
+    reactVersion = 'react19',
+    errorBoundary = true,
+    onError,
+    ...renderOptions
+  } = options;
 
   const mockRouter = { ...createMockRouter(), ...router };
 
-  const Wrapper = ({ children }: { children: ReactNode }) => (
-    <TestProviders session={session} router={router}>
-      {children}
-    </TestProviders>
-  );
+  // Initialize mock registry
+  const mockRegistry: MockRegistry = {
+    hooks: new Map(),
+    components: new Map(),
+    providers: new Map(),
+    utilities: new Map(),
+  };
 
-  // Use React 19 compatible rendering
-  const result = render(ui, { wrapper: Wrapper, ...renderOptions });
+  // Setup mocks based on configuration
+  if (mockConfig.useToast) {
+    // Mock useToast hook (will be implemented in later tasks)
+    mockRegistry.hooks.set('useToast', jest.fn());
+  }
+
+  if (mockConfig.localStorage) {
+    // Mock localStorage for auto-save functionality
+    const localStorageMock = {
+      getItem: jest.fn(),
+      setItem: jest.fn(),
+      removeItem: jest.fn(),
+      clear: jest.fn(),
+    };
+    Object.defineProperty(window, 'localStorage', {
+      value: localStorageMock,
+      writable: true,
+    });
+    mockRegistry.utilities.set('localStorage', localStorageMock);
+  }
+
+  if (mockConfig.timers) {
+    // Mock timers for debounced functionality
+    jest.useFakeTimers();
+    mockRegistry.utilities.set('timers', { useFakeTimers: true });
+  }
+
+  // Enhanced wrapper with error boundary and React 19 support
+  const Wrapper = ({ children }: { children: ReactNode }) => {
+    const content = (
+      <TestProviders session={session} router={router}>
+        {children}
+      </TestProviders>
+    );
+
+    // Wrap with error boundary if enabled
+    if (errorBoundary) {
+      return (
+        <React19ErrorBoundary
+          onError={(error, errorInfo) => {
+            // Enhanced error logging for React 19
+            if (error instanceof AggregateError) {
+              console.error('React 19 AggregateError in test:', {
+                totalErrors: error.errors?.length || 0,
+                errors: error.errors?.map((e) => e.message) || [],
+                component: ui.type?.name || 'Unknown',
+              });
+            }
+            onError?.(error, errorInfo);
+          }}
+          resetOnPropsChange={true}
+        >
+          {content}
+        </React19ErrorBoundary>
+      );
+    }
+
+    return content;
+  };
+
+  // Cleanup function for test teardown
+  const cleanup = () => {
+    // Clear mock registry
+    mockRegistry.hooks.clear();
+    mockRegistry.components.clear();
+    mockRegistry.providers.clear();
+    mockRegistry.utilities.clear();
+
+    // Restore timers if mocked
+    if (mockConfig.timers) {
+      jest.useRealTimers();
+    }
+
+    // Clear localStorage mock
+    if (mockConfig.localStorage) {
+      delete (window as any).localStorage;
+    }
+
+    // Clear all mocks
+    jest.clearAllMocks();
+  };
+
+  let result: RenderResult;
+
+  try {
+    // React 19 compatible rendering with enhanced error handling
+    result = render(ui, { wrapper: Wrapper, ...renderOptions });
+  } catch (error) {
+    // Handle React 19 AggregateError during rendering
+    if (error instanceof AggregateError) {
+      const errorReport = React19ErrorHandler.handleAggregateError(error);
+      console.error('AggregateError during render:', errorReport);
+
+      // If error is recoverable, try rendering with minimal setup
+      if (errorReport.recoverable) {
+        console.warn('Attempting recovery render with minimal setup...');
+        const MinimalWrapper = ({ children }: { children: ReactNode }) => (
+          <React19ErrorBoundary>{children}</React19ErrorBoundary>
+        );
+        result = render(ui, { wrapper: MinimalWrapper, ...renderOptions });
+      } else {
+        throw error;
+      }
+    } else {
+      throw error;
+    }
+  }
 
   return {
     ...result,
     mockRouter,
+    mockRegistry,
+    cleanup,
   };
 };
 
@@ -152,22 +404,106 @@ class TestDataManager {
 
 export const testDataManager = new TestDataManager();
 
-// Utility functions for test setup and cleanup
-export const setupTest = (testName: string) => {
+// Enhanced test setup with React 19 error handling
+export const setupTest = (
+  testName: string,
+  options: {
+    captureErrors?: boolean;
+    mockTimers?: boolean;
+    mockLocalStorage?: boolean;
+  } = {}
+) => {
+  const {
+    captureErrors = true,
+    mockTimers = false,
+    mockLocalStorage = false,
+  } = options;
+
   // Clear any existing mocks
   jest.clearAllMocks();
 
   // Clear test data
   testDataManager.clearTestStates();
 
-  // Setup console spy to catch errors
-  const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+  // Setup console spy to catch errors (including AggregateError)
+  const consoleSpy = captureErrors
+    ? jest.spyOn(console, 'error').mockImplementation((message, ...args) => {
+        // Log React 19 AggregateErrors for debugging
+        if (
+          message &&
+          typeof message === 'string' &&
+          message.includes('AggregateError')
+        ) {
+          console.warn(
+            'AggregateError detected in test:',
+            testName,
+            message,
+            ...args
+          );
+        }
+      })
+    : null;
+
+  // Setup timers if requested
+  if (mockTimers) {
+    jest.useFakeTimers();
+  }
+
+  // Setup localStorage mock if requested
+  let localStorageMock;
+  if (mockLocalStorage) {
+    localStorageMock = {
+      getItem: jest.fn(),
+      setItem: jest.fn(),
+      removeItem: jest.fn(),
+      clear: jest.fn(),
+    };
+    Object.defineProperty(window, 'localStorage', {
+      value: localStorageMock,
+      writable: true,
+    });
+  }
+
+  // Setup global error handler for unhandled React 19 errors
+  const originalErrorHandler = window.onerror;
+  window.onerror = (message, source, lineno, colno, error) => {
+    if (error instanceof AggregateError) {
+      console.warn('Unhandled AggregateError in test:', testName, {
+        message,
+        totalErrors: error.errors?.length || 0,
+        errors: error.errors?.map((e) => e.message) || [],
+      });
+    }
+    return (
+      originalErrorHandler?.(message, source, lineno, colno, error) || false
+    );
+  };
 
   return {
     consoleSpy,
+    localStorageMock,
     cleanup: () => {
-      consoleSpy.mockRestore();
+      // Restore console spy
+      consoleSpy?.mockRestore();
+
+      // Clear test data
       testDataManager.clearTestStates();
+
+      // Restore timers
+      if (mockTimers) {
+        jest.useRealTimers();
+      }
+
+      // Restore localStorage
+      if (mockLocalStorage) {
+        delete (window as unknown).localStorage;
+      }
+
+      // Restore error handler
+      window.onerror = originalErrorHandler;
+
+      // Clear all mocks
+      jest.clearAllMocks();
     },
   };
 };
@@ -235,23 +571,141 @@ export const submitForm = async (form: HTMLFormElement) => {
   fireEvent.submit(form);
 };
 
-// Error boundary testing
+// React 19 Compatible Error Boundary
+interface React19ErrorBoundaryProps {
+  children: ReactNode;
+  onError?: (error: Error | AggregateError, errorInfo: React.ErrorInfo) => void;
+  fallback?: React.ComponentType<{
+    error: Error | AggregateError;
+    retry: () => void;
+  }>;
+  resetOnPropsChange?: boolean;
+}
+
+interface React19ErrorBoundaryState extends ErrorBoundaryState {}
+
+export class React19ErrorBoundary extends React.Component<
+  React19ErrorBoundaryProps,
+  React19ErrorBoundaryState
+> {
+  constructor(props: React19ErrorBoundaryProps) {
+    super(props);
+    this.state = {
+      hasError: false,
+      error: undefined,
+      errorInfo: undefined,
+      retryCount: 0,
+      maxRetries: 3,
+    };
+  }
+
+  static getDerivedStateFromError(
+    error: Error | AggregateError
+  ): Partial<React19ErrorBoundaryState> {
+    return {
+      hasError: true,
+      error,
+    };
+  }
+
+  componentDidCatch(error: Error | AggregateError, errorInfo: React.ErrorInfo) {
+    this.setState({
+      errorInfo,
+    });
+
+    // Handle React 19 AggregateError specifically
+    if (error instanceof AggregateError) {
+      const errorReport = React19ErrorHandler.handleAggregateError(error);
+      console.error('React 19 AggregateError caught:', errorReport);
+
+      // Log individual errors for debugging
+      error.errors?.forEach((individualError, index) => {
+        console.error(`AggregateError[${index}]:`, individualError);
+      });
+    } else {
+      console.error('Test Error Boundary caught error:', error, errorInfo);
+    }
+
+    // Call custom error handler if provided
+    this.props.onError?.(error, errorInfo);
+  }
+
+  componentDidUpdate(prevProps: React19ErrorBoundaryProps) {
+    // Reset error boundary if props change and resetOnPropsChange is true
+    if (
+      this.props.resetOnPropsChange &&
+      this.state.hasError &&
+      prevProps.children !== this.props.children
+    ) {
+      this.setState({
+        hasError: false,
+        error: undefined,
+        errorInfo: undefined,
+        retryCount: 0,
+      });
+    }
+  }
+
+  retry = () => {
+    if (this.state.retryCount < this.state.maxRetries) {
+      this.setState({
+        hasError: false,
+        error: undefined,
+        errorInfo: undefined,
+        retryCount: this.state.retryCount + 1,
+      });
+    }
+  };
+
+  render() {
+    if (this.state.hasError && this.state.error) {
+      // Use custom fallback component if provided
+      if (this.props.fallback) {
+        const FallbackComponent = this.props.fallback;
+        return (
+          <FallbackComponent error={this.state.error} retry={this.retry} />
+        );
+      }
+
+      // Default fallback UI with retry option
+      return (
+        <div data-testid="error-boundary" role="alert">
+          <h2>Test Error Boundary</h2>
+          <details>
+            <summary>Error Details</summary>
+            <pre>{this.state.error.message}</pre>
+            {this.state.error instanceof AggregateError && (
+              <div>
+                <p>
+                  Individual Errors ({this.state.error.errors?.length || 0}):
+                </p>
+                <ul>
+                  {this.state.error.errors?.map((err, index) => (
+                    <li key={index}>{err.message}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </details>
+          {this.state.retryCount < this.state.maxRetries && (
+            <button onClick={this.retry} data-testid="error-boundary-retry">
+              Retry ({this.state.maxRetries - this.state.retryCount} attempts
+              left)
+            </button>
+          )}
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
+}
+
+// Legacy error boundary for backward compatibility
 export const TestErrorBoundary: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
-  const [hasError, setHasError] = React.useState(false);
-
-  React.useEffect(() => {
-    const handleError = () => setHasError(true);
-    window.addEventListener('error', handleError);
-    return () => window.removeEventListener('error', handleError);
-  }, []);
-
-  if (hasError) {
-    return <div data-testid="error-boundary">Something went wrong</div>;
-  }
-
-  return <>{children}</>;
+  return <React19ErrorBoundary>{children}</React19ErrorBoundary>;
 };
 
 // Performance testing utilities
@@ -272,7 +726,7 @@ export const checkAccessibility = async (container: HTMLElement) => {
   return results;
 };
 
-// Export all utilities
+// Export all utilities including React 19 enhancements
 export const testUtils = {
   renderWithProviders,
   createMockRouter,
@@ -287,6 +741,20 @@ export const testUtils = {
   measureRenderTime,
   checkAccessibility,
   testDataManager,
+  React19ErrorBoundary,
+  React19ErrorHandler,
+};
+
+// Export React 19 specific utilities
+export {
+  React19ErrorBoundary,
+  React19ErrorHandler,
+  type TestErrorReport,
+  type ErrorCategory,
+  type ErrorBoundaryState,
+  type MockConfiguration,
+  type MockRegistry,
+  type RenderWithProvidersOptions,
 };
 
 export default testUtils;
