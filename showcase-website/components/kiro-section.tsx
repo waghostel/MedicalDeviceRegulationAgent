@@ -13,6 +13,7 @@ export function KiroSection() {
         </p>
       </div>
 
+      {/* Why Spec-Driven Development */}
       <div className="mx-auto max-w-[64rem]">
         <h3 className="text-2xl font-bold text-center mb-8 flex items-center justify-center gap-2">
           <Code className="h-6 w-6 text-blue-500" />
