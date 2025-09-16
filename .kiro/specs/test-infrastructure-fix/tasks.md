@@ -215,14 +215,14 @@ Each completed task requires a report:
   - Add FormSubmissionProgress and EnhancedButton mocks
   - _Requirements: 2.4, 3.1_
 
-- [ ] Task B2.2 Fix toast component test issues
+- [x] Task B2.2 Fix toast component test issues
 
   - Resolve multiple element role conflicts in toast tests
   - Add missing test data attributes to toast components
   - Fix accessibility test expectations and implementations
   - _Requirements: 4.1, 4.2_
 
-- [ ] Task B2.3 Create component mock registry system
+- [x] Task B2.3 Create component mock registry system
   - Implement ComponentMockRegistry from design
   - Add automatic component mock loading
   - Create mock component validation and testing

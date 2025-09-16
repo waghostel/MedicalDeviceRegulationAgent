@@ -30,6 +30,14 @@ export * from './enhanced-form-component-mocks';
 export * from './setup-enhanced-form-component-mocks';
 export { default as enhancedFormComponentMocks } from './setup-enhanced-form-component-mocks';
 
+// Component Mock Registry System (Task B2.3)
+export * from './ComponentMockRegistry';
+export * from './setup-component-mock-registry';
+export { default as componentMockRegistry } from './setup-component-mock-registry';
+
+// Mock Registry System
+export * from './MockRegistry';
+
 // Mock validation and debugging system (Task 3.2)
 export * from './mock-validation-system';
 export { default as mockValidationSystem } from './mock-validation-system';
