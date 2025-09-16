@@ -414,10 +414,22 @@ global.__ENHANCED_CLEANUP = function() {
     jest.useRealTimers();
   }
   
-  // Clear any DOM modifications
+  // Clear any DOM modifications (but be careful with React components)
   if (typeof document !== 'undefined') {
-    document.body.innerHTML = '';
-    document.head.innerHTML = '';
+    // Only clear DOM if no React components are mounted
+    // This prevents "NotFoundError: The node to be removed is not a child of this node"
+    try {
+      // Check if there are any React components still mounted
+      const reactRoots = document.querySelectorAll('[data-reactroot], [data-react-checksum]');
+      if (reactRoots.length === 0) {
+        // Safe to clear DOM
+        document.body.innerHTML = '';
+        document.head.innerHTML = '';
+      }
+    } catch (error) {
+      // If there's an error checking, skip DOM clearing to be safe
+      console.warn('Skipping DOM cleanup due to potential React component conflicts:', error.message);
+    }
   }
   
   // Force garbage collection if available (helps with memory cleanup)

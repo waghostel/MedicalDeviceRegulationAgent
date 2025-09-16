@@ -71,6 +71,8 @@ const Toast = React.forwardRef<
       actionUrl?: string;
       progress?: number;
       showProgress?: boolean;
+      title?: string;
+      description?: string;
     }
 >(
   (
@@ -84,6 +86,9 @@ const Toast = React.forwardRef<
       actionUrl,
       progress,
       showProgress,
+      title,
+      description,
+      children,
       ...props
     },
     ref
@@ -136,8 +141,25 @@ const Toast = React.forwardRef<
           {getIcon() && <div className="flex-shrink-0 mt-0.5">{getIcon()}</div>}
           <div className="flex-1 min-w-0">
             <div className="flex flex-col space-y-1">
-              <ToastPrimitives.Title className="text-sm font-semibold" />
-              <ToastPrimitives.Description className="text-sm opacity-90" />
+              {title && (
+                <ToastPrimitives.Title 
+                  className="text-sm font-semibold" 
+                  data-testid="toast-title"
+                >
+                  {title}
+                </ToastPrimitives.Title>
+              )}
+              {description && (
+                <ToastPrimitives.Description 
+                  className="text-sm opacity-90" 
+                  data-testid="toast-description"
+                >
+                  {description}
+                </ToastPrimitives.Description>
+              )}
+
+              {/* Render children if provided */}
+              {children}
 
               {/* Progress bar for long-running operations */}
               {showProgress && typeof progress === 'number' && (
