@@ -34,6 +34,18 @@ htmlcov/
 db.sqlite3
 media/
 
+# Python virtual environments
+venv/
+env/
+ENV/
+.venv/
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+medical_device_assistant.db
+
 # Node.js / TypeScript
 node_modules/
 dist/
@@ -71,11 +83,26 @@ typings/
 # Ignore folder
 .ignore/
 ignore/
-.DS_Store
-.DS_Store
 
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Database temporary files
 *.db-shm
-*.db-wal.DS_Store
+*.db-wal
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
 
 .gemini/
 # GitHub App credentials
@@ -100,6 +127,12 @@ test-health-report.json
 # Any files with <rootDir> in the path (Jest placeholder issues)
 **/*<rootDir>*
 *<rootDir>*
+
+# Additional test artifacts
+test-results/
+junit.xml
+coverage.xml
+.nyc_output/
 
 # Next.js specific (for showcase-website and other Next.js projects)
 .next/
