@@ -72,3 +72,4 @@ typings/
 # Ignore folder
 .ignore/
 ignore/
+/medical-device-regulatory-assistant/test-reports
