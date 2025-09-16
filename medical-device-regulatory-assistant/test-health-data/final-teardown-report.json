@@ -1,11 +1,6 @@
 {
-<<<<<<< Updated upstream
-  "teardownStartTime": 1758006875843,
-  "setupTime": 3502.5492000000004,
-=======
   "teardownStartTime": 1758007702986,
   "setupTime": 2869.632252,
->>>>>>> Stashed changes
   "react19Features": 7,
   "errorSummary": {
     "setup": 0,
@@ -16,30 +11,6 @@
   },
   "mockCount": 0,
   "memoryBaseline": {
-<<<<<<< Updated upstream
-    "heapUsed": 75.5787582397461,
-    "heapTotal": 104.765625,
-    "external": 3.5604562759399414,
-    "rss": 159.08203125,
-    "timestamp": 1758006872342
-  },
-  "react19SetupComplete": true,
-  "finalMemoryUsage": {
-    "heapUsed": 180.00983428955078,
-    "heapTotal": 204.60546875,
-    "external": 8.571440696716309,
-    "rss": 277.52734375,
-    "timestamp": 1758006875843
-  },
-  "memoryDelta": {
-    "heapUsed": 104.43107604980469,
-    "heapTotal": 99.83984375,
-    "external": 5.010984420776367,
-    "rss": 118.4453125
-  },
-  "teardownTime": 0.9117000000005646,
-  "teardownCompletedAt": 1758006875844
-=======
     "heapUsed": 73.53666687011719,
     "heapTotal": 100.73828125,
     "external": 3.3787107467651367,
@@ -62,5 +33,4 @@
   },
   "teardownTime": 3.5880019999995056,
   "teardownCompletedAt": 1758007702989
->>>>>>> Stashed changes
 }
