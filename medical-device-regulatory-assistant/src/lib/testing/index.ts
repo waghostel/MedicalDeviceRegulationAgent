@@ -38,6 +38,12 @@ export { default as mockValidationSystem } from './mock-validation-system';
 export * from './MockValidator';
 export * from './MockDebugger';
 
+// Test debugging tools (Task 3.3)
+export * from './TestFailureAnalyzer';
+export * from './ComponentRenderingDebugger';
+export * from './HookExecutionTracer';
+export * from './TestDebuggingTools';
+
 // Re-export commonly used testing libraries
 export { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 export { default as userEvent } from '@testing-library/user-event';
