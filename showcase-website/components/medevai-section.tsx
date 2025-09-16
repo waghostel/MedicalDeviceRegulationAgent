@@ -5,7 +5,15 @@ import {
   BarChart3, 
   FileText, 
   CheckCircle, 
-  Shield
+  Shield,
+  Clock,
+  Target,
+  Users,
+  Zap,
+  TrendingUp,
+  Award,
+  CheckSquare,
+  AlertTriangle
 } from 'lucide-react'
 
 export function MedevAISection() {
@@ -20,6 +28,7 @@ export function MedevAISection() {
         </p>
       </div>
 
+      {/* Core Features */}
       <div className="mx-auto grid justify-center gap-4 sm:grid-cols-2 md:max-w-[64rem] md:grid-cols-3">
         <Card>
           <CardHeader>
@@ -30,7 +39,7 @@ export function MedevAISection() {
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground mb-2">
-              Automatically determines FDA device class (I, II, III) and identifies appropriate product codes.
+              Automatically determines FDA device class (I, II, III) and identifies appropriate product codes based on device description and intended use.
             </p>
             <p className="text-sm font-semibold text-green-600">
               90%+ accuracy when validated against FDA decisions
@@ -47,10 +56,10 @@ export function MedevAISection() {
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground mb-2">
-              Performs semantic analysis to find the most suitable predicate devices from the FDA database.
+              Performs semantic analysis to find the most suitable predicate devices from the FDA database, ranking them by substantial equivalence potential.
             </p>
             <p className="text-sm font-semibold text-green-600">
-              Reduces research time from 2-3 days to &lt;2 hours
+              Reduces predicate identification from 2-3 days to &lt;2 hours
             </p>
           </CardContent>
         </Card>
@@ -64,7 +73,7 @@ export function MedevAISection() {
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground mb-2">
-              Generates detailed side-by-side comparisons between user devices and potential predicates.
+              Generates detailed side-by-side comparisons between user devices and potential predicates, highlighting similarities and differences.
             </p>
             <p className="text-sm font-semibold text-green-600">
               Complete comparison matrices with testing recommendations
@@ -81,7 +90,7 @@ export function MedevAISection() {
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground mb-2">
-              Automatically identifies and retrieves relevant FDA guidance documents and testing requirements.
+              Automatically identifies and retrieves relevant FDA guidance documents, special controls, and testing requirements specific to each device type.
             </p>
             <p className="text-sm font-semibold text-green-600">
               Always cites sources with URLs and effective dates
@@ -92,13 +101,13 @@ export function MedevAISection() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <CheckCircle className="h-5 w-5 text-blue-500" />
+              <CheckSquare className="h-5 w-5 text-blue-500" />
               Compliance Checklist
             </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground mb-2">
-              Creates customized 510(k) submission checklists based on device classification.
+              Creates customized 510(k) submission checklists based on device classification and predicate analysis.
             </p>
             <p className="text-sm font-semibold text-green-600">
               Tailored specifically for FDA submissions
@@ -115,7 +124,7 @@ export function MedevAISection() {
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground mb-2">
-              Maintains comprehensive, exportable audit logs of all AI decisions and reasoning.
+              Maintains comprehensive, exportable audit logs of all AI decisions and reasoning for regulatory compliance.
             </p>
             <p className="text-sm font-semibold text-green-600">
               Complete reasoning traces for all conclusions

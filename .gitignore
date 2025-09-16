@@ -80,6 +80,11 @@ typings/
 .env.*
 !.env.example
 
+# Test reports with invalid paths
+**/test-reports/
+**/<rootDir>/test-reports/
+medical-device-regulatory-assistant/<rootDir>/test-reports/
+
 # Ignore folder
 .ignore/
 ignore/
