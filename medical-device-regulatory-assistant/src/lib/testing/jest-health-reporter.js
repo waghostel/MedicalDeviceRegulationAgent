@@ -19,14 +19,19 @@ class JestHealthReporter {
     this.testResults = [];
     this.suiteStartTime = Date.now();
     
-    // Resolve <rootDir> placeholder in output directory
-    let outputDir = this.options.outputDir || './test-reports';
-    if (outputDir.includes('<rootDir>')) {
-      const rootDir = globalConfig.rootDir || process.cwd();
-      outputDir = outputDir.replace('<rootDir>', rootDir);
-    }
+    // Resolve output directory with proper path handling
+    let outputDir = this.options.outputDir || 'test-reports';
     
-    this.reportsDir = outputDir;
+    // Get the root directory from Jest config or use current working directory
+    const rootDir = globalConfig.rootDir || process.cwd();
+    
+    // Ensure we have an absolute path for cross-platform compatibility
+    // If outputDir is relative, resolve it relative to the root directory
+    if (!require('path').isAbsolute(outputDir)) {
+      this.reportsDir = require('path').resolve(rootDir, outputDir);
+    } else {
+      this.reportsDir = outputDir;
+    }
     if (!existsSync(this.reportsDir)) {
       mkdirSync(this.reportsDir, { recursive: true });
     }

@@ -12,6 +12,9 @@
 
 # testing
 /coverage
+/test-reports/
+test-health-report*.json
+*<rootDir>*
 
 # next.js
 /.next/

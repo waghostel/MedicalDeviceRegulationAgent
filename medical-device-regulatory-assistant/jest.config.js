@@ -73,7 +73,7 @@ const customJestConfig = {
     [
       '<rootDir>/src/lib/testing/jest-health-reporter.js',
       {
-        outputDir: '<rootDir>/test-reports',
+        outputDir: 'test-reports',
         failOnHealthIssues: process.env.CI === 'true' // Fail CI on health issues
       }
     ]
@@ -103,7 +103,10 @@ const customJestConfig = {
   projects: [
     {
       displayName: 'unit',
-      testMatch: ['<rootDir>/src/**/*.unit.{test,spec}.{js,jsx,ts,tsx}'],
+      testMatch: [
+        '<rootDir>/src/**/*.unit.{test,spec}.{js,jsx,ts,tsx}',
+        '<rootDir>/src/**/__tests__/**/*.unit.{test,spec}.{js,jsx,ts,tsx}'
+      ],
       testEnvironment: 'jsdom',
       setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
       moduleNameMapper: {
@@ -133,7 +136,10 @@ const customJestConfig = {
     },
     {
       displayName: 'integration',
-      testMatch: ['<rootDir>/src/**/*.integration.{test,spec}.{js,jsx,ts,tsx}'],
+      testMatch: [
+        '<rootDir>/src/**/*.integration.{test,spec}.{js,jsx,ts,tsx}',
+        '<rootDir>/src/**/__tests__/**/*.integration.{test,spec}.{js,jsx,ts,tsx}'
+      ],
       testEnvironment: 'jsdom',
       setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
       moduleNameMapper: {
@@ -163,7 +169,10 @@ const customJestConfig = {
     },
     {
       displayName: 'accessibility',
-      testMatch: ['<rootDir>/src/**/*.accessibility.{test,spec}.{js,jsx,ts,tsx}'],
+      testMatch: [
+        '<rootDir>/src/**/*.accessibility.{test,spec}.{js,jsx,ts,tsx}',
+        '<rootDir>/src/**/__tests__/**/*.accessibility.{test,spec}.{js,jsx,ts,tsx}'
+      ],
       testEnvironment: 'jsdom',
       setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
       moduleNameMapper: {

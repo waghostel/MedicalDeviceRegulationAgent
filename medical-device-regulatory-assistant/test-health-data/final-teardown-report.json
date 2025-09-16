@@ -1,0 +1,36 @@
+{
+  "teardownStartTime": 1757987204006,
+  "setupTime": 4475.372114,
+  "react19Features": 7,
+  "errorSummary": {
+    "setup": 0,
+    "aggregate": 0,
+    "hook": 0,
+    "render": 0,
+    "total": 0
+  },
+  "mockCount": 0,
+  "memoryBaseline": {
+    "heapUsed": 74.84860229492188,
+    "heapTotal": 102.05859375,
+    "external": 3.3800477981567383,
+    "rss": 171.44140625,
+    "timestamp": 1757987199531
+  },
+  "react19SetupComplete": true,
+  "finalMemoryUsage": {
+    "heapUsed": 146.55675506591797,
+    "heapTotal": 175.92578125,
+    "external": 8.595280647277832,
+    "rss": 260.15234375,
+    "timestamp": 1757987204006
+  },
+  "memoryDelta": {
+    "heapUsed": 71.7081527709961,
+    "heapTotal": 73.8671875,
+    "external": 5.215232849121094,
+    "rss": 88.7109375
+  },
+  "teardownTime": 0.3617400000002817,
+  "teardownCompletedAt": 1757987204006
+}
