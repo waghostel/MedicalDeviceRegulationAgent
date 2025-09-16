@@ -487,12 +487,12 @@ const mockControl: Control = {
 };
 
 // Enhanced form specific functions
-const mockValidateField = jest.fn(async (fieldName: string, value: any, immediate = false) => {
+const mockEnhancedValidateField = jest.fn(async (fieldName: string, value: any, immediate = false) => {
   // Mock validation logic - return success by default
   return { isValid: true, errors: [] };
 });
 
-const mockGetFieldValidation = jest.fn((fieldName: string) => {
+const mockEnhancedGetFieldValidation = jest.fn((fieldName: string) => {
   // Mock field validation - return no errors by default
   return { errors: [], isValid: true };
 });
@@ -620,8 +620,8 @@ export const mockUseEnhancedForm = jest.fn(<T extends FieldValues>(
     formState: mockEnhancedFormState as FormState<T>,
 
     // Enhanced form methods
-    validateField: mockValidateField as (fieldName: keyof T, value: any, immediate?: boolean) => Promise<void>,
-    getFieldValidation: mockGetFieldValidation as (fieldName: keyof T) => ValidationState,
+    validateField: mockEnhancedValidateField as (fieldName: keyof T, value: any, immediate?: boolean) => Promise<void>,
+    getFieldValidation: mockEnhancedGetFieldValidation as (fieldName: keyof T) => ValidationState,
     saveNow: autoSaveHook.saveNow,
     isSaving: autoSaveHook.isSaving,
     lastSaved: mockAutoSaveState.lastSaved || undefined,
@@ -725,6 +725,8 @@ export const enhancedFormMockUtils = {
     mockSaveNow.mockClear();
     mockValidateField.mockClear();
     mockGetFieldValidation.mockClear();
+    mockEnhancedValidateField.mockClear();
+    mockEnhancedGetFieldValidation.mockClear();
     mockValidateAllFields.mockClear();
     mockClearValidation.mockClear();
     mockShowValidationError.mockClear();

@@ -15,6 +15,15 @@ import {
   enhancedFormMockUtils,
 } from './setup-enhanced-form-mocks';
 
+// Import MockRegistry integration
+import {
+  getDefaultIntegration,
+  initializeMockSystem,
+  loadMockPreset,
+  getMock,
+  type SystemInitializationOptions,
+} from './MockRegistryIntegration';
+
 // Import the dedicated React19ErrorBoundary component
 import {
   React19ErrorBoundary,
@@ -120,7 +129,7 @@ const TestProviders: React.FC<TestProvidersProps> = ({
   return <SessionProvider session={session}>{children}</SessionProvider>;
 };
 
-// Enhanced render options with React 19 support
+// Enhanced render options with React 19 support and MockRegistry integration
 interface RenderWithProvidersOptions extends Omit<RenderOptions, 'wrapper'> {
   session?: Session | null;
   router?: Partial<MockRouter>;
@@ -131,11 +140,15 @@ interface RenderWithProvidersOptions extends Omit<RenderOptions, 'wrapper'> {
   reactVersion?: 'react18' | 'react19';
   errorBoundary?: boolean;
   onError?: (error: Error | AggregateError, errorInfo: React.ErrorInfo) => void;
+  // MockRegistry integration options
+  useMockRegistry?: boolean;
+  mockPreset?: string;
+  mockRegistryOptions?: Record<string, any>;
 }
 
 /**
  * Enhanced render function with React 19 compatibility and error handling
- * Includes SessionProvider, mock router, error boundary, and mock registry
+ * Includes SessionProvider, mock router, error boundary, and MockRegistry integration
  */
 export const renderWithProviders = (
   ui: ReactElement,
@@ -156,12 +169,15 @@ export const renderWithProviders = (
     reactVersion = 'react19',
     errorBoundary = true,
     onError,
+    useMockRegistry = true,
+    mockPreset,
+    mockRegistryOptions = {},
     ...renderOptions
   } = options;
 
   const mockRouter = { ...createMockRouter(), ...router };
 
-  // Initialize mock registry
+  // Initialize mock registry (legacy interface for backward compatibility)
   const mockRegistry: MockRegistry = {
     hooks: new Map(),
     components: new Map(),
@@ -169,21 +185,49 @@ export const renderWithProviders = (
     utilities: new Map(),
   };
 
-  // Setup toast mock if enabled
-  if (mockToast) {
-    setupUseToastMock();
-  }
+  // Setup MockRegistry system if enabled
+  if (useMockRegistry) {
+    const integration = getDefaultIntegration();
+    
+    // Load preset if specified
+    if (mockPreset) {
+      loadMockPreset(mockPreset).catch(error => {
+        console.warn(`Failed to load mock preset '${mockPreset}':`, error);
+      });
+    }
 
-  // Setup enhanced form mocks if enabled
-  if (mockEnhancedForm) {
-    setupEnhancedFormMocks();
-  }
+    // Get mocks from registry
+    if (mockToast || mockConfig.useToast) {
+      const registryToastMock = getMock('useToast');
+      if (registryToastMock) {
+        mockRegistry.hooks.set('useToast', registryToastMock);
+      }
+    }
 
-  // Setup mocks based on configuration
-  if (mockConfig.useToast || mockToast) {
-    // Mock useToast hook (enhanced with registry tracking)
-    const toastMock = jest.fn();
-    mockRegistry.hooks.set('useToast', toastMock);
+    if (mockEnhancedForm) {
+      const registryFormMock = getMock('useEnhancedForm');
+      if (registryFormMock) {
+        mockRegistry.hooks.set('useEnhancedForm', registryFormMock);
+      }
+    }
+  } else {
+    // Fallback to legacy mock setup
+    // Setup toast mock if enabled
+    if (mockToast) {
+      setupUseToastMock();
+    }
+
+    // Setup enhanced form mocks if enabled
+    if (mockEnhancedForm) {
+      setupEnhancedFormMocks();
+    }
+
+    // Setup mocks based on configuration
+    if (mockConfig.useToast || mockToast) {
+      // Mock useToast hook (enhanced with registry tracking)
+      const toastMock = jest.fn();
+      mockRegistry.hooks.set('useToast', toastMock);
+    }
   }
 
   if (mockConfig.localStorage) {
