@@ -25,6 +25,11 @@ export { default as databaseUtils } from './database-utils';
 // Mock data auditor
 export * from './MockDataAuditor';
 
+// Enhanced form component mocks
+export * from './enhanced-form-component-mocks';
+export * from './setup-enhanced-form-component-mocks';
+export { default as enhancedFormComponentMocks } from './setup-enhanced-form-component-mocks';
+
 // Re-export commonly used testing libraries
 export { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 export { default as userEvent } from '@testing-library/user-event';
