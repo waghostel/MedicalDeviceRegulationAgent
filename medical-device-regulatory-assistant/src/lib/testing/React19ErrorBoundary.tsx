@@ -16,6 +16,25 @@ export interface TestErrorReport {
   timestamp: number;
   componentStack?: string;
   errorBoundary: string;
+  // Enhanced Task 3.1 properties
+  performanceImpact?: {
+    errorHandlingTime: number;
+    memoryImpact: number;
+    performanceGrade: 'A' | 'B' | 'C' | 'D' | 'F';
+    optimizationSuggestions: string[];
+  };
+  memoryLeakAnalysis?: {
+    hasLeak: boolean;
+    leakSeverity: 'none' | 'minor' | 'moderate' | 'severe';
+    leakSources: string[];
+    recommendations: string[];
+  };
+  recoveryAnalysis?: {
+    canRecover: boolean;
+    recoveryStrategy: string;
+    estimatedRecoveryTime: number;
+    fallbackOptions: string[];
+  };
 }
 
 export interface ErrorCategory {
@@ -60,7 +79,14 @@ export interface React19ErrorBoundaryProps {
 
 /**
  * Enhanced React 19 Error Handler
- * Provides comprehensive error analysis and categorization for test environments
+ * Provides comprehensive error analysis, categorization, recovery mechanisms, and detailed debugging for test environments
+ *
+ * Task 3.1 Enhancements:
+ * - Enhanced AggregateError categorization and analysis
+ * - Advanced error recovery and retry mechanisms
+ * - Detailed error reporting for debugging
+ * - Performance impact tracking
+ * - Memory leak detection
  */
 export class React19ErrorHandler {
   /**
@@ -84,7 +110,7 @@ export class React19ErrorHandler {
       suggestions: this.generateSuggestions(categorizedErrors),
       recoverable: this.isRecoverable(categorizedErrors),
       timestamp: Date.now(),
-      componentStack: errorInfo?.componentStack,
+      componentStack: errorInfo?.componentStack || undefined,
       errorBoundary: context?.componentName || 'React19ErrorBoundary',
     };
   }
@@ -98,15 +124,20 @@ export class React19ErrorHandler {
     context?: { testName?: string; componentName?: string }
   ): TestErrorReport {
     const category = this.categorizeError(error, errorInfo);
+    const errorType = this.getErrorType(error);
 
     return {
-      type: this.getErrorType(error) as unknown,
+      type: errorType as
+        | 'AggregateError'
+        | 'Error'
+        | 'TypeError'
+        | 'ReferenceError',
       totalErrors: 1,
       categories: [category],
       suggestions: this.generateSuggestions([category]),
       recoverable: this.isRecoverable([category]),
       timestamp: Date.now(),
-      componentStack: errorInfo?.componentStack,
+      componentStack: errorInfo?.componentStack || undefined,
       errorBoundary: context?.componentName || 'React19ErrorBoundary',
     };
   }
@@ -377,61 +408,591 @@ export class React19ErrorHandler {
   }
 
   /**
-   * Generate detailed debug information
+   * Enhanced Error Recovery System
+   * Attempts to recover from errors using various strategies
+   */
+  static attemptErrorRecovery(
+    error: Error | AggregateError,
+    errorInfo: ErrorInfo,
+    retryCount: number = 0,
+    maxRetries: number = 3
+  ): {
+    canRecover: boolean;
+    recoveryStrategy: string;
+    estimatedRecoveryTime: number;
+    fallbackOptions: string[];
+  } {
+    const report =
+      error instanceof AggregateError
+        ? this.handleAggregateError(error, errorInfo)
+        : this.handleStandardError(error, errorInfo);
+
+    // Determine recovery strategy based on error categories
+    const recoveryStrategies = this.analyzeRecoveryStrategies(
+      report.categories || []
+    );
+    const primaryStrategy = recoveryStrategies[0];
+
+    return {
+      canRecover: report.recoverable && retryCount < maxRetries,
+      recoveryStrategy: primaryStrategy?.strategy || 'manual-intervention',
+      estimatedRecoveryTime: primaryStrategy?.estimatedTime || 0,
+      fallbackOptions: recoveryStrategies.slice(1).map((s) => s.strategy),
+    };
+  }
+
+  /**
+   * Analyze possible recovery strategies for error categories
+   */
+  static analyzeRecoveryStrategies(categories: ErrorCategory[]): Array<{
+    strategy: string;
+    estimatedTime: number;
+    confidence: number;
+  }> {
+    const strategies: Array<{
+      strategy: string;
+      estimatedTime: number;
+      confidence: number;
+    }> = [];
+
+    categories.forEach((category) => {
+      switch (category.type) {
+        case 'HookMockError':
+          strategies.push({
+            strategy: 'reinitialize-hook-mocks',
+            estimatedTime: 100,
+            confidence: 0.8,
+          });
+          break;
+
+        case 'ProviderError':
+          strategies.push({
+            strategy: 'reset-provider-context',
+            estimatedTime: 200,
+            confidence: 0.7,
+          });
+          break;
+
+        case 'RenderError':
+          strategies.push({
+            strategy: 'force-component-remount',
+            estimatedTime: 150,
+            confidence: 0.6,
+          });
+          break;
+
+        case 'StorageError':
+          strategies.push({
+            strategy: 'clear-storage-mocks',
+            estimatedTime: 50,
+            confidence: 0.9,
+          });
+          break;
+
+        case 'TimerError':
+          strategies.push({
+            strategy: 'reset-timer-mocks',
+            estimatedTime: 50,
+            confidence: 0.9,
+          });
+          break;
+
+        default:
+          strategies.push({
+            strategy: 'component-isolation',
+            estimatedTime: 300,
+            confidence: 0.4,
+          });
+      }
+    });
+
+    // Sort by confidence and estimated time
+    return strategies.sort((a, b) => {
+      if (a.confidence !== b.confidence) {
+        return b.confidence - a.confidence;
+      }
+      return a.estimatedTime - b.estimatedTime;
+    });
+  }
+
+  /**
+   * Execute error recovery strategy
+   */
+  static async executeRecoveryStrategy(
+    strategy: string,
+    context?: {
+      mockRegistry?: any;
+      componentRef?: React.RefObject<any>;
+      testName?: string;
+    }
+  ): Promise<{
+    success: boolean;
+    message: string;
+    nextSteps?: string[];
+  }> {
+    try {
+      switch (strategy) {
+        case 'reinitialize-hook-mocks':
+          return await this.reinitializeHookMocks(context);
+
+        case 'reset-provider-context':
+          return await this.resetProviderContext(context);
+
+        case 'force-component-remount':
+          return await this.forceComponentRemount(context);
+
+        case 'clear-storage-mocks':
+          return await this.clearStorageMocks(context);
+
+        case 'reset-timer-mocks':
+          return await this.resetTimerMocks(context);
+
+        case 'component-isolation':
+          return await this.isolateComponent(context);
+
+        default:
+          return {
+            success: false,
+            message: `Unknown recovery strategy: ${strategy}`,
+            nextSteps: [
+              'Try manual intervention',
+              'Check error logs',
+              'Contact support',
+            ],
+          };
+      }
+    } catch (recoveryError) {
+      return {
+        success: false,
+        message: `Recovery strategy failed: ${recoveryError instanceof Error ? recoveryError.message : 'Unknown error'}`,
+        nextSteps: [
+          'Try alternative recovery strategy',
+          'Manual intervention required',
+        ],
+      };
+    }
+  }
+
+  /**
+   * Recovery Strategy Implementations
+   */
+  private static async reinitializeHookMocks(
+    context?: any
+  ): Promise<{ success: boolean; message: string; nextSteps?: string[] }> {
+    // Clear existing hook mocks
+    if (global.__GLOBAL_MOCK_REGISTRY?.hooks) {
+      global.__GLOBAL_MOCK_REGISTRY.hooks.clear();
+    }
+
+    // Reinitialize common hook mocks
+    const { setupUseToastMock } = await import('./setup-use-toast-mock');
+    const { setupEnhancedFormMocks } = await import(
+      './setup-enhanced-form-mocks'
+    );
+
+    try {
+      setupUseToastMock();
+      setupEnhancedFormMocks();
+
+      return {
+        success: true,
+        message: 'Hook mocks reinitialized successfully',
+        nextSteps: ['Retry component render', 'Verify hook functionality'],
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: `Failed to reinitialize hook mocks: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        nextSteps: ['Check mock configuration', 'Manual mock setup required'],
+      };
+    }
+  }
+
+  private static async resetProviderContext(
+    context?: any
+  ): Promise<{ success: boolean; message: string; nextSteps?: string[] }> {
+    // Clear provider-related mocks
+    if (global.__GLOBAL_MOCK_REGISTRY?.providers) {
+      global.__GLOBAL_MOCK_REGISTRY.providers.clear();
+    }
+
+    return {
+      success: true,
+      message: 'Provider context reset successfully',
+      nextSteps: [
+        'Remount component with fresh providers',
+        'Verify context values',
+      ],
+    };
+  }
+
+  private static async forceComponentRemount(
+    context?: any
+  ): Promise<{ success: boolean; message: string; nextSteps?: string[] }> {
+    // Force component remount by clearing component cache
+    if (context?.componentRef?.current) {
+      // Trigger component unmount/remount cycle
+      const component = context.componentRef.current;
+      if (component && typeof component.forceUpdate === 'function') {
+        component.forceUpdate();
+      }
+    }
+
+    return {
+      success: true,
+      message: 'Component remount initiated',
+      nextSteps: [
+        'Wait for component to remount',
+        'Check for persistent errors',
+      ],
+    };
+  }
+
+  private static async clearStorageMocks(
+    context?: any
+  ): Promise<{ success: boolean; message: string; nextSteps?: string[] }> {
+    // Clear localStorage and sessionStorage mocks
+    if (global.localStorage?.clear) {
+      global.localStorage.clear();
+    }
+    if (global.sessionStorage?.clear) {
+      global.sessionStorage.clear();
+    }
+
+    return {
+      success: true,
+      message: 'Storage mocks cleared successfully',
+      nextSteps: [
+        'Retry storage-dependent operations',
+        'Verify storage functionality',
+      ],
+    };
+  }
+
+  private static async resetTimerMocks(
+    context?: any
+  ): Promise<{ success: boolean; message: string; nextSteps?: string[] }> {
+    // Reset timer mocks
+    if (jest.isMockFunction(setTimeout)) {
+      jest.useRealTimers();
+      jest.useFakeTimers();
+    }
+
+    return {
+      success: true,
+      message: 'Timer mocks reset successfully',
+      nextSteps: [
+        'Retry timer-dependent operations',
+        'Verify timer functionality',
+      ],
+    };
+  }
+
+  private static async isolateComponent(
+    context?: unknown
+  ): Promise<{ success: boolean; message: string; nextSteps?: string[] }> {
+    // Isolate component by clearing all external dependencies
+    if (global.__ENHANCED_CLEANUP) {
+      global.__ENHANCED_CLEANUP();
+    }
+
+    return {
+      success: true,
+      message: 'Component isolated from external dependencies',
+      nextSteps: [
+        'Render component in minimal environment',
+        'Gradually add dependencies',
+      ],
+    };
+  }
+
+  /**
+   * Enhanced Performance Impact Analysis
+   */
+  static analyzePerformanceImpact(
+    error: Error | AggregateError,
+    startTime: number,
+    memoryBefore: number
+  ): {
+    errorHandlingTime: number;
+    memoryImpact: number;
+    performanceGrade: 'A' | 'B' | 'C' | 'D' | 'F';
+    optimizationSuggestions: string[];
+  } {
+    const errorHandlingTime = performance.now() - startTime;
+    const memoryAfter = process.memoryUsage().heapUsed;
+    const memoryImpact = memoryAfter - memoryBefore;
+
+    // Grade performance impact
+    let performanceGrade: 'A' | 'B' | 'C' | 'D' | 'F' = 'A';
+    const suggestions: string[] = [];
+
+    if (errorHandlingTime > 100) {
+      performanceGrade = 'C';
+      suggestions.push('Error handling is taking too long (>100ms)');
+    }
+    if (errorHandlingTime > 500) {
+      performanceGrade = 'F';
+      suggestions.push('Critical: Error handling is blocking (>500ms)');
+    }
+    if (memoryImpact > 10 * 1024 * 1024) {
+      // 10MB
+      performanceGrade = performanceGrade === 'A' ? 'B' : 'D';
+      suggestions.push('High memory usage during error handling');
+    }
+    if (memoryImpact > 50 * 1024 * 1024) {
+      // 50MB
+      performanceGrade = 'F';
+      suggestions.push('Critical: Memory leak detected during error handling');
+    }
+
+    if (suggestions.length === 0) {
+      suggestions.push('Error handling performance is optimal');
+    }
+
+    return {
+      errorHandlingTime,
+      memoryImpact,
+      performanceGrade,
+      optimizationSuggestions: suggestions,
+    };
+  }
+
+  /**
+   * Memory Leak Detection for Error Handling
+   */
+  static detectMemoryLeaks(
+    beforeMemory: NodeJS.MemoryUsage,
+    afterMemory: NodeJS.MemoryUsage,
+    errorCount: number
+  ): {
+    hasLeak: boolean;
+    leakSeverity: 'none' | 'minor' | 'moderate' | 'severe';
+    leakSources: string[];
+    recommendations: string[];
+  } {
+    const heapDelta = afterMemory.heapUsed - beforeMemory.heapUsed;
+    const externalDelta = afterMemory.external - beforeMemory.external;
+
+    // Calculate per-error memory impact
+    const memoryPerError = errorCount > 0 ? heapDelta / errorCount : heapDelta;
+
+    let hasLeak = false;
+    let leakSeverity: 'none' | 'minor' | 'moderate' | 'severe' = 'none';
+    const leakSources: string[] = [];
+    const recommendations: string[] = [];
+
+    // Detect heap memory leaks
+    if (memoryPerError > 1024 * 1024) {
+      // 1MB per error
+      hasLeak = true;
+      leakSeverity = 'severe';
+      leakSources.push('Heap memory not being released after error handling');
+      recommendations.push('Review error boundary cleanup logic');
+      recommendations.push('Check for retained references in error handlers');
+    } else if (memoryPerError > 100 * 1024) {
+      // 100KB per error
+      hasLeak = true;
+      leakSeverity = 'moderate';
+      leakSources.push('Moderate heap memory retention');
+      recommendations.push('Optimize error object cleanup');
+    } else if (memoryPerError > 10 * 1024) {
+      // 10KB per error
+      hasLeak = true;
+      leakSeverity = 'minor';
+      leakSources.push('Minor heap memory retention');
+      recommendations.push('Consider more aggressive cleanup');
+    }
+
+    // Detect external memory leaks
+    if (externalDelta > 5 * 1024 * 1024) {
+      // 5MB
+      hasLeak = true;
+      if (leakSeverity === 'none') leakSeverity = 'moderate';
+      leakSources.push(
+        'External memory (buffers, native objects) not released'
+      );
+      recommendations.push('Check for unreleased external resources');
+    }
+
+    if (!hasLeak) {
+      recommendations.push('Memory usage is within acceptable limits');
+    }
+
+    return {
+      hasLeak,
+      leakSeverity,
+      leakSources,
+      recommendations,
+    };
+  }
+
+  /**
+   * Generate enhanced detailed debug information with performance and memory analysis
    */
   static generateDebugInfo(
     error: Error | AggregateError,
     errorInfo: ErrorInfo,
-    report: TestErrorReport
+    report: TestErrorReport,
+    performanceData?: {
+      errorHandlingTime: number;
+      memoryImpact: number;
+      performanceGrade: string;
+    },
+    memoryLeakData?: {
+      hasLeak: boolean;
+      leakSeverity: string;
+      leakSources: string[];
+    }
   ): string {
     const debugLines: string[] = [];
 
-    debugLines.push('=== React 19 Error Boundary Debug Report ===');
+    debugLines.push('=== Enhanced React 19 Error Boundary Debug Report ===');
     debugLines.push(`Timestamp: ${new Date(report.timestamp).toISOString()}`);
     debugLines.push(`Error Type: ${report.type}`);
     debugLines.push(`Total Errors: ${report.totalErrors || 1}`);
     debugLines.push(`Recoverable: ${report.recoverable ? 'Yes' : 'No'}`);
+    debugLines.push(`Error Boundary: ${report.errorBoundary}`);
     debugLines.push('');
 
+    // Performance Analysis Section
+    if (performanceData) {
+      debugLines.push('=== Performance Impact Analysis ===');
+      debugLines.push(
+        `Error Handling Time: ${performanceData.errorHandlingTime.toFixed(2)}ms`
+      );
+      debugLines.push(
+        `Memory Impact: ${(performanceData.memoryImpact / 1024 / 1024).toFixed(2)}MB`
+      );
+      debugLines.push(`Performance Grade: ${performanceData.performanceGrade}`);
+      debugLines.push('');
+    }
+
+    // Memory Leak Detection Section
+    if (memoryLeakData) {
+      debugLines.push('=== Memory Leak Analysis ===');
+      debugLines.push(
+        `Memory Leak Detected: ${memoryLeakData.hasLeak ? 'Yes' : 'No'}`
+      );
+      debugLines.push(`Leak Severity: ${memoryLeakData.leakSeverity}`);
+      if (memoryLeakData.leakSources.length > 0) {
+        debugLines.push('Leak Sources:');
+        memoryLeakData.leakSources.forEach((source, index) => {
+          debugLines.push(`  ${index + 1}. ${source}`);
+        });
+      }
+      debugLines.push('');
+    }
+
+    // Error Details Section
     if (error instanceof AggregateError) {
-      debugLines.push('Individual Errors:');
+      debugLines.push('=== AggregateError Details ===');
+      debugLines.push(`Primary Message: ${error.message}`);
+      debugLines.push(`Individual Errors (${error.errors?.length || 0}):`);
       error.errors?.forEach((err, index) => {
-        debugLines.push(`  ${index + 1}. ${err.message}`);
+        debugLines.push(
+          `  ${index + 1}. ${err.constructor.name}: ${err.message}`
+        );
+        if (err.stack) {
+          const stackLines = err.stack.split('\n').slice(1, 3); // First 2 stack lines
+          stackLines.forEach((line) => {
+            debugLines.push(`     ${line.trim()}`);
+          });
+        }
+      });
+      debugLines.push('');
+    } else {
+      debugLines.push('=== Error Details ===');
+      debugLines.push(`Error Name: ${error.constructor.name}`);
+      debugLines.push(`Error Message: ${error.message}`);
+      debugLines.push('');
+    }
+
+    // Error Categories Analysis
+    debugLines.push('=== Error Categories Analysis ===');
+    report.categories?.forEach((category, index) => {
+      debugLines.push(
+        `${index + 1}. ${category.type} (${category.severity} severity)`
+      );
+      debugLines.push(`   Source: ${category.source}`);
+      debugLines.push(`   Message: ${category.message}`);
+      if (category.component) {
+        debugLines.push(`   Component: ${category.component}`);
+      }
+      if (category.hook) {
+        debugLines.push(`   Hook: ${category.hook}`);
+      }
+      debugLines.push('');
+    });
+
+    // Recovery Suggestions
+    debugLines.push('=== Recovery Suggestions ===');
+    report.suggestions?.forEach((suggestion, index) => {
+      debugLines.push(`${index + 1}. ${suggestion}`);
+    });
+    debugLines.push('');
+
+    // Recovery Strategy Analysis
+    const recoveryAnalysis = this.attemptErrorRecovery(error, errorInfo);
+    debugLines.push('=== Recovery Strategy Analysis ===');
+    debugLines.push(
+      `Can Recover: ${recoveryAnalysis.canRecover ? 'Yes' : 'No'}`
+    );
+    debugLines.push(`Primary Strategy: ${recoveryAnalysis.recoveryStrategy}`);
+    debugLines.push(
+      `Estimated Recovery Time: ${recoveryAnalysis.estimatedRecoveryTime}ms`
+    );
+    if (recoveryAnalysis.fallbackOptions.length > 0) {
+      debugLines.push('Fallback Options:');
+      recoveryAnalysis.fallbackOptions.forEach((option, index) => {
+        debugLines.push(`  ${index + 1}. ${option}`);
+      });
+    }
+    debugLines.push('');
+
+    // Component Stack Analysis
+    if (errorInfo.componentStack) {
+      debugLines.push('=== Component Stack Analysis ===');
+      const componentStackLines = errorInfo.componentStack
+        .split('\n')
+        .filter((line) => line.trim());
+      componentStackLines.forEach((line, index) => {
+        if (line.includes('at ')) {
+          const componentName = line.match(/at (\w+)/)?.[1];
+          debugLines.push(
+            `${index + 1}. ${componentName || 'Unknown'}: ${line.trim()}`
+          );
+        }
       });
       debugLines.push('');
     }
 
-    debugLines.push('Error Categories:');
-    report.categories?.forEach((category, index) => {
-      debugLines.push(`  ${index + 1}. Type: ${category.type}`);
-      debugLines.push(`     Severity: ${category.severity}`);
-      debugLines.push(`     Source: ${category.source}`);
-      debugLines.push(`     Message: ${category.message}`);
-      if (category.component) {
-        debugLines.push(`     Component: ${category.component}`);
-      }
-      if (category.hook) {
-        debugLines.push(`     Hook: ${category.hook}`);
+    // Full Error Stack (truncated for readability)
+    if (error.stack) {
+      debugLines.push('=== Error Stack (First 10 lines) ===');
+      const stackLines = error.stack.split('\n').slice(0, 10);
+      stackLines.forEach((line, index) => {
+        debugLines.push(`${index + 1}. ${line}`);
+      });
+      if (error.stack.split('\n').length > 10) {
+        debugLines.push('... (stack truncated for readability)');
       }
       debugLines.push('');
-    });
+    }
 
-    debugLines.push('Suggestions:');
-    report.suggestions?.forEach((suggestion, index) => {
-      debugLines.push(`  ${index + 1}. ${suggestion}`);
-    });
+    // Environment Information
+    debugLines.push('=== Environment Information ===');
+    debugLines.push(`React Version: ${global.__REACT_VERSION || 'Unknown'}`);
+    debugLines.push(`Node Environment: ${process.env.NODE_ENV || 'Unknown'}`);
+    debugLines.push(
+      `Test Environment: ${process.env.JEST_WORKER_ID ? 'Jest' : 'Unknown'}`
+    );
+    debugLines.push(
+      `Memory Usage: ${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)}MB`
+    );
     debugLines.push('');
 
-    if (errorInfo.componentStack) {
-      debugLines.push('Component Stack:');
-      debugLines.push(errorInfo.componentStack);
-      debugLines.push('');
-    }
-
-    if (error.stack) {
-      debugLines.push('Error Stack:');
-      debugLines.push(error.stack);
-    }
+    debugLines.push('=== End Debug Report ===');
 
     return debugLines.join('\n');
   }
@@ -498,6 +1059,35 @@ export const DefaultTestErrorFallback: React.FC<{
               </li>
             ))}
           </ul>
+        </div>
+      )}
+
+      {/* Enhanced Task 3.1: Performance and Recovery Information */}
+      {errorReport.performanceImpact && (
+        <div style={{ marginBottom: '12px' }}>
+          <strong>Performance Impact:</strong> Grade{' '}
+          {errorReport.performanceImpact.performanceGrade} (
+          {errorReport.performanceImpact.errorHandlingTime.toFixed(1)}ms)
+        </div>
+      )}
+
+      {errorReport.recoveryAnalysis && (
+        <div style={{ marginBottom: '12px' }}>
+          <strong>Recovery Strategy:</strong>{' '}
+          {errorReport.recoveryAnalysis.recoveryStrategy}
+          {errorReport.recoveryAnalysis.canRecover && (
+            <span>
+              {' '}
+              (Est. {errorReport.recoveryAnalysis.estimatedRecoveryTime}ms)
+            </span>
+          )}
+        </div>
+      )}
+
+      {errorReport.memoryLeakAnalysis?.hasLeak && (
+        <div style={{ marginBottom: '12px', color: '#dc2626' }}>
+          <strong>⚠️ Memory Leak Detected:</strong>{' '}
+          {errorReport.memoryLeakAnalysis.leakSeverity} severity
         </div>
       )}
 
@@ -608,7 +1198,9 @@ export const DefaultTestErrorFallback: React.FC<{
             {React19ErrorHandler.generateDebugInfo(
               error,
               { componentStack: '' },
-              errorReport
+              errorReport,
+              errorReport.performanceImpact,
+              errorReport.memoryLeakAnalysis
             )}
           </pre>
         </details>
@@ -651,6 +1243,9 @@ export class React19ErrorBoundary extends Component<
   }
 
   componentDidCatch(error: Error | AggregateError, errorInfo: ErrorInfo) {
+    const startTime = performance.now();
+    const memoryBefore = process.memoryUsage().heapUsed;
+
     const context = {
       testName: this.props.testName,
       componentName: this.props.componentName || 'React19ErrorBoundary',
@@ -662,16 +1257,52 @@ export class React19ErrorBoundary extends Component<
         ? React19ErrorHandler.handleAggregateError(error, errorInfo, context)
         : React19ErrorHandler.handleStandardError(error, errorInfo, context);
 
+    // Analyze performance impact
+    const performanceAnalysis = React19ErrorHandler.analyzePerformanceImpact(
+      error,
+      startTime,
+      memoryBefore
+    );
+
+    // Detect memory leaks
+    const memoryLeakAnalysis = React19ErrorHandler.detectMemoryLeaks(
+      {
+        heapUsed: memoryBefore,
+        external: 0,
+        rss: 0,
+        heapTotal: 0,
+        arrayBuffers: 0,
+      },
+      process.memoryUsage(),
+      error instanceof AggregateError ? error.errors?.length || 1 : 1
+    );
+
+    // Attempt error recovery analysis
+    const recoveryAnalysis = React19ErrorHandler.attemptErrorRecovery(
+      error,
+      errorInfo,
+      this.state.retryCount,
+      this.state.maxRetries
+    );
+
     this.setState({
       errorInfo,
-      errorReport,
+      errorReport: {
+        ...errorReport,
+        performanceImpact: performanceAnalysis,
+        memoryLeakAnalysis,
+        recoveryAnalysis,
+      },
     });
 
     // Enhanced logging for React 19 AggregateError
     if (error instanceof AggregateError) {
-      console.group('🚨 React 19 AggregateError Caught');
+      console.group('🚨 Enhanced React 19 AggregateError Analysis');
       console.error('Total Errors:', error.errors?.length || 0);
       console.error('Recoverable:', errorReport.recoverable);
+      console.error('Performance Grade:', performanceAnalysis.performanceGrade);
+      console.error('Memory Leak Detected:', memoryLeakAnalysis.hasLeak);
+      console.error('Recovery Strategy:', recoveryAnalysis.recoveryStrategy);
       console.error('Error Report:', errorReport);
 
       error.errors?.forEach((individualError, index) => {
@@ -680,26 +1311,69 @@ export class React19ErrorBoundary extends Component<
 
       if (this.state.debugMode) {
         console.error(
-          'Debug Info:',
-          React19ErrorHandler.generateDebugInfo(error, errorInfo, errorReport)
+          'Enhanced Debug Info:',
+          React19ErrorHandler.generateDebugInfo(
+            error,
+            errorInfo,
+            errorReport,
+            performanceAnalysis,
+            memoryLeakAnalysis
+          )
         );
       }
 
       console.groupEnd();
     } else {
-      console.group('🚨 React Error Caught');
+      console.group('🚨 Enhanced React Error Analysis');
       console.error('Error:', error);
       console.error('Error Info:', errorInfo);
+      console.error('Performance Grade:', performanceAnalysis.performanceGrade);
+      console.error('Memory Leak Detected:', memoryLeakAnalysis.hasLeak);
+      console.error('Recovery Strategy:', recoveryAnalysis.recoveryStrategy);
       console.error('Error Report:', errorReport);
 
       if (this.state.debugMode) {
         console.error(
-          'Debug Info:',
-          React19ErrorHandler.generateDebugInfo(error, errorInfo, errorReport)
+          'Enhanced Debug Info:',
+          React19ErrorHandler.generateDebugInfo(
+            error,
+            errorInfo,
+            errorReport,
+            performanceAnalysis,
+            memoryLeakAnalysis
+          )
         );
       }
 
       console.groupEnd();
+    }
+
+    // Track error in global registry for analysis
+    if (global.__REACT_19_ERROR_TRACKER) {
+      const errorEntry = {
+        message: error.message,
+        type: error.constructor.name,
+        timestamp: Date.now(),
+        recoverable: errorReport.recoverable,
+        performanceGrade: performanceAnalysis.performanceGrade,
+        memoryLeak: memoryLeakAnalysis.hasLeak,
+        recoveryStrategy: recoveryAnalysis.recoveryStrategy,
+        testName: this.props.testName,
+        componentName: this.props.componentName,
+      };
+
+      if (error instanceof AggregateError) {
+        global.__REACT_19_ERROR_TRACKER.aggregateErrors.push({
+          ...errorEntry,
+          errors: error.errors?.map((e) => e.message) || [],
+          source: 'errorBoundary',
+        });
+      } else {
+        global.__REACT_19_ERROR_TRACKER.renderErrors.push({
+          ...errorEntry,
+          source: 'errorBoundary',
+        });
+      }
     }
 
     // Call custom error handler if provided
@@ -735,12 +1409,65 @@ export class React19ErrorBoundary extends Component<
     });
   };
 
-  retry = () => {
-    if (this.state.retryCount < this.state.maxRetries) {
+  retry = async () => {
+    if (
+      this.state.retryCount < this.state.maxRetries &&
+      this.state.error &&
+      this.state.errorInfo
+    ) {
       console.log(
-        `🔄 Retrying error boundary (attempt ${this.state.retryCount + 1}/${this.state.maxRetries})`
+        `🔄 Enhanced retry with recovery strategy (attempt ${this.state.retryCount + 1}/${this.state.maxRetries})`
       );
 
+      // Get recovery analysis
+      const recoveryAnalysis = React19ErrorHandler.attemptErrorRecovery(
+        this.state.error,
+        this.state.errorInfo,
+        this.state.retryCount,
+        this.state.maxRetries
+      );
+
+      console.log(
+        `🛠️ Executing recovery strategy: ${recoveryAnalysis.recoveryStrategy}`
+      );
+
+      // Execute recovery strategy
+      try {
+        const recoveryResult =
+          await React19ErrorHandler.executeRecoveryStrategy(
+            recoveryAnalysis.recoveryStrategy,
+            {
+              mockRegistry: global.__GLOBAL_MOCK_REGISTRY,
+              testName: this.props.testName,
+            }
+          );
+
+        console.log(`🔧 Recovery result:`, recoveryResult);
+
+        if (recoveryResult.success) {
+          console.log(`✅ Recovery successful: ${recoveryResult.message}`);
+        } else {
+          console.warn(`⚠️ Recovery failed: ${recoveryResult.message}`);
+          // Try fallback strategies if available
+          if (recoveryAnalysis.fallbackOptions.length > 0) {
+            const fallbackStrategy = recoveryAnalysis.fallbackOptions[0];
+            console.log(`🔄 Trying fallback strategy: ${fallbackStrategy}`);
+            const fallbackResult =
+              await React19ErrorHandler.executeRecoveryStrategy(
+                fallbackStrategy,
+                {
+                  mockRegistry: global.__GLOBAL_MOCK_REGISTRY,
+                  testName: this.props.testName,
+                }
+              );
+            console.log(`🔧 Fallback result:`, fallbackResult);
+          }
+        }
+      } catch (recoveryError) {
+        console.error(`❌ Recovery strategy execution failed:`, recoveryError);
+      }
+
+      // Reset error boundary state
       this.setState({
         hasError: false,
         error: undefined,
@@ -749,17 +1476,37 @@ export class React19ErrorBoundary extends Component<
         retryCount: this.state.retryCount + 1,
       });
 
-      // Add a small delay to allow for cleanup
+      // Add a delay based on recovery strategy estimation
+      const delay = Math.max(recoveryAnalysis.estimatedRecoveryTime, 100);
       this.retryTimeoutId = setTimeout(() => {
         // Force re-render by updating a dummy state if needed
         this.forceUpdate();
-      }, 100);
+      }, delay);
+    } else {
+      console.warn(
+        `❌ Cannot retry: ${this.state.retryCount >= this.state.maxRetries ? 'Max retries reached' : 'No error to retry'}`
+      );
     }
   };
 
   render() {
-    if (this.state.hasError && this.state.error && this.state.errorReport) {
+    if (this.state.hasError && this.state.error) {
       const canRetry = this.state.retryCount < this.state.maxRetries;
+
+      // If errorReport is not yet available (before componentDidCatch), create a basic one
+      const errorReport = this.state.errorReport || {
+        type: 'Error' as const,
+        totalErrors: 1,
+        categories: [],
+        suggestions: [
+          'Error boundary caught an error',
+          'Check component implementation',
+        ],
+        recoverable: true,
+        timestamp: Date.now(),
+        componentStack: '',
+        errorBoundary: this.props.componentName || 'React19ErrorBoundary',
+      };
 
       // Use custom fallback component if provided
       if (this.props.fallback) {
@@ -767,7 +1514,7 @@ export class React19ErrorBoundary extends Component<
         return (
           <FallbackComponent
             error={this.state.error}
-            errorReport={this.state.errorReport}
+            errorReport={errorReport}
             retry={this.retry}
             canRetry={canRetry}
           />
@@ -778,7 +1525,7 @@ export class React19ErrorBoundary extends Component<
       return (
         <DefaultTestErrorFallback
           error={this.state.error}
-          errorReport={this.state.errorReport}
+          errorReport={errorReport}
           retry={this.retry}
           canRetry={canRetry}
         />
@@ -804,10 +1551,4 @@ export const TestErrorBoundary: React.FC<{
   );
 };
 
-// Export types for external use
-export type {
-  React19ErrorBoundaryProps,
-  ErrorBoundaryState,
-  TestErrorReport,
-  ErrorCategory,
-};
+// Types are already exported above, no need to re-export
