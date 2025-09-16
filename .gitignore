@@ -82,8 +82,8 @@ ignore/
 gha-creds-*.json.DS_Store
 medical-device-regulatory-assistant/backend/error_tracking.db
 
-# Showcase website - to be committed separately
-showcase-website/
+# Showcase website build artifacts (but allow source files)
+# Note: showcase-website/ source files should be tracked
 
 # Test reports with unresolved Jest placeholders (prevent <rootDir> issues)
 **/<rootDir>/
@@ -113,3 +113,7 @@ showcase-website/.next/
 showcase-website/out/
 showcase-website/.vercel/
 showcase-website/*.tsbuildinfo
+
+# Editor directories and files (allow settings.json for project config)
+.vscode/*
+!.vscode/settings.json

@@ -488,11 +488,13 @@ const mockControl: Control = {
 
 // Enhanced form specific functions
 const mockValidateField = jest.fn(async (fieldName: string, value: any, immediate = false) => {
-  await mockValidateField(fieldName, value, immediate);
+  // Mock validation logic - return success by default
+  return { isValid: true, errors: [] };
 });
 
 const mockGetFieldValidation = jest.fn((fieldName: string) => {
-  return mockGetFieldValidation(fieldName);
+  // Mock field validation - return no errors by default
+  return { errors: [], isValid: true };
 });
 
 const mockSubmitWithFeedback = jest.fn(async (onSubmit: (data: any) => Promise<void>) => {
