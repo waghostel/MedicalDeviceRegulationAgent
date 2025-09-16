@@ -151,3 +151,4 @@ showcase-website/*.tsbuildinfo
 .vscode/*
 !.vscode/settings.json
 /medical-device-regulatory-assistant/test-health-data
+/medical-device-regulatory-assistant/test-health-data

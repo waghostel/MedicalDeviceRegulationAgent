@@ -26,11 +26,14 @@ export { default as databaseUtils } from './database-utils';
 export * from './MockDataAuditor';
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 // Enhanced form component mocks
 export * from './enhanced-form-component-mocks';
 export * from './setup-enhanced-form-component-mocks';
 export { default as enhancedFormComponentMocks } from './setup-enhanced-form-component-mocks';
 =======
+=======
+>>>>>>> Stashed changes
 // Mock validation and debugging system (Task 3.2)
 export * from './mock-validation-system';
 export { default as mockValidationSystem } from './mock-validation-system';
@@ -38,6 +41,9 @@ export { default as mockValidationSystem } from './mock-validation-system';
 // Individual mock validation components
 export * from './MockValidator';
 export * from './MockDebugger';
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 
 // Re-export commonly used testing libraries
