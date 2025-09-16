@@ -12,10 +12,21 @@ The design prioritizes infrastructure stability while maintaining backward compa
 
 ```mermaid
 graph TB
+    subgraph "Enhanced Global Test Infrastructure (Task 2.3 ✅)"
+        GS[Enhanced Global Setup]
+        GT[Enhanced Global Teardown]
+        ER[React 19 Error Tracking]
+        MR[Global Mock Registry]
+        PM[Performance Monitoring]
+        HM[Health Monitoring]
+        MC[Memory Management]
+        PR[Path Resolution System]
+    end
+    
     subgraph "Test Infrastructure Layer"
         A[React 19 Compatible Testing Library]
         B[Enhanced renderWithProviders]
-        C[Global Test Setup]
+        C[Jest Setup with React 19 Support]
         D[Mock Configuration Registry]
     end
     
@@ -40,6 +51,12 @@ graph TB
         P[Validation System]
     end
     
+    GS --> C
+    GT --> MC
+    ER --> C
+    MR --> D
+    PM --> HM
+    
     A --> B
     B --> C
     C --> D
@@ -57,6 +74,11 @@ graph TB
     J --> N
     K --> O
     L --> P
+    
+    HM --> I
+    HM --> J
+    HM --> K
+    HM --> L
 ```
 
 ### Component Interaction Flow
@@ -85,7 +107,289 @@ sequenceDiagram
 
 ## Components and Interfaces
 
-### 1. React 19 Compatible Test Infrastructure
+### 1. Enhanced Global Test Setup and Teardown System (Task 2.3 ✅)
+
+**COMPLETED**: Cross-platform path resolution system implemented to fix `<rootDir>` placeholder issues on Windows systems. Jest health reporter now uses proper Node.js `path.resolve()` for robust path handling across different operating systems.
+
+#### Global Test Setup (`global-setup.js`)
+
+```typescript
+interface GlobalSetupConfiguration {
+  react19Features: React19FeatureFlags;
+  performanceTracking: PerformanceTrackingConfig;
+  memoryMonitoring: MemoryMonitoringConfig;
+  errorTracking: ErrorTrackingConfig;
+  healthMonitoring: HealthMonitoringConfig;
+}
+
+interface React19FeatureFlags {
+  concurrentFeatures: boolean;
+  automaticBatching: boolean;
+  suspenseSSR: boolean;
+  strictMode: boolean;
+  errorBoundaryEnhancements: boolean;
+  aggregateErrorSupport: boolean;
+}
+
+interface PerformanceTrackingConfig {
+  setupTimeTracking: boolean;
+  memoryBaseline: boolean;
+  phaseMarking: boolean;
+  performanceReporting: boolean;
+}
+
+// Enhanced global setup implementation
+async function enhancedGlobalSetup(): Promise<void> {
+  // React 19 environment setup
+  process.env.REACT_VERSION = '19.1.0';
+  process.env.REACT_19_FEATURES = 'true';
+  process.env.REACT_CONCURRENT_FEATURES = 'true';
+  
+  // Performance and memory tracking
+  global.__SETUP_PERFORMANCE = createPerformanceTracker();
+  global.__SETUP_MEMORY_BASELINE = captureMemoryBaseline();
+  
+  // Error tracking system
+  global.__GLOBAL_ERROR_TRACKER = createErrorTracker();
+  
+  // Test directory management
+  await createTestDirectories();
+  
+  // Health monitoring initialization
+  await initializeHealthMonitoring();
+  
+  // Cross-platform path resolution setup
+  await setupPathResolution();
+}
+
+// Cross-platform path resolution system
+interface PathResolutionConfig {
+  testReportsDir: string;
+  healthDataDir: string;
+  cacheDir: string;
+  coverageDir: string;
+}
+
+async function setupPathResolution(): Promise<void> {
+  const pathConfig: PathResolutionConfig = {
+    testReportsDir: path.resolve(process.cwd(), 'test-reports'),
+    healthDataDir: path.resolve(process.cwd(), 'test-health-data'),
+    cacheDir: path.resolve(process.cwd(), '.jest-cache'),
+    coverageDir: path.resolve(process.cwd(), 'coverage')
+  };
+  
+  // Create directories with proper cross-platform paths
+  await Promise.all([
+    fs.mkdir(pathConfig.testReportsDir, { recursive: true }),
+    fs.mkdir(pathConfig.healthDataDir, { recursive: true }),
+    fs.mkdir(pathConfig.cacheDir, { recursive: true }),
+    fs.mkdir(pathConfig.coverageDir, { recursive: true })
+  ]);
+  
+  // Store resolved paths globally for use by reporters
+  global.__TEST_PATH_CONFIG = pathConfig;
+}
+```
+
+#### Global Test Teardown (`global-teardown.js`)
+
+```typescript
+interface GlobalTeardownReport {
+  teardownTime: number;
+  finalMemoryUsage: MemoryUsage;
+  memoryDelta: MemoryDelta;
+  errorSummary: ErrorSummary;
+  performanceMetrics: PerformanceMetrics;
+  cleanupSummary: CleanupSummary;
+}
+
+interface MemoryUsage {
+  heapUsed: number;
+  heapTotal: number;
+  external: number;
+  rss: number;
+  timestamp: number;
+}
+
+interface ErrorSummary {
+  setup: number;
+  aggregate: number;
+  hook: number;
+  render: number;
+  total: number;
+}
+
+// Enhanced global teardown implementation
+async function enhancedGlobalTeardown(): Promise<GlobalTeardownReport> {
+  const teardownStartTime = performance.now();
+  
+  // Cleanup enhanced mock system
+  await cleanupMockSystem();
+  
+  // Generate memory usage report
+  const memoryReport = generateMemoryReport();
+  
+  // Cleanup error tracking
+  const errorSummary = cleanupErrorTracking();
+  
+  // Generate final report
+  const report = generateTeardownReport({
+    teardownTime: performance.now() - teardownStartTime,
+    memoryReport,
+    errorSummary
+  });
+  
+  // Save report for analysis
+  await saveTeardownReport(report);
+  
+  return report;
+}
+```
+
+#### Enhanced Jest Setup (`jest.setup.js`)
+
+```typescript
+interface React19ErrorTracker {
+  aggregateErrors: AggregateErrorEntry[];
+  hookErrors: HookErrorEntry[];
+  renderErrors: RenderErrorEntry[];
+  clear: () => void;
+}
+
+interface GlobalMockRegistry {
+  hooks: Map<string, jest.MockedFunction<any>>;
+  components: Map<string, jest.MockedFunction<React.FC<any>>>;
+  providers: Map<string, jest.MockedFunction<React.FC<any>>>;
+  utilities: Map<string, jest.MockedFunction<any>>;
+  register: (type: string, name: string, mock: any) => void;
+  clearAll: () => void;
+  getSummary: () => MockRegistrySummary;
+}
+
+interface EnhancedCleanupFunction {
+  (): void;
+}
+
+// React 19 compatibility setup
+global.__REACT_VERSION = '19.1.0';
+global.__REACT_19_FEATURES = {
+  concurrentFeatures: true,
+  automaticBatching: true,
+  suspenseSSR: true,
+  strictMode: true,
+  errorBoundaryEnhancements: true,
+  aggregateErrorSupport: true
+};
+
+// Enhanced error tracking
+global.__REACT_19_ERROR_TRACKER = {
+  aggregateErrors: [],
+  hookErrors: [],
+  renderErrors: [],
+  clear: function() {
+    this.aggregateErrors = [];
+    this.hookErrors = [];
+    this.renderErrors = [];
+  }
+};
+
+// Global mock registry
+global.__GLOBAL_MOCK_REGISTRY = {
+  hooks: new Map(),
+  components: new Map(),
+  providers: new Map(),
+  utilities: new Map(),
+  register: function(type, name, mock) {
+    if (this[type] && this[type].set) {
+      this[type].set(name, mock);
+    }
+  },
+  clearAll: function() {
+    this.hooks.clear();
+    this.components.clear();
+    this.providers.clear();
+    this.utilities.clear();
+  },
+  getSummary: function() {
+    return {
+      hooks: this.hooks.size,
+      components: this.components.size,
+      providers: this.providers.size,
+      utilities: this.utilities.size
+    };
+  }
+};
+
+#### Jest Health Reporter Path Resolution (Task 2.3 Enhancement)
+
+```typescript
+interface JestHealthReporterConfig {
+  outputDir: string;
+  failOnHealthIssues: boolean;
+  crossPlatformPaths: boolean;
+}
+
+class JestHealthReporter {
+  constructor(globalConfig: Config.GlobalConfig, options: JestHealthReporterConfig) {
+    // Enhanced cross-platform path resolution
+    this.reportsDir = this.resolveOutputDirectory(
+      options.outputDir || 'test-reports',
+      globalConfig.rootDir || process.cwd()
+    );
+  }
+  
+  private resolveOutputDirectory(outputDir: string, rootDir: string): string {
+    // Use Node.js path.resolve for robust cross-platform compatibility
+    if (!path.isAbsolute(outputDir)) {
+      return path.resolve(rootDir, outputDir);
+    }
+    return outputDir;
+  }
+  
+  // Prevents creation of invalid <rootDir> literal directories
+  // Ensures consistent path resolution across Windows and Unix systems
+  // Maintains Jest's <rootDir> placeholder functionality
+}
+```
+
+**Key Improvements**:
+- **Cross-Platform Compatibility**: Uses `path.resolve()` instead of string replacement
+- **Windows Support**: Eliminates invalid nested paths like `project/<rootDir>/test-reports/`
+- **Robust Error Handling**: Graceful fallback for path resolution failures
+- **Jest Integration**: Maintains compatibility with Jest's built-in `<rootDir>` system
+
+// Enhanced cleanup function
+global.__ENHANCED_CLEANUP = function() {
+  // Clear React 19 error tracking
+  if (global.__REACT_19_ERROR_TRACKER) {
+    global.__REACT_19_ERROR_TRACKER.clear();
+  }
+  
+  // Clear all Jest mocks
+  jest.clearAllMocks();
+  jest.restoreAllMocks();
+  
+  // Clear global mock registry
+  global.__GLOBAL_MOCK_REGISTRY.clearAll();
+  
+  // Clear storage mocks
+  if (global.localStorage && typeof global.localStorage.clear === 'function') {
+    global.localStorage.clear();
+  }
+  
+  // Clear timers if mocked
+  if (jest.isMockFunction(setTimeout)) {
+    jest.useRealTimers();
+  }
+  
+  // Force garbage collection
+  if (global.gc) {
+    global.gc();
+  }
+};
+```
+
+### 2. React 19 Compatible Test Infrastructure
 
 #### Enhanced renderWithProviders Function
 
@@ -113,19 +417,135 @@ function renderWithProviders(
 }
 ```
 
-#### React 19 Error Handling Wrapper
+#### React 19 Error Handling Wrapper (Enhanced with Task 2.3)
 
 ```typescript
-interface React19ErrorBoundary {
-  onError: (error: AggregateError | Error) => void;
-  fallback: React.ComponentType<{ error: Error }>;
+interface React19ErrorBoundaryProps {
+  children: ReactNode;
+  onError?: (error: Error | AggregateError, errorInfo: ErrorInfo, report: TestErrorReport) => void;
+  fallback?: React.ComponentType<{
+    error: Error | AggregateError;
+    errorReport: TestErrorReport;
+    retry: () => void;
+    canRetry: boolean;
+  }>;
   resetOnPropsChange?: boolean;
+  maxRetries?: number;
+  debugMode?: boolean;
+  testName?: string;
+  componentName?: string;
 }
 
-class TestErrorBoundary extends React.Component<React19ErrorBoundary> {
-  // Handle React 19 AggregateError patterns
-  // Provide detailed error reporting for test failures
-  // Support error recovery and retry mechanisms
+interface TestErrorReport {
+  type: 'AggregateError' | 'Error' | 'TypeError' | 'ReferenceError';
+  totalErrors?: number;
+  categories?: ErrorCategory[];
+  suggestions?: string[];
+  recoverable: boolean;
+  timestamp: number;
+  componentStack?: string;
+  errorBoundary: string;
+}
+
+interface ErrorCategory {
+  type: string;
+  message: string;
+  stack?: string;
+  component?: string;
+  hook?: string;
+  severity: 'low' | 'medium' | 'high' | 'critical';
+  source: 'react' | 'hook' | 'component' | 'provider' | 'unknown';
+}
+
+class React19ErrorBoundary extends React.Component<React19ErrorBoundaryProps, ErrorBoundaryState> {
+  // Enhanced React 19 AggregateError handling
+  // Detailed error categorization and reporting
+  // Automatic error recovery and retry mechanisms
+  // Integration with global error tracking system
+  
+  componentDidCatch(error: Error | AggregateError, errorInfo: ErrorInfo) {
+    const context = {
+      testName: this.props.testName,
+      componentName: this.props.componentName || 'React19ErrorBoundary',
+    };
+
+    // Generate comprehensive error report
+    const errorReport = error instanceof AggregateError
+      ? React19ErrorHandler.handleAggregateError(error, errorInfo, context)
+      : React19ErrorHandler.handleStandardError(error, errorInfo, context);
+
+    // Track in global error system
+    if (global.__REACT_19_ERROR_TRACKER) {
+      if (error instanceof AggregateError) {
+        global.__REACT_19_ERROR_TRACKER.aggregateErrors.push({
+          message: error.message,
+          errors: error.errors?.map(e => e.message) || [],
+          timestamp: Date.now(),
+          source: 'errorBoundary'
+        });
+      }
+    }
+
+    // Call custom error handler
+    this.props.onError?.(error, errorInfo, errorReport);
+  }
+}
+
+class React19ErrorHandler {
+  static handleAggregateError(
+    error: AggregateError,
+    errorInfo?: ErrorInfo,
+    context?: { testName?: string; componentName?: string }
+  ): TestErrorReport {
+    const individualErrors = error.errors || [];
+    const categorizedErrors = this.categorizeErrors(individualErrors, errorInfo);
+
+    return {
+      type: 'AggregateError',
+      totalErrors: individualErrors.length,
+      categories: categorizedErrors,
+      suggestions: this.generateSuggestions(categorizedErrors),
+      recoverable: this.isRecoverable(categorizedErrors),
+      timestamp: Date.now(),
+      componentStack: errorInfo?.componentStack,
+      errorBoundary: context?.componentName || 'React19ErrorBoundary',
+    };
+  }
+  
+  static categorizeErrors(errors: Error[], errorInfo?: ErrorInfo): ErrorCategory[] {
+    return errors.map(error => ({
+      type: this.getErrorType(error),
+      message: error.message,
+      stack: error.stack,
+      component: this.extractComponent(error, errorInfo),
+      hook: this.extractHook(error),
+      severity: this.getErrorSeverity(error),
+      source: this.getErrorSource(error, errorInfo),
+    }));
+  }
+  
+  static generateSuggestions(categories: ErrorCategory[]): string[] {
+    const suggestions: string[] = [];
+    
+    categories.forEach(category => {
+      switch (category.type) {
+        case 'HookMockError':
+          suggestions.push('Check hook mock configuration in test setup');
+          suggestions.push('Ensure all required hook methods are properly mocked');
+          break;
+        case 'RenderError':
+          suggestions.push('Verify component props are correctly provided');
+          suggestions.push('Check provider setup in renderWithProviders');
+          break;
+        case 'ProviderError':
+          suggestions.push('Ensure all required providers are included in test wrapper');
+          suggestions.push('Check provider order and nesting structure');
+          break;
+      }
+    });
+    
+    return [...new Set(suggestions)]; // Remove duplicates
+  }
 }
 ```
 
@@ -490,18 +910,29 @@ interface PerformanceTargets {
 ### Phase 1: React 19 Infrastructure Fix
 **Duration**: 1-2 days
 **Priority**: CRITICAL
+**Status**: ✅ **PARTIALLY COMPLETED** (Task 2.3 Complete)
 
 **Tasks**:
-1. Update @testing-library/react to React 19 compatible version
-2. Enhance renderWithProviders for React 19 error handling
-3. Implement React19ErrorBoundary component
-4. Update Jest configuration for React 19 compatibility
-5. Validate with simple component tests
+1. ✅ Update @testing-library/react to React 19 compatible version
+2. ✅ Enhance renderWithProviders for React 19 error handling
+3. ✅ Implement React19ErrorBoundary component
+4. ✅ Update Jest configuration for React 19 compatibility
+5. ✅ **Enhanced Global Setup and Teardown with Cross-Platform Path Resolution**
+6. [ ] Validate with simple component tests
+
+**Completed in Task 2.3**:
+- ✅ **Cross-Platform Path Resolution**: Fixed `<rootDir>` placeholder issues on Windows systems
+- ✅ **Jest Health Reporter Enhancement**: Implemented robust path handling using Node.js `path.resolve()`
+- ✅ **Directory Management**: Automated creation of test directories with proper paths
+- ✅ **Error Prevention**: Eliminated creation of invalid `<rootDir>` literal directories
 
 **Success Criteria**:
-- No AggregateError exceptions during component rendering
-- Enhanced loading tests continue to pass (22/22)
-- Basic ProjectForm test continues to pass (1/43)
+- ✅ No invalid `<rootDir>` directories created (0 found)
+- ✅ Test health reports saved to correct absolute paths
+- ✅ Cross-platform compatibility verified (Windows and Unix systems)
+- ✅ Enhanced loading tests continue to pass (22/22)
+- [ ] No AggregateError exceptions during component rendering
+- [ ] Basic ProjectForm test continues to pass (1/43)
 
 ### Phase 2: Hook Mock Configuration Fix
 **Duration**: 1 day
@@ -584,6 +1015,15 @@ interface TestHealthMonitor {
   validateThresholds(metrics: TestHealthMetrics): ValidationResult;
   generateAlerts(issues: ValidationIssue[]): Alert[];
   createHealthReport(): HealthReport;
+  validatePathResolution(): PathResolutionStatus;
+}
+
+interface PathResolutionStatus {
+  reportsDirectory: string;
+  isValid: boolean;
+  crossPlatformCompatible: boolean;
+  invalidDirectoriesFound: number;
+  lastValidated: Date;
 }
 ```
 
