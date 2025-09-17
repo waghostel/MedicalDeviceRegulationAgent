@@ -389,7 +389,47 @@ global.__ENHANCED_CLEANUP = function() {
 };
 ```
 
-### 2. React 19 Compatible Test Infrastructure
+### 2. Database Testing Infrastructure (F2.3)
+
+#### Isolated Database Test Fixtures
+
+```python
+# Test-specific database configuration
+@pytest_asyncio.fixture(scope="function")
+async def test_db_session():
+    engine = create_async_engine(
+        "sqlite+aiosqlite:///:memory:",
+        poolclass=StaticPool,
+        connect_args={"check_same_thread": False}
+    )
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+    async_session = async_sessionmaker(engine, expire_on_commit=False)
+    async with async_session() as session:
+        yield session
+    await engine.dispose()
+```
+
+#### Database Manager Bypass Strategy
+
+```python
+interface TestDatabaseConfig {
+  bypassGlobalManager: boolean;
+  useInMemoryDatabase: boolean;
+  isolateTestSessions: boolean;
+  enableAsyncSupport: boolean;
+}
+
+class TestDatabaseManager {
+  static createIsolatedSession(): AsyncSession {
+    // Create isolated database session for testing
+    // Bypass global DatabaseManager to prevent conflicts
+    // Use StaticPool for proper async connection handling
+  }
+}
+```
+
+### 3. React 19 Compatible Test Infrastructure
 
 #### Enhanced renderWithProviders Function
 
@@ -907,17 +947,27 @@ interface PerformanceTargets {
 
 ## Implementation Phases
 
-### Phase 1: React 19 Infrastructure Fix
-**Duration**: 1-2 days
+### Phase 1: Foundation Dependencies (F1.1-F1.3)
+**Duration**: 1-2 days  
 **Priority**: CRITICAL
+**Status**: ❌ **PENDING** - Must be completed first
+
+**Tasks**:
+1. F1.1 Add Backend Dependencies (`jsonschema` to pyproject.toml)
+2. F1.2 Fix Frontend Mock Registry Configuration (useEnhancedForm@1.0.0 object structure)
+3. F1.3 Validate Dependency Resolution
+
+### Phase 2: Infrastructure Foundation (F2.1-F2.4)
+**Duration**: 1-2 days
+**Priority**: CRITICAL  
 **Status**: ✅ **PARTIALLY COMPLETED** (Task 2.3 Complete)
 
 **Tasks**:
-1. ✅ Update @testing-library/react to React 19 compatible version
-2. ✅ Enhance renderWithProviders for React 19 error handling
-3. ✅ Implement React19ErrorBoundary component
-4. ✅ Update Jest configuration for React 19 compatibility
-5. ✅ **Enhanced Global Setup and Teardown with Cross-Platform Path Resolution**
+1. F2.1 Update @testing-library/react to React 19 compatible version
+2. F2.2 Implement React 19 Error Boundary System  
+3. F2.3 Refactor Database Testing Infrastructure
+4. F2.4 Update Jest configuration for React 19 compatibility
+5. ✅ **Enhanced Global Setup and Teardown with Cross-Platform Path Resolution** (Task 2.3 Complete)
 6. [ ] Validate with simple component tests
 
 **Completed in Task 2.3**:
@@ -934,54 +984,69 @@ interface PerformanceTargets {
 - [ ] No AggregateError exceptions during component rendering
 - [ ] Basic ProjectForm test continues to pass (1/43)
 
-### Phase 2: Hook Mock Configuration Fix
-**Duration**: 1 day
+### Phase 3: System Integration (F3.1-F3.4)
+**Duration**: 1-2 days
 **Priority**: HIGH
 
 **Tasks**:
-1. Implement correct useToast hook mock structure
-2. Create enhanced form hook mock chain
-3. Add localStorage and timer mocks for auto-save
-4. Implement mock validation and debugging tools
-5. Test enhanced form component rendering
+1. F3.1 Enhance renderWithProviders for React 19
+2. F3.2 Fix Hook Mock Configuration Structure
+3. F3.3 Standardize HTTP Client Testing Patterns
+4. F3.4 Validate Infrastructure Integration
 
 **Success Criteria**:
 - No "useToast is not a function" errors
 - Enhanced form components render successfully
 - All hook dependencies properly mocked
+- HTTP client testing standardized
 
-### Phase 3: Enhanced Form Test Restoration
-**Duration**: 1 day
+### Phase 4: Feature Validation (F4.1-F4.4)
+**Duration**: 1-2 days
 **Priority**: HIGH
 
 **Tasks**:
-1. Restore ProjectForm unit tests (42 tests)
-2. Restore enhanced form integration tests (18 tests)
-3. Validate all enhanced form features
-4. Fix component-specific test issues
-5. Achieve >95% pass rate for enhanced form tests
+1. F4.1 Implement Authentication Testing Infrastructure
+2. F4.2 Restore Enhanced Form Component Testing
+3. F4.3 Fix Component-Specific Test Issues
+4. F4.4 Validate Feature Integration
 
 **Success Criteria**:
 - ProjectForm tests: 41+ passing out of 43
 - Integration tests: 18+ passing out of 18
 - All enhanced form features validated
+- Authentication testing functional
 
-### Phase 4: Component Test Fixes and Optimization
+### Phase 5: System Optimization (F5.1-F5.4)
 **Duration**: 1 day
 **Priority**: MEDIUM
 
 **Tasks**:
-1. Fix toast component test issues (10 failing tests)
-2. Resolve multiple element role conflicts
-3. Add missing test data attributes
-4. Optimize test performance and reliability
-5. Create comprehensive test documentation
+1. F5.1 Optimize Test Performance
+2. F5.2 Enhance Test Health Monitoring
+3. F5.3 Create Comprehensive Test Debugging Tools
+4. F5.4 Validate System Reliability
 
 **Success Criteria**:
-- Toast tests: 27+ passing out of 29
-- Overall test suite: >90% pass rate
-- Test execution time: <30 seconds
-- Comprehensive documentation available
+- Test execution time: <60 seconds
+- Health monitoring functional
+- Debugging tools available
+- System reliability >99%
+
+### Phase 6: Final Integration (F6.1-F6.4)
+**Duration**: 1 day
+**Priority**: MEDIUM
+
+**Tasks**:
+1. F6.1 Execute Complete System Integration Testing
+2. F6.2 Create Maintenance Documentation
+3. F6.3 Validate Production Readiness
+4. F6.4 Complete Final Validation
+
+**Success Criteria**:
+- Overall test suite: >95% pass rate
+- Complete documentation available
+- Production readiness validated
+- All success criteria met
 
 ## Deployment Strategy
 
