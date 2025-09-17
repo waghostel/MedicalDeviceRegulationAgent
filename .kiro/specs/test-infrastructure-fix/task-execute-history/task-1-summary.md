@@ -188,7 +188,7 @@ assert 500 == 401  # Expected unauthorized, got server error
 **Priority**: CRITICAL - Core infrastructure must be stable before system fixes.
 **Dependencies**: Phase 1 completion required.
 
-- [ ] F2.1 Update React 19 Testing Library Compatibility
+- [-] F2.1 Update React 19 Testing Library Compatibility
   - Update `@testing-library/react` to React 19 compatible version (`^16.4.0` or higher)
   - Verify React version compatibility with `pnpm list react`
   - Test basic component rendering with updated library
