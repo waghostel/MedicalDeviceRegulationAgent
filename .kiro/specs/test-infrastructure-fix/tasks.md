@@ -57,6 +57,14 @@ This implementation plan divides the test infrastructure fixes into independent,
    - **Definition**: Tests that are skipped or simplified because the problem is either too complex or outside the current project scope.
    - **Action**: Identify them from the development process or chat history, and clearly document the reason for skipping.
 
+5. **Minimize the test output**
+  - **Start with summary**: Use `--reporters=summary --silent` for overview
+  - **Focus on failures**: Add `--onlyFailures` to see only problems
+  - **Capture structured data**: Use JSON reporters for programmatic analysis
+  - **Progressive detail**: Start minimal, add detail only for specific failures
+  - **Filter output**: Use grep/awk to extract only error-relevant information
+  - **Reference**: Take `0_minimal-test-output-error-capture.md` as the testing guide when needed
+
 ### Task Report Format
 
 Each completed task requires a report:

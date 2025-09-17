@@ -163,21 +163,21 @@ assert 500 == 401  # Expected unauthorized, got server error
 **Priority**: CRITICAL - Must be completed first to enable any further progress.
 **Dependencies**: None - tasks can be executed in parallel.
 
-- [ ] F1.1 Add Backend Dependencies
+- [x] F1.1 Add Backend Dependencies
   - Add `jsonschema` to the `[tool.poetry.dependencies]` section of `medical-device-regulatory-assistant/backend/pyproject.toml`
   - Run `poetry install` in the backend directory to update the lock file
   - Run `poetry check` to audit for other dependency inconsistencies
   - Verify no `ModuleNotFoundError: No module named 'jsonschema'` errors occur
   - _Requirements: Database initialization, Backend test execution_
 
-- [ ] F1.2 Fix Frontend Mock Registry Configuration
+- [x] F1.2 Fix Frontend Mock Registry Configuration
   - Investigate the mock registry validation script to confirm expected object structure
   - Locate configuration file where `'useEnhancedForm@1.0.0'` is defined
   - Update the value from string to required object format
   - Run `pnpm audit` to identify any other dependency issues
   - _Requirements: Frontend test execution, Mock system validation_
 
-- [ ] F1.3 Validate Dependency Resolution
+- [x] F1.3 Validate Dependency Resolution
   - Execute backend test suite to confirm dependency fixes
   - Execute frontend test suite to confirm mock configuration fixes
   - Document any remaining dependency conflicts

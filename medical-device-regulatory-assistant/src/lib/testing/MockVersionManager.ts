@@ -116,7 +116,7 @@ const CompatibilityMatrixSchema = z.object({
   reactTestingLibrary: VersionRangeSchema,
   jest: VersionRangeSchema,
   typescript: VersionRangeSchema,
-  dependencies: z.record(VersionRangeSchema),
+  dependencies: z.record(z.string(), VersionRangeSchema),
 });
 
 // ============================================================================
