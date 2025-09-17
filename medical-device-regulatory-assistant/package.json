@@ -58,7 +58,10 @@
     "ci:validate": "node scripts/validate-ci-pipeline.js",
     "ci:setup": "pnpm ci:validate && pre-commit install",
     "health:dashboard": "node scripts/system-health-dashboard.js",
-    "health:check": "node scripts/system-health-dashboard.js --once"
+    "health:check": "node scripts/system-health-dashboard.js --once",
+    "ci:health-check": "node scripts/ci-health-check-basic.js",
+    "ci:performance-monitor": "node scripts/ci-health-check.js --performance-only",
+    "ci:dashboard": "node scripts/ci-health-check.js --dashboard-only"
   },
   "packageManager": "pnpm@9.0.0",
   "dependencies": {
