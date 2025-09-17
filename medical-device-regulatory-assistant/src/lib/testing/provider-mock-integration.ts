@@ -1,7 +1,8 @@
 /**
  * Provider Mock Integration for Test Utils
  * Integrates provider mock system with existing test infrastructure
- * Requirements: 2.4, 7.1
+ * Enhanced with Provider Stack Management (Task B3.2)
+ * Requirements: 2.4, 7.1, 7.2
  */
 
 import React, { ReactNode } from 'react';
@@ -13,6 +14,17 @@ import {
   cleanupProviderMocks,
   type ProviderMockOptions,
 } from './provider-mock-system';
+import {
+  providerStackManager,
+  createProviderStack,
+  createProviderStackFromOptions,
+  cleanupProviderStack,
+  resetProviderStack,
+  cleanupAllProviderStacks,
+  resetAllProviderStates,
+  EnhancedProviderStack,
+  providerStackUtils,
+} from './ProviderStackManager';
 
 /**
  * Enhanced test providers wrapper with provider mock integration
@@ -117,10 +129,10 @@ export const createEnhancedWrapper = (options: EnhancedRenderOptions = {}) => {
 };
 
 /**
- * Provider mock utilities for test integration
+ * Enhanced provider mock utilities for test integration with stack management
  */
 export const providerMockIntegration = {
-  // Setup and cleanup
+  // Setup and cleanup (enhanced with stack management)
   setup: (options: ProviderMockOptions = {}) => {
     setupProviderMocks();
     
@@ -156,10 +168,13 @@ export const providerMockIntegration = {
   cleanup: () => {
     cleanupProviderMocks();
     providerMockUtils.clearAllProviderStates();
+    // Enhanced cleanup with stack management
+    cleanupAllProviderStacks();
   },
 
   reset: () => {
     providerMockUtils.clearAllProviderStates();
+    resetAllProviderStates();
     jest.clearAllMocks();
   },
 
@@ -174,6 +189,20 @@ export const providerMockIntegration = {
   // Validation
   validate: () => {
     return providerMockUtils.validateProviderMocks();
+  },
+
+  // Enhanced stack management utilities (Task B3.2)
+  stack: {
+    create: createProviderStack,
+    createFromOptions: createProviderStackFromOptions,
+    cleanup: cleanupProviderStack,
+    reset: resetProviderStack,
+    cleanupAll: cleanupAllProviderStacks,
+    resetAllStates: resetAllProviderStates,
+    getInfo: (stackId: string) => providerStackManager.getStackInfo(stackId),
+    getDebugInfo: () => providerStackManager.getDebugInfo(),
+    validate: () => providerStackManager.validateConfiguration(),
+    manager: providerStackManager,
   },
 
   // Utilities
@@ -299,4 +328,8 @@ export default {
   scenarios: integrationScenarios,
   register: registerProviderMocks,
   unregister: unregisterProviderMocks,
+  // Enhanced Provider Stack Management (Task B3.2)
+  ProviderStack: EnhancedProviderStack,
+  stackUtils: providerStackUtils,
+  stackManager: providerStackManager,
 };
