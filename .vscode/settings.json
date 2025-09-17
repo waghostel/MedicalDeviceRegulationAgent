@@ -1,41 +1,37 @@
 {
   "kiroAgent.trustedCommands": [
-    // --- Safe, Read-Only Commands ---
     "cls",
     "clear",
     "ls",
     "ls -F",
     "ls -l",
-    "cat *",      // Still a minor risk, can read any file. Keep only if necessary.
+    "cat *",
     "head *",
     "tail *",
     "grep *",
     "pwd",
     "whoami",
     "id",
-
-    // --- Version Control (Specific Subcommands Only) ---
     "git status",
     "git diff",
     "git log",
     "git branch",
     "git pull",
-    "git add .", // Be specific, avoid 'git add *'
+    "git add .",
     "git stash",
-    "git checkout", // Note: checkout can still modify files.
+    "git checkout",
     "git commit -m",
-
-    // --- Project-Specific Build & Test Commands ---
-    // These are generally safe as they operate within the project scope.
-    "pnpm install",
-    "pnpm test",
-    "pnpm dev",
-    "pnpm build",
-    "poetry install",
+    "pnpm test *",
+    "pnpm dev *",
+    "pnpm build *",
+    "poetry install *",
     "npm install",
     "npm test",
     "yarn install",
-    "yarn test"
+    "yarn test",
+    "pnpm *",
+    "poetry run *",
+    "poetry *"
   ],
  "typescript.autoClosingTags": false,
 
