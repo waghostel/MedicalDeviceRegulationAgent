@@ -16,21 +16,26 @@ This implementation plan divides the test infrastructure fixes into independent,
 - Use **`poetry`** for Python commands (e.g. `poetry run python test_document_tool.py`).
 - Create the test script and run it instead of run it directly with `poetry run python -c`
 - Follow **Test-Driven Development (TDD)**.
-- Always clear the terminal before running a new command. Type the clear command first, press Enter, then type the actual command and press Enter again.
+- Always clear the terminal before running a new command. After clear the terminal, run the second command no matter if clear 
 - Document the faild and skipped test in the from chat history into **Undone tests/Skipped test**.
 
-Example 1(Windows):
+### Clear terminal example
+Example 1(Windows, cmd):
 
 ```bash
-cls
-<command>
+cls & <command>
 ```
+Example (Windows, powershell):
+
+```bash
+cls; <command>
+```
+
 
 Example 2 (Mac and Linux)
 
 ```bash
-clear
-<command>
+clear; <command>
 ```
 
 - After reading this file, say: **"I will use poetry and pnpm"**.
@@ -278,7 +283,7 @@ Each completed task requires a report:
 
 ### Computer B Integration Tasks: Mock System Validation
 
-- [ ] Task B-I1: Hook mock system integration testing
+- [x] Task B-I1: Hook mock system integration testing
 
   - Test useToast mock with actual enhanced form components
   - Validate enhanced form hook chain with real component rendering
