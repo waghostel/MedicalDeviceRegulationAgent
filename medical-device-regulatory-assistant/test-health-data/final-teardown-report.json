@@ -1,6 +1,6 @@
 {
-  "teardownStartTime": 1758115817140,
-  "setupTime": 3625.432818000001,
+  "teardownStartTime": 1758131599728,
+  "setupTime": 160467.3716,
   "react19Features": 7,
   "errorSummary": {
     "setup": 0,
@@ -11,26 +11,26 @@
   },
   "mockCount": 0,
   "memoryBaseline": {
-    "heapUsed": 75.93944549560547,
-    "heapTotal": 99.98828125,
-    "external": 3.378920555114746,
-    "rss": 170.8671875,
-    "timestamp": 1758115813515
+    "heapUsed": 81.73716735839844,
+    "heapTotal": 108.515625,
+    "external": 3.589247703552246,
+    "rss": 171.15625,
+    "timestamp": 1758131439264
   },
   "react19SetupComplete": true,
   "finalMemoryUsage": {
-    "heapUsed": 148.17479705810547,
-    "heapTotal": 171.03515625,
-    "external": 7.684113502502441,
-    "rss": 256.78515625,
-    "timestamp": 1758115817140
+    "heapUsed": 81.44181060791016,
+    "heapTotal": 114.12109375,
+    "external": 3.5919809341430664,
+    "rss": 178.98046875,
+    "timestamp": 1758131599729
   },
   "memoryDelta": {
-    "heapUsed": 72.2353515625,
-    "heapTotal": 71.046875,
-    "external": 4.305192947387695,
-    "rss": 85.91796875
+    "heapUsed": -0.29535675048828125,
+    "heapTotal": 5.60546875,
+    "external": 0.0027332305908203125,
+    "rss": 7.82421875
   },
-  "teardownTime": 0.8642650000001595,
-  "teardownCompletedAt": 1758115817141
+  "teardownTime": 3.345000000001164,
+  "teardownCompletedAt": 1758131599730
 }

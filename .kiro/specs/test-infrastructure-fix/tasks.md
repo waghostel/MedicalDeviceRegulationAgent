@@ -57,13 +57,33 @@ This implementation plan divides the test infrastructure fixes into independent,
    - **Definition**: Tests that are skipped or simplified because the problem is either too complex or outside the current project scope.
    - **Action**: Identify them from the development process or chat history, and clearly document the reason for skipping.
 
-5. **Minimize the test output**
-  - **Start with summary**: Use `--reporters=summary --silent` for overview
-  - **Focus on failures**: Add `--onlyFailures` to see only problems
-  - **Capture structured data**: Use JSON reporters for programmatic analysis
-  - **Progressive detail**: Start minimal, add detail only for specific failures
-  - **Filter output**: Use grep/awk to extract only error-relevant information
-  - **Reference**: Take `0_minimal-test-output-error-capture.md` as the testing guide when needed
+5. **Optimize Test Output for Speed & Token Efficiency**
+   - **Start with SWC-optimized summary**: Use `--maxWorkers=75% --cache --reporters=summary --silent` for fastest overview
+   - **Focus on failures with parallel execution**: Add `--onlyFailures --maxWorkers=100% --cache` to rapidly detect problems
+   - **Capture structured data at speed**: Use `--reporters=json --maxWorkers=100% --cache --silent` for fast programmatic analysis
+   - **Progressive detail with performance**: Start with `--bail --reporters=dot` for instant feedback, add `--verbose` only for specific failures
+   - **High-speed output filtering**: Use PowerShell `Select-String` or `grep` with parallel execution to extract error-relevant information
+   - **Memory-aware execution**: Use `--maxWorkers=50%` for tests with memory leaks, `--maxWorkers=100%` for clean tests
+   - **Reference guides**:
+     - `docs/test-guide/fast-test-guide.md` for speed-optimized commands
+     - `docs/test-guide/windows-fast-test-commands.md` for PowerShell benchmarking
+     - `docs/test-guide/minimal-test-output-error-capture.md` for comprehensive testing strategies
+     - `docs/test-guide/README.md` for complete test guide overview
+
+   **Quick Command Reference for LLMs:**
+   ```bash
+   # Instant health check (< 2s with cache)
+   pnpm test --maxWorkers=100% --cache --silent --reporters=summary --bail
+
+   # Error detection (< 5s)
+   pnpm test --silent --onlyFailures --maxWorkers=75% --cache --reporters=dot
+
+   # Single test investigation (< 3s)
+   pnpm test path/to/test.tsx --maxWorkers=1 --cache --silent --reporters=default
+
+   # Memory-safe testing (for React 19 compatibility issues)
+   pnpm test --maxWorkers=50% --cache --silent --reporters=summary
+   ```
 
 ### Task Report Format
 
