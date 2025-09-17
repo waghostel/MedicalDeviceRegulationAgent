@@ -20,22 +20,17 @@ This implementation plan divides the test infrastructure fixes into independent,
 - Document the faild and skipped test in the from chat history into **Undone tests/Skipped test**.
 
 ### Clear terminal example
-Example 1(Windows, cmd):
+Example (Windows cmd and powershell 7):
 
 ```bash
-cls & <command>
-```
-Example (Windows, powershell):
-
-```bash
-cls; <command>
+cls && <command>
 ```
 
 
 Example 2 (Mac and Linux)
 
 ```bash
-clear; <command>
+clear && <command>
 ```
 
 - After reading this file, say: **"I will use poetry and pnpm"**.
