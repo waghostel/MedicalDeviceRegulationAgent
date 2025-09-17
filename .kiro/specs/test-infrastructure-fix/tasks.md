@@ -16,22 +16,8 @@ This implementation plan divides the test infrastructure fixes into independent,
 - Use **`poetry`** for Python commands (e.g. `poetry run python test_document_tool.py`).
 - Create the test script and run it instead of run it directly with `poetry run python -c`
 - Follow **Test-Driven Development (TDD)**.
-- Always clear the terminal before running a new command. After clear the terminal, run the second command no matter if clear 
 - Document the faild and skipped test in the from chat history into **Undone tests/Skipped test**.
 
-### Clear terminal example
-Example (Windows cmd and powershell 7):
-
-```bash
-cls && <command>
-```
-
-
-Example 2 (Mac and Linux)
-
-```bash
-clear && <command>
-```
 
 - After reading this file, say: **"I will use poetry and pnpm"**.
 
