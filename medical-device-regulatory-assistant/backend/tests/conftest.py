@@ -104,46 +104,25 @@ async def test_db_session() -> AsyncGenerator[AsyncSession, None]:
     Provide completely isolated database session for each test function.
     
     This fixture creates a new, isolated in-memory SQLite database for each test,
-    bypassing the global database manager entirely. It uses StaticPool for proper
-    in-memory database handling and ensures complete cleanup after each test.
+    bypassing the global database manager entirely. It uses the new TestDatabaseConfig
+    for proper isolation and StaticPool configuration.
     
     Key features:
     - Creates isolated in-memory database per test
-    - Uses StaticPool for SQLite in-memory databases
-    - Bypasses global database manager for isolation
+    - Uses StaticPool for SQLite in-memory databases with proper PRAGMA settings
+    - Bypasses global database manager for complete isolation
     - Automatic table creation and cleanup
     - Proper async session lifecycle management
+    - SQLite foreign key constraints enabled
     
     Returns:
         AsyncSession: Isolated database session for the test
     """
-    # Create unique engine for this test with StaticPool
-    engine = create_async_engine(
-        "sqlite+aiosqlite:///:memory:",
-        poolclass=StaticPool,
-        connect_args={"check_same_thread": False},
-        echo=False  # Set to True for SQL debugging
-    )
+    from database.test_config import isolated_test_session
     
-    try:
-        # Create all tables in the test database
-        async with engine.begin() as conn:
-            await conn.run_sync(Base.metadata.create_all)
-        
-        # Create session factory
-        async_session = async_sessionmaker(
-            bind=engine,
-            class_=AsyncSession,
-            expire_on_commit=False
-        )
-        
-        # Provide session to test
-        async with async_session() as session:
-            yield session
-            
-    finally:
-        # Ensure proper cleanup
-        await engine.dispose()
+    # Use the new isolated test session context manager
+    async with isolated_test_session("pytest_test") as session:
+        yield session
 
 
 @pytest_asyncio.fixture(scope="function")
@@ -491,6 +470,73 @@ def mock_openfda_service_error():
     with patch.object(service, '_make_request') as mock_request:
         mock_request.side_effect = FDAAPIError("Test API error")
         yield service
+
+
+@pytest_asyncio.fixture(scope="function")
+async def isolated_db_config():
+    """
+    Provide isolated database configuration for advanced test scenarios.
+    
+    This fixture provides direct access to the TestDatabaseConfig for tests
+    that need more control over database operations or multiple sessions.
+    
+    Returns:
+        TestDatabaseConfig: Isolated database configuration
+    """
+    from database.test_config import isolated_test_database
+    
+    async with isolated_test_database("pytest_config") as config:
+        yield config
+
+
+@pytest_asyncio.fixture(scope="function")
+async def test_db_connection():
+    """
+    Provide isolated database connection for raw SQL operations.
+    
+    This fixture provides a raw database connection for tests that need
+    to execute SQL directly without going through SQLAlchemy sessions.
+    
+    Returns:
+        Connection: Raw database connection
+    """
+    from database.test_config import isolated_test_database
+    
+    async with isolated_test_database("pytest_connection") as config:
+        async with config.get_connection() as conn:
+            yield conn
+
+
+@pytest_asyncio.fixture(scope="function")
+async def multiple_test_sessions():
+    """
+    Provide multiple isolated database sessions for testing concurrent operations.
+    
+    This fixture creates multiple isolated database sessions that can be used
+    to test concurrent database operations while maintaining isolation.
+    
+    Returns:
+        List[AsyncSession]: List of isolated database sessions
+    """
+    from database.test_config import isolated_test_database
+    
+    async with isolated_test_database("pytest_multi") as config:
+        sessions = []
+        try:
+            # Create multiple sessions from the same isolated database
+            for i in range(3):
+                session = config.session_factory()
+                sessions.append(session)
+            
+            yield sessions
+            
+        finally:
+            # Clean up all sessions
+            for session in sessions:
+                try:
+                    await session.close()
+                except Exception as e:
+                    logger.warning(f"Error closing test session: {e}")
 
 
 # Legacy compatibility fixtures (deprecated - use new fixtures above)

@@ -22,17 +22,28 @@ const customJestConfig = {
         }],
         ['@babel/preset-react', { 
           runtime: 'automatic',
-          development: process.env.NODE_ENV === 'development'
+          development: process.env.NODE_ENV === 'development',
+          // React 19 specific options
+          importSource: 'react',
+          throwIfNamespace: false,
+          // Fix JSX fragment parsing issues
+          pragma: 'React.createElement',
+          pragmaFrag: 'React.Fragment'
         }],
         '@babel/preset-typescript'
       ],
       plugins: [
-        '@babel/plugin-transform-runtime'
+        '@babel/plugin-transform-runtime',
+        // React 19 JSX fragment support
+        ['@babel/plugin-transform-react-jsx', {
+          runtime: 'automatic',
+          importSource: 'react'
+        }]
       ]
     }]
   },
   transformIgnorePatterns: [
-    'node_modules/(?!(.*\\.mjs$|@radix-ui|@testing-library|react-19-compat|@copilotkit))'
+    'node_modules/(?!(.*\\.mjs$|@radix-ui|@testing-library|react-19-compat|@copilotkit|react|react-dom|@babel))'
   ],
   collectCoverageFrom: [
     'src/**/*.{js,jsx,ts,tsx}',
@@ -88,16 +99,23 @@ const customJestConfig = {
   // React 19 compatibility settings
   testEnvironmentOptions: {
     customExportConditions: ['node', 'node-addons'],
+    // React 19 specific jsdom options
+    resources: 'usable',
+    runScripts: 'dangerously',
+    pretendToBeVisual: true,
   },
   // Enhanced error handling for React 19 AggregateError
-  errorOnDeprecated: false, // Temporarily disable to handle React 19 transition
-  // React 19 specific globals
+  errorOnDeprecated: false, // Disabled for React 19 compatibility
+  // React 19 specific globals and feature flags
   globals: {
     'ts-jest': {
       useESM: true,
     },
     // React 19 feature flags
     __REACT_DEVTOOLS_GLOBAL_HOOK__: {},
+    __REACT_19_FEATURES_ENABLED__: true,
+    __REACT_CONCURRENT_FEATURES__: true,
+    __REACT_STRICT_MODE__: true,
   },
   // Simplified test categorization with consistent transform configuration
   projects: [
