@@ -109,6 +109,9 @@ Thumbs.db
 *.swo
 *~
 
+# Compressed files
+*.gz
+
 .gemini/
 # GitHub App credentials
 gha-creds-*.json.DS_Store
