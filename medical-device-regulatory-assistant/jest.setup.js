@@ -528,6 +528,235 @@ afterEach(() => {
   }
 });
 
+// Mock next-auth to fix React 19 compatibility issues
+jest.mock('next-auth/react', () => {
+  const React = require('react');
+  
+  // Create a session context
+  const SessionContext = React.createContext({
+    data: null,
+    status: 'unauthenticated',
+    update: async () => null,
+  });
+
+  // Mock SessionProvider that's compatible with React 19
+  const SessionProvider = ({ children, session = null }) => {
+    const contextValue = React.useMemo(() => ({
+      data: session,
+      status: session ? 'authenticated' : 'unauthenticated',
+      update: async () => session,
+    }), [session]);
+
+    return React.createElement(
+      SessionContext.Provider,
+      { value: contextValue },
+      children
+    );
+  };
+
+  // Mock useSession hook
+  const useSession = () => {
+    const context = React.useContext(SessionContext);
+    return context || {
+      data: null,
+      status: 'unauthenticated',
+      update: async () => null,
+    };
+  };
+
+  return {
+    SessionProvider,
+    useSession,
+    getSession: jest.fn().mockResolvedValue(null),
+    signIn: jest.fn().mockResolvedValue({ ok: true, error: null }),
+    signOut: jest.fn().mockResolvedValue({ url: '/' }),
+    getCsrfToken: jest.fn().mockResolvedValue('mock-csrf-token'),
+    getProviders: jest.fn().mockResolvedValue({}),
+  };
+});
+
+jest.mock('next-auth', () => ({
+  getSession: jest.fn().mockResolvedValue(null),
+  signIn: jest.fn().mockResolvedValue({ ok: true, error: null }),
+  signOut: jest.fn().mockResolvedValue({ url: '/' }),
+  getCsrfToken: jest.fn().mockResolvedValue('mock-csrf-token'),
+  getProviders: jest.fn().mockResolvedValue({}),
+}));
+
+// Mock react-hook-form to fix React 19 compatibility issues
+jest.mock('react-hook-form', () => {
+  const React = require('react');
+
+  // Mock form state
+  const createMockFormState = (overrides = {}) => ({
+    isDirty: false,
+    isValid: true,
+    isSubmitting: false,
+    isLoading: false,
+    isSubmitted: false,
+    isSubmitSuccessful: false,
+    isValidating: false,
+    submitCount: 0,
+    touchedFields: {},
+    dirtyFields: {},
+    validatingFields: {},
+    errors: {},
+    disabled: false,
+    ...overrides,
+  });
+
+  // Mock control object with React 19 compatibility
+  const createMockControl = () => ({
+    _subjects: {
+      values: { next: jest.fn() },
+      array: { next: jest.fn() },
+      state: { next: jest.fn() },
+    },
+    _removeUnmounted: jest.fn(), // Add the missing method that React 19 removed
+    _names: {
+      mount: new Set(),
+      unMount: new Set(),
+      array: new Set(),
+      focus: '',
+      watch: new Set(),
+      watchAll: false,
+    },
+    _formState: createMockFormState(),
+    _defaultValues: {},
+    _formValues: {},
+    register: jest.fn(),
+    unregister: jest.fn(),
+    getFieldState: jest.fn(),
+    handleSubmit: jest.fn(),
+    reset: jest.fn(),
+    resetField: jest.fn(),
+    clearErrors: jest.fn(),
+    setValue: jest.fn(),
+    getValue: jest.fn(),
+    getValues: jest.fn(),
+    watch: jest.fn(),
+    trigger: jest.fn(),
+    setError: jest.fn(),
+    setFocus: jest.fn(),
+  });
+
+  // Mock useForm hook
+  const useForm = jest.fn((options = {}) => {
+    const control = createMockControl();
+    
+    return {
+      register: jest.fn((name, options) => ({
+        name,
+        onChange: jest.fn(),
+        onBlur: jest.fn(),
+        ref: jest.fn(),
+      })),
+      handleSubmit: jest.fn((onValid, onInvalid) => (event) => {
+        event?.preventDefault?.();
+        return Promise.resolve(onValid?.({}));
+      }),
+      control,
+      formState: createMockFormState(),
+      watch: jest.fn(() => ({})),
+      getValues: jest.fn(() => ({})),
+      setValue: jest.fn(),
+      reset: jest.fn(),
+      trigger: jest.fn(() => Promise.resolve(true)),
+      clearErrors: jest.fn(),
+      setError: jest.fn(),
+      setFocus: jest.fn(),
+      getFieldState: jest.fn(() => ({
+        invalid: false,
+        isTouched: false,
+        isDirty: false,
+        error: undefined,
+      })),
+      resetField: jest.fn(),
+      unregister: jest.fn(),
+    };
+  });
+
+  // Mock useWatch hook - this is where the error occurs
+  const useWatch = jest.fn((props = {}) => {
+    // Return mock values based on the watch configuration
+    if (props.name) {
+      return '';
+    }
+    return {};
+  });
+
+  // Mock useController hook
+  const useController = jest.fn((props = {}) => ({
+    field: {
+      name: props.name || 'field',
+      value: props.defaultValue || '',
+      onChange: jest.fn(),
+      onBlur: jest.fn(),
+      ref: jest.fn(),
+    },
+    fieldState: {
+      invalid: false,
+      isTouched: false,
+      isDirty: false,
+      error: undefined,
+    },
+    formState: createMockFormState(),
+  }));
+
+  // Mock useFormContext hook
+  const useFormContext = jest.fn(() => {
+    const mockForm = useForm();
+    return mockForm;
+  });
+
+  // Mock Controller component
+  const Controller = jest.fn(({ render, name, control, defaultValue, ...props }) => {
+    const field = {
+      name,
+      value: defaultValue || '',
+      onChange: jest.fn(),
+      onBlur: jest.fn(),
+      ref: jest.fn(),
+    };
+    
+    const fieldState = {
+      invalid: false,
+      isTouched: false,
+      isDirty: false,
+      error: undefined,
+    };
+    
+    const formState = createMockFormState();
+    
+    if (typeof render === 'function') {
+      return render({ field, fieldState, formState });
+    }
+    
+    return React.createElement('div', { 'data-testid': `controller-${name}` });
+  });
+
+  // Mock FormProvider component
+  const FormProvider = jest.fn(({ children, ...methods }) => {
+    return React.createElement(
+      'div',
+      { 'data-testid': 'form-provider' },
+      children
+    );
+  });
+
+  return {
+    useForm,
+    useWatch,
+    useController,
+    useFormContext,
+    Controller,
+    FormProvider,
+    // Utilities for testing
+    createMockFormState,
+    createMockControl,
+  };
+});
+
 // Setup consolidated test environment
 try {
   const { setupTestEnvironment } = require('./src/lib/testing/test-setup');

@@ -21,30 +21,23 @@
     "git stash",
     "git checkout",
     "git commit -m",
-<<<<<<< Updated upstream
-    "pnpm test *",
-    "pnpm dev *",
-    "pnpm build *",
-    "poetry install *",
-=======
     "pnpm install",
     "pnpm test",
+    "pnpm test *",
     "pnpm dev",
+    "pnpm dev *",
     "pnpm build",
+    "pnpm build *",
+    "pnpm *",
     "poetry install",
->>>>>>> Stashed changes
+    "poetry install *",
+    "poetry run *",
+    "poetry *",
     "npm install",
     "npm test",
     "yarn install",
     "yarn test",
-<<<<<<< Updated upstream
-    "pnpm *",
-    "poetry run *",
-    "poetry *"
-=======
-    "cd *",
-    "pnpm test *"
->>>>>>> Stashed changes
+    "cd *"
   ],
  "typescript.autoClosingTags": false,
 

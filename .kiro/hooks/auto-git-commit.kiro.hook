@@ -1,0 +1,16 @@
+{
+  "enabled": true,
+  "name": "Auto Git Commit & Push",
+  "description": "Automatically stages all files, creates a git commit with a descriptive message based on code modifications and any error messages, then pushes to the current branch",
+  "version": "1",
+  "when": {
+    "type": "userTriggered",
+    "patterns": [
+      "**/*"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "Analyze the current code modifications and any error messages in the workspace. Then execute the following git operations: 1) Run 'git add .' to stage all changes, 2) Create a commit message in standard git format that describes the code modifications and includes any unresolved error messages, 3) Commit the changes with 'git commit -m \"[your generated message]\"', 4) Push to the current branch with 'git push'. The commit message should follow conventional commit format and clearly describe what was changed and any errors that need attention."
+  }
+}

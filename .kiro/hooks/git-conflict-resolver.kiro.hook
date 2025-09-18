@@ -1,0 +1,16 @@
+{
+  "enabled": true,
+  "name": "Git Conflict Resolver",
+  "description": "Automatically analyzes git conflict files, finds suitable solutions, resolves conflicts, stages changes, commits with appropriate message, and pushes to remote repository",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": [
+      "**/*"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "A git conflict has been detected in the repository. Please analyze the conflict files, determine the best resolution strategy, resolve the conflicts by choosing appropriate code sections, then execute the following git commands in sequence: 1) git add . to stage the resolved files, 2) write an appropriate commit message describing the conflict resolution, 3) git commit with the message, and 4) git push to update the remote repository. Ensure the resolution maintains code functionality and follows the project's coding standards."
+  }
+}
