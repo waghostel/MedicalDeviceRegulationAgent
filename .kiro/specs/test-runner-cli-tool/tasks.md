@@ -6,7 +6,7 @@ This implementation plan provides a structured approach to building the Cross-Pl
 
 ## Development Rules
 
-- Use **Node.js** with **npm** or **pnpm** for JavaScript/TypeScript development
+- Use **Node.js** with **pnpm** or **ppnpm** for JavaScript/TypeScript development
 - Follow **Test-Driven Development (TDD)** principles
 - Create test scripts and run them instead of executing commands directly
 - Document all failed and skipped tests in task reports
@@ -101,22 +101,22 @@ Each completed task requires a report following this template:
 **Node.js/JavaScript Tests:**
 ```bash
 # Run all tests
-npm test
+pnpm test
 
 # Run specific test file
-npm test -- path/to/test.js
+pnpm test -- path/to/test.js
 
 # Run tests with coverage
-npm run test:coverage
+pnpm run test:coverage
 
 # Run tests in watch mode
-npm run test:watch
+pnpm run test:watch
 ```
 
 **Cross-Platform Testing:**
 ```bash
 # Test on current platform
-npm run test:platform
+pnpm run test:platform
 
 # Test CLI functionality
 node src/index.js --help
@@ -162,7 +162,7 @@ node src/index.js --version
     - _Requirements: 7.1, 7.2, 7.3, 7.4_
 
   - [ ] 2.2 Implement dependency validation
-    - Create dependency checker for Node.js, pnpm, and Poetry
+    - Create dependency checker for Node.js, ppnpm, and Poetry
     - Write platform-specific installation instruction generator
     - Add validation error handling with helpful messages
     - _Requirements: 1.4, 1.5, 8.3_
@@ -214,8 +214,8 @@ node src/index.js --version
     - _Requirements: 2.1, 2.2, 4.1, 4.2_
 
   - [ ] 6.2 Create frontend test execution commands
-    - Build pnpm command generation for different test types
-    - Implement "Run All Tests" functionality with pnpm test
+    - Build ppnpm command generation for different test types
+    - Implement "Run All Tests" functionality with ppnpm test
     - Add category-specific test execution (unit, integration, accessibility)
     - _Requirements: 3.1, 3.2, 4.3, 4.4, 4.5_
 
@@ -323,7 +323,7 @@ node src/index.js --version
     - _Requirements: 7.1, 7.2, 7.3, 8.3_
 
   - [ ] 13.2 Package for distribution
-    - Configure npm package for global installation
+    - Configure pnpm package for global installation
     - Create executable scripts for different platforms
     - Add CI/CD pipeline for automated testing and publishing
     - _Requirements: 7.1, 7.2, 7.3_
