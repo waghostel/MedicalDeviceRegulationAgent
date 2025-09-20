@@ -8,12 +8,6 @@
  * - Performance monitoring and metrics
  */
 
-import React, { useState, useEffect, useMemo, memo } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Progress } from '@/components/ui/progress';
 import {
   Activity,
   Database,
@@ -23,23 +17,31 @@ import {
   TrendingUp,
   CheckCircle,
 } from 'lucide-react';
+import React, { useState, useEffect, useMemo, memo } from 'react';
+
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 // Import performance optimization components
-import { VirtualizedProjectList } from './virtual-scrolling';
-import { LazyImage, LazyComponent, LazyChart } from './lazy-loading';
-import { PerformanceMonitor } from './performance-monitor';
-
-// Import performance utilities
-import {
-  usePerformanceMonitor,
-  useMemoryMonitoring,
-  useRenderPerformance,
-} from '@/lib/performance/optimization';
 import {
   useCachedData,
   apiCache,
   memoryCache,
 } from '@/lib/performance/caching';
+import {
+  usePerformanceMonitor,
+  useMemoryMonitoring,
+  useRenderPerformance,
+} from '@/lib/performance/optimization';
+
+import { LazyImage, LazyComponent, LazyChart } from './lazy-loading';
+import { PerformanceMonitor } from './performance-monitor';
+import { VirtualizedProjectList } from './virtual-scrolling';
+
+// Import performance utilities
 
 // Mock data generators
 const generateLargeDataset = (size: number) =>
@@ -211,7 +213,7 @@ const CacheStats = memo(() => {
 });
 CacheStats.displayName = 'CacheStats';
 
-export const PerformanceDemo = memo(function PerformanceDemo() {
+export const PerformanceDemo = memo(() => {
   useRenderPerformance('PerformanceDemo');
 
   const [datasetSize, setDatasetSize] = useState(1000);

@@ -214,9 +214,9 @@ export class ProjectTestHelper {
 
     if (format === 'json') {
       return await response.json();
-    } else {
+    } 
       return await response.body();
-    }
+    
   }
 }
 
@@ -225,6 +225,7 @@ export class ProjectTestHelper {
  */
 export class WebSocketTestHelper {
   private wsMessages: WebSocketMessage[] = [];
+
   private wsConnection: any = null;
 
   constructor(private page: Page) {
@@ -273,12 +274,10 @@ export class WebSocketTestHelper {
    */
   async waitForConnection(timeout: number = 5000): Promise<void> {
     await this.page.waitForFunction(
-      () => {
-        return (
+      () => (
           (window as any).websocketConnection &&
           (window as any).websocketConnection.readyState === WebSocket.OPEN
-        );
-      },
+        ),
       { timeout }
     );
   }
@@ -489,9 +488,7 @@ export class PerformanceTestHelper {
    * Get network performance data
    */
   async getNetworkPerformance(): Promise<any> {
-    return await this.page.evaluate(() => {
-      return (window as any).performanceData?.requests || [];
-    });
+    return await this.page.evaluate(() => (window as any).performanceData?.requests || []);
   }
 
   /**
@@ -781,12 +778,10 @@ export class AuthTestHelper {
    * Verify authentication state
    */
   async verifyAuthState(shouldBeAuthenticated: boolean): Promise<void> {
-    const authData = await this.page.evaluate(() => {
-      return {
+    const authData = await this.page.evaluate(() => ({
         token: localStorage.getItem('auth-token'),
         userData: localStorage.getItem('user-data'),
-      };
-    });
+      }));
 
     if (shouldBeAuthenticated) {
       expect(authData.token).toBeTruthy();
@@ -821,6 +816,7 @@ export class AuthTestHelper {
  */
 export class CleanupTestHelper {
   private createdProjects: TestProject[] = [];
+
   private createdUsers: TestUser[] = [];
 
   constructor(private page: Page) {}

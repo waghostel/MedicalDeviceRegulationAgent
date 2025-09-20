@@ -95,14 +95,23 @@ export type AppError =
  */
 export class APIError extends Error {
   public readonly type: AppError['type'];
+
   public readonly code?: string;
+
   public readonly status?: number;
+
   public readonly timestamp: string;
+
   public readonly requestId?: string;
+
   public readonly userMessage?: string;
+
   public readonly suggestions: string[];
+
   public readonly details?: Record<string, unknown>;
+
   public readonly retryable: boolean;
+
   public readonly retryAfter?: number;
 
   constructor(error: AppError, originalError?: Error) {

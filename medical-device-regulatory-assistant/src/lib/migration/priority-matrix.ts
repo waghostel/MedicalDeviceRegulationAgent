@@ -209,6 +209,7 @@ export interface ContingencyPlan {
  */
 export class PriorityMatrixGenerator {
   private config: PriorityMatrixConfig;
+
   private analyzer: MigrationStrategyAnalyzer;
 
   constructor(config?: Partial<PriorityMatrixConfig>) {
@@ -728,7 +729,7 @@ export class PriorityMatrixGenerator {
    * Generate summary of priority matrix
    */
   private generateSummary(matrix: PriorityMatrix): PrioritySummary {
-    const components = matrix.components;
+    const {components} = matrix;
     const highPriority = components.filter((c) => c.priority === 'high').length;
     const mediumPriority = components.filter(
       (c) => c.priority === 'medium'

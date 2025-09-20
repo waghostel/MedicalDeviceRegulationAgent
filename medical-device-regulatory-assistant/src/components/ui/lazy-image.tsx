@@ -3,6 +3,7 @@
  */
 
 import { useState, useRef, memo, useCallback } from 'react';
+
 import { useIntersectionObserver } from '@/lib/performance/optimization';
 import { cn } from '@/lib/utils';
 
@@ -19,7 +20,7 @@ interface LazyImageProps {
   onError?: () => void;
 }
 
-export const LazyImage = memo(function LazyImage({
+export const LazyImage = memo(({
   src,
   alt,
   className,
@@ -30,7 +31,7 @@ export const LazyImage = memo(function LazyImage({
   loading = 'lazy',
   onLoad,
   onError,
-}: LazyImageProps) {
+}: LazyImageProps) => {
   const [imageState, setImageState] = useState<'loading' | 'loaded' | 'error'>(
     'loading'
   );
@@ -97,13 +98,13 @@ interface LazyBackgroundImageProps {
   fallback?: string;
 }
 
-export const LazyBackgroundImage = memo(function LazyBackgroundImage({
+export const LazyBackgroundImage = memo(({
   src,
   className,
   children,
   placeholder = 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
   fallback = 'linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)',
-}: LazyBackgroundImageProps) {
+}: LazyBackgroundImageProps) => {
   const [imageState, setImageState] = useState<'loading' | 'loaded' | 'error'>(
     'loading'
   );
@@ -157,14 +158,14 @@ interface ProgressiveImageProps {
   height?: number;
 }
 
-export const ProgressiveImage = memo(function ProgressiveImage({
+export const ProgressiveImage = memo(({
   src,
   lowQualitySrc,
   alt,
   className,
   width,
   height,
-}: ProgressiveImageProps) {
+}: ProgressiveImageProps) => {
   const [imageState, setImageState] = useState<'loading' | 'loaded'>('loading');
   const imgRef = useRef<HTMLImageElement>(null);
 

@@ -188,9 +188,13 @@ export interface ActionResult {
  */
 export class MigrationValidationMonitor {
   private triggers: Map<string, ValidationTrigger> = new Map();
+
   private events: TriggerEvent[] = [];
+
   private monitoring: boolean = false;
+
   private metricsCollector: MetricsCollector;
+
   private actionExecutor: ActionExecutor;
 
   constructor() {
@@ -467,7 +471,7 @@ export class MigrationValidationMonitor {
     trigger: ValidationTrigger,
     metrics: ValidationMetrics
   ): boolean {
-    const condition = trigger.condition;
+    const {condition} = trigger;
 
     // Find metric value
     const metricValue = this.getMetricValue(

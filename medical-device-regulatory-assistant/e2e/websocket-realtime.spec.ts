@@ -549,12 +549,10 @@ test.describe('WebSocket Real-time Functionality', () => {
 
       // Verify connection established
       return userPage.waitForFunction(
-        () => {
-          return (
+        () => (
             (window as any).websocketConnection &&
             (window as any).websocketConnection.readyState === WebSocket.OPEN
-          );
-        },
+          ),
         { timeout: 10000 }
       );
     });
@@ -760,7 +758,7 @@ test.describe('WebSocket Real-time Functionality', () => {
 
     // Verify large message handling
     const sizeErrorMessages = wsMessages.filter(
-      (msg) => msg.type === 'error' && msg.data && msg.data.includes('size')
+      (msg) => msg.type === 'error' && msg.data?.includes('size')
     );
 
     // Either the message is processed or a size error is returned
@@ -793,16 +791,14 @@ test.describe('WebSocket Real-time Functionality', () => {
     // Verify rate limiting or message processing
     const pongResponses = wsMessages.filter((msg) => msg.type === 'pong');
     const rateLimitErrors = wsMessages.filter(
-      (msg) => msg.type === 'error' && msg.data && msg.data.includes('rate')
+      (msg) => msg.type === 'error' && msg.data?.includes('rate')
     );
 
     // Either all messages processed or rate limiting applied
     expect(pongResponses.length + rateLimitErrors.length).toBeGreaterThan(0);
 
     // Step 6: Test connection cleanup on page unload
-    const connectionCountBefore = await page.evaluate(() => {
-      return (window as any).websocketConnection ? 1 : 0;
-    });
+    const connectionCountBefore = await page.evaluate(() => (window as any).websocketConnection ? 1 : 0);
 
     expect(connectionCountBefore).toBe(1);
 

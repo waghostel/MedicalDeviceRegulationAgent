@@ -74,7 +74,7 @@ describe('API Client', () => {
 
       // Access private property for testing
       const headers = (apiClient as any).defaultHeaders;
-      expect(headers['Authorization']).toBe(`Bearer ${token}`);
+      expect(headers.Authorization).toBe(`Bearer ${token}`);
     });
 
     test('should remove authentication token', () => {
@@ -82,7 +82,7 @@ describe('API Client', () => {
       apiClient.setAuthToken(null);
 
       const headers = (apiClient as any).defaultHeaders;
-      expect(headers['Authorization']).toBeUndefined();
+      expect(headers.Authorization).toBeUndefined();
     });
   });
 

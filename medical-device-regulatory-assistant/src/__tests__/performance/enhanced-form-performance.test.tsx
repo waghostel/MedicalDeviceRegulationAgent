@@ -9,15 +9,16 @@
  * - Bundle size impact
  */
 
-import React from 'react';
 import { render, screen, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import React from 'react';
+
 import { ProjectForm } from '@/components/projects/project-form';
-import { renderWithProviders } from '@/lib/testing/test-utils';
 import {
   setupTestEnvironment,
   teardownTestEnvironment,
 } from '@/lib/testing/test-setup';
+import { renderWithProviders } from '@/lib/testing/test-utils';
 
 // Performance measurement utilities
 interface PerformanceMetrics {
@@ -30,7 +31,9 @@ interface PerformanceMetrics {
 
 class PerformanceProfiler {
   private startTime: number = 0;
+
   private endTime: number = 0;
+
   private memoryBaseline: number = 0;
 
   startMeasurement(): void {
@@ -430,7 +433,7 @@ describe('Enhanced Form Performance Tests', () => {
       const nameInput = screen.getByLabelText(/project name/i);
 
       // Simulate long editing session
-      const initialMemory = profiler['getMemoryUsage']();
+      const initialMemory = profiler.getMemoryUsage();
 
       for (let i = 0; i < 100; i++) {
         await user.clear(nameInput);
@@ -441,7 +444,7 @@ describe('Enhanced Form Performance Tests', () => {
         });
       }
 
-      const peakMemory = profiler['getMemoryUsage']();
+      const peakMemory = profiler.getMemoryUsage();
 
       // Unmount component
       unmount();
@@ -451,7 +454,7 @@ describe('Enhanced Form Performance Tests', () => {
         jest.advanceTimersByTime(1000);
       });
 
-      const finalMemory = profiler['getMemoryUsage']();
+      const finalMemory = profiler.getMemoryUsage();
 
       // Memory should be released after unmount
       expect(finalMemory).toBeLessThan(peakMemory);

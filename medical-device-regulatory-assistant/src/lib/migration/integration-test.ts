@@ -4,20 +4,21 @@
  */
 
 import {
-  MigrationStrategyFactory,
-  MigrationProgressMonitor,
-  type ComprehensiveMigrationStrategy,
-} from './index';
-import {
   DatabaseIntegrationManager,
   DatabaseIntegrationFactory,
 } from '../database/index';
+import { ABTestManager } from '../feature-flags/ab-testing';
 import {
   FeatureFlagManager,
   DEFAULT_MIGRATION_CONFIG,
 } from '../feature-flags/feature-flag-system';
-import { ABTestManager } from '../feature-flags/ab-testing';
 import { MigrationAutomationManager } from '../feature-flags/migration-automation';
+
+import {
+  MigrationStrategyFactory,
+  MigrationProgressMonitor,
+  type ComprehensiveMigrationStrategy,
+} from './index';
 
 export interface IntegrationTestResult {
   success: boolean;
@@ -40,8 +41,11 @@ export interface IntegrationTestResult {
  */
 export class MigrationIntegrationTester {
   private migrationStrategy: ComprehensiveMigrationStrategy | null = null;
+
   private databaseManager: DatabaseIntegrationManager | null = null;
+
   private flagManager: FeatureFlagManager | null = null;
+
   private abTestManager: ABTestManager | null = null;
 
   constructor() {

@@ -1,5 +1,6 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { usePathname } from 'next/navigation';
+
 import { AppLayout } from '../AppLayout';
 
 // Mock next/navigation

@@ -8,11 +8,9 @@
  * Requirements: 5.4, 6.2
  */
 
-import {
-  testFailureAnalyzer,
-  TestFailureReport,
-  TestFailureContext,
-} from './TestFailureAnalyzer';
+import { RenderResult } from '@testing-library/react';
+import React from 'react';
+
 import {
   componentRenderingDebugger,
   ComponentRenderingReport,
@@ -23,8 +21,12 @@ import {
   HookExecutionTrace,
   TracingOptions,
 } from './HookExecutionTracer';
-import React from 'react';
-import { RenderResult } from '@testing-library/react';
+import {
+  testFailureAnalyzer,
+  TestFailureReport,
+  TestFailureContext,
+} from './TestFailureAnalyzer';
+
 
 export interface ComprehensiveDebugReport {
   testName: string;
@@ -98,7 +100,9 @@ export type RecommendationCategory =
 
 export class TestDebuggingTools {
   private static instance: TestDebuggingTools;
+
   private debuggingSessions: Map<string, DebuggingSession> = new Map();
+
   private debugHistory: ComprehensiveDebugReport[] = [];
 
   constructor() {
@@ -209,27 +213,23 @@ export class TestDebuggingTools {
       // Phase 4: Integration Analysis
       const integrationPhase = await this.executeDebugPhase(
         'INTEGRATION_ANALYSIS',
-        async () => {
-          return this.analyzeIntegrationIssues(
+        async () => this.analyzeIntegrationIssues(
             failureAnalysis,
             renderingAnalysis,
             hookTraces
-          );
-        }
+          )
       );
       session.phases.push(integrationPhase);
 
       // Phase 5: Solution Generation
       const solutionPhase = await this.executeDebugPhase(
         'SOLUTION_GENERATION',
-        async () => {
-          return this.generateSolutions(
+        async () => this.generateSolutions(
             failureAnalysis,
             renderingAnalysis,
             hookTraces,
             error
-          );
-        }
+          )
       );
       session.phases.push(solutionPhase);
 
@@ -432,7 +432,7 @@ ${report.actionableRecommendations
 
     this.debugHistory.forEach((report) => {
       // Count severity
-      const severity = report.overallAssessment.severity;
+      const {severity} = report.overallAssessment;
       severityCount.set(severity, (severityCount.get(severity) || 0) + 1);
 
       // Count categories

@@ -2,11 +2,14 @@
  * Migration test for PredicateWidget - verifies real API integration
  */
 
-import React from 'react';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
-import { PredicateWidget } from '../predicate-widget';
-import { dashboardService } from '@/lib/services/dashboard-service';
+import React from 'react';
+
 import { generateMockPredicateDevices } from '@/lib/mock-data';
+import { dashboardService } from '@/lib/services/dashboard-service';
+
+import { PredicateWidget } from '../predicate-widget';
+
 
 // Mock the dashboard service
 jest.mock('@/lib/services/dashboard-service', () => ({

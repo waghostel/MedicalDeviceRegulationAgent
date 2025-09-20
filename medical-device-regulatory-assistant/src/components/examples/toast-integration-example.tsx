@@ -6,15 +6,16 @@
 'use client';
 
 import React, { useState } from 'react';
+
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useToast, contextualToast } from '@/hooks/use-toast';
-import { useFormToast } from '@/hooks/use-form-toast';
 import { useAccessibleToast } from '@/hooks/use-accessibility-announcements';
+import { useFormToast } from '@/hooks/use-form-toast';
+import { useToast, contextualToast } from '@/hooks/use-toast';
 
-export function ToastIntegrationExample() {
+export const ToastIntegrationExample = () => {
   const { toast } = useToast();
   const {
     showValidationError,

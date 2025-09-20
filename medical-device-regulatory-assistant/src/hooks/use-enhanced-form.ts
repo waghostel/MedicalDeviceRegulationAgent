@@ -2,6 +2,8 @@
  * Enhanced form hook with real-time validation, auto-save, and accessibility features
  */
 
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   useForm,
   UseFormProps,
@@ -9,12 +11,12 @@ import {
   FieldValues,
   Path,
 } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useCallback, useEffect, useRef, useState } from 'react';
+
+import { useRealTimeValidation } from '@/components/forms/FormValidation';
+
 import { useAutoSave } from './use-auto-save';
 import { useFormToast } from './use-form-toast';
-import { useRealTimeValidation } from '@/components/forms/FormValidation';
 
 export interface EnhancedFormOptions<T extends FieldValues>
   extends UseFormProps<T> {
@@ -208,16 +210,12 @@ export function useEnhancedForm<T extends FieldValues>(
 
   // Helper to check if specific field is dirty
   const isDirtyField = useCallback(
-    (fieldName: keyof T) => {
-      return form.formState.dirtyFields[fieldName] || false;
-    },
+    (fieldName: keyof T) => form.formState.dirtyFields[fieldName] || false,
     [form.formState.dirtyFields]
   );
 
   // Get list of touched fields
-  const getTouchedFields = useCallback(() => {
-    return Object.keys(form.formState.touchedFields) as (keyof T)[];
-  }, [form.formState.touchedFields]);
+  const getTouchedFields = useCallback(() => Object.keys(form.formState.touchedFields) as (keyof T)[], [form.formState.touchedFields]);
 
   // Load saved data from localStorage if available
   useEffect(() => {

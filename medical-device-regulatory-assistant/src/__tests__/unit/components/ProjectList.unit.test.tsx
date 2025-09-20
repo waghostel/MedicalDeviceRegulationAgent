@@ -3,7 +3,6 @@
  * Tests search, filtering, loading states, and user interactions
  */
 
-import React from 'react';
 import {
   render,
   screen,
@@ -12,15 +11,17 @@ import {
   within,
 } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import React from 'react';
+
 import { ProjectList } from '@/components/projects/project-list';
+import { useOffline } from '@/hooks/use-offline';
 import { useProjects } from '@/hooks/use-projects';
 import { useProjectWebSocket } from '@/hooks/use-websocket';
-import { useOffline } from '@/hooks/use-offline';
-import { Project, ProjectStatus } from '@/types/project';
 import {
   renderWithProviders,
   createMockSession,
 } from '@/lib/testing/test-utils';
+import { Project, ProjectStatus } from '@/types/project';
 
 // Mock hooks
 jest.mock('@/hooks/use-projects');

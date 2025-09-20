@@ -5,18 +5,6 @@
 
 'use client';
 
-import React from 'react';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
   CheckCircle,
   Clock,
@@ -29,19 +17,32 @@ import {
   Search,
   BarChart3,
 } from 'lucide-react';
+import React from 'react';
+
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
 import {
   ProjectProgress,
   ProgressWidgetProps,
   ProgressStep,
 } from '@/types/dashboard';
 
-export function ProgressWidget({
+export const ProgressWidget = ({
   progress,
   loading = false,
   error,
   onStepClick,
   onRefresh,
-}: ProgressWidgetProps) {
+}: ProgressWidgetProps) => {
   const getStepIcon = (step: ProgressStep) => {
     switch (step.status) {
       case 'completed':

@@ -65,6 +65,7 @@ export interface MigrationStatus {
  */
 export class DatabaseMigrationManager {
   private connection: any; // Database connection
+
   private migrations: Map<string, Migration> = new Map();
 
   constructor(connection: any) {
@@ -717,7 +718,7 @@ export class DatabaseMigrationManager {
     for (let i = 0; i < content.length; i++) {
       const char = content.charCodeAt(i);
       hash = (hash << 5) - hash + char;
-      hash = hash & hash; // Convert to 32-bit integer
+      hash &= hash; // Convert to 32-bit integer
     }
 
     return hash.toString(16);

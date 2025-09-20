@@ -46,7 +46,9 @@ export interface ToastCall {
  */
 export class MockToastSystem {
   private toasts: Map<string, ToastData> = new Map();
+
   private toastCalls: ToastCall[] = [];
+
   private idCounter = 0;
 
   /**

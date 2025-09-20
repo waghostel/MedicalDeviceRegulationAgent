@@ -1,6 +1,7 @@
+import { performance } from 'perf_hooks';
+
 import { render, RenderResult } from '@testing-library/react';
 import { ReactElement } from 'react';
-import { performance } from 'perf_hooks';
 
 export interface PerformanceMetrics {
   renderTime: number;

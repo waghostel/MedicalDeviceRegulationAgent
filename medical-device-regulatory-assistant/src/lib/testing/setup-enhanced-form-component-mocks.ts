@@ -150,9 +150,7 @@ export function validateEnhancedFormComponentMocks(): {
     try {
       const inputElement = EnhancedInputMock(testProps);
       if (
-        !inputElement ||
-        !inputElement.props ||
-        !inputElement.props['data-testid']
+        !inputElement?.props?.['data-testid']
       ) {
         warnings.push('EnhancedInput mock missing data-testid');
       }
@@ -164,9 +162,7 @@ export function validateEnhancedFormComponentMocks(): {
     try {
       const textareaElement = EnhancedTextareaMock(testProps);
       if (
-        !textareaElement ||
-        !textareaElement.props ||
-        !textareaElement.props['data-testid']
+        !textareaElement?.props?.['data-testid']
       ) {
         warnings.push('EnhancedTextarea mock missing data-testid');
       }
@@ -178,9 +174,7 @@ export function validateEnhancedFormComponentMocks(): {
     try {
       const indicatorElement = AutoSaveIndicatorMock({ isSaving: false });
       if (
-        !indicatorElement ||
-        !indicatorElement.props ||
-        !indicatorElement.props['data-testid']
+        !indicatorElement?.props?.['data-testid']
       ) {
         warnings.push('AutoSaveIndicator mock missing data-testid');
       }
@@ -195,9 +189,7 @@ export function validateEnhancedFormComponentMocks(): {
         currentStep: 'Test Step',
       });
       if (
-        !progressElement ||
-        !progressElement.props ||
-        !progressElement.props['data-testid']
+        !progressElement?.props?.['data-testid']
       ) {
         warnings.push('FormSubmissionProgress mock missing data-testid');
       }
@@ -209,9 +201,7 @@ export function validateEnhancedFormComponentMocks(): {
     try {
       const buttonElement = EnhancedButtonMock({ children: 'Test Button' });
       if (
-        !buttonElement ||
-        !buttonElement.props ||
-        !buttonElement.props['data-testid']
+        !buttonElement?.props?.['data-testid']
       ) {
         warnings.push('EnhancedButton mock missing data-testid');
       }

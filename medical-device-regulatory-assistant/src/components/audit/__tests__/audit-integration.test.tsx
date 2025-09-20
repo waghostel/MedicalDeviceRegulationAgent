@@ -2,17 +2,19 @@
  * Integration tests for audit trail and compliance components
  */
 
-import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { jest } from '@jest/globals';
-import { AuditLogPage } from '../AuditLogPage';
-import { ComplianceDashboard } from '../ComplianceDashboard';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import React from 'react';
+
 import { auditAPI } from '@/lib/api/audit';
 import {
   AgentInteraction,
   ComplianceReport,
   AuditIntegrityResult,
 } from '@/types/audit';
+
+import { AuditLogPage } from '../AuditLogPage';
+import { ComplianceDashboard } from '../ComplianceDashboard';
 
 // Mock the audit API
 jest.mock('@/lib/api/audit', () => ({

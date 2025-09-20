@@ -1,7 +1,5 @@
 'use client';
 
-import React, { useState, useCallback } from 'react';
-import { Button } from '@/components/ui/button';
 import {
   Folder,
   FolderOpen,
@@ -16,6 +14,9 @@ import {
   ChevronDown,
   Upload,
 } from 'lucide-react';
+import React, { useState, useCallback } from 'react';
+
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 export interface FileNode {

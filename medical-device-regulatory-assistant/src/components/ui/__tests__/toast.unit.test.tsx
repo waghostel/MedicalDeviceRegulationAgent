@@ -2,7 +2,6 @@
  * Tests for enhanced Toast UI component
  */
 
-import React from 'react';
 import {
   screen,
   fireEvent,
@@ -11,6 +10,8 @@ import {
   cleanup,
 } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import React from 'react';
+
 import {
   Toast,
   ToastProvider,

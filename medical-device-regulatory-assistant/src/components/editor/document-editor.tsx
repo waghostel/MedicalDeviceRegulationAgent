@@ -1,19 +1,22 @@
 'use client';
 
+import { Plus, FileText, FolderPlus } from 'lucide-react';
 import React, { useState, useCallback } from 'react';
-import { Document } from '@/types/document';
+
+import { Button } from '@/components/ui/button';
 import { useDocuments } from '@/hooks/use-documents';
+import { Document } from '@/types/document';
+
 import { FileTree } from './file-tree';
 import { MarkdownEditor } from './markdown-editor';
 import { TemplateSelector } from './template-selector';
-import { Button } from '@/components/ui/button';
-import { Plus, FileText, FolderPlus } from 'lucide-react';
+
 
 interface DocumentEditorProps {
   projectId: string;
 }
 
-export function DocumentEditor({ projectId }: DocumentEditorProps) {
+export const DocumentEditor = ({ projectId }: DocumentEditorProps) => {
   const {
     documents,
     loading,

@@ -3,9 +3,13 @@
  * Optimized with React.memo, useMemo, and virtual scrolling for performance
  */
 
-import { useState, useEffect, useCallback, useMemo, memo } from 'react';
 import { Search, Filter, Plus, RefreshCw } from 'lucide-react';
+import { useState, useEffect, useCallback, useMemo, memo } from 'react';
+
+import { ProjectListSkeleton, DataLoadingProgress } from '@/components/loading';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import {
   Select,
@@ -14,20 +18,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { ProjectCard, ProjectCardSkeleton } from './project-card';
-import { ProjectListSkeleton, DataLoadingProgress } from '@/components/loading';
+import { useOffline } from '@/hooks/use-offline';
 import { useProjects } from '@/hooks/use-projects';
 import { useProjectWebSocket } from '@/hooks/use-websocket';
-import { useOffline } from '@/hooks/use-offline';
-import { Project, ProjectStatus, WebSocketMessage } from '@/types/project';
-import { cn } from '@/lib/utils';
 import {
   useVirtualScrolling,
   useDebouncedCallback,
   useRenderPerformance,
 } from '@/lib/performance/optimization';
+import { cn } from '@/lib/utils';
+import { Project, ProjectStatus, WebSocketMessage } from '@/types/project';
+
+import { ProjectCard, ProjectCardSkeleton } from './project-card';
 
 interface ProjectListProps {
   onCreateProject?: () => void;
@@ -198,12 +200,12 @@ const VirtualizedProjectGrid = memo(
 );
 VirtualizedProjectGrid.displayName = 'VirtualizedProjectGrid';
 
-export const ProjectList = memo(function ProjectList({
+export const ProjectList = memo(({
   onCreateProject,
   onSelectProject,
   onEditProject,
   className,
-}: ProjectListProps) {
+}: ProjectListProps) => {
   // Performance monitoring
   useRenderPerformance('ProjectList');
   const [searchQuery, setSearchQuery] = useState('');

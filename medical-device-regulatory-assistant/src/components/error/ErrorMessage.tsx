@@ -1,8 +1,5 @@
 'use client';
 
-import React from 'react';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Button } from '@/components/ui/button';
 import {
   AlertTriangle,
   Wifi,
@@ -13,6 +10,10 @@ import {
   ExternalLink,
   HelpCircle,
 } from 'lucide-react';
+import React from 'react';
+
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
 
 export interface ErrorMessageProps {
   type: 'network' | 'auth' | 'fda-api' | 'validation' | 'timeout' | 'generic';

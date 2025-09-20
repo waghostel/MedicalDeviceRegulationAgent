@@ -1,7 +1,10 @@
-import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { AuditLogExport } from '../AuditLogExport';
+import React from 'react';
+
 import { AgentInteraction } from '@/types/audit';
+
+import { AuditLogExport } from '../AuditLogExport';
+
 
 // Mock URL.createObjectURL and URL.revokeObjectURL
 global.URL.createObjectURL = jest.fn(() => 'mock-url');

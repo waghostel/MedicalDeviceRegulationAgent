@@ -154,11 +154,52 @@ Each completed task requires a report:
 
 ---
 
-## 🔴 Critical Tasks (Must Complete First) - From Task Analysis Summary
+## 🔴 Critical Tasks (Must Complete First) - ESLint/Prettier Infrastructure Fixes
+
+### Phase 0: ESLint/Prettier Configuration Fixes - URGENT
+**Duration**: 0.5 days  
+**Priority**: 🔴 CRITICAL - Blocks all automated fixes and development workflow
+**Status**: ❌ **PENDING** - Must be completed before any other tasks
+**Root Cause**: Configuration issues preventing lint:fix and automated code quality improvements
+
+**Analysis Summary**: 15,453 total issues (13,616 errors, 1,837 warnings) with 0 auto-fixes applied due to configuration blocking issues. Error density: 27.2 errors per 100 lines of code.
+
+- [ ] **Task E0.1** Fix Prettier Configuration Blocking Issues
+  - **Root Cause**: Prettier fails to parse `pnpm-lock.yaml` file (24,000+ lines causing parser issues)
+  - **Impact**: Prevents automated formatting and lint:fix script execution (0 files formatted)
+  - Add `pnpm-lock.yaml` to `.prettierignore` to exclude from formatting
+  - Add additional exclusions: `*.min.js`, `*.min.css`, `coverage/`, `dist/`, `build/`, `.next/`, `node_modules/`
+  - Optionally regenerate lock file if corruption suspected: `rm pnpm-lock.yaml && pnpm install`
+  - Verify Prettier can run successfully: `pnpm format`
+  - **Test Command**: `cd medical-device-regulatory-assistant && echo "pnpm-lock.yaml" >> .prettierignore && pnpm format`
+  - **Expected Result**: Prettier runs without parser errors, formats applicable files
+  - _Requirements: Code formatting, Automated fixes enablement_
+
+- [ ] **Task E0.2** Configure Jest Globals in ESLint
+  - **Root Cause**: 'jest' is not defined in 200+ test files (8,500+ occurrences of `no-undef` errors)
+  - **Impact**: All test files fail ESLint validation, blocking development workflow
+  - Update `eslint.config.mjs` to include Jest globals for test files
+  - Add configuration for test file patterns: `**/*.test.{js,ts,tsx}`, `**/__tests__/**/*`, `**/test-*.js`
+  - Include all Jest globals: `jest`, `describe`, `it`, `expect`, `beforeEach`, `afterEach`, `beforeAll`, `afterAll`
+  - Add Node.js globals for config files: `**/*.config.{js,ts}`, `**/scripts/**/*`
+  - Disable specific rules for test files: `no-console: 'off'`, `@typescript-eslint/no-explicit-any: 'warn'`
+  - **Test Command**: `cd medical-device-regulatory-assistant && pnpm lint:check --max-warnings=0`
+  - **Expected Result**: Jest global errors reduced from 8,500+ to 0
+  - _Requirements: Test file validation, ESLint configuration_
+
+- [ ] **Task E0.3** Fix Dependency Classifications
+  - **Root Cause**: `@testing-library/react` and `web-vitals` in devDependencies instead of dependencies
+  - **Impact**: Import/export issues (2,000+ occurrences) and build system reliability
+  - Move testing libraries from devDependencies to dependencies: `pnpm add @testing-library/react web-vitals`
+  - Remove from devDependencies: `pnpm remove -D @testing-library/react web-vitals`
+  - Verify no import/no-extraneous-dependencies errors remain
+  - **Test Command**: `cd medical-device-regulatory-assistant && pnpm add @testing-library/react web-vitals && pnpm remove -D @testing-library/react web-vitals && pnpm lint:check`
+  - **Expected Result**: Import dependency errors reduced significantly
+  - _Requirements: Dependency management, Build system reliability_
 
 ### Phase 1: Foundation Dependencies (F1.1-F1.3) - URGENT
 **Duration**: 1 day  
-**Priority**: 🔴 CRITICAL - Must be completed first to enable any further progress
+**Priority**: 🔴 CRITICAL - Must be completed after Phase 0 to enable test execution
 **Status**: ❌ **PENDING** - Blocks all other tasks
 
 ### Phase 1.5: React 19 Provider Compatibility - URGENT (New Tasks from F1.2.1 Analysis)
@@ -238,6 +279,125 @@ Each completed task requires a report:
   - **Test Command**: `cd medical-device-regulatory-assistant && pnpm test && cd backend && poetry run python -m pytest tests/ -v`
   - _Requirements: Test suite execution, Performance baseline_
 
+## 🟡 High Priority Tasks - ESLint Automated Fixes
+
+### Phase 1.5: Automated Code Quality Fixes - HIGH PRIORITY
+**Duration**: 0.5 days
+**Priority**: 🟡 HIGH - Apply automated fixes once configuration is resolved
+**Dependencies**: Phase 0 (ESLint/Prettier configuration) completion required
+**Status**: ❌ **BLOCKED** - Waiting for configuration fixes
+
+- [ ] **Task E1.1** Apply Automated ESLint Fixes
+  - **Root Cause**: 1,654 auto-fixable issues identified but blocked by configuration
+  - **Impact**: Code quality issues that can be automatically resolved
+  - Run ESLint auto-fix after configuration issues resolved: `pnpm lint:fix`
+  - Apply automatic fixes for: import order, spacing, quotes, semicolons
+  - Verify fixes don't break functionality: `pnpm test --bail --maxWorkers=75%`
+  - **Test Command**: `cd medical-device-regulatory-assistant && pnpm lint:fix && pnpm lint:check`
+  - **Expected Result**: 1,654+ issues automatically resolved, remaining issues reduced to <14,000
+  - _Requirements: Code formatting, Import organization, Style consistency_
+
+- [ ] **Task E1.2** Convert require() to import Statements
+  - **Root Cause**: 200+ files using `require()` instead of ES6 imports (`@typescript-eslint/no-require-imports`)
+  - **Impact**: TypeScript compliance issues and modern JavaScript standards
+  - Target critical files first: testing infrastructure, configuration files
+  - Convert `const fs = require('fs')` to `import fs from 'fs'`
+  - Convert `const { something } = require('module')` to `import { something } from 'module'`
+  - Update module.exports to export statements where applicable
+  - Focus on most problematic files: `src/lib/testing/test-utils.tsx` (150+ issues), `src/lib/testing/test-health-monitor.ts` (100+ issues)
+  - **Test Command**: `cd medical-device-regulatory-assistant && pnpm lint:check --rule @typescript-eslint/no-require-imports`
+  - **Expected Result**: require() usage reduced from 200+ to 0 in critical files
+  - _Requirements: ES6 module compliance, TypeScript compatibility_
+
+- [ ] **Task E1.3** Implement Nullish Coalescing Operator
+  - **Root Cause**: 300+ occurrences of `||` that should be `??` for better null handling (`@typescript-eslint/prefer-nullish-coalescing`)
+  - **Impact**: Potential bugs with falsy values (0, '', false) being treated as null
+  - Replace `const value = data || defaultValue` with `const value = data ?? defaultValue`
+  - Focus on critical paths: form validation, API responses, configuration
+  - Use ESLint auto-fix where possible: `--fix --rule @typescript-eslint/prefer-nullish-coalescing`
+  - **Test Command**: `cd medical-device-regulatory-assistant && pnpm lint:check --rule @typescript-eslint/prefer-nullish-coalescing`
+  - **Expected Result**: Nullish coalescing violations reduced from 300+ to <50
+  - _Requirements: Type safety, Null handling, Modern JavaScript_
+
+- [ ] **Task E1.4** Clean Up Unused Variables and Imports
+  - **Root Cause**: 500+ unused variable declarations and imports (`no-unused-vars`)
+  - **Impact**: Code bloat, potential confusion, and linting noise
+  - Remove completely unused imports and variables
+  - Prefix intentionally unused variables with underscore: `_error`, `_data`
+  - Focus on test files and utility modules first
+  - **Test Command**: `cd medical-device-regulatory-assistant && pnpm lint:check --rule no-unused-vars`
+  - **Expected Result**: Unused variable violations reduced from 500+ to <100
+  - _Requirements: Code cleanliness, Import optimization, Variable management_
+
+- [ ] **Task E1.5** Remove Console Statements from Production Code
+  - **Root Cause**: 400+ console statements in production code (`no-console`)
+  - **Impact**: Production log noise and debugging statements left in code
+  - Remove `console.log()` statements from production code
+  - Replace with proper logging where necessary
+  - Keep `console.warn()` and `console.error()` for important messages
+  - Focus on non-test files first
+  - **Test Command**: `cd medical-device-regulatory-assistant && pnpm lint:check --rule no-console`
+  - **Expected Result**: Console statement violations reduced from 400+ to <50
+  - _Requirements: Production readiness, Clean logging_
+
+- [ ] **Task E1.6** Fix React Component Best Practices
+  - **Root Cause**: 500+ React/JSX issues (`react/jsx-props-no-spreading`, `react/display-name`, `no-underscore-dangle`)
+  - **Impact**: Component reliability and debugging issues
+  - Add display names to components: `MyComponent.displayName = 'MyComponent'`
+  - Minimize prop spreading where possible
+  - Fix underscore dangle issues in component props
+  - **Test Command**: `cd medical-device-regulatory-assistant && pnpm lint:check --rule react/display-name`
+  - **Expected Result**: React component issues reduced from 500+ to <100
+  - _Requirements: React best practices, Component debugging_
+
+## 🟢 Medium Priority Tasks - TypeScript and Code Quality Improvements
+
+### Phase 1.6: TypeScript Compliance and Code Quality - MEDIUM PRIORITY
+**Duration**: 1 day
+**Priority**: 🟢 MEDIUM - Improve type safety and code maintainability
+**Dependencies**: Phase 1.5 (Automated fixes) completion recommended
+**Status**: ❌ **PENDING** - Can be done in parallel with other phases
+
+- [ ] **Task E2.1** Improve TypeScript Type Safety
+  - **Root Cause**: 800+ warnings for `@typescript-eslint/no-explicit-any` usage
+  - **Impact**: Reduced type safety and IntelliSense support
+  - Replace `any` types with specific interfaces and types
+  - Create proper type definitions for complex objects
+  - Focus on critical paths: API responses, form data, component props
+  - **Test Command**: `cd medical-device-regulatory-assistant && pnpm lint:check --rule @typescript-eslint/no-explicit-any`
+  - **Expected Result**: `any` type usage reduced from 800+ to <200
+  - _Requirements: Type safety, Developer experience_
+
+- [ ] **Task E2.2** Reduce Code Complexity
+  - **Root Cause**: 300+ warnings for functions exceeding complexity threshold (10)
+  - **Impact**: Code maintainability and testing difficulty
+  - Refactor complex functions into smaller, focused functions
+  - Extract helper functions and utilities
+  - Improve code organization and readability
+  - **Test Command**: `cd medical-device-regulatory-assistant && pnpm lint:check --rule complexity`
+  - **Expected Result**: Complexity violations reduced from 300+ to <100
+  - _Requirements: Code maintainability, Testing ease_
+
+- [ ] **Task E2.3** Fix Class Method Usage
+  - **Root Cause**: 200+ occurrences of class methods not using `this` (`class-methods-use-this`)
+  - **Impact**: Incorrect class design and potential performance issues
+  - Convert methods that don't use `this` to static methods
+  - Extract utility functions from classes where appropriate
+  - Review class design patterns
+  - **Test Command**: `cd medical-device-regulatory-assistant && pnpm lint:check --rule class-methods-use-this`
+  - **Expected Result**: Class method violations reduced from 200+ to <50
+  - _Requirements: Object-oriented design, Performance_
+
+- [ ] **Task E2.4** Standardize Import/Export Patterns
+  - **Root Cause**: 2,000+ import/export issues (`import/order`, `import/extensions`)
+  - **Impact**: Inconsistent module organization and potential build issues
+  - Standardize import order: React first, then third-party, then local imports
+  - Remove unnecessary file extensions in import statements
+  - Group related imports together
+  - **Test Command**: `cd medical-device-regulatory-assistant && pnpm lint:check --rule import/order`
+  - **Expected Result**: Import/export violations reduced from 2,000+ to <500
+  - _Requirements: Module organization, Build consistency_
+
 ## 🟡 High Priority Tasks - From Task Analysis Summary
 
 ### Phase 2: Test Category Fixes (F2.1-F2.8) - HIGH PRIORITY (New Tasks from F1.2.1 Analysis)
@@ -267,7 +427,7 @@ Each completed task requires a report:
   - **Expected Result**: 3/3 loading state tests passing with proper submission state mocking
   - _Requirements: Form submission mocking, Loading state management, Progress indicators_
 
-- [ ] **Task F2.3** (assigned) Fix Error Handling Tests (4 tests)
+- [x] **Task F2.3** (assigned) Fix Error Handling Tests (4 tests)
   - **Root Cause**: Tests require SessionProvider and toast system for error display
   - **Current Error**: `s._removeUnmounted is not a function` in SessionProvider
   - Fix validation error toast display and integration
@@ -278,7 +438,7 @@ Each completed task requires a report:
   - **Expected Result**: 4/4 error handling tests passing with proper toast and error state mocking
   - _Requirements: Toast system mocking, Error state management, Authentication error handling_
 
-- [ ] **Task F2.4** (assigned) Fix Success Handling Tests (2 tests)
+- [x] **Task F2.4** (assigned) Fix Success Handling Tests (2 tests)
   - **Root Cause**: Tests require SessionProvider and toast system for success notifications
   - **Current Error**: `s._removeUnmounted is not a function` in SessionProvider
   - Fix success toast display and dialog close functionality
@@ -288,7 +448,7 @@ Each completed task requires a report:
   - **Expected Result**: 2/2 success handling tests passing with proper toast and dialog mocking
   - _Requirements: Toast system mocking, Dialog management, Success state handling_
 
-- [ ] **Task F2.5** (assigned) Fix Dialog Controls Tests (2 tests)
+- [-] **Task F2.5** (assigned) Fix Dialog Controls Tests (2 tests)
   - **Root Cause**: Tests require SessionProvider for dialog state management
   - **Current Error**: `s._removeUnmounted is not a function` in SessionProvider
   - Fix dialog onOpenChange callback functionality
@@ -381,6 +541,89 @@ Each completed task requires a report:
   - Address any remaining component rendering issues
   - **Test Command**: `cd medical-device-regulatory-assistant && pnpm test src/components/toast/__tests__/ --maxWorkers=75% --cache --silent --reporters=summary`
   - _Requirements: Component testing, Accessibility compliance_
+
+## 🟢 Medium Priority Tasks - Code Quality Improvements
+
+### Phase 2.5: Code Quality and Standards - MEDIUM PRIORITY
+**Duration**: 1-2 days
+**Priority**: 🟢 MEDIUM - Improve code quality and maintainability
+**Dependencies**: Phase 1.5 (Automated fixes) completion required
+**Status**: ❌ **PENDING** - Waiting for automated fixes
+
+- [ ] **Task E2.1** Remove Console Statements from Production Code
+  - **Root Cause**: 400+ console.log statements in production code
+  - **Impact**: Production log noise and debugging statements left in code
+  - Remove debug console.log statements from production components
+  - Replace with proper logging where needed: `console.warn`, `console.error`
+  - Add ESLint rule exceptions for legitimate console usage
+  - **Test Command**: `cd medical-device-regulatory-assistant && pnpm lint:check --rule no-console`
+  - **Expected Result**: Console violations reduced from 400+ to <50 (legitimate warnings/errors only)
+  - _Requirements: Production readiness, Logging standards, Debug cleanup_
+
+- [ ] **Task E2.2** Fix React Component Best Practices
+  - **Root Cause**: 500+ React/JSX issues including prop spreading and missing display names
+  - **Impact**: Component reliability, debugging difficulty, and React best practices
+  - Add display names to all functional components: `MyComponent.displayName = 'MyComponent'`
+  - Minimize prop spreading where possible, use explicit props
+  - Fix component structure and organization issues
+  - **Test Command**: `cd medical-device-regulatory-assistant && pnpm lint:check --rule react/display-name --rule react/jsx-props-no-spreading`
+  - **Expected Result**: React violations reduced from 500+ to <100
+  - _Requirements: React best practices, Component debugging, Code maintainability_
+
+- [ ] **Task E2.3** Improve TypeScript Type Safety
+  - **Root Cause**: 800+ warnings for `any` types reducing type safety
+  - **Impact**: Reduced IntelliSense support and type checking effectiveness
+  - Replace generic `any` types with specific interfaces and types
+  - Add proper type definitions for complex objects and API responses
+  - Focus on critical paths: form handling, API integration, component props
+  - **Test Command**: `cd medical-device-regulatory-assistant && pnpm lint:check --rule @typescript-eslint/no-explicit-any`
+  - **Expected Result**: Explicit any violations reduced from 800+ to <200
+  - _Requirements: Type safety, IntelliSense support, Code reliability_
+
+- [ ] **Task E2.4** Reduce Code Complexity
+  - **Root Cause**: 300+ functions exceeding complexity threshold (>10)
+  - **Impact**: Code maintainability and testing difficulty
+  - Refactor complex functions into smaller, focused functions
+  - Extract helper functions and utilities
+  - Improve code organization and readability
+  - **Test Command**: `cd medical-device-regulatory-assistant && pnpm lint:check --rule complexity`
+  - **Expected Result**: Complexity violations reduced from 300+ to <100
+  - _Requirements: Code maintainability, Function organization, Testing ease_
+
+### Phase 2.6: Configuration and Tooling Improvements - MEDIUM PRIORITY
+**Duration**: 0.5 days
+**Priority**: 🟢 MEDIUM - Improve development workflow and prevent future issues
+**Dependencies**: Phase 2.5 completion recommended
+
+- [ ] **Task E2.5** Enhance ESLint Configuration
+  - **Root Cause**: ESLint configuration needs refinement for different file types
+  - **Impact**: Inconsistent linting rules across different file contexts
+  - Add specific rules for test files (allow console.log, relax any types)
+  - Configure Node.js globals for configuration files
+  - Add file-specific rule overrides for different contexts
+  - **Test Command**: `cd medical-device-regulatory-assistant && pnpm lint:check`
+  - **Expected Result**: Context-appropriate linting rules, reduced false positives
+  - _Requirements: Development workflow, Context-aware linting, Rule optimization_
+
+- [ ] **Task E2.6** Set Up Pre-commit Hooks
+  - **Root Cause**: No automated quality checks before commits
+  - **Impact**: Quality issues accumulate over time without prevention
+  - Install and configure husky for Git hooks
+  - Add pre-commit hook for linting and formatting
+  - Add commit message validation if needed
+  - **Test Command**: `cd medical-device-regulatory-assistant && git commit -m "test: verify pre-commit hooks"`
+  - **Expected Result**: Automated quality checks prevent low-quality commits
+  - _Requirements: Quality prevention, Git workflow, Automated checks_
+
+- [ ] **Task E2.7** Create ESLint Monitoring and Reporting
+  - **Root Cause**: No systematic tracking of code quality metrics
+  - **Impact**: Quality regression detection and improvement tracking difficulty
+  - Set up ESLint reporting in CI/CD pipeline
+  - Create quality metrics dashboard or reporting
+  - Add quality gates for pull requests
+  - **Test Command**: `cd medical-device-regulatory-assistant && pnpm lint:check --format json > eslint-report.json`
+  - **Expected Result**: Systematic quality tracking and regression prevention
+  - _Requirements: Quality monitoring, CI/CD integration, Metrics tracking_
 
 ## 🟢 Medium Priority Tasks - From Task Analysis Summary
 

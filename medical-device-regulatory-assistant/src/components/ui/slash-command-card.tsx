@@ -1,9 +1,10 @@
 'use client';
 
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { SlashCommand } from '@/types/copilot';
 
 interface SlashCommandCardProps {
@@ -19,11 +20,11 @@ const categoryColors = {
   guidance: 'bg-orange-100 text-orange-800 hover:bg-orange-200',
 };
 
-export function SlashCommandCard({
+export const SlashCommandCard = ({
   command,
   onExecute,
   disabled = false,
-}: SlashCommandCardProps) {
+}: SlashCommandCardProps) => {
   const handleClick = () => {
     if (!disabled && onExecute) {
       onExecute(command.command);
@@ -76,12 +77,11 @@ interface SlashCommandGridProps {
   disabled?: boolean;
 }
 
-export function SlashCommandGrid({
+export const SlashCommandGrid = ({
   commands,
   onExecuteCommand,
   disabled = false,
-}: SlashCommandGridProps) {
-  return (
+}: SlashCommandGridProps) => (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       {commands.map((command) => (
         <SlashCommandCard
@@ -92,5 +92,4 @@ export function SlashCommandGrid({
         />
       ))}
     </div>
-  );
-}
+  )

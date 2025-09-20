@@ -3,11 +3,12 @@
  * Optimized with React.memo for performance
  */
 
-import { useState, memo, useMemo } from 'react';
 import { MoreHorizontal, Calendar, FileText, Activity } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useState, memo, useMemo } from 'react';
+
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,9 +16,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Project, ProjectStatus } from '@/types/project';
-import { cn } from '@/lib/utils';
 import { useRenderPerformance } from '@/lib/performance/optimization';
+import { cn } from '@/lib/utils';
+import { Project, ProjectStatus } from '@/types/project';
 
 interface ProjectCardProps {
   project: Project;
@@ -47,7 +48,7 @@ const statusConfig = {
   },
 };
 
-export const ProjectCard = memo(function ProjectCard({
+export const ProjectCard = memo(({
   project,
   onSelect,
   onEdit,
@@ -55,7 +56,7 @@ export const ProjectCard = memo(function ProjectCard({
   onExport,
   loading = false,
   className,
-}: ProjectCardProps) {
+}: ProjectCardProps) => {
   // Performance monitoring
   useRenderPerformance('ProjectCard');
   const [isDeleting, setIsDeleting] = useState(false);
@@ -235,12 +236,11 @@ export const ProjectCard = memo(function ProjectCard({
 /**
  * Skeleton loader for project cards
  */
-export const ProjectCardSkeleton = memo(function ProjectCardSkeleton({
+export const ProjectCardSkeleton = memo(({
   className,
 }: {
   className?: string;
-}) {
-  return (
+}) => (
     <Card
       data-testid="project-card-skeleton"
       className={cn('animate-pulse', className)}
@@ -282,5 +282,4 @@ export const ProjectCardSkeleton = memo(function ProjectCardSkeleton({
         </div>
       </CardContent>
     </Card>
-  );
-});
+  ));

@@ -3,11 +3,11 @@
  * Ensures the mock matches the actual implementation interface
  */
 
-import { useToastMock, toastMockUtils } from '../use-toast-mock';
 import {
   setupUseToastMock,
   cleanupUseToastMock,
 } from '../setup-use-toast-mock';
+import { useToastMock, toastMockUtils } from '../use-toast-mock';
 
 describe('useToast Mock Structure', () => {
   beforeEach(() => {
@@ -51,7 +51,7 @@ describe('useToast Mock Structure', () => {
 
     it('should provide all contextual toast methods', () => {
       const mockReturn = useToastMock.useToast();
-      const contextualToast = mockReturn.contextualToast;
+      const {contextualToast} = mockReturn;
 
       // Check all contextual toast methods exist
       expect(contextualToast).toHaveProperty('fdaApiError');

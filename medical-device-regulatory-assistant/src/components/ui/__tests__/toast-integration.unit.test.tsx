@@ -2,11 +2,14 @@
  * Simple integration test for enhanced toast system
  */
 
-import React from 'react';
 import { render, screen, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { Toaster } from '../toaster';
+import React from 'react';
+
 import { contextualToast } from '@/hooks/use-toast';
+
+import { Toaster } from '../toaster';
+
 
 // Simple test to verify the enhanced toast system works
 describe('Enhanced Toast System Integration', () => {

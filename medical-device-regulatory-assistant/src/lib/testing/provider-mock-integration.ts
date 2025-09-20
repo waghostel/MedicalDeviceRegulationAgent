@@ -5,8 +5,9 @@
  * Requirements: 2.4, 7.1, 7.2
  */
 
-import React, { ReactNode } from 'react';
 import { Session } from 'next-auth';
+import React, { ReactNode } from 'react';
+
 import {
   MockProviderStack,
   providerMockUtils,
@@ -190,9 +191,7 @@ export const providerMockIntegration = {
   }),
 
   // Validation
-  validate: () => {
-    return providerMockUtils.validateProviderMocks();
-  },
+  validate: () => providerMockUtils.validateProviderMocks(),
 
   // Enhanced stack management utilities (Task B3.2)
   stack: {

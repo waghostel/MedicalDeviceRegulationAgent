@@ -4,7 +4,6 @@
  * Tests for virtual scrolling, lazy loading, caching, and performance monitoring
  */
 
-import React from 'react';
 import {
   render,
   screen,
@@ -13,7 +12,30 @@ import {
   act,
 } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import React from 'react';
 import '@testing-library/jest-dom';
+
+// Import components after mocking
+import {
+  LazyImage,
+  LazyComponent,
+  LazyData,
+} from '@/components/performance/lazy-loading';
+import { PerformanceMonitor } from '@/components/performance/performance-monitor';
+import {
+  VirtualScrollContainer,
+  VirtualGrid,
+} from '@/components/performance/virtual-scrolling';
+import {
+  MemoryCache,
+  PersistentCache,
+  APICache,
+} from '@/lib/performance/caching';
+import {
+  useVirtualScrolling,
+  usePerformanceMonitor,
+  useMemoryMonitoring,
+} from '@/lib/performance/optimization';
 
 // Mock performance APIs
 const mockPerformance = {
@@ -60,28 +82,6 @@ jest.mock('web-vitals', () => ({
     callback({ name: 'TTFB', value: 500, id: 'test-ttfb' })
   ),
 }));
-
-// Import components after mocking
-import {
-  VirtualScrollContainer,
-  VirtualGrid,
-} from '@/components/performance/virtual-scrolling';
-import {
-  LazyImage,
-  LazyComponent,
-  LazyData,
-} from '@/components/performance/lazy-loading';
-import { PerformanceMonitor } from '@/components/performance/performance-monitor';
-import {
-  MemoryCache,
-  PersistentCache,
-  APICache,
-} from '@/lib/performance/caching';
-import {
-  useVirtualScrolling,
-  usePerformanceMonitor,
-  useMemoryMonitoring,
-} from '@/lib/performance/optimization';
 
 // Mock localStorage
 const mockLocalStorage = {

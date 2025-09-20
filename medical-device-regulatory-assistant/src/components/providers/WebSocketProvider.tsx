@@ -1,17 +1,19 @@
 'use client';
 
 import React, { createContext, useContext, useEffect, ReactNode } from 'react';
+
+import { useToast } from '@/hooks/use-toast';
 import {
   useRealtimeMessaging,
   useProjectWebSocket,
 } from '@/hooks/use-websocket';
-import { useProjectContext } from './ProjectContextProvider';
 import {
   WebSocketMessage,
   ProjectUpdateMessage,
   AgentResponseMessage,
 } from '@/types/project';
-import { useToast } from '@/hooks/use-toast';
+
+import { useProjectContext } from './ProjectContextProvider';
 
 interface WebSocketContextType {
   connectionStatus: 'connecting' | 'connected' | 'disconnected' | 'error';
@@ -27,7 +29,7 @@ const WebSocketContext = createContext<WebSocketContextType | undefined>(
   undefined
 );
 
-export function WebSocketProvider({ children }: { children: ReactNode }) {
+export const WebSocketProvider = ({ children }: { children: ReactNode }) => {
   const { state: projectState, setProject } = useProjectContext();
   const { toast } = useToast();
 

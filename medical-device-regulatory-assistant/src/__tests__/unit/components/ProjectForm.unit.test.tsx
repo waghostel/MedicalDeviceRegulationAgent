@@ -3,19 +3,26 @@
  * Tests form validation, submission flows, and user interactions
  */
 
-import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import React from 'react';
+
+import {
+  EnhancedInput,
+  EnhancedTextarea,
+  AutoSaveIndicator,
+} from '@/components/forms/EnhancedFormField';
 import { ProjectForm } from '@/components/projects/project-form';
+import { useEnhancedForm } from '@/hooks/use-enhanced-form';
 import { useFormSubmissionState } from '@/hooks/use-loading-state';
 import { contextualToast } from '@/hooks/use-toast';
+import { renderWithProviders } from '@/lib/testing/test-utils';
 import {
   Project,
   ProjectStatus,
   ProjectCreateRequest,
   ProjectUpdateRequest,
 } from '@/types/project';
-import { renderWithProviders } from '@/lib/testing/test-utils';
 
 // Setup localStorage mock for auto-save functionality tests
 const localStorageMock = {
@@ -34,12 +41,6 @@ jest.useFakeTimers();
 
 // Mock hooks and utilities
 jest.mock('@/hooks/use-loading-state');
-import { useEnhancedForm } from '@/hooks/use-enhanced-form';
-import {
-  EnhancedInput,
-  EnhancedTextarea,
-  AutoSaveIndicator,
-} from '@/components/forms/EnhancedFormField';
 
 // Mock useToast hook to match actual implementation structure
 jest.mock('@/hooks/use-toast', () => ({
@@ -220,7 +221,7 @@ describe('ProjectForm Component', () => {
 
     // Setup useEnhancedForm mock
     let isSaving = false;
-    let lastSaved = undefined;
+    let lastSaved;
 
     mockUseEnhancedForm.mockReturnValue({
       // Standard react-hook-form methods
@@ -374,12 +375,12 @@ describe('ProjectForm Component', () => {
           React.createElement('input', {
             key: 'input',
             id: fieldId,
-            name: name,
+            name,
             value: value || '',
             onChange: (e) => onChange?.(e.target.value),
-            onBlur: onBlur,
-            onFocus: onFocus,
-            disabled: disabled,
+            onBlur,
+            onFocus,
+            disabled,
             ...props,
           }),
         ]);
@@ -424,13 +425,13 @@ describe('ProjectForm Component', () => {
           React.createElement('textarea', {
             key: 'textarea',
             id: fieldId,
-            name: name,
+            name,
             value: value || '',
             onChange: (e) => onChange?.(e.target.value),
-            onBlur: onBlur,
-            onFocus: onFocus,
-            disabled: disabled,
-            rows: rows,
+            onBlur,
+            onFocus,
+            disabled,
+            rows,
             ...props,
           }),
         ]);
@@ -1114,12 +1115,12 @@ describe('ProjectForm Component', () => {
             React.createElement('input', {
               key: 'input',
               id: fieldId,
-              name: name,
+              name,
               value: displayValue,
               onChange: (e) => onChange?.(e.target.value),
-              onBlur: onBlur,
-              onFocus: onFocus,
-              disabled: disabled,
+              onBlur,
+              onFocus,
+              disabled,
               ...props,
             }),
           ]);
@@ -1171,13 +1172,13 @@ describe('ProjectForm Component', () => {
             React.createElement('textarea', {
               key: 'textarea',
               id: fieldId,
-              name: name,
+              name,
               value: displayValue,
               onChange: (e) => onChange?.(e.target.value),
-              onBlur: onBlur,
-              onFocus: onFocus,
-              disabled: disabled,
-              rows: rows,
+              onBlur,
+              onFocus,
+              disabled,
+              rows,
               ...props,
             }),
           ]);

@@ -3,8 +3,9 @@
  * A simple avatar component for displaying user profile pictures or initials
  */
 
-import * as React from 'react';
 import * as AvatarPrimitive from '@radix-ui/react-avatar';
+import * as React from 'react';
+
 import { cn } from '@/lib/utils';
 
 const Avatar = React.forwardRef<

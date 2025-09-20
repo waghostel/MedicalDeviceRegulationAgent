@@ -63,7 +63,7 @@ class SystemHealthDashboard {
   }
 
   logSection(title) {
-    console.log('\n' + '='.repeat(70));
+    console.log(`\n${  '='.repeat(70)}`);
     this.log(`${COLORS.BOLD}${title}${COLORS.RESET}`, COLORS.BLUE);
     console.log('='.repeat(70));
   }
@@ -191,10 +191,10 @@ class SystemHealthDashboard {
         });
         const match = output.match(/(\d+\.\d+)%\s+user/);
         return match ? parseFloat(match[1]) : 0;
-      } else {
+      } 
         // Windows or other platforms
         return 0;
-      }
+      
     } catch (error) {
       return 0;
     }
@@ -578,7 +578,7 @@ class SystemHealthDashboard {
       }
 
       return {
-        vulnerabilities: vulnerabilities,
+        vulnerabilities,
         security_score:
           vulnerabilities === 0 ? 100 : Math.max(0, 100 - vulnerabilities * 10),
       };
@@ -1384,7 +1384,7 @@ class SystemHealthDashboard {
     ];
 
     components.forEach((component) => {
-      const score = component.score.toFixed(1) + '%';
+      const score = `${component.score.toFixed(1)  }%`;
       const status =
         component.score >= 90
           ? '🟢 Excellent'

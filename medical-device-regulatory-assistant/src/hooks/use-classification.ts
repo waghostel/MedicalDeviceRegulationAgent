@@ -3,6 +3,7 @@
  */
 
 import { useState, useEffect, useCallback, useRef } from 'react';
+
 import { useToast } from '@/hooks/use-toast';
 import { dashboardService } from '@/lib/services/dashboard-service';
 import { DeviceClassification } from '@/types/dashboard';

@@ -3,14 +3,17 @@
  * Tests predicate display, selection functionality, and tab navigation
  */
 
-import React from 'react';
 import { screen, fireEvent, waitFor } from '@testing-library/react';
+import React from 'react';
+
+import { generateMockPredicateDevices } from '@/lib/mock-data';
 import {
   renderWithProviders,
   createMockSession,
 } from '@/lib/testing/test-utils';
+
 import { PredicateWidget } from '../predicate-widget';
-import { generateMockPredicateDevices } from '@/lib/mock-data';
+
 
 describe('PredicateWidget Component', () => {
   const mockSession = createMockSession();

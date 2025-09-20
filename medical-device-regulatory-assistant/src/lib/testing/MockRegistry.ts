@@ -135,9 +135,13 @@ const MockRegistryConfigSchema = z.object({
 
 export class MockRegistry {
   private registry: Map<string, MockRegistryEntry> = new Map();
+
   private config: MockRegistryConfig;
+
   private stats: MockRegistryStats;
+
   private loadOrder: string[] = [];
+
   private dependencyGraph: Map<string, Set<string>> = new Map();
 
   constructor(config?: Partial<MockRegistryConfig>) {
@@ -421,7 +425,7 @@ export class MockRegistry {
       // Unload from global registry
       if (global.__GLOBAL_MOCK_REGISTRY) {
         const registryMap = global.__GLOBAL_MOCK_REGISTRY[
-          entry.metadata.type + 's'
+          `${entry.metadata.type  }s`
         ] as Map<string, any>;
         if (registryMap && registryMap.delete) {
           registryMap.delete(name);
@@ -569,9 +573,9 @@ export class MockRegistry {
 
     if (this.config.react.compatibility === 'strict') {
       return major1 === major2 && minor1 === minor2;
-    } else {
+    } 
       return major1 === major2; // Loose compatibility - same major version
-    }
+    
   }
 
   private hasCircularDependency(

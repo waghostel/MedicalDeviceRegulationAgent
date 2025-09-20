@@ -1,11 +1,13 @@
-import React from 'react';
 import { render } from '@testing-library/react';
+import React from 'react';
+
 import {
   measureRenderPerformance,
   performanceTest,
   PERFORMANCE_THRESHOLDS,
   PerformanceRegression,
 } from '@/lib/testing/performance-utils';
+
 import { ClassificationWidget } from '../classification-widget';
 import { PredicateWidget } from '../predicate-widget';
 import { ProgressWidget } from '../progress-widget';

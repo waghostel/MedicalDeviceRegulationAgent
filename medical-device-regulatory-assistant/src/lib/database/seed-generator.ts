@@ -549,6 +549,7 @@ if __name__ == "__main__":
  */
 export class DatabaseSeedExecutor {
   private databaseUrl: string;
+
   private executionHistory: SeedExecutionResult[] = [];
 
   constructor(databaseUrl: string) {
@@ -651,7 +652,7 @@ export class DatabaseSeedExecutor {
       const dependencyResult = this.executionHistory.find(
         (r) => r.scriptId === dependency
       );
-      if (!dependencyResult || !dependencyResult.success) {
+      if (!dependencyResult?.success) {
         throw new Error(`Dependency ${dependency} not satisfied`);
       }
     }

@@ -3,17 +3,20 @@
  * Tests status display, progress tracking, and user interactions
  */
 
-import React from 'react';
 import { screen, fireEvent } from '@testing-library/react';
+import React from 'react';
+
+import { AgentExecutionStatus } from '@/hooks/useAgentExecution';
 import {
   renderWithProviders,
   createMockSession,
 } from '@/lib/testing/test-utils';
+
 import {
   AgentExecutionStatusComponent,
   AgentExecutionStatusInline,
 } from '../AgentExecutionStatus';
-import { AgentExecutionStatus } from '@/hooks/useAgentExecution';
+
 
 describe('AgentExecutionStatusComponent', () => {
   const mockSession = createMockSession();

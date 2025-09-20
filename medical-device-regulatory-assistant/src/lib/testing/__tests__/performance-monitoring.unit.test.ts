@@ -6,19 +6,19 @@
  */
 
 import {
-  TestPerformanceTracker,
-  getPerformanceTracker,
-  resetPerformanceTracker,
-} from '../test-performance-tracker';
+  performanceTest,
+  performanceAssertions,
+} from '../jest-performance-setup';
 import {
   PerformanceThresholdValidator,
   validateTestPerformance,
   validateSuitePerformance,
 } from '../performance-threshold-validator';
 import {
-  performanceTest,
-  performanceAssertions,
-} from '../jest-performance-setup';
+  TestPerformanceTracker,
+  getPerformanceTracker,
+  resetPerformanceTracker,
+} from '../test-performance-tracker';
 
 describe('Performance Monitoring System', () => {
   let tracker: TestPerformanceTracker;
@@ -410,7 +410,7 @@ describe('Performance Monitoring Integration', () => {
       executionTimes.reduce((sum, time) => sum + time, 0) /
       executionTimes.length;
     const variance =
-      executionTimes.reduce((sum, time) => sum + Math.pow(time - mean, 2), 0) /
+      executionTimes.reduce((sum, time) => sum + (time - mean)**2, 0) /
       executionTimes.length;
     const standardDeviation = Math.sqrt(variance);
     const coefficientOfVariation = standardDeviation / mean;

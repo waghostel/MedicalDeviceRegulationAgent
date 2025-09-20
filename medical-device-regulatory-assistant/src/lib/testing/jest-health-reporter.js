@@ -7,9 +7,9 @@
  * Requirements: 5.2 (consistent test results), 8.1 (CI environment success >90% pass rate)
  */
 
-const { getTestHealthMonitor } = require('./test-health-monitor.js');
 const { writeFileSync, existsSync, mkdirSync } = require('fs');
 const { join } = require('path');
+const { getTestHealthMonitor } = require('./test-health-monitor.js');
 
 class JestHealthReporter {
   constructor(globalConfig, options) {
@@ -20,7 +20,7 @@ class JestHealthReporter {
     this.suiteStartTime = Date.now();
 
     // Resolve output directory with proper path handling
-    let outputDir = this.options.outputDir || 'test-reports';
+    const outputDir = this.options.outputDir || 'test-reports';
 
     // Get the root directory from Jest config or use current working directory
     const rootDir = globalConfig.rootDir || process.cwd();
@@ -158,7 +158,7 @@ class JestHealthReporter {
   }
 
   logHealthSummary(healthReport) {
-    console.log('\n' + '='.repeat(60));
+    console.log(`\n${  '='.repeat(60)}`);
     console.log('📊 TEST HEALTH REPORT');
     console.log('='.repeat(60));
 
@@ -264,11 +264,11 @@ class JestHealthReporter {
       });
     }
 
-    console.log('\n' + '='.repeat(60));
+    console.log(`\n${  '='.repeat(60)}`);
     console.log(
       `📄 Detailed report saved to: ${join(this.reportsDir, 'test-health-report.json')}`
     );
-    console.log('='.repeat(60) + '\n');
+    console.log(`${'='.repeat(60)  }\n`);
   }
 
   getStatusIcon(status) {

@@ -3,11 +3,13 @@
  * Tests Google OAuth login flow, session persistence, protected routes, and security features
  */
 
-import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { SessionProvider, useSession, signIn, signOut } from 'next-auth/react';
 import { useRouter } from 'next/router';
+import { SessionProvider, useSession, signIn, signOut } from 'next-auth/react';
+import React from 'react';
+
+import { generateMockUser } from '@/lib/mock-data';
 import {
   setupMockAPI,
   teardownMockAPI,
@@ -17,7 +19,6 @@ import {
   createMockSession,
   renderWithProviders,
 } from '@/lib/testing/test-utils';
-import { generateMockUser } from '@/lib/mock-data';
 
 // Mock Next.js router
 jest.mock('next/router', () => ({

@@ -3,22 +3,22 @@
  * Tests header rendering, navigation links, user information display, and responsive behavior
  */
 
-import React from 'react';
 import { screen, fireEvent } from '@testing-library/react';
+import React from 'react';
+
 import {
   renderWithProviders,
   createMockSession,
 } from '@/lib/testing/test-utils';
+
 import { Header } from '../Header';
 
 // Mock Next.js Link component
-jest.mock('next/link', () => {
-  return (props) => (
+jest.mock('next/link', () => (props) => (
     <a href={props.href} {...props}>
       {props.children}
     </a>
-  );
-});
+  ));
 
 describe('Header Component', () => {
   const mockSession = createMockSession({

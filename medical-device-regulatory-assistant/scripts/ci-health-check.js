@@ -17,9 +17,11 @@ async function loadModules() {
     // Fallback implementation
     TestHealthDashboard = class {
       constructor() {}
+
       async initialize() {
         console.log('Dashboard initialized (fallback)');
       }
+
       async generateCIReport() {
         return {
           exitCode: 0,
@@ -27,6 +29,7 @@ async function loadModules() {
           details: 'Test infrastructure monitoring is active',
         };
       }
+
       async generateHTMLDashboard() {
         return 'test-reports/dashboard.html (fallback)';
       }
@@ -69,7 +72,7 @@ class CIHealthChecker {
       const dashboardPath = await this.dashboard.generateHTMLDashboard();
 
       // Output results
-      console.log('\n' + '='.repeat(60));
+      console.log(`\n${  '='.repeat(60)}`);
       console.log('📋 TEST HEALTH SUMMARY');
       console.log('='.repeat(60));
       console.log(ciReport.summary);
@@ -110,7 +113,7 @@ class CIHealthChecker {
 
     const outputFile = process.env.GITHUB_OUTPUT;
     if (outputFile) {
-      await fs.appendFile(outputFile, outputs.join('\n') + '\n');
+      await fs.appendFile(outputFile, `${outputs.join('\n')  }\n`);
     }
   }
 

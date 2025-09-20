@@ -30,7 +30,7 @@ test.describe('Agent Workflow and AI Interactions', () => {
         message.includes('predicate')
       ) {
         response = {
-          id: 'msg-' + Date.now(),
+          id: `msg-${  Date.now()}`,
           content: `I'll help you search for predicate devices. Based on your device description, I found several potential predicates:
 
 ## Predicate Search Results
@@ -71,7 +71,7 @@ Would you like me to perform a detailed comparison with any of these predicates?
         message.includes('classify')
       ) {
         response = {
-          id: 'msg-' + Date.now(),
+          id: `msg-${  Date.now()}`,
           content: `I'll analyze your device classification. Based on the device description and intended use:
 
 ## Device Classification Analysis
@@ -114,7 +114,7 @@ Would you like me to search for predicate devices or provide more details about 
         message.includes('guidance')
       ) {
         response = {
-          id: 'msg-' + Date.now(),
+          id: `msg-${  Date.now()}`,
           content: `I'll help you find relevant FDA guidance documents:
 
 ## Relevant FDA Guidance Documents
@@ -152,7 +152,7 @@ Would you like me to provide more details about any of these guidance documents 
         };
       } else {
         response = {
-          id: 'msg-' + Date.now(),
+          id: `msg-${  Date.now()}`,
           content: `I'm here to help with your medical device regulatory questions. I can assist with:
 
 - **/predicate-search** - Find similar devices for 510(k) submissions
@@ -184,7 +184,7 @@ What would you like help with today?`,
         status: 200,
         contentType: 'application/json',
         body: JSON.stringify({
-          id: 'file-' + Date.now(),
+          id: `file-${  Date.now()}`,
           filename: 'test-document.pdf',
           size: 1024000,
           type: 'application/pdf',

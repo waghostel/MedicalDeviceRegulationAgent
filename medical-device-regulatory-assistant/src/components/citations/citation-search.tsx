@@ -1,10 +1,16 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
 import { Search, Filter, X } from 'lucide-react';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
+import React, { useState, useMemo } from 'react';
+
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
 import {
   Select,
   SelectContent,
@@ -12,12 +18,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
 import { SourceCitation } from '@/types/copilot';
+
 import { getDocumentTypeDisplayName } from './citation-utils';
 
 interface CitationSearchProps {
@@ -33,11 +35,11 @@ interface SearchFilters {
   validOnly: boolean;
 }
 
-export function CitationSearch({
+export const CitationSearch = ({
   citations,
   onFilteredResults,
   placeholder = 'Search citations...',
-}: CitationSearchProps) {
+}: CitationSearchProps) => {
   const [filters, setFilters] = useState<SearchFilters>({
     query: '',
     documentType: 'all',

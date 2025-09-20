@@ -1,9 +1,18 @@
 'use client';
 
+import { format } from 'date-fns';
+import { CalendarIcon, X } from 'lucide-react';
 import React from 'react';
+
 import { Button } from '@/components/ui/button';
+import { Calendar } from '@/components/ui/calendar';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
 import {
   Select,
   SelectContent,
@@ -11,14 +20,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Calendar } from '@/components/ui/calendar';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
-import { CalendarIcon, X } from 'lucide-react';
-import { format } from 'date-fns';
 import { AuditLogFilter } from '@/types/audit';
 
 interface AuditLogFiltersProps {
@@ -26,10 +27,10 @@ interface AuditLogFiltersProps {
   onFiltersChange: (filters: AuditLogFilter) => void;
 }
 
-export function AuditLogFilters({
+export const AuditLogFilters = ({
   filters,
   onFiltersChange,
-}: AuditLogFiltersProps) {
+}: AuditLogFiltersProps) => {
   const handleFilterChange = (key: keyof AuditLogFilter, value: any) => {
     onFiltersChange({
       ...filters,

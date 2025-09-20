@@ -3,15 +3,18 @@
  * Provides comprehensive streaming interface with typing indicators and interruption handling
  */
 
+import { StopCircle, RotateCcw, Loader2, AlertCircle } from 'lucide-react';
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { cn } from '@/lib/utils';
+
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { useWebSocket } from '@/hooks/use-websocket';
-import { AgentTypingIndicator, TypingAnimation } from './typing-indicators';
-import { StopCircle, RotateCcw, Loader2, AlertCircle } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import { WebSocketMessage } from '@/types/project';
+
+import { AgentTypingIndicator, TypingAnimation } from './typing-indicators';
+
 
 interface EnhancedStreamingResponseProps {
   streamId?: string;
@@ -26,7 +29,7 @@ interface EnhancedStreamingResponseProps {
   enableInterruption?: boolean;
 }
 
-export function EnhancedStreamingResponse({
+export const EnhancedStreamingResponse = ({
   streamId,
   className,
   onStreamStart,
@@ -37,7 +40,7 @@ export function EnhancedStreamingResponse({
   agentName = 'AI Assistant',
   showTypingIndicator = true,
   enableInterruption = true,
-}: EnhancedStreamingResponseProps) {
+}: EnhancedStreamingResponseProps) => {
   const [content, setContent] = useState('');
   const [isStreaming, setIsStreaming] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
@@ -321,12 +324,12 @@ interface CompactStreamingResponseProps {
   maxLength?: number;
 }
 
-export function CompactStreamingResponse({
+export const CompactStreamingResponse = ({
   streamId,
   className,
   placeholder = 'AI is thinking...',
   maxLength = 100,
-}: CompactStreamingResponseProps) {
+}: CompactStreamingResponseProps) => {
   const [content, setContent] = useState('');
   const [isStreaming, setIsStreaming] = useState(false);
   const websocket = useWebSocket();
@@ -349,7 +352,7 @@ export function CompactStreamingResponse({
           setContent((prev) => {
             const newContent = prev + chunk;
             return newContent.length > maxLength
-              ? newContent.slice(0, maxLength) + '...'
+              ? `${newContent.slice(0, maxLength)  }...`
               : newContent;
           });
         }

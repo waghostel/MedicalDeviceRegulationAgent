@@ -2,11 +2,14 @@
  * Tests for Toaster component integration
  */
 
-import React from 'react';
 import { render, screen, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { Toaster } from '../toaster';
+import React from 'react';
+
 import { useToast, toast, contextualToast } from '@/hooks/use-toast';
+
+import { Toaster } from '../toaster';
+
 
 // Mock the toast hook
 const mockToasts = [

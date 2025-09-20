@@ -2,7 +2,10 @@
  * Bundle Size Analysis and Optimization Utilities
  */
 
+import { useState, useCallback, useEffect } from 'react';
+
 import { performanceMonitor } from './optimization';
+
 
 interface BundleAnalysis {
   totalSize: number;
@@ -23,6 +26,7 @@ interface ChunkInfo {
 
 class BundleAnalyzer {
   private analysis: BundleAnalysis | null = null;
+
   private thresholds = {
     totalSize: 1000 * 1024, // 1MB
     chunkSize: 250 * 1024, // 250KB
@@ -237,7 +241,7 @@ class BundleAnalyzer {
     // Monitor memory usage for bundle impact
     setInterval(() => {
       if ('memory' in performance) {
-        const memory = (performance as any).memory;
+        const {memory} = (performance as any);
         performanceMonitor.recordMetric(
           'memory_usage_mb',
           memory.usedJSHeapSize / 1024 / 1024,
@@ -304,8 +308,8 @@ export function generateBundleReport(): void {
       console.table(
         analysis.chunks.map((chunk) => ({
           name: chunk.name,
-          size: Math.round(chunk.size / 1024) + 'KB',
-          loadTime: Math.round(chunk.loadTime) + 'ms',
+          size: `${Math.round(chunk.size / 1024)  }KB`,
+          loadTime: `${Math.round(chunk.loadTime)  }ms`,
           async: chunk.isAsync ? '✓' : '✗',
           dependencies: chunk.dependencies.length,
         }))
@@ -325,5 +329,3 @@ if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
     });
   }, 3000);
 }
-
-import { useState, useCallback, useEffect } from 'react';

@@ -7,6 +7,7 @@
  */
 
 import { jest } from '@jest/globals';
+
 import { ValidationError, ValidationResult } from './MockValidator';
 
 // ============================================================================
@@ -229,7 +230,9 @@ const mockUseToast = jest.fn(() => ({
 
 export class MockDebugger {
   private diagnosisHistory: Map<string, DiagnosisReport[]> = new Map();
+
   private knownIssues: Map<string, RelatedIssue[]> = new Map();
+
   private performanceMetrics: Map<string, number[]> = new Map();
 
   constructor() {
@@ -407,7 +410,7 @@ export class MockDebugger {
           } else {
             properties[key] = {
               type: Array.isArray(value) ? 'array' : typeof value,
-              value: value,
+              value,
               required: true, // Assume required for now
               description: `Property ${key}`,
             };
@@ -915,7 +918,7 @@ const mock = jest.fn(() => ({
     const funcStr = func.toString();
     const paramMatch = funcStr.match(/\(([^)]*)\)/);
 
-    if (!paramMatch || !paramMatch[1].trim()) {
+    if (!paramMatch?.[1].trim()) {
       return [];
     }
 

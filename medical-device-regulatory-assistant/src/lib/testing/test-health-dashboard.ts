@@ -3,13 +3,14 @@
  * Requirements: 8.1, 8.2, 8.3
  */
 
+import * as fs from 'fs/promises';
+import * as path from 'path';
+
 import {
   TestHealthMonitor,
   HealthReport,
   ValidationIssue,
 } from './test-health-monitor';
-import * as fs from 'fs/promises';
-import * as path from 'path';
 
 export interface DashboardConfig {
   refreshInterval: number;
@@ -49,8 +50,11 @@ export interface DashboardData {
 
 export class TestHealthDashboard {
   private monitor: TestHealthMonitor;
+
   private config: DashboardConfig;
+
   private reports: HealthReport[] = [];
+
   private alerts: DashboardData['alerts'] = [];
 
   constructor(config?: Partial<DashboardConfig>) {

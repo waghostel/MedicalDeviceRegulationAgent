@@ -1,8 +1,11 @@
-import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { CitationSearch } from '../citation-search';
+import React from 'react';
+
 import { SourceCitation } from '@/types/copilot';
+
+import { CitationSearch } from '../citation-search';
+
 
 describe('CitationSearch', () => {
   const mockCitations: SourceCitation[] = [

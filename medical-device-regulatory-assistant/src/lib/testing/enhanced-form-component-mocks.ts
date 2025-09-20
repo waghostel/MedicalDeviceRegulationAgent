@@ -8,6 +8,7 @@
  */
 
 import React from 'react';
+
 import { registerMock } from './MockRegistry';
 
 // ============================================================================
@@ -417,12 +418,12 @@ export const AutoSaveIndicatorMock = jest.fn<
 
       if (diff < 60000) {
         return 'Just now';
-      } else if (diff < 3600000) {
+      } if (diff < 3600000) {
         const minutes = Math.floor(diff / 60000);
         return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
-      } else {
+      } 
         return date.toLocaleTimeString();
-      }
+      
     };
 
     if (isSaving) {
@@ -886,7 +887,7 @@ export function cleanupEnhancedFormComponentMocks(): void {
   if (global.__GLOBAL_MOCK_REGISTRY) {
     Object.keys(componentMocks).forEach((name) => {
       const componentMap = global.__GLOBAL_MOCK_REGISTRY.components;
-      if (componentMap && componentMap.delete) {
+      if (componentMap?.delete) {
         componentMap.delete(name);
       }
     });

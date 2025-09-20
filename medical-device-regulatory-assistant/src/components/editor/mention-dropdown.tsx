@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
-import { MentionItem } from '@/types/document';
 import { File, FileText, Folder, Search } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+
+import { MentionItem } from '@/types/document';
 
 interface MentionDropdownProps {
   items: MentionItem[];
@@ -12,13 +13,13 @@ interface MentionDropdownProps {
   onClose: () => void;
 }
 
-export function MentionDropdown({
+export const MentionDropdown = ({
   items,
   query,
   position,
   onSelect,
   onClose,
-}: MentionDropdownProps) {
+}: MentionDropdownProps) => {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const dropdownRef = useRef<HTMLDivElement>(null);
 

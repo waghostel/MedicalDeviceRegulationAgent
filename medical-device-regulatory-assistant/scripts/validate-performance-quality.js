@@ -161,7 +161,7 @@ class PerformanceQualityValidator {
             description: test.description,
             duration: actualDuration,
             target: test.target,
-            withinTarget: withinTarget,
+            withinTarget,
             error: !result.success
               ? result.stderr
               : `Exceeded time target: ${actualDuration}ms > ${test.target}ms`,

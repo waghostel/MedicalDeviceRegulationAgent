@@ -6,9 +6,10 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { rest } from 'msw';
 import { setupServer } from 'msw/node';
+
 import { ProjectList } from '@/components/projects/project-list';
-import { apiClient } from '@/lib/api-client';
 import { toast } from '@/hooks/use-toast';
+import { apiClient } from '@/lib/api-client';
 
 // Mock toast
 jest.mock('@/hooks/use-toast', () => ({
@@ -27,9 +28,7 @@ jest.mock('next/navigation', () => ({
 // Mock server for error scenarios
 const server = setupServer(
   // Default success response
-  rest.get('/api/projects', (req, res, ctx) => {
-    return res(ctx.json([]));
-  })
+  rest.get('/api/projects', (req, res, ctx) => res(ctx.json([])))
 );
 
 beforeAll(() => server.listen());
@@ -43,9 +42,7 @@ describe('Error Handling Integration Tests', () => {
   describe('Network Errors', () => {
     test('should handle network connection errors', async () => {
       server.use(
-        rest.get('/api/projects', (req, res) => {
-          return res.networkError('Network connection failed');
-        })
+        rest.get('/api/projects', (req, res) => res.networkError('Network connection failed'))
       );
 
       render(<ProjectList />);
@@ -64,9 +61,9 @@ describe('Error Handling Integration Tests', () => {
 
     test('should handle request timeout errors', async () => {
       server.use(
-        rest.get('/api/projects', (req, res, ctx) => {
-          return res(ctx.delay(35000)); // Longer than 30s timeout
-        })
+        rest.get('/api/projects', (req, res, ctx) => 
+           res(ctx.delay(35000)) // Longer than 30s timeout
+        )
       );
 
       render(<ProjectList />);
@@ -155,15 +152,13 @@ describe('Error Handling Integration Tests', () => {
   describe('HTTP Error Responses', () => {
     test('should handle 401 unauthorized errors', async () => {
       server.use(
-        rest.get('/api/projects', (req, res, ctx) => {
-          return res(
+        rest.get('/api/projects', (req, res, ctx) => res(
             ctx.status(401),
             ctx.json({
               error: 'Unauthorized',
               message: 'Authentication required',
             })
-          );
-        })
+          ))
       );
 
       render(<ProjectList />);
@@ -181,15 +176,13 @@ describe('Error Handling Integration Tests', () => {
 
     test('should handle 403 forbidden errors', async () => {
       server.use(
-        rest.get('/api/projects', (req, res, ctx) => {
-          return res(
+        rest.get('/api/projects', (req, res, ctx) => res(
             ctx.status(403),
             ctx.json({
               error: 'Forbidden',
               message: 'Access denied',
             })
-          );
-        })
+          ))
       );
 
       render(<ProjectList />);
@@ -207,15 +200,13 @@ describe('Error Handling Integration Tests', () => {
 
     test('should handle 404 not found errors', async () => {
       server.use(
-        rest.get('/api/projects/123', (req, res, ctx) => {
-          return res(
+        rest.get('/api/projects/123', (req, res, ctx) => res(
             ctx.status(404),
             ctx.json({
               error: 'Not Found',
               message: 'Project not found',
             })
-          );
-        })
+          ))
       );
 
       try {
@@ -228,8 +219,7 @@ describe('Error Handling Integration Tests', () => {
 
     test('should handle 422 validation errors', async () => {
       server.use(
-        rest.post('/api/projects', (req, res, ctx) => {
-          return res(
+        rest.post('/api/projects', (req, res, ctx) => res(
             ctx.status(422),
             ctx.json({
               error: 'Validation Error',
@@ -243,8 +233,7 @@ describe('Error Handling Integration Tests', () => {
                 'Select an appropriate device type',
               ],
             })
-          );
-        })
+          ))
       );
 
       try {
@@ -259,15 +248,13 @@ describe('Error Handling Integration Tests', () => {
 
     test('should handle 500 internal server errors', async () => {
       server.use(
-        rest.get('/api/projects', (req, res, ctx) => {
-          return res(
+        rest.get('/api/projects', (req, res, ctx) => res(
             ctx.status(500),
             ctx.json({
               error: 'Internal Server Error',
               message: 'Something went wrong on our end',
             })
-          );
-        })
+          ))
       );
 
       render(<ProjectList />);
@@ -285,15 +272,13 @@ describe('Error Handling Integration Tests', () => {
 
     test('should handle 503 service unavailable errors', async () => {
       server.use(
-        rest.get('/api/projects', (req, res, ctx) => {
-          return res(
+        rest.get('/api/projects', (req, res, ctx) => res(
             ctx.status(503),
             ctx.json({
               error: 'Service Unavailable',
               message: 'Service is temporarily unavailable',
             })
-          );
-        })
+          ))
       );
 
       render(<ProjectList />);
@@ -314,9 +299,7 @@ describe('Error Handling Integration Tests', () => {
   describe('Loading States', () => {
     test('should show loading skeletons during initial load', async () => {
       server.use(
-        rest.get('/api/projects', (req, res, ctx) => {
-          return res(ctx.delay(1000), ctx.json([]));
-        })
+        rest.get('/api/projects', (req, res, ctx) => res(ctx.delay(1000), ctx.json([])))
       );
 
       render(<ProjectList />);
@@ -347,9 +330,7 @@ describe('Error Handling Integration Tests', () => {
 
       // Add delay for refresh
       server.use(
-        rest.get('/api/projects', (req, res, ctx) => {
-          return res(ctx.delay(500), ctx.json([]));
-        })
+        rest.get('/api/projects', (req, res, ctx) => res(ctx.delay(500), ctx.json([])))
       );
 
       // Click refresh button
@@ -413,12 +394,8 @@ describe('Error Handling Integration Tests', () => {
       ];
 
       server.use(
-        rest.get('/api/projects', (req, res, ctx) => {
-          return res(ctx.json(mockProjects));
-        }),
-        rest.delete('/api/projects/1', (req, res, ctx) => {
-          return res(ctx.delay(1000), ctx.json({ message: 'Deleted' }));
-        })
+        rest.get('/api/projects', (req, res, ctx) => res(ctx.json(mockProjects))),
+        rest.delete('/api/projects/1', (req, res, ctx) => res(ctx.delay(1000), ctx.json({ message: 'Deleted' })))
       );
 
       render(<ProjectList />);
@@ -505,12 +482,8 @@ describe('Error Handling Integration Tests', () => {
       ];
 
       server.use(
-        rest.get('/api/projects', (req, res, ctx) => {
-          return res(ctx.json(mockProjects));
-        }),
-        rest.get('/api/projects/1/dashboard', (req, res, ctx) => {
-          return res(ctx.status(500), ctx.json({ error: 'Dashboard error' }));
-        })
+        rest.get('/api/projects', (req, res, ctx) => res(ctx.json(mockProjects))),
+        rest.get('/api/projects/1/dashboard', (req, res, ctx) => res(ctx.status(500), ctx.json({ error: 'Dashboard error' })))
       );
 
       render(<ProjectList />);
@@ -540,9 +513,7 @@ describe('Error Handling Integration Tests', () => {
       ];
 
       server.use(
-        rest.get('/api/projects', (req, res, ctx) => {
-          return res(ctx.json(mockProjects));
-        })
+        rest.get('/api/projects', (req, res, ctx) => res(ctx.json(mockProjects)))
       );
 
       render(<ProjectList />);
@@ -573,8 +544,7 @@ describe('Error Handling Integration Tests', () => {
 
     test('should provide helpful error messages with suggestions', async () => {
       server.use(
-        rest.post('/api/projects', (req, res, ctx) => {
-          return res(
+        rest.post('/api/projects', (req, res, ctx) => res(
             ctx.status(400),
             ctx.json({
               error: 'Validation Error',
@@ -585,8 +555,7 @@ describe('Error Handling Integration Tests', () => {
                 'Avoid special characters in project names',
               ],
             })
-          );
-        })
+          ))
       );
 
       try {
@@ -607,9 +576,7 @@ describe('Error Handling Integration Tests', () => {
 
     test('should handle malformed error responses', async () => {
       server.use(
-        rest.get('/api/projects', (req, res, ctx) => {
-          return res(ctx.status(500), ctx.text('Internal Server Error'));
-        })
+        rest.get('/api/projects', (req, res, ctx) => res(ctx.status(500), ctx.text('Internal Server Error')))
       );
 
       render(<ProjectList />);
@@ -630,9 +597,7 @@ describe('Error Handling Integration Tests', () => {
     test('should normalize different error types', async () => {
       // Test network error
       server.use(
-        rest.get('/api/projects/network-error', (req, res) => {
-          return res.networkError('Network error');
-        })
+        rest.get('/api/projects/network-error', (req, res) => res.networkError('Network error'))
       );
 
       try {
@@ -646,9 +611,7 @@ describe('Error Handling Integration Tests', () => {
 
       // Test timeout error
       server.use(
-        rest.get('/api/projects/timeout', (req, res, ctx) => {
-          return res(ctx.delay(35000));
-        })
+        rest.get('/api/projects/timeout', (req, res, ctx) => res(ctx.delay(35000)))
       );
 
       try {
@@ -661,9 +624,7 @@ describe('Error Handling Integration Tests', () => {
 
     test('should skip error toast when requested', async () => {
       server.use(
-        rest.get('/api/projects/silent-error', (req, res, ctx) => {
-          return res(ctx.status(500), ctx.json({ error: 'Silent error' }));
-        })
+        rest.get('/api/projects/silent-error', (req, res, ctx) => res(ctx.status(500), ctx.json({ error: 'Silent error' })))
       );
 
       try {
@@ -679,12 +640,8 @@ describe('Error Handling Integration Tests', () => {
 
     test('should handle concurrent requests with different error states', async () => {
       server.use(
-        rest.get('/api/projects/success', (req, res, ctx) => {
-          return res(ctx.json({ success: true }));
-        }),
-        rest.get('/api/projects/error', (req, res, ctx) => {
-          return res(ctx.status(500), ctx.json({ error: 'Server error' }));
-        })
+        rest.get('/api/projects/success', (req, res, ctx) => res(ctx.json({ success: true }))),
+        rest.get('/api/projects/error', (req, res, ctx) => res(ctx.status(500), ctx.json({ error: 'Server error' })))
       );
 
       const [successResult, errorResult] = await Promise.allSettled([

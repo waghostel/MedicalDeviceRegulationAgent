@@ -3,12 +3,12 @@
  * Monitors migration health and triggers automatic rollbacks when needed
  */
 
+import { ABTestManager, ABTestResult } from './ab-testing';
 import {
   FeatureFlagManager,
   MIGRATION_FLAGS,
   FeatureFlag,
 } from './feature-flag-system';
-import { ABTestManager, ABTestResult } from './ab-testing';
 
 export interface MigrationHealthCheck {
   flagKey: string;
@@ -71,10 +71,15 @@ export interface MigrationAlert {
 
 export class MigrationAutomationManager {
   private flagManager: FeatureFlagManager;
+
   private abTestManager: ABTestManager;
+
   private rules: Map<string, MigrationRule> = new Map();
+
   private healthChecks: Map<string, MigrationHealthCheck[]> = new Map();
+
   private alerts: MigrationAlert[] = [];
+
   private monitoringInterval?: NodeJS.Timeout;
 
   constructor(flagManager: FeatureFlagManager, abTestManager: ABTestManager) {
@@ -189,7 +194,7 @@ export class MigrationAutomationManager {
   }
 
   public recordHealthCheck(healthCheck: MigrationHealthCheck): void {
-    const flagKey = healthCheck.flagKey;
+    const {flagKey} = healthCheck;
 
     if (!this.healthChecks.has(flagKey)) {
       this.healthChecks.set(flagKey, []);
@@ -564,9 +569,9 @@ export class MigrationAutomationManager {
 
     if (higherIsBetter) {
       return change > 0 ? 'improving' : 'degrading';
-    } else {
+    } 
       return change < 0 ? 'improving' : 'degrading';
-    }
+    
   }
 
   public startMonitoring(intervalMinutes: number = 5): void {

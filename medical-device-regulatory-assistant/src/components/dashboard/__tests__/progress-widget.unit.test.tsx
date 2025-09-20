@@ -3,14 +3,17 @@
  * Tests progress display, step navigation, and various progress states
  */
 
-import React from 'react';
 import { screen, fireEvent, waitFor } from '@testing-library/react';
+import React from 'react';
+
+import { generateMockProjectProgress } from '@/lib/mock-data';
 import {
   renderWithProviders,
   createMockSession,
 } from '@/lib/testing/test-utils';
+
 import { ProgressWidget } from '../progress-widget';
-import { generateMockProjectProgress } from '@/lib/mock-data';
+
 
 describe('ProgressWidget Component', () => {
   const mockSession = createMockSession();

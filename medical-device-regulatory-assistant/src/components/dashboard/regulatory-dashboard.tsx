@@ -5,18 +5,6 @@
 
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   RefreshCw,
   Download,
@@ -26,14 +14,27 @@ import {
   LayoutDashboard,
   TrendingUp,
 } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
 
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { contextualToast } from '@/hooks/use-toast';
+import { DashboardData, DashboardConfig } from '@/types/dashboard';
+
+import { ActivityWidget } from './activity-widget';
 import { ClassificationWidget } from './classification-widget';
 import { PredicateWidget } from './predicate-widget';
 import { ProgressWidget } from './progress-widget';
-import { ActivityWidget } from './activity-widget';
 
-import { DashboardData, DashboardConfig } from '@/types/dashboard';
-import { contextualToast } from '@/hooks/use-toast';
 
 interface RegulatoryDashboardProps {
   projectId: string;
@@ -48,7 +49,7 @@ interface RegulatoryDashboardProps {
   onStepClick?: (step: string) => void;
 }
 
-export function RegulatoryDashboard({
+export const RegulatoryDashboard = ({
   projectId,
   dashboardData,
   loading = false,
@@ -59,7 +60,7 @@ export function RegulatoryDashboard({
   onSearchPredicates,
   onSelectPredicate,
   onStepClick,
-}: RegulatoryDashboardProps) {
+}: RegulatoryDashboardProps) => {
   // Remove the toast destructuring since we're using contextualToast directly
   const [activeTab, setActiveTab] = useState('overview');
   const [isRefreshing, setIsRefreshing] = useState(false);

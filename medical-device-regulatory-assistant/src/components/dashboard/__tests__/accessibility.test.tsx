@@ -1,7 +1,8 @@
-import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { axe, toHaveNoViolations } from 'jest-axe';
+import React from 'react';
+
 import {
   testAccessibility,
   testKeyboardNavigation,
@@ -9,6 +10,7 @@ import {
   testAriaLabels,
   ScreenReaderSimulator,
 } from '@/lib/testing/accessibility-utils';
+
 import { ClassificationWidget } from '../classification-widget';
 import { PredicateWidget } from '../predicate-widget';
 import { ProgressWidget } from '../progress-widget';

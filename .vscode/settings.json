@@ -37,7 +37,9 @@
     "npm test",
     "yarn install",
     "yarn test",
-    "cd *"
+    "cd *",
+    "git commit *",
+    "git *"
   ],
  "typescript.autoClosingTags": false,
 

@@ -158,7 +158,9 @@ export interface TestRecommendation {
  */
 export class ABTestManager {
   private tests: Map<string, ABTestConfig> = new Map();
+
   private results: Map<string, ABTestResult> = new Map();
+
   private participantAssignments: Map<string, string> = new Map(); // userId -> variantId
 
   constructor() {
@@ -371,7 +373,7 @@ export class ABTestManager {
     for (let i = 0; i < userId.length; i++) {
       const char = userId.charCodeAt(i);
       hash = (hash << 5) - hash + char;
-      hash = hash & hash; // Convert to 32-bit integer
+      hash &= hash; // Convert to 32-bit integer
     }
     return Math.abs(hash);
   }

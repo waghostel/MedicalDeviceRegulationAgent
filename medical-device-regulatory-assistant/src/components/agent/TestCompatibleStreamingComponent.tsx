@@ -4,6 +4,7 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
+
 import { useWebSocket } from '@/hooks/use-websocket';
 import { WebSocketMessage } from '@/types/project';
 
@@ -11,9 +12,9 @@ interface TestCompatibleStreamingComponentProps {
   className?: string;
 }
 
-export function TestCompatibleStreamingComponent({
+export const TestCompatibleStreamingComponent = ({
   className,
-}: TestCompatibleStreamingComponentProps) {
+}: TestCompatibleStreamingComponentProps) => {
   const [streamingResponse, setStreamingResponse] = useState('');
   const [isStreaming, setIsStreaming] = useState(false);
   const [typingIndicator, setTypingIndicator] = useState(false);

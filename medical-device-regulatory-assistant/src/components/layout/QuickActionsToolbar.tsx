@@ -1,8 +1,5 @@
 'use client';
 
-import React from 'react';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import {
   Search,
   BarChart3,
@@ -11,6 +8,10 @@ import {
   Zap,
   Tooltip,
 } from 'lucide-react';
+import React from 'react';
+
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 interface QuickActionsToolbarProps {

@@ -128,7 +128,7 @@ module.exports = async () => {
     hookErrors: [],
     renderErrors: [],
 
-    trackError: function (type, error, context = {}) {
+    trackError (type, error, context = {}) {
       const errorEntry = {
         type,
         message: error.message,
@@ -143,10 +143,10 @@ module.exports = async () => {
         errorEntry.individualErrors = error.errors?.map((e) => e.message) || [];
       }
 
-      this[type + 'Errors'].push(errorEntry);
+      this[`${type  }Errors`].push(errorEntry);
     },
 
-    getSummary: function () {
+    getSummary () {
       return {
         setup: this.setupErrors.length,
         aggregate: this.aggregateErrors.length,
@@ -160,7 +160,7 @@ module.exports = async () => {
       };
     },
 
-    clear: function () {
+    clear () {
       this.setupErrors = [];
       this.aggregateErrors = [];
       this.hookErrors = [];
@@ -204,11 +204,11 @@ module.exports = async () => {
     startTime: setupStartTime,
     phases: {},
 
-    markPhase: function (phaseName) {
+    markPhase (phaseName) {
       this.phases[phaseName] = performance.now() - this.startTime;
     },
 
-    getSetupTime: function () {
+    getSetupTime () {
       return performance.now() - this.startTime;
     },
   };
@@ -226,11 +226,11 @@ module.exports = async () => {
     aggregateErrorSupport: true,
     newJSXTransform: true,
 
-    isFeatureEnabled: function (feature) {
+    isFeatureEnabled (feature) {
       return this[feature] === true;
     },
 
-    getEnabledFeatures: function () {
+    getEnabledFeatures () {
       return Object.keys(this).filter(
         (key) => typeof this[key] === 'boolean' && this[key] === true
       );
@@ -244,14 +244,14 @@ module.exports = async () => {
     registeredMocks: new Map(),
     cleanupFunctions: new Set(),
 
-    registerMock: function (name, mock, cleanup) {
+    registerMock (name, mock, cleanup) {
       this.registeredMocks.set(name, mock);
       if (cleanup && typeof cleanup === 'function') {
         this.cleanupFunctions.add(cleanup);
       }
     },
 
-    clearAllMocks: function () {
+    clearAllMocks () {
       this.registeredMocks.clear();
       this.cleanupFunctions.forEach((cleanup) => {
         try {
@@ -263,7 +263,7 @@ module.exports = async () => {
       this.cleanupFunctions.clear();
     },
 
-    getMockCount: function () {
+    getMockCount () {
       return this.registeredMocks.size;
     },
   };

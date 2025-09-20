@@ -1,5 +1,5 @@
-import { NextRequest } from 'next/server';
 import { CopilotRuntime, OpenAIAdapter } from '@copilotkit/runtime';
+import { NextRequest } from 'next/server';
 
 // Backend API configuration
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:8000';
@@ -29,7 +29,7 @@ async function callBackendAgent(
           projectContext?.deviceDescription || parameters.deviceDescription,
         intended_use: projectContext?.intendedUse || parameters.intendedUse,
         device_type: projectContext?.deviceType || parameters.deviceType,
-        parameters: parameters,
+        parameters,
       }),
     });
 
@@ -354,13 +354,13 @@ const copilotKit = new CopilotRuntime({
           'guidance_search',
           {
             device_type: deviceType,
-            topic: topic,
+            topic,
           },
           {
             projectId: projectId || 'copilot-session',
             deviceDescription: deviceDescription || `${deviceType} device`,
             intendedUse: intendedUse || `Medical device of type: ${deviceType}`,
-            deviceType: deviceType,
+            deviceType,
           }
         );
 

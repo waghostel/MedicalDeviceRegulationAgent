@@ -47,7 +47,7 @@ class TestMonitor {
       timestamp: new Date().toISOString(),
       commit: this.getGitCommit(),
       branch: this.getGitBranch(),
-      results: results,
+      results,
       metrics: this.calculateMetrics(results),
     };
 

@@ -13,7 +13,7 @@ import {
 describe('TestFailureAnalyzer', () => {
   beforeEach(() => {
     // Clear any existing failure history
-    testFailureAnalyzer['failureHistory'] = [];
+    testFailureAnalyzer.failureHistory = [];
   });
 
   describe('analyzeFailure', () => {
@@ -288,7 +288,7 @@ describe('TestFailureAnalyzer', () => {
         );
       }
 
-      const history = testFailureAnalyzer['failureHistory'];
+      const history = testFailureAnalyzer.failureHistory;
       expect(history).toHaveLength(50);
 
       // Should contain the most recent failures

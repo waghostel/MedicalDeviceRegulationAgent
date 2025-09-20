@@ -3,9 +3,9 @@
  * Tests based on success metrics from requirements document
  */
 
+import { jest } from '@jest/globals';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { jest } from '@jest/globals';
 
 // Mock the entire Next.js router
 jest.mock('next/router', () => ({

@@ -1,10 +1,10 @@
-import React from 'react';
 import { render, screen } from '@testing-library/react';
+import React from 'react';
+
 import { Breadcrumb, BreadcrumbItem } from '../Breadcrumb';
 
 // Mock Next.js Link component
-jest.mock('next/link', () => {
-  return function MockLink({
+jest.mock('next/link', () => function MockLink({
     children,
     href,
   }: {
@@ -12,8 +12,7 @@ jest.mock('next/link', () => {
     href: string;
   }) {
     return <a href={href}>{children}</a>;
-  };
-});
+  });
 
 describe('Breadcrumb', () => {
   const mockItems: BreadcrumbItem[] = [

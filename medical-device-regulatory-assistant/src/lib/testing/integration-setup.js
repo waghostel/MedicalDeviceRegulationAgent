@@ -6,15 +6,15 @@
 // Simple mock setup for integration tests
 beforeAll(async () => {
   // Setup basic fetch mocking
-  global.fetch = jest.fn().mockImplementation(async (url, options = {}) => {
+  global.fetch = jest.fn().mockImplementation(async (url, options = {}) => 
     // Default mock response
-    return new Response(JSON.stringify({ message: 'Mock API response' }), {
+     new Response(JSON.stringify({ message: 'Mock API response' }), {
       status: 200,
       headers: {
         'Content-Type': 'application/json',
       },
-    });
-  });
+    })
+  );
 });
 
 // Reset between tests

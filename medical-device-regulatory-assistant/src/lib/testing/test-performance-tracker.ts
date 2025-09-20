@@ -7,9 +7,9 @@
  * - 5.2: Consistent results across multiple runs
  */
 
-import { performance } from 'perf_hooks';
 import { writeFileSync, existsSync, readFileSync, mkdirSync } from 'fs';
 import { join } from 'path';
+import { performance } from 'perf_hooks';
 
 export interface TestExecutionMetrics {
   testName: string;
@@ -97,11 +97,15 @@ export class TestPerformanceTracker {
   > = new Map();
 
   private completedTests: TestExecutionMetrics[] = [];
+
   private suiteStartTimes: Map<string, number> = new Map();
+
   private suiteMetrics: Map<string, SuitePerformanceMetrics> = new Map();
 
   private readonly thresholds: PerformanceThresholds;
+
   private readonly reportDir: string;
+
   private readonly historyFile: string;
 
   constructor(thresholds?: Partial<PerformanceThresholds>) {
@@ -411,7 +415,7 @@ export class TestPerformanceTracker {
       executionTimes.reduce((sum, time) => sum + time, 0) /
       executionTimes.length;
     const variance =
-      executionTimes.reduce((sum, time) => sum + Math.pow(time - mean, 2), 0) /
+      executionTimes.reduce((sum, time) => sum + (time - mean)**2, 0) /
       executionTimes.length;
     const standardDeviation = Math.sqrt(variance);
     const coefficientOfVariation = standardDeviation / mean;
@@ -642,11 +646,7 @@ export function withPerformanceTracking(suiteName: string) {
       console.log(getPerformanceTracker().getPerformanceSummary());
       return metrics;
     },
-    beforeEach: (testName: string) => {
-      return getPerformanceTracker().startTest(testName, suiteName);
-    },
-    afterEach: (testId: string, status: 'passed' | 'failed' | 'skipped') => {
-      return getPerformanceTracker().endTest(testId, status);
-    },
+    beforeEach: (testName: string) => getPerformanceTracker().startTest(testName, suiteName),
+    afterEach: (testId: string, status: 'passed' | 'failed' | 'skipped') => getPerformanceTracker().endTest(testId, status),
   };
 }

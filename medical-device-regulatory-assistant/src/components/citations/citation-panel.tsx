@@ -1,6 +1,5 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
 import {
   ChevronRight,
   ChevronDown,
@@ -8,12 +7,15 @@ import {
   Settings,
   RefreshCw,
 } from 'lucide-react';
+import React, { useState, useMemo } from 'react';
+
 import { Button } from '@/components/ui/button';
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   Select,
   SelectContent,
@@ -21,12 +23,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { SourceCitation } from '@/types/copilot';
+
 import { CitationCard } from './citation-card';
-import { CitationSearch } from './citation-search';
 import { CitationExporter } from './citation-exporter';
+import { CitationSearch } from './citation-search';
 import { CitationFormat, validateSourceUrl } from './citation-utils';
 
 interface CitationPanelProps {
@@ -38,14 +40,14 @@ interface CitationPanelProps {
   className?: string;
 }
 
-export function CitationPanel({
+export const CitationPanel = ({
   citations,
   isOpen = true,
   onToggle,
   projectName = 'Current Project',
   onRefresh,
   className = '',
-}: CitationPanelProps) {
+}: CitationPanelProps) => {
   const [filteredCitations, setFilteredCitations] =
     useState<SourceCitation[]>(citations);
   const [citationFormat, setCitationFormat] = useState<CitationFormat>('APA');

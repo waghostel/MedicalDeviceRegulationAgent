@@ -3,7 +3,10 @@
  * Tests the effectiveness of frontend optimizations
  */
 
+import { useState, useCallback } from 'react';
+
 import { performanceMonitor } from './optimization';
+
 
 interface PerformanceTestResult {
   testName: string;
@@ -149,7 +152,7 @@ class PerformanceTestRunner {
     };
 
     if ('memory' in performance) {
-      const memory = (performance as any).memory;
+      const {memory} = (performance as any);
 
       // Test heap usage
       const heapUsage = (memory.usedJSHeapSize / memory.jsHeapSizeLimit) * 100;
@@ -411,9 +414,7 @@ class PerformanceTestRunner {
     const jsResources = resources.filter((r) => r.name.includes('.js'));
 
     return (
-      jsResources.reduce((total, resource) => {
-        return total + (resource.transferSize || 0);
-      }, 0) / 1024
+      jsResources.reduce((total, resource) => total + (resource.transferSize || 0), 0) / 1024
     ); // Convert to KB
   }
 
@@ -509,5 +510,3 @@ export function usePerformanceTest() {
     generateReport: () => performanceTestRunner.generateReport(),
   };
 }
-
-import { useState, useCallback } from 'react';

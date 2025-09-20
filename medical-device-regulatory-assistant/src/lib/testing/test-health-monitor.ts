@@ -3,9 +3,9 @@
  * Requirements: 5.2, 8.1, 8.2
  */
 
-import { performance } from 'perf_hooks';
 import * as fs from 'fs/promises';
 import * as path from 'path';
+import { performance } from 'perf_hooks';
 
 export interface TestHealthMetrics {
   passRate: number;
@@ -91,8 +91,11 @@ export interface HealthReport {
 
 export class TestHealthMonitor {
   private thresholds: TestHealthThresholds;
+
   private metricsHistory: TestHealthMetrics[] = [];
+
   private startTime: number = 0;
+
   private memoryBaseline: number = 0;
 
   constructor(thresholds?: Partial<TestHealthThresholds>) {

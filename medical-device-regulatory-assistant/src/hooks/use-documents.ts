@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
+
 import { Document, DocumentTreeNode, MentionItem } from '@/types/document';
 
 // Mock data for development - in production this would connect to a backend
@@ -106,15 +107,12 @@ export function useDocuments(projectId: string) {
   }, []);
 
   const getDocument = useCallback(
-    (id: string): Document | undefined => {
-      return documents.find((doc) => doc.id === id);
-    },
+    (id: string): Document | undefined => documents.find((doc) => doc.id === id),
     [documents]
   );
 
   const getDocumentTree = useCallback((): DocumentTreeNode[] => {
-    const buildTree = (parentId?: string): DocumentTreeNode[] => {
-      return documents
+    const buildTree = (parentId?: string): DocumentTreeNode[] => documents
         .filter((doc) => doc.parentId === parentId)
         .map((doc) => ({
           id: doc.id,
@@ -124,13 +122,11 @@ export function useDocuments(projectId: string) {
           parentId: doc.parentId,
           children: doc.isFolder ? buildTree(doc.id) : undefined,
         }));
-    };
 
     return buildTree();
   }, [documents]);
 
-  const getMentionItems = useCallback((): MentionItem[] => {
-    return documents
+  const getMentionItems = useCallback((): MentionItem[] => documents
       .filter((doc) => !doc.isFolder)
       .map((doc) => ({
         id: doc.id,
@@ -141,8 +137,7 @@ export function useDocuments(projectId: string) {
           type: doc.type,
           updatedAt: doc.updatedAt,
         },
-      }));
-  }, [documents]);
+      })), [documents]);
 
   const searchDocuments = useCallback(
     (query: string): Document[] => {

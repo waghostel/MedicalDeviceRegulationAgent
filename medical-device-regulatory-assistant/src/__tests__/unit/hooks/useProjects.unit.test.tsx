@@ -5,9 +5,10 @@
 
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { useRouter } from 'next/navigation';
+
 import { useProjects, useProject, useProjectStats } from '@/hooks/use-projects';
-import { projectService } from '@/lib/services/project-service';
 import { toast } from '@/hooks/use-toast';
+import { projectService } from '@/lib/services/project-service';
 import {
   Project,
   ProjectStatus,

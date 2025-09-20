@@ -3,8 +3,9 @@
  * Validates mock debugging and analysis functionality
  */
 
-import { MockDebugger, DiagnosisReport, MockDiff } from '../MockDebugger';
 import { jest } from '@jest/globals';
+
+import { MockDebugger, DiagnosisReport, MockDiff } from '../MockDebugger';
 
 describe('MockDebugger', () => {
   let mockDebugger: MockDebugger;

@@ -129,9 +129,12 @@ const CompatibilityMatrixSchema = z.object({
 
 export class MockVersionManager {
   private versions: Map<string, Map<string, MockVersion>> = new Map(); // mockName -> version -> MockVersion
+
   private config: VersionManagerConfig;
+
   private compatibilityCache: Map<string, VersionCompatibilityResult> =
     new Map();
+
   private migrationCache: Map<string, MigrationPath> = new Map();
 
   constructor(config?: Partial<VersionManagerConfig>) {

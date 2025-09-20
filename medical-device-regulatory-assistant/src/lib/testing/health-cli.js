@@ -9,9 +9,9 @@
  * Requirements: 5.2 (consistent test results), 8.1 (CI environment success >90% pass rate)
  */
 
-const { getTestHealthMonitor } = require('./test-health-monitor');
 const { writeFileSync, existsSync } = require('fs');
 const { join } = require('path');
+const { getTestHealthMonitor } = require('./test-health-monitor');
 
 function printUsage() {
   console.log(`

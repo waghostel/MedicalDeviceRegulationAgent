@@ -5,7 +5,10 @@
  * including memory cache, localStorage cache, and API response caching.
  */
 
+import { useState, useEffect, useCallback } from 'react';
+
 import { performanceMonitor } from './optimization';
+
 
 // Generic cache interface
 interface CacheEntry<T> {
@@ -24,7 +27,9 @@ interface CacheOptions {
 // In-memory cache implementation
 export class MemoryCache<T = any> {
   private cache = new Map<string, CacheEntry<T>>();
+
   private maxSize: number;
+
   private defaultTTL: number;
 
   constructor(options: CacheOptions = {}) {
@@ -141,7 +146,9 @@ export class MemoryCache<T = any> {
 // Persistent cache using localStorage
 export class PersistentCache<T = any> {
   private prefix: string;
+
   private defaultTTL: number;
+
   private maxSize: number;
 
   constructor(prefix: string = 'app_cache', options: CacheOptions = {}) {
@@ -302,7 +309,9 @@ export class PersistentCache<T = any> {
 // API response cache with automatic invalidation
 export class APICache {
   private memoryCache: MemoryCache<any>;
+
   private persistentCache: PersistentCache<any>;
+
   private pendingRequests = new Map<string, Promise<any>>();
 
   constructor() {
@@ -496,6 +505,7 @@ export function useCachedData<T>(
 // Cache warming utilities
 export class CacheWarmer {
   private static instance: CacheWarmer;
+
   private warmupTasks: Array<() => Promise<void>> = [];
 
   static getInstance(): CacheWarmer {
@@ -561,5 +571,3 @@ export function getCacheSize(): { memory: number; persistent: number } {
     persistent: persistentSize,
   };
 }
-
-import { useState, useEffect, useCallback } from 'react';

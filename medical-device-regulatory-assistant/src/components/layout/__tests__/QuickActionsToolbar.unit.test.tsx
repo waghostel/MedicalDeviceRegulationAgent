@@ -3,12 +3,14 @@
  * Tests quick action buttons, keyboard shortcuts, and callback handling
  */
 
-import React from 'react';
 import { screen, fireEvent } from '@testing-library/react';
+import React from 'react';
+
 import {
   renderWithProviders,
   createMockSession,
 } from '@/lib/testing/test-utils';
+
 import { QuickActionsToolbar } from '../QuickActionsToolbar';
 
 describe('QuickActionsToolbar Component', () => {

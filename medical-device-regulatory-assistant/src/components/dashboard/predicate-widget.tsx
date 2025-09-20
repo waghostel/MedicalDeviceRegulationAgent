@@ -6,19 +6,6 @@
 
 'use client';
 
-import React, { useState } from 'react';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   CheckCircle,
   Clock,
@@ -31,6 +18,20 @@ import {
   FileText,
   TrendingUp,
 } from 'lucide-react';
+import React, { useState } from 'react';
+
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { usePredicates } from '@/hooks/use-predicates';
 
 interface PredicateWidgetProps {
@@ -38,10 +39,10 @@ interface PredicateWidgetProps {
   autoRefresh?: boolean;
 }
 
-export function PredicateWidget({
+export const PredicateWidget = ({
   projectId,
   autoRefresh = false,
-}: PredicateWidgetProps) {
+}: PredicateWidgetProps) => {
   const {
     predicates,
     selectedPredicates,

@@ -4,13 +4,14 @@
  */
 
 import { useEffect, useRef, useState, useCallback } from 'react';
-import { WebSocketMessage } from '@/types/project';
+
 import {
   WebSocketService,
   ConnectionStatus,
   MessageHandler,
   getWebSocketService,
 } from '@/lib/services/websocket-service';
+import { WebSocketMessage } from '@/types/project';
 
 // Enhanced WebSocket state interface
 interface WebSocketState {
@@ -148,9 +149,7 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
   }, []);
 
   const sendMessage = useCallback(
-    <T = any>(message: WebSocketMessage<T>): boolean => {
-      return serviceRef.current?.sendMessage(message) || false;
-    },
+    <T = any>(message: WebSocketMessage<T>): boolean => serviceRef.current?.sendMessage(message) || false,
     []
   );
 
@@ -158,9 +157,7 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
     <T = any>(
       messageType: string,
       handler: MessageHandler<T>
-    ): (() => void) => {
-      return serviceRef.current?.subscribe(messageType, handler) || (() => {});
-    },
+    ): (() => void) => serviceRef.current?.subscribe(messageType, handler) || (() => {}),
     []
   );
 
@@ -221,12 +218,10 @@ export function useRealtimeMessaging() {
   }, []);
 
   // Cleanup subscriptions on unmount
-  useEffect(() => {
-    return () => {
+  useEffect(() => () => {
       subscriptionsRef.current.forEach((unsub) => unsub());
       subscriptionsRef.current.clear();
-    };
-  }, []);
+    }, []);
 
   return {
     ...websocket,
@@ -649,24 +644,18 @@ export function useTypingIndicators() {
   );
 
   const isUserTyping = useCallback(
-    (userId: string, projectId?: number): boolean => {
-      return typingUsers.some(
+    (userId: string, projectId?: number): boolean => typingUsers.some(
         (u) =>
           u.userId === userId &&
           (projectId === undefined || u.projectId === projectId)
-      );
-    },
+      ),
     [typingUsers]
   );
 
-  const getOnlineUsers = useCallback(() => {
-    return Array.from(userPresence.values()).filter((user) => user.isOnline);
-  }, [userPresence]);
+  const getOnlineUsers = useCallback(() => Array.from(userPresence.values()).filter((user) => user.isOnline), [userPresence]);
 
   const getUsersTypingInProject = useCallback(
-    (projectId: number) => {
-      return typingUsers.filter((u) => u.projectId === projectId);
-    },
+    (projectId: number) => typingUsers.filter((u) => u.projectId === projectId),
     [typingUsers]
   );
 

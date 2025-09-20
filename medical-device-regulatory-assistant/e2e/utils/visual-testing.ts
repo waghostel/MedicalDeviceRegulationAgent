@@ -318,8 +318,7 @@ export class CrossBrowserTester {
    * Test JavaScript API compatibility
    */
   async testJavaScriptAPIs(): Promise<void> {
-    const apiSupport = await this.page.evaluate(() => {
-      return {
+    const apiSupport = await this.page.evaluate(() => ({
         fetch: typeof fetch !== 'undefined',
         intersectionObserver: typeof IntersectionObserver !== 'undefined',
         resizeObserver: typeof ResizeObserver !== 'undefined',
@@ -328,8 +327,7 @@ export class CrossBrowserTester {
           typeof HTMLElement.prototype.attachShadow !== 'undefined',
         es6Modules: typeof Symbol !== 'undefined',
         asyncAwait: (async () => true)() instanceof Promise,
-      };
-    });
+      }));
 
     // Verify critical APIs are available
     expect(apiSupport.fetch).toBe(true);
@@ -407,8 +405,7 @@ export class VisualPerformanceTester {
    * Test layout stability (CLS)
    */
   async measureLayoutStability(): Promise<number> {
-    return await this.page.evaluate(() => {
-      return new Promise<number>((resolve) => {
+    return await this.page.evaluate(() => new Promise<number>((resolve) => {
         let clsValue = 0;
 
         const observer = new PerformanceObserver((list) => {
@@ -428,7 +425,6 @@ export class VisualPerformanceTester {
           observer.disconnect();
           resolve(clsValue);
         }, 5000);
-      });
-    });
+      }));
   }
 }

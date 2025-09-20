@@ -84,7 +84,7 @@ function isErrorWithName(error: unknown): error is { name: string; code?: string
 `;
 
   // Insert type guards at the top of the file
-  content = content.replace(/^(import.*\n)*\n*/, '$&' + typeGuardCode);
+  content = content.replace(/^(import.*\n)*\n*/, `$&${  typeGuardCode}`);
 
   // Replace error property access with type guards
   content = content.replace(

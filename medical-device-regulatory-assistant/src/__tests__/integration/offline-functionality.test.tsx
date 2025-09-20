@@ -5,6 +5,7 @@
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { rest } from 'msw';
 import { setupServer } from 'msw/node';
+
 import { useOffline, useOfflineApi } from '@/hooks/use-offline';
 import { useProjects } from '@/hooks/use-projects';
 import { ProjectStatus } from '@/types/project';
@@ -31,8 +32,7 @@ jest.mock('@/hooks/use-toast', () => ({
 
 // Mock server setup
 const server = setupServer(
-  rest.get('/api/projects', (req, res, ctx) => {
-    return res(
+  rest.get('/api/projects', (req, res, ctx) => res(
       ctx.json([
         {
           id: 1,
@@ -45,11 +45,9 @@ const server = setupServer(
           updated_at: '2024-01-01T00:00:00Z',
         },
       ])
-    );
-  }),
+    )),
 
-  rest.post('/api/projects', (req, res, ctx) => {
-    return res(
+  rest.post('/api/projects', (req, res, ctx) => res(
       ctx.json({
         id: 2,
         name: 'New Project',
@@ -60,11 +58,9 @@ const server = setupServer(
         created_at: '2024-01-01T00:00:00Z',
         updated_at: '2024-01-01T00:00:00Z',
       })
-    );
-  }),
+    )),
 
-  rest.put('/api/projects/:id', (req, res, ctx) => {
-    return res(
+  rest.put('/api/projects/:id', (req, res, ctx) => res(
       ctx.json({
         id: parseInt(req.params.id as string),
         name: 'Updated Project',
@@ -75,12 +71,9 @@ const server = setupServer(
         created_at: '2024-01-01T00:00:00Z',
         updated_at: '2024-01-01T01:00:00Z',
       })
-    );
-  }),
+    )),
 
-  rest.delete('/api/projects/:id', (req, res, ctx) => {
-    return res(ctx.json({ message: 'Project deleted' }));
-  })
+  rest.delete('/api/projects/:id', (req, res, ctx) => res(ctx.json({ message: 'Project deleted' })))
 );
 
 beforeAll(() => server.listen());
@@ -275,9 +268,7 @@ describe('Offline Functionality Tests', () => {
 
     test('should discard actions after max retries', async () => {
       server.use(
-        rest.post('/api/projects', (req, res, ctx) => {
-          return res(ctx.status(500), ctx.json({ error: 'Persistent error' }));
-        })
+        rest.post('/api/projects', (req, res, ctx) => res(ctx.status(500), ctx.json({ error: 'Persistent error' })))
       );
 
       const { result } = renderHook(() =>
@@ -471,9 +462,7 @@ describe('Offline Functionality Tests', () => {
         }),
 
         // Update succeeds
-        rest.put('/api/projects/1', (req, res, ctx) => {
-          return res(ctx.json({ id: 1, name: 'Updated' }));
-        })
+        rest.put('/api/projects/1', (req, res, ctx) => res(ctx.json({ id: 1, name: 'Updated' })))
       );
 
       const { result } = renderHook(() =>

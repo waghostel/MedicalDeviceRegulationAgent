@@ -3,6 +3,9 @@
  * Compares performance between mock and real data implementations
  */
 
+// Add React import
+import React from 'react';
+
 export interface ABTestMetric {
   testId: string;
   variant: 'mock' | 'real';
@@ -66,7 +69,9 @@ export interface ABTestResult {
  */
 export class ABTestManager {
   private metrics: ABTestMetric[] = [];
+
   private tests: Map<string, ABTestConfiguration> = new Map();
+
   private sessionId: string;
 
   constructor() {
@@ -254,7 +259,7 @@ export class ABTestManager {
     const mean = values.reduce((sum, val) => sum + val, 0) / values.length;
     const median = sorted[Math.floor(sorted.length / 2)];
     const variance =
-      values.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) /
+      values.reduce((sum, val) => sum + (val - mean)**2, 0) /
       values.length;
     const standardDeviation = Math.sqrt(variance);
     const percentile95Index = Math.floor(sorted.length * 0.95);
@@ -293,13 +298,13 @@ export class ABTestManager {
 
     const mockVariance =
       mockRenderTimes.reduce(
-        (sum, val) => sum + Math.pow(val - mockMean, 2),
+        (sum, val) => sum + (val - mockMean)**2,
         0
       ) /
       (mockRenderTimes.length - 1);
     const realVariance =
       realRenderTimes.reduce(
-        (sum, val) => sum + Math.pow(val - realMean, 2),
+        (sum, val) => sum + (val - realMean)**2,
         0
       ) /
       (realRenderTimes.length - 1);
@@ -425,9 +430,7 @@ export function useABTest(testId: string, component: string) {
     setIsRecording(false);
   }, []);
 
-  const getResults = React.useCallback(() => {
-    return abTestManager.analyzeTest(testId);
-  }, [testId, abTestManager]);
+  const getResults = React.useCallback(() => abTestManager.analyzeTest(testId), [testId, abTestManager]);
 
   return {
     recordMetric,
@@ -437,9 +440,6 @@ export function useABTest(testId: string, component: string) {
     getResults,
   };
 }
-
-// Add React import
-import React from 'react';
 
 /**
  * Performance monitoring hook for A/B testing

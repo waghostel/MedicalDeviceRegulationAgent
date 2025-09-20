@@ -1,9 +1,5 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import {
   HelpCircle,
   Info,
@@ -13,6 +9,11 @@ import {
   BookOpen,
   AlertTriangle,
 } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 
 interface TooltipProps {

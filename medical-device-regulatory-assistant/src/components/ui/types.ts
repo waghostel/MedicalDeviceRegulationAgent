@@ -3,8 +3,8 @@
  * Ensures proper type checking and IntelliSense support
  */
 
-import * as React from 'react';
 import { VariantProps } from 'class-variance-authority';
+import * as React from 'react';
 
 // Button component types
 export interface ButtonProps

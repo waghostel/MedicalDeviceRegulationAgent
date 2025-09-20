@@ -4,6 +4,7 @@
  */
 
 import { Database } from 'sqlite3';
+
 import {
   DatabaseSeed,
   generateDatabaseSeed,
@@ -468,9 +469,7 @@ export const closeTestDatabase = async (): Promise<void> => {
 /**
  * Get current test database instance
  */
-export const getTestDatabase = (): TestDatabase | null => {
-  return testDatabase;
-};
+export const getTestDatabase = (): TestDatabase | null => testDatabase;
 
 /**
  * Execute raw SQL query on test database

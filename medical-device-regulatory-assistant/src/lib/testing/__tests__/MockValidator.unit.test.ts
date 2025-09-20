@@ -3,12 +3,13 @@
  * Validates mock validation system functionality
  */
 
+import { jest } from '@jest/globals';
+
 import {
   MockValidator,
   ValidationResult,
   ValidationError,
 } from '../MockValidator';
-import { jest } from '@jest/globals';
 
 describe('MockValidator', () => {
   let validator: MockValidator;
@@ -177,7 +178,7 @@ describe('MockValidator', () => {
     it('should warn about missing test ID', () => {
       const mockWithoutTestId = jest.fn((props) => ({
         type: 'input',
-        props: props,
+        props,
       }));
 
       const result = validator.validateComponentMock(

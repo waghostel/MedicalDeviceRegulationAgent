@@ -4,6 +4,7 @@
  */
 
 import { useEffect, useRef, useState, useCallback } from 'react';
+
 import { useWebSocket } from './use-websocket';
 
 export interface UserPresence {
@@ -264,16 +265,12 @@ export function useUserPresence({
     }, heartbeatInterval);
   }, [websocket, userId, projectId, heartbeatInterval]);
 
-  const getOnlineUsers = useCallback(() => {
-    return Array.from(users.values()).filter((user) => user.isOnline);
-  }, [users]);
+  const getOnlineUsers = useCallback(() => Array.from(users.values()).filter((user) => user.isOnline), [users]);
 
   const getUsersInProject = useCallback(
-    (targetProjectId: number) => {
-      return Array.from(users.values()).filter(
+    (targetProjectId: number) => Array.from(users.values()).filter(
         (user) => user.isOnline && user.currentProject === targetProjectId
-      );
-    },
+      ),
     [users]
   );
 

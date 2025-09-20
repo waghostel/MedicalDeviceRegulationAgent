@@ -104,7 +104,7 @@ export function setupJestPerformanceTracking(): void {
     try {
       const report = tracker.generateReport();
 
-      console.log('\n' + '='.repeat(60));
+      console.log(`\n${  '='.repeat(60)}`);
       console.log('📊 FINAL PERFORMANCE REPORT');
       console.log('='.repeat(60));
       console.log(tracker.getPerformanceSummary());

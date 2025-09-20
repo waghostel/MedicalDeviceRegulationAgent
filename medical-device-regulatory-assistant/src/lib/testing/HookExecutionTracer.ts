@@ -136,10 +136,15 @@ export type HookErrorType =
 
 export class HookExecutionTracer {
   private static instance: HookExecutionTracer;
+
   private activeTraces: Map<string, HookExecutionTrace> = new Map();
+
   private completedTraces: HookExecutionTrace[] = [];
+
   private hookInterceptors: Map<string, HookInterceptor> = new Map();
+
   private renderCycleCounter = 0;
+
   private isTracingEnabled = false;
 
   constructor() {

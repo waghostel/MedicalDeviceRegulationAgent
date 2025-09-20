@@ -4,8 +4,9 @@
  * Task: B3.3 Add context mock validation
  */
 
-import React from 'react';
 import { render } from '@testing-library/react';
+import React from 'react';
+
 import {
   ContextMockValidator,
   createContextMockValidator,

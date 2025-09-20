@@ -40,7 +40,7 @@ class CIPipelineValidator {
   }
 
   logSection(title) {
-    console.log('\n' + '='.repeat(70));
+    console.log(`\n${  '='.repeat(70)}`);
     this.log(`${COLORS.BOLD}${title}${COLORS.RESET}`, COLORS.BLUE);
     console.log('='.repeat(70));
   }

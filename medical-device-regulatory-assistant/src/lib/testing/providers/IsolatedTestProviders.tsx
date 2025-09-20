@@ -5,6 +5,7 @@
  * This system ensures tests run in complete isolation without external provider dependencies.
  */
 
+import { Session } from 'next-auth';
 import React, {
   ReactNode,
   createContext,
@@ -13,7 +14,6 @@ import React, {
   useCallback,
   useMemo,
 } from 'react';
-import { Session } from 'next-auth';
 
 // ============================================================================
 // Session Provider Isolation
@@ -51,11 +51,11 @@ export const IsolatedSessionProvider: React.FC<
         setCurrentSession(data);
         setCurrentStatus('authenticated');
         return data;
-      } else {
+      } 
         setCurrentSession(null);
         setCurrentStatus('unauthenticated');
         return null;
-      }
+      
     },
     []
   );
@@ -252,9 +252,7 @@ export const IsolatedFormProvider: React.FC<IsolatedFormProviderProps> = ({
     setSubmitCount(0);
   }, [initialValues]);
 
-  const isValid = useMemo(() => {
-    return Object.values(fields).every((field) => !field.error);
-  }, [fields]);
+  const isValid = useMemo(() => Object.values(fields).every((field) => !field.error), [fields]);
 
   const value = useMemo(
     () => ({
@@ -440,9 +438,7 @@ export const IsolatedRouterProvider: React.FC<IsolatedRouterProviderProps> = ({
   }, []);
 
   const replace = useCallback(
-    async (url: string): Promise<boolean> => {
-      return push(url);
-    },
+    async (url: string): Promise<boolean> => push(url),
     [push]
   );
 
@@ -637,8 +633,7 @@ export const isolatedProviderManager = new IsolatedProviderManager();
 export const createIsolatedProviderPreset = (
   name: string,
   config: IsolatedProviderComposition
-) => {
-  return {
+) => ({
     name,
     config,
     apply: (children: ReactNode) => (
@@ -646,8 +641,7 @@ export const createIsolatedProviderPreset = (
         {children}
       </IsolatedTestProviders>
     ),
-  };
-};
+  });
 
 // Common presets
 export const isolatedProviderPresets = {

@@ -3,15 +3,16 @@
  * Tests rendering, interactions, loading states, and accessibility
  */
 
-import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import React from 'react';
+
 import {
   ProjectCard,
   ProjectCardSkeleton,
 } from '@/components/projects/project-card';
-import { Project, ProjectStatus } from '@/types/project';
 import { renderWithProviders } from '@/lib/testing/test-utils';
+import { Project, ProjectStatus } from '@/types/project';
 
 // Mock performance optimization hook
 jest.mock('@/lib/performance/optimization', () => ({

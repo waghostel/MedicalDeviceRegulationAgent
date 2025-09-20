@@ -3,6 +3,8 @@
  */
 
 // Mock the dependencies first
+import { useTypingIndicators } from '@/hooks/use-websocket';
+
 jest.mock('@/types/project', () => ({}));
 jest.mock('@/lib/services/websocket-service', () => ({
   getWebSocketService: jest.fn(() => ({
@@ -18,16 +20,21 @@ jest.mock('@/lib/services/websocket-service', () => ({
 // Mock WebSocket
 (global as any).WebSocket = class MockWebSocket {
   static CONNECTING = 0;
+
   static OPEN = 1;
+
   static CLOSING = 2;
+
   static CLOSED = 3;
+
   readyState = 0;
+
   constructor() {}
+
   send() {}
+
   close() {}
 };
-
-import { useTypingIndicators } from '@/hooks/use-websocket';
 
 describe('WebSocket Hook Exports', () => {
   it('should export useTypingIndicators function', () => {

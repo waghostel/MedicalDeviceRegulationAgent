@@ -25,10 +25,10 @@ const mockUseToast = jest.fn(() => ({
 describe('HookExecutionTracer', () => {
   beforeEach(() => {
     // Clear any existing traces
-    hookExecutionTracer['activeTraces'].clear();
-    hookExecutionTracer['completedTraces'] = [];
-    hookExecutionTracer['renderCycleCounter'] = 0;
-    hookExecutionTracer['isTracingEnabled'] = false;
+    hookExecutionTracer.activeTraces.clear();
+    hookExecutionTracer.completedTraces = [];
+    hookExecutionTracer.renderCycleCounter = 0;
+    hookExecutionTracer.isTracingEnabled = false;
 
     // Reset mocks
     jest.clearAllMocks();
@@ -39,8 +39,8 @@ describe('HookExecutionTracer', () => {
       const executionId = hookExecutionTracer.startTracing('TestComponent');
 
       expect(executionId).toMatch(/TestComponent-\d+-\w+/);
-      expect(hookExecutionTracer['isTracingEnabled']).toBe(true);
-      expect(hookExecutionTracer['renderCycleCounter']).toBe(1);
+      expect(hookExecutionTracer.isTracingEnabled).toBe(true);
+      expect(hookExecutionTracer.renderCycleCounter).toBe(1);
 
       const trace = hookExecutionTracer.stopTracing(executionId);
 
@@ -48,7 +48,7 @@ describe('HookExecutionTracer', () => {
       expect(trace!.componentName).toBe('TestComponent');
       expect(trace!.status).toBe('COMPLETED');
       expect(trace!.duration).toBeGreaterThan(0);
-      expect(hookExecutionTracer['isTracingEnabled']).toBe(false);
+      expect(hookExecutionTracer.isTracingEnabled).toBe(false);
     });
 
     it('should return null when stopping non-existent trace', () => {
@@ -61,16 +61,16 @@ describe('HookExecutionTracer', () => {
       const id1 = hookExecutionTracer.startTracing('Component1');
       const id2 = hookExecutionTracer.startTracing('Component2');
 
-      expect(hookExecutionTracer['activeTraces'].size).toBe(2);
-      expect(hookExecutionTracer['isTracingEnabled']).toBe(true);
+      expect(hookExecutionTracer.activeTraces.size).toBe(2);
+      expect(hookExecutionTracer.isTracingEnabled).toBe(true);
 
       hookExecutionTracer.stopTracing(id1);
-      expect(hookExecutionTracer['activeTraces'].size).toBe(1);
-      expect(hookExecutionTracer['isTracingEnabled']).toBe(true);
+      expect(hookExecutionTracer.activeTraces.size).toBe(1);
+      expect(hookExecutionTracer.isTracingEnabled).toBe(true);
 
       hookExecutionTracer.stopTracing(id2);
-      expect(hookExecutionTracer['activeTraces'].size).toBe(0);
-      expect(hookExecutionTracer['isTracingEnabled']).toBe(false);
+      expect(hookExecutionTracer.activeTraces.size).toBe(0);
+      expect(hookExecutionTracer.isTracingEnabled).toBe(false);
     });
   });
 
@@ -99,7 +99,7 @@ describe('HookExecutionTracer', () => {
 
       expect(result).toEqual(['initial value', expect.any(Function)]);
       expect(mockUseState).toHaveBeenCalledWith('initial value');
-      expect(hookExecutionTracer['activeTraces'].size).toBe(0);
+      expect(hookExecutionTracer.activeTraces.size).toBe(0);
     });
 
     it('should handle hook execution errors', () => {
@@ -119,7 +119,7 @@ describe('HookExecutionTracer', () => {
       }).toThrow('Hook execution failed');
 
       // Should still create trace with error information
-      const traces = Array.from(hookExecutionTracer['activeTraces'].values());
+      const traces = Array.from(hookExecutionTracer.activeTraces.values());
       expect(traces).toHaveLength(1);
       expect(traces[0].status).toBe('ERROR');
       expect(traces[0].errors).toHaveLength(1);
@@ -135,7 +135,7 @@ describe('HookExecutionTracer', () => {
         [() => console.log('effect'), []]
       );
 
-      const traces = Array.from(hookExecutionTracer['activeTraces'].values());
+      const traces = Array.from(hookExecutionTracer.activeTraces.values());
       expect(traces[0].steps).toHaveLength(1);
       expect(traces[0].steps[0].stepType).toBe('INITIALIZATION');
       expect(traces[0].steps[0].description).toContain('useEffect');
@@ -294,7 +294,7 @@ describe('HookExecutionTracer', () => {
       // Mock a slow hook
       const slowHook = jest.fn(() => {
         // Simulate slow execution by manipulating the trace
-        const traces = Array.from(hookExecutionTracer['activeTraces'].values());
+        const traces = Array.from(hookExecutionTracer.activeTraces.values());
         if (traces.length > 0) {
           traces[0].performance.totalExecutionTime = 150; // > 100ms threshold
         }
@@ -333,7 +333,7 @@ describe('HookExecutionTracer', () => {
       );
 
       const category =
-        hookExecutionTracer['categorizeHookError'](invalidHookError);
+        hookExecutionTracer.categorizeHookError(invalidHookError);
       expect(category).toBe('INVALID_HOOK_CALL');
     });
 
@@ -342,21 +342,21 @@ describe('HookExecutionTracer', () => {
         'useEffect dependency array is missing dependencies'
       );
 
-      const category = hookExecutionTracer['categorizeHookError'](depError);
+      const category = hookExecutionTracer.categorizeHookError(depError);
       expect(category).toBe('DEPENDENCY_ERROR');
     });
 
     it('should categorize state update errors', () => {
       const stateError = new Error('Cannot update state during render');
 
-      const category = hookExecutionTracer['categorizeHookError'](stateError);
+      const category = hookExecutionTracer.categorizeHookError(stateError);
       expect(category).toBe('STATE_UPDATE_ERROR');
     });
 
     it('should categorize infinite loop errors', () => {
       const loopError = new Error('Maximum update depth exceeded');
 
-      const category = hookExecutionTracer['categorizeHookError'](loopError);
+      const category = hookExecutionTracer.categorizeHookError(loopError);
       expect(category).toBe('INFINITE_LOOP');
     });
   });
@@ -366,14 +366,14 @@ describe('HookExecutionTracer', () => {
       const invalidHookError = new Error('Invalid hook call');
 
       const isRecoverable =
-        hookExecutionTracer['isRecoverableError'](invalidHookError);
+        hookExecutionTracer.isRecoverableError(invalidHookError);
       expect(isRecoverable).toBe(false);
     });
 
     it('should identify recoverable errors', () => {
       const depError = new Error('useEffect dependency missing');
 
-      const isRecoverable = hookExecutionTracer['isRecoverableError'](depError);
+      const isRecoverable = hookExecutionTracer.isRecoverableError(depError);
       expect(isRecoverable).toBe(true);
     });
   });
@@ -399,7 +399,7 @@ describe('HookExecutionTracer', () => {
       ];
 
       testCases.forEach(({ error, expectedSuggestion }) => {
-        const suggestion = hookExecutionTracer['getErrorSuggestion'](error);
+        const suggestion = hookExecutionTracer.getErrorSuggestion(error);
         expect(suggestion).toBe(expectedSuggestion);
       });
     });
@@ -410,7 +410,7 @@ describe('HookExecutionTracer', () => {
       const executionId = hookExecutionTracer.startTracing('TestComponent');
 
       // Add some mock steps
-      const trace = hookExecutionTracer['activeTraces'].get(executionId);
+      const trace = hookExecutionTracer.activeTraces.get(executionId);
       if (trace) {
         trace.steps = [
           {
@@ -466,7 +466,7 @@ describe('HookExecutionTracer', () => {
         hookExecutionTracer.stopTracing(id);
       }
 
-      const completedTraces = hookExecutionTracer['completedTraces'];
+      const {completedTraces} = hookExecutionTracer;
       expect(completedTraces).toHaveLength(100);
 
       // Should contain the most recent traces
@@ -479,7 +479,7 @@ describe('HookExecutionTracer', () => {
 
   describe('call stack capture', () => {
     it('should capture call stack information', () => {
-      const callStack = hookExecutionTracer['captureCallStack']();
+      const callStack = hookExecutionTracer.captureCallStack();
 
       expect(callStack).toBeInstanceOf(Array);
       expect(callStack.length).toBeGreaterThan(0);
@@ -498,7 +498,7 @@ describe('HookExecutionTracer', () => {
         errors: [],
       } as any;
 
-      const score = hookExecutionTracer['calculatePerformanceScore'](mockTrace);
+      const score = hookExecutionTracer.calculatePerformanceScore(mockTrace);
       expect(score).toBe(100); // Perfect score
     });
 
@@ -512,7 +512,7 @@ describe('HookExecutionTracer', () => {
         errors: [{ type: 'PERFORMANCE_WARNING' }],
       } as any;
 
-      const score = hookExecutionTracer['calculatePerformanceScore'](mockTrace);
+      const score = hookExecutionTracer.calculatePerformanceScore(mockTrace);
       expect(score).toBeLessThan(100);
       expect(score).toBeGreaterThan(0);
     });

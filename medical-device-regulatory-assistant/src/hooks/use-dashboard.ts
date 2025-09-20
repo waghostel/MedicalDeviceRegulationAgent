@@ -3,8 +3,9 @@
  */
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { useWebSocket } from '@/hooks/use-websocket';
+
 import { useToast } from '@/hooks/use-toast';
+import { useWebSocket } from '@/hooks/use-websocket';
 import { projectService } from '@/lib/services/project-service';
 import { DashboardData, DashboardUpdate } from '@/types/dashboard';
 
@@ -74,7 +75,7 @@ export function useDashboard({
           classification: dashboardData.classification || undefined,
           predicateDevices: dashboardData.predicate_devices || [],
           progress: dashboardData.progress || {
-            projectId: projectId,
+            projectId,
             classification: { status: 'pending' },
             predicateSearch: { status: 'pending' },
             comparisonAnalysis: { status: 'pending' },

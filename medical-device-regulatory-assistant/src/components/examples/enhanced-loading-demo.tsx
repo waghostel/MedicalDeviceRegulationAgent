@@ -4,9 +4,7 @@
  */
 
 import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+
 import {
   EnhancedProgressBar,
   FormSubmissionProgress,
@@ -16,20 +14,21 @@ import {
   LoadingOverlay,
   LoadingSpinner,
   InlineLoader,
-} from '@/components/loading';
-import {
+
   ProjectListSkeleton,
   EnhancedFormSkeleton,
   BulkOperationsSkeleton,
-  ExportProgressSkeleton,
-} from '@/components/loading';
+  ExportProgressSkeleton} from '@/components/loading';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   useLoadingState,
   useFormSubmissionState,
   useBulkOperationState,
 } from '@/hooks/use-loading-state';
 
-export function EnhancedLoadingDemo() {
+export const EnhancedLoadingDemo = () => {
   const [showOverlay, setShowOverlay] = useState(false);
   const [progressValue, setProgressValue] = useState(45);
   const [showDataLoading, setShowDataLoading] = useState(false);

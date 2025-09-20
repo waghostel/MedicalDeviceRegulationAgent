@@ -6,6 +6,7 @@
  */
 
 import { performance } from 'perf_hooks';
+
 import { RenderResult } from '@testing-library/react';
 
 export interface TestPerformanceMetrics {
@@ -58,8 +59,11 @@ export class FrontendTestPerformanceMonitor {
   > = new Map();
 
   private performanceHistory: TestPerformanceMetrics[] = [];
+
   private memorySnapshots: MemorySnapshot[] = [];
+
   private thresholds: PerformanceThresholds;
+
   private mutationObserver?: MutationObserver;
 
   constructor(thresholds?: Partial<PerformanceThresholds>) {
@@ -168,7 +172,7 @@ export class FrontendTestPerformanceMonitor {
    */
   stopRenderMonitoring(monitorId: string, renderResult: RenderResult): void {
     const monitor = this.activeMonitors.get(monitorId);
-    if (monitor && monitor.renderStartTime) {
+    if (monitor?.renderStartTime) {
       const renderTime = performance.now() - monitor.renderStartTime;
       monitor.renderResult = renderResult;
 

@@ -2,9 +2,155 @@
 
 ## Overview
 
-This design addresses the critical test infrastructure failures affecting the enhanced form system. The solution involves a multi-layered approach to fix React 19 compatibility issues, correct hook mock configurations, and restore reliable test coverage for 70 currently failing tests.
+This design addresses the critical test infrastructure failures affecting the enhanced form system, with a primary focus on resolving ESLint/Prettier configuration issues that are blocking automated code quality improvements and development workflow.
 
-The design prioritizes infrastructure stability while maintaining backward compatibility with existing working tests (22 enhanced loading tests, 19 toast tests, and 1 basic ProjectForm test).
+The solution involves a multi-layered approach:
+1. **Phase 0**: Fix ESLint/Prettier configuration blocking issues (15,453 total issues, 0 auto-fixes applied)
+2. **Phase 1**: Apply automated code quality fixes (1,654+ auto-fixable issues)
+3. **Phase 2**: Fix React 19 compatibility issues and hook mock configurations
+4. **Phase 3**: Restore reliable test coverage for 70 currently failing tests
+
+The design prioritizes configuration fixes first to enable automated tooling, then infrastructure stability while maintaining backward compatibility with existing working tests (22 enhanced loading tests, 19 toast tests, and 1 basic ProjectForm test).
+
+### Critical Blocking Issues Identified
+
+**ESLint/Prettier Configuration Problems**:
+- Prettier fails to parse `pnpm-lock.yaml` (24,000+ lines) preventing all automated formatting
+- Jest globals not configured causing 8,500+ `no-undef` errors in test files
+- Dependency classification issues with testing libraries in wrong dependency categories
+- 1,654 auto-fixable issues blocked by configuration problems
+
+**Code Quality Issues**:
+- 13,616 errors and 1,837 warnings across 500+ files
+- Error density: 27.2 errors per 100 lines of code
+- Most problematic files in testing infrastructure with 150+ issues each
+
+**Detailed Issue Breakdown**:
+- **Jest/Testing Framework Issues**: 8,500+ occurrences of undefined Jest globals
+- **Import/Export Issues**: 2,000+ occurrences of dependency and import order problems
+- **TypeScript Configuration Issues**: 1,500+ occurrences of require() vs import and type safety
+- **Code Quality Issues**: 1,000+ occurrences of console statements, unused variables, complexity
+- **React/JSX Issues**: 500+ occurrences of component best practices violations
+
+**Most Problematic Files**:
+1. `src/lib/testing/test-utils.tsx` - 150+ issues
+2. `src/lib/testing/test-health-monitor.ts` - 100+ issues  
+3. `src/lib/testing/MockDebugger.ts` - 80+ issues
+4. `src/lib/testing/ComponentMockRegistry.ts` - 75+ issues
+5. `test_frontend_performance_monitor.js` - 70+ issues
+
+## ESLint/Prettier Infrastructure Design
+
+### Code Quality Pipeline Architecture
+
+```mermaid
+graph TB
+    subgraph "Phase 0: Configuration Fixes"
+        A[Fix Prettier Configuration]
+        B[Configure Jest Globals]
+        C[Fix Dependency Classifications]
+    end
+    
+    subgraph "Phase 1: Automated Fixes"
+        D[Apply ESLint Auto-fixes]
+        E[Convert require() to import]
+        F[Implement Nullish Coalescing]
+        G[Clean Up Unused Variables]
+        H[Remove Console Statements]
+        I[Fix React Best Practices]
+    end
+    
+    subgraph "Phase 2: Type Safety & Quality"
+        J[Improve TypeScript Types]
+        K[Reduce Code Complexity]
+        L[Fix Class Method Usage]
+        M[Standardize Import Patterns]
+    end
+    
+    subgraph "Validation & Monitoring"
+        N[ESLint Health Check]
+        O[Code Quality Metrics]
+        P[Performance Impact Analysis]
+    end
+    
+    A --> D
+    B --> D
+    C --> D
+    D --> E
+    E --> F
+    F --> G
+    G --> H
+    H --> I
+    I --> J
+    J --> K
+    K --> L
+    L --> M
+    M --> N
+    N --> O
+    O --> P
+```
+
+### ESLint Configuration Strategy
+
+```typescript
+interface ESLintConfigurationStrategy {
+  phase0: {
+    prettierIgnore: string[];
+    jestGlobals: JestGlobalConfig;
+    dependencyClassification: DependencyConfig;
+  };
+  phase1: {
+    autoFixableRules: string[];
+    requireToImportConversion: ConversionConfig;
+    nullishCoalescingRules: CoalescingConfig;
+  };
+  phase2: {
+    typeScriptRules: TypeScriptConfig;
+    complexityThresholds: ComplexityConfig;
+    importOrderRules: ImportConfig;
+  };
+}
+
+interface JestGlobalConfig {
+  testFilePatterns: string[];
+  globals: string[];
+  disabledRules: Record<string, string>;
+}
+
+interface ConversionConfig {
+  targetFiles: string[];
+  conversionPatterns: ConversionPattern[];
+  excludePatterns: string[];
+}
+```
+
+### Code Quality Metrics Tracking
+
+```typescript
+interface CodeQualityMetrics {
+  before: {
+    totalIssues: 15453;
+    errors: 13616;
+    warnings: 1837;
+    autoFixable: 1654;
+    errorDensity: 27.2; // per 100 lines
+  };
+  targets: {
+    totalIssues: number; // < 5000
+    errors: number; // < 2000
+    warnings: number; // < 1000
+    autoFixable: number; // 0
+    errorDensity: number; // < 5.0
+  };
+  tracking: {
+    jestGlobalErrors: number; // 8500+ -> 0
+    importExportIssues: number; // 2000+ -> <500
+    typeScriptIssues: number; // 1500+ -> <300
+    codeQualityIssues: number; // 1000+ -> <200
+    reactJsxIssues: number; // 500+ -> <100
+  };
+}
+```
 
 ## Architecture
 
@@ -106,6 +252,147 @@ sequenceDiagram
 ```
 
 ## Components and Interfaces
+
+### 0. ESLint/Prettier Configuration System (Phase 0)
+
+#### Prettier Configuration Enhancement
+
+```typescript
+interface PrettierConfiguration {
+  ignorePatterns: string[];
+  formatSettings: PrettierSettings;
+  crossPlatformSupport: boolean;
+}
+
+interface PrettierSettings {
+  semi: boolean;
+  trailingComma: 'es5' | 'all' | 'none';
+  singleQuote: boolean;
+  printWidth: number;
+  tabWidth: number;
+  useTabs: boolean;
+}
+
+// Enhanced .prettierignore configuration
+const prettierIgnorePatterns = [
+  'pnpm-lock.yaml',
+  '*.min.js',
+  '*.min.css',
+  'coverage/',
+  'dist/',
+  'build/',
+  '.next/',
+  'node_modules/',
+  '*.d.ts',
+  'public/static/',
+];
+```
+
+#### ESLint Configuration Enhancement
+
+```typescript
+interface ESLintConfiguration {
+  testFileConfiguration: TestFileConfig;
+  nodeFileConfiguration: NodeFileConfig;
+  globalConfiguration: GlobalConfig;
+  ruleOverrides: RuleOverrides;
+}
+
+interface TestFileConfig {
+  files: string[];
+  languageOptions: {
+    globals: Record<string, 'readonly' | 'writable'>;
+  };
+  rules: Record<string, 'off' | 'warn' | 'error'>;
+}
+
+// Enhanced ESLint configuration for Jest
+const jestConfiguration: TestFileConfig = {
+  files: [
+    '**/*.test.{js,ts,tsx}',
+    '**/__tests__/**/*',
+    '**/test-*.js',
+    '**/*.spec.{js,ts,tsx}'
+  ],
+  languageOptions: {
+    globals: {
+      jest: 'readonly',
+      describe: 'readonly',
+      it: 'readonly',
+      test: 'readonly',
+      expect: 'readonly',
+      beforeEach: 'readonly',
+      afterEach: 'readonly',
+      beforeAll: 'readonly',
+      afterAll: 'readonly',
+      vi: 'readonly', // Vitest support
+      global: 'readonly'
+    }
+  },
+  rules: {
+    'no-console': 'off',
+    '@typescript-eslint/no-explicit-any': 'warn',
+    'no-unused-vars': 'off',
+    '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }]
+  }
+};
+
+// Node.js configuration files
+const nodeConfiguration: NodeFileConfig = {
+  files: [
+    '**/*.config.{js,ts}',
+    '**/scripts/**/*',
+    '**/jest.setup.js',
+    '**/global-setup.js',
+    '**/global-teardown.js'
+  ],
+  languageOptions: {
+    globals: {
+      ...globals.node,
+      process: 'readonly',
+      Buffer: 'readonly',
+      __dirname: 'readonly',
+      __filename: 'readonly',
+      module: 'readonly',
+      require: 'readonly'
+    }
+  }
+};
+```
+
+#### Dependency Classification System
+
+```typescript
+interface DependencyClassificationSystem {
+  productionDependencies: string[];
+  developmentDependencies: string[];
+  peerDependencies: string[];
+  reclassificationRules: ReclassificationRule[];
+}
+
+interface ReclassificationRule {
+  package: string;
+  from: 'devDependencies' | 'dependencies';
+  to: 'devDependencies' | 'dependencies';
+  reason: string;
+}
+
+// Critical dependency reclassifications
+const dependencyReclassifications: ReclassificationRule[] = [
+  {
+    package: '@testing-library/react',
+    from: 'devDependencies',
+    to: 'dependencies',
+    reason: 'Required for runtime test utilities and component testing'
+  },
+  {
+    package: 'web-vitals',
+    from: 'devDependencies', 
+    to: 'dependencies',
+    reason: 'Used in production for performance monitoring'
+  }
+];
+```
 
 ### 1. Enhanced Global Test Setup and Teardown System (Task 2.3 ✅)
 
@@ -946,6 +1233,76 @@ interface PerformanceTargets {
 ```
 
 ## Implementation Phases
+
+### Phase 0: ESLint/Prettier Configuration Fixes (E0.1-E0.3)
+**Duration**: 0.5 days  
+**Priority**: 🔴 CRITICAL - Must be completed before any other tasks
+**Status**: ❌ **PENDING** - Blocks all automated fixes and development workflow
+
+**Root Cause Analysis**:
+- **Configuration Blocking**: Prettier parser failure on `pnpm-lock.yaml` prevents all automated formatting
+- **Test File Validation**: 8,500+ Jest global errors block test file linting
+- **Dependency Misclassification**: Testing libraries in wrong categories cause 2,000+ import errors
+
+**Tasks**:
+1. E0.1 Fix Prettier Configuration Blocking Issues
+2. E0.2 Configure Jest Globals in ESLint  
+3. E0.3 Fix Dependency Classifications
+
+**Success Criteria**:
+- ✅ Prettier runs without parser errors and formats applicable files
+- ✅ Jest global errors reduced from 8,500+ to 0
+- ✅ Import dependency errors reduced significantly
+- ✅ ESLint auto-fix functionality restored (1,654+ issues become fixable)
+
+### Phase 1: Automated Code Quality Fixes (E1.1-E1.6)
+**Duration**: 0.5 days
+**Priority**: 🟡 HIGH - Apply automated fixes once configuration is resolved
+**Dependencies**: Phase 0 completion required
+**Status**: ❌ **BLOCKED** - Waiting for configuration fixes
+
+**Impact Analysis**:
+- **Auto-fixable Issues**: 1,654 issues can be automatically resolved
+- **Manual Fixes Required**: 13,799 issues need targeted solutions
+- **Error Density Reduction**: From 27.2 to ~10 errors per 100 lines
+
+**Tasks**:
+1. E1.1 Apply Automated ESLint Fixes
+2. E1.2 Convert require() to import Statements (200+ files)
+3. E1.3 Implement Nullish Coalescing Operator (300+ occurrences)
+4. E1.4 Clean Up Unused Variables and Imports (500+ occurrences)
+5. E1.5 Remove Console Statements from Production Code (400+ occurrences)
+6. E1.6 Fix React Component Best Practices (500+ issues)
+
+**Success Criteria**:
+- ✅ Total issues reduced from 15,453 to <10,000
+- ✅ Auto-fixable issues reduced to 0
+- ✅ Critical code quality violations addressed
+- ✅ TypeScript compliance improved significantly
+
+### Phase 2: TypeScript and Code Quality Improvements (E2.1-E2.4)
+**Duration**: 1 day
+**Priority**: 🟢 MEDIUM - Improve type safety and code maintainability
+**Dependencies**: Phase 1 completion recommended
+**Status**: ❌ **PENDING** - Can be done in parallel with test infrastructure fixes
+
+**Quality Targets**:
+- **Type Safety**: Reduce `any` usage from 800+ to <200
+- **Code Complexity**: Reduce complex functions from 300+ to <100
+- **Class Design**: Fix 200+ class method issues
+- **Import Organization**: Standardize 2,000+ import/export patterns
+
+**Tasks**:
+1. E2.1 Improve TypeScript Type Safety
+2. E2.2 Reduce Code Complexity
+3. E2.3 Fix Class Method Usage
+4. E2.4 Standardize Import/Export Patterns
+
+**Success Criteria**:
+- ✅ TypeScript type safety significantly improved
+- ✅ Code maintainability enhanced
+- ✅ Consistent code patterns established
+- ✅ Developer experience improved
 
 ### Phase 1: Foundation Dependencies (F1.1-F1.3)
 **Duration**: 1-2 days  

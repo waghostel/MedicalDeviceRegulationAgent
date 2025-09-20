@@ -13,9 +13,10 @@ import {
 import userEvent from '@testing-library/user-event';
 import { rest } from 'msw';
 import { setupServer } from 'msw/node';
+
 import { ProjectsPage } from '@/app/projects/page';
-import { Project, ProjectStatus } from '@/types/project';
 import { apiClient } from '@/lib/api-client';
+import { Project, ProjectStatus } from '@/types/project';
 
 // Mock data
 const mockProjects: Project[] = [
@@ -195,20 +196,16 @@ const server = setupServer(
   }),
 
   // Error scenarios
-  rest.get('/api/projects/error', (req, res, ctx) => {
-    return res(ctx.status(500), ctx.json({ error: 'Internal server error' }));
-  }),
+  rest.get('/api/projects/error', (req, res, ctx) => res(ctx.status(500), ctx.json({ error: 'Internal server error' }))),
 
-  rest.post('/api/projects/error', (req, res, ctx) => {
-    return res(
+  rest.post('/api/projects/error', (req, res, ctx) => res(
       ctx.status(400),
       ctx.json({
         error: 'Validation error',
         message: 'Project name is required',
         suggestions: ['Please provide a valid project name'],
       })
-    );
-  })
+    ))
 );
 
 // Test setup
@@ -380,16 +377,14 @@ describe('Project Management Integration Tests', () => {
     test('should handle validation errors during creation', async () => {
       // Mock validation error response
       server.use(
-        rest.post('/api/projects', (req, res, ctx) => {
-          return res(
+        rest.post('/api/projects', (req, res, ctx) => res(
             ctx.status(400),
             ctx.json({
               error: 'Validation error',
               message: 'Project name is required',
               suggestions: ['Please provide a valid project name'],
             })
-          );
-        })
+          ))
       );
 
       render(<ProjectsPage />);
@@ -497,12 +492,10 @@ describe('Project Management Integration Tests', () => {
     test('should handle API errors gracefully', async () => {
       // Mock server error
       server.use(
-        rest.get('/api/projects', (req, res, ctx) => {
-          return res(
+        rest.get('/api/projects', (req, res, ctx) => res(
             ctx.status(500),
             ctx.json({ error: 'Internal server error' })
-          );
-        })
+          ))
       );
 
       render(<ProjectsPage />);
@@ -521,9 +514,7 @@ describe('Project Management Integration Tests', () => {
     test('should handle network errors', async () => {
       // Mock network error
       server.use(
-        rest.get('/api/projects', (req, res, ctx) => {
-          return res.networkError('Network error');
-        })
+        rest.get('/api/projects', (req, res, ctx) => res.networkError('Network error'))
       );
 
       render(<ProjectsPage />);
@@ -539,9 +530,7 @@ describe('Project Management Integration Tests', () => {
     test('should show loading skeletons while fetching projects', async () => {
       // Delay the response to test loading state
       server.use(
-        rest.get('/api/projects', (req, res, ctx) => {
-          return res(ctx.delay(1000), ctx.json(mockProjects));
-        })
+        rest.get('/api/projects', (req, res, ctx) => res(ctx.delay(1000), ctx.json(mockProjects)))
       );
 
       render(<ProjectsPage />);
@@ -630,9 +619,9 @@ describe('API Client Integration', () => {
 
   test('should handle timeout errors', async () => {
     server.use(
-      rest.get('/api/projects', (req, res, ctx) => {
-        return res(ctx.delay(35000)); // Longer than 30s timeout
-      })
+      rest.get('/api/projects', (req, res, ctx) => 
+         res(ctx.delay(35000)) // Longer than 30s timeout
+      )
     );
 
     await expect(apiClient.get('/api/projects')).rejects.toThrow(
@@ -645,7 +634,7 @@ describe('API Client Integration', () => {
     apiClient.setAuthToken(token);
 
     // Verify token is set in default headers
-    expect((apiClient as any).defaultHeaders['Authorization']).toBe(
+    expect((apiClient as any).defaultHeaders.Authorization).toBe(
       `Bearer ${token}`
     );
   });

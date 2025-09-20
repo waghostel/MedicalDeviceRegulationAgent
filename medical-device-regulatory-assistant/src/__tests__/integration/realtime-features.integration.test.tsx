@@ -3,7 +3,6 @@
  * Tests WebSocket connections, real-time updates, typing indicators, and connection recovery
  */
 
-import React from 'react';
 import {
   render,
   screen,
@@ -12,30 +11,40 @@ import {
   act,
 } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { setupMockAPI, teardownMockAPI } from '@/lib/testing/msw-utils';
-import {
-  renderWithProviders,
-  createMockSession,
-} from '@/lib/testing/test-utils';
+import React from 'react';
+
 import {
   generateMockUser,
   generateMockProject,
   generateMockAgentInteraction,
 } from '@/lib/mock-data';
+import { setupMockAPI, teardownMockAPI } from '@/lib/testing/msw-utils';
+import {
+  renderWithProviders,
+  createMockSession,
+} from '@/lib/testing/test-utils';
 import { WebSocketMessage, ProjectStatus } from '@/types/project';
 
 // Mock WebSocket
 class MockWebSocket {
   static CONNECTING = 0;
+
   static OPEN = 1;
+
   static CLOSING = 2;
+
   static CLOSED = 3;
 
   readyState: number = MockWebSocket.CONNECTING;
+
   url: string;
+
   onopen: ((event: Event) => void) | null = null;
+
   onclose: ((event: CloseEvent) => void) | null = null;
+
   onmessage: ((event: MessageEvent) => void) | null = null;
+
   onerror: ((event: Event) => void) | null = null;
 
   constructor(url: string) {
@@ -158,7 +167,7 @@ const WebSocketTestComponent: React.FC<{ projectId: string }> = ({
 
       // Attempt reconnection if not a clean close
       if (event.code !== 1000 && reconnectAttempts < 5) {
-        const delay = Math.min(1000 * Math.pow(2, reconnectAttempts), 30000);
+        const delay = Math.min(1000 * 2**reconnectAttempts, 30000);
         reconnectTimeoutRef.current = setTimeout(() => {
           setReconnectAttempts((prev) => prev + 1);
           connect();
@@ -1000,7 +1009,7 @@ describe('Real-time Features Integration Tests', () => {
           setIsRecovering(true);
 
           const attemptReconnection = (attempt: number) => {
-            const delay = Math.min(1000 * Math.pow(2, attempt), 30000);
+            const delay = Math.min(1000 * 2**attempt, 30000);
             setBackoffDelay(delay);
             setConnectionAttempts(attempt + 1);
 

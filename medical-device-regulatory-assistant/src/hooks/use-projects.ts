@@ -2,8 +2,9 @@
  * React hooks for project management with loading states, error handling, and optimistic updates
  */
 
-import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import { useState, useEffect, useCallback, useRef } from 'react';
+
 import { toast } from '@/hooks/use-toast';
 import { projectService } from '@/lib/services/project-service';
 import {

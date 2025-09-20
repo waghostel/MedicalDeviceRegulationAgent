@@ -41,37 +41,27 @@ export const mockValidationUtils = {
   /**
    * Quick validation of a hook mock
    */
-  validateHook: (hookName: string, mock: any) => {
-    return mockValidator.validateHookMock(hookName, mock);
-  },
+  validateHook: (hookName: string, mock: any) => mockValidator.validateHookMock(hookName, mock),
 
   /**
    * Quick validation of a component mock
    */
-  validateComponent: (componentName: string, mock: any) => {
-    return mockValidator.validateComponentMock(componentName, mock);
-  },
+  validateComponent: (componentName: string, mock: any) => mockValidator.validateComponentMock(componentName, mock),
 
   /**
    * Quick diagnosis of a mock-related error
    */
-  diagnoseError: (mockName: string, error: Error) => {
-    return MockDebugger.diagnoseHookFailure(mockName, error);
-  },
+  diagnoseError: (mockName: string, error: Error) => MockDebugger.diagnoseHookFailure(mockName, error),
 
   /**
    * Generate diff between expected and actual mocks
    */
-  generateDiff: (expected: any, actual: any, mockName?: string) => {
-    return MockDebugger.generateMockDiff(expected, actual, mockName);
-  },
+  generateDiff: (expected: any, actual: any, mockName?: string) => MockDebugger.generateMockDiff(expected, actual, mockName),
 
   /**
    * Get comprehensive health report for all registered mocks
    */
-  getHealthReport: () => {
-    return mockValidator.generateMockReport();
-  },
+  getHealthReport: () => mockValidator.generateMockReport(),
 
   /**
    * Register a mock for validation tracking
@@ -95,9 +85,7 @@ export const mockValidationUtils = {
   /**
    * Generate debug report for a specific mock
    */
-  generateDebugReport: (mockName: string, error?: Error) => {
-    return mockDebugger.generateDebugReport(mockName, error);
-  },
+  generateDebugReport: (mockName: string, error?: Error) => mockDebugger.generateDebugReport(mockName, error),
 };
 
 // Integration helpers for test setup
@@ -178,7 +166,7 @@ export const jestMockValidation = {
           `Expected ${mockName} mock to be invalid, but it passed validation with score ${result.score}`,
         pass: true,
       };
-    } else {
+    } 
       const errorMessages = result.errors
         .map((e) => `  - ${e.message}`)
         .join('\n');
@@ -187,7 +175,7 @@ export const jestMockValidation = {
           `Expected ${mockName} mock to be valid, but validation failed:\n${errorMessages}`,
         pass: false,
       };
-    }
+    
   },
 
   /**
@@ -217,13 +205,13 @@ export const jestMockValidation = {
           `Expected ${mockName} mock coverage to be below ${threshold}%, but it was ${report.coverage.coveragePercentage}%`,
         pass: true,
       };
-    } else {
+    } 
       return {
         message: () =>
           `Expected ${mockName} mock coverage to be at least ${threshold}%, but it was ${report.coverage.coveragePercentage}%. Missing: ${report.coverage.missingItems.join(', ')}`,
         pass: false,
       };
-    }
+    
   },
 };
 

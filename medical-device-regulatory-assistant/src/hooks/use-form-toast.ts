@@ -4,6 +4,7 @@
  */
 
 import { useCallback } from 'react';
+
 import { useToast, contextualToast } from './use-toast';
 
 export interface FormToastOptions {
@@ -78,14 +79,14 @@ export function useFormToast(): UseFormToastReturn {
         error.message.includes('fetch')
       ) {
         return contextualToast.networkError();
-      } else if (
+      } if (
         error.message.includes('auth') ||
         error.message.includes('unauthorized')
       ) {
         return contextualToast.authExpired();
-      } else if (error.message.includes('validation')) {
+      } if (error.message.includes('validation')) {
         return contextualToast.validationError(error.message);
-      } else {
+      } 
         return toast({
           variant: 'destructive',
           title: formName
@@ -96,7 +97,7 @@ export function useFormToast(): UseFormToastReturn {
           category: 'user',
           priority: 'high',
         });
-      }
+      
     },
     [toast, contextualToast]
   );
@@ -147,16 +148,12 @@ export function useFormToast(): UseFormToastReturn {
   );
 
   const showNetworkError = useCallback(
-    (onRetry: () => void, options: FormToastOptions = {}) => {
-      return contextualToast.networkError(onRetry);
-    },
+    (onRetry: () => void, options: FormToastOptions = {}) => contextualToast.networkError(onRetry),
     [contextualToast]
   );
 
   const showAuthError = useCallback(
-    (onSignIn: () => void, options: FormToastOptions = {}) => {
-      return contextualToast.authExpired(onSignIn);
-    },
+    (onSignIn: () => void, options: FormToastOptions = {}) => contextualToast.authExpired(onSignIn),
     [contextualToast]
   );
 

@@ -47,7 +47,7 @@ class RegressionDetector {
   }
 
   logSection(title) {
-    console.log('\n' + '='.repeat(70));
+    console.log(`\n${  '='.repeat(70)}`);
     this.log(`${COLORS.BOLD}${title}${COLORS.RESET}`, COLORS.BLUE);
     console.log('='.repeat(70));
   }
@@ -135,7 +135,7 @@ class RegressionDetector {
         message: 'Overall quality score regression detected',
         current: currentScore,
         previous: previousScore,
-        difference: difference,
+        difference,
         threshold: REGRESSION_THRESHOLDS.overall_score,
       });
     }
@@ -143,7 +143,7 @@ class RegressionDetector {
     return {
       current: currentScore,
       previous: previousScore,
-      difference: difference,
+      difference,
       regression: difference <= REGRESSION_THRESHOLDS.overall_score,
     };
   }
@@ -321,7 +321,7 @@ class RegressionDetector {
         message: 'Security vulnerability regression detected',
         current: currentVulns,
         previous: previousVulns,
-        difference: difference,
+        difference,
         threshold: REGRESSION_THRESHOLDS.security_vulnerabilities,
       });
     }
@@ -330,7 +330,7 @@ class RegressionDetector {
       name: 'Critical Vulnerabilities',
       current: currentVulns,
       previous: previousVulns,
-      difference: difference,
+      difference,
       regression: difference >= REGRESSION_THRESHOLDS.security_vulnerabilities,
     };
   }
@@ -413,7 +413,7 @@ class RegressionDetector {
         overall_score: previous.overall?.overall_score || 0,
       },
       regressions: this.regressions,
-      comparisons: comparisons,
+      comparisons,
       summary: {
         total_regressions: this.regressions.length,
         critical_regressions: this.regressions.filter(

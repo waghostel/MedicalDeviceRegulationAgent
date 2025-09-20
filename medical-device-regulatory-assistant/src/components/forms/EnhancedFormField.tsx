@@ -2,13 +2,6 @@
  * Enhanced form field components with real-time validation, accessibility, and auto-save
  */
 
-import React, { forwardRef, useId, useState, useEffect } from 'react';
-import { FieldError, FieldPath, FieldValues } from 'react-hook-form';
-import { cn } from '@/lib/utils';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
   CheckCircle,
   AlertCircle,
@@ -18,6 +11,14 @@ import {
   HelpCircle,
   Loader2,
 } from 'lucide-react';
+import React, { forwardRef, useId, useState, useEffect } from 'react';
+import { FieldError, FieldPath, FieldValues } from 'react-hook-form';
+
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { cn } from '@/lib/utils';
 
 export interface BaseFieldProps {
   label: string;
@@ -479,13 +480,13 @@ export const AutoSaveIndicator: React.FC<{
     if (diff < 60000) {
       // Less than 1 minute
       return 'Just now';
-    } else if (diff < 3600000) {
+    } if (diff < 3600000) {
       // Less than 1 hour
       const minutes = Math.floor(diff / 60000);
       return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
-    } else {
+    } 
       return date.toLocaleTimeString();
-    }
+    
   };
 
   if (isSaving) {

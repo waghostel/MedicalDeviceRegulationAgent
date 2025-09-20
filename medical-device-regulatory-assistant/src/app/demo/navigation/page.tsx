@@ -1,15 +1,16 @@
 'use client';
 
 import React, { useState } from 'react';
+
 import {
   AppLayout,
   FileExplorer,
   type BreadcrumbItem,
   type FileNode,
 } from '@/components/layout';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 const mockFiles: FileNode[] = [
   {

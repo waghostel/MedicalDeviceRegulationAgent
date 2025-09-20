@@ -3,15 +3,17 @@
  * Tests citation display, filtering, and external link handling
  */
 
-import React from 'react';
 import { screen, fireEvent, waitFor } from '@testing-library/react';
+import React from 'react';
+
+import { generateMockSourceCitation } from '@/lib/mock-data';
 import {
   renderWithProviders,
   createMockSession,
 } from '@/lib/testing/test-utils';
-import { CitationPanel } from '../citation-panel';
-import { generateMockSourceCitation } from '@/lib/mock-data';
 import { SourceCitation } from '@/types/copilot';
+
+import { CitationPanel } from '../citation-panel';
 
 // Mock the child components
 jest.mock('../citation-card', () => ({

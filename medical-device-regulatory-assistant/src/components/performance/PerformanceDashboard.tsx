@@ -4,12 +4,15 @@
  * Displays performance metrics and trends for test execution monitoring.
  */
 
+import {
+  AlertTriangle,
+  CheckCircle,
+  Clock,
+  Memory,
+  Database,
+  Globe,
+} from 'lucide-react';
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   BarChart,
   Bar,
@@ -24,14 +27,13 @@ import {
   Pie,
   Cell,
 } from 'recharts';
-import {
-  AlertTriangle,
-  CheckCircle,
-  Clock,
-  Memory,
-  Database,
-  Globe,
-} from 'lucide-react';
+
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+
 
 export interface PerformanceMetrics {
   testName: string;

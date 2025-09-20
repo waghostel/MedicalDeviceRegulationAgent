@@ -24,8 +24,11 @@ interface Breadcrumb {
 
 class ErrorReportingService {
   private config: ErrorReportingConfig;
+
   private breadcrumbs: Breadcrumb[] = [];
+
   private sessionId: string;
+
   private userId?: string;
 
   constructor(config: Partial<ErrorReportingConfig> = {}) {
@@ -359,9 +362,7 @@ export { ErrorReportingService };
 export const reportError = (
   error: APIError | Error,
   context?: Record<string, any>
-) => {
-  return errorReporting.reportError(error, context);
-};
+) => errorReporting.reportError(error, context);
 
 export const trackAction = (action: string, data?: Record<string, any>) => {
   errorReporting.trackAction(action, data);

@@ -4,9 +4,10 @@
  * This test demonstrates how to integrate performance monitoring into React component tests.
  */
 
-import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import React from 'react';
+
 import {
   FrontendTestPerformanceMonitor,
   getPerformanceMonitor,
@@ -14,8 +15,7 @@ import {
 } from '../lib/testing/performance-monitor';
 
 // Mock components for testing
-const SimpleComponent: React.FC<{ data?: string[] }> = ({ data = [] }) => {
-  return (
+const SimpleComponent: React.FC<{ data?: string[] }> = ({ data = [] }) => (
     <div data-testid="simple-component">
       <h1>Simple Component</h1>
       <ul>
@@ -25,7 +25,6 @@ const SimpleComponent: React.FC<{ data?: string[] }> = ({ data = [] }) => {
       </ul>
     </div>
   );
-};
 
 const ComplexComponent: React.FC = () => {
   const [count, setCount] = React.useState(0);

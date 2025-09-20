@@ -1,24 +1,5 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import {
   Search,
   Filter,
@@ -29,18 +10,40 @@ import {
   User,
   Activity,
 } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Input } from '@/components/ui/input';
+import { Progress } from '@/components/ui/progress';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { useToast } from '@/hooks/use-toast';
+import { auditAPI, AuditTrailResponse } from '@/lib/api/audit';
 import { AgentInteraction, AuditLogFilter } from '@/types/audit';
-import { AuditLogFilters } from './AuditLogFilters';
+
 import { AgentInteractionCard } from './AgentInteractionCard';
 import { AuditLogExport } from './AuditLogExport';
-import { auditAPI, AuditTrailResponse } from '@/lib/api/audit';
-import { useToast } from '@/hooks/use-toast';
+import { AuditLogFilters } from './AuditLogFilters';
+
 
 interface AuditLogPageProps {
   projectId?: string;
 }
 
-export function AuditLogPage({ projectId }: AuditLogPageProps) {
+export const AuditLogPage = ({ projectId }: AuditLogPageProps) => {
   const [interactions, setInteractions] = useState<AgentInteraction[]>([]);
   const [filteredInteractions, setFilteredInteractions] = useState<
     AgentInteraction[]
@@ -226,12 +229,10 @@ export function AuditLogPage({ projectId }: AuditLogPageProps) {
     }
   };
 
-  const formatActionName = (action: string) => {
-    return action
+  const formatActionName = (action: string) => action
       .split('-')
       .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
       .join(' ');
-  };
 
   if (isLoading) {
     return (

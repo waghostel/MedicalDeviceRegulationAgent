@@ -8,7 +8,6 @@
  * Requirements tested: 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 10.1, 10.5
  */
 
-import React from 'react';
 import {
   render,
   screen,
@@ -19,13 +18,14 @@ import {
 import userEvent from '@testing-library/user-event';
 import { rest } from 'msw';
 import { setupServer } from 'msw/node';
+import React from 'react';
 import '@testing-library/jest-dom';
 
-import { ProjectList } from '@/components/projects/project-list';
-import { ProjectForm } from '@/components/projects/project-form';
 import { ProjectCard } from '@/components/projects/project-card';
-import { useProjects } from '@/hooks/use-projects';
+import { ProjectForm } from '@/components/projects/project-form';
+import { ProjectList } from '@/components/projects/project-list';
 import { ProjectContextProvider } from '@/components/providers/ProjectContextProvider';
+import { useProjects } from '@/hooks/use-projects';
 import { Project, ProjectStatus } from '@/types/project';
 
 // Mock data for testing
@@ -457,12 +457,10 @@ describe('Task 8.4: Frontend Integration Testing', () => {
     test('should display error messages for failed API calls', async () => {
       // Mock API failure
       server.use(
-        rest.get('/api/projects', (req, res, ctx) => {
-          return res(
+        rest.get('/api/projects', (req, res, ctx) => res(
             ctx.status(500),
             ctx.json({ error: 'Internal server error' })
-          );
-        })
+          ))
       );
 
       render(
@@ -515,9 +513,7 @@ describe('Task 8.4: Frontend Integration Testing', () => {
     test('should display loading states', async () => {
       // Mock slow API response
       server.use(
-        rest.get('/api/projects', (req, res, ctx) => {
-          return res(ctx.delay(1000), ctx.json(mockProjects));
-        })
+        rest.get('/api/projects', (req, res, ctx) => res(ctx.delay(1000), ctx.json(mockProjects)))
       );
 
       render(
@@ -656,9 +652,7 @@ describe('Task 8.4: Frontend Integration Testing', () => {
       }));
 
       server.use(
-        rest.get('/api/projects', (req, res, ctx) => {
-          return res(ctx.json(largeProjectList));
-        })
+        rest.get('/api/projects', (req, res, ctx) => res(ctx.json(largeProjectList)))
       );
 
       const startTime = performance.now();

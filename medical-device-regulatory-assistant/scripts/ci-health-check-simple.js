@@ -38,7 +38,7 @@ class SimpleCIHealthChecker {
       const dashboardPath = await this.generateBasicDashboard(healthReport);
 
       // Output results
-      console.log('\n' + '='.repeat(60));
+      console.log(`\n${  '='.repeat(60)}`);
       console.log('📋 TEST HEALTH SUMMARY');
       console.log('='.repeat(60));
       console.log(healthReport.summary);
@@ -304,7 +304,7 @@ CI Environment: ${process.env.CI ? 'Yes' : 'No'}
 
     const outputFile = process.env.GITHUB_OUTPUT;
     if (outputFile) {
-      await fs.appendFile(outputFile, outputs.join('\n') + '\n');
+      await fs.appendFile(outputFile, `${outputs.join('\n')  }\n`);
       console.log('📤 GitHub outputs set');
     }
   }

@@ -21,7 +21,7 @@ function test(  ){
 return x+y;
 }
 `,
-  
+
   'test-lint-issues.ts': `
 // File with linting issues
 let unusedVar = "test";
@@ -54,7 +54,7 @@ return <div onClick={()=>count++}>{prop1+prop2}</div>;
 };
 
 export default Component;
-`
+`,
 };
 
 console.log('🧪 Testing Format and Lint Hook');
@@ -73,32 +73,31 @@ console.log('\n🔧 Running Format and Lint Hook...\n');
 try {
   const FormatAndLintHook = require('./.kiro/hooks/format-and-lint-autofix.js');
   const hook = new FormatAndLintHook();
-  
+
   const testFileNames = Object.keys(testFiles);
-  hook.execute(testFileNames).then(result => {
+  hook.execute(testFileNames).then((result) => {
     console.log('\n📊 Test Results:');
     console.log('================');
     console.log(`Success: ${result.success}`);
     console.log(`Formatted files: ${result.formatting.formattedFiles}`);
     console.log(`Remaining issues: ${result.linting.remainingIssues}`);
-    
+
     // Cleanup
     console.log('\n🧹 Cleaning up test files...');
-    testFileNames.forEach(filename => {
+    testFileNames.forEach((filename) => {
       if (fs.existsSync(filename)) {
         fs.unlinkSync(filename);
         console.log(`   Removed: ${filename}`);
       }
     });
-    
+
     console.log('\n✅ Hook test completed!');
   });
-  
 } catch (error) {
   console.error('❌ Hook test failed:', error.message);
-  
+
   // Cleanup on error
-  Object.keys(testFiles).forEach(filename => {
+  Object.keys(testFiles).forEach((filename) => {
     if (fs.existsSync(filename)) {
       fs.unlinkSync(filename);
     }

@@ -7,14 +7,15 @@
  * Requirements: 5.2 (consistent test results), 8.1 (CI environment success >90% pass rate)
  */
 
+import { existsSync, rmSync, mkdirSync } from 'fs';
+import { join } from 'path';
+
 import {
   TestHealthMonitor,
   TestResult,
   TestSuiteResult,
   HealthThresholds,
 } from '../test-health-monitor';
-import { existsSync, rmSync, mkdirSync } from 'fs';
-import { join } from 'path';
 
 describe('TestHealthMonitor', () => {
   let monitor: TestHealthMonitor;

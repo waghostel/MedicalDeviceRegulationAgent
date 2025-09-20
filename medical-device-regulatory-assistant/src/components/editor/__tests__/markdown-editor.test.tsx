@@ -1,12 +1,14 @@
-import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { MarkdownEditor } from '../markdown-editor';
+import React from 'react';
+
 import { Document, MentionItem } from '@/types/document';
 
+import { MarkdownEditor } from '../markdown-editor';
+
+
 // Mock the dynamic import
-jest.mock('next/dynamic', () => {
-  return function mockDynamic(importFunc: any) {
+jest.mock('next/dynamic', () => function mockDynamic(importFunc: any) {
     const MockedComponent = React.forwardRef<any, any>((props, ref) => {
       const { value, onChange, textareaProps } = props;
       return (
@@ -23,8 +25,7 @@ jest.mock('next/dynamic', () => {
     });
     MockedComponent.displayName = 'MockedMDEditor';
     return MockedComponent;
-  };
-});
+  });
 
 const mockDocument: Document = {
   id: '1',
@@ -144,7 +145,7 @@ describe('MarkdownEditor', () => {
 
     await waitFor(() => {
       expect(mockOnSave).toHaveBeenCalledWith(
-        mockDocument.content + ' Modified'
+        `${mockDocument.content  } Modified`
       );
     });
   });
@@ -215,7 +216,7 @@ describe('MarkdownEditor', () => {
 
       await waitFor(() => {
         expect(mockOnSave).toHaveBeenCalledWith(
-          mockDocument.content + ' Auto-save test'
+          `${mockDocument.content  } Auto-save test`
         );
       });
     });

@@ -4,8 +4,9 @@
  * Requirements: 2.4, 7.1
  */
 
-import React from 'react';
 import { Session } from 'next-auth';
+import React from 'react';
+
 import {
   MockToastProvider,
   MockFormProvider,
@@ -88,19 +89,14 @@ export const resetProviderMockSystem = () => {
  */
 export const createProviderTestWrapper = (
   options: ProviderMockOptions = {}
-) => {
-  return ({ children }: { children: React.ReactNode }) => {
-    return React.createElement(MockProviderStack, { options }, children);
-  };
-};
+) => ({ children }: { children: React.ReactNode }) => React.createElement(MockProviderStack, { options }, children);
 
 /**
  * Create a mock session for testing
  */
 export const createMockSession = (
   overrides: Partial<Session> = {}
-): Session => {
-  return {
+): Session => ({
     user: {
       id: 'test-user-id',
       name: 'Test User',
@@ -111,17 +107,14 @@ export const createMockSession = (
     expires: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // 24 hours from now
     accessToken: 'mock-access-token',
     ...overrides,
-  } as Session;
-};
+  } as Session);
 
 /**
  * Simulate provider interactions for testing
  */
 export const simulateProviderInteractions = {
   // Toast interactions
-  addToast: (toast: any) => {
-    return providerMockUtils.addMockToast(toast);
-  },
+  addToast: (toast: any) => providerMockUtils.addMockToast(toast),
 
   removeToast: (id: string) => {
     const state = providerMockUtils.getToastState();

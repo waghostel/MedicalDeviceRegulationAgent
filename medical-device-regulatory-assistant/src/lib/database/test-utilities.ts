@@ -3,13 +3,14 @@
  * Provides utilities for database cleanup, reset, and test isolation
  */
 
-import { DatabaseConnection, DatabaseSeeder, SeedingResult } from './seeder';
-import { DatabaseMigrationManager, MigrationResult } from './migrations';
 import {
   DatabaseSeed,
   TestScenario,
   MockDataGenerator,
 } from '../mock-data/generators';
+
+import { DatabaseMigrationManager, MigrationResult } from './migrations';
+import { DatabaseConnection, DatabaseSeeder, SeedingResult } from './seeder';
 
 export interface TestDatabaseConfig {
   path?: string;
@@ -104,7 +105,9 @@ export interface TestIsolationManager {
  */
 export class DatabaseTestManager {
   private instances: Map<string, TestDatabaseInstance> = new Map();
+
   private snapshots: Map<string, DatabaseSnapshot> = new Map();
+
   private config: TestDatabaseConfig;
 
   constructor(config: TestDatabaseConfig = { isolationLevel: 'test' }) {
@@ -450,6 +453,7 @@ export class DatabaseTestManager {
  */
 class MockDatabaseConnection implements DatabaseConnection {
   private path: string;
+
   private closed: boolean = false;
 
   constructor(path: string) {

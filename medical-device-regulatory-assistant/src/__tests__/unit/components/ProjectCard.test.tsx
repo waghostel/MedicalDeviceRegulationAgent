@@ -1,8 +1,11 @@
-import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { ProjectCard } from '@/components/ProjectCard';
+import React from 'react';
+
 import { Project } from '@/types/project';
+
+import { ProjectCard } from '@/components/ProjectCard';
+
 
 // Mock project data
 const mockProject: Project = {

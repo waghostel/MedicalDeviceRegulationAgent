@@ -1,15 +1,17 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
 import { CopilotKit, CopilotChat } from '@copilotkit/react-core';
 import { CopilotSidebar } from '@copilotkit/react-ui';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import React, { useState, useEffect } from 'react';
+
+import { useProjectContext } from '@/components/providers/ProjectContextProvider';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { SlashCommandGrid } from '@/components/ui/slash-command-card';
-import { useProjectContext } from '@/components/providers/ProjectContextProvider';
-import { ProjectContext } from '@/types/copilot';
 import { useAgentExecution } from '@/hooks/useAgentExecution';
+import { ProjectContext } from '@/types/copilot';
+
 import { AgentExecutionStatusComponent } from './AgentExecutionStatus';
 
 interface AgentWorkflowPageProps {
@@ -17,10 +19,10 @@ interface AgentWorkflowPageProps {
   initialProject?: ProjectContext;
 }
 
-export function AgentWorkflowPage({
+export const AgentWorkflowPage = ({
   projectId,
   initialProject,
-}: AgentWorkflowPageProps) {
+}: AgentWorkflowPageProps) => {
   const { state, setProject, setLoading, addMessage } = useProjectContext();
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
@@ -117,17 +119,17 @@ export function AgentWorkflowPage({
       command.includes('predicate')
     ) {
       return 'predicate_search';
-    } else if (
+    } if (
       command.includes('/classify-device') ||
       command.includes('classify')
     ) {
       return 'device_classification';
-    } else if (
+    } if (
       command.includes('/compare-predicate') ||
       command.includes('compare')
     ) {
       return 'predicate_comparison';
-    } else if (
+    } if (
       command.includes('/find-guidance') ||
       command.includes('guidance')
     ) {

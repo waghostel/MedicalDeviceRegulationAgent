@@ -130,7 +130,7 @@ class QualityCheckSystem {
   }
 
   logSection(title) {
-    console.log('\n' + '='.repeat(70));
+    console.log(`\n${  '='.repeat(70)}`);
     this.log(`${COLORS.BOLD}${title}${COLORS.RESET}`, COLORS.BLUE);
     console.log('='.repeat(70));
   }
@@ -332,7 +332,7 @@ class QualityCheckSystem {
   async analyzeTestCoverage() {
     this.logSection('Test Coverage Analysis');
     const issues = [];
-    let coverage = {};
+    const coverage = {};
 
     try {
       // Frontend coverage
@@ -1117,11 +1117,11 @@ class QualityCheckSystem {
   printQualitySummary() {
     const report = this.generateQualityReport();
 
-    console.log('\n' + '='.repeat(70));
+    console.log(`\n${  '='.repeat(70)}`);
     this.log('QUALITY CHECK SYSTEM - SUMMARY REPORT', COLORS.BOLD);
     console.log('='.repeat(70));
 
-    const overallScore = report.summary.overallScore;
+    const {overallScore} = report.summary;
     const scoreColor =
       overallScore >= 90
         ? COLORS.GREEN

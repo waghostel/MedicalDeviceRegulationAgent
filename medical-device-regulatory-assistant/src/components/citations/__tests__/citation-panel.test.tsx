@@ -1,8 +1,11 @@
-import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { CitationPanel } from '../citation-panel';
+import React from 'react';
+
 import { SourceCitation } from '@/types/copilot';
+
+import { CitationPanel } from '../citation-panel';
+
 
 // Mock the child components
 jest.mock('../citation-card', () => ({

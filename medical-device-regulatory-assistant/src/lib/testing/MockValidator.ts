@@ -392,6 +392,7 @@ const COMPONENT_SCHEMAS: Record<string, ComponentValidationSchema> = {
 
 export class MockValidator {
   private validationHistory: Map<string, ValidationResult[]> = new Map();
+
   private mockRegistry: Map<string, any> = new Map();
 
   constructor() {
@@ -590,10 +591,9 @@ export class MockValidator {
           // Check for test ID
           if (schema.expectedBehavior.hasTestId) {
             const hasTestIdWithProps =
-              result.props && result.props['data-testid'];
+              result.props?.['data-testid'];
             const hasTestIdWithoutProps =
-              resultWithoutTestId.props &&
-              resultWithoutTestId.props['data-testid'];
+              resultWithoutTestId.props?.['data-testid'];
 
             // Warn if mock doesn't add test ID when not provided in props
             if (!hasTestIdWithoutProps) {

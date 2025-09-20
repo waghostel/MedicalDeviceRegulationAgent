@@ -4,10 +4,11 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { cn } from '@/lib/utils';
-import { Badge } from '@/components/ui/badge';
+
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
 import { useTypingIndicators } from '@/hooks/use-websocket';
+import { cn } from '@/lib/utils';
 
 interface TypingUser {
   userId: string;
@@ -45,14 +46,14 @@ const getUserColor = (userId: string): string => {
   return colors[Math.abs(hash) % colors.length];
 };
 
-export function TypingIndicators({
+export const TypingIndicators = ({
   className,
   maxVisible = 3,
   showAvatars = true,
   showUserColors = true,
   projectId,
   compact = false,
-}: TypingIndicatorsProps) {
+}: TypingIndicatorsProps) => {
   const { typingUsers, connectionStatus } = useTypingIndicators();
   const [displayUsers, setDisplayUsers] = useState<TypingUser[]>([]);
 
@@ -85,18 +86,18 @@ export function TypingIndicators({
 
     if (visibleUsers.length === 1) {
       return `${visibleUsers[0].userName} is typing...`;
-    } else if (visibleUsers.length === 2) {
+    } if (visibleUsers.length === 2) {
       return `${visibleUsers[0].userName} and ${visibleUsers[1].userName} are typing...`;
-    } else if (visibleUsers.length === 3 && hiddenCount === 0) {
+    } if (visibleUsers.length === 3 && hiddenCount === 0) {
       return `${visibleUsers[0].userName}, ${visibleUsers[1].userName}, and ${visibleUsers[2].userName} are typing...`;
-    } else {
+    } 
       const names = visibleUsers
         .slice(0, 2)
         .map((u) => u.userName)
         .join(', ');
       const additional = hiddenCount > 0 ? hiddenCount + 1 : 1;
       return `${names} and ${additional} other${additional > 1 ? 's' : ''} are typing...`;
-    }
+    
   };
 
   if (compact) {
@@ -170,8 +171,7 @@ export function TypingIndicators({
 /**
  * Animated typing dots indicator
  */
-export function TypingAnimation({ className }: { className?: string }) {
-  return (
+export const TypingAnimation = ({ className }: { className?: string }) => (
     <div className={cn('flex items-center gap-1', className)}>
       <div className="flex space-x-1">
         <div className="h-1 w-1 bg-muted-foreground rounded-full animate-bounce [animation-delay:-0.3s]"></div>
@@ -179,8 +179,7 @@ export function TypingAnimation({ className }: { className?: string }) {
         <div className="h-1 w-1 bg-muted-foreground rounded-full animate-bounce"></div>
       </div>
     </div>
-  );
-}
+  )
 
 /**
  * Individual typing indicator for specific users with enhanced styling
@@ -193,13 +192,13 @@ interface UserTypingIndicatorProps {
   size?: 'sm' | 'md' | 'lg';
 }
 
-export function UserTypingIndicator({
+export const UserTypingIndicator = ({
   userId,
   userName,
   className,
   showAvatar = true,
   size = 'md',
-}: UserTypingIndicatorProps) {
+}: UserTypingIndicatorProps) => {
   const { isUserTyping } = useTypingIndicators();
 
   if (!isUserTyping(userId)) {
@@ -252,13 +251,13 @@ interface AgentTypingIndicatorProps {
   progress?: number; // 0-100 for progress indication
 }
 
-export function AgentTypingIndicator({
+export const AgentTypingIndicator = ({
   isTyping,
   className,
   agentName = 'AI Assistant',
   showAvatar = true,
   progress,
-}: AgentTypingIndicatorProps) {
+}: AgentTypingIndicatorProps) => {
   if (!isTyping) {
     return null;
   }
@@ -307,11 +306,11 @@ interface UserPresenceIndicatorProps {
   className?: string;
 }
 
-export function UserPresenceIndicator({
+export const UserPresenceIndicator = ({
   users,
   maxVisible = 5,
   className,
-}: UserPresenceIndicatorProps) {
+}: UserPresenceIndicatorProps) => {
   const onlineUsers = users.filter((user) => user.isOnline);
   const visibleUsers = onlineUsers.slice(0, maxVisible);
   const hiddenCount = Math.max(0, onlineUsers.length - maxVisible);
@@ -363,7 +362,7 @@ interface CollaborativeInputProps {
   userName: string;
 }
 
-export function CollaborativeInput({
+export const CollaborativeInput = ({
   value,
   onChange,
   onTypingStart,
@@ -373,7 +372,7 @@ export function CollaborativeInput({
   projectId,
   userId,
   userName,
-}: CollaborativeInputProps) {
+}: CollaborativeInputProps) => {
   const { startTyping, stopTyping } = useTypingIndicators();
   const [isTyping, setIsTyping] = useState(false);
   const typingTimeoutRef = React.useRef<NodeJS.Timeout>();
@@ -425,16 +424,14 @@ export function CollaborativeInput({
     }
   }, [isTyping, stopTyping, userId, onTypingStop]);
 
-  useEffect(() => {
-    return () => {
+  useEffect(() => () => {
       if (typingTimeoutRef.current) {
         clearTimeout(typingTimeoutRef.current);
       }
       if (isTyping) {
         stopTyping(userId);
       }
-    };
-  }, [isTyping, stopTyping, userId]);
+    }, [isTyping, stopTyping, userId]);
 
   return (
     <div className={cn('relative', className)}>

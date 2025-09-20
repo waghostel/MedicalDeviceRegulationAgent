@@ -4,32 +4,27 @@
  * Optimized with React.memo and useMemo for performance
  */
 
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Loader2, Save, X } from 'lucide-react';
 import { useState, useEffect, memo, useMemo, useRef } from 'react';
 import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useEnhancedForm } from '@/hooks/use-enhanced-form';
+import { z } from 'zod';
+
 import {
   EnhancedInput,
   EnhancedTextarea,
   AutoSaveIndicator,
 } from '@/components/forms/EnhancedFormField';
-import { z } from 'zod';
-import { Loader2, Save, X } from 'lucide-react';
-import { useFormSubmissionState } from '@/hooks/use-loading-state';
-import {
-  useFormFocusManagement,
-  useAccessibilityAnnouncements,
-} from '@/hooks/use-focus-management';
 import { FormSubmissionProgress } from '@/components/loading';
 import { EnhancedButton } from '@/components/ui/enhanced-button';
-import { Textarea } from '@/components/ui/textarea';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/enhanced-dialog';
 import {
   Form,
   FormControl,
@@ -41,21 +36,27 @@ import {
   EnhancedForm,
 } from '@/components/ui/enhanced-form';
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/enhanced-dialog';
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import { useEnhancedForm } from '@/hooks/use-enhanced-form';
+import {
+  useFormFocusManagement,
+  useAccessibilityAnnouncements,
+} from '@/hooks/use-focus-management';
+import { useFormSubmissionState } from '@/hooks/use-loading-state';
+import { contextualToast } from '@/hooks/use-toast';
+import { useRenderPerformance } from '@/lib/performance/optimization';
 import {
   Project,
   ProjectCreateRequest,
   ProjectUpdateRequest,
   ProjectStatus,
 } from '@/types/project';
-import { contextualToast } from '@/hooks/use-toast';
-import { useRenderPerformance } from '@/lib/performance/optimization';
 
 // Enhanced form validation schema with comprehensive rules
 const projectFormSchema = z.object({
@@ -147,13 +148,13 @@ const COMMON_DEVICE_TYPES = [
   'Other',
 ];
 
-export const ProjectForm = memo(function ProjectForm({
+export const ProjectForm = memo(({
   project,
   open,
   onOpenChange,
   onSubmit,
   loading = false,
-}: ProjectFormProps) {
+}: ProjectFormProps) => {
   // Performance monitoring
   useRenderPerformance('ProjectForm');
   const isEditing = useMemo(() => !!project, [project]);

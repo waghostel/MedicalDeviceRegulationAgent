@@ -3,23 +3,39 @@
  * Tests the multi-user typing indicators and collaboration features
  */
 
-import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import React from 'react';
 import '@testing-library/jest-dom';
+
+// Import components after WebSocket mock
+import { CollaborationProvider } from '@/components/collaboration/CollaborationProvider';
+import {
+  TypingIndicators,
+  UserTypingIndicator,
+  CollaborativeInput,
+} from '@/components/ui/typing-indicators';
 
 // Mock WebSocket
 class MockWebSocket {
   static CONNECTING = 0;
+
   static OPEN = 1;
+
   static CLOSING = 2;
+
   static CLOSED = 3;
 
   readyState: number = MockWebSocket.CONNECTING;
+
   url: string;
+
   onopen: ((event: Event) => void) | null = null;
+
   onclose: ((event: CloseEvent) => void) | null = null;
+
   onmessage: ((event: MessageEvent) => void) | null = null;
+
   onerror: ((event: Event) => void) | null = null;
 
   constructor(url: string) {
@@ -62,14 +78,6 @@ class MockWebSocket {
 
 // Replace global WebSocket with mock
 (global as any).WebSocket = MockWebSocket;
-
-// Import components after WebSocket mock
-import {
-  TypingIndicators,
-  UserTypingIndicator,
-  CollaborativeInput,
-} from '@/components/ui/typing-indicators';
-import { CollaborationProvider } from '@/components/collaboration/CollaborationProvider';
 
 // Mock session
 const mockSession = {
@@ -353,15 +361,13 @@ describe('Multi-user Typing Indicators', () => {
 
 describe('Collaboration Provider', () => {
   it('should provide collaboration context', () => {
-    const TestComponent = () => {
-      return (
+    const TestComponent = () => (
         <CollaborationProvider projectId={1}>
           <div data-testid="collaboration-test">
             Collaboration provider loaded
           </div>
         </CollaborationProvider>
       );
-    };
 
     render(<TestComponent />);
 

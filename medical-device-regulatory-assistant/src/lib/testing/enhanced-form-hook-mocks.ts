@@ -149,16 +149,14 @@ const mockValidateField = jest.fn(
   }
 );
 
-const mockGetFieldValidation = jest.fn((fieldName: string): ValidationState => {
-  return (
+const mockGetFieldValidation = jest.fn((fieldName: string): ValidationState => (
     mockValidationState[fieldName] || {
       isValid: false,
       isValidating: false,
       hasBeenTouched: false,
       message: undefined,
     }
-  );
-});
+  ));
 
 const mockValidateAllFields = jest.fn(
   async (formData: Record<string, unknown>) => {
@@ -181,15 +179,13 @@ export const mockUseRealTimeValidation = jest.fn(
   (
     schema: z.ZodSchema,
     debounceMs: number = 300
-  ): UseRealTimeValidationReturn => {
-    return {
+  ): UseRealTimeValidationReturn => ({
       validateField: mockValidateField,
       getFieldValidation: mockGetFieldValidation,
       validateAllFields: mockValidateAllFields,
       clearValidation: mockClearValidation,
       validationState: mockValidationState,
-    };
-  }
+    })
 );
 
 // ============================================================================
@@ -337,8 +333,7 @@ const mockClearFormToasts = jest.fn(() => {
   });
 });
 
-export const mockUseFormToast = jest.fn((): UseFormToastReturn => {
-  return {
+export const mockUseFormToast = jest.fn((): UseFormToastReturn => ({
     showValidationError: mockShowValidationError,
     showSubmissionSuccess: mockShowSubmissionSuccess,
     showSubmissionError: mockShowSubmissionError,
@@ -347,8 +342,7 @@ export const mockUseFormToast = jest.fn((): UseFormToastReturn => {
     showNetworkError: mockShowNetworkError,
     showAuthError: mockShowAuthError,
     clearFormToasts: mockClearFormToasts,
-  };
-});
+  }));
 
 // ============================================================================
 // useEnhancedForm Mock
@@ -531,16 +525,16 @@ const mockControl: Control = {
 
 // Enhanced form specific functions
 const mockEnhancedValidateField = jest.fn(
-  async (fieldName: string, value: any, immediate = false) => {
+  async (fieldName: string, value: any, immediate = false) => 
     // Mock validation logic - return success by default
-    return { isValid: true, errors: [] };
-  }
+     ({ isValid: true, errors: [] })
+  
 );
 
-const mockEnhancedGetFieldValidation = jest.fn((fieldName: string) => {
+const mockEnhancedGetFieldValidation = jest.fn((fieldName: string) => 
   // Mock field validation - return no errors by default
-  return { errors: [], isValid: true };
-});
+   ({ errors: [], isValid: true })
+);
 
 const mockSubmitWithFeedback = jest.fn(
   async (onSubmit: (data: any) => Promise<void>) => {
@@ -571,13 +565,9 @@ const mockSubmitWithFeedback = jest.fn(
   }
 );
 
-const mockIsDirtyField = jest.fn((fieldName: string) => {
-  return !!mockEnhancedFormState.dirtyFields[fieldName];
-});
+const mockIsDirtyField = jest.fn((fieldName: string) => !!mockEnhancedFormState.dirtyFields[fieldName]);
 
-const mockGetTouchedFields = jest.fn(() => {
-  return Object.keys(mockEnhancedFormState.touchedFields);
-});
+const mockGetTouchedFields = jest.fn(() => Object.keys(mockEnhancedFormState.touchedFields));
 
 const mockFocusFirstError = jest.fn(() => {
   const firstErrorField = Object.keys(mockEnhancedFormState.errors)[0];

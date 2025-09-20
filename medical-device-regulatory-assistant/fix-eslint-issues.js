@@ -118,9 +118,9 @@ function addDisplayNamesToComponents(filePath) {
         const insertAfter = content.indexOf('\n', insertPoint);
         if (insertAfter !== -1) {
           content =
-            content.slice(0, insertAfter + 1) +
-            `${componentName}.displayName = '${componentName}';\n` +
-            content.slice(insertAfter + 1);
+            `${content.slice(0, insertAfter + 1) 
+            }${componentName}.displayName = '${componentName}';\n${ 
+            content.slice(insertAfter + 1)}`;
           modified = true;
         }
       }

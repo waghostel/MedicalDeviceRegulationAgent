@@ -3,15 +3,17 @@
  * Tests project data display, user interactions, and loading states
  */
 
-import React from 'react';
 import { screen, fireEvent, waitFor } from '@testing-library/react';
+import React from 'react';
+
+import { generateMockProject } from '@/lib/mock-data';
 import {
   renderWithProviders,
   createMockSession,
 } from '@/lib/testing/test-utils';
-import { ProjectCard, ProjectCardSkeleton } from '../project-card';
-import { generateMockProject } from '@/lib/mock-data';
 import { ProjectStatus } from '@/types/project';
+
+import { ProjectCard, ProjectCardSkeleton } from '../project-card';
 
 describe('ProjectCard Component', () => {
   const mockSession = createMockSession();

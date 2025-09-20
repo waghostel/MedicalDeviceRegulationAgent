@@ -62,7 +62,7 @@ global.__REACT_19_ERROR_TRACKER = {
   aggregateErrors: [],
   renderErrors: [],
   hookErrors: [],
-  clear: function () {
+  clear () {
     this.aggregateErrors = [];
     this.renderErrors = [];
     this.hookErrors = [];
@@ -184,6 +184,7 @@ if (typeof global.__REACT_DEVTOOLS_GLOBAL_HOOK__ === 'undefined') {
 
 // Polyfills for MSW and Node.js compatibility
 const { TextEncoder, TextDecoder } = require('util');
+
 global.TextEncoder = TextEncoder;
 global.TextDecoder = TextDecoder;
 
@@ -356,14 +357,14 @@ global.__GLOBAL_MOCK_REGISTRY = {
   storage: new Map(),
 
   // Register a mock for cleanup tracking
-  register: function (type, name, mock) {
+  register (type, name, mock) {
     if (this[type] && this[type].set) {
       this[type].set(name, mock);
     }
   },
 
   // Clear all registered mocks
-  clearAll: function () {
+  clearAll () {
     this.hooks.clear();
     this.components.clear();
     this.providers.clear();
@@ -373,7 +374,7 @@ global.__GLOBAL_MOCK_REGISTRY = {
   },
 
   // Get cleanup summary
-  getSummary: function () {
+  getSummary () {
     return {
       hooks: this.hooks.size,
       components: this.components.size,
@@ -777,13 +778,11 @@ jest.mock('react-hook-form', () => {
   );
 
   // Mock FormProvider component
-  const FormProvider = jest.fn(({ children, ...methods }) => {
-    return React.createElement(
+  const FormProvider = jest.fn(({ children, ...methods }) => React.createElement(
       'div',
       { 'data-testid': 'form-provider' },
       children
-    );
-  });
+    ));
 
   return {
     useForm,

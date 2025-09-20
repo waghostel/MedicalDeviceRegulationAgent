@@ -12,11 +12,11 @@ import {
   RollbackStrategyManager,
   RollbackConfiguration,
 } from './rollback-strategy';
+import { TimelinePlanner, TimelinePlan } from './timeline-planner';
 import {
   MigrationValidationManager,
   ValidationFramework,
 } from './validation-criteria';
-import { TimelinePlanner, TimelinePlan } from './timeline-planner';
 
 export interface MigrationStrategyReport {
   id: string;
@@ -354,9 +354,13 @@ export interface GlossaryTerm {
  */
 export class MigrationStrategyReportGenerator {
   private analyzer: MigrationStrategyAnalyzer;
+
   private priorityGenerator: PriorityMatrixGenerator;
+
   private rollbackManager: RollbackStrategyManager;
+
   private validationManager: MigrationValidationManager;
+
   private timelinePlanner: TimelinePlanner;
 
   constructor() {
@@ -1216,9 +1220,7 @@ export class MigrationStrategyReportGenerator {
       'very-complex': 100,
     };
     const avgComplexity =
-      priorityMatrix.matrix.components.reduce((sum, component) => {
-        return sum + complexityScores[component.technicalComplexity];
-      }, 0) / priorityMatrix.matrix.components.length;
+      priorityMatrix.matrix.components.reduce((sum, component) => sum + complexityScores[component.technicalComplexity], 0) / priorityMatrix.matrix.components.length;
 
     return Math.round(avgComplexity);
   }

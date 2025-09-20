@@ -3,8 +3,9 @@
  * Verifies React 19 AggregateError handling, error reporting, and fallback UI
  */
 
-import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
+import React from 'react';
+
 import {
   React19ErrorBoundary,
   React19ErrorHandler,

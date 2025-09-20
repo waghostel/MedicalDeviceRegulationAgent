@@ -136,7 +136,7 @@ const addToRemoveQueue = (toastId: string, duration?: number) => {
     toastTimeouts.delete(toastId);
     dispatch({
       type: 'REMOVE_TOAST',
-      toastId: toastId,
+      toastId,
     });
   }, delay);
 
@@ -263,7 +263,7 @@ export const reducer = (state: ToastState, action: any): ToastState => {
     }
 
     case 'REMOVE_TOAST': {
-      const toastId = action.toastId;
+      const {toastId} = action;
 
       if (toastId === undefined) {
         // Clear all timeouts
@@ -297,7 +297,7 @@ export const reducer = (state: ToastState, action: any): ToastState => {
       const { toastId } = action;
       const toast = state.toasts.find((t) => t.id === toastId);
 
-      if (toast && toast.onRetry) {
+      if (toast?.onRetry) {
         const retryCount = (toast.retryCount || 0) + 1;
         const maxRetries = toast.maxRetries || 3;
 
@@ -318,7 +318,7 @@ export const reducer = (state: ToastState, action: any): ToastState => {
                 : t
             ),
           };
-        } else {
+        } 
           // Max retries reached, convert to error
           return {
             ...state,
@@ -335,7 +335,7 @@ export const reducer = (state: ToastState, action: any): ToastState => {
                 : t
             ),
           };
-        }
+        
       }
 
       return state;
@@ -417,7 +417,7 @@ function toast({ ...props }: ToastProps) {
 // Contextual toast helpers for common medical device regulatory scenarios
 const contextualToast = {
   fdaApiError: (onRetry?: () => void) => {
-    const context = CONTEXTUAL_MESSAGES['fda_api_error'];
+    const context = CONTEXTUAL_MESSAGES.fda_api_error;
     return toast({
       variant: 'destructive',
       title: context.title,
@@ -432,7 +432,7 @@ const contextualToast = {
   },
 
   predicateSearchFailed: (onRetry?: () => void) => {
-    const context = CONTEXTUAL_MESSAGES['predicate_search_failed'];
+    const context = CONTEXTUAL_MESSAGES.predicate_search_failed;
     return toast({
       variant: 'destructive',
       title: context.title,
@@ -445,7 +445,7 @@ const contextualToast = {
   },
 
   classificationError: (onRetry?: () => void) => {
-    const context = CONTEXTUAL_MESSAGES['classification_error'];
+    const context = CONTEXTUAL_MESSAGES.classification_error;
     return toast({
       variant: 'destructive',
       title: context.title,
@@ -460,7 +460,7 @@ const contextualToast = {
   },
 
   projectSaveFailed: (onRetry?: () => void) => {
-    const context = CONTEXTUAL_MESSAGES['project_save_failed'];
+    const context = CONTEXTUAL_MESSAGES.project_save_failed;
     return toast({
       variant: 'destructive',
       title: context.title,
@@ -474,7 +474,7 @@ const contextualToast = {
   },
 
   exportFailed: (onRetry?: () => void) => {
-    const context = CONTEXTUAL_MESSAGES['export_failed'];
+    const context = CONTEXTUAL_MESSAGES.export_failed;
     return toast({
       variant: 'destructive',
       title: context.title,
@@ -487,7 +487,7 @@ const contextualToast = {
   },
 
   validationError: (message?: string) => {
-    const context = CONTEXTUAL_MESSAGES['validation_error'];
+    const context = CONTEXTUAL_MESSAGES.validation_error;
     return toast({
       variant: 'warning',
       title: context.title,
@@ -498,7 +498,7 @@ const contextualToast = {
   },
 
   authExpired: (onAction?: () => void) => {
-    const context = CONTEXTUAL_MESSAGES['auth_expired'];
+    const context = CONTEXTUAL_MESSAGES.auth_expired;
     return toast({
       variant: 'warning',
       title: context.title,
@@ -512,7 +512,7 @@ const contextualToast = {
   },
 
   networkError: (onRetry?: () => void) => {
-    const context = CONTEXTUAL_MESSAGES['network_error'];
+    const context = CONTEXTUAL_MESSAGES.network_error;
     return toast({
       variant: 'destructive',
       title: context.title,
@@ -525,8 +525,7 @@ const contextualToast = {
   },
 
   // Progress toast for long-running operations
-  progress: (title: string, description?: string) => {
-    return toast({
+  progress: (title: string, description?: string) => toast({
       variant: 'progress',
       title,
       description,
@@ -535,23 +534,19 @@ const contextualToast = {
       persistent: true, // Don't auto-dismiss progress toasts
       category: 'system',
       priority: 'normal',
-    });
-  },
+    }),
 
   // Success toast
-  success: (title: string, description?: string) => {
-    return toast({
+  success: (title: string, description?: string) => toast({
       variant: 'success',
       title,
       description,
       category: 'user',
       priority: 'normal',
-    });
-  },
+    }),
 
   // Info toast
-  info: (title: string, description?: string, actionUrl?: string) => {
-    return toast({
+  info: (title: string, description?: string, actionUrl?: string) => toast({
       variant: 'info',
       title,
       description,
@@ -559,8 +554,7 @@ const contextualToast = {
       actionLabel: actionUrl ? 'Learn More' : undefined,
       category: 'system',
       priority: 'low',
-    });
-  },
+    }),
 };
 
 function useToast() {
@@ -585,16 +579,12 @@ function useToast() {
   }, []);
 
   const getToastsByCategory = useCallback(
-    (category: string) => {
-      return state.toasts.filter((t) => t.category === category);
-    },
+    (category: string) => state.toasts.filter((t) => t.category === category),
     [state.toasts]
   );
 
   const getToastsByPriority = useCallback(
-    (priority: 'low' | 'normal' | 'high' | 'critical') => {
-      return state.toasts.filter((t) => t.priority === priority);
-    },
+    (priority: 'low' | 'normal' | 'high' | 'critical') => state.toasts.filter((t) => t.priority === priority),
     [state.toasts]
   );
 

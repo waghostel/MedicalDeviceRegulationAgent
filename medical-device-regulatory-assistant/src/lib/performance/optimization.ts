@@ -44,6 +44,7 @@ interface PerformanceMetric {
 
 class FrontendPerformanceMonitor {
   private metrics: PerformanceMetric[] = [];
+
   private observers: PerformanceObserver[] = [];
 
   constructor() {
@@ -405,14 +406,12 @@ export function useVirtualScrolling<T>(
     return { start, end };
   }, [scrollTop, itemHeight, containerHeight, items.length, overscan]);
 
-  const visibleItems = useMemo(() => {
-    return items
+  const visibleItems = useMemo(() => items
       .slice(visibleRange.start, visibleRange.end)
       .map((item, index) => ({
         item,
         index: visibleRange.start + index,
-      }));
-  }, [items, visibleRange]);
+      })), [items, visibleRange]);
 
   const totalHeight = items.length * itemHeight;
   const offsetY = visibleRange.start * itemHeight;
@@ -441,7 +440,7 @@ export function useMemoryMonitoring() {
 
     const updateMemoryInfo = () => {
       if ('memory' in performance) {
-        const memory = (performance as any).memory;
+        const {memory} = (performance as any);
         setMemoryInfo({
           usedJSHeapSize: memory.usedJSHeapSize,
           totalJSHeapSize: memory.totalJSHeapSize,
@@ -488,13 +487,9 @@ export function analyzeBundleSize() {
 
     const cssResources = resources.filter((r) => r.name.includes('.css'));
 
-    const totalJSSize = jsResources.reduce((total, resource) => {
-      return total + (resource.transferSize || 0);
-    }, 0);
+    const totalJSSize = jsResources.reduce((total, resource) => total + (resource.transferSize || 0), 0);
 
-    const totalCSSSize = cssResources.reduce((total, resource) => {
-      return total + (resource.transferSize || 0);
-    }, 0);
+    const totalCSSSize = cssResources.reduce((total, resource) => total + (resource.transferSize || 0), 0);
 
     return {
       totalJSSize: totalJSSize / 1024, // KB

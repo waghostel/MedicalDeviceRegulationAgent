@@ -30,14 +30,23 @@ export interface ConnectionStatusHandler {
 
 export class WebSocketService {
   private ws: WebSocket | null = null;
+
   private config: WebSocketConfig;
+
   private reconnectAttempts = 0;
+
   private reconnectTimeout: NodeJS.Timeout | null = null;
+
   private heartbeatInterval: NodeJS.Timeout | null = null;
+
   private messageQueue: WebSocketMessage[] = [];
+
   private messageHandlers = new Map<string, Set<MessageHandler>>();
+
   private statusHandlers = new Set<ConnectionStatusHandler>();
+
   private connectionStatus: ConnectionStatus = 'disconnected';
+
   private isDestroyed = false;
 
   constructor(config: Partial<WebSocketConfig> = {}) {
@@ -263,7 +272,7 @@ export class WebSocketService {
 
     this.reconnectAttempts++;
     const delay = Math.min(
-      this.config.reconnectInterval * Math.pow(2, this.reconnectAttempts - 1),
+      this.config.reconnectInterval * 2**(this.reconnectAttempts - 1),
       30000 // Max 30 seconds
     );
 

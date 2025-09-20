@@ -1,6 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useReducer, ReactNode } from 'react';
+
 import {
   ProjectContext,
   AgentWorkflowState,
@@ -106,7 +107,7 @@ const ProjectContextContext = createContext<ProjectContextType | undefined>(
   undefined
 );
 
-export function ProjectContextProvider({ children }: { children: ReactNode }) {
+export const ProjectContextProvider = ({ children }: { children: ReactNode }) => {
   const [state, dispatch] = useReducer(projectReducer, initialState);
 
   const setProject = (project: ProjectContext) => {

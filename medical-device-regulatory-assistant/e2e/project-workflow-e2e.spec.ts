@@ -1,4 +1,5 @@
 import { test, expect, Page } from '@playwright/test';
+
 import { VisualTester } from './utils/visual-testing';
 
 /**
@@ -515,7 +516,9 @@ test.describe('Project Workflow End-to-End Tests', () => {
             if (this.onerror) this.onerror(new Event('error'));
           }, 100);
         }
+
         send() {}
+
         close() {}
       };
     });

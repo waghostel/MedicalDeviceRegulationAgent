@@ -1,8 +1,11 @@
-import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { FileTree } from '../file-tree';
+import React from 'react';
+
 import { DocumentTreeNode } from '@/types/document';
+
+import { FileTree } from '../file-tree';
+
 
 const mockTree: DocumentTreeNode[] = [
   {

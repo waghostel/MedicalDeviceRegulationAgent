@@ -132,7 +132,7 @@ const mockUpdate = jest.fn((id: string, updateProps: Partial<Toast>) => {
 // Mock retry function
 const mockRetry = jest.fn((id: string) => {
   const toast = mockState.toasts.find((t) => t.id === id);
-  if (toast && toast.onRetry) {
+  if (toast?.onRetry) {
     toast.onRetry();
   }
 });
@@ -146,21 +146,16 @@ const mockUpdateProgress = jest.fn((id: string, progress: number) => {
 });
 
 // Mock getToastsByCategory function
-const mockGetToastsByCategory = jest.fn((category: string) => {
-  return mockState.toasts.filter((t) => t.category === category);
-});
+const mockGetToastsByCategory = jest.fn((category: string) => mockState.toasts.filter((t) => t.category === category));
 
 // Mock getToastsByPriority function
 const mockGetToastsByPriority = jest.fn(
-  (priority: 'low' | 'normal' | 'high' | 'critical') => {
-    return mockState.toasts.filter((t) => t.priority === priority);
-  }
+  (priority: 'low' | 'normal' | 'high' | 'critical') => mockState.toasts.filter((t) => t.priority === priority)
 );
 
 // Mock contextual toast methods
 const mockContextualToast = {
-  fdaApiError: jest.fn((onRetry?: () => void) => {
-    return mockToast({
+  fdaApiError: jest.fn((onRetry?: () => void) => mockToast({
       variant: 'destructive',
       title: 'FDA API Connection Failed',
       description:
@@ -171,11 +166,9 @@ const mockContextualToast = {
       actionLabel: 'Check FDA Status',
       category: 'api',
       priority: 'high',
-    });
-  }),
+    })),
 
-  predicateSearchFailed: jest.fn((onRetry?: () => void) => {
-    return mockToast({
+  predicateSearchFailed: jest.fn((onRetry?: () => void) => mockToast({
       variant: 'destructive',
       title: 'Predicate Search Failed',
       description:
@@ -184,11 +177,9 @@ const mockContextualToast = {
       retryLabel: 'Retry Search',
       category: 'regulatory',
       priority: 'high',
-    });
-  }),
+    })),
 
-  classificationError: jest.fn((onRetry?: () => void) => {
-    return mockToast({
+  classificationError: jest.fn((onRetry?: () => void) => mockToast({
       variant: 'destructive',
       title: 'Device Classification Error',
       description:
@@ -200,11 +191,9 @@ const mockContextualToast = {
       actionLabel: 'Classification Guide',
       category: 'regulatory',
       priority: 'high',
-    });
-  }),
+    })),
 
-  projectSaveFailed: jest.fn((onRetry?: () => void) => {
-    return mockToast({
+  projectSaveFailed: jest.fn((onRetry?: () => void) => mockToast({
       variant: 'destructive',
       title: 'Project Save Failed',
       description:
@@ -214,11 +203,9 @@ const mockContextualToast = {
       category: 'user',
       priority: 'critical',
       persistent: true,
-    });
-  }),
+    })),
 
-  exportFailed: jest.fn((onRetry?: () => void) => {
-    return mockToast({
+  exportFailed: jest.fn((onRetry?: () => void) => mockToast({
       variant: 'destructive',
       title: 'Export Failed',
       description:
@@ -227,11 +214,9 @@ const mockContextualToast = {
       retryLabel: 'Retry Export',
       category: 'user',
       priority: 'normal',
-    });
-  }),
+    })),
 
-  validationError: jest.fn((message?: string) => {
-    return mockToast({
+  validationError: jest.fn((message?: string) => mockToast({
       variant: 'warning',
       title: 'Validation Error',
       description:
@@ -239,11 +224,9 @@ const mockContextualToast = {
         'Please check the highlighted fields and ensure all required information is provided.',
       category: 'validation',
       priority: 'normal',
-    });
-  }),
+    })),
 
-  authExpired: jest.fn((onAction?: () => void) => {
-    return mockToast({
+  authExpired: jest.fn((onAction?: () => void) => mockToast({
       variant: 'warning',
       title: 'Session Expired',
       description:
@@ -253,11 +236,9 @@ const mockContextualToast = {
       category: 'system',
       priority: 'high',
       persistent: true,
-    });
-  }),
+    })),
 
-  networkError: jest.fn((onRetry?: () => void) => {
-    return mockToast({
+  networkError: jest.fn((onRetry?: () => void) => mockToast({
       variant: 'destructive',
       title: 'Network Connection Error',
       description: 'Please check your internet connection and try again.',
@@ -265,11 +246,9 @@ const mockContextualToast = {
       retryLabel: 'Retry',
       category: 'system',
       priority: 'high',
-    });
-  }),
+    })),
 
-  progress: jest.fn((title: string, description?: string) => {
-    return mockToast({
+  progress: jest.fn((title: string, description?: string) => mockToast({
       variant: 'progress',
       title,
       description,
@@ -278,21 +257,17 @@ const mockContextualToast = {
       persistent: true,
       category: 'system',
       priority: 'normal',
-    });
-  }),
+    })),
 
-  success: jest.fn((title: string, description?: string) => {
-    return mockToast({
+  success: jest.fn((title: string, description?: string) => mockToast({
       variant: 'success',
       title,
       description,
       category: 'user',
       priority: 'normal',
-    });
-  }),
+    })),
 
-  info: jest.fn((title: string, description?: string, actionUrl?: string) => {
-    return mockToast({
+  info: jest.fn((title: string, description?: string, actionUrl?: string) => mockToast({
       variant: 'info',
       title,
       description,
@@ -300,8 +275,7 @@ const mockContextualToast = {
       actionLabel: actionUrl ? 'Learn More' : undefined,
       category: 'system',
       priority: 'low',
-    });
-  }),
+    })),
 };
 
 // Mock useToast hook
@@ -347,14 +321,12 @@ export const toastMockUtils = {
     mockState.calls.filter((call) => call.category === category),
 
   // Check if toast was called with specific content
-  wasCalledWith: (title?: string, description?: string, variant?: string) => {
-    return mockState.calls.some(
+  wasCalledWith: (title?: string, description?: string, variant?: string) => mockState.calls.some(
       (call) =>
         (!title || call.title === title) &&
         (!description || call.description === description) &&
         (!variant || call.variant === variant)
-    );
-  },
+    ),
 
   // Get call count
   getCallCount: () => mockState.calls.length,

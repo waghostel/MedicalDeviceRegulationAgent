@@ -1,14 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { useForm, Controller, FieldError } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
   CheckCircle,
   AlertCircle,
@@ -17,6 +9,15 @@ import {
   EyeOff,
   HelpCircle,
 } from 'lucide-react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useForm, Controller, FieldError } from 'react-hook-form';
+import { z } from 'zod';
+
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 
 // Enhanced validation schemas with comprehensive rules
@@ -507,27 +508,23 @@ export const useRealTimeValidation = (
   }, []);
 
   const getFieldValidation = useCallback(
-    (fieldName: string) => {
-      return (
+    (fieldName: string) => (
         validationState[fieldName] || {
           isValid: false,
           isValidating: false,
           hasBeenTouched: false,
           message: undefined,
         }
-      );
-    },
+      ),
     [validationState]
   );
 
   // Cleanup timeouts on unmount
-  useEffect(() => {
-    return () => {
+  useEffect(() => () => {
       Object.values(timeoutRefs.current).forEach((timeout) =>
         clearTimeout(timeout)
       );
-    };
-  }, []);
+    }, []);
 
   return {
     validationState,

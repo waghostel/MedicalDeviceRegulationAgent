@@ -1,10 +1,12 @@
 'use client';
 
-import React from 'react';
-import Link from 'next/link';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Menu, User, Settings } from 'lucide-react';
+import Link from 'next/link';
+import React from 'react';
+
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+
 
 interface HeaderProps {
   onMenuToggle?: () => void;
@@ -14,8 +16,7 @@ interface HeaderProps {
 export const Header: React.FC<HeaderProps> = ({
   onMenuToggle,
   showMenuButton = true,
-}) => {
-  return (
+}) => (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-14 items-center">
         {showMenuButton && (
@@ -71,4 +72,3 @@ export const Header: React.FC<HeaderProps> = ({
       </div>
     </header>
   );
-};

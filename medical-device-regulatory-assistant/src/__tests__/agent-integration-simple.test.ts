@@ -101,17 +101,17 @@ describe('Agent Integration - Core Logic', () => {
       const parseCommandToTaskType = (cmd: string): string => {
         if (cmd.includes('/predicate-search') || cmd.includes('predicate')) {
           return 'predicate_search';
-        } else if (
+        } if (
           cmd.includes('/classify-device') ||
           cmd.includes('classify')
         ) {
           return 'device_classification';
-        } else if (
+        } if (
           cmd.includes('/compare-predicate') ||
           cmd.includes('compare')
         ) {
           return 'predicate_comparison';
-        } else if (cmd.includes('/find-guidance') || cmd.includes('guidance')) {
+        } if (cmd.includes('/find-guidance') || cmd.includes('guidance')) {
           return 'guidance_search';
         }
         return 'predicate_search'; // Default
@@ -127,17 +127,17 @@ describe('Agent Integration - Core Logic', () => {
       const parseCommandToTaskType = (cmd: string): string => {
         if (cmd.includes('/predicate-search') || cmd.includes('predicate')) {
           return 'predicate_search';
-        } else if (
+        } if (
           cmd.includes('/classify-device') ||
           cmd.includes('classify')
         ) {
           return 'device_classification';
-        } else if (
+        } if (
           cmd.includes('/compare-predicate') ||
           cmd.includes('compare')
         ) {
           return 'predicate_comparison';
-        } else if (cmd.includes('/find-guidance') || cmd.includes('guidance')) {
+        } if (cmd.includes('/find-guidance') || cmd.includes('guidance')) {
           return 'guidance_search';
         }
         return 'predicate_search'; // Default

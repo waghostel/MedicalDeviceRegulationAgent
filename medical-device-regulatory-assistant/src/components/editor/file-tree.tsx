@@ -1,6 +1,5 @@
 'use client';
 
-import React, { useState } from 'react';
 import {
   ChevronRight,
   ChevronDown,
@@ -10,7 +9,8 @@ import {
   Plus,
   MoreHorizontal,
 } from 'lucide-react';
-import { DocumentTreeNode, Document } from '@/types/document';
+import React, { useState } from 'react';
+
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -18,6 +18,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { DocumentTreeNode, Document } from '@/types/document';
 
 interface FileTreeProps {
   tree: DocumentTreeNode[];
@@ -46,7 +47,7 @@ interface TreeNodeProps {
   onRenameDocument: (id: string, newName: string) => void;
 }
 
-function TreeNode({
+const TreeNode = ({
   node,
   level,
   selectedDocumentId,
@@ -54,7 +55,7 @@ function TreeNode({
   onCreateDocument,
   onDeleteDocument,
   onRenameDocument,
-}: TreeNodeProps) {
+}: TreeNodeProps) => {
   const [isExpanded, setIsExpanded] = useState(true);
   const [isRenaming, setIsRenaming] = useState(false);
   const [newName, setNewName] = useState(node.name);
@@ -217,15 +218,14 @@ function TreeNode({
   );
 }
 
-export function FileTree({
+export const FileTree = ({
   tree,
   selectedDocumentId,
   onSelectDocument,
   onCreateDocument,
   onDeleteDocument,
   onRenameDocument,
-}: FileTreeProps) {
-  return (
+}: FileTreeProps) => (
     <div className="w-64 border-r bg-gray-50 overflow-y-auto">
       <div className="p-3 border-b">
         <div className="flex items-center justify-between">
@@ -269,5 +269,4 @@ export function FileTree({
         ))}
       </div>
     </div>
-  );
-}
+  )

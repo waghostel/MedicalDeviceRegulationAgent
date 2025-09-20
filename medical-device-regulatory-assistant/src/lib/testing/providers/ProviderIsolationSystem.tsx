@@ -5,9 +5,9 @@
  * and provides advanced provider composition and testing patterns.
  */
 
-import React, { ReactElement, ReactNode } from 'react';
 import { RenderOptions, RenderResult, render } from '@testing-library/react';
 import { Session } from 'next-auth';
+import React, { ReactElement, ReactNode } from 'react';
 
 import {
   IsolatedTestProviders,
@@ -109,7 +109,9 @@ interface ToastMessage {
 
 class ProviderStateManager {
   private currentState: Partial<ProviderState> = {};
+
   private stateHistory: Partial<ProviderState>[] = [];
+
   private debugMode = false;
 
   setDebugMode(enabled: boolean) {
@@ -375,8 +377,7 @@ export const createProviderTestScenario = (
     teardown?: () => void;
     assertions?: (state: Partial<ProviderState>) => void;
   }
-) => {
-  return {
+) => ({
     name,
     config,
     run: async (testFn: () => Promise<void> | void) => {
@@ -397,8 +398,7 @@ export const createProviderTestScenario = (
         config.teardown?.();
       }
     },
-  };
-};
+  });
 
 export const providerTestScenarios = {
   authenticatedUser: createProviderTestScenario('authenticated-user', {

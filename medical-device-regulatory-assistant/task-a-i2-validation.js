@@ -45,7 +45,7 @@ const testResults = {
 };
 
 function logSection(title) {
-  console.log('\n' + '='.repeat(50));
+  console.log(`\n${  '='.repeat(50)}`);
   console.log(`📋 ${title}`);
   console.log('='.repeat(50));
 }

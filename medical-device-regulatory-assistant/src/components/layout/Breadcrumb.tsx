@@ -1,8 +1,9 @@
 'use client';
 
-import React from 'react';
-import Link from 'next/link';
 import { ChevronRight, Home } from 'lucide-react';
+import Link from 'next/link';
+import React from 'react';
+
 import { cn } from '@/lib/utils';
 
 export interface BreadcrumbItem {
@@ -16,8 +17,7 @@ interface BreadcrumbProps {
   className?: string;
 }
 
-export const Breadcrumb: React.FC<BreadcrumbProps> = ({ items, className }) => {
-  return (
+export const Breadcrumb: React.FC<BreadcrumbProps> = ({ items, className }) => (
     <nav
       className={cn('flex items-center space-x-1 text-sm', className)}
       aria-label="Breadcrumb"
@@ -61,4 +61,3 @@ export const Breadcrumb: React.FC<BreadcrumbProps> = ({ items, className }) => {
       </ol>
     </nav>
   );
-};

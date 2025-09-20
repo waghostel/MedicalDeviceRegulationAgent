@@ -199,8 +199,11 @@ export interface ExecutionMetrics {
  */
 export class RollbackStrategyManager {
   private config: RollbackConfiguration;
+
   private plans: Map<string, RollbackPlan> = new Map();
+
   private executions: Map<string, RollbackExecution> = new Map();
+
   private monitoring: boolean = false;
 
   constructor(config: RollbackConfiguration) {

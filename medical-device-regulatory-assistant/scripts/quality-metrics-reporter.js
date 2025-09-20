@@ -62,7 +62,7 @@ class QualityMetricsReporter {
   }
 
   logSection(title) {
-    console.log('\n' + '='.repeat(70));
+    console.log(`\n${  '='.repeat(70)}`);
     this.log(`${COLORS.BOLD}${title}${COLORS.RESET}`, COLORS.BLUE);
     console.log('='.repeat(70));
   }
@@ -185,7 +185,7 @@ class QualityMetricsReporter {
         const coverageData = JSON.parse(
           await fs.readFile(coveragePath, 'utf8')
         );
-        const total = coverageData.total;
+        const {total} = coverageData;
 
         return {
           statements: total.statements.pct,
@@ -208,7 +208,7 @@ class QualityMetricsReporter {
         const coverageData = JSON.parse(
           await fs.readFile(coveragePath, 'utf8')
         );
-        const total = coverageData.total;
+        const {total} = coverageData;
 
         return {
           statements: total.statements.pct,
@@ -284,7 +284,7 @@ class QualityMetricsReporter {
 
           chunks.push({
             file: path.relative(staticDir, file),
-            size: size,
+            size,
           });
         }
       }
@@ -398,7 +398,7 @@ class QualityMetricsReporter {
         const coverage = coverageData.totals?.percent_covered || 0;
 
         return {
-          coverage: coverage,
+          coverage,
           score: coverage,
         };
       } catch (e) {
@@ -414,7 +414,7 @@ class QualityMetricsReporter {
         const coverage = coverageData.totals?.percent_covered || 0;
 
         return {
-          coverage: coverage,
+          coverage,
           score: coverage,
         };
       }
@@ -526,8 +526,8 @@ class QualityMetricsReporter {
       dependencies: 0.15,
     };
 
-    let totalScore = 0;
-    let totalWeight = 0;
+    const totalScore = 0;
+    const totalWeight = 0;
 
     // Frontend contribution (50%)
     const frontendScore =
@@ -634,7 +634,7 @@ class QualityMetricsReporter {
 
     return {
       passed: passedGates === totalGates,
-      gates: gates,
+      gates,
       passed_count: passedGates,
       total_count: totalGates,
     };

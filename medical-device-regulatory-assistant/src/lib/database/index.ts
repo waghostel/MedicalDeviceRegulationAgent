@@ -55,9 +55,13 @@ export {
  */
 export class DatabaseIntegrationManager {
   private seedGenerator: DatabaseSeedGenerator;
+
   private seedExecutor: DatabaseSeedExecutor;
+
   private migrationManager: DatabaseMigrationManager;
+
   private testManager: DatabaseTestManager;
+
   private integrityValidator: DataIntegrityValidator;
 
   constructor(databaseUrl: string, config?: Partial<DatabaseTestConfig>) {

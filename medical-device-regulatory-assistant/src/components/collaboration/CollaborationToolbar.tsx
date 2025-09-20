@@ -3,11 +3,21 @@
  * Shows online users, typing indicators, and collaboration controls
  */
 
+import {
+  Users,
+  Wifi,
+  WifiOff,
+  Circle,
+  MessageCircle,
+  Settings,
+  Eye,
+  EyeOff,
+} from 'lucide-react';
 import React, { useState } from 'react';
-import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import {
   Popover,
   PopoverContent,
@@ -20,20 +30,12 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import {
-  Users,
-  Wifi,
-  WifiOff,
-  Circle,
-  MessageCircle,
-  Settings,
-  Eye,
-  EyeOff,
-} from 'lucide-react';
-import { useCollaboration } from './CollaborationProvider';
-import {
   TypingIndicators,
   UserPresenceIndicator,
 } from '@/components/ui/typing-indicators';
+import { cn } from '@/lib/utils';
+
+import { useCollaboration } from './CollaborationProvider';
 
 interface CollaborationToolbarProps {
   className?: string;
@@ -43,13 +45,13 @@ interface CollaborationToolbarProps {
   compact?: boolean;
 }
 
-export function CollaborationToolbar({
+export const CollaborationToolbar = ({
   className,
   projectId,
   showTypingIndicators = true,
   showPresenceIndicators = true,
   compact = false,
-}: CollaborationToolbarProps) {
+}: CollaborationToolbarProps) => {
   const {
     currentUser,
     onlineUsers,
@@ -299,10 +301,10 @@ interface FloatingCollaborationIndicatorProps {
   projectId?: number;
 }
 
-export function FloatingCollaborationIndicator({
+export const FloatingCollaborationIndicator = ({
   className,
   projectId,
-}: FloatingCollaborationIndicatorProps) {
+}: FloatingCollaborationIndicatorProps) => {
   const { onlineUsers, typingUsers, isConnected, getUsersInProject } =
     useCollaboration();
 

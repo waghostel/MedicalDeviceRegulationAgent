@@ -1,6 +1,9 @@
-import React from 'react';
 import { render, screen } from '@testing-library/react';
+import React from 'react';
+
 import { ProjectContextProvider } from '@/components/providers/ProjectContextProvider';
+
+import { AgentWorkflowPage } from '../AgentWorkflowPage';
 
 // Mock the entire AgentWorkflowPage component to prevent hanging
 jest.mock('../AgentWorkflowPage', () => ({
@@ -22,8 +25,6 @@ jest.mock('../AgentWorkflowPage', () => ({
     </div>
   ),
 }));
-
-import { AgentWorkflowPage } from '../AgentWorkflowPage';
 
 const mockProject = {
   id: 'test-project-1',
@@ -54,14 +55,10 @@ describe('AgentWorkflowPage', () => {
     );
 
     expect(
-      screen.getByText((content, element) => {
-        return element?.textContent === 'Current Project: Test Cardiac Device';
-      })
+      screen.getByText((content, element) => element?.textContent === 'Current Project: Test Cardiac Device')
     ).toBeInTheDocument();
     expect(
-      screen.getByText((content, element) => {
-        return element?.textContent === 'Device Type: Class II Medical Device';
-      })
+      screen.getByText((content, element) => element?.textContent === 'Device Type: Class II Medical Device')
     ).toBeInTheDocument();
   });
 

@@ -3,11 +3,12 @@
  * Verifies that next-auth works correctly with React 19 without internal API errors
  */
 
-import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { SessionProvider, useSession } from 'next-auth/react';
-import { createMockSession } from '@/lib/testing/test-utils';
+import React from 'react';
+
 import { generateMockUser } from '@/lib/mock-data';
+import { createMockSession } from '@/lib/testing/test-utils';
 
 // Test component that uses next-auth hooks
 const TestAuthComponent: React.FC = () => {

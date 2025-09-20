@@ -9,6 +9,7 @@
 
 import React from 'react';
 import { z } from 'zod';
+
 import {
   MockRegistry,
   MockMetadata,
@@ -119,9 +120,13 @@ export interface AutoLoadConfig {
 
 export class ComponentMockRegistry {
   private registry: Map<string, ComponentMockEntry> = new Map();
+
   private mockRegistry: MockRegistry;
+
   private autoLoadConfig: AutoLoadConfig;
+
   private validationCache: Map<string, ComponentValidationResult> = new Map();
+
   private testResults: Map<string, ComponentTestResult> = new Map();
 
   constructor(
@@ -405,7 +410,7 @@ export class ComponentMockRegistry {
     try {
       // Check if already loaded
       const existing = this.registry.get(componentName);
-      if (existing && existing.isRegistered) {
+      if (existing?.isRegistered) {
         existing.usageCount++;
         return existing;
       }
@@ -926,7 +931,7 @@ export class ComponentMockRegistry {
       // Remove from global registry
       if (global.__GLOBAL_MOCK_REGISTRY) {
         const componentMap = global.__GLOBAL_MOCK_REGISTRY.components;
-        if (componentMap && componentMap.delete) {
+        if (componentMap?.delete) {
           componentMap.delete(name);
         }
       }

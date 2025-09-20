@@ -3,14 +3,17 @@
  * Tests classification display, confidence scores, and various data states
  */
 
-import React from 'react';
 import { screen, fireEvent, waitFor } from '@testing-library/react';
+import React from 'react';
+
+import { generateMockDeviceClassification } from '@/lib/mock-data';
 import {
   renderWithProviders,
   createMockSession,
 } from '@/lib/testing/test-utils';
+
 import { ClassificationWidget } from '../classification-widget';
-import { generateMockDeviceClassification } from '@/lib/mock-data';
+
 
 describe('ClassificationWidget Component', () => {
   const mockSession = createMockSession();

@@ -54,7 +54,7 @@ function makeRequest(options) {
         resolve({
           statusCode: res.statusCode,
           headers: res.headers,
-          data: data,
+          data,
         });
       });
     });
@@ -89,10 +89,10 @@ async function testBackendHealth() {
     if (response.statusCode === 200) {
       logSuccess(`Backend health endpoint responded: ${response.statusCode}`);
       return true;
-    } else {
+    } 
       logError(`Backend health endpoint failed: ${response.statusCode}`);
       return false;
-    }
+    
   } catch (error) {
     logError(`Backend health endpoint error: ${error.message}`);
     return false;
@@ -123,10 +123,10 @@ async function testBackendRoot() {
         logWarning('Could not parse backend response as JSON');
       }
       return true;
-    } else {
+    } 
       logError(`Backend root endpoint failed: ${response.statusCode}`);
       return false;
-    }
+    
   } catch (error) {
     logError(`Backend root endpoint error: ${error.message}`);
     return false;
@@ -150,10 +150,10 @@ async function testFrontendHealth() {
     if (response.statusCode === 200) {
       logSuccess(`Frontend responded: ${response.statusCode}`);
       return true;
-    } else {
+    } 
       logError(`Frontend failed: ${response.statusCode}`);
       return false;
-    }
+    
   } catch (error) {
     logError(`Frontend error: ${error.message}`);
     return false;
@@ -180,10 +180,10 @@ async function testCORS() {
     if (corsHeaders) {
       logSuccess(`CORS configured correctly: ${corsHeaders}`);
       return true;
-    } else {
+    } 
       logWarning('CORS headers not found - may need configuration');
       return false;
-    }
+    
   } catch (error) {
     logError(`CORS test error: ${error.message}`);
     return false;
@@ -210,13 +210,13 @@ async function testAPIStructure() {
         'Projects endpoint properly protected (requires authentication)'
       );
       return true;
-    } else if (response.statusCode === 200) {
+    } if (response.statusCode === 200) {
       logWarning('Projects endpoint accessible without authentication');
       return true;
-    } else {
+    } 
       logError(`Projects endpoint unexpected response: ${response.statusCode}`);
       return false;
-    }
+    
   } catch (error) {
     logError(`API structure test error: ${error.message}`);
     return false;
@@ -254,7 +254,7 @@ async function runVerification() {
   };
 
   let passedTests = 0;
-  let totalTests = Object.keys(results).length;
+  const totalTests = Object.keys(results).length;
 
   for (const [key, passed] of Object.entries(results)) {
     if (passed) {

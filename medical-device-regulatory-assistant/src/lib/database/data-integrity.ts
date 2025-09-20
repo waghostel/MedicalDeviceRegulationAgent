@@ -3,8 +3,6 @@
  * Validates data consistency between mock data and database schema
  */
 
-import { DatabaseConnection } from './seeder';
-import { DatabaseSeed } from '../mock-data/generators';
 import {
   Project,
   DeviceClassification,
@@ -12,6 +10,10 @@ import {
   AgentInteraction,
   ProjectDocument,
 } from '@/types/project';
+
+import { DatabaseSeed } from '../mock-data/generators';
+
+import { DatabaseConnection } from './seeder';
 
 export interface IntegrityValidationResult {
   valid: boolean;
@@ -143,6 +145,7 @@ export interface SchemaIssue {
  */
 export class DataIntegrityValidator {
   private connection: DatabaseConnection;
+
   private rules: Map<string, ValidationRule> = new Map();
 
   constructor(connection: DatabaseConnection) {

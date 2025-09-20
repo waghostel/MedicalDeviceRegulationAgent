@@ -111,7 +111,7 @@ try {
     }
   });
 
-  console.log('\n' + '-'.repeat(60));
+  console.log(`\n${  '-'.repeat(60)}`);
   console.log(`Summary: ${passed} passed, ${failed} failed`);
 
   if (failed === 0) {
@@ -126,7 +126,7 @@ try {
   const classes = (content.match(/class /g) || []).length;
   const interfaces = (content.match(/interface /g) || []).length;
 
-  console.log('\n' + '-'.repeat(60));
+  console.log(`\n${  '-'.repeat(60)}`);
   console.log('Implementation Statistics:');
   console.log(`   Lines of code: ${lines}`);
   console.log(`   Functions/methods: ${functions}`);
@@ -159,7 +159,7 @@ try {
     console.log('   ❌ Test file not found');
   }
 
-  console.log('\n' + '='.repeat(60));
+  console.log(`\n${  '='.repeat(60)}`);
 
   if (failed === 0) {
     console.log(

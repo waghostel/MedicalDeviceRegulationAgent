@@ -42,26 +42,25 @@ const obj = {
 `;
 
   fs.writeFileSync('temp-test-file.js', testContent);
-  
+
   // Run ESLint auto-fix
   execSync('pnpm eslint temp-test-file.js --fix', { stdio: 'pipe' });
-  
+
   // Check if file was modified
   const fixedContent = fs.readFileSync('temp-test-file.js', 'utf8');
-  
+
   if (fixedContent.includes('const') && fixedContent.includes('testFunc,')) {
     console.log('✅ Auto-fix is working correctly');
   } else {
     console.log('⚠️  Auto-fix may not be working as expected');
   }
-  
+
   // Clean up
   fs.unlinkSync('temp-test-file.js');
-  
 } catch (error) {
   console.log('❌ Auto-fix test failed');
   console.log('Error:', error.message);
-  
+
   // Clean up on error
   if (fs.existsSync('temp-test-file.js')) {
     fs.unlinkSync('temp-test-file.js');
@@ -73,14 +72,17 @@ console.log('\n3. Testing package.json scripts...');
 const packageJson = JSON.parse(fs.readFileSync('package.json', 'utf8'));
 
 const requiredScripts = {
-  'lint': 'pnpm format && eslint .',
+  lint: 'pnpm format && eslint .',
   'lint:fix': 'pnpm format && eslint . --fix',
-  'format': 'prettier --write .',
+  format: 'prettier --write .',
 };
 
 let scriptsValid = true;
 Object.entries(requiredScripts).forEach(([script, expectedCommand]) => {
-  if (packageJson.scripts[script] && packageJson.scripts[script].includes('eslint')) {
+  if (
+    packageJson.scripts[script] &&
+    packageJson.scripts[script].includes('eslint')
+  ) {
     console.log(`✅ Script "${script}" is configured correctly`);
   } else {
     console.log(`❌ Script "${script}" is missing or incorrect`);

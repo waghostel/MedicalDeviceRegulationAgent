@@ -3,13 +3,14 @@
  * Tests the mock structure against actual component usage
  */
 
-import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { useToastMock, toastMockUtils } from '../use-toast-mock';
+import React from 'react';
+
 import {
   setupUseToastMock,
   cleanupUseToastMock,
 } from '../setup-use-toast-mock';
+import { useToastMock, toastMockUtils } from '../use-toast-mock';
 
 // Simple test component that uses useToast
 const TestComponent: React.FC = () => {

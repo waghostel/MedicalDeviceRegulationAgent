@@ -5,17 +5,6 @@
 
 'use client';
 
-import React from 'react';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
   CheckCircle,
   Clock,
@@ -29,14 +18,26 @@ import {
   Upload,
   Bot,
 } from 'lucide-react';
+import React from 'react';
+
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { ActivityItem, ActivityWidgetProps } from '@/types/dashboard';
 
-export function ActivityWidget({
+export const ActivityWidget = ({
   activities,
   loading = false,
   error,
   onRefresh,
-}: ActivityWidgetProps) {
+}: ActivityWidgetProps) => {
   const getActivityIcon = (type: string) => {
     switch (type) {
       case 'classification':
@@ -87,16 +88,16 @@ export function ActivityWidget({
 
     if (diffInSeconds < 60) {
       return 'Just now';
-    } else if (diffInSeconds < 3600) {
+    } if (diffInSeconds < 3600) {
       const minutes = Math.floor(diffInSeconds / 60);
       return `${minutes}m ago`;
-    } else if (diffInSeconds < 86400) {
+    } if (diffInSeconds < 86400) {
       const hours = Math.floor(diffInSeconds / 3600);
       return `${hours}h ago`;
-    } else {
+    } 
       const days = Math.floor(diffInSeconds / 86400);
       return `${days}d ago`;
-    }
+    
   };
 
   if (error) {

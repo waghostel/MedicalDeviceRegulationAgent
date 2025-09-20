@@ -155,13 +155,11 @@ export function useLoadingState(initialState: Partial<LoadingState> = {}) {
   }, []);
 
   // Cleanup on unmount
-  useEffect(() => {
-    return () => {
+  useEffect(() => () => {
       if (progressInterval.current) {
         clearInterval(progressInterval.current);
       }
-    };
-  }, []);
+    }, []);
 
   return {
     ...state,
@@ -354,11 +352,11 @@ function formatTimeRemaining(milliseconds: number): string {
 
   if (seconds < 60) {
     return `${seconds}s`;
-  } else if (seconds < 3600) {
+  } if (seconds < 3600) {
     const minutes = Math.ceil(seconds / 60);
     return `${minutes}m`;
-  } else {
+  } 
     const hours = Math.ceil(seconds / 3600);
     return `${hours}h`;
-  }
+  
 }

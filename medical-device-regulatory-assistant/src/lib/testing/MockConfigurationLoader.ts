@@ -8,6 +8,7 @@
  */
 
 import { z } from 'zod';
+
 import {
   MockRegistry,
   MockRegistryConfig,
@@ -123,8 +124,11 @@ const MockConfigurationFileSchema = z.object({
 
 export class MockConfigurationLoader {
   private registry: MockRegistry;
+
   private options: LoaderOptions;
+
   private loadedConfigurations: Map<string, MockConfigurationFile> = new Map();
+
   private implementationCache: Map<string, any> = new Map();
 
   constructor(registry?: MockRegistry, options?: Partial<LoaderOptions>) {
@@ -539,7 +543,7 @@ export class MockConfigurationLoader {
       } else {
         // Search all loaded configurations
         for (const config of this.loadedConfigurations.values()) {
-          if (config.presets && config.presets[presetName]) {
+          if (config.presets?.[presetName]) {
             targetConfig = config;
             break;
           }
@@ -547,9 +551,7 @@ export class MockConfigurationLoader {
       }
 
       if (
-        !targetConfig ||
-        !targetConfig.presets ||
-        !targetConfig.presets[presetName]
+        !targetConfig?.presets?.[presetName]
       ) {
         errors.push(`Preset '${presetName}' not found`);
         return {

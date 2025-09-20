@@ -1,15 +1,16 @@
-import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { axe, toHaveNoViolations } from 'jest-axe';
 import userEvent from '@testing-library/user-event';
+import { axe, toHaveNoViolations } from 'jest-axe';
+import React from 'react';
+
+import { AccessibilityProvider } from '@/components/accessibility/AccessibilityFeatures';
+import { KeyboardShortcutsProvider } from '@/components/accessibility/KeyboardShortcuts';
 import { ErrorBoundary } from '@/components/error/ErrorBoundary';
 import { ErrorMessage } from '@/components/error/ErrorMessage';
 import {
   ValidatedInput,
   ValidatedTextarea,
 } from '@/components/forms/FormValidation';
-import { KeyboardShortcutsProvider } from '@/components/accessibility/KeyboardShortcuts';
-import { AccessibilityProvider } from '@/components/accessibility/AccessibilityFeatures';
 import { OnboardingFlow } from '@/components/onboarding/OnboardingFlow';
 import { Tooltip, HelpTooltip } from '@/components/onboarding/Tooltips';
 

@@ -113,7 +113,7 @@ function testFrontendValidator() {
   const instructions = validator.generateSetupInstructions(allResults);
   console.log(`   Generated instructions: ${instructions.length} characters`);
   console.log('   Sample instructions:');
-  console.log('   ' + instructions.split('\n').slice(0, 5).join('\n   '));
+  console.log(`   ${  instructions.split('\n').slice(0, 5).join('\n   ')}`);
 
   console.log('\n9. Testing Validation Summary Display...');
   const summaryResult = validator.printValidationSummary(allResults);
@@ -133,7 +133,7 @@ function main() {
   const validatorResult = testFrontendValidator();
 
   // Summary
-  console.log('\n' + '='.repeat(60));
+  console.log(`\n${  '='.repeat(60)}`);
   console.log('TEST SUMMARY');
   console.log('='.repeat(60));
   console.log(

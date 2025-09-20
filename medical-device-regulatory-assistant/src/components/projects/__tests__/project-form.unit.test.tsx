@@ -3,16 +3,18 @@
  * Tests form validation, submission, and dialog behavior
  */
 
-import React from 'react';
 import { screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import React from 'react';
+
+import { generateMockProject } from '@/lib/mock-data';
 import {
   renderWithProviders,
   createMockSession,
 } from '@/lib/testing/test-utils';
-import { ProjectForm } from '../project-form';
-import { generateMockProject } from '@/lib/mock-data';
 import { ProjectStatus } from '@/types/project';
+
+import { ProjectForm } from '../project-form';
 
 // Mock the toast hook
 jest.mock('@/hooks/use-toast', () => ({

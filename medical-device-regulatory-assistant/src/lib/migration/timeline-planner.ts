@@ -365,7 +365,9 @@ export interface PathOptimization {
  */
 export class TimelinePlanner {
   private baseDate: Date;
+
   private workingDaysPerWeek: number = 5;
+
   private hoursPerDay: number = 8;
 
   constructor(startDate?: Date) {

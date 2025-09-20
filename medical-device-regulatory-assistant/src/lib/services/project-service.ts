@@ -46,10 +46,12 @@ const MOCK_PROJECTS: Project[] = [
 
 class ProjectService {
   private baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+
   private cache = new Map<
     string,
     { data: any; timestamp: number; ttl: number }
   >();
+
   private readonly CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
   /**
@@ -429,12 +431,12 @@ class ProjectService {
       if (format === 'json') {
         const jsonString = JSON.stringify(exportData, null, 2);
         return new Blob([jsonString], { type: 'application/json' });
-      } else {
+      } 
         // For PDF, we'd need a PDF generation library
         // For now, return JSON as fallback
         const jsonString = JSON.stringify(exportData, null, 2);
         return new Blob([jsonString], { type: 'application/json' });
-      }
+      
     } catch (error) {
       console.error(`Failed to export project ${projectId}:`, error);
       throw error;

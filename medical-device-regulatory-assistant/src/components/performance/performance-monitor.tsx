@@ -5,13 +5,6 @@
  * for tracking application performance and identifying bottlenecks.
  */
 
-import React, { useState, useEffect, useCallback, memo } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
   Activity,
   Zap,
@@ -25,14 +18,22 @@ import {
   TrendingUp,
   TrendingDown,
 } from 'lucide-react';
+import React, { useState, useEffect, useCallback, memo } from 'react';
+
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { apiCache, memoryCache, getCacheSize } from '@/lib/performance/caching';
 import {
   usePerformanceMonitor,
   useMemoryMonitoring,
   performanceMonitor,
 } from '@/lib/performance/optimization';
-import { useWebVitals } from '@/lib/web-vitals';
-import { apiCache, memoryCache, getCacheSize } from '@/lib/performance/caching';
 import { cn } from '@/lib/utils';
+import { useWebVitals } from '@/lib/web-vitals';
 
 interface PerformanceAlert {
   id: string;
@@ -193,7 +194,7 @@ const AlertsList = memo(({ alerts }: { alerts: PerformanceAlert[] }) => {
 });
 AlertsList.displayName = 'AlertsList';
 
-export const PerformanceMonitor = memo(function PerformanceMonitor() {
+export const PerformanceMonitor = memo(() => {
   const { metrics, recordMetric } = usePerformanceMonitor();
   const { metrics: webVitals, scores } = useWebVitals();
   const memoryInfo = useMemoryMonitoring();

@@ -3,13 +3,14 @@
  * Provides seamless transition between mock and real data implementations
  */
 
-import { FeatureFlagManager, FlagEvaluationContext } from './feature-flags';
 import {
   Project,
   DeviceClassification,
   PredicateDevice,
   AgentInteraction,
 } from '@/types/project';
+
+import { FeatureFlagManager, FlagEvaluationContext } from './feature-flags';
 
 export interface CompatibilityConfig {
   enableFeatureFlags: boolean;
@@ -58,9 +59,13 @@ export interface DataAdapter<T> {
  */
 export class CompatibilityLayerManager {
   private flagManager: FeatureFlagManager;
+
   private config: CompatibilityConfig;
+
   private dataSources: Map<string, DataSource> = new Map();
+
   private metrics: CompatibilityMetrics;
+
   private adapters: Map<string, DataAdapter<any>> = new Map();
 
   constructor(

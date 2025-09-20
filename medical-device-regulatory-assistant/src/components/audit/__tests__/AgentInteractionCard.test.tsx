@@ -1,7 +1,10 @@
-import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { AgentInteractionCard } from '../AgentInteractionCard';
+import React from 'react';
+
 import { AgentInteraction } from '@/types/audit';
+
+import { AgentInteractionCard } from '../AgentInteractionCard';
+
 
 // Mock the child components
 jest.mock('../ReasoningTrace', () => ({

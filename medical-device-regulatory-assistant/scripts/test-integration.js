@@ -61,12 +61,12 @@ async function testHealthEndpoint() {
       const data = await response.json();
       logSuccess(`Health endpoint responded: ${data.status}`);
       return true;
-    } else {
+    } 
       logError(
         `Health endpoint failed: ${response.status} ${response.statusText}`
       );
       return false;
-    }
+    
   } catch (error) {
     logError(`Health endpoint error: ${error.message}`);
     return false;
@@ -90,17 +90,17 @@ async function testProjectsEndpoint() {
         `Projects endpoint responded with ${projects.length} projects`
       );
       return true;
-    } else if (response.status === 401) {
+    } if (response.status === 401) {
       logWarning(
         'Projects endpoint requires authentication (expected for production)'
       );
       return true; // This is expected behavior
-    } else {
+    } 
       logError(
         `Projects endpoint failed: ${response.status} ${response.statusText}`
       );
       return false;
-    }
+    
   } catch (error) {
     logError(`Projects endpoint error: ${error.message}`);
     return false;
@@ -126,18 +126,18 @@ async function testProjectCreation() {
         `Project created successfully: ${project.name} (ID: ${project.id})`
       );
       return project.id;
-    } else if (response.status === 401) {
+    } if (response.status === 401) {
       logWarning(
         'Project creation requires authentication (expected for production)'
       );
       return null;
-    } else {
+    } 
       const errorData = await response.json().catch(() => ({}));
       logError(
         `Project creation failed: ${response.status} - ${errorData.message || response.statusText}`
       );
       return null;
-    }
+    
   } catch (error) {
     logError(`Project creation error: ${error.message}`);
     return null;
@@ -171,13 +171,13 @@ async function testProjectUpdate(projectId) {
       const project = await response.json();
       logSuccess(`Project updated successfully: ${project.name}`);
       return true;
-    } else {
+    } 
       const errorData = await response.json().catch(() => ({}));
       logError(
         `Project update failed: ${response.status} - ${errorData.message || response.statusText}`
       );
       return false;
-    }
+    
   } catch (error) {
     logError(`Project update error: ${error.message}`);
     return false;
@@ -203,13 +203,13 @@ async function testProjectDeletion(projectId) {
     if (response.ok) {
       logSuccess('Project deleted successfully');
       return true;
-    } else {
+    } 
       const errorData = await response.json().catch(() => ({}));
       logError(
         `Project deletion failed: ${response.status} - ${errorData.message || response.statusText}`
       );
       return false;
-    }
+    
   } catch (error) {
     logError(`Project deletion error: ${error.message}`);
     return false;
@@ -297,10 +297,10 @@ async function testErrorHandling() {
     if (response.status === 404) {
       logSuccess('404 error handling works correctly');
       return true;
-    } else {
+    } 
       logWarning(`Expected 404, got ${response.status}`);
       return false;
-    }
+    
   } catch (error) {
     logError(`Error handling test failed: ${error.message}`);
     return false;
@@ -368,7 +368,7 @@ async function runIntegrationTests() {
   };
 
   let passedTests = 0;
-  let totalTests = Object.keys(results).length;
+  const totalTests = Object.keys(results).length;
 
   for (const [key, passed] of Object.entries(results)) {
     if (passed) {

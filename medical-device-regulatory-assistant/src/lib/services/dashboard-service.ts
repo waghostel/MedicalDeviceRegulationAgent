@@ -11,6 +11,7 @@ export class DashboardService {
     string,
     { data: any; timestamp: number; ttl: number }
   >();
+
   private readonly CACHE_TTL = 2 * 60 * 1000; // 2 minutes for dashboard data
 
   /**

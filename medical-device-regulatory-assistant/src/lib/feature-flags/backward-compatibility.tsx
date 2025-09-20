@@ -4,6 +4,7 @@
  */
 
 import React from 'react';
+
 import {
   useFeatureFlag,
   MIGRATION_FLAGS,
@@ -24,7 +25,7 @@ export interface BackwardCompatibilityProps {
  * Higher-order component that switches between mock and real implementations
  * based on feature flag evaluation
  */
-export function BackwardCompatibilityWrapper({
+export const BackwardCompatibilityWrapper = ({
   flagKey,
   mockComponent: MockComponent,
   realComponent: RealComponent,
@@ -32,7 +33,7 @@ export function BackwardCompatibilityWrapper({
   context,
   fallbackToMock = true,
   children,
-}: BackwardCompatibilityProps) {
+}: BackwardCompatibilityProps) => {
   const { isEnabled, isLoading, evaluation } = useFeatureFlag(flagKey, context);
 
   // Show loading state while evaluating feature flag
@@ -151,11 +152,10 @@ export function useConditionalData<T>(
  */
 
 // Project data migration wrapper
-export function ProjectDataWrapper({
+export const ProjectDataWrapper = ({
   children,
   ...props
-}: Omit<BackwardCompatibilityProps, 'flagKey'>) {
-  return (
+}: Omit<BackwardCompatibilityProps, 'flagKey'>) => (
     <BackwardCompatibilityWrapper
       flagKey={MIGRATION_FLAGS.USE_REAL_PROJECT_DATA}
       context={{ component: 'ProjectData' }}
@@ -163,15 +163,13 @@ export function ProjectDataWrapper({
     >
       {children}
     </BackwardCompatibilityWrapper>
-  );
-}
+  )
 
 // Classification data migration wrapper
-export function ClassificationDataWrapper({
+export const ClassificationDataWrapper = ({
   children,
   ...props
-}: Omit<BackwardCompatibilityProps, 'flagKey'>) {
-  return (
+}: Omit<BackwardCompatibilityProps, 'flagKey'>) => (
     <BackwardCompatibilityWrapper
       flagKey={MIGRATION_FLAGS.USE_REAL_CLASSIFICATION_DATA}
       context={{ component: 'ClassificationData' }}
@@ -179,15 +177,13 @@ export function ClassificationDataWrapper({
     >
       {children}
     </BackwardCompatibilityWrapper>
-  );
-}
+  )
 
 // Predicate data migration wrapper
-export function PredicateDataWrapper({
+export const PredicateDataWrapper = ({
   children,
   ...props
-}: Omit<BackwardCompatibilityProps, 'flagKey'>) {
-  return (
+}: Omit<BackwardCompatibilityProps, 'flagKey'>) => (
     <BackwardCompatibilityWrapper
       flagKey={MIGRATION_FLAGS.USE_REAL_PREDICATE_DATA}
       context={{ component: 'PredicateData' }}
@@ -195,15 +191,13 @@ export function PredicateDataWrapper({
     >
       {children}
     </BackwardCompatibilityWrapper>
-  );
-}
+  )
 
 // Agent backend migration wrapper
-export function AgentBackendWrapper({
+export const AgentBackendWrapper = ({
   children,
   ...props
-}: Omit<BackwardCompatibilityProps, 'flagKey'>) {
-  return (
+}: Omit<BackwardCompatibilityProps, 'flagKey'>) => (
     <BackwardCompatibilityWrapper
       flagKey={MIGRATION_FLAGS.USE_REAL_AGENT_BACKEND}
       context={{ component: 'AgentBackend' }}
@@ -211,19 +205,18 @@ export function AgentBackendWrapper({
     >
       {children}
     </BackwardCompatibilityWrapper>
-  );
-}
+  )
 
 /**
  * Migration status indicator component
  */
-export function MigrationStatusIndicator({
+export const MigrationStatusIndicator = ({
   flagKey,
   className = '',
 }: {
   flagKey: string;
   className?: string;
-}) {
+}) => {
   const { isEnabled, evaluation } = useFeatureFlag(flagKey);
 
   if (process.env.NODE_ENV !== 'development') {
@@ -273,14 +266,14 @@ export interface ABTestProps {
   context?: Partial<FeatureFlagContext>;
 }
 
-export function ABTestWrapper({
+export const ABTestWrapper = ({
   flagKey,
   mockComponent: MockComponent,
   realComponent: RealComponent,
   componentProps = {},
   onPerformanceMetric,
   context,
-}: ABTestProps) {
+}: ABTestProps) => {
   const { isEnabled } = useFeatureFlag(flagKey, context);
   const [renderTime, setRenderTime] = React.useState<number>(0);
   const [errorCount, setErrorCount] = React.useState<number>(0);

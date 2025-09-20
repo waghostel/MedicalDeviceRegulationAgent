@@ -3,9 +3,10 @@
  */
 
 import { useState, useCallback, useRef, useEffect } from 'react';
+
 import { toast } from '@/hooks/use-toast';
-import { APIError } from '@/types/error';
 import { errorReporting, trackAction } from '@/lib/services/error-reporting';
+import { APIError } from '@/types/error';
 
 interface ErrorState {
   error: APIError | null;
@@ -206,13 +207,11 @@ export function useErrorHandling(
     errorState.error?.retryable && errorState.retryCount < maxRetries;
 
   // Cleanup on unmount
-  useEffect(() => {
-    return () => {
+  useEffect(() => () => {
       if (retryTimeoutRef.current) {
         clearTimeout(retryTimeoutRef.current);
       }
-    };
-  }, []);
+    }, []);
 
   return {
     error: errorState.error,

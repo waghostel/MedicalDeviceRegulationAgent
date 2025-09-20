@@ -268,6 +268,7 @@ export interface ContingencyPlan {
  */
 export class MigrationStrategyAnalyzer {
   private components: ComponentMockUsage[] = [];
+
   private priorities: MigrationPriority[] = [];
 
   /**
@@ -540,7 +541,7 @@ export class MigrationStrategyAnalyzer {
   private calculateUserImpact(
     analysis: ComponentMockUsage
   ): 'critical' | 'high' | 'medium' | 'low' {
-    const componentName = analysis.componentName;
+    const {componentName} = analysis;
 
     if (
       componentName.includes('classification-widget') ||

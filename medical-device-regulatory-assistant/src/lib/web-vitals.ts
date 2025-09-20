@@ -1,4 +1,7 @@
+import { useState, useEffect, useMemo } from 'react';
 import { onCLS, onFCP, onFID, onLCP, onTTFB, type Metric } from 'web-vitals';
+
+// Add missing imports
 
 export interface WebVitalsMetrics {
   fcp: number | null;
@@ -35,11 +38,11 @@ export function getWebVitalScore(
 
   if (value <= thresholds.good) {
     return 'good';
-  } else if (value <= thresholds.needsImprovement) {
+  } if (value <= thresholds.needsImprovement) {
     return 'needs-improvement';
-  } else {
+  } 
     return 'poor';
-  }
+  
 }
 
 export class WebVitalsCollector {
@@ -239,21 +242,16 @@ export function useWebVitals(): {
     }
   }, []);
 
-  const scores = useMemo(() => {
-    return {
+  const scores = useMemo(() => ({
       fcp: metrics.fcp ? getWebVitalScore('fcp', metrics.fcp) : null,
       lcp: metrics.lcp ? getWebVitalScore('lcp', metrics.lcp) : null,
       cls: metrics.cls ? getWebVitalScore('cls', metrics.cls) : null,
       fid: metrics.fid ? getWebVitalScore('fid', metrics.fid) : null,
       ttfb: metrics.ttfb ? getWebVitalScore('ttfb', metrics.ttfb) : null,
-    };
-  }, [metrics]);
+    }), [metrics]);
 
   return { metrics, scores, isLoading };
 }
-
-// Add missing imports
-import { useState, useEffect, useMemo } from 'react';
 
 // Extend Window interface for gtag
 declare global {

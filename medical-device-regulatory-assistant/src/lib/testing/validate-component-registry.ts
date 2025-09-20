@@ -4,6 +4,7 @@
  */
 
 import React from 'react';
+
 import { ComponentMockRegistry } from './ComponentMockRegistry';
 import { MockRegistry } from './MockRegistry';
 
@@ -214,7 +215,7 @@ export function runComponentMockRegistryValidation(): void {
   }
 
   // Summary
-  console.log('\n' + '='.repeat(60));
+  console.log(`\n${  '='.repeat(60)}`);
   console.log('Validation Summary:');
   console.log(
     `Basic Validation: ${basicValidation.success ? '✅ PASSED' : '❌ FAILED'}`

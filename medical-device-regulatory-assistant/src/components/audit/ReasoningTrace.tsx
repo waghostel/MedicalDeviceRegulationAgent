@@ -1,6 +1,14 @@
 'use client';
 
+import {
+  CheckCircle,
+  AlertTriangle,
+  Info,
+  ArrowRight,
+  ExternalLink,
+} from 'lucide-react';
 import React from 'react';
+
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import {
@@ -9,20 +17,13 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import {
-  CheckCircle,
-  AlertTriangle,
-  Info,
-  ArrowRight,
-  ExternalLink,
-} from 'lucide-react';
 import { ExpandedReasoning, ReasoningStep } from '@/types/audit';
 
 interface ReasoningTraceProps {
   reasoning: ExpandedReasoning;
 }
 
-export function ReasoningTrace({ reasoning }: ReasoningTraceProps) {
+export const ReasoningTrace = ({ reasoning }: ReasoningTraceProps) => {
   const getStepIcon = (step: ReasoningStep, index: number) => {
     if (step.confidence && step.confidence >= 0.8) {
       return <CheckCircle className="h-4 w-4 text-green-500" />;

@@ -3,12 +3,12 @@
  * Tests for dashboard data flow and real-time updates
  */
 
-import React from 'react';
-import { screen, fireEvent, waitFor } from '@testing-library/react';
 import { jest } from '@jest/globals';
+import { screen, fireEvent, waitFor } from '@testing-library/react';
+import React from 'react';
+
 import { RegulatoryDashboard } from '@/components/dashboard/regulatory-dashboard';
 import { useDashboard } from '@/hooks/use-dashboard';
-import { DashboardData } from '@/types/dashboard';
 import {
   renderWithProviders,
   waitForAsyncUpdates,
@@ -16,6 +16,7 @@ import {
   setupTestEnvironment,
   cleanupTestEnvironment,
 } from '@/lib/testing/react-test-utils';
+import { DashboardData } from '@/types/dashboard';
 
 // Mock the dashboard hook
 const mockUseDashboard = jest.fn();

@@ -4,8 +4,8 @@
  */
 
 import { toast } from '@/hooks/use-toast';
-import { APIError } from '@/types/error';
 import { trackAPICall } from '@/lib/services/error-reporting';
+import { APIError } from '@/types/error';
 
 // Types for API responses and errors
 export interface ApiResponse<T = any> {
@@ -41,7 +41,9 @@ export interface RequestConfig {
 
 class ApiClient {
   private baseUrl: string;
+
   private defaultHeaders: Record<string, string>;
+
   private defaultRetryConfig: RetryConfig;
 
   constructor(
@@ -55,10 +57,10 @@ class ApiClient {
       maxRetries: 3,
       baseDelay: 1000,
       maxDelay: 10000,
-      retryCondition: (error) => {
+      retryCondition: (error) => 
         // Retry on network errors and 5xx server errors
-        return !error.status || error.status >= 500;
-      },
+         !error.status || error.status >= 500
+      ,
     };
   }
 
@@ -67,9 +69,9 @@ class ApiClient {
    */
   setAuthToken(token: string | null) {
     if (token) {
-      this.defaultHeaders['Authorization'] = `Bearer ${token}`;
+      this.defaultHeaders.Authorization = `Bearer ${token}`;
     } else {
-      delete this.defaultHeaders['Authorization'];
+      delete this.defaultHeaders.Authorization;
     }
   }
 
@@ -117,7 +119,7 @@ class ApiClient {
 
         // Calculate delay with exponential backoff
         const delay = Math.min(
-          retryConfig.baseDelay * Math.pow(2, attempt),
+          retryConfig.baseDelay * 2**attempt,
           retryConfig.maxDelay
         );
 

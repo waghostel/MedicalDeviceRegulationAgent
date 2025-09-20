@@ -5,6 +5,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
+
 import { authOptions } from '@/lib/auth';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:8000';
@@ -29,7 +30,7 @@ export async function GET(
 ) {
   try {
     const headers = await getAuthHeaders(request);
-    const sessionId = params.sessionId;
+    const {sessionId} = params;
 
     // Create a readable stream that proxies the backend SSE stream
     const stream = new ReadableStream({

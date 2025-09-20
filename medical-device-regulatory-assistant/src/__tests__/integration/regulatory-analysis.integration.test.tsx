@@ -3,7 +3,6 @@
  * Tests device classification, predicate search, comparison analysis, and agent conversations
  */
 
-import React from 'react';
 import {
   render,
   screen,
@@ -12,6 +11,18 @@ import {
   within,
 } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import React from 'react';
+
+import { AgentWorkflowPage } from '@/components/agent/AgentWorkflowPage';
+import { ClassificationWidget } from '@/components/dashboard/classification-widget';
+import { PredicateWidget } from '@/components/dashboard/predicate-widget';
+import {
+  generateMockDeviceClassification,
+  generateMockPredicateDevices,
+  generateMockAgentInteraction,
+  generateMockUser,
+  generateMockProject,
+} from '@/lib/mock-data';
 import {
   setupMockAPI,
   teardownMockAPI,
@@ -21,18 +32,8 @@ import {
   renderWithProviders,
   createMockSession,
 } from '@/lib/testing/test-utils';
-import {
-  generateMockDeviceClassification,
-  generateMockPredicateDevices,
-  generateMockAgentInteraction,
-  generateMockUser,
-  generateMockProject,
-} from '@/lib/mock-data';
-import { ClassificationWidget } from '@/components/dashboard/classification-widget';
-import { PredicateWidget } from '@/components/dashboard/predicate-widget';
-import { AgentWorkflowPage } from '@/components/agent/AgentWorkflowPage';
-import { DeviceClassification, PredicateDevice } from '@/types/dashboard';
 import { ProjectContext } from '@/types/copilot';
+import { DeviceClassification, PredicateDevice } from '@/types/dashboard';
 
 // Mock CopilotKit components
 jest.mock('@copilotkit/react-core', () => ({

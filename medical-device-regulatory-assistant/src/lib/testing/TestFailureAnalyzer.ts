@@ -7,8 +7,8 @@
  * Requirements: 5.4, 6.2
  */
 
-import { ReactWrapper } from 'enzyme';
 import { RenderResult } from '@testing-library/react';
+import { ReactWrapper } from 'enzyme';
 
 export interface TestFailureReport {
   testName: string;
@@ -96,7 +96,9 @@ export type FailureCategory =
 
 export class TestFailureAnalyzer {
   private static instance: TestFailureAnalyzer;
+
   private failureHistory: TestFailureReport[] = [];
+
   private errorPatterns: Map<string, FailurePattern> = new Map();
 
   constructor() {
@@ -362,7 +364,7 @@ ${this.generateHookIssuesSection(report.analysis.hookIssues)}
     error: Error | AggregateError,
     category: FailureCategory
   ): string {
-    const message = error.message;
+    const {message} = error;
 
     switch (category) {
       case 'REACT_19_COMPATIBILITY':

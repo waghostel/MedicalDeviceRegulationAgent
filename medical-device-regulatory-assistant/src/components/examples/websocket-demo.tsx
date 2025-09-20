@@ -6,20 +6,21 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ConnectionStatus } from '@/components/ui/connection-status';
-import { TypingIndicators } from '@/components/ui/typing-indicators';
+import { Input } from '@/components/ui/input';
 import { StreamingResponse } from '@/components/ui/streaming-response';
+import { TypingIndicators } from '@/components/ui/typing-indicators';
 import {
   useRealtimeMessaging,
   useTypingIndicators,
   useStreamingResponse,
 } from '@/hooks/use-websocket';
 
-export function WebSocketDemo() {
+export const WebSocketDemo = () => {
   const [message, setMessage] = useState('');
   const [userId] = useState(`user-${Math.random().toString(36).substr(2, 9)}`);
 

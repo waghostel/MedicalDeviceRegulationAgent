@@ -6,18 +6,6 @@
 
 'use client';
 
-import React from 'react';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
   CheckCircle,
   Clock,
@@ -27,6 +15,19 @@ import {
   ExternalLink,
   Loader2,
 } from 'lucide-react';
+import React from 'react';
+
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
 import { useClassification } from '@/hooks/use-classification';
 
 interface ClassificationWidgetProps {
@@ -34,10 +35,10 @@ interface ClassificationWidgetProps {
   autoRefresh?: boolean;
 }
 
-export function ClassificationWidget({
+export const ClassificationWidget = ({
   projectId,
   autoRefresh = false,
-}: ClassificationWidgetProps) {
+}: ClassificationWidgetProps) => {
   const {
     classification,
     loading,

@@ -5,12 +5,13 @@
  * props analysis, context validation, and DOM structure inspection.
  */
 
+import { render } from '@testing-library/react';
 import React from 'react';
+
 import {
   ComponentRenderingDebugger,
   componentRenderingDebugger,
 } from '../ComponentRenderingDebugger';
-import { render } from '@testing-library/react';
 
 // Mock component for testing
 const TestComponent: React.FC<{
@@ -43,7 +44,7 @@ const ComponentWithPropTypes: React.FC<any> = ({ name, age, isActive }) => (
 describe('ComponentRenderingDebugger', () => {
   beforeEach(() => {
     // Clear any existing rendering history
-    componentRenderingDebugger['renderingHistory'] = [];
+    componentRenderingDebugger.renderingHistory = [];
   });
 
   describe('debugComponentRendering', () => {
@@ -452,7 +453,7 @@ describe('ComponentRenderingDebugger', () => {
         });
       }
 
-      const history = componentRenderingDebugger['renderingHistory'];
+      const history = componentRenderingDebugger.renderingHistory;
       expect(history).toHaveLength(30);
 
       // Should contain the most recent renders

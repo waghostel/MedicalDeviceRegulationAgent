@@ -3,18 +3,6 @@
  * Comprehensive interface for agent response streaming with typing indicators
  */
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { cn } from '@/lib/utils';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
-import { useWebSocket } from '@/hooks/use-websocket';
-import {
-  AgentTypingIndicator,
-  TypingAnimation,
-} from '@/components/ui/typing-indicators';
-import { EnhancedStreamingResponse } from '@/components/ui/enhanced-streaming-response';
 import {
   MessageSquare,
   StopCircle,
@@ -25,6 +13,19 @@ import {
   CheckCircle,
   Clock,
 } from 'lucide-react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { EnhancedStreamingResponse } from '@/components/ui/enhanced-streaming-response';
+import { Separator } from '@/components/ui/separator';
+import {
+  AgentTypingIndicator,
+  TypingAnimation,
+} from '@/components/ui/typing-indicators';
+import { useWebSocket } from '@/hooks/use-websocket';
+import { cn } from '@/lib/utils';
 import { WebSocketMessage } from '@/types/project';
 
 interface AgentStreamingInterfaceProps {
@@ -37,7 +38,7 @@ interface AgentStreamingInterfaceProps {
   agentName?: string;
 }
 
-export function AgentStreamingInterface({
+export const AgentStreamingInterface = ({
   projectId,
   className,
   onResponseComplete,
@@ -45,7 +46,7 @@ export function AgentStreamingInterface({
   enableInterruption = true,
   showMetadata = true,
   agentName = 'Regulatory Assistant',
-}: AgentStreamingInterfaceProps) {
+}: AgentStreamingInterfaceProps) => {
   const [streamingResponse, setStreamingResponse] = useState('');
   const [isStreaming, setIsStreaming] = useState(false);
   const [isTyping, setIsTyping] = useState(false);

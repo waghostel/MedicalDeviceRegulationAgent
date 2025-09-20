@@ -1,10 +1,13 @@
-import React from 'react';
 import { render, screen, fireEvent, act } from '@testing-library/react';
+import React from 'react';
+
+import { ProjectContext, ChatMessage } from '@/types/copilot';
+
 import {
   ProjectContextProvider,
   useProjectContext,
 } from '../ProjectContextProvider';
-import { ProjectContext, ChatMessage } from '@/types/copilot';
+
 
 const mockProject: ProjectContext = {
   id: 'test-project-1',
@@ -24,7 +27,7 @@ const mockMessage: ChatMessage = {
 };
 
 // Test component to interact with the context
-function TestComponent() {
+const TestComponent = () => {
   const {
     state,
     setProject,
@@ -217,14 +220,14 @@ describe('ProjectContextProvider', () => {
 
 describe('ProjectContextProvider Integration', () => {
   it('should maintain state across multiple components', () => {
-    function FirstComponent() {
+    const FirstComponent = () => {
       const { setProject } = useProjectContext();
       return (
         <button onClick={() => setProject(mockProject)}>Set Project</button>
       );
     }
 
-    function SecondComponent() {
+    const SecondComponent = () => {
       const { state } = useProjectContext();
       return (
         <div data-testid="project-name">

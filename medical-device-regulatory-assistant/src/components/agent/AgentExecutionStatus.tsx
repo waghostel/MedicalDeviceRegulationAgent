@@ -3,12 +3,6 @@
  * Displays real-time status updates for agent task execution
  */
 
-import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
   CheckCircle,
   Clock,
@@ -17,6 +11,13 @@ import {
   Loader2,
   StopCircle,
 } from 'lucide-react';
+import React from 'react';
+
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
 import { AgentExecutionStatus } from '@/hooks/useAgentExecution';
 
 interface AgentExecutionStatusProps {
@@ -27,13 +28,13 @@ interface AgentExecutionStatusProps {
   className?: string;
 }
 
-export function AgentExecutionStatusComponent({
+export const AgentExecutionStatusComponent = ({
   status,
   onCancel,
   onRetry,
   showDetails = true,
   className = '',
-}: AgentExecutionStatusProps) {
+}: AgentExecutionStatusProps) => {
   const getStatusIcon = () => {
     switch (status.status) {
       case 'idle':
@@ -90,13 +91,13 @@ export function AgentExecutionStatusComponent({
 
     if (timeMs < 1000) {
       return `${timeMs}ms`;
-    } else if (timeMs < 60000) {
+    } if (timeMs < 60000) {
       return `${(timeMs / 1000).toFixed(1)}s`;
-    } else {
+    } 
       const minutes = Math.floor(timeMs / 60000);
       const seconds = Math.floor((timeMs % 60000) / 1000);
       return `${minutes}m ${seconds}s`;
-    }
+    
   };
 
   const canCancel = status.status === 'processing' && onCancel;
@@ -220,11 +221,11 @@ export function AgentExecutionStatusComponent({
 }
 
 // Compact version for inline display
-export function AgentExecutionStatusInline({
+export const AgentExecutionStatusInline = ({
   status,
   onCancel,
   className = '',
-}: Pick<AgentExecutionStatusProps, 'status' | 'onCancel' | 'className'>) {
+}: Pick<AgentExecutionStatusProps, 'status' | 'onCancel' | 'className'>) => {
   const getStatusIcon = () => {
     switch (status.status) {
       case 'processing':

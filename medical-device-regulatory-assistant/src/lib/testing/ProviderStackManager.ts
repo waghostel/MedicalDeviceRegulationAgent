@@ -5,8 +5,9 @@
  * Task: B3.2 Create provider stack management
  */
 
-import React, { ReactNode, ComponentType } from 'react';
 import { Session } from 'next-auth';
+import React, { ReactNode, ComponentType } from 'react';
+
 import {
   MockToastProvider,
   MockFormProvider,
@@ -52,9 +53,13 @@ export interface ProviderDependencyGraph {
 
 export class ProviderStackManager {
   private static instance: ProviderStackManager;
+
   private providerRegistry: Map<string, ProviderConfig> = new Map();
+
   private activeStacks: Map<string, ReactNode> = new Map();
+
   private cleanupFunctions: Map<string, (() => void)[]> = new Map();
+
   private dependencyGraph: ProviderDependencyGraph = {};
 
   private constructor() {
@@ -134,7 +139,7 @@ export class ProviderStackManager {
    */
   public unregisterProvider(name: string): void {
     const config = this.providerRegistry.get(name);
-    if (config && config.cleanup) {
+    if (config?.cleanup) {
       config.cleanup();
     }
     this.providerRegistry.delete(name);
@@ -525,9 +530,7 @@ export const createProviderStack = (
     providerProps?: Record<string, any>;
     onError?: (error: Error, providerName: string) => void;
   }
-): ComponentType<{ children: ReactNode }> => {
-  return providerStackManager.createProviderStack(stackId, options);
-};
+): ComponentType<{ children: ReactNode }> => providerStackManager.createProviderStack(stackId, options);
 
 /**
  * Create a provider stack from legacy options
@@ -535,9 +538,7 @@ export const createProviderStack = (
 export const createProviderStackFromOptions = (
   stackId: string,
   options: ProviderMockOptions = {}
-): ComponentType<{ children: ReactNode }> => {
-  return providerStackManager.createProviderStackFromOptions(stackId, options);
-};
+): ComponentType<{ children: ReactNode }> => providerStackManager.createProviderStackFromOptions(stackId, options);
 
 /**
  * Cleanup a provider stack
@@ -555,9 +556,7 @@ export const resetProviderStack = (
     enabledProviders?: string[];
     providerProps?: Record<string, any>;
   }
-): ComponentType<{ children: ReactNode }> | null => {
-  return providerStackManager.resetStack(stackId, options);
-};
+): ComponentType<{ children: ReactNode }> | null => providerStackManager.resetStack(stackId, options);
 
 /**
  * Cleanup all provider stacks
@@ -594,13 +593,11 @@ export const EnhancedProviderStack: React.FC<EnhancedProviderStackProps> = ({
   onError,
   autoCleanup = true,
 }) => {
-  const ProviderStack = React.useMemo(() => {
-    return providerStackManager.createProviderStack(stackId, {
+  const ProviderStack = React.useMemo(() => providerStackManager.createProviderStack(stackId, {
       enabledProviders,
       providerProps,
       onError,
-    });
-  }, [stackId, enabledProviders, providerProps, onError]);
+    }), [stackId, enabledProviders, providerProps, onError]);
 
   // Cleanup on unmount if autoCleanup is enabled
   React.useEffect(() => {

@@ -27,10 +27,10 @@ global.MutationObserver = class MutationObserver {
 function createMockRenderResult() {
   return {
     container: {
-      querySelectorAll: (selector) => {
+      querySelectorAll: (selector) => 
         // Mock DOM elements
-        return new Array(Math.floor(Math.random() * 100) + 10).fill({});
-      },
+         new Array(Math.floor(Math.random() * 100) + 10).fill({})
+      ,
     },
     rerender: () => {},
     unmount: () => {},
@@ -396,10 +396,10 @@ async function main() {
   if (failed === 0) {
     console.log('🎉 All frontend performance monitor tests passed!');
     return true;
-  } else {
+  } 
     console.log('💥 Some tests failed!');
     return false;
-  }
+  
 }
 
 // Run tests

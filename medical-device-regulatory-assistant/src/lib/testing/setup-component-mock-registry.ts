@@ -450,9 +450,9 @@ export function generateComponentMockReport(): {
 
   if (stats.averageCoverage < 80) {
     recommendations.push(
-      'Improve test coverage for component mocks (current: ' +
-        stats.averageCoverage.toFixed(1) +
-        '%)'
+      `Improve test coverage for component mocks (current: ${ 
+        stats.averageCoverage.toFixed(1) 
+        }%)`
     );
   }
 

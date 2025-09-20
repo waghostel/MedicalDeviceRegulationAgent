@@ -1,7 +1,10 @@
-import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { CitationCard } from '../citation-card';
+import React from 'react';
+
 import { SourceCitation } from '@/types/copilot';
+
+import { CitationCard } from '../citation-card';
+
 
 describe('CitationCard Simple Tests', () => {
   const mockCitation: SourceCitation = {

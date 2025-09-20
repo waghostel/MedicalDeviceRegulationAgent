@@ -1,7 +1,7 @@
 import { render, RenderResult } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { ReactElement } from 'react';
 import { axe, toHaveNoViolations } from 'jest-axe';
+import { ReactElement } from 'react';
 
 // Extend Jest matchers
 expect.extend(toHaveNoViolations);
@@ -367,7 +367,7 @@ export function testColorContrast(
 
     const computedStyle = window.getComputedStyle(element);
     const foregroundColor = computedStyle.color;
-    const backgroundColor = computedStyle.backgroundColor;
+    const {backgroundColor} = computedStyle;
 
     // Simplified contrast calculation (in real implementation, use a proper library)
     const contrastRatio = calculateContrastRatio(
@@ -424,7 +424,7 @@ export function toBeAccessible() {
         message: () => {
           if (report.passed) {
             return 'Component passed all accessibility tests';
-          } else {
+          } 
             const violations = report.axeViolations
               .map((v) => `- ${v.description}`)
               .join('\n');
@@ -434,7 +434,7 @@ export function toBeAccessible() {
               .join('\n');
 
             return `Component failed accessibility tests:\n\nAxe violations:\n${violations}\n\nKeyboard navigation issues:\n${keyboardIssues}`;
-          }
+          
         },
       };
     },

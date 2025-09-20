@@ -3,7 +3,6 @@
  * Provides proper act() wrapping and async state update handling
  */
 
-import React, { ReactElement, ReactNode } from 'react';
 import {
   render,
   RenderOptions,
@@ -11,8 +10,10 @@ import {
   act,
   waitFor,
 } from '@testing-library/react';
-import { SessionProvider } from 'next-auth/react';
 import { Session } from 'next-auth';
+import { SessionProvider } from 'next-auth/react';
+import React, { ReactElement, ReactNode } from 'react';
+
 import { generateMockSession, generateMockUser } from '@/lib/mock-data';
 
 // Enhanced render options with proper typing
@@ -180,10 +181,10 @@ export const waitForAsyncUpdates = async (
 
   // Additional wait for any pending async operations
   await waitFor(
-    () => {
+    () => 
       // This will resolve immediately if no async operations are pending
-      return Promise.resolve();
-    },
+       Promise.resolve()
+    ,
     { timeout }
   );
 };

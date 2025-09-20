@@ -87,8 +87,11 @@ let globalFeatureFlagManager: FeatureFlagManager | null = null;
  */
 export class FeatureFlagManager {
   private flags: Map<string, FeatureFlag> = new Map();
+
   private cache: Map<string, FeatureFlagEvaluation> = new Map();
+
   private config: FeatureFlagConfiguration;
+
   private evaluationLog: FeatureFlagEvaluation[] = [];
 
   constructor(config: FeatureFlagConfiguration) {
@@ -303,7 +306,7 @@ export class FeatureFlagManager {
     for (let i = 0; i < str.length; i++) {
       const char = str.charCodeAt(i);
       hash = (hash << 5) - hash + char;
-      hash = hash & hash; // Convert to 32-bit integer
+      hash &= hash; // Convert to 32-bit integer
     }
     return Math.abs(hash);
   }

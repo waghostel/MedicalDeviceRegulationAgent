@@ -1,8 +1,11 @@
-import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { CitationExporter } from '../citation-exporter';
+import React from 'react';
+
 import { SourceCitation } from '@/types/copilot';
+
+import { CitationExporter } from '../citation-exporter';
+
 
 // Mock clipboard API
 const mockWriteText = jest.fn(() => Promise.resolve());

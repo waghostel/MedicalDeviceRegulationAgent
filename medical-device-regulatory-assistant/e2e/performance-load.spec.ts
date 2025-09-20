@@ -78,9 +78,7 @@ test.describe('Performance and Load Testing', () => {
 
   test.afterEach(async ({ page }) => {
     // Collect final performance data
-    const finalMetrics = await page.evaluate(() => {
-      return (window as any).performanceData;
-    });
+    const finalMetrics = await page.evaluate(() => (window as any).performanceData);
 
     console.log('Performance Summary:', {
       totalRequests: finalMetrics.requests?.length || 0,
@@ -710,15 +708,13 @@ test.describe('Performance and Load Testing', () => {
     }
 
     // Step 5: Test resource cleanup on page navigation
-    const resourceCountBefore = await page.evaluate(() => {
-      return {
+    const resourceCountBefore = await page.evaluate(() => ({
         eventListeners: (window as any).getEventListeners
           ? Object.keys((window as any).getEventListeners(document)).length
           : 0,
         timers: (window as any).activeTimers || 0,
         websockets: (window as any).websocketConnection ? 1 : 0,
-      };
-    });
+      }));
 
     // Navigate to different pages
     await page.goto('/projects/new');
@@ -726,15 +722,13 @@ test.describe('Performance and Load Testing', () => {
     await page.goto('/projects');
     await page.waitForLoadState('networkidle');
 
-    const resourceCountAfter = await page.evaluate(() => {
-      return {
+    const resourceCountAfter = await page.evaluate(() => ({
         eventListeners: (window as any).getEventListeners
           ? Object.keys((window as any).getEventListeners(document)).length
           : 0,
         timers: (window as any).activeTimers || 0,
         websockets: (window as any).websocketConnection ? 1 : 0,
-      };
-    });
+      }));
 
     console.log('Resource cleanup:', {
       before: resourceCountBefore,

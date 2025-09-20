@@ -1,11 +1,5 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
-import { Slider } from '@/components/ui/slider';
 import {
   Eye,
   EyeOff,
@@ -16,6 +10,13 @@ import {
   Volume2,
   Settings,
 } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
+import { Slider } from '@/components/ui/slider';
+import { Switch } from '@/components/ui/switch';
 import { cn } from '@/lib/utils';
 
 interface AccessibilitySettings {
@@ -334,12 +335,10 @@ export const FocusTrap: React.FC<{
           e.preventDefault();
           lastElement?.focus();
         }
-      } else {
-        if (document.activeElement === lastElement) {
+      } else if (document.activeElement === lastElement) {
           e.preventDefault();
           firstElement?.focus();
         }
-      }
     };
 
     container.addEventListener('keydown', handleKeyDown);

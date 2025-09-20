@@ -4,7 +4,6 @@
  * Validates localStorage and timer mocks with auto-save scenarios
  */
 
-import React from 'react';
 import {
   render,
   screen,
@@ -13,6 +12,7 @@ import {
   act,
 } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import React from 'react';
 
 // Mock ProjectForm component for testing
 const MockProjectForm: React.FC<{

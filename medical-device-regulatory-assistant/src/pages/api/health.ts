@@ -108,7 +108,7 @@ async function checkBackendAPI(): Promise<HealthCheck> {
         },
         responseTime,
       };
-    } else {
+    } 
       return {
         name: 'backend_api',
         status: 'unhealthy',
@@ -119,7 +119,7 @@ async function checkBackendAPI(): Promise<HealthCheck> {
         },
         responseTime,
       };
-    }
+    
   } catch (error) {
     const responseTime = Date.now() - startTime;
     return {
@@ -153,7 +153,7 @@ function checkEnvironmentVariables(): HealthCheck {
         configured_vars: requiredEnvVars.length - missingVars.length,
       },
     };
-  } else {
+  } 
     return {
       name: 'environment_variables',
       status: 'unhealthy',
@@ -164,7 +164,7 @@ function checkEnvironmentVariables(): HealthCheck {
         missing_vars: missingVars,
       },
     };
-  }
+  
 }
 
 function checkNextJSConfig(): HealthCheck {
@@ -229,7 +229,7 @@ function checkAuthConfig(): HealthCheck {
           google_oauth_configured: !!googleClientId && !!googleClientSecret,
         },
       };
-    } else {
+    } 
       return {
         name: 'auth_config',
         status: 'degraded',
@@ -240,7 +240,7 @@ function checkAuthConfig(): HealthCheck {
           google_oauth_configured: !!googleClientId && !!googleClientSecret,
         },
       };
-    }
+    
   } catch (error) {
     return {
       name: 'auth_config',

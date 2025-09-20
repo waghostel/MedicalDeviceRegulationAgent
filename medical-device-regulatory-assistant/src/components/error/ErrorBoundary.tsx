@@ -1,9 +1,5 @@
 'use client';
 
-import React from 'react';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   AlertTriangle,
   RefreshCw,
@@ -13,8 +9,13 @@ import {
   Copy,
   CheckCircle,
 } from 'lucide-react';
-import { APIError } from '@/types/error';
+import React from 'react';
+
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
+import { APIError } from '@/types/error';
 
 interface ErrorBoundaryState {
   hasError: boolean;
@@ -136,7 +137,7 @@ export class ErrorBoundary extends React.Component<
 
     if (isRetryable && this.state.retryCount < maxRetries) {
       const retryDelay = Math.min(
-        1000 * Math.pow(2, this.state.retryCount),
+        1000 * 2**this.state.retryCount,
         10000
       ); // Exponential backoff
 

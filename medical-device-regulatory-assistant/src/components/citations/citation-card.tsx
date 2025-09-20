@@ -1,10 +1,11 @@
 'use client';
 
-import React from 'react';
 import { ExternalLink, Copy, AlertCircle, CheckCircle } from 'lucide-react';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import React from 'react';
+
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import {
   Tooltip,
   TooltipContent,
@@ -12,6 +13,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { SourceCitation } from '@/types/copilot';
+
 import {
   getDocumentTypeDisplayName,
   getDocumentTypeIcon,
@@ -29,14 +31,14 @@ interface CitationCardProps {
   className?: string;
 }
 
-export function CitationCard({
+export const CitationCard = ({
   citation,
   format = 'APA',
   showValidation = true,
   onCopy,
   onVisit,
   className = '',
-}: CitationCardProps) {
+}: CitationCardProps) => {
   const validation = validateCitation(citation);
   const formattedCitation = formatCitation(citation, format);
 

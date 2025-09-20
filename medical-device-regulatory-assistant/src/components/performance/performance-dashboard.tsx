@@ -2,12 +2,6 @@
  * Performance Dashboard Component for monitoring frontend optimizations
  */
 
-import { memo, useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Activity,
   Zap,
@@ -19,11 +13,18 @@ import {
   AlertTriangle,
   CheckCircle,
 } from 'lucide-react';
+import { memo, useState, useEffect } from 'react';
+
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useBundleAnalysis } from '@/lib/performance/bundle-analyzer';
 import {
   usePerformanceMonitor,
   useMemoryMonitoring,
 } from '@/lib/performance/optimization';
-import { useBundleAnalysis } from '@/lib/performance/bundle-analyzer';
 import { cn } from '@/lib/utils';
 
 interface PerformanceMetric {
@@ -105,7 +106,7 @@ const PerformanceMetricCard = memo(
 );
 PerformanceMetricCard.displayName = 'PerformanceMetricCard';
 
-export const PerformanceDashboard = memo(function PerformanceDashboard() {
+export const PerformanceDashboard = memo(() => {
   const { metrics, recordMetric } = usePerformanceMonitor();
   const memoryInfo = useMemoryMonitoring();
   const {

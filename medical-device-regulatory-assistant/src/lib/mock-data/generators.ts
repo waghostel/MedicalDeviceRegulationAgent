@@ -47,6 +47,7 @@ export interface MockUser {
  */
 export class MockDataGenerator {
   private seed: number;
+
   private random: () => number;
 
   constructor(options: MockDataOptions = {}) {

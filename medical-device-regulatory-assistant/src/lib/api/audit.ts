@@ -330,7 +330,7 @@ class AuditAPI {
       if (format === 'json') {
         const jsonString = JSON.stringify(auditData, null, 2);
         return new Blob([jsonString], { type: 'application/json' });
-      } else if (format === 'csv') {
+      } if (format === 'csv') {
         // Simple CSV export
         const headers = [
           'ID',
@@ -351,12 +351,12 @@ class AuditAPI {
           .map((row) => row.join(','))
           .join('\n');
         return new Blob([csvContent], { type: 'text/csv' });
-      } else {
+      } 
         // For PDF, we'd need a PDF generation library
         // For now, return JSON as fallback
         const jsonString = JSON.stringify(auditData, null, 2);
         return new Blob([jsonString], { type: 'application/json' });
-      }
+      
     } catch (error) {
       console.error('Failed to export audit trail:', error);
       throw error;

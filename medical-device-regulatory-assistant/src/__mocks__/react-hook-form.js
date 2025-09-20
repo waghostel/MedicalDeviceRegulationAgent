@@ -169,13 +169,11 @@ const Controller = jest.fn(
 );
 
 // Mock FormProvider component
-const FormProvider = jest.fn(({ children, ...methods }) => {
-  return React.createElement(
+const FormProvider = jest.fn(({ children, ...methods }) => React.createElement(
     'div',
     { 'data-testid': 'form-provider' },
     children
-  );
-});
+  ));
 
 // Mock resolver functions
 const zodResolver = jest.fn(() => jest.fn());

@@ -1,11 +1,14 @@
 'use client';
 
 import React from 'react';
+
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ProjectErrorBoundary } from './ProjectErrorBoundary';
-import { APIError } from '@/types/error';
 import { useErrorHandling } from '@/hooks/use-error-handling';
+import { APIError } from '@/types/error';
+
+import { ProjectErrorBoundary } from './ProjectErrorBoundary';
+
 
 /**
  * Test component for error handling functionality

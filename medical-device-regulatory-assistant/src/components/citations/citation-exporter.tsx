@@ -1,15 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
 import { Download, FileText, Copy } from 'lucide-react';
+import React, { useState } from 'react';
+
 import { Button } from '@/components/ui/button';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import {
   Dialog,
   DialogContent,
@@ -17,8 +11,16 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { SourceCitation } from '@/types/copilot';
+
 import { formatCitation, CitationFormat } from './citation-utils';
 
 interface CitationExporterProps {
@@ -27,11 +29,11 @@ interface CitationExporterProps {
   className?: string;
 }
 
-export function CitationExporter({
+export const CitationExporter = ({
   citations,
   projectName = 'Regulatory Project',
   className = '',
-}: CitationExporterProps) {
+}: CitationExporterProps) => {
   const [format, setFormat] = useState<CitationFormat>('APA');
   const [isOpen, setIsOpen] = useState(false);
 

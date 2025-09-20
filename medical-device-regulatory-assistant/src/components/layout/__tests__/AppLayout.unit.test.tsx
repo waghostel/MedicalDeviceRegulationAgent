@@ -3,13 +3,15 @@
  * Tests layout rendering, sidebar functionality, and responsive behavior
  */
 
-import React from 'react';
 import { screen, fireEvent, waitFor } from '@testing-library/react';
+import React from 'react';
+
 import '@testing-library/jest-dom';
 import {
   renderWithProviders,
   createMockSession,
 } from '@/lib/testing/test-utils';
+
 import { AppLayout } from '../AppLayout';
 
 // Mock the child components

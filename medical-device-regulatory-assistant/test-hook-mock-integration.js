@@ -32,7 +32,7 @@ try {
     'toastMockUtils',
   ];
 
-  let missingMethods = [];
+  const missingMethods = [];
   requiredMethods.forEach((method) => {
     if (!useToastMockContent.includes(method)) {
       missingMethods.push(method);
@@ -61,7 +61,7 @@ try {
     'info',
   ];
 
-  let missingContextualMethods = [];
+  const missingContextualMethods = [];
   contextualMethods.forEach((method) => {
     if (!useToastMockContent.includes(method)) {
       missingContextualMethods.push(method);
@@ -99,7 +99,7 @@ try {
     'mockUseRealTimeValidation',
   ];
 
-  let missingHooks = [];
+  const missingHooks = [];
   requiredHooks.forEach((hook) => {
     if (!enhancedFormMockContent.includes(hook)) {
       missingHooks.push(hook);
@@ -126,7 +126,7 @@ try {
     'control',
   ];
 
-  let missingRHFMethods = [];
+  const missingRHFMethods = [];
   reactHookFormMethods.forEach((method) => {
     if (!enhancedFormMockContent.includes(method)) {
       missingRHFMethods.push(method);
@@ -165,7 +165,7 @@ try {
     'EnhancedButtonMock',
   ];
 
-  let missingComponents = [];
+  const missingComponents = [];
   requiredComponents.forEach((component) => {
     if (!componentMockContent.includes(component)) {
       missingComponents.push(component);
@@ -188,7 +188,7 @@ try {
     'role="status"',
   ];
 
-  let missingTestAttributes = [];
+  const missingTestAttributes = [];
   testAttributes.forEach((attr) => {
     if (!componentMockContent.includes(attr)) {
       missingTestAttributes.push(attr);
@@ -315,7 +315,7 @@ try {
     'clearValidationState',
   ];
 
-  let missingUtilities = [];
+  const missingUtilities = [];
   testUtilities.forEach((utility) => {
     if (!enhancedFormMockContent.includes(utility)) {
       missingUtilities.push(utility);

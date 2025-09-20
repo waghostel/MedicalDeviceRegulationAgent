@@ -3,22 +3,23 @@
  * Tests for the enhanced loading states and progress indicators
  */
 
+import { render, screen, fireEvent, act , renderHook } from '@testing-library/react';
 import React from 'react';
-import { render, screen, fireEvent, act } from '@testing-library/react';
-import { renderHook } from '@testing-library/react';
-import {
-  EnhancedProgressBar,
-  FormSubmissionProgress,
-  LoadingSpinner,
-  InlineLoader,
-} from '../ProgressIndicator';
+
+import { useLoadingState } from '@/hooks/use-loading-state';
+
 import {
   ProjectListSkeleton,
   EnhancedFormSkeleton,
   BulkOperationsSkeleton,
   ExportProgressSkeleton,
 } from '../LoadingSkeleton';
-import { useLoadingState } from '@/hooks/use-loading-state';
+import {
+  EnhancedProgressBar,
+  FormSubmissionProgress,
+  LoadingSpinner,
+  InlineLoader,
+} from '../ProgressIndicator';
 
 // Mock timers for testing
 jest.useFakeTimers();

@@ -3,23 +3,23 @@
  * Tests navigation rendering, route changes, and responsive behavior
  */
 
-import React from 'react';
 import { screen, fireEvent } from '@testing-library/react';
+import React from 'react';
+
 import {
   renderWithProviders,
   createMockSession,
   createMockRouter,
 } from '@/lib/testing/test-utils';
+
 import { Sidebar } from '../Sidebar';
 
 // Mock Next.js Link component
-jest.mock('next/link', () => {
-  return (props) => (
+jest.mock('next/link', () => (props) => (
     <a href={props.href} {...props}>
       {props.children}
     </a>
-  );
-});
+  ));
 
 // Mock Next.js usePathname hook
 jest.mock('next/navigation', () => ({

@@ -3,7 +3,6 @@
  * Tests complete project creation, editing, deletion, and list management with optimistic updates
  */
 
-import React from 'react';
 import {
   render,
   screen,
@@ -12,6 +11,16 @@ import {
   within,
 } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import React from 'react';
+
+import { ProjectCard } from '@/components/projects/project-card';
+import { ProjectForm } from '@/components/projects/project-form';
+import { ProjectList } from '@/components/projects/project-list';
+import {
+  generateMockProject,
+  generateMockUser,
+  generateMockProjects,
+} from '@/lib/mock-data';
 import {
   setupTestMocks,
   teardownTestMocks,
@@ -21,14 +30,6 @@ import {
   renderWithProviders,
   createMockSession,
 } from '@/lib/testing/test-utils';
-import {
-  generateMockProject,
-  generateMockUser,
-  generateMockProjects,
-} from '@/lib/mock-data';
-import { ProjectList } from '@/components/projects/project-list';
-import { ProjectForm } from '@/components/projects/project-form';
-import { ProjectCard } from '@/components/projects/project-card';
 import {
   Project,
   ProjectStatus,

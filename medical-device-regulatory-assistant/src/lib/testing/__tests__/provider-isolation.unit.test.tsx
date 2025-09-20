@@ -5,8 +5,8 @@
  * Verifies provider composition, state management, and cleanup mechanisms.
  */
 
-import React, { act } from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import React, { act } from 'react';
 import '@testing-library/jest-dom';
 
 import {
@@ -24,7 +24,6 @@ import {
   isolatedProviderManager,
   isolatedProviderPresets,
 } from '../providers/IsolatedTestProviders';
-
 import {
   renderWithIsolatedProviders,
   providerStateManager,
@@ -164,8 +163,7 @@ const RouterTestComponent: React.FC = () => {
   );
 };
 
-const CompositeTestComponent: React.FC = () => {
-  return (
+const CompositeTestComponent: React.FC = () => (
     <div data-testid="composite-test">
       <SessionTestComponent />
       <ThemeTestComponent />
@@ -174,7 +172,6 @@ const CompositeTestComponent: React.FC = () => {
       <RouterTestComponent />
     </div>
   );
-};
 
 // ============================================================================
 // Individual Provider Tests
@@ -540,10 +537,10 @@ describe('Provider Isolation System', () => {
     });
 
     it('should provide access to isolated hooks', () => {
-      const TestComponent = () => {
+      const TestComponent = () => 
         // These hooks should be available without throwing errors
-        return <div data-testid="hooks-test">Hooks Test</div>;
-      };
+         <div data-testid="hooks-test">Hooks Test</div>
+      ;
 
       const { getByTestId, isolatedHooks } = renderWithIsolatedProviders(
         <TestComponent />,

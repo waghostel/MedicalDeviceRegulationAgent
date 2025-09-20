@@ -3,12 +3,15 @@
  * Verifies component renders without syntax errors and basic functionality
  */
 
-import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { ProjectList } from '../project-list';
+import React from 'react';
+
+import { useOffline } from '@/hooks/use-offline';
 import { useProjects } from '@/hooks/use-projects';
 import { useProjectWebSocket } from '@/hooks/use-websocket';
-import { useOffline } from '@/hooks/use-offline';
+
+import { ProjectList } from '../project-list';
+
 
 // Mock the hooks
 jest.mock('@/hooks/use-projects');

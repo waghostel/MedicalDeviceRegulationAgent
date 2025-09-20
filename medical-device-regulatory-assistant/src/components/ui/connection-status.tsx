@@ -3,8 +3,10 @@
  * Shows real-time WebSocket connection status with visual feedback
  */
 
+import { Wifi, WifiOff, AlertCircle, RotateCcw } from 'lucide-react';
 import React from 'react';
-import { cn } from '@/lib/utils';
+
+import { useWebSocketContext } from '@/components/providers/WebSocketProvider';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -13,8 +15,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { useWebSocketContext } from '@/components/providers/WebSocketProvider';
-import { Wifi, WifiOff, AlertCircle, RotateCcw } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface ConnectionStatusProps {
   className?: string;
@@ -22,11 +23,11 @@ interface ConnectionStatusProps {
   compact?: boolean;
 }
 
-export function ConnectionStatus({
+export const ConnectionStatus = ({
   className,
   showReconnectButton = true,
   compact = false,
-}: ConnectionStatusProps) {
+}: ConnectionStatusProps) => {
   const { connectionStatus } = useWebSocketContext();
 
   const getStatusConfig = () => {
@@ -145,11 +146,11 @@ export function ConnectionStatus({
 /**
  * Detailed connection status component for debugging/admin views
  */
-export function DetailedConnectionStatus({
+export const DetailedConnectionStatus = ({
   className,
 }: {
   className?: string;
-}) {
+}) => {
   const { connectionStatus, messages } = useWebSocketContext();
 
   const getLastMessageTime = () => {

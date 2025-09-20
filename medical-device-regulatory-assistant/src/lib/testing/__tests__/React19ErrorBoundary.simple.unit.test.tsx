@@ -2,8 +2,9 @@
  * Simple test to verify React19ErrorBoundary basic functionality
  */
 
-import React from 'react';
 import { render, screen } from '@testing-library/react';
+import React from 'react';
+
 import { React19ErrorBoundary } from '../React19ErrorBoundary';
 
 // Mock console methods to avoid noise in tests
@@ -30,9 +31,7 @@ const ErrorComponent: React.FC = () => {
 };
 
 // Working component
-const WorkingComponent: React.FC = () => {
-  return <div data-testid="working-component">Component works!</div>;
-};
+const WorkingComponent: React.FC = () => <div data-testid="working-component">Component works!</div>;
 
 describe('React19ErrorBoundary Basic Functionality', () => {
   it('should render children when no error occurs', () => {

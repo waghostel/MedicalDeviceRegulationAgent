@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+
 import {
   TestDebuggingTools,
   testDebuggingTools,
@@ -44,8 +45,8 @@ const HookComponent: React.FC<{ initialCount?: number }> = ({
 describe('TestDebuggingTools Integration', () => {
   beforeEach(() => {
     // Clear debugging history
-    testDebuggingTools['debugHistory'] = [];
-    testDebuggingTools['debuggingSessions'].clear();
+    testDebuggingTools.debugHistory = [];
+    testDebuggingTools.debuggingSessions.clear();
   });
 
   describe('debugTestFailure', () => {
@@ -498,7 +499,7 @@ describe('TestDebuggingTools Integration', () => {
         );
       }
 
-      const history = testDebuggingTools['debugHistory'];
+      const history = testDebuggingTools.debugHistory;
       expect(history).toHaveLength(50);
 
       // Should contain the most recent sessions

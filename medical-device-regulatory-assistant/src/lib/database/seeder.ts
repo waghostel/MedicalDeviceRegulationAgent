@@ -4,17 +4,18 @@
  */
 
 import {
-  DatabaseSeed,
-  MockDataGenerator,
-  TestScenario,
-} from '../mock-data/generators';
-import {
   Project,
   DeviceClassification,
   PredicateDevice,
   AgentInteraction,
   ProjectDocument,
 } from '@/types/project';
+
+import {
+  DatabaseSeed,
+  MockDataGenerator,
+  TestScenario,
+} from '../mock-data/generators';
 
 export interface SeedingOptions {
   environment: 'development' | 'testing' | 'staging';
@@ -66,6 +67,7 @@ export interface DatabaseTransaction {
  */
 export class DatabaseSeeder {
   private connection: DatabaseConnection;
+
   private generator: MockDataGenerator;
 
   constructor(connection: DatabaseConnection) {

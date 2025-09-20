@@ -1,14 +1,6 @@
 'use client';
 
-import React from 'react';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
+import { format } from 'date-fns';
 import {
   ExternalLink,
   FileText,
@@ -17,14 +9,23 @@ import {
   Copy,
   Check,
 } from 'lucide-react';
-import { format } from 'date-fns';
+import React from 'react';
+
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { SourceCitation } from '@/types/audit';
 
 interface SourceCitationsProps {
   sources: SourceCitation[];
 }
 
-export function SourceCitations({ sources }: SourceCitationsProps) {
+export const SourceCitations = ({ sources }: SourceCitationsProps) => {
   const [copiedIndex, setCopiedIndex] = React.useState<number | null>(null);
 
   const getDocumentTypeIcon = (type: SourceCitation['documentType']) => {

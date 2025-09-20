@@ -3,9 +3,10 @@
  * Tests the complete workflow from frontend to backend
  */
 
-import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { jest } from '@jest/globals';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import React from 'react';
+
 import { AgentWorkflowPage } from '@/components/agent/AgentWorkflowPage';
 import { ProjectContextProvider } from '@/components/providers/ProjectContextProvider';
 import { useAgentExecution } from '@/hooks/useAgentExecution';
@@ -66,13 +67,11 @@ describe('Agent Integration Tests', () => {
     });
   });
 
-  const renderAgentWorkflowPage = (project = mockProject) => {
-    return render(
+  const renderAgentWorkflowPage = (project = mockProject) => render(
       <ProjectContextProvider>
         <AgentWorkflowPage projectId={project.id} initialProject={project} />
       </ProjectContextProvider>
     );
-  };
 
   describe('Component Rendering', () => {
     test('renders agent workflow page with project context', () => {

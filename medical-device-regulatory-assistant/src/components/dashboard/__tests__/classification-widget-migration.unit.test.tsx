@@ -2,11 +2,14 @@
  * Migration test for ClassificationWidget - verifies real API integration
  */
 
-import React from 'react';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
-import { ClassificationWidget } from '../classification-widget';
-import { dashboardService } from '@/lib/services/dashboard-service';
+import React from 'react';
+
 import { generateMockDeviceClassification } from '@/lib/mock-data';
+import { dashboardService } from '@/lib/services/dashboard-service';
+
+import { ClassificationWidget } from '../classification-widget';
+
 
 // Mock the dashboard service
 jest.mock('@/lib/services/dashboard-service', () => ({

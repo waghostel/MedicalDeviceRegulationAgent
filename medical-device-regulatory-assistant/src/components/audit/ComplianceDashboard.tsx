@@ -1,11 +1,5 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
   Shield,
   CheckCircle,
@@ -17,15 +11,22 @@ import {
   Lock,
   Clock,
 } from 'lucide-react';
-import { ComplianceReport, AuditIntegrityResult } from '@/types/audit';
-import { auditAPI, downloadFile } from '@/lib/api/audit';
+import React, { useState, useEffect } from 'react';
+
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
+import { auditAPI, downloadFile } from '@/lib/api/audit';
+import { ComplianceReport, AuditIntegrityResult } from '@/types/audit';
 
 interface ComplianceDashboardProps {
   projectId: string;
 }
 
-export function ComplianceDashboard({ projectId }: ComplianceDashboardProps) {
+export const ComplianceDashboard = ({ projectId }: ComplianceDashboardProps) => {
   const [complianceReport, setComplianceReport] =
     useState<ComplianceReport | null>(null);
   const [integrityResult, setIntegrityResult] =

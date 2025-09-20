@@ -3,9 +3,10 @@
  * Tests how the two systems work together to provide comprehensive mock analysis
  */
 
-import { MockValidator } from '../MockValidator';
-import { MockDebugger } from '../MockDebugger';
 import { jest } from '@jest/globals';
+
+import { MockDebugger } from '../MockDebugger';
+import { MockValidator } from '../MockValidator';
 
 describe('MockValidator + MockDebugger Integration', () => {
   let validator: MockValidator;

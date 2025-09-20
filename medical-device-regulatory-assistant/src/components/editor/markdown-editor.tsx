@@ -1,13 +1,17 @@
 'use client';
 
-import React, { useState, useRef, useCallback, useEffect } from 'react';
-import dynamic from 'next/dynamic';
-import { Document, MentionItem } from '@/types/document';
-import { useAutoSave } from '@/hooks/use-auto-save';
-import { MentionDropdown } from './mention-dropdown';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Save, FileText, Clock, AlertCircle } from 'lucide-react';
+import dynamic from 'next/dynamic';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
+
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { useAutoSave } from '@/hooks/use-auto-save';
+import { Document, MentionItem } from '@/types/document';
+
+import { MentionDropdown } from './mention-dropdown';
+
+
 
 // Dynamically import MDEditor to avoid SSR issues
 const MDEditor = dynamic(
@@ -29,12 +33,12 @@ interface MentionState {
   cursorPosition: number;
 }
 
-export function MarkdownEditor({
+export const MarkdownEditor = ({
   document,
   onSave,
   mentionItems,
   className = '',
-}: MarkdownEditorProps) {
+}: MarkdownEditorProps) => {
   const [content, setContent] = useState(document.content);
   const [mentionState, setMentionState] = useState<MentionState>({
     isOpen: false,

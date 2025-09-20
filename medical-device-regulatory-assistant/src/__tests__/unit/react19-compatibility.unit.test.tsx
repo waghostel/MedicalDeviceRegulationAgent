@@ -1,6 +1,6 @@
-import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import React from 'react';
 
 // Simple test component to verify React 19 compatibility
 const React19TestComponent: React.FC<{ children?: React.ReactNode }> = ({

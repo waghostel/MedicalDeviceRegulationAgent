@@ -4,16 +4,13 @@
  * Enhanced with React 19 compatibility and AggregateError handling
  */
 
-import React, { ReactElement, ReactNode } from 'react';
 import { render, RenderOptions, RenderResult } from '@testing-library/react';
-import { SessionProvider } from 'next-auth/react';
 import { Session } from 'next-auth';
+import { SessionProvider } from 'next-auth/react';
+import React, { ReactElement, ReactNode } from 'react';
+
 import { generateMockSession, generateMockUser } from '@/lib/mock-data';
-import { setupUseToastMock, toastMockUtils } from './setup-use-toast-mock';
-import {
-  setupEnhancedFormMocks,
-  enhancedFormMockUtils,
-} from './setup-enhanced-form-mocks';
+
 
 // Import MockRegistry integration
 import {
@@ -33,6 +30,11 @@ import {
   type ErrorBoundaryState as React19ErrorBoundaryState,
   type React19ErrorBoundaryProps,
 } from './React19ErrorBoundary';
+import {
+  setupEnhancedFormMocks,
+  enhancedFormMockUtils,
+} from './setup-enhanced-form-mocks';
+import { setupUseToastMock, toastMockUtils } from './setup-use-toast-mock';
 
 // React 19 Error Handling Types and Mock Configuration
 interface MockConfiguration {

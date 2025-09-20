@@ -396,7 +396,7 @@ export class MigrationProgressMonitor {
    * Calculate resource utilization
    */
   private calculateResourceUtilization(): ResourceUtilization {
-    const resources = this.strategy.timeline.resources;
+    const {resources} = this.strategy.timeline;
     const utilization = resources.map((resource) => {
       const totalAssigned = resource.assignments.reduce(
         (sum, assignment) => sum + assignment.hoursAllocated,

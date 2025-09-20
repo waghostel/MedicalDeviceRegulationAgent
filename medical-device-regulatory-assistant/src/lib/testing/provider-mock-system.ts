@@ -4,10 +4,11 @@
  * Requirements: 2.4, 7.1
  */
 
-import React, { ReactNode, createContext, useContext } from 'react';
 import { Session } from 'next-auth';
-import { useToastMock } from './use-toast-mock';
+import React, { ReactNode, createContext, useContext } from 'react';
+
 import { enhancedFormMocks } from './enhanced-form-hook-mocks';
+import { useToastMock } from './use-toast-mock';
 
 // ============================================================================
 // Toast Provider Mock System
@@ -535,10 +536,8 @@ export const providerMockUtils = {
   },
 
   // Provider composition utilities
-  createProviderStack: (options: ProviderMockOptions) => {
-    return ({ children }: { children: ReactNode }) =>
-      React.createElement(MockProviderStack, { options }, children);
-  },
+  createProviderStack: (options: ProviderMockOptions) => ({ children }: { children: ReactNode }) =>
+      React.createElement(MockProviderStack, { options }, children),
 
   // Mock validation utilities
   validateProviderMocks: () => {

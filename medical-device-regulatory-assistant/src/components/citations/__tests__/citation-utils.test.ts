@@ -1,3 +1,5 @@
+import { SourceCitation } from '@/types/copilot';
+
 import {
   formatCitation,
   validateCitation,
@@ -6,7 +8,6 @@ import {
   getDocumentTypeIcon,
   CitationFormat,
 } from '../citation-utils';
-import { SourceCitation } from '@/types/copilot';
 
 // Mock fetch for URL validation tests
 global.fetch = jest.fn();

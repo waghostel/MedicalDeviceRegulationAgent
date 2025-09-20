@@ -3,6 +3,7 @@
  * Provides multi-user collaboration context and real-time features
  */
 
+import { useSession } from 'next-auth/react';
 import React, {
   createContext,
   useContext,
@@ -10,7 +11,7 @@ import React, {
   useState,
   useCallback,
 } from 'react';
-import { useSession } from 'next-auth/react';
+
 import { useUserPresence, UserPresence } from '@/hooks/use-user-presence';
 import { useTypingIndicators } from '@/hooks/use-websocket';
 
@@ -55,11 +56,11 @@ interface CollaborationProviderProps {
   enableCursorTracking?: boolean;
 }
 
-export function CollaborationProvider({
+export const CollaborationProvider = ({
   children,
   projectId,
   enableCursorTracking = false,
-}: CollaborationProviderProps) {
+}: CollaborationProviderProps) => {
   const { data: session } = useSession();
   const [currentProject, setCurrentProject] = useState<number | null>(
     projectId || null
@@ -156,13 +157,11 @@ export function CollaborationProvider({
   }, [projectId, currentProject, currentUser, joinProject]);
 
   // Cleanup on unmount
-  useEffect(() => {
-    return () => {
+  useEffect(() => () => {
       if (currentProject && currentUser) {
         leaveProject(currentProject);
       }
-    };
-  }, [currentProject, currentUser, leaveProject]);
+    }, [currentProject, currentUser, leaveProject]);
 
   const contextValue: CollaborationContextType = {
     currentUser,

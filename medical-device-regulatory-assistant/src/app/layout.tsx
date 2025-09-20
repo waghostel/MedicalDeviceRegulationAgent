@@ -1,8 +1,9 @@
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import { getServerSession } from 'next-auth';
-import { SessionProvider } from '@/components/providers/SessionProvider';
+
 import { ProjectContextProvider } from '@/components/providers/ProjectContextProvider';
+import { SessionProvider } from '@/components/providers/SessionProvider';
 import { WebSocketProvider } from '@/components/providers/WebSocketProvider';
 import { Toaster } from '@/components/ui/toaster';
 import { authOptions } from '@/lib/auth';

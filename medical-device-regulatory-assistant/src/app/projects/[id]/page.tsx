@@ -4,8 +4,6 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
 import {
   ArrowLeft,
   Settings,
@@ -15,6 +13,12 @@ import {
   CheckCircle,
   Clock,
 } from 'lucide-react';
+import { useParams, useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
+
+import { RegulatoryDashboard } from '@/components/dashboard/regulatory-dashboard';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -23,17 +27,14 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { useProjects } from '@/hooks/use-projects';
 import { useDashboard } from '@/hooks/use-dashboard';
+import { useOffline } from '@/hooks/use-offline';
+import { useProjects } from '@/hooks/use-projects';
 import { useToast } from '@/hooks/use-toast';
 import { useWebSocket } from '@/hooks/use-websocket';
-import { useOffline } from '@/hooks/use-offline';
 import { Project, ProjectStatus } from '@/types/project';
-import { RegulatoryDashboard } from '@/components/dashboard/regulatory-dashboard';
 
 interface ProjectDetailPageProps {
   params: { id: string };

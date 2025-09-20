@@ -8,13 +8,13 @@
  * Requirements tested: 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 10.1, 10.5
  */
 
-import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import React from 'react';
 import '@testing-library/jest-dom';
 
-import { ProjectList } from '@/components/projects/project-list';
 import { ProjectCard } from '@/components/projects/project-card';
+import { ProjectList } from '@/components/projects/project-list';
 import { Project, ProjectStatus } from '@/types/project';
 
 // Define mock project status constants

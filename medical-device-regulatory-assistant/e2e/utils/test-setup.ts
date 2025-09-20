@@ -1,4 +1,5 @@
 import { test as base, expect, Page, BrowserContext } from '@playwright/test';
+
 import {
   ProjectTestHelper,
   WebSocketTestHelper,
@@ -248,7 +249,7 @@ export class TestSetup {
               (window as any).webSocketMessages.push({
                 type: 'message',
                 event: 'message',
-                data: data,
+                data,
                 timestamp: Date.now(),
               });
             } catch (e) {
@@ -297,13 +298,11 @@ export class TestSetup {
 
     // Wait for React to be ready
     await page.waitForFunction(
-      () => {
-        return (
+      () => (
           typeof window.React !== 'undefined' ||
           document.querySelector('[data-reactroot]') !== null ||
           document.querySelector('#__next') !== null
-        );
-      },
+        ),
       { timeout }
     );
 
@@ -383,30 +382,24 @@ export class TestSetup {
     errors: any[];
     warnings: any[];
   }> {
-    return await page.evaluate(() => {
-      return {
+    return await page.evaluate(() => ({
         errors: (window as any).testErrors || [],
         warnings: (window as any).testWarnings || [],
-      };
-    });
+      }));
   }
 
   /**
    * Get performance metrics
    */
   static async getPerformanceMetrics(page: Page): Promise<any> {
-    return await page.evaluate(() => {
-      return (window as any).testPerformance || {};
-    });
+    return await page.evaluate(() => (window as any).testPerformance || {});
   }
 
   /**
    * Get WebSocket messages
    */
   static async getWebSocketMessages(page: Page): Promise<any[]> {
-    return await page.evaluate(() => {
-      return (window as any).webSocketMessages || [];
-    });
+    return await page.evaluate(() => (window as any).webSocketMessages || []);
   }
 
   /**

@@ -3,15 +3,27 @@
  * Tests for the enhanced loading states and progress indicators
  */
 
-import React from 'react';
 import {
   render,
   screen,
   fireEvent,
   waitFor,
   act,
-} from '@testing-library/react';
-import { renderHook } from '@testing-library/react';
+ renderHook } from '@testing-library/react';
+import React from 'react';
+
+import {
+  useLoadingState,
+  useFormSubmissionState,
+  useBulkOperationState,
+} from '@/hooks/use-loading-state';
+
+import {
+  ProjectListSkeleton,
+  EnhancedFormSkeleton,
+  BulkOperationsSkeleton,
+  ExportProgressSkeleton,
+} from '../LoadingSkeleton';
 import {
   EnhancedProgressBar,
   FormSubmissionProgress,
@@ -20,17 +32,6 @@ import {
   DataLoadingProgress,
   LoadingOverlay,
 } from '../ProgressIndicator';
-import {
-  ProjectListSkeleton,
-  EnhancedFormSkeleton,
-  BulkOperationsSkeleton,
-  ExportProgressSkeleton,
-} from '../LoadingSkeleton';
-import {
-  useLoadingState,
-  useFormSubmissionState,
-  useBulkOperationState,
-} from '@/hooks/use-loading-state';
 
 // Mock timers for testing
 jest.useFakeTimers();

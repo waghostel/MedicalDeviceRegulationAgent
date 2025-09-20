@@ -1,7 +1,10 @@
-import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { SlashCommandCard, SlashCommandGrid } from '../slash-command-card';
+import React from 'react';
+
 import { SlashCommand } from '@/types/copilot';
+
+import { SlashCommandCard, SlashCommandGrid } from '../slash-command-card';
+
 
 const mockCommand: SlashCommand = {
   command: '/predicate-search',

@@ -5,8 +5,8 @@
  * Task: B3.3 Add context mock validation
  */
 
-import React, { Context, ReactNode, ComponentType } from 'react';
 import { render } from '@testing-library/react';
+import React, { Context, ReactNode, ComponentType } from 'react';
 
 // ============================================================================
 // Context Validation Types
@@ -130,6 +130,7 @@ export interface SessionContextValue {
 
 export class ContextMockValidator {
   private config: ContextValidationConfig;
+
   private validationCache: Map<string, ContextValidationResult>;
 
   constructor(config: Partial<ContextValidationConfig> = {}) {

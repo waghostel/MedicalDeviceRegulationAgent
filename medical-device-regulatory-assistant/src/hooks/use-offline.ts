@@ -3,6 +3,7 @@
  */
 
 import { useState, useEffect, useCallback, useRef } from 'react';
+
 import { toast } from '@/hooks/use-toast';
 
 interface OfflineState {
@@ -240,13 +241,11 @@ export function useOffline(options: UseOfflineOptions = {}) {
   }, [state.isOnline, syncPendingActions]);
 
   // Cleanup timeout on unmount
-  useEffect(() => {
-    return () => {
+  useEffect(() => () => {
       if (syncTimeoutRef.current) {
         clearTimeout(syncTimeoutRef.current);
       }
-    };
-  }, []);
+    }, []);
 
   return {
     ...state,
@@ -277,9 +276,9 @@ export function useOfflineApi() {
         // Return fallback data or throw error
         if (fallbackData !== undefined) {
           return { data: fallbackData, offline: true, actionId };
-        } else {
+        } 
           throw new Error('Operation queued for sync when online');
-        }
+        
       }
 
       // Make normal request when online

@@ -10,7 +10,6 @@
  * - Performance characteristics
  */
 
-import React from 'react';
 import {
   render,
   screen,
@@ -19,12 +18,14 @@ import {
   act,
 } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import React from 'react';
+
 import { ProjectForm } from '@/components/projects/project-form';
-import { renderWithProviders } from '@/lib/testing/test-utils';
 import {
   setupTestEnvironment,
   teardownTestEnvironment,
 } from '@/lib/testing/test-setup';
+import { renderWithProviders } from '@/lib/testing/test-utils';
 import { Project, ProjectStatus } from '@/types/project';
 
 // Setup comprehensive test environment

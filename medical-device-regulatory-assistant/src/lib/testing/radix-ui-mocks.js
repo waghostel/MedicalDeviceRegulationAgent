@@ -5,6 +5,7 @@
  */
 
 const React = require('react');
+
 const { useState, forwardRef } = React;
 
 // Context for Select state management
@@ -49,9 +50,9 @@ const MockSelectRoot = ({
       name &&
         React.createElement('input', {
           type: 'hidden',
-          name: name,
+          name,
           value: value || internalValue,
-          required: required,
+          required,
         }),
       children
     )
@@ -71,13 +72,13 @@ const MockSelectTrigger = forwardRef(
     return React.createElement(
       'button',
       {
-        ref: ref,
+        ref,
         type: 'button',
         role: 'combobox',
         'aria-expanded': isOpen,
         'aria-haspopup': 'listbox',
-        className: className,
-        disabled: disabled,
+        className,
+        disabled,
         onClick: handleClick,
         'data-testid': 'select-trigger',
         'data-state': isOpen ? 'open' : 'closed',
@@ -101,7 +102,7 @@ const MockSelectContent = ({ children, className, ...props }) => {
     'div',
     {
       role: 'listbox',
-      className: className,
+      className,
       'data-testid': 'select-content',
       'data-state': 'open',
       ...props,
@@ -125,7 +126,7 @@ const MockSelectItem = ({ children, value, className, disabled = false }) => {
       role: 'option',
       'aria-selected': false,
       'data-value': value,
-      className: className,
+      className,
       'data-disabled': disabled,
       onClick: handleClick,
       'data-testid': `select-item-${value}`,
@@ -142,7 +143,7 @@ const MockSelectValue = ({
 
   return React.createElement(
     'span',
-    { className: className, 'data-testid': 'select-value' },
+    { className, 'data-testid': 'select-value' },
     value || placeholder
   );
 };
@@ -196,7 +197,7 @@ const MockDialogTrigger = ({ children, asChild = false, className }) => {
     'button',
     {
       type: 'button',
-      className: className,
+      className,
       onClick: handleClick,
       'data-testid': 'dialog-trigger',
     },
@@ -212,7 +213,7 @@ const MockDialogOverlay = ({ className }) => {
   }
 
   return React.createElement('div', {
-    className: className,
+    className,
     'data-testid': 'dialog-overlay',
     'data-state': 'open',
   });
@@ -251,7 +252,7 @@ const MockDialogContent = ({
     {
       role: 'dialog',
       'aria-modal': 'true',
-      className: className,
+      className,
       'data-testid': 'dialog-content',
       'data-state': 'open',
     },

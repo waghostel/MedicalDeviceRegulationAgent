@@ -6,6 +6,7 @@
 'use client';
 
 import { useEffect } from 'react';
+
 import {
   Toast,
   ToastClose,
@@ -14,17 +15,17 @@ import {
   ToastTitle,
   ToastViewport,
 } from '@/components/ui/toast';
-import { useToast } from '@/hooks/use-toast';
 import { useAccessibilityAnnouncements } from '@/hooks/use-accessibility-announcements';
+import { useToast } from '@/hooks/use-toast';
 
-export function Toaster() {
+export const Toaster = () => {
   const { toasts } = useToast();
   const { announce, liveRegionProps } = useAccessibilityAnnouncements();
 
   // Announce new toasts to screen readers
   useEffect(() => {
     const latestToast = toasts[0]; // Most recent toast is first
-    if (latestToast && latestToast.title) {
+    if (latestToast?.title) {
       const message = latestToast.description
         ? `${latestToast.title}. ${latestToast.description}`
         : latestToast.title;
@@ -42,7 +43,7 @@ export function Toaster() {
   return (
     <>
       <ToastProvider>
-        {toasts.map(function ({
+        {toasts.map(({
           id,
           title,
           description,
@@ -55,8 +56,7 @@ export function Toaster() {
           progress,
           showProgress,
           ...props
-        }) {
-          return (
+        }) => (
             <Toast
               key={id}
               variant={variant}
@@ -77,8 +77,7 @@ export function Toaster() {
               </div>
               <ToastClose />
             </Toast>
-          );
-        })}
+          ))}
         <ToastViewport />
       </ToastProvider>
 

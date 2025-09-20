@@ -3,13 +3,15 @@
  * Displays AI agent responses as they stream in real-time
  */
 
+import { StopCircle, RotateCcw, Loader2 } from 'lucide-react';
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { cn } from '@/lib/utils';
+
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useStreamingResponse, useWebSocket } from '@/hooks/use-websocket';
+import { cn } from '@/lib/utils';
+
 import { AgentTypingIndicator } from './typing-indicators';
-import { StopCircle, RotateCcw, Loader2 } from 'lucide-react';
 
 interface StreamingResponseProps {
   streamId?: string;
@@ -21,7 +23,7 @@ interface StreamingResponseProps {
   autoScroll?: boolean;
 }
 
-export function StreamingResponse({
+export const StreamingResponse = ({
   streamId,
   className,
   onStreamStart,
@@ -29,7 +31,7 @@ export function StreamingResponse({
   onError,
   showControls = true,
   autoScroll = true,
-}: StreamingResponseProps) {
+}: StreamingResponseProps) => {
   const { content, isStreaming, error, interrupt, restart, connectionStatus } =
     useStreamingResponse({
       streamId,
@@ -143,11 +145,11 @@ interface CompactStreamingResponseProps {
   placeholder?: string;
 }
 
-export function CompactStreamingResponse({
+export const CompactStreamingResponse = ({
   streamId,
   className,
   placeholder = 'AI is thinking...',
-}: CompactStreamingResponseProps) {
+}: CompactStreamingResponseProps) => {
   const { content, isStreaming } = useStreamingResponse({ streamId });
 
   return (
@@ -173,13 +175,13 @@ interface MarkdownStreamingResponseProps extends StreamingResponseProps {
   renderMarkdown?: boolean;
 }
 
-export function MarkdownStreamingResponse({
+export const MarkdownStreamingResponse = ({
   renderMarkdown = true,
   ...props
-}: MarkdownStreamingResponseProps) {
+}: MarkdownStreamingResponseProps) => 
   // For now, we'll use the basic streaming response
   // In a full implementation, you'd integrate with a markdown renderer
   // like react-markdown or @uiw/react-md-editor
 
-  return <StreamingResponse {...props} />;
-}
+   <StreamingResponse {...props} />
+

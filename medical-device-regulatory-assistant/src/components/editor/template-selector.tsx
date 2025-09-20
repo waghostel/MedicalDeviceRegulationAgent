@@ -1,8 +1,8 @@
 'use client';
 
+import { FileText, Calendar, Type, List } from 'lucide-react';
 import React, { useState } from 'react';
-import { DocumentTemplate, TemplatePlaceholder } from '@/types/document';
-import { documentTemplates, renderTemplate } from '@/lib/document-templates';
+
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -21,7 +21,6 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import {
   Select,
   SelectContent,
@@ -29,7 +28,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { FileText, Calendar, Type, List } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
+import { documentTemplates, renderTemplate } from '@/lib/document-templates';
+import { DocumentTemplate, TemplatePlaceholder } from '@/types/document';
 
 interface TemplateSelectorProps {
   isOpen: boolean;
@@ -37,11 +38,11 @@ interface TemplateSelectorProps {
   onSelectTemplate: (content: string, templateName: string) => void;
 }
 
-export function TemplateSelector({
+export const TemplateSelector = ({
   isOpen,
   onClose,
   onSelectTemplate,
-}: TemplateSelectorProps) {
+}: TemplateSelectorProps) => {
   const [selectedTemplate, setSelectedTemplate] =
     useState<DocumentTemplate | null>(null);
   const [formValues, setFormValues] = useState<Record<string, string>>({});

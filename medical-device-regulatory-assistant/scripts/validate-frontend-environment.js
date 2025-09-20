@@ -395,7 +395,7 @@ class FrontendEnvironmentValidator {
 
     // Load environment variables from .env files
     const envFiles = ['.env.local', '.env.development', '.env'];
-    let loadedEnvVars = { ...process.env };
+    const loadedEnvVars = { ...process.env };
 
     for (const envFile of envFiles) {
       const envPath = path.join(this.projectRoot, envFile);
@@ -635,7 +635,7 @@ class FrontendEnvironmentValidator {
       }
     }
 
-    console.log('\n' + '='.repeat(60));
+    console.log(`\n${  '='.repeat(60)}`);
 
     return overallValid;
   }
@@ -674,7 +674,7 @@ function main() {
     );
 
     if (process.argv.includes('--instructions')) {
-      console.log('\n' + validator.generateSetupInstructions(results));
+      console.log(`\n${  validator.generateSetupInstructions(results)}`);
     }
   }
 

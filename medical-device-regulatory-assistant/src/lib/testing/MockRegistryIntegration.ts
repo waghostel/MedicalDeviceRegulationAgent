@@ -8,6 +8,16 @@
  */
 
 import {
+  enhancedFormMocks,
+  enhancedFormMockUtils,
+} from './enhanced-form-hook-mocks';
+import {
+  MockConfigurationLoader,
+  ConfigurationSource,
+  LoaderResult,
+  getDefaultLoader,
+} from './MockConfigurationLoader';
+import {
   MockRegistry,
   MockRegistryConfig,
   MockMetadata,
@@ -16,14 +26,6 @@ import {
   MockRegistryStats,
   getDefaultRegistry,
 } from './MockRegistry';
-
-import {
-  MockConfigurationLoader,
-  ConfigurationSource,
-  LoaderResult,
-  getDefaultLoader,
-} from './MockConfigurationLoader';
-
 import {
   MockVersionManager,
   VersionCompatibilityResult,
@@ -33,10 +35,6 @@ import {
 
 // Import existing mock implementations
 import { useToastMock, toastMockUtils } from './use-toast-mock';
-import {
-  enhancedFormMocks,
-  enhancedFormMockUtils,
-} from './enhanced-form-hook-mocks';
 
 // ============================================================================
 // Unified Integration Types
@@ -77,9 +75,13 @@ export interface MockRegistrationOptions {
 
 export class MockRegistryIntegration {
   private registry: MockRegistry;
+
   private loader: MockConfigurationLoader;
+
   private versionManager: MockVersionManager;
+
   private initialized: boolean = false;
+
   private initializationTime: Date | null = null;
 
   constructor(options?: SystemInitializationOptions) {

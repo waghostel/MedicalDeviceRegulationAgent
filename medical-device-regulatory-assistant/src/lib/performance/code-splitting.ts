@@ -6,17 +6,16 @@
  */
 
 import React, { Suspense, ComponentType, LazyExoticComponent } from 'react';
+
 import { performanceMonitor } from './optimization';
 
-import React, { Suspense, ComponentType, LazyExoticComponent } from 'react';
 
 // Loading component for Suspense fallbacks
 export const LoadingSpinner = ({
   message = 'Loading...',
 }: {
   message?: string;
-}) => {
-  return React.createElement(
+}) => React.createElement(
     'div',
     { className: 'flex items-center justify-center p-8' },
     React.createElement('div', {
@@ -28,7 +27,6 @@ export const LoadingSpinner = ({
       message
     )
   );
-};
 
 // Enhanced lazy loading with performance monitoring
 export function createLazyComponent<T extends ComponentType<any>>(
@@ -169,8 +167,7 @@ const DefaultErrorFallback = ({
 }: {
   error: Error;
   retry: () => void;
-}) => {
-  return React.createElement(
+}) => React.createElement(
     'div',
     {
       className:
@@ -215,7 +212,6 @@ const DefaultErrorFallback = ({
       'Try Again'
     )
   );
-};
 
 export const LazyWrapper: React.FC<LazyWrapperProps> = ({
   children,
@@ -266,7 +262,7 @@ export interface RouteConfig {
 // Preload components for better UX
 export function preloadComponent(importFn: () => Promise<any>): void {
   // Only preload if the user is on a fast connection
-  const connection = (navigator as any).connection;
+  const {connection} = (navigator as any);
   if (
     connection &&
     (connection.effectiveType === '4g' || connection.effectiveType === '3g')

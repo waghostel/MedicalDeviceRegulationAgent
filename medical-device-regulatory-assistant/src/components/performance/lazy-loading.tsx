@@ -15,9 +15,10 @@ import React, {
   memo,
   ComponentType,
 } from 'react';
-import { useIntersectionObserver } from '@/lib/performance/optimization';
+
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useIntersectionObserver } from '@/lib/performance/optimization';
 import { cn } from '@/lib/utils';
 
 // Lazy Image Component with intersection observer
@@ -32,7 +33,7 @@ interface LazyImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
   onError?: () => void;
 }
 
-export const LazyImage = memo(function LazyImage({
+export const LazyImage = memo(({
   src,
   alt,
   placeholder,
@@ -43,7 +44,7 @@ export const LazyImage = memo(function LazyImage({
   onError,
   className,
   ...props
-}: LazyImageProps) {
+}: LazyImageProps) => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [hasError, setHasError] = useState(false);
   const [imageSrc, setImageSrc] = useState<string | undefined>(placeholder);
@@ -103,13 +104,13 @@ interface LazyComponentProps {
   delay?: number;
 }
 
-export const LazyComponent = memo(function LazyComponent({
+export const LazyComponent = memo(({
   children,
   fallback = <Skeleton className="w-full h-32" />,
   threshold = 0.1,
   rootMargin = '100px',
   delay = 0,
-}: LazyComponentProps) {
+}: LazyComponentProps) => {
   const [shouldRender, setShouldRender] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -123,9 +124,9 @@ export const LazyComponent = memo(function LazyComponent({
       if (delay > 0) {
         const timer = setTimeout(() => setShouldRender(true), delay);
         return () => clearTimeout(timer);
-      } else {
+      } 
         setShouldRender(true);
-      }
+      
     }
   }, [hasIntersected, delay]);
 
@@ -214,6 +215,7 @@ export function createLazyRoute<P extends object>(
 // Preload utilities for better UX
 export class PreloadManager {
   private static preloadedComponents = new Set<string>();
+
   private static preloadedImages = new Set<string>();
 
   static preloadComponent(importFn: () => Promise<any>, key: string) {
@@ -264,13 +266,11 @@ export function usePreloadOnHover<T>(
     }
   }, []);
 
-  useEffect(() => {
-    return () => {
+  useEffect(() => () => {
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
       }
-    };
-  }, []);
+    }, []);
 
   return { handleMouseEnter, handleMouseLeave };
 }
@@ -345,14 +345,13 @@ export const LazyProjectCard = withLazyLoading(
   <Skeleton className="w-full h-32" />
 );
 
-export const LazyChart = memo(function LazyChart({
+export const LazyChart = memo(({
   data,
   type = 'line',
 }: {
   data: any[];
   type?: string;
-}) {
-  return (
+}) => (
     <LazyComponent fallback={<Skeleton className="w-full h-64" />}>
       <div className="w-full h-64 flex items-center justify-center border rounded">
         <p>
@@ -360,5 +359,4 @@ export const LazyChart = memo(function LazyChart({
         </p>
       </div>
     </LazyComponent>
-  );
-});
+  ));

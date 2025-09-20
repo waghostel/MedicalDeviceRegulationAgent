@@ -10,6 +10,7 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
+
 import { parse } from '@typescript-eslint/parser';
 import { AST_NODE_TYPES, TSESTree } from '@typescript-eslint/types';
 
@@ -127,7 +128,9 @@ export interface AuditReport {
 
 export class MockDataAuditor {
   private srcPath: string;
+
   private mockDataPath: string;
+
   private componentCache: Map<string, ComponentAnalysis> = new Map();
 
   constructor(
@@ -515,8 +518,7 @@ export class MockDataAuditor {
     // Check if used in a hook
     if (
       parent.type === AST_NODE_TYPES.CallExpression &&
-      parent.callee.name &&
-      parent.callee.name.startsWith('use')
+      parent.callee.name?.startsWith('use')
     ) {
       return 'hook';
     }

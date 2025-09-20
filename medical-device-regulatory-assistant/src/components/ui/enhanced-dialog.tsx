@@ -1,10 +1,11 @@
 'use client';
 
-import * as React from 'react';
 import * as DialogPrimitive from '@radix-ui/react-dialog';
 import { X } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import * as React from 'react';
+
 import { useAccessibilityAnnouncements } from '@/hooks/use-focus-management';
+import { cn } from '@/lib/utils';
 
 // Enhanced Dialog components with proper focus management
 const Dialog = DialogPrimitive.Root;

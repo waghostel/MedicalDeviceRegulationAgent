@@ -14,6 +14,7 @@ import React, {
   memo,
   CSSProperties,
 } from 'react';
+
 import { useVirtualScrolling } from '@/lib/performance/optimization';
 import { cn } from '@/lib/utils';
 
@@ -350,14 +351,14 @@ interface VirtualizedProjectListProps {
   className?: string;
 }
 
-export const VirtualizedProjectList = memo(function VirtualizedProjectList({
+export const VirtualizedProjectList = memo(({
   projects,
   onSelectProject,
   onEditProject,
   containerHeight = 600,
   itemHeight = 120,
   className,
-}: VirtualizedProjectListProps) {
+}: VirtualizedProjectListProps) => {
   const renderProject = useCallback(
     (project: any, index: number) => (
       <div

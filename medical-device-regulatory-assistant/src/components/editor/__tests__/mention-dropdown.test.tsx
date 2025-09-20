@@ -1,8 +1,11 @@
-import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { MentionDropdown } from '../mention-dropdown';
+import React from 'react';
+
 import { MentionItem } from '@/types/document';
+
+import { MentionDropdown } from '../mention-dropdown';
+
 
 const mockMentionItems: MentionItem[] = [
   {

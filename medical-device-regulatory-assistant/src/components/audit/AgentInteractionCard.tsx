@@ -1,21 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from '@/components/ui/collapsible';
+import { format } from 'date-fns';
 import {
   ChevronDown,
   ChevronRight,
@@ -27,8 +12,25 @@ import {
   AlertCircle,
   Loader,
 } from 'lucide-react';
-import { format } from 'date-fns';
+import React, { useState } from 'react';
+
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible';
+import { Progress } from '@/components/ui/progress';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { AgentInteraction, ExpandedReasoning } from '@/types/audit';
+
 import { ReasoningTrace } from './ReasoningTrace';
 import { SourceCitations } from './SourceCitations';
 
@@ -36,9 +38,9 @@ interface AgentInteractionCardProps {
   interaction: AgentInteraction;
 }
 
-export function AgentInteractionCard({
+export const AgentInteractionCard = ({
   interaction,
-}: AgentInteractionCardProps) {
+}: AgentInteractionCardProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [showReasoning, setShowReasoning] = useState(false);
   const [showSources, setShowSources] = useState(false);
@@ -73,12 +75,10 @@ export function AgentInteractionCard({
     }
   };
 
-  const formatActionName = (action: string) => {
-    return action
+  const formatActionName = (action: string) => action
       .split('-')
       .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
       .join(' ');
-  };
 
   const getConfidenceColor = (score: number) => {
     if (score >= 0.8) return 'text-green-600';

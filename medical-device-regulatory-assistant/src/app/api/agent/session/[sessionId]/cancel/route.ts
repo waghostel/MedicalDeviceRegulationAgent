@@ -5,6 +5,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
+
 import { authOptions } from '@/lib/auth';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:8000';
@@ -28,7 +29,7 @@ export async function POST(
 ) {
   try {
     const headers = await getAuthHeaders(request);
-    const sessionId = params.sessionId;
+    const {sessionId} = params;
     const body = await request.json();
 
     const response = await fetch(

@@ -35,7 +35,7 @@ class TestRunner {
   }
 
   logSection(title) {
-    console.log('\n' + '='.repeat(60));
+    console.log(`\n${  '='.repeat(60)}`);
     this.log(`${COLORS.BOLD}${title}${COLORS.RESET}`, COLORS.BLUE);
     console.log('='.repeat(60));
   }

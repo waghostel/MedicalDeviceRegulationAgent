@@ -7,9 +7,9 @@
  * Requirements: 5.4, 6.2
  */
 
-import React from 'react';
 import { RenderResult, queries } from '@testing-library/react';
 import { ReactWrapper } from 'enzyme';
+import React from 'react';
 
 export interface ComponentRenderingReport {
   componentName: string;
@@ -149,7 +149,9 @@ export type RenderingPhase =
 
 export class ComponentRenderingDebugger {
   private static instance: ComponentRenderingDebugger;
+
   private renderingHistory: ComponentRenderingReport[] = [];
+
   private performanceObserver?: PerformanceObserver;
 
   constructor() {
@@ -183,21 +185,15 @@ export class ComponentRenderingDebugger {
 
     try {
       // Step 1: Validate props
-      const propsStep = this.executeRenderingStep('PROPS_VALIDATION', () => {
-        return this.analyzeProps(component, props);
-      });
+      const propsStep = this.executeRenderingStep('PROPS_VALIDATION', () => this.analyzeProps(component, props));
       debugTrace.push(propsStep);
 
       // Step 2: Analyze context requirements
-      const contextStep = this.executeRenderingStep('CONTEXT_SETUP', () => {
-        return this.analyzeContext(component, options.contexts || []);
-      });
+      const contextStep = this.executeRenderingStep('CONTEXT_SETUP', () => this.analyzeContext(component, options.contexts || []));
       debugTrace.push(contextStep);
 
       // Step 3: Attempt component rendering
-      const renderStep = this.executeRenderingStep('COMPONENT_MOUNT', () => {
-        return this.attemptComponentRender(component, props, options);
-      });
+      const renderStep = this.executeRenderingStep('COMPONENT_MOUNT', () => this.attemptComponentRender(component, props, options));
       debugTrace.push(renderStep);
       renderResult = renderStep.data?.renderResult;
 
@@ -213,9 +209,7 @@ export class ComponentRenderingDebugger {
       if (renderResult) {
         const childrenStep = this.executeRenderingStep(
           'CHILDREN_RENDER',
-          () => {
-            return this.analyzeChildren(renderResult!);
-          }
+          () => this.analyzeChildren(renderResult!)
         );
         debugTrace.push(childrenStep);
         childrenAnalysis = childrenStep.data || childrenAnalysis;
@@ -236,9 +230,7 @@ export class ComponentRenderingDebugger {
       };
 
       if (renderResult) {
-        const domStep = this.executeRenderingStep('DOM_CREATION', () => {
-          return this.analyzeDOMStructure(renderResult!);
-        });
+        const domStep = this.executeRenderingStep('DOM_CREATION', () => this.analyzeDOMStructure(renderResult!));
         debugTrace.push(domStep);
         domAnalysis = domStep.data || domAnalysis;
       }
@@ -530,7 +522,7 @@ ${report.suggestions.map((suggestion) => `- ${suggestion}`).join('\n')}
     const providedProps = { ...props };
     const requiredProps = Object.keys(propTypes).filter((key) => {
       const propType = propTypes[key];
-      return propType && propType.isRequired;
+      return propType?.isRequired;
     });
 
     const missingProps = requiredProps.filter(
@@ -621,7 +613,7 @@ ${report.suggestions.map((suggestion) => `- ${suggestion}`).join('\n')}
   }
 
   private analyzeChildren(renderResult: RenderResult): ChildrenAnalysis {
-    const container = renderResult.container;
+    const {container} = renderResult;
     const allElements = container.querySelectorAll('*');
 
     return {
@@ -636,7 +628,7 @@ ${report.suggestions.map((suggestion) => `- ${suggestion}`).join('\n')}
   }
 
   private analyzeDOMStructure(renderResult: RenderResult): DOMAnalysis {
-    const container = renderResult.container;
+    const {container} = renderResult;
     const allElements = container.querySelectorAll('*');
     const elementsWithTestId = container.querySelectorAll('[data-testid]');
 
@@ -759,7 +751,7 @@ ${report.suggestions.map((suggestion) => `- ${suggestion}`).join('\n')}
   }
 
   private calculateTreeDepth(element?: Element): number {
-    if (!element || !element.children.length) return 0;
+    if (!element?.children.length) return 0;
 
     let maxDepth = 0;
     Array.from(element.children).forEach((child) => {

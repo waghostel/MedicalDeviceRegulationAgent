@@ -316,6 +316,7 @@ export interface ValidationRecommendation {
  */
 export class MigrationValidationManager {
   private framework: ValidationFramework;
+
   private results: Map<string, ValidationResult[]> = new Map();
 
   constructor(framework?: Partial<ValidationFramework>) {
@@ -1085,14 +1086,14 @@ export class MigrationValidationManager {
 
     if (passed) {
       return ValidationStatus.PASSED;
-    } else if (
+    } if (
       tolerance > 0 &&
       Math.abs(measurement - threshold) <= tolerance * 2
     ) {
       return ValidationStatus.WARNING;
-    } else {
+    } 
       return ValidationStatus.FAILED;
-    }
+    
   }
 
   /**

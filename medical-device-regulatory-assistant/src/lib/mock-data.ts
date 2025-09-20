@@ -25,7 +25,6 @@ import {
   ActivityItem,
   DashboardStatistics,
 } from '@/types/dashboard';
-
 import {
   Project,
   ProjectStatus,
@@ -110,9 +109,7 @@ const getRandomDate = (daysBack: number = 30): string => {
   return date.toISOString();
 };
 
-const getRandomId = (prefix: string = 'id'): string => {
-  return `${prefix}-${Math.random().toString(36).substring(2, 9)}`;
-};
+const getRandomId = (prefix: string = 'id'): string => `${prefix}-${Math.random().toString(36).substring(2, 9)}`;
 
 // Core mock data generators
 export const generateMockSourceCitation = (

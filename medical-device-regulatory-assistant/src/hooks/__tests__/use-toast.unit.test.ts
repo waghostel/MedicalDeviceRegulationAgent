@@ -3,6 +3,7 @@
  */
 
 import { renderHook, act } from '@testing-library/react';
+
 import { useToast, toast, contextualToast } from '../use-toast';
 
 // Mock setTimeout and clearTimeout

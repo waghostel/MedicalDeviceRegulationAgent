@@ -1,16 +1,19 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Header } from './Header';
-import { Sidebar } from './Sidebar';
-import { QuickActionsToolbar } from './QuickActionsToolbar';
-import { CommandPalette } from './CommandPalette';
-import { Breadcrumb, BreadcrumbItem } from './Breadcrumb';
+
 import {
   useKeyboardShortcuts,
   createRegulatoryShortcuts,
 } from '@/hooks/useKeyboardShortcuts';
 import { cn } from '@/lib/utils';
+
+import { Breadcrumb, BreadcrumbItem } from './Breadcrumb';
+import { CommandPalette } from './CommandPalette';
+import { Header } from './Header';
+import { QuickActionsToolbar } from './QuickActionsToolbar';
+import { Sidebar } from './Sidebar';
+
 
 interface AppLayoutProps {
   children: React.ReactNode;

@@ -110,7 +110,7 @@ module.exports = {
     // Notification settings
     notifications: {
       slack: {
-        enabled: process.env.SLACK_WEBHOOK_URL ? true : false,
+        enabled: !!process.env.SLACK_WEBHOOK_URL,
         webhook: process.env.SLACK_WEBHOOK_URL,
         channel: '#dev-alerts',
         onlyOnFailure: true,
@@ -211,7 +211,7 @@ module.exports = {
 
     // Codecov
     codecov: {
-      enabled: process.env.CODECOV_TOKEN ? true : false,
+      enabled: !!process.env.CODECOV_TOKEN,
       token: process.env.CODECOV_TOKEN,
     },
 

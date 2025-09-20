@@ -31,7 +31,9 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 // Mock Response class for test environment
 class MockResponse {
   private _body: string;
+
   private _status: number;
+
   private _headers: Record<string, string>;
 
   constructor(

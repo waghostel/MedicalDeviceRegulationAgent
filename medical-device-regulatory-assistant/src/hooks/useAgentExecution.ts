@@ -163,7 +163,7 @@ export function useAgentExecution(options: UseAgentExecutionOptions = {}) {
             typeof data === 'string' ? data : data.message || 'Unknown error';
 
           const newStatus: AgentExecutionStatus = {
-            sessionId: sessionId,
+            sessionId,
             status: 'error',
             completedTasks: [],
             error: errorMessage,
@@ -185,7 +185,7 @@ export function useAgentExecution(options: UseAgentExecutionOptions = {}) {
         console.error('EventSource error:', error);
 
         const newStatus: AgentExecutionStatus = {
-          sessionId: sessionId,
+          sessionId,
           status: 'error',
           completedTasks: [],
           error: 'Connection error',
@@ -244,7 +244,7 @@ export function useAgentExecution(options: UseAgentExecutionOptions = {}) {
               projectContext?.deviceDescription || 'Unknown device',
             intended_use: projectContext?.intendedUse || 'Unknown use',
             device_type: projectContext?.deviceType,
-            parameters: parameters,
+            parameters,
           }),
           signal: abortControllerRef.current.signal,
         });
@@ -391,9 +391,7 @@ export function useAgentExecution(options: UseAgentExecutionOptions = {}) {
   );
 
   // Cleanup on unmount
-  useEffect(() => {
-    return cleanup;
-  }, [cleanup]);
+  useEffect(() => cleanup, [cleanup]);
 
   return {
     status,
