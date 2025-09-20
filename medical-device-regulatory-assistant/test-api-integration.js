@@ -44,14 +44,14 @@ const tests = [
 function makeRequest(options) {
   return new Promise((resolve, reject) => {
     const protocol = options.protocol === 'https:' ? https : http;
-    
+
     const req = protocol.request(options, (res) => {
       let data = '';
-      
+
       res.on('data', (chunk) => {
         data += chunk;
       });
-      
+
       res.on('end', () => {
         resolve({
           statusCode: res.statusCode,
@@ -60,15 +60,15 @@ function makeRequest(options) {
         });
       });
     });
-    
+
     req.on('error', (error) => {
       reject(error);
     });
-    
+
     if (options.body) {
       req.write(options.body);
     }
-    
+
     req.end();
   });
 }
@@ -76,7 +76,7 @@ function makeRequest(options) {
 async function runTest(test) {
   console.log(`\n🧪 Testing: ${test.name}`);
   console.log(`   ${test.method} ${test.path}`);
-  
+
   try {
     const url = new URL(test.path, BASE_URL);
     const options = {
@@ -86,34 +86,37 @@ async function runTest(test) {
       method: test.method,
       headers: test.headers || {},
     };
-    
+
     if (test.body) {
       options.body = test.body;
     }
-    
+
     const response = await makeRequest(options);
-    
+
     const isExpectedStatus = test.expectedStatus.includes(response.statusCode);
     const status = isExpectedStatus ? '✅' : '❌';
-    
-    console.log(`   ${status} Status: ${response.statusCode} (expected: ${test.expectedStatus.join(' or ')})`);
-    
+
+    console.log(
+      `   ${status} Status: ${response.statusCode} (expected: ${test.expectedStatus.join(' or ')})`
+    );
+
     if (response.body) {
       try {
         const jsonBody = JSON.parse(response.body);
-        console.log(`   📄 Response: ${JSON.stringify(jsonBody, null, 2).substring(0, 200)}...`);
+        console.log(
+          `   📄 Response: ${JSON.stringify(jsonBody, null, 2).substring(0, 200)}...`
+        );
       } catch (e) {
         console.log(`   📄 Response: ${response.body.substring(0, 100)}...`);
       }
     }
-    
+
     return {
       name: test.name,
       passed: isExpectedStatus,
       statusCode: response.statusCode,
       expectedStatus: test.expectedStatus,
     };
-    
   } catch (error) {
     console.log(`   ❌ Error: ${error.message}`);
     return {
@@ -127,44 +130,48 @@ async function runTest(test) {
 async function runAllTests() {
   console.log('🚀 Starting API Integration Tests...');
   console.log(`📍 Base URL: ${BASE_URL}`);
-  
+
   const results = [];
-  
+
   for (const test of tests) {
     const result = await runTest(test);
     results.push(result);
   }
-  
+
   console.log('\n📊 Test Results Summary:');
   console.log('========================');
-  
+
   let passed = 0;
   let failed = 0;
-  
+
   results.forEach((result) => {
     const status = result.passed ? '✅ PASS' : '❌ FAIL';
     console.log(`${status} ${result.name}`);
-    
+
     if (result.passed) {
       passed++;
     } else {
       failed++;
     }
-    
+
     if (result.error) {
       console.log(`      Error: ${result.error}`);
     } else if (!result.passed) {
-      console.log(`      Expected: ${result.expectedStatus.join(' or ')}, Got: ${result.statusCode}`);
+      console.log(
+        `      Expected: ${result.expectedStatus.join(' or ')}, Got: ${result.statusCode}`
+      );
     }
   });
-  
+
   console.log(`\n📈 Results: ${passed} passed, ${failed} failed`);
-  
+
   if (failed === 0) {
     console.log('🎉 All tests passed!');
     process.exit(0);
   } else {
-    console.log('⚠️  Some tests failed. This may be expected if the server is not running.');
+    console.log(
+      '⚠️  Some tests failed. This may be expected if the server is not running.'
+    );
     process.exit(1);
   }
 }
@@ -179,7 +186,7 @@ async function checkServerHealth() {
       method: 'GET',
       timeout: 5000,
     });
-    
+
     console.log('✅ Server is running');
     return true;
   } catch (error) {
@@ -191,7 +198,7 @@ async function checkServerHealth() {
 
 async function main() {
   const serverRunning = await checkServerHealth();
-  
+
   if (!serverRunning) {
     console.log('\n⚠️  Skipping API tests - server not running');
     console.log('   This is expected during automated testing');
@@ -200,7 +207,7 @@ async function main() {
     console.log('   2. Run this script: node test-api-integration.js');
     process.exit(0);
   }
-  
+
   await runAllTests();
 }
 

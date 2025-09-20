@@ -1,11 +1,17 @@
 /**
  * Performance Optimization Tests
- * 
+ *
  * Tests for virtual scrolling, lazy loading, caching, and performance monitoring
  */
 
 import React from 'react';
-import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
+import {
+  render,
+  screen,
+  fireEvent,
+  waitFor,
+  act,
+} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 
@@ -38,22 +44,43 @@ window.IntersectionObserver = mockIntersectionObserver;
 
 // Mock web-vitals
 jest.mock('web-vitals', () => ({
-  getCLS: jest.fn((callback) => callback({ name: 'CLS', value: 0.05, id: 'test-cls' })),
-  getFCP: jest.fn((callback) => callback({ name: 'FCP', value: 1500, id: 'test-fcp' })),
-  getFID: jest.fn((callback) => callback({ name: 'FID', value: 50, id: 'test-fid' })),
-  getLCP: jest.fn((callback) => callback({ name: 'LCP', value: 2000, id: 'test-lcp' })),
-  getTTFB: jest.fn((callback) => callback({ name: 'TTFB', value: 500, id: 'test-ttfb' })),
+  getCLS: jest.fn((callback) =>
+    callback({ name: 'CLS', value: 0.05, id: 'test-cls' })
+  ),
+  getFCP: jest.fn((callback) =>
+    callback({ name: 'FCP', value: 1500, id: 'test-fcp' })
+  ),
+  getFID: jest.fn((callback) =>
+    callback({ name: 'FID', value: 50, id: 'test-fid' })
+  ),
+  getLCP: jest.fn((callback) =>
+    callback({ name: 'LCP', value: 2000, id: 'test-lcp' })
+  ),
+  getTTFB: jest.fn((callback) =>
+    callback({ name: 'TTFB', value: 500, id: 'test-ttfb' })
+  ),
 }));
 
 // Import components after mocking
-import { VirtualScrollContainer, VirtualGrid } from '@/components/performance/virtual-scrolling';
-import { LazyImage, LazyComponent, LazyData } from '@/components/performance/lazy-loading';
+import {
+  VirtualScrollContainer,
+  VirtualGrid,
+} from '@/components/performance/virtual-scrolling';
+import {
+  LazyImage,
+  LazyComponent,
+  LazyData,
+} from '@/components/performance/lazy-loading';
 import { PerformanceMonitor } from '@/components/performance/performance-monitor';
-import { MemoryCache, PersistentCache, APICache } from '@/lib/performance/caching';
-import { 
-  useVirtualScrolling, 
+import {
+  MemoryCache,
+  PersistentCache,
+  APICache,
+} from '@/lib/performance/caching';
+import {
+  useVirtualScrolling,
   usePerformanceMonitor,
-  useMemoryMonitoring 
+  useMemoryMonitoring,
 } from '@/lib/performance/optimization';
 
 // Mock localStorage
@@ -120,12 +147,13 @@ describe('Performance Optimization Features', () => {
         />
       );
 
-      const scrollContainer = screen.getByRole('scrollbar', { hidden: true }) || 
-                             document.querySelector('[style*="overflow-auto"]');
-      
+      const scrollContainer =
+        screen.getByRole('scrollbar', { hidden: true }) ||
+        document.querySelector('[style*="overflow-auto"]');
+
       if (scrollContainer) {
         fireEvent.scroll(scrollContainer, { target: { scrollTop: 500 } });
-        
+
         await waitFor(() => {
           // Should re-render with new visible items
           expect(renderItem).toHaveBeenCalled();
@@ -181,7 +209,7 @@ describe('Performance Optimization Features', () => {
     it('should lazy load images with intersection observer', async () => {
       const onLoad = jest.fn();
       const mockObserve = jest.fn();
-      
+
       mockIntersectionObserver.mockImplementation((callback) => ({
         observe: mockObserve,
         unobserve: jest.fn(),
@@ -189,22 +217,20 @@ describe('Performance Optimization Features', () => {
       }));
 
       render(
-        <LazyImage
-          src="/test-image.jpg"
-          alt="Test image"
-          onLoad={onLoad}
-        />
+        <LazyImage src="/test-image.jpg" alt="Test image" onLoad={onLoad} />
       );
 
       expect(mockObserve).toHaveBeenCalled();
     });
 
     it('should lazy load components when they enter viewport', async () => {
-      const TestComponent = () => <div data-testid="lazy-content">Lazy Content</div>;
-      
+      const TestComponent = () => (
+        <div data-testid="lazy-content">Lazy Content</div>
+      );
+
       const mockObserve = jest.fn();
       const mockCallback = jest.fn();
-      
+
       mockIntersectionObserver.mockImplementation((callback) => {
         mockCallback.mockImplementation(callback);
         return {
@@ -236,7 +262,7 @@ describe('Performance Optimization Features', () => {
       const fetchData = jest.fn().mockResolvedValue({ message: 'Loaded data' });
       const mockObserve = jest.fn();
       const mockCallback = jest.fn();
-      
+
       mockIntersectionObserver.mockImplementation((callback) => {
         mockCallback.mockImplementation(callback);
         return {
@@ -265,7 +291,9 @@ describe('Performance Optimization Features', () => {
       });
 
       await waitFor(() => {
-        expect(screen.getByTestId('data-content')).toHaveTextContent('Loaded data');
+        expect(screen.getByTestId('data-content')).toHaveTextContent(
+          'Loaded data'
+        );
       });
     });
   });
@@ -274,32 +302,32 @@ describe('Performance Optimization Features', () => {
     describe('MemoryCache', () => {
       it('should store and retrieve data', () => {
         const cache = new MemoryCache({ maxSize: 10, ttl: 1000 });
-        
+
         cache.set('test-key', { data: 'test-value' });
         const result = cache.get('test-key');
-        
+
         expect(result).toEqual({ data: 'test-value' });
       });
 
       it('should expire data after TTL', async () => {
         const cache = new MemoryCache({ maxSize: 10, ttl: 100 });
-        
+
         cache.set('test-key', { data: 'test-value' });
-        
+
         // Wait for expiration
-        await new Promise(resolve => setTimeout(resolve, 150));
-        
+        await new Promise((resolve) => setTimeout(resolve, 150));
+
         const result = cache.get('test-key');
         expect(result).toBeNull();
       });
 
       it('should respect max size limit', () => {
         const cache = new MemoryCache({ maxSize: 2 });
-        
+
         cache.set('key1', 'value1');
         cache.set('key2', 'value2');
         cache.set('key3', 'value3'); // Should evict key1
-        
+
         expect(cache.get('key1')).toBeNull();
         expect(cache.get('key2')).toBe('value2');
         expect(cache.get('key3')).toBe('value3');
@@ -307,13 +335,13 @@ describe('Performance Optimization Features', () => {
 
       it('should provide cache statistics', () => {
         const cache = new MemoryCache({ maxSize: 10 });
-        
+
         cache.set('key1', 'value1');
         cache.set('key2', 'value2');
         cache.get('key1'); // Hit
         cache.get('key1'); // Hit
         cache.get('nonexistent'); // Miss
-        
+
         const stats = cache.getStats();
         expect(stats.size).toBe(2);
         expect(stats.maxSize).toBe(10);
@@ -323,9 +351,9 @@ describe('Performance Optimization Features', () => {
     describe('PersistentCache', () => {
       it('should store data in localStorage', () => {
         const cache = new PersistentCache('test_cache');
-        
+
         cache.set('test-key', { data: 'test-value' });
-        
+
         expect(mockLocalStorage.setItem).toHaveBeenCalledWith(
           'test_cache_test-key',
           expect.stringContaining('test-value')
@@ -340,9 +368,9 @@ describe('Performance Optimization Features', () => {
           ttl: 60000,
           hits: 0,
         };
-        
+
         mockLocalStorage.getItem.mockReturnValue(JSON.stringify(testData));
-        
+
         const result = cache.get('test-key');
         expect(result).toEqual({ data: 'test-value' });
       });
@@ -352,10 +380,10 @@ describe('Performance Optimization Features', () => {
       it('should cache API responses', async () => {
         const cache = new APICache();
         const fetchFn = jest.fn().mockResolvedValue({ data: 'api-response' });
-        
+
         const result1 = await cache.get('api-key', fetchFn);
         const result2 = await cache.get('api-key', fetchFn);
-        
+
         expect(fetchFn).toHaveBeenCalledTimes(1);
         expect(result1).toEqual({ data: 'api-response' });
         expect(result2).toEqual({ data: 'api-response' });
@@ -364,18 +392,20 @@ describe('Performance Optimization Features', () => {
       it('should handle API errors', async () => {
         const cache = new APICache();
         const fetchFn = jest.fn().mockRejectedValue(new Error('API Error'));
-        
-        await expect(cache.get('api-key', fetchFn)).rejects.toThrow('API Error');
+
+        await expect(cache.get('api-key', fetchFn)).rejects.toThrow(
+          'API Error'
+        );
       });
 
       it('should invalidate cache entries', async () => {
         const cache = new APICache();
         const fetchFn = jest.fn().mockResolvedValue({ data: 'api-response' });
-        
+
         await cache.get('api-key', fetchFn);
         cache.invalidate('api-key');
         await cache.get('api-key', fetchFn);
-        
+
         expect(fetchFn).toHaveBeenCalledTimes(2);
       });
     });
@@ -384,14 +414,14 @@ describe('Performance Optimization Features', () => {
   describe('Performance Monitoring', () => {
     it('should render performance monitor component', () => {
       render(<PerformanceMonitor />);
-      
+
       expect(screen.getByText('Performance Monitor')).toBeInTheDocument();
       expect(screen.getByText('Overall Performance Score')).toBeInTheDocument();
     });
 
     it('should display performance metrics', () => {
       render(<PerformanceMonitor />);
-      
+
       // Should show tabs for different metric categories
       expect(screen.getByText('Metrics')).toBeInTheDocument();
       expect(screen.getByText('Web Vitals')).toBeInTheDocument();
@@ -401,13 +431,17 @@ describe('Performance Optimization Features', () => {
 
     it('should allow exporting performance data', async () => {
       const user = userEvent.setup();
-      
+
       // Mock URL.createObjectURL
       const mockCreateObjectURL = jest.fn(() => 'mock-url');
       const mockRevokeObjectURL = jest.fn();
-      Object.defineProperty(URL, 'createObjectURL', { value: mockCreateObjectURL });
-      Object.defineProperty(URL, 'revokeObjectURL', { value: mockRevokeObjectURL });
-      
+      Object.defineProperty(URL, 'createObjectURL', {
+        value: mockCreateObjectURL,
+      });
+      Object.defineProperty(URL, 'revokeObjectURL', {
+        value: mockRevokeObjectURL,
+      });
+
       // Mock document.createElement and appendChild
       const mockAnchor = {
         href: '',
@@ -417,16 +451,22 @@ describe('Performance Optimization Features', () => {
       const mockCreateElement = jest.fn(() => mockAnchor);
       const mockAppendChild = jest.fn();
       const mockRemoveChild = jest.fn();
-      
-      Object.defineProperty(document, 'createElement', { value: mockCreateElement });
-      Object.defineProperty(document.body, 'appendChild', { value: mockAppendChild });
-      Object.defineProperty(document.body, 'removeChild', { value: mockRemoveChild });
-      
+
+      Object.defineProperty(document, 'createElement', {
+        value: mockCreateElement,
+      });
+      Object.defineProperty(document.body, 'appendChild', {
+        value: mockAppendChild,
+      });
+      Object.defineProperty(document.body, 'removeChild', {
+        value: mockRemoveChild,
+      });
+
       render(<PerformanceMonitor />);
-      
+
       const exportButton = screen.getByText('Export');
       await user.click(exportButton);
-      
+
       expect(mockCreateObjectURL).toHaveBeenCalled();
       expect(mockAnchor.click).toHaveBeenCalled();
       expect(mockRevokeObjectURL).toHaveBeenCalled();
@@ -434,14 +474,14 @@ describe('Performance Optimization Features', () => {
 
     it('should toggle recording state', async () => {
       const user = userEvent.setup();
-      
+
       render(<PerformanceMonitor />);
-      
+
       expect(screen.getByText('Recording')).toBeInTheDocument();
-      
+
       const pauseButton = screen.getByText('Pause');
       await user.click(pauseButton);
-      
+
       expect(screen.getByText('Paused')).toBeInTheDocument();
       expect(screen.getByText('Resume')).toBeInTheDocument();
     });
@@ -455,7 +495,7 @@ describe('Performance Optimization Features', () => {
       };
 
       render(<TestComponent />);
-      
+
       // Should call performance.now() for timing
       expect(mockPerformance.now).toHaveBeenCalled();
     });
@@ -477,7 +517,7 @@ describe('Performance Optimization Features', () => {
       };
 
       render(<TestComponent />);
-      
+
       expect(screen.getByTestId('memory-usage')).toHaveTextContent('50%');
     });
   });
@@ -547,20 +587,23 @@ describe('Performance Optimization Integration', () => {
 
   it('should maintain performance with caching and monitoring', async () => {
     const cache = new APICache();
-    const fetchFn = jest.fn().mockResolvedValue({ 
-      projects: Array.from({ length: 1000 }, (_, i) => ({ id: i, name: `Project ${i}` }))
+    const fetchFn = jest.fn().mockResolvedValue({
+      projects: Array.from({ length: 1000 }, (_, i) => ({
+        id: i,
+        name: `Project ${i}`,
+      })),
     });
 
     const startTime = performance.now();
-    
+
     // First call - should fetch
     await cache.get('projects', fetchFn);
-    
+
     // Second call - should use cache
     await cache.get('projects', fetchFn);
-    
+
     const endTime = performance.now();
-    
+
     expect(fetchFn).toHaveBeenCalledTimes(1);
     expect(endTime - startTime).toBeLessThan(1000); // Should be fast due to caching
   });

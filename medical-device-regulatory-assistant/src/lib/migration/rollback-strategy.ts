@@ -15,7 +15,7 @@ export enum RollbackStrategyType {
   IMMEDIATE = 'immediate',
   GRADUAL = 'gradual',
   SELECTIVE = 'selective',
-  MANUAL = 'manual'
+  MANUAL = 'manual',
 }
 
 export interface RollbackTrigger {
@@ -36,7 +36,7 @@ export enum TriggerType {
   USER_COMPLAINTS = 'user_complaints',
   FUNCTIONALITY_FAILURE = 'functionality_failure',
   DATA_CORRUPTION = 'data_corruption',
-  MANUAL = 'manual'
+  MANUAL = 'manual',
 }
 
 export interface TriggerCondition {
@@ -131,7 +131,7 @@ export enum RollbackMethod {
   CODE_REVERT = 'code_revert',
   DATABASE_RESTORE = 'database_restore',
   CONFIG_CHANGE = 'config_change',
-  SERVICE_RESTART = 'service_restart'
+  SERVICE_RESTART = 'service_restart',
 }
 
 export interface RollbackStep {
@@ -164,7 +164,7 @@ export enum ExecutionStatus {
   IN_PROGRESS = 'in_progress',
   COMPLETED = 'completed',
   FAILED = 'failed',
-  CANCELLED = 'cancelled'
+  CANCELLED = 'cancelled',
 }
 
 export interface StepExecution {
@@ -232,11 +232,11 @@ export class RollbackStrategyManager {
             command: 'check_feature_flags',
             expectedResult: { migrationEnabled: false },
             timeout: 30,
-            critical: true
+            critical: true,
           },
           rollbackOnFailure: false,
           estimatedTime: 2,
-          dependencies: []
+          dependencies: [],
         },
         {
           order: 2,
@@ -251,12 +251,12 @@ export class RollbackStrategyManager {
             command: 'check_mock_data_active',
             expectedResult: { mockDataActive: true },
             timeout: 60,
-            critical: true
+            critical: true,
           },
           rollbackOnFailure: false,
           estimatedTime: 3,
-          dependencies: ['feature-flag-validation']
-        }
+          dependencies: ['feature-flag-validation'],
+        },
       ],
       estimatedTime: 5,
       riskLevel: 'low',
@@ -264,8 +264,8 @@ export class RollbackStrategyManager {
       postRollbackActions: [
         'Monitor application stability',
         'Investigate root cause of migration failure',
-        'Plan remediation strategy'
-      ]
+        'Plan remediation strategy',
+      ],
     };
 
     // Database restore rollback plan
@@ -288,20 +288,20 @@ export class RollbackStrategyManager {
             command: 'check_service_status',
             expectedResult: { allServicesStopped: true },
             timeout: 30,
-            critical: true
+            critical: true,
           },
           rollbackOnFailure: false,
           estimatedTime: 2,
-          dependencies: []
+          dependencies: [],
         },
         {
           order: 2,
           name: 'Restore Database Backup',
           description: 'Restore database from pre-migration backup',
           method: RollbackMethod.DATABASE_RESTORE,
-          parameters: { 
+          parameters: {
             backupFile: 'pre_migration_backup.db',
-            targetDatabase: 'medical_device_assistant.db'
+            targetDatabase: 'medical_device_assistant.db',
           },
           validation: {
             id: 'database-restored',
@@ -310,11 +310,11 @@ export class RollbackStrategyManager {
             command: 'verify_database_integrity',
             expectedResult: { integrityCheck: 'passed' },
             timeout: 120,
-            critical: true
+            critical: true,
           },
           rollbackOnFailure: true,
           estimatedTime: 10,
-          dependencies: ['services-stopped']
+          dependencies: ['services-stopped'],
         },
         {
           order: 3,
@@ -329,21 +329,24 @@ export class RollbackStrategyManager {
             command: 'check_service_health',
             expectedResult: { allServicesHealthy: true },
             timeout: 60,
-            critical: true
+            critical: true,
           },
           rollbackOnFailure: true,
           estimatedTime: 3,
-          dependencies: ['database-restored']
-        }
+          dependencies: ['database-restored'],
+        },
       ],
       estimatedTime: 15,
       riskLevel: 'medium',
-      prerequisites: ['Database backup available', 'Services can be safely stopped'],
+      prerequisites: [
+        'Database backup available',
+        'Services can be safely stopped',
+      ],
       postRollbackActions: [
         'Verify all functionality works correctly',
         'Check data consistency',
-        'Monitor for any issues'
-      ]
+        'Monitor for any issues',
+      ],
     };
 
     this.plans.set(featureFlagPlan.id, featureFlagPlan);
@@ -396,8 +399,8 @@ export class RollbackStrategyManager {
    * Execute rollback plan
    */
   async executeRollback(
-    planId: string, 
-    triggeredBy: string, 
+    planId: string,
+    triggeredBy: string,
     reason: string
   ): Promise<RollbackExecution> {
     const plan = this.plans.get(planId);
@@ -420,8 +423,8 @@ export class RollbackStrategyManager {
         stepsTotal: plan.steps.length,
         errorsEncountered: 0,
         validationsPassed: 0,
-        validationsTotal: plan.steps.length
-      }
+        validationsTotal: plan.steps.length,
+      },
     };
 
     this.executions.set(execution.id, execution);
@@ -430,7 +433,11 @@ export class RollbackStrategyManager {
       await this.executeRollbackPlan(execution, plan);
     } catch (error) {
       execution.status = ExecutionStatus.FAILED;
-      this.addExecutionLog(execution, 'error', `Rollback execution failed: ${error}`);
+      this.addExecutionLog(
+        execution,
+        'error',
+        `Rollback execution failed: ${error}`
+      );
     }
 
     execution.endTime = new Date().toISOString();
@@ -442,19 +449,29 @@ export class RollbackStrategyManager {
   /**
    * Execute rollback plan steps
    */
-  private async executeRollbackPlan(execution: RollbackExecution, plan: RollbackPlan): Promise<void> {
+  private async executeRollbackPlan(
+    execution: RollbackExecution,
+    plan: RollbackPlan
+  ): Promise<void> {
     execution.status = ExecutionStatus.IN_PROGRESS;
-    this.addExecutionLog(execution, 'info', `Starting rollback plan: ${plan.name}`);
+    this.addExecutionLog(
+      execution,
+      'info',
+      `Starting rollback plan: ${plan.name}`
+    );
 
     // Send rollback initiated notification
     await this.sendNotification('rollback_initiated', {
       planName: plan.name,
       triggeredBy: execution.triggeredBy,
-      reason: execution.triggerReason
+      reason: execution.triggerReason,
     });
 
     // Execute pre-rollback checks
-    await this.executeValidationChecks(execution, this.config.validation.preRollbackChecks);
+    await this.executeValidationChecks(
+      execution,
+      this.config.validation.preRollbackChecks
+    );
 
     // Execute rollback steps in order
     for (const step of plan.steps.sort((a, b) => a.order - b.order)) {
@@ -463,7 +480,11 @@ export class RollbackStrategyManager {
 
       if (stepExecution.status === ExecutionStatus.FAILED) {
         if (step.rollbackOnFailure) {
-          this.addExecutionLog(execution, 'error', `Step failed, initiating step rollback: ${step.name}`);
+          this.addExecutionLog(
+            execution,
+            'error',
+            `Step failed, initiating step rollback: ${step.name}`
+          );
           // Implement step-level rollback logic here
         } else {
           throw new Error(`Critical step failed: ${step.name}`);
@@ -474,7 +495,10 @@ export class RollbackStrategyManager {
     }
 
     // Execute post-rollback checks
-    await this.executeValidationChecks(execution, this.config.validation.postRollbackChecks);
+    await this.executeValidationChecks(
+      execution,
+      this.config.validation.postRollbackChecks
+    );
 
     execution.status = ExecutionStatus.COMPLETED;
     this.addExecutionLog(execution, 'info', 'Rollback completed successfully');
@@ -483,7 +507,7 @@ export class RollbackStrategyManager {
     await this.sendNotification('rollback_completed', {
       planName: plan.name,
       executionTime: execution.metrics.totalTime,
-      stepsCompleted: execution.metrics.stepsCompleted
+      stepsCompleted: execution.metrics.stepsCompleted,
     });
   }
 
@@ -491,14 +515,14 @@ export class RollbackStrategyManager {
    * Execute individual rollback step
    */
   private async executeRollbackStep(
-    execution: RollbackExecution, 
+    execution: RollbackExecution,
     step: RollbackStep
   ): Promise<StepExecution> {
     const stepExecution: StepExecution = {
       stepId: step.name,
       startTime: new Date().toISOString(),
       status: ExecutionStatus.IN_PROGRESS,
-      retryCount: 0
+      retryCount: 0,
     };
 
     this.addExecutionLog(execution, 'info', `Executing step: ${step.name}`);
@@ -512,18 +536,30 @@ export class RollbackStrategyManager {
       if (validationResult.success) {
         stepExecution.status = ExecutionStatus.COMPLETED;
         execution.metrics.validationsPassed++;
-        this.addExecutionLog(execution, 'info', `Step completed successfully: ${step.name}`);
+        this.addExecutionLog(
+          execution,
+          'info',
+          `Step completed successfully: ${step.name}`
+        );
       } else {
         stepExecution.status = ExecutionStatus.FAILED;
         stepExecution.error = validationResult.error;
         execution.metrics.errorsEncountered++;
-        this.addExecutionLog(execution, 'error', `Step validation failed: ${step.name} - ${validationResult.error}`);
+        this.addExecutionLog(
+          execution,
+          'error',
+          `Step validation failed: ${step.name} - ${validationResult.error}`
+        );
       }
     } catch (error) {
       stepExecution.status = ExecutionStatus.FAILED;
       stepExecution.error = String(error);
       execution.metrics.errorsEncountered++;
-      this.addExecutionLog(execution, 'error', `Step execution failed: ${step.name} - ${error}`);
+      this.addExecutionLog(
+        execution,
+        'error',
+        `Step execution failed: ${step.name} - ${error}`
+      );
     }
 
     stepExecution.endTime = new Date().toISOString();
@@ -558,10 +594,12 @@ export class RollbackStrategyManager {
   /**
    * Execute feature flag rollback
    */
-  private async executeFeatureFlagRollback(parameters: Record<string, any>): Promise<void> {
+  private async executeFeatureFlagRollback(
+    parameters: Record<string, any>
+  ): Promise<void> {
     // Implementation would integrate with feature flag system
     console.log('Executing feature flag rollback:', parameters);
-    
+
     // Simulate feature flag changes
     if (parameters.action === 'disable_all_migration_flags') {
       // Set all migration-related feature flags to false
@@ -569,9 +607,9 @@ export class RollbackStrategyManager {
         'enable_real_classification_api',
         'enable_real_predicate_api',
         'enable_real_project_api',
-        'enable_database_integration'
+        'enable_database_integration',
       ];
-      
+
       for (const flag of migrationFlags) {
         // In real implementation, this would call feature flag service
         console.log(`Disabling feature flag: ${flag}`);
@@ -582,44 +620,52 @@ export class RollbackStrategyManager {
   /**
    * Execute code revert
    */
-  private async executeCodeRevert(parameters: Record<string, any>): Promise<void> {
+  private async executeCodeRevert(
+    parameters: Record<string, any>
+  ): Promise<void> {
     console.log('Executing code revert:', parameters);
-    
+
     // In real implementation, this would:
     // 1. Checkout previous commit/branch
     // 2. Deploy previous version
     // 3. Restart services
-    
-    throw new Error('Code revert not implemented - use feature flags for safer rollback');
+
+    throw new Error(
+      'Code revert not implemented - use feature flags for safer rollback'
+    );
   }
 
   /**
    * Execute database restore
    */
-  private async executeDatabaseRestore(parameters: Record<string, any>): Promise<void> {
+  private async executeDatabaseRestore(
+    parameters: Record<string, any>
+  ): Promise<void> {
     console.log('Executing database restore:', parameters);
-    
+
     const { backupFile, targetDatabase } = parameters;
-    
+
     // In real implementation, this would:
     // 1. Stop database connections
     // 2. Restore from backup file
     // 3. Verify data integrity
     // 4. Restart connections
-    
+
     // Simulate database restore
     console.log(`Restoring ${targetDatabase} from ${backupFile}`);
-    
+
     // Add artificial delay to simulate restore time
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    await new Promise((resolve) => setTimeout(resolve, 2000));
   }
 
   /**
    * Execute config change
    */
-  private async executeConfigChange(parameters: Record<string, any>): Promise<void> {
+  private async executeConfigChange(
+    parameters: Record<string, any>
+  ): Promise<void> {
     console.log('Executing config change:', parameters);
-    
+
     // Implementation would modify configuration files or environment variables
     if (parameters.action === 'verify_mock_data_usage') {
       // Check that components are using mock data
@@ -630,11 +676,13 @@ export class RollbackStrategyManager {
   /**
    * Execute service restart
    */
-  private async executeServiceRestart(parameters: Record<string, any>): Promise<void> {
+  private async executeServiceRestart(
+    parameters: Record<string, any>
+  ): Promise<void> {
     console.log('Executing service restart:', parameters);
-    
+
     const { action } = parameters;
-    
+
     if (action === 'stop_services') {
       console.log('Stopping application services...');
       // Stop backend services, frontend build processes, etc.
@@ -642,18 +690,20 @@ export class RollbackStrategyManager {
       console.log('Starting application services...');
       // Start services in correct order
     }
-    
+
     // Add delay to simulate service restart time
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise((resolve) => setTimeout(resolve, 1000));
   }
 
   /**
    * Validate step execution
    */
-  private async validateStep(validation: ValidationCheck): Promise<{ success: boolean; error?: string }> {
+  private async validateStep(
+    validation: ValidationCheck
+  ): Promise<{ success: boolean; error?: string }> {
     try {
       console.log(`Validating: ${validation.name}`);
-      
+
       // Simulate validation based on type
       switch (validation.type) {
         case 'health_check':
@@ -665,41 +715,52 @@ export class RollbackStrategyManager {
         case 'performance':
           return await this.validatePerformance(validation);
         default:
-          return { success: false, error: `Unknown validation type: ${validation.type}` };
+          return {
+            success: false,
+            error: `Unknown validation type: ${validation.type}`,
+          };
       }
     } catch (error) {
       return { success: false, error: String(error) };
     }
   }
 
-  private async validateHealthCheck(validation: ValidationCheck): Promise<{ success: boolean; error?: string }> {
+  private async validateHealthCheck(
+    validation: ValidationCheck
+  ): Promise<{ success: boolean; error?: string }> {
     // Simulate health check validation
     console.log(`Running health check: ${validation.command}`);
-    
+
     // In real implementation, this would check service health endpoints
     return { success: true };
   }
 
-  private async validateDataIntegrity(validation: ValidationCheck): Promise<{ success: boolean; error?: string }> {
+  private async validateDataIntegrity(
+    validation: ValidationCheck
+  ): Promise<{ success: boolean; error?: string }> {
     // Simulate data integrity validation
     console.log(`Checking data integrity: ${validation.command}`);
-    
+
     // In real implementation, this would run database integrity checks
     return { success: true };
   }
 
-  private async validateFunctionality(validation: ValidationCheck): Promise<{ success: boolean; error?: string }> {
+  private async validateFunctionality(
+    validation: ValidationCheck
+  ): Promise<{ success: boolean; error?: string }> {
     // Simulate functionality validation
     console.log(`Testing functionality: ${validation.command}`);
-    
+
     // In real implementation, this would run automated tests
     return { success: true };
   }
 
-  private async validatePerformance(validation: ValidationCheck): Promise<{ success: boolean; error?: string }> {
+  private async validatePerformance(
+    validation: ValidationCheck
+  ): Promise<{ success: boolean; error?: string }> {
     // Simulate performance validation
     console.log(`Checking performance: ${validation.command}`);
-    
+
     // In real implementation, this would measure response times, etc.
     return { success: true };
   }
@@ -708,13 +769,15 @@ export class RollbackStrategyManager {
    * Execute validation checks
    */
   private async executeValidationChecks(
-    execution: RollbackExecution, 
+    execution: RollbackExecution,
     checks: ValidationCheck[]
   ): Promise<void> {
     for (const check of checks) {
       const result = await this.validateStep(check);
       if (!result.success && check.critical) {
-        throw new Error(`Critical validation failed: ${check.name} - ${result.error}`);
+        throw new Error(
+          `Critical validation failed: ${check.name} - ${result.error}`
+        );
       }
     }
   }
@@ -724,12 +787,12 @@ export class RollbackStrategyManager {
    */
   private setupTriggerMonitoring(trigger: RollbackTrigger): void {
     console.log(`Setting up monitoring for trigger: ${trigger.name}`);
-    
+
     // In real implementation, this would:
     // 1. Set up metrics collection
     // 2. Configure alerting thresholds
     // 3. Connect to monitoring systems
-    
+
     // Simulate trigger monitoring
     setInterval(() => {
       if (this.monitoring) {
@@ -744,12 +807,12 @@ export class RollbackStrategyManager {
   private checkTriggerCondition(trigger: RollbackTrigger): void {
     // In real implementation, this would query monitoring systems
     // For simulation, we'll randomly trigger based on probability
-    
+
     const shouldTrigger = Math.random() < 0.001; // Very low probability for demo
-    
+
     if (shouldTrigger && trigger.autoExecute) {
       console.log(`Trigger activated: ${trigger.name}`);
-      
+
       // Execute appropriate rollback plan
       const planId = this.selectRollbackPlan(trigger);
       if (planId) {
@@ -777,12 +840,17 @@ export class RollbackStrategyManager {
   /**
    * Send notification
    */
-  private async sendNotification(type: string, data: Record<string, any>): Promise<void> {
+  private async sendNotification(
+    type: string,
+    data: Record<string, any>
+  ): Promise<void> {
     console.log(`Sending notification: ${type}`, data);
-    
+
     // In real implementation, this would send notifications via configured channels
     for (const notification of this.config.automation.notifications) {
-      console.log(`Notification sent via ${notification.channel} to ${notification.recipients.join(', ')}`);
+      console.log(
+        `Notification sent via ${notification.channel} to ${notification.recipients.join(', ')}`
+      );
     }
   }
 
@@ -790,8 +858,8 @@ export class RollbackStrategyManager {
    * Add execution log entry
    */
   private addExecutionLog(
-    execution: RollbackExecution, 
-    level: 'debug' | 'info' | 'warn' | 'error', 
+    execution: RollbackExecution,
+    level: 'debug' | 'info' | 'warn' | 'error',
     message: string,
     context?: Record<string, any>
   ): void {
@@ -799,7 +867,7 @@ export class RollbackStrategyManager {
       timestamp: new Date().toISOString(),
       level,
       message,
-      context
+      context,
     });
   }
 
@@ -808,7 +876,7 @@ export class RollbackStrategyManager {
    */
   private calculateExecutionTime(execution: RollbackExecution): number {
     if (!execution.endTime) return 0;
-    
+
     const start = new Date(execution.startTime).getTime();
     const end = new Date(execution.endTime).getTime();
     return Math.round((end - start) / 1000 / 60); // Convert to minutes
@@ -845,15 +913,21 @@ export class RollbackStrategyManager {
     averageExecutionTime: number;
   } {
     const executions = this.getAllExecutions();
-    const successful = executions.filter(e => e.status === ExecutionStatus.COMPLETED);
-    const failed = executions.filter(e => e.status === ExecutionStatus.FAILED);
-    const avgTime = executions.reduce((sum, e) => sum + e.metrics.totalTime, 0) / executions.length || 0;
+    const successful = executions.filter(
+      (e) => e.status === ExecutionStatus.COMPLETED
+    );
+    const failed = executions.filter(
+      (e) => e.status === ExecutionStatus.FAILED
+    );
+    const avgTime =
+      executions.reduce((sum, e) => sum + e.metrics.totalTime, 0) /
+        executions.length || 0;
 
     return {
       totalExecutions: executions.length,
       successfulExecutions: successful.length,
       failedExecutions: failed.length,
-      averageExecutionTime: avgTime
+      averageExecutionTime: avgTime,
     };
   }
 }
@@ -874,13 +948,13 @@ export function createDefaultRollbackConfig(): RollbackConfiguration {
           operator: 'gt',
           value: 5, // 5% error rate
           aggregation: 'avg',
-          timeframe: 5 // 5 minutes
+          timeframe: 5, // 5 minutes
         },
         threshold: 5,
         timeWindow: 15,
         enabled: true,
         priority: 'high',
-        autoExecute: true
+        autoExecute: true,
       },
       {
         id: 'response-time-trigger',
@@ -891,14 +965,14 @@ export function createDefaultRollbackConfig(): RollbackConfiguration {
           operator: 'gt',
           value: 5000, // 5 seconds
           aggregation: 'avg',
-          timeframe: 10 // 10 minutes
+          timeframe: 10, // 10 minutes
         },
         threshold: 5000,
         timeWindow: 10,
         enabled: true,
         priority: 'medium',
-        autoExecute: false
-      }
+        autoExecute: false,
+      },
     ],
     automation: {
       enabled: true,
@@ -911,9 +985,9 @@ export function createDefaultRollbackConfig(): RollbackConfiguration {
           channel: 'email',
           recipients: ['dev-team@company.com'],
           template: 'rollback-notification',
-          urgency: 'high'
-        }
-      ]
+          urgency: 'high',
+        },
+      ],
     },
     validation: {
       preRollbackChecks: [
@@ -924,8 +998,8 @@ export function createDefaultRollbackConfig(): RollbackConfiguration {
           command: 'check_backup_availability',
           expectedResult: { backupExists: true },
           timeout: 30,
-          critical: true
-        }
+          critical: true,
+        },
       ],
       postRollbackChecks: [
         {
@@ -935,46 +1009,46 @@ export function createDefaultRollbackConfig(): RollbackConfiguration {
           command: 'health_check_all',
           expectedResult: { healthy: true },
           timeout: 60,
-          critical: true
-        }
+          critical: true,
+        },
       ],
       timeout: 30,
-      retryAttempts: 3
+      retryAttempts: 3,
     },
     communication: {
       stakeholders: [
         {
           role: 'Development Team',
           contacts: ['dev-team@company.com'],
-          notificationLevel: 'all'
+          notificationLevel: 'all',
         },
         {
           role: 'Product Management',
           contacts: ['product@company.com'],
-          notificationLevel: 'critical'
-        }
+          notificationLevel: 'critical',
+        },
       ],
       templates: [
         {
           type: 'rollback_initiated',
           subject: 'Migration Rollback Initiated',
           body: 'A migration rollback has been initiated due to: {{reason}}',
-          urgency: 'high'
+          urgency: 'high',
         },
         {
           type: 'rollback_completed',
           subject: 'Migration Rollback Completed',
           body: 'Migration rollback completed successfully in {{executionTime}} minutes',
-          urgency: 'medium'
-        }
+          urgency: 'medium',
+        },
       ],
       channels: [
         {
           type: 'email',
           config: { smtpServer: 'smtp.company.com' },
-          enabled: true
-        }
-      ]
-    }
+          enabled: true,
+        },
+      ],
+    },
   };
 }

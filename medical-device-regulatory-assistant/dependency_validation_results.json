@@ -1,0 +1,99 @@
+{
+  "timestamp": 1758259825.3950584,
+  "frontend": {
+    "dependency_check": {
+      "pnpm_available": {
+        "success": false,
+        "version": null,
+        "error": "[WinError 2] The system cannot find the file specified"
+      }
+    },
+    "test_execution": {},
+    "package_manager": "pnpm"
+  },
+  "backend": {
+    "dependency_check": {
+      "backend_dir_exists": true,
+      "poetry_available": {
+        "success": true,
+        "version": "Poetry (version 2.1.4)",
+        "error": null
+      },
+      "pyproject_toml_exists": true,
+      "install": {
+        "success": true,
+        "execution_time": 7.5125486850738525,
+        "error": null
+      }
+    },
+    "test_execution": {
+      "jsonschema_import": {
+        "success": true,
+        "execution_time": 1.990312099456787,
+        "output": "jsonschema imported successfully",
+        "error": null
+      },
+      "python_check": {
+        "success": true,
+        "execution_time": 1.6713740825653076,
+        "output": "Python environment working",
+        "error": null
+      },
+      "fastapi_import": {
+        "success": true,
+        "execution_time": 2.4285364151000977,
+        "output": "fastapi imported successfully",
+        "error": null
+      },
+      "sqlalchemy_import": {
+        "success": true,
+        "execution_time": 2.0365779399871826,
+        "output": "sqlalchemy imported successfully",
+        "error": null
+      },
+      "pydantic_import": {
+        "success": true,
+        "execution_time": 1.9507110118865967,
+        "output": "pydantic imported successfully",
+        "error": null
+      },
+      "pytest_import": {
+        "success": true,
+        "execution_time": 1.9315381050109863,
+        "output": "pytest imported successfully",
+        "error": null
+      }
+    },
+    "package_manager": "poetry"
+  },
+  "performance_baseline": {
+    "test_execution_times": {},
+    "dependency_install_times": {
+      "backend_poetry": 7.5125486850738525
+    },
+    "system_info": {
+      "platform": "Windows-10-10.0.26100-SP0",
+      "python_version": "3.11.0",
+      "cpu_count": 4,
+      "memory_total_gb": 15.78,
+      "memory_available_gb": 4.81
+    }
+  },
+  "dependency_conflicts": [
+    {
+      "type": "frontend_install_failure",
+      "description": "Frontend dependency installation failed",
+      "error": null,
+      "severity": "high"
+    }
+  ],
+  "summary": {
+    "overall_status": "failure",
+    "frontend_dependencies": "failed",
+    "backend_dependencies": "resolved",
+    "jsonschema_requirement": "satisfied",
+    "total_conflicts": 1,
+    "critical_conflicts": 1,
+    "recommendations": ["Run 'pnpm install' to resolve frontend dependencies"]
+  }
+}

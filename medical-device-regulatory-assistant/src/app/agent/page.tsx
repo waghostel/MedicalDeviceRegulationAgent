@@ -8,19 +8,18 @@ import { ProjectContext } from '@/types/copilot';
 const mockProject: ProjectContext = {
   id: 'project-1',
   name: 'Cardiac Monitoring Device',
-  description: 'A wearable cardiac monitoring device for continuous heart rhythm analysis',
+  description:
+    'A wearable cardiac monitoring device for continuous heart rhythm analysis',
   deviceType: 'Class II Medical Device',
-  intendedUse: 'For continuous monitoring of cardiac rhythm in ambulatory patients to detect arrhythmias',
-  status: 'in-progress'
+  intendedUse:
+    'For continuous monitoring of cardiac rhythm in ambulatory patients to detect arrhythmias',
+  status: 'in-progress',
 };
 
 export default function AgentPage() {
   return (
     <ProjectContextProvider>
-      <AgentWorkflowPage 
-        projectId="project-1"
-        initialProject={mockProject}
-      />
+      <AgentWorkflowPage projectId="project-1" initialProject={mockProject} />
     </ProjectContextProvider>
   );
 }

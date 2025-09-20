@@ -5,14 +5,17 @@
 
 import React from 'react';
 import { screen, fireEvent, waitFor } from '@testing-library/react';
-import { renderWithProviders, createMockSession } from '@/lib/testing/test-utils';
+import {
+  renderWithProviders,
+  createMockSession,
+} from '@/lib/testing/test-utils';
 import { PredicateWidget } from '../predicate-widget';
 import { generateMockPredicateDevices } from '@/lib/mock-data';
 
 describe('PredicateWidget Component', () => {
   const mockSession = createMockSession();
   const mockPredicates = generateMockPredicateDevices(5);
-  
+
   // Set some predicates as selected for testing
   mockPredicates[0].isSelected = true;
   mockPredicates[1].isSelected = true;
@@ -37,23 +40,35 @@ describe('PredicateWidget Component', () => {
 
       expect(screen.getByText('Predicate Devices')).toBeInTheDocument();
       expect(screen.getByText('Pending')).toBeInTheDocument();
-      expect(screen.getByText('Search for 510(k) predicate devices for substantial equivalence')).toBeInTheDocument();
-      expect(screen.getByText('No predicate devices have been identified yet. Start by searching the FDA database.')).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: /search predicates/i })).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          'Search for 510(k) predicate devices for substantial equivalence'
+        )
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          'No predicate devices have been identified yet. Start by searching the FDA database.'
+        )
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole('button', { name: /search predicates/i })
+      ).toBeInTheDocument();
     });
 
     it('calls onSearchPredicates when search button is clicked', () => {
       const mockOnSearchPredicates = jest.fn();
       renderWithProviders(
-        <PredicateWidget 
-          {...defaultProps} 
-          predicates={[]} 
-          onSearchPredicates={mockOnSearchPredicates} 
+        <PredicateWidget
+          {...defaultProps}
+          predicates={[]}
+          onSearchPredicates={mockOnSearchPredicates}
         />,
         { session: mockSession }
       );
 
-      const searchButton = screen.getByRole('button', { name: /search predicates/i });
+      const searchButton = screen.getByRole('button', {
+        name: /search predicates/i,
+      });
       fireEvent.click(searchButton);
 
       expect(mockOnSearchPredicates).toHaveBeenCalled();
@@ -68,12 +83,14 @@ describe('PredicateWidget Component', () => {
       );
 
       expect(screen.getByText('Searching...')).toBeInTheDocument();
-      expect(screen.getByText('Searching FDA 510(k) database for similar devices...')).toBeInTheDocument();
-      
+      expect(
+        screen.getByText('Searching FDA 510(k) database for similar devices...')
+      ).toBeInTheDocument();
+
       // Should show loading spinner
       const spinner = document.querySelector('.animate-spin');
       expect(spinner).toBeInTheDocument();
-      
+
       // Should show skeleton loading
       const skeletonElements = document.querySelectorAll('.animate-pulse');
       expect(skeletonElements.length).toBeGreaterThan(0);
@@ -99,17 +116,21 @@ describe('PredicateWidget Component', () => {
 
       expect(screen.getByText('Error')).toBeInTheDocument();
       expect(screen.getByText(errorMessage)).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: /retry/i })).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: /search predicates/i })).toBeInTheDocument();
+      expect(
+        screen.getByRole('button', { name: /retry/i })
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole('button', { name: /search predicates/i })
+      ).toBeInTheDocument();
     });
 
     it('calls onRefresh when retry button is clicked', () => {
       const mockOnRefresh = jest.fn();
       renderWithProviders(
-        <PredicateWidget 
-          {...defaultProps} 
-          error="Test error" 
-          onRefresh={mockOnRefresh} 
+        <PredicateWidget
+          {...defaultProps}
+          error="Test error"
+          onRefresh={mockOnRefresh}
         />,
         { session: mockSession }
       );
@@ -123,32 +144,35 @@ describe('PredicateWidget Component', () => {
 
   describe('Loaded State with Predicates', () => {
     it('renders predicate count badge correctly', () => {
-      renderWithProviders(
-        <PredicateWidget {...defaultProps} />,
-        { session: mockSession }
-      );
+      renderWithProviders(<PredicateWidget {...defaultProps} />, {
+        session: mockSession,
+      });
 
       expect(screen.getByText('5 Found')).toBeInTheDocument();
     });
 
     it('renders tab navigation correctly', () => {
-      renderWithProviders(
-        <PredicateWidget {...defaultProps} />,
-        { session: mockSession }
-      );
+      renderWithProviders(<PredicateWidget {...defaultProps} />, {
+        session: mockSession,
+      });
 
-      expect(screen.getByRole('tab', { name: /overview/i })).toBeInTheDocument();
-      expect(screen.getByRole('tab', { name: /top matches/i })).toBeInTheDocument();
-      expect(screen.getByRole('tab', { name: /selected \(2\)/i })).toBeInTheDocument();
+      expect(
+        screen.getByRole('tab', { name: /overview/i })
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole('tab', { name: /top matches/i })
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole('tab', { name: /selected \(2\)/i })
+      ).toBeInTheDocument();
     });
   });
 
   describe('Overview Tab', () => {
     it('displays statistics correctly', () => {
-      renderWithProviders(
-        <PredicateWidget {...defaultProps} />,
-        { session: mockSession }
-      );
+      renderWithProviders(<PredicateWidget {...defaultProps} />, {
+        session: mockSession,
+      });
 
       // Should be on overview tab by default
       expect(screen.getByText('5')).toBeInTheDocument(); // Total Found
@@ -159,36 +183,42 @@ describe('PredicateWidget Component', () => {
     });
 
     it('calculates average confidence correctly', () => {
-      renderWithProviders(
-        <PredicateWidget {...defaultProps} />,
-        { session: mockSession }
-      );
+      renderWithProviders(<PredicateWidget {...defaultProps} />, {
+        session: mockSession,
+      });
 
       // Calculate expected average
-      const totalConfidence = mockPredicates.reduce((sum, p) => sum + p.confidenceScore, 0);
-      const avgConfidence = Math.round((totalConfidence / mockPredicates.length) * 100);
-      
+      const totalConfidence = mockPredicates.reduce(
+        (sum, p) => sum + p.confidenceScore,
+        0
+      );
+      const avgConfidence = Math.round(
+        (totalConfidence / mockPredicates.length) * 100
+      );
+
       expect(screen.getByText(`${avgConfidence}%`)).toBeInTheDocument();
     });
 
     it('displays average confidence progress bar', () => {
-      renderWithProviders(
-        <PredicateWidget {...defaultProps} />,
-        { session: mockSession }
-      );
+      renderWithProviders(<PredicateWidget {...defaultProps} />, {
+        session: mockSession,
+      });
 
       const progressBar = document.querySelector('[role="progressbar"]');
       expect(progressBar).toBeInTheDocument();
     });
 
     it('renders action buttons', () => {
-      renderWithProviders(
-        <PredicateWidget {...defaultProps} />,
-        { session: mockSession }
-      );
+      renderWithProviders(<PredicateWidget {...defaultProps} />, {
+        session: mockSession,
+      });
 
-      expect(screen.getByRole('button', { name: /refresh/i })).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: /search more/i })).toBeInTheDocument();
+      expect(
+        screen.getByRole('button', { name: /refresh/i })
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole('button', { name: /search more/i })
+      ).toBeInTheDocument();
     });
 
     it('calls onRefresh when refresh button is clicked', () => {
@@ -207,11 +237,16 @@ describe('PredicateWidget Component', () => {
     it('calls onSearchPredicates when search more button is clicked', () => {
       const mockOnSearchPredicates = jest.fn();
       renderWithProviders(
-        <PredicateWidget {...defaultProps} onSearchPredicates={mockOnSearchPredicates} />,
+        <PredicateWidget
+          {...defaultProps}
+          onSearchPredicates={mockOnSearchPredicates}
+        />,
         { session: mockSession }
       );
 
-      const searchMoreButton = screen.getByRole('button', { name: /search more/i });
+      const searchMoreButton = screen.getByRole('button', {
+        name: /search more/i,
+      });
       fireEvent.click(searchMoreButton);
 
       expect(mockOnSearchPredicates).toHaveBeenCalled();
@@ -220,10 +255,9 @@ describe('PredicateWidget Component', () => {
 
   describe('Top Matches Tab', () => {
     it('switches to top matches tab correctly', async () => {
-      renderWithProviders(
-        <PredicateWidget {...defaultProps} />,
-        { session: mockSession }
-      );
+      renderWithProviders(<PredicateWidget {...defaultProps} />, {
+        session: mockSession,
+      });
 
       const topMatchesTab = screen.getByRole('tab', { name: /top matches/i });
       fireEvent.click(topMatchesTab);
@@ -236,17 +270,16 @@ describe('PredicateWidget Component', () => {
     });
 
     it('displays predicate devices sorted by confidence', async () => {
-      renderWithProviders(
-        <PredicateWidget {...defaultProps} />,
-        { session: mockSession }
-      );
+      renderWithProviders(<PredicateWidget {...defaultProps} />, {
+        session: mockSession,
+      });
 
       const topMatchesTab = screen.getByRole('tab', { name: /top matches/i });
       fireEvent.click(topMatchesTab);
 
       await waitFor(() => {
         // Check that K-numbers are displayed
-        mockPredicates.slice(0, 5).forEach(predicate => {
+        mockPredicates.slice(0, 5).forEach((predicate) => {
           expect(screen.getByText(predicate.kNumber)).toBeInTheDocument();
           expect(screen.getByText(predicate.deviceName)).toBeInTheDocument();
         });
@@ -254,16 +287,15 @@ describe('PredicateWidget Component', () => {
     });
 
     it('shows confidence scores with correct badge variants', async () => {
-      renderWithProviders(
-        <PredicateWidget {...defaultProps} />,
-        { session: mockSession }
-      );
+      renderWithProviders(<PredicateWidget {...defaultProps} />, {
+        session: mockSession,
+      });
 
       const topMatchesTab = screen.getByRole('tab', { name: /top matches/i });
       fireEvent.click(topMatchesTab);
 
       await waitFor(() => {
-        mockPredicates.slice(0, 5).forEach(predicate => {
+        mockPredicates.slice(0, 5).forEach((predicate) => {
           const confidenceText = `${Math.round(predicate.confidenceScore * 100)}%`;
           expect(screen.getByText(confidenceText)).toBeInTheDocument();
         });
@@ -271,10 +303,9 @@ describe('PredicateWidget Component', () => {
     });
 
     it('shows star icon for selected predicates', async () => {
-      renderWithProviders(
-        <PredicateWidget {...defaultProps} />,
-        { session: mockSession }
-      );
+      renderWithProviders(<PredicateWidget {...defaultProps} />, {
+        session: mockSession,
+      });
 
       const topMatchesTab = screen.getByRole('tab', { name: /top matches/i });
       fireEvent.click(topMatchesTab);
@@ -287,10 +318,9 @@ describe('PredicateWidget Component', () => {
     });
 
     it('displays external links to FDA database', async () => {
-      renderWithProviders(
-        <PredicateWidget {...defaultProps} />,
-        { session: mockSession }
-      );
+      renderWithProviders(<PredicateWidget {...defaultProps} />, {
+        session: mockSession,
+      });
 
       const topMatchesTab = screen.getByRole('tab', { name: /top matches/i });
       fireEvent.click(topMatchesTab);
@@ -298,8 +328,8 @@ describe('PredicateWidget Component', () => {
       await waitFor(() => {
         const externalLinks = screen.getAllByRole('link');
         expect(externalLinks.length).toBeGreaterThan(0);
-        
-        externalLinks.forEach(link => {
+
+        externalLinks.forEach((link) => {
           expect(link).toHaveAttribute('target', '_blank');
           expect(link).toHaveAttribute('rel', 'noopener noreferrer');
         });
@@ -309,7 +339,10 @@ describe('PredicateWidget Component', () => {
     it('calls onSelectPredicate when select button is clicked', async () => {
       const mockOnSelectPredicate = jest.fn();
       renderWithProviders(
-        <PredicateWidget {...defaultProps} onSelectPredicate={mockOnSelectPredicate} />,
+        <PredicateWidget
+          {...defaultProps}
+          onSelectPredicate={mockOnSelectPredicate}
+        />,
         { session: mockSession }
       );
 
@@ -328,10 +361,9 @@ describe('PredicateWidget Component', () => {
 
   describe('Selected Tab', () => {
     it('switches to selected tab correctly', async () => {
-      renderWithProviders(
-        <PredicateWidget {...defaultProps} />,
-        { session: mockSession }
-      );
+      renderWithProviders(<PredicateWidget {...defaultProps} />, {
+        session: mockSession,
+      });
 
       const selectedTab = screen.getByRole('tab', { name: /selected \(2\)/i });
       fireEvent.click(selectedTab);
@@ -342,17 +374,16 @@ describe('PredicateWidget Component', () => {
     });
 
     it('displays selected predicates correctly', async () => {
-      renderWithProviders(
-        <PredicateWidget {...defaultProps} />,
-        { session: mockSession }
-      );
+      renderWithProviders(<PredicateWidget {...defaultProps} />, {
+        session: mockSession,
+      });
 
       const selectedTab = screen.getByRole('tab', { name: /selected \(2\)/i });
       fireEvent.click(selectedTab);
 
       await waitFor(() => {
-        const selectedPredicates = mockPredicates.filter(p => p.isSelected);
-        selectedPredicates.forEach(predicate => {
+        const selectedPredicates = mockPredicates.filter((p) => p.isSelected);
+        selectedPredicates.forEach((predicate) => {
           expect(screen.getByText(predicate.kNumber)).toBeInTheDocument();
           expect(screen.getByText(predicate.deviceName)).toBeInTheDocument();
         });
@@ -360,28 +391,35 @@ describe('PredicateWidget Component', () => {
     });
 
     it('shows average confidence for selected predicates', async () => {
-      renderWithProviders(
-        <PredicateWidget {...defaultProps} />,
-        { session: mockSession }
-      );
+      renderWithProviders(<PredicateWidget {...defaultProps} />, {
+        session: mockSession,
+      });
 
       const selectedTab = screen.getByRole('tab', { name: /selected \(2\)/i });
       fireEvent.click(selectedTab);
 
       await waitFor(() => {
-        const selectedPredicates = mockPredicates.filter(p => p.isSelected);
+        const selectedPredicates = mockPredicates.filter((p) => p.isSelected);
         const avgConfidence = Math.round(
-          selectedPredicates.reduce((sum, p) => sum + p.confidenceScore, 0) / selectedPredicates.length * 100
+          (selectedPredicates.reduce((sum, p) => sum + p.confidenceScore, 0) /
+            selectedPredicates.length) *
+            100
         );
         expect(screen.getByText(`Avg: ${avgConfidence}%`)).toBeInTheDocument();
       });
     });
 
     it('shows empty state when no predicates are selected', async () => {
-      const predicatesWithNoneSelected = mockPredicates.map(p => ({ ...p, isSelected: false }));
-      
+      const predicatesWithNoneSelected = mockPredicates.map((p) => ({
+        ...p,
+        isSelected: false,
+      }));
+
       renderWithProviders(
-        <PredicateWidget {...defaultProps} predicates={predicatesWithNoneSelected} />,
+        <PredicateWidget
+          {...defaultProps}
+          predicates={predicatesWithNoneSelected}
+        />,
         { session: mockSession }
       );
 
@@ -389,16 +427,28 @@ describe('PredicateWidget Component', () => {
       fireEvent.click(selectedTab);
 
       await waitFor(() => {
-        expect(screen.getByText('No predicate devices selected yet. Review the top matches and select the most suitable ones.')).toBeInTheDocument();
-        expect(screen.getByRole('button', { name: /view top matches/i })).toBeInTheDocument();
+        expect(
+          screen.getByText(
+            'No predicate devices selected yet. Review the top matches and select the most suitable ones.'
+          )
+        ).toBeInTheDocument();
+        expect(
+          screen.getByRole('button', { name: /view top matches/i })
+        ).toBeInTheDocument();
       });
     });
 
     it('switches to top matches tab when view top matches button is clicked', async () => {
-      const predicatesWithNoneSelected = mockPredicates.map(p => ({ ...p, isSelected: false }));
-      
+      const predicatesWithNoneSelected = mockPredicates.map((p) => ({
+        ...p,
+        isSelected: false,
+      }));
+
       renderWithProviders(
-        <PredicateWidget {...defaultProps} predicates={predicatesWithNoneSelected} />,
+        <PredicateWidget
+          {...defaultProps}
+          predicates={predicatesWithNoneSelected}
+        />,
         { session: mockSession }
       );
 
@@ -406,20 +456,27 @@ describe('PredicateWidget Component', () => {
       fireEvent.click(selectedTab);
 
       await waitFor(() => {
-        const viewTopMatchesButton = screen.getByRole('button', { name: /view top matches/i });
+        const viewTopMatchesButton = screen.getByRole('button', {
+          name: /view top matches/i,
+        });
         fireEvent.click(viewTopMatchesButton);
       });
 
       // Should switch to top matches tab
       await waitFor(() => {
-        expect(screen.getByRole('tab', { name: /top matches/i })).toHaveAttribute('data-state', 'active');
+        expect(
+          screen.getByRole('tab', { name: /top matches/i })
+        ).toHaveAttribute('data-state', 'active');
       });
     });
 
     it('calls onSelectPredicate when deselect button is clicked', async () => {
       const mockOnSelectPredicate = jest.fn();
       renderWithProviders(
-        <PredicateWidget {...defaultProps} onSelectPredicate={mockOnSelectPredicate} />,
+        <PredicateWidget
+          {...defaultProps}
+          onSelectPredicate={mockOnSelectPredicate}
+        />,
         { session: mockSession }
       );
 
@@ -445,7 +502,10 @@ describe('PredicateWidget Component', () => {
       ];
 
       renderWithProviders(
-        <PredicateWidget {...defaultProps} predicates={predicatesWithVariedConfidence} />,
+        <PredicateWidget
+          {...defaultProps}
+          predicates={predicatesWithVariedConfidence}
+        />,
         { session: mockSession }
       );
 
@@ -457,10 +517,9 @@ describe('PredicateWidget Component', () => {
 
   describe('Accessibility', () => {
     it('has proper ARIA labels and roles for tabs', () => {
-      renderWithProviders(
-        <PredicateWidget {...defaultProps} />,
-        { session: mockSession }
-      );
+      renderWithProviders(<PredicateWidget {...defaultProps} />, {
+        session: mockSession,
+      });
 
       const tabList = screen.getByRole('tablist');
       expect(tabList).toBeInTheDocument();
@@ -468,23 +527,22 @@ describe('PredicateWidget Component', () => {
       const tabs = screen.getAllByRole('tab');
       expect(tabs).toHaveLength(3);
 
-      tabs.forEach(tab => {
+      tabs.forEach((tab) => {
         expect(tab).toHaveAttribute('aria-selected');
       });
     });
 
     it('provides proper screen reader text for external links', async () => {
-      renderWithProviders(
-        <PredicateWidget {...defaultProps} />,
-        { session: mockSession }
-      );
+      renderWithProviders(<PredicateWidget {...defaultProps} />, {
+        session: mockSession,
+      });
 
       const topMatchesTab = screen.getByRole('tab', { name: /top matches/i });
       fireEvent.click(topMatchesTab);
 
       await waitFor(() => {
         const externalLinks = screen.getAllByRole('link');
-        externalLinks.forEach(link => {
+        externalLinks.forEach((link) => {
           expect(link).toHaveAttribute('rel', 'noopener noreferrer');
         });
       });
@@ -493,13 +551,14 @@ describe('PredicateWidget Component', () => {
 
   describe('Error Handling', () => {
     it('handles missing callback props gracefully', () => {
-      renderWithProviders(
-        <PredicateWidget predicates={mockPredicates} />,
-        { session: mockSession }
-      );
+      renderWithProviders(<PredicateWidget predicates={mockPredicates} />, {
+        session: mockSession,
+      });
 
       const refreshButton = screen.getByRole('button', { name: /refresh/i });
-      const searchMoreButton = screen.getByRole('button', { name: /search more/i });
+      const searchMoreButton = screen.getByRole('button', {
+        name: /search more/i,
+      });
 
       expect(() => {
         fireEvent.click(refreshButton);

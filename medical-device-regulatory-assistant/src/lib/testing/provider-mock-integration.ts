@@ -135,28 +135,31 @@ export const providerMockIntegration = {
   // Setup and cleanup (enhanced with stack management)
   setup: (options: ProviderMockOptions = {}) => {
     setupProviderMocks();
-    
+
     // Initialize provider states based on options
     if (options.toast?.initialToasts) {
-      options.toast.initialToasts.forEach(toast => {
+      options.toast.initialToasts.forEach((toast) => {
         providerMockUtils.addMockToast(toast);
       });
     }
-    
+
     if (options.form?.initialValues) {
       providerMockUtils.setFormState({
         values: options.form.initialValues,
         formId: options.form.formId || 'test-form',
       });
     }
-    
+
     if (options.theme?.defaultTheme) {
       providerMockUtils.setThemeState({
         theme: options.theme.defaultTheme,
-        resolvedTheme: options.theme.defaultTheme === 'system' ? 'light' : options.theme.defaultTheme,
+        resolvedTheme:
+          options.theme.defaultTheme === 'system'
+            ? 'light'
+            : options.theme.defaultTheme,
       });
     }
-    
+
     if (options.session?.session) {
       providerMockUtils.setSessionState({
         data: options.session.session,
@@ -214,7 +217,9 @@ export const providerMockIntegration = {
  */
 export const integrationScenarios = {
   // Basic authenticated user scenario
-  authenticatedUser: (userOverrides: Partial<Session> = {}): ProviderMockOptions => ({
+  authenticatedUser: (
+    userOverrides: Partial<Session> = {}
+  ): ProviderMockOptions => ({
     toast: { enabled: true },
     form: { enabled: true },
     theme: { enabled: true, defaultTheme: 'light' },
@@ -292,13 +297,33 @@ export const integrationScenarios = {
  * Integration with global mock registry
  */
 export const registerProviderMocks = () => {
-  if (typeof global !== 'undefined' && global.__GLOBAL_MOCK_REGISTRY) {
+  if (typeof global !== 'undefined' && (global as any).__GLOBAL_MOCK_REGISTRY) {
     // Register provider mocks in global registry
-    global.__GLOBAL_MOCK_REGISTRY.register('providers', 'toast', 'MockToastProvider');
-    global.__GLOBAL_MOCK_REGISTRY.register('providers', 'form', 'MockFormProvider');
-    global.__GLOBAL_MOCK_REGISTRY.register('providers', 'theme', 'MockThemeProvider');
-    global.__GLOBAL_MOCK_REGISTRY.register('providers', 'session', 'MockSessionProvider');
-    global.__GLOBAL_MOCK_REGISTRY.register('providers', 'stack', 'MockProviderStack');
+    (global as any).__GLOBAL_MOCK_REGISTRY.register(
+      'providers',
+      'toast',
+      'MockToastProvider'
+    );
+    (global as any).__GLOBAL_MOCK_REGISTRY.register(
+      'providers',
+      'form',
+      'MockFormProvider'
+    );
+    (global as any).__GLOBAL_MOCK_REGISTRY.register(
+      'providers',
+      'theme',
+      'MockThemeProvider'
+    );
+    (global as any).__GLOBAL_MOCK_REGISTRY.register(
+      'providers',
+      'session',
+      'MockSessionProvider'
+    );
+    (global as any).__GLOBAL_MOCK_REGISTRY.register(
+      'providers',
+      'stack',
+      'MockProviderStack'
+    );
   }
 };
 
@@ -306,9 +331,9 @@ export const registerProviderMocks = () => {
  * Cleanup provider mocks from global registry
  */
 export const unregisterProviderMocks = () => {
-  if (typeof global !== 'undefined' && global.__GLOBAL_MOCK_REGISTRY) {
+  if (typeof global !== 'undefined' && (global as any).__GLOBAL_MOCK_REGISTRY) {
     // Clear provider mocks from global registry
-    const registry = global.__GLOBAL_MOCK_REGISTRY;
+    const registry = (global as any).__GLOBAL_MOCK_REGISTRY;
     if (registry.providers) {
       registry.providers.clear();
     }
@@ -316,10 +341,7 @@ export const unregisterProviderMocks = () => {
 };
 
 // Export main integration components
-export {
-  MockProviderStack,
-  providerMockUtils,
-};
+export { MockProviderStack, providerMockUtils };
 
 export default {
   EnhancedTestProviders,

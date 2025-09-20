@@ -28,7 +28,9 @@ describe('MockDebugger', () => {
     });
 
     it('should diagnose property access errors', () => {
-      const error = new Error('Cannot read properties of undefined (reading \'toast\')');
+      const error = new Error(
+        "Cannot read properties of undefined (reading 'toast')"
+      );
       const report = MockDebugger.diagnoseHookFailure('useToast', error);
 
       expect(report.diagnosis.category).toBe('STRUCTURE');
@@ -42,7 +44,9 @@ describe('MockDebugger', () => {
 
       expect(report.diagnosis.category).toBe('TYPE');
       expect(report.diagnosis.severity).toBe('high');
-      expect(report.recommendations.some(r => r.action.includes('Type'))).toBe(true);
+      expect(
+        report.recommendations.some((r) => r.action.includes('Type'))
+      ).toBe(true);
     });
 
     it('should diagnose AggregateError issues', () => {
@@ -81,13 +85,17 @@ describe('MockDebugger', () => {
       const report = MockDebugger.diagnoseHookFailure('useToast', error);
 
       expect(report.recommendations.length).toBeGreaterThan(0);
-      
+
       // Should have immediate fix
-      const immediateFix = report.recommendations.find(r => r.priority === 'immediate');
+      const immediateFix = report.recommendations.find(
+        (r) => r.priority === 'immediate'
+      );
       expect(immediateFix).toBeDefined();
-      
+
       // Should have validation recommendation
-      const validationRec = report.recommendations.find(r => r.description.includes('MockValidator'));
+      const validationRec = report.recommendations.find((r) =>
+        r.description.includes('MockValidator')
+      );
       expect(validationRec).toBeDefined();
     });
 
@@ -96,8 +104,10 @@ describe('MockDebugger', () => {
       const report = MockDebugger.diagnoseHookFailure('useToast', error);
 
       expect(report.codeExamples.length).toBeGreaterThan(0);
-      
-      const toastExample = report.codeExamples.find(e => e.title.includes('useToast'));
+
+      const toastExample = report.codeExamples.find((e) =>
+        e.title.includes('useToast')
+      );
       expect(toastExample).toBeDefined();
       expect(toastExample!.after).toContain('jest.fn()');
       expect(toastExample!.language).toBe('typescript');
@@ -107,7 +117,9 @@ describe('MockDebugger', () => {
       const error = new Error('useEnhancedForm is not a function');
       const report = MockDebugger.diagnoseHookFailure('useEnhancedForm', error);
 
-      const formExample = report.codeExamples.find(e => e.title.includes('Enhanced Form'));
+      const formExample = report.codeExamples.find((e) =>
+        e.title.includes('Enhanced Form')
+      );
       expect(formExample).toBeDefined();
       expect(formExample!.after).toContain('validateField');
       expect(formExample!.after).toContain('saveNow');
@@ -131,10 +143,12 @@ describe('MockDebugger', () => {
 
       expect(diff.mockName).toBe('useToast');
       expect(diff.differences.length).toBeGreaterThan(0);
-      
-      const missingMethods = diff.differences.filter(d => d.type === 'MISSING');
+
+      const missingMethods = diff.differences.filter(
+        (d) => d.type === 'MISSING'
+      );
       expect(missingMethods.length).toBe(2); // dismiss and dismissAll
-      expect(missingMethods.some(d => d.path.includes('dismiss'))).toBe(true);
+      expect(missingMethods.some((d) => d.path.includes('dismiss'))).toBe(true);
     });
 
     it('should generate diff for type mismatches', () => {
@@ -150,7 +164,9 @@ describe('MockDebugger', () => {
 
       const diff = MockDebugger.generateMockDiff(expected, actual, 'testMock');
 
-      const typeMismatches = diff.differences.filter(d => d.type === 'TYPE_MISMATCH');
+      const typeMismatches = diff.differences.filter(
+        (d) => d.type === 'TYPE_MISMATCH'
+      );
       expect(typeMismatches.length).toBeGreaterThan(0);
     });
 
@@ -167,18 +183,26 @@ describe('MockDebugger', () => {
 
       const diff = MockDebugger.generateMockDiff(expected, actual, 'testMock');
 
-      const extraItems = diff.differences.filter(d => d.type === 'EXTRA');
+      const extraItems = diff.differences.filter((d) => d.type === 'EXTRA');
       expect(extraItems.length).toBe(2); // extraMethod and extraProperty
     });
 
     it('should calculate compatibility score correctly', () => {
       const perfect = { toast: jest.fn() };
-      const perfectDiff = MockDebugger.generateMockDiff(perfect, perfect, 'perfect');
+      const perfectDiff = MockDebugger.generateMockDiff(
+        perfect,
+        perfect,
+        'perfect'
+      );
       expect(perfectDiff.summary.compatibilityScore).toBe(100);
       expect(perfectDiff.summary.overallHealth).toBe('excellent');
 
       const broken = {};
-      const brokenDiff = MockDebugger.generateMockDiff(perfect, broken, 'broken');
+      const brokenDiff = MockDebugger.generateMockDiff(
+        perfect,
+        broken,
+        'broken'
+      );
       expect(brokenDiff.summary.compatibilityScore).toBeLessThan(50);
       expect(brokenDiff.summary.overallHealth).toBe('critical');
     });
@@ -197,8 +221,8 @@ describe('MockDebugger', () => {
       const diff = MockDebugger.generateMockDiff(expected, actual, 'useToast');
 
       expect(diff.fixSuggestions.length).toBeGreaterThan(0);
-      expect(diff.fixSuggestions.some(s => s.includes('missing'))).toBe(true);
-      expect(diff.fixSuggestions.some(s => s.includes('type'))).toBe(true);
+      expect(diff.fixSuggestions.some((s) => s.includes('missing'))).toBe(true);
+      expect(diff.fixSuggestions.some((s) => s.includes('type'))).toBe(true);
     });
 
     it('should generate fix code', () => {
@@ -231,11 +255,17 @@ describe('MockDebugger', () => {
       }));
 
       // Call the functions to get their return values for comparison
-      const diff = MockDebugger.generateMockDiff(expectedHook(), actualHook(), 'useToast');
+      const diff = MockDebugger.generateMockDiff(
+        expectedHook(),
+        actualHook(),
+        'useToast'
+      );
 
       expect(diff.differences.length).toBeGreaterThan(0);
-      const missingMethods = diff.differences.filter(d => d.type === 'MISSING');
-      expect(missingMethods.some(d => d.path.includes('dismiss'))).toBe(true);
+      const missingMethods = diff.differences.filter(
+        (d) => d.type === 'MISSING'
+      );
+      expect(missingMethods.some((d) => d.path.includes('dismiss'))).toBe(true);
     });
   });
 
@@ -266,7 +296,7 @@ describe('MockDebugger', () => {
 
       const history = mockDebugger.getDiagnosisHistory('useToast');
       expect(history).toHaveLength(20); // Should be limited to 20
-      
+
       // Should keep the most recent ones
       expect(history[19].error.message).toBe('Error 24');
     });
@@ -301,7 +331,7 @@ describe('MockDebugger', () => {
 
       const metrics = mockDebugger.getPerformanceMetrics('useToast');
       expect(metrics).toHaveLength(100); // Should be limited to 100
-      
+
       // Should keep the most recent ones
       expect(metrics[99]).toBe(104);
     });
@@ -311,7 +341,9 @@ describe('MockDebugger', () => {
       mockDebugger.recordPerformance('useEnhancedForm', 200);
 
       expect(mockDebugger.getPerformanceMetrics('useToast')).toEqual([100]);
-      expect(mockDebugger.getPerformanceMetrics('useEnhancedForm')).toEqual([200]);
+      expect(mockDebugger.getPerformanceMetrics('useEnhancedForm')).toEqual([
+        200,
+      ]);
       expect(mockDebugger.getPerformanceMetrics('unknownMock')).toEqual([]);
     });
   });
@@ -379,11 +411,15 @@ describe('MockDebugger', () => {
     });
 
     it('should match property access error pattern', () => {
-      const error = new Error('Cannot read properties of undefined (reading \'dismiss\')');
+      const error = new Error(
+        "Cannot read properties of undefined (reading 'dismiss')"
+      );
       const report = MockDebugger.diagnoseHookFailure('useToast', error);
 
       expect(report.diagnosis.category).toBe('STRUCTURE');
-      expect(report.diagnosis.rootCause).toContain('missing expected properties');
+      expect(report.diagnosis.rootCause).toContain(
+        'missing expected properties'
+      );
     });
 
     it('should match React createElement error pattern', () => {
@@ -400,7 +436,9 @@ describe('MockDebugger', () => {
 
       expect(report.confidence).toBeLessThan(50);
       expect(report.diagnosis.category).toBe('STRUCTURE');
-      expect(report.diagnosis.rootCause).toContain('Unknown mock configuration');
+      expect(report.diagnosis.rootCause).toContain(
+        'Unknown mock configuration'
+      );
     });
   });
 
@@ -409,7 +447,7 @@ describe('MockDebugger', () => {
       const error = new Error('dismiss is not a function');
       const report = MockDebugger.diagnoseHookFailure('useToast', error);
 
-      const functionIssue = report.relatedIssues.find(i => 
+      const functionIssue = report.relatedIssues.find((i) =>
         i.description.includes('not a function')
       );
       expect(functionIssue).toBeDefined();
@@ -420,7 +458,7 @@ describe('MockDebugger', () => {
       const error = new Error('Cannot read properties of undefined');
       const report = MockDebugger.diagnoseHookFailure('useToast', error);
 
-      const propertyIssue = report.relatedIssues.find(i => 
+      const propertyIssue = report.relatedIssues.find((i) =>
         i.description.includes('Property access')
       );
       expect(propertyIssue).toBeDefined();
@@ -430,7 +468,7 @@ describe('MockDebugger', () => {
       const error = new Error('Some form error');
       const report = MockDebugger.diagnoseHookFailure('useEnhancedForm', error);
 
-      const formIssue = report.relatedIssues.find(i => 
+      const formIssue = report.relatedIssues.find((i) =>
         i.description.includes('react-hook-form')
       );
       expect(formIssue).toBeDefined();

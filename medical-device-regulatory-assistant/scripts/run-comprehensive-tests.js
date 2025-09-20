@@ -15,33 +15,34 @@ class TestRunner {
       frontend: { passed: 0, failed: 0, total: 0, duration: 0, errors: [] },
       backend: { passed: 0, failed: 0, total: 0, duration: 0, errors: [] },
       environment: { passed: 0, failed: 0, total: 0, errors: [] },
-      overall: { success: false, issues: [] }
+      overall: { success: false, issues: [] },
     };
   }
 
   log(message, type = 'info') {
     const timestamp = new Date().toISOString();
-    const prefix = {
-      info: '📋',
-      success: '✅',
-      error: '❌',
-      warning: '⚠️',
-      progress: '🔄'
-    }[type] || '📋';
-    
+    const prefix =
+      {
+        info: '📋',
+        success: '✅',
+        error: '❌',
+        warning: '⚠️',
+        progress: '🔄',
+      }[type] || '📋';
+
     console.log(`${prefix} [${timestamp}] ${message}`);
   }
 
   async runCommand(command, cwd = process.cwd(), timeout = 60000) {
     return new Promise((resolve, reject) => {
       const startTime = Date.now();
-      
+
       this.log(`Running: ${command}`, 'progress');
-      
+
       const child = spawn('sh', ['-c', command], {
         cwd,
         stdio: ['pipe', 'pipe', 'pipe'],
-        env: { ...process.env, DATABASE_URL: 'sqlite:./test.db' }
+        env: { ...process.env, DATABASE_URL: 'sqlite:./test.db' },
       });
 
       let stdout = '';
@@ -63,13 +64,13 @@ class TestRunner {
       child.on('close', (code) => {
         clearTimeout(timeoutId);
         const duration = Date.now() - startTime;
-        
+
         resolve({
           code,
           stdout,
           stderr,
           duration,
-          success: code === 0
+          success: code === 0,
         });
       });
 
@@ -82,9 +83,11 @@ class TestRunner {
 
   parseJestOutput(output) {
     const results = { passed: 0, failed: 0, total: 0, errors: [] };
-    
+
     // Parse test results from Jest output
-    const testSuiteMatch = output.match(/Test Suites: (\d+) failed, (\d+) passed, (\d+) total/);
+    const testSuiteMatch = output.match(
+      /Test Suites: (\d+) failed, (\d+) passed, (\d+) total/
+    );
     if (testSuiteMatch) {
       results.failed = parseInt(testSuiteMatch[1]);
       results.passed = parseInt(testSuiteMatch[2]);
@@ -102,7 +105,7 @@ class TestRunner {
 
   parsePytestOutput(output) {
     const results = { passed: 0, failed: 0, total: 0, errors: [] };
-    
+
     // Parse pytest results
     const resultMatch = output.match(/(\d+) failed, (\d+) passed/);
     if (resultMatch) {
@@ -130,7 +133,7 @@ class TestRunner {
 
   async validateEnvironment() {
     this.log('Validating environment setup...', 'progress');
-    
+
     const checks = [
       { name: 'Node.js version', command: 'node --version' },
       { name: 'pnpm installation', command: 'pnpm --version' },
@@ -140,13 +143,19 @@ class TestRunner {
 
     for (const check of checks) {
       try {
-        const result = await this.runCommand(check.command, process.cwd(), 5000);
+        const result = await this.runCommand(
+          check.command,
+          process.cwd(),
+          5000
+        );
         if (result.success) {
           this.results.environment.passed++;
           this.log(`${check.name}: ${result.stdout.trim()}`, 'success');
         } else {
           this.results.environment.failed++;
-          this.results.environment.errors.push(`${check.name}: ${result.stderr}`);
+          this.results.environment.errors.push(
+            `${check.name}: ${result.stderr}`
+          );
           this.log(`${check.name}: Failed`, 'error');
         }
       } catch (error) {
@@ -160,9 +169,12 @@ class TestRunner {
 
   async runFrontendTests() {
     this.log('Running frontend tests...', 'progress');
-    
-    const frontendDir = path.join(process.cwd(), 'medical-device-regulatory-assistant');
-    
+
+    const frontendDir = path.join(
+      process.cwd(),
+      'medical-device-regulatory-assistant'
+    );
+
     try {
       // First, check if dependencies are installed
       if (!fs.existsSync(path.join(frontendDir, 'node_modules'))) {
@@ -178,13 +190,21 @@ class TestRunner {
       );
 
       this.results.frontend.duration = result.duration;
-      
+
       if (result.success) {
         this.results.frontend = this.parseJestOutput(result.stdout);
-        this.log(`Frontend tests completed: ${this.results.frontend.passed}/${this.results.frontend.total} passed`, 'success');
+        this.log(
+          `Frontend tests completed: ${this.results.frontend.passed}/${this.results.frontend.total} passed`,
+          'success'
+        );
       } else {
-        this.results.frontend = this.parseJestOutput(result.stdout + result.stderr);
-        this.log(`Frontend tests failed: ${this.results.frontend.failed}/${this.results.frontend.total} failed`, 'error');
+        this.results.frontend = this.parseJestOutput(
+          result.stdout + result.stderr
+        );
+        this.log(
+          `Frontend tests failed: ${this.results.frontend.failed}/${this.results.frontend.total} failed`,
+          'error'
+        );
       }
     } catch (error) {
       this.results.frontend.errors.push(error.message);
@@ -194,9 +214,13 @@ class TestRunner {
 
   async runBackendTests() {
     this.log('Running backend tests...', 'progress');
-    
-    const backendDir = path.join(process.cwd(), 'medical-device-regulatory-assistant', 'backend');
-    
+
+    const backendDir = path.join(
+      process.cwd(),
+      'medical-device-regulatory-assistant',
+      'backend'
+    );
+
     try {
       // Check if poetry is set up
       if (!fs.existsSync(path.join(backendDir, 'poetry.lock'))) {
@@ -208,7 +232,7 @@ class TestRunner {
       const testFiles = [
         'tests/test_framework.py',
         'tests/test_database_connection.py',
-        'tests/test_health_check_service.py'
+        'tests/test_health_check_service.py',
       ];
 
       let totalPassed = 0;
@@ -225,7 +249,9 @@ class TestRunner {
               60000
             );
 
-            const parsed = this.parsePytestOutput(result.stdout + result.stderr);
+            const parsed = this.parsePytestOutput(
+              result.stdout + result.stderr
+            );
             totalPassed += parsed.passed;
             totalFailed += parsed.failed;
             totalTests += parsed.total;
@@ -248,7 +274,6 @@ class TestRunner {
       this.results.backend.passed = totalPassed;
       this.results.backend.failed = totalFailed;
       this.results.backend.total = totalTests;
-
     } catch (error) {
       this.results.backend.errors.push(error.message);
       this.log(`Backend test execution failed: ${error.message}`, 'error');
@@ -260,37 +285,50 @@ class TestRunner {
       timestamp: new Date().toISOString(),
       summary: {
         frontend: {
-          successRate: this.results.frontend.total > 0 
-            ? (this.results.frontend.passed / this.results.frontend.total * 100).toFixed(1)
-            : '0.0',
+          successRate:
+            this.results.frontend.total > 0
+              ? (
+                  (this.results.frontend.passed / this.results.frontend.total) *
+                  100
+                ).toFixed(1)
+              : '0.0',
           passed: this.results.frontend.passed,
           failed: this.results.frontend.failed,
           total: this.results.frontend.total,
-          duration: `${(this.results.frontend.duration / 1000).toFixed(1)}s`
+          duration: `${(this.results.frontend.duration / 1000).toFixed(1)}s`,
         },
         backend: {
-          successRate: this.results.backend.total > 0 
-            ? (this.results.backend.passed / this.results.backend.total * 100).toFixed(1)
-            : '0.0',
+          successRate:
+            this.results.backend.total > 0
+              ? (
+                  (this.results.backend.passed / this.results.backend.total) *
+                  100
+                ).toFixed(1)
+              : '0.0',
           passed: this.results.backend.passed,
           failed: this.results.backend.failed,
-          total: this.results.backend.total
+          total: this.results.backend.total,
         },
         environment: {
-          successRate: this.results.environment.total > 0 
-            ? (this.results.environment.passed / this.results.environment.total * 100).toFixed(1)
-            : '0.0',
+          successRate:
+            this.results.environment.total > 0
+              ? (
+                  (this.results.environment.passed /
+                    this.results.environment.total) *
+                  100
+                ).toFixed(1)
+              : '0.0',
           passed: this.results.environment.passed,
           failed: this.results.environment.failed,
-          total: this.results.environment.total
-        }
+          total: this.results.environment.total,
+        },
       },
       issues: {
         frontend: this.results.frontend.errors.slice(0, 3),
         backend: this.results.backend.errors.slice(0, 3),
-        environment: this.results.environment.errors.slice(0, 3)
+        environment: this.results.environment.errors.slice(0, 3),
       },
-      recommendations: this.generateRecommendations()
+      recommendations: this.generateRecommendations(),
     };
 
     return report;
@@ -300,30 +338,32 @@ class TestRunner {
     const recommendations = [];
 
     // Frontend recommendations
-    const frontendSuccessRate = this.results.frontend.total > 0 
-      ? (this.results.frontend.passed / this.results.frontend.total * 100)
-      : 0;
+    const frontendSuccessRate =
+      this.results.frontend.total > 0
+        ? (this.results.frontend.passed / this.results.frontend.total) * 100
+        : 0;
 
     if (frontendSuccessRate < 95) {
       recommendations.push({
         category: 'Frontend Testing',
         priority: 'High',
         issue: `Success rate ${frontendSuccessRate.toFixed(1)}% is below 95% target`,
-        action: 'Fix React testing utilities and component mocking issues'
+        action: 'Fix React testing utilities and component mocking issues',
       });
     }
 
     // Backend recommendations
-    const backendSuccessRate = this.results.backend.total > 0 
-      ? (this.results.backend.passed / this.results.backend.total * 100)
-      : 0;
+    const backendSuccessRate =
+      this.results.backend.total > 0
+        ? (this.results.backend.passed / this.results.backend.total) * 100
+        : 0;
 
     if (backendSuccessRate < 100) {
       recommendations.push({
         category: 'Backend Testing',
         priority: 'High',
         issue: `Success rate ${backendSuccessRate.toFixed(1)}% is below 100% target`,
-        action: 'Fix database configuration and import dependencies'
+        action: 'Fix database configuration and import dependencies',
       });
     }
 
@@ -333,7 +373,7 @@ class TestRunner {
         category: 'Environment',
         priority: 'Medium',
         issue: 'Environment validation failures detected',
-        action: 'Ensure all required tools are properly installed'
+        action: 'Ensure all required tools are properly installed',
       });
     }
 
@@ -342,7 +382,7 @@ class TestRunner {
 
   async run() {
     this.log('Starting comprehensive test suite validation...', 'progress');
-    
+
     // Run all test phases
     await this.validateEnvironment();
     await this.runFrontendTests();
@@ -350,46 +390,64 @@ class TestRunner {
 
     // Generate and display report
     const report = this.generateReport();
-    
+
     this.log('='.repeat(80), 'info');
     this.log('COMPREHENSIVE TEST RESULTS', 'info');
     this.log('='.repeat(80), 'info');
-    
-    this.log(`Frontend: ${report.summary.frontend.passed}/${report.summary.frontend.total} passed (${report.summary.frontend.successRate}%)`, 
-      report.summary.frontend.successRate >= 95 ? 'success' : 'error');
-    
-    this.log(`Backend: ${report.summary.backend.passed}/${report.summary.backend.total} passed (${report.summary.backend.successRate}%)`, 
-      report.summary.backend.successRate >= 100 ? 'success' : 'error');
-    
-    this.log(`Environment: ${report.summary.environment.passed}/${report.summary.environment.total} passed (${report.summary.environment.successRate}%)`, 
-      report.summary.environment.successRate >= 100 ? 'success' : 'error');
+
+    this.log(
+      `Frontend: ${report.summary.frontend.passed}/${report.summary.frontend.total} passed (${report.summary.frontend.successRate}%)`,
+      report.summary.frontend.successRate >= 95 ? 'success' : 'error'
+    );
+
+    this.log(
+      `Backend: ${report.summary.backend.passed}/${report.summary.backend.total} passed (${report.summary.backend.successRate}%)`,
+      report.summary.backend.successRate >= 100 ? 'success' : 'error'
+    );
+
+    this.log(
+      `Environment: ${report.summary.environment.passed}/${report.summary.environment.total} passed (${report.summary.environment.successRate}%)`,
+      report.summary.environment.successRate >= 100 ? 'success' : 'error'
+    );
 
     // Show recommendations
     if (report.recommendations.length > 0) {
       this.log('='.repeat(80), 'info');
       this.log('RECOMMENDATIONS', 'warning');
       this.log('='.repeat(80), 'info');
-      
+
       report.recommendations.forEach((rec, index) => {
-        this.log(`${index + 1}. [${rec.priority}] ${rec.category}: ${rec.issue}`, 'warning');
+        this.log(
+          `${index + 1}. [${rec.priority}] ${rec.category}: ${rec.issue}`,
+          'warning'
+        );
         this.log(`   Action: ${rec.action}`, 'info');
       });
     }
 
     // Save detailed report
-    const reportPath = path.join(process.cwd(), '.kiro', 'specs', 'system-error-resolution', 'task-execute-history', 'task-11.1-test-results.json');
+    const reportPath = path.join(
+      process.cwd(),
+      '.kiro',
+      'specs',
+      'system-error-resolution',
+      'task-execute-history',
+      'task-11.1-test-results.json'
+    );
     fs.writeFileSync(reportPath, JSON.stringify(report, null, 2));
     this.log(`Detailed report saved to: ${reportPath}`, 'info');
 
     // Determine overall success
-    const overallSuccess = 
+    const overallSuccess =
       parseFloat(report.summary.frontend.successRate) >= 95 &&
       parseFloat(report.summary.backend.successRate) >= 100 &&
       parseFloat(report.summary.environment.successRate) >= 100;
 
     this.log('='.repeat(80), 'info');
-    this.log(`OVERALL RESULT: ${overallSuccess ? 'SUCCESS' : 'NEEDS IMPROVEMENT'}`, 
-      overallSuccess ? 'success' : 'error');
+    this.log(
+      `OVERALL RESULT: ${overallSuccess ? 'SUCCESS' : 'NEEDS IMPROVEMENT'}`,
+      overallSuccess ? 'success' : 'error'
+    );
     this.log('='.repeat(80), 'info');
 
     return overallSuccess;
@@ -399,11 +457,12 @@ class TestRunner {
 // Run the test suite
 if (require.main === module) {
   const runner = new TestRunner();
-  runner.run()
-    .then(success => {
+  runner
+    .run()
+    .then((success) => {
       process.exit(success ? 0 : 1);
     })
-    .catch(error => {
+    .catch((error) => {
       console.error('Test runner failed:', error);
       process.exit(1);
     });

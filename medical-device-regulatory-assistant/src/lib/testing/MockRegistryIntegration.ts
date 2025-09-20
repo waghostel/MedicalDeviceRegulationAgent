@@ -1,9 +1,9 @@
 /**
  * MockRegistryIntegration - Unified Mock Registry System
- * 
+ *
  * Integrates MockRegistry, MockConfigurationLoader, and MockVersionManager
  * to provide a comprehensive mock management system for the test infrastructure.
- * 
+ *
  * Requirements: 2.4, 6.1
  */
 
@@ -33,7 +33,10 @@ import {
 
 // Import existing mock implementations
 import { useToastMock, toastMockUtils } from './use-toast-mock';
-import { enhancedFormMocks, enhancedFormMockUtils } from './enhanced-form-hook-mocks';
+import {
+  enhancedFormMocks,
+  enhancedFormMockUtils,
+} from './enhanced-form-hook-mocks';
 
 // ============================================================================
 // Unified Integration Types
@@ -93,7 +96,9 @@ export class MockRegistryIntegration {
   // System Initialization
   // ============================================================================
 
-  public async initialize(options: SystemInitializationOptions = {}): Promise<LoaderResult> {
+  public async initialize(
+    options: SystemInitializationOptions = {}
+  ): Promise<LoaderResult> {
     const startTime = performance.now();
     const errors: string[] = [];
     const warnings: string[] = [];
@@ -110,8 +115,13 @@ export class MockRegistryIntegration {
       mockResults.push(...builtInResults);
 
       // Load configurations from sources
-      if (options.configurationSources && options.configurationSources.length > 0) {
-        const loaderResult = await this.loader.loadConfiguration(options.configurationSources);
+      if (
+        options.configurationSources &&
+        options.configurationSources.length > 0
+      ) {
+        const loaderResult = await this.loader.loadConfiguration(
+          options.configurationSources
+        );
         mockResults.push(...loaderResult.mockResults);
         errors.push(...loaderResult.errors);
         warnings.push(...loaderResult.warnings);
@@ -133,14 +143,20 @@ export class MockRegistryIntegration {
 
       // Perform compatibility checks if enabled
       if (options.enableVersionChecking) {
-        const compatibilityResults = this.performCompatibilityChecks(options.strictCompatibility);
-        
+        const compatibilityResults = this.performCompatibilityChecks(
+          options.strictCompatibility
+        );
+
         for (const result of compatibilityResults) {
           if (!result.compatible) {
             if (options.strictCompatibility) {
-              errors.push(`Compatibility check failed for ${result.mockName}@${result.mockVersion}`);
+              errors.push(
+                `Compatibility check failed for ${result.mockName}@${result.mockVersion}`
+              );
             } else {
-              warnings.push(`Compatibility issues detected for ${result.mockName}@${result.mockVersion}`);
+              warnings.push(
+                `Compatibility issues detected for ${result.mockName}@${result.mockVersion}`
+              );
             }
           }
         }
@@ -150,7 +166,9 @@ export class MockRegistryIntegration {
       this.initializationTime = new Date();
 
       const loadTime = performance.now() - startTime;
-      this.logDebug(`Mock registry system initialized in ${loadTime.toFixed(2)}ms`);
+      this.logDebug(
+        `Mock registry system initialized in ${loadTime.toFixed(2)}ms`
+      );
 
       return {
         success: errors.length === 0,
@@ -161,7 +179,6 @@ export class MockRegistryIntegration {
         warnings,
         loadTime,
       };
-
     } catch (error) {
       errors.push(`System initialization failed: ${error}`);
       return {
@@ -180,115 +197,127 @@ export class MockRegistryIntegration {
     const results: MockLoadResult[] = [];
 
     // Register useToast mock
-    results.push(this.registry.register(
-      'useToast',
-      useToastMock,
-      {
-        name: 'useToast',
-        version: '1.1.0',
-        type: 'hook',
-        dependencies: [],
-        compatibleVersions: ['18.0.0', '19.1.0'],
-        description: 'Enhanced useToast hook mock with contextual methods',
-        tags: ['hook', 'toast', 'ui', 'notifications'],
-      },
-      {
-        enabled: true,
-        options: {
-          utils: toastMockUtils,
+    results.push(
+      this.registry.register(
+        'useToast',
+        useToastMock,
+        {
+          name: 'useToast',
+          version: '1.1.0',
+          type: 'hook',
+          dependencies: [],
+          compatibleVersions: ['18.0.0', '19.1.0'],
+          description: 'Enhanced useToast hook mock with contextual methods',
+          tags: ['hook', 'toast', 'ui', 'notifications'],
         },
-      }
-    ));
+        {
+          enabled: true,
+          options: {
+            utils: toastMockUtils,
+          },
+        }
+      )
+    );
 
     // Register enhanced form mocks
-    results.push(this.registry.register(
-      'useEnhancedForm',
-      enhancedFormMocks.useEnhancedForm,
-      {
-        name: 'useEnhancedForm',
-        version: '1.0.0',
-        type: 'hook',
-        dependencies: ['useToast'],
-        compatibleVersions: ['18.0.0', '19.1.0'],
-        description: 'Enhanced form hook mock with validation and auto-save',
-        tags: ['hook', 'form', 'validation', 'auto-save'],
-      },
-      {
-        enabled: true,
-        options: {
-          utils: enhancedFormMockUtils,
+    results.push(
+      this.registry.register(
+        'useEnhancedForm',
+        enhancedFormMocks.useEnhancedForm,
+        {
+          name: 'useEnhancedForm',
+          version: '1.0.0',
+          type: 'hook',
+          dependencies: ['useToast'],
+          compatibleVersions: ['18.0.0', '19.1.0'],
+          description: 'Enhanced form hook mock with validation and auto-save',
+          tags: ['hook', 'form', 'validation', 'auto-save'],
         },
-      }
-    ));
+        {
+          enabled: true,
+          options: {
+            utils: enhancedFormMockUtils,
+          },
+        }
+      )
+    );
 
-    results.push(this.registry.register(
-      'useAutoSave',
-      enhancedFormMocks.useAutoSave,
-      {
-        name: 'useAutoSave',
-        version: '1.0.0',
-        type: 'hook',
-        dependencies: [],
-        compatibleVersions: ['18.0.0', '19.1.0'],
-        description: 'Auto-save hook mock for form persistence',
-        tags: ['hook', 'auto-save', 'persistence'],
-      },
-      {
-        enabled: true,
-      }
-    ));
+    results.push(
+      this.registry.register(
+        'useAutoSave',
+        enhancedFormMocks.useAutoSave,
+        {
+          name: 'useAutoSave',
+          version: '1.0.0',
+          type: 'hook',
+          dependencies: [],
+          compatibleVersions: ['18.0.0', '19.1.0'],
+          description: 'Auto-save hook mock for form persistence',
+          tags: ['hook', 'auto-save', 'persistence'],
+        },
+        {
+          enabled: true,
+        }
+      )
+    );
 
-    results.push(this.registry.register(
-      'useRealTimeValidation',
-      enhancedFormMocks.useRealTimeValidation,
-      {
-        name: 'useRealTimeValidation',
-        version: '1.0.0',
-        type: 'hook',
-        dependencies: [],
-        compatibleVersions: ['18.0.0', '19.1.0'],
-        description: 'Real-time validation hook mock',
-        tags: ['hook', 'validation', 'real-time'],
-      },
-      {
-        enabled: true,
-      }
-    ));
+    results.push(
+      this.registry.register(
+        'useRealTimeValidation',
+        enhancedFormMocks.useRealTimeValidation,
+        {
+          name: 'useRealTimeValidation',
+          version: '1.0.0',
+          type: 'hook',
+          dependencies: [],
+          compatibleVersions: ['18.0.0', '19.1.0'],
+          description: 'Real-time validation hook mock',
+          tags: ['hook', 'validation', 'real-time'],
+        },
+        {
+          enabled: true,
+        }
+      )
+    );
 
     // Register utility mocks
-    results.push(this.registry.register(
-      'localStorage',
-      this.createLocalStorageMock(),
-      {
-        name: 'localStorage',
-        version: '1.0.0',
-        type: 'utility',
-        dependencies: [],
-        compatibleVersions: ['18.0.0', '19.1.0'],
-        description: 'localStorage mock for testing',
-        tags: ['utility', 'storage', 'persistence'],
-      },
-      {
-        enabled: true,
-      }
-    ));
+    results.push(
+      this.registry.register(
+        'localStorage',
+        this.createLocalStorageMock(),
+        {
+          name: 'localStorage',
+          version: '1.0.0',
+          type: 'utility',
+          dependencies: [],
+          compatibleVersions: ['18.0.0', '19.1.0'],
+          description: 'localStorage mock for testing',
+          tags: ['utility', 'storage', 'persistence'],
+        },
+        {
+          enabled: true,
+        }
+      )
+    );
 
-    results.push(this.registry.register(
-      'timers',
-      this.createTimersMock(),
-      {
-        name: 'timers',
-        version: '1.0.0',
-        type: 'utility',
-        dependencies: [],
-        compatibleVersions: ['18.0.0', '19.1.0'],
-        description: 'Timer mocks for testing debounced functionality',
-        tags: ['utility', 'timers', 'debounce'],
-      },
-      {
-        enabled: true,
-      }
-    ));
+    results.push(
+      this.registry.register(
+        'timers',
+        this.createTimersMock(),
+        {
+          name: 'timers',
+          version: '1.0.0',
+          type: 'utility',
+          dependencies: [],
+          compatibleVersions: ['18.0.0', '19.1.0'],
+          description: 'Timer mocks for testing debounced functionality',
+          tags: ['utility', 'timers', 'debounce'],
+        },
+        {
+          enabled: true,
+        }
+      )
+    );
 
     return results;
   }
@@ -317,7 +346,9 @@ export class MockRegistryIntegration {
         success: false,
         mockName: name,
         version,
-        errors: [`Mock '${name}' already exists. Use overrideExisting option to replace.`],
+        errors: [
+          `Mock '${name}' already exists. Use overrideExisting option to replace.`,
+        ],
         warnings: [],
         loadTime: 0,
       };
@@ -331,7 +362,9 @@ export class MockRegistryIntegration {
           success: false,
           mockName: name,
           version,
-          errors: [`Compatibility check failed: ${compatibilityResult.issues.map(i => i.message).join(', ')}`],
+          errors: [
+            `Compatibility check failed: ${compatibilityResult.issues.map((i) => i.message).join(', ')}`,
+          ],
           warnings: [],
           loadTime: 0,
         };
@@ -359,7 +392,10 @@ export class MockRegistryIntegration {
     return registrationResult;
   }
 
-  public async loadMock(name: string, options?: Record<string, any>): Promise<MockLoadResult> {
+  public async loadMock(
+    name: string,
+    options?: Record<string, any>
+  ): Promise<MockLoadResult> {
     return this.registry.load(name, options);
   }
 
@@ -379,11 +415,16 @@ export class MockRegistryIntegration {
   // Configuration Management
   // ============================================================================
 
-  public async loadConfiguration(sources: ConfigurationSource[]): Promise<LoaderResult> {
+  public async loadConfiguration(
+    sources: ConfigurationSource[]
+  ): Promise<LoaderResult> {
     return this.loader.loadConfiguration(sources);
   }
 
-  public async loadPreset(presetName: string, configName?: string): Promise<LoaderResult> {
+  public async loadPreset(
+    presetName: string,
+    configName?: string
+  ): Promise<LoaderResult> {
     return this.loader.loadPreset(presetName, configName);
   }
 
@@ -401,18 +442,30 @@ export class MockRegistryIntegration {
     targetEnvironment?: Parameters<MockVersionManager['checkCompatibility']>[2]
   ): VersionCompatibilityResult {
     const environment = targetEnvironment || this.getCurrentEnvironment();
-    return this.versionManager.checkCompatibility(mockName, mockVersion, environment);
+    return this.versionManager.checkCompatibility(
+      mockName,
+      mockVersion,
+      environment
+    );
   }
 
-  public getMockVersion(mockName: string, versionString: string): MockVersion | undefined {
+  public getMockVersion(
+    mockName: string,
+    versionString: string
+  ): MockVersion | undefined {
     return this.versionManager.getVersion(mockName, versionString);
   }
 
-  public getLatestMockVersion(mockName: string, includePrerelease = false): MockVersion | undefined {
+  public getLatestMockVersion(
+    mockName: string,
+    includePrerelease = false
+  ): MockVersion | undefined {
     return this.versionManager.getLatestVersion(mockName, includePrerelease);
   }
 
-  private performCompatibilityChecks(strict = false): VersionCompatibilityResult[] {
+  private performCompatibilityChecks(
+    strict = false
+  ): VersionCompatibilityResult[] {
     const results: VersionCompatibilityResult[] = [];
     const environment = this.getCurrentEnvironment();
     const mocks = this.registry.list({ enabled: true });
@@ -423,7 +476,7 @@ export class MockRegistryIntegration {
         mock.metadata.version,
         environment
       );
-      
+
       if (!result.compatible || (strict && result.issues.length > 0)) {
         results.push(result);
       }
@@ -440,7 +493,7 @@ export class MockRegistryIntegration {
       typescript: '5.0.0',
       dependencies: {
         'react-hook-form': '7.45.0',
-        'zod': '3.21.0',
+        zod: '3.21.0',
       },
     };
   }
@@ -451,7 +504,7 @@ export class MockRegistryIntegration {
 
   public getSystemStatus(): SystemStatus {
     const compatibilityIssues = this.performCompatibilityChecks();
-    
+
     return {
       initialized: this.initialized,
       registryStats: this.registry.getStats(),
@@ -481,7 +534,7 @@ export class MockRegistryIntegration {
 
   private createLocalStorageMock() {
     const storage: Record<string, string> = {};
-    
+
     return {
       getItem: jest.fn((key: string) => storage[key] || null),
       setItem: jest.fn((key: string, value: string) => {
@@ -491,7 +544,7 @@ export class MockRegistryIntegration {
         delete storage[key];
       }),
       clear: jest.fn(() => {
-        Object.keys(storage).forEach(key => delete storage[key]);
+        Object.keys(storage).forEach((key) => delete storage[key]);
       }),
       key: jest.fn((index: number) => {
         const keys = Object.keys(storage);
@@ -554,7 +607,9 @@ export function getDefaultIntegration(): MockRegistryIntegration {
   return defaultIntegration;
 }
 
-export async function initializeMockSystem(options?: SystemInitializationOptions): Promise<LoaderResult> {
+export async function initializeMockSystem(
+  options?: SystemInitializationOptions
+): Promise<LoaderResult> {
   return getDefaultIntegration().initialize(options);
 }
 
@@ -565,10 +620,19 @@ export async function registerMock(
   configuration?: Partial<MockConfiguration>,
   options?: MockRegistrationOptions
 ): Promise<MockLoadResult> {
-  return getDefaultIntegration().registerMock(name, mockImplementation, metadata, configuration, options);
+  return getDefaultIntegration().registerMock(
+    name,
+    mockImplementation,
+    metadata,
+    configuration,
+    options
+  );
 }
 
-export async function loadMock(name: string, options?: Record<string, any>): Promise<MockLoadResult> {
+export async function loadMock(
+  name: string,
+  options?: Record<string, any>
+): Promise<MockLoadResult> {
   return getDefaultIntegration().loadMock(name, options);
 }
 
@@ -584,11 +648,16 @@ export function listMocks(filter?: Parameters<MockRegistry['list']>[0]) {
   return getDefaultIntegration().listMocks(filter);
 }
 
-export async function loadMockConfiguration(sources: ConfigurationSource[]): Promise<LoaderResult> {
+export async function loadMockConfiguration(
+  sources: ConfigurationSource[]
+): Promise<LoaderResult> {
   return getDefaultIntegration().loadConfiguration(sources);
 }
 
-export async function loadMockPreset(presetName: string, configName?: string): Promise<LoaderResult> {
+export async function loadMockPreset(
+  presetName: string,
+  configName?: string
+): Promise<LoaderResult> {
   return getDefaultIntegration().loadPreset(presetName, configName);
 }
 
@@ -596,7 +665,9 @@ export function getMockSystemStatus(): SystemStatus {
   return getDefaultIntegration().getSystemStatus();
 }
 
-export function cleanupMockSystem(options?: Parameters<MockRegistry['cleanup']>[0]): void {
+export function cleanupMockSystem(
+  options?: Parameters<MockRegistry['cleanup']>[0]
+): void {
   return getDefaultIntegration().cleanup(options);
 }
 

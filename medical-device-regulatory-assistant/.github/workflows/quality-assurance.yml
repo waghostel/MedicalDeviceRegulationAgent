@@ -2,9 +2,9 @@ name: Quality Assurance Pipeline
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [main, develop]
   pull_request:
-    branches: [ main, develop ]
+    branches: [main, develop]
   schedule:
     # Run quality checks daily at 2 AM UTC
     - cron: '0 2 * * *'
@@ -21,7 +21,7 @@ jobs:
     outputs:
       frontend-valid: ${{ steps.frontend-validation.outputs.valid }}
       backend-valid: ${{ steps.backend-validation.outputs.valid }}
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -74,7 +74,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: environment-validation
     if: needs.environment-validation.outputs.frontend-valid == 'true'
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -135,7 +135,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: environment-validation
     if: needs.environment-validation.outputs.backend-valid == 'true'
-    
+
     services:
       redis:
         image: redis:7-alpine
@@ -215,7 +215,7 @@ jobs:
     name: Integration Tests
     runs-on: ubuntu-latest
     needs: [frontend-quality, backend-quality]
-    
+
     services:
       redis:
         image: redis:7-alpine
@@ -284,7 +284,7 @@ jobs:
     name: End-to-End Tests
     runs-on: ubuntu-latest
     needs: integration-tests
-    
+
     services:
       redis:
         image: redis:7-alpine
@@ -358,7 +358,7 @@ jobs:
     name: Performance Tests
     runs-on: ubuntu-latest
     needs: [frontend-quality, backend-quality]
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -406,8 +406,9 @@ jobs:
   quality-gates:
     name: Quality Gates Validation
     runs-on: ubuntu-latest
-    needs: [frontend-quality, backend-quality, integration-tests, performance-tests]
-    
+    needs:
+      [frontend-quality, backend-quality, integration-tests, performance-tests]
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -460,12 +461,12 @@ jobs:
     runs-on: ubuntu-latest
     needs: quality-gates
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Fetch full history for comparison
+          fetch-depth: 0 # Fetch full history for comparison
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -503,7 +504,7 @@ jobs:
     name: Security Scanning
     runs-on: ubuntu-latest
     needs: environment-validation
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -555,7 +556,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [quality-gates, security-scan, regression-detection]
     if: always()
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -563,7 +564,7 @@ jobs:
       - name: Check deployment readiness
         run: |
           echo "## Deployment Readiness Report" >> $GITHUB_STEP_SUMMARY
-          
+
           # Check if all required jobs passed
           if [[ "${{ needs.quality-gates.result }}" == "success" && "${{ needs.security-scan.result }}" == "success" ]]; then
             echo "✅ **READY FOR DEPLOYMENT**" >> $GITHUB_STEP_SUMMARY
@@ -574,7 +575,7 @@ jobs:
             echo "Some quality gates failed or security issues were found." >> $GITHUB_STEP_SUMMARY
             echo "deployment-ready=false" >> $GITHUB_OUTPUT
           fi
-          
+
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Job Results:" >> $GITHUB_STEP_SUMMARY
           echo "- Quality Gates: ${{ needs.quality-gates.result }}" >> $GITHUB_STEP_SUMMARY

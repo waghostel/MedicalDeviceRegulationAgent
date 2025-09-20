@@ -1,7 +1,7 @@
 export {
   OnboardingFlow,
   OnboardingTrigger,
-  FeatureHighlight
+  FeatureHighlight,
 } from './OnboardingFlow';
 
 export {
@@ -12,5 +12,5 @@ export {
   TipTooltip,
   RegulatoryTooltip,
   FDAGuidanceTooltip,
-  ConfidenceTooltip
+  ConfidenceTooltip,
 } from './Tooltips';

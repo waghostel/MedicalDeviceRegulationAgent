@@ -52,7 +52,7 @@ export function useOffline(options: UseOfflineOptions = {}) {
     if (stored) {
       try {
         const pendingActions = JSON.parse(stored);
-        setState(prev => ({ ...prev, pendingActions }));
+        setState((prev) => ({ ...prev, pendingActions }));
       } catch (error) {
         console.error('Failed to load pending actions:', error);
         localStorage.removeItem('pendingActions');
@@ -62,14 +62,17 @@ export function useOffline(options: UseOfflineOptions = {}) {
 
   // Save pending actions to localStorage whenever they change
   useEffect(() => {
-    localStorage.setItem('pendingActions', JSON.stringify(state.pendingActions));
+    localStorage.setItem(
+      'pendingActions',
+      JSON.stringify(state.pendingActions)
+    );
   }, [state.pendingActions]);
 
   // Handle online/offline events
   useEffect(() => {
     const handleOnline = () => {
-      setState(prev => ({ ...prev, isOnline: true, isOffline: false }));
-      
+      setState((prev) => ({ ...prev, isOnline: true, isOffline: false }));
+
       if (hasShownOfflineToast.current && showOfflineToast) {
         toast({
           title: 'Back Online',
@@ -77,19 +80,20 @@ export function useOffline(options: UseOfflineOptions = {}) {
         });
         hasShownOfflineToast.current = false;
       }
-      
+
       if (syncOnReconnect) {
         syncPendingActions();
       }
     };
 
     const handleOffline = () => {
-      setState(prev => ({ ...prev, isOnline: false, isOffline: true }));
-      
+      setState((prev) => ({ ...prev, isOnline: false, isOffline: true }));
+
       if (showOfflineToast && !hasShownOfflineToast.current) {
         toast({
           title: 'Offline Mode',
-          description: 'You are currently offline. Changes will be synced when connection is restored.',
+          description:
+            'You are currently offline. Changes will be synced when connection is restored.',
           variant: 'destructive',
         });
         hasShownOfflineToast.current = true;
@@ -105,35 +109,44 @@ export function useOffline(options: UseOfflineOptions = {}) {
     };
   }, [syncOnReconnect, showOfflineToast]);
 
-  const addPendingAction = useCallback((action: Omit<PendingAction, 'id' | 'timestamp' | 'retryCount'>) => {
-    const pendingAction: PendingAction = {
-      ...action,
-      id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      timestamp: Date.now(),
-      retryCount: 0,
-    };
+  const addPendingAction = useCallback(
+    (action: Omit<PendingAction, 'id' | 'timestamp' | 'retryCount'>) => {
+      const pendingAction: PendingAction = {
+        ...action,
+        id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        timestamp: Date.now(),
+        retryCount: 0,
+      };
 
-    setState(prev => ({
-      ...prev,
-      pendingActions: [...prev.pendingActions, pendingAction],
-    }));
+      setState((prev) => ({
+        ...prev,
+        pendingActions: [...prev.pendingActions, pendingAction],
+      }));
 
-    return pendingAction.id;
-  }, []);
+      return pendingAction.id;
+    },
+    []
+  );
 
   const removePendingAction = useCallback((actionId: string) => {
-    setState(prev => ({
+    setState((prev) => ({
       ...prev,
-      pendingActions: prev.pendingActions.filter(action => action.id !== actionId),
+      pendingActions: prev.pendingActions.filter(
+        (action) => action.id !== actionId
+      ),
     }));
   }, []);
 
   const syncPendingActions = useCallback(async () => {
-    if (!state.isOnline || state.syncInProgress || state.pendingActions.length === 0) {
+    if (
+      !state.isOnline ||
+      state.syncInProgress ||
+      state.pendingActions.length === 0
+    ) {
       return;
     }
 
-    setState(prev => ({ ...prev, syncInProgress: true }));
+    setState((prev) => ({ ...prev, syncInProgress: true }));
 
     const actionsToSync = [...state.pendingActions];
     const successfulActions: string[] = [];
@@ -143,7 +156,12 @@ export function useOffline(options: UseOfflineOptions = {}) {
       try {
         // Simulate API call based on action type
         const response = await fetch(action.endpoint, {
-          method: action.type === 'create' ? 'POST' : action.type === 'update' ? 'PUT' : 'DELETE',
+          method:
+            action.type === 'create'
+              ? 'POST'
+              : action.type === 'update'
+                ? 'PUT'
+                : 'DELETE',
           headers: {
             'Content-Type': 'application/json',
           },
@@ -157,20 +175,22 @@ export function useOffline(options: UseOfflineOptions = {}) {
         }
       } catch (error) {
         console.error(`Failed to sync action ${action.id}:`, error);
-        
+
         if (action.retryCount < maxRetries) {
           failedActions.push({
             ...action,
             retryCount: action.retryCount + 1,
           });
         } else {
-          console.error(`Max retries exceeded for action ${action.id}, discarding`);
+          console.error(
+            `Max retries exceeded for action ${action.id}, discarding`
+          );
         }
       }
     }
 
     // Update state with results
-    setState(prev => ({
+    setState((prev) => ({
       ...prev,
       pendingActions: failedActions,
       syncInProgress: false,
@@ -188,15 +208,21 @@ export function useOffline(options: UseOfflineOptions = {}) {
       if (syncTimeoutRef.current) {
         clearTimeout(syncTimeoutRef.current);
       }
-      
+
       syncTimeoutRef.current = setTimeout(() => {
         syncPendingActions();
       }, retryDelay);
     }
-  }, [state.isOnline, state.syncInProgress, state.pendingActions, maxRetries, retryDelay]);
+  }, [
+    state.isOnline,
+    state.syncInProgress,
+    state.pendingActions,
+    maxRetries,
+    retryDelay,
+  ]);
 
   const clearPendingActions = useCallback(() => {
-    setState(prev => ({ ...prev, pendingActions: [] }));
+    setState((prev) => ({ ...prev, pendingActions: [] }));
     localStorage.removeItem('pendingActions');
   }, []);
 
@@ -206,7 +232,8 @@ export function useOffline(options: UseOfflineOptions = {}) {
     } else {
       toast({
         title: 'Cannot Sync',
-        description: 'You are currently offline. Sync will happen automatically when connection is restored.',
+        description:
+          'You are currently offline. Sync will happen automatically when connection is restored.',
         variant: 'destructive',
       });
     }
@@ -237,37 +264,36 @@ export function useOffline(options: UseOfflineOptions = {}) {
 export function useOfflineApi() {
   const offline = useOffline();
 
-  const makeRequest = useCallback(async (
-    endpoint: string,
-    options: RequestInit = {},
-    fallbackData?: any
-  ) => {
-    if (offline.isOffline) {
-      // Queue the action for later sync
-      const actionId = offline.addPendingAction({
-        type: (options.method as any) || 'GET',
-        endpoint,
-        data: options.body ? JSON.parse(options.body as string) : undefined,
-      });
+  const makeRequest = useCallback(
+    async (endpoint: string, options: RequestInit = {}, fallbackData?: any) => {
+      if (offline.isOffline) {
+        // Queue the action for later sync
+        const actionId = offline.addPendingAction({
+          type: (options.method as any) || 'GET',
+          endpoint,
+          data: options.body ? JSON.parse(options.body as string) : undefined,
+        });
 
-      // Return fallback data or throw error
-      if (fallbackData !== undefined) {
-        return { data: fallbackData, offline: true, actionId };
-      } else {
-        throw new Error('Operation queued for sync when online');
+        // Return fallback data or throw error
+        if (fallbackData !== undefined) {
+          return { data: fallbackData, offline: true, actionId };
+        } else {
+          throw new Error('Operation queued for sync when online');
+        }
       }
-    }
 
-    // Make normal request when online
-    const response = await fetch(endpoint, options);
-    
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-    }
+      // Make normal request when online
+      const response = await fetch(endpoint, options);
 
-    const data = await response.json();
-    return { data, offline: false };
-  }, [offline]);
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      return { data, offline: false };
+    },
+    [offline]
+  );
 
   return {
     ...offline,

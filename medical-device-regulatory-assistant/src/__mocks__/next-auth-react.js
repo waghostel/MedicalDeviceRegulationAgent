@@ -14,11 +14,14 @@ const SessionContext = React.createContext({
 
 // Mock SessionProvider that's compatible with React 19
 const SessionProvider = ({ children, session = null }) => {
-  const contextValue = React.useMemo(() => ({
-    data: session,
-    status: session ? 'authenticated' : 'unauthenticated',
-    update: async () => session,
-  }), [session]);
+  const contextValue = React.useMemo(
+    () => ({
+      data: session,
+      status: session ? 'authenticated' : 'unauthenticated',
+      update: async () => session,
+    }),
+    [session]
+  );
 
   return React.createElement(
     SessionContext.Provider,
@@ -30,11 +33,13 @@ const SessionProvider = ({ children, session = null }) => {
 // Mock useSession hook
 const useSession = () => {
   const context = React.useContext(SessionContext);
-  return context || {
-    data: null,
-    status: 'unauthenticated',
-    update: async () => null,
-  };
+  return (
+    context || {
+      data: null,
+      status: 'unauthenticated',
+      update: async () => null,
+    }
+  );
 };
 
 // Mock other next-auth/react functions

@@ -11,13 +11,13 @@ const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:8000';
 
 async function getAuthHeaders(request: NextRequest) {
   const session = await getServerSession(authOptions);
-  
+
   if (!session?.user?.email) {
     throw new Error('Unauthorized');
   }
 
   return {
-    'Authorization': `Bearer ${session.accessToken || 'mock-token'}`,
+    Authorization: `Bearer ${session.accessToken || 'mock-token'}`,
     'Content-Type': 'application/json',
   };
 }
@@ -26,11 +26,11 @@ export async function GET(request: NextRequest) {
   try {
     const headers = await getAuthHeaders(request);
     const { searchParams } = new URL(request.url);
-    
+
     // Forward query parameters to backend
     const queryString = searchParams.toString();
     const backendUrl = `${BACKEND_URL}/projects${queryString ? `?${queryString}` : ''}`;
-    
+
     const response = await fetch(backendUrl, {
       method: 'GET',
       headers,
@@ -39,9 +39,9 @@ export async function GET(request: NextRequest) {
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       return NextResponse.json(
-        { 
+        {
           message: errorData.message || `Backend error: ${response.status}`,
-          details: errorData 
+          details: errorData,
         },
         { status: response.status }
       );
@@ -49,10 +49,9 @@ export async function GET(request: NextRequest) {
 
     const data = await response.json();
     return NextResponse.json(data);
-
   } catch (error) {
     console.error('Projects API error:', error);
-    
+
     if (error.message === 'Unauthorized') {
       return NextResponse.json(
         { message: 'Authentication required' },
@@ -71,7 +70,7 @@ export async function POST(request: NextRequest) {
   try {
     const headers = await getAuthHeaders(request);
     const body = await request.json();
-    
+
     const response = await fetch(`${BACKEND_URL}/projects`, {
       method: 'POST',
       headers,
@@ -81,9 +80,9 @@ export async function POST(request: NextRequest) {
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       return NextResponse.json(
-        { 
+        {
           message: errorData.message || `Backend error: ${response.status}`,
-          details: errorData 
+          details: errorData,
         },
         { status: response.status }
       );
@@ -91,10 +90,9 @@ export async function POST(request: NextRequest) {
 
     const data = await response.json();
     return NextResponse.json(data, { status: 201 });
-
   } catch (error) {
     console.error('Create project API error:', error);
-    
+
     if (error.message === 'Unauthorized') {
       return NextResponse.json(
         { message: 'Authentication required' },

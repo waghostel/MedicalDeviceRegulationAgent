@@ -2,7 +2,7 @@
 
 /**
  * End-to-End Test Runner Script
- * 
+ *
  * Comprehensive test runner for project workflow end-to-end tests.
  * Handles test environment setup, execution, and cleanup.
  */
@@ -18,21 +18,22 @@ const CONFIG = {
     workflow: 'e2e/project-workflow-e2e.spec.ts',
     websocket: 'e2e/websocket-realtime.spec.ts',
     performance: 'e2e/performance-load.spec.ts',
-    all: 'e2e/'
+    all: 'e2e/',
   },
 
   // Environment setup
   services: {
     backend: {
-      command: 'cd backend && poetry run uvicorn main:app --host 0.0.0.0 --port 8000',
+      command:
+        'cd backend && poetry run uvicorn main:app --host 0.0.0.0 --port 8000',
       port: 8000,
-      healthCheck: 'http://localhost:8000/api/health'
+      healthCheck: 'http://localhost:8000/api/health',
     },
     frontend: {
       command: 'pnpm dev',
       port: 3000,
-      healthCheck: 'http://localhost:3000'
-    }
+      healthCheck: 'http://localhost:3000',
+    },
   },
 
   // Test execution options
@@ -40,8 +41,8 @@ const CONFIG = {
     timeout: 300000, // 5 minutes
     retries: 2,
     workers: process.env.CI ? 1 : undefined,
-    reporter: ['html', 'json', 'junit']
-  }
+    reporter: ['html', 'json', 'junit'],
+  },
 };
 
 class E2ETestRunner {
@@ -51,7 +52,7 @@ class E2ETestRunner {
       passed: 0,
       failed: 0,
       skipped: 0,
-      duration: 0
+      duration: 0,
     };
   }
 
@@ -65,24 +66,23 @@ class E2ETestRunner {
     try {
       // Parse command line arguments
       const args = this.parseArguments();
-      
+
       // Setup test environment
       await this.setupEnvironment();
-      
+
       // Start required services
       await this.startServices();
-      
+
       // Wait for services to be ready
       await this.waitForServices();
-      
+
       // Run tests
       await this.runTests(args);
-      
+
       // Generate reports
       await this.generateReports();
-      
+
       console.log('✅ End-to-End tests completed successfully');
-      
     } catch (error) {
       console.error('❌ End-to-End tests failed:', error.message);
       process.exit(1);
@@ -105,12 +105,12 @@ class E2ETestRunner {
       retries: CONFIG.execution.retries,
       reporter: CONFIG.execution.reporter,
       grep: null,
-      project: null
+      project: null,
     };
 
     for (let i = 0; i < args.length; i++) {
       const arg = args[i];
-      
+
       switch (arg) {
         case '--category':
         case '-c':
@@ -193,7 +193,7 @@ Examples:
     // Set environment variables
     process.env.NODE_ENV = 'test';
     process.env.PLAYWRIGHT_BROWSERS_PATH = '0';
-    
+
     // Enable debug mode if requested
     if (process.argv.includes('--debug')) {
       process.env.DEBUG = 'pw:*';
@@ -211,10 +211,10 @@ Examples:
 
     for (const [serviceName, config] of Object.entries(CONFIG.services)) {
       console.log(`Starting ${serviceName} service...`);
-      
+
       const service = spawn('sh', ['-c', config.command], {
         stdio: ['ignore', 'pipe', 'pipe'],
-        detached: false
+        detached: false,
       });
 
       service.stdout.on('data', (data) => {
@@ -237,7 +237,7 @@ Examples:
       this.runningServices.push({
         name: serviceName,
         process: service,
-        port: config.port
+        port: config.port,
       });
     }
 
@@ -256,7 +256,7 @@ Examples:
 
     for (const [serviceName, config] of Object.entries(CONFIG.services)) {
       console.log(`Checking ${serviceName} health...`);
-      
+
       while (Date.now() - startTime < maxWaitTime) {
         try {
           const response = await this.makeHealthCheck(config.healthCheck);
@@ -275,7 +275,9 @@ Examples:
       try {
         await this.makeHealthCheck(config.healthCheck);
       } catch (error) {
-        throw new Error(`${serviceName} failed to start within ${maxWaitTime}ms`);
+        throw new Error(
+          `${serviceName} failed to start within ${maxWaitTime}ms`
+        );
       }
     }
 
@@ -289,19 +291,22 @@ Examples:
     return new Promise((resolve, reject) => {
       const http = require('http');
       const urlObj = new URL(url);
-      
-      const req = http.get({
-        hostname: urlObj.hostname,
-        port: urlObj.port,
-        path: urlObj.pathname,
-        timeout: 5000
-      }, (res) => {
-        if (res.statusCode >= 200 && res.statusCode < 400) {
-          resolve(true);
-        } else {
-          reject(new Error(`Health check failed: ${res.statusCode}`));
+
+      const req = http.get(
+        {
+          hostname: urlObj.hostname,
+          port: urlObj.port,
+          path: urlObj.pathname,
+          timeout: 5000,
+        },
+        (res) => {
+          if (res.statusCode >= 200 && res.statusCode < 400) {
+            resolve(true);
+          } else {
+            reject(new Error(`Health check failed: ${res.statusCode}`));
+          }
         }
-      });
+      );
 
       req.on('error', reject);
       req.on('timeout', () => {
@@ -320,13 +325,10 @@ Examples:
     console.log(`Workers: ${options.workers || 'auto'}`);
     console.log(`Retries: ${options.retries}`);
 
-    const testPath = CONFIG.testCategories[options.category] || options.category;
-    
-    const playwrightArgs = [
-      'test',
-      testPath,
-      '--config=playwright.config.ts'
-    ];
+    const testPath =
+      CONFIG.testCategories[options.category] || options.category;
+
+    const playwrightArgs = ['test', testPath, '--config=playwright.config.ts'];
 
     // Add options
     if (options.headed) {
@@ -361,8 +363,8 @@ Examples:
         stdio: 'inherit',
         env: {
           ...process.env,
-          FORCE_COLOR: '1'
-        }
+          FORCE_COLOR: '1',
+        },
       });
 
       testProcess.on('close', (code) => {
@@ -402,7 +404,6 @@ Examples:
       if (fs.existsSync('playwright-report/results.json')) {
         this.generatePerformanceReport();
       }
-
     } catch (error) {
       console.warn('Failed to generate some reports:', error.message);
     }
@@ -420,13 +421,15 @@ Examples:
       failed: 0,
       skipped: 0,
       duration: 0,
-      tests: []
+      tests: [],
     };
 
     try {
       if (fs.existsSync('playwright-report/results.json')) {
-        const data = JSON.parse(fs.readFileSync('playwright-report/results.json', 'utf8'));
-        
+        const data = JSON.parse(
+          fs.readFileSync('playwright-report/results.json', 'utf8')
+        );
+
         results.total = data.stats?.total || 0;
         results.passed = data.stats?.passed || 0;
         results.failed = data.stats?.failed || 0;
@@ -478,32 +481,45 @@ Generated at: ${new Date().toISOString()}
    */
   generatePerformanceReport() {
     try {
-      const resultsData = JSON.parse(fs.readFileSync('playwright-report/results.json', 'utf8'));
-      
-      const performanceTests = resultsData.tests?.filter(test => 
-        test.title?.includes('Performance') || 
-        test.title?.includes('Load') ||
-        test.file?.includes('performance')
-      ) || [];
+      const resultsData = JSON.parse(
+        fs.readFileSync('playwright-report/results.json', 'utf8')
+      );
+
+      const performanceTests =
+        resultsData.tests?.filter(
+          (test) =>
+            test.title?.includes('Performance') ||
+            test.title?.includes('Load') ||
+            test.file?.includes('performance')
+        ) || [];
 
       if (performanceTests.length > 0) {
         const performanceReport = {
           summary: {
             totalPerformanceTests: performanceTests.length,
-            averageDuration: performanceTests.reduce((sum, test) => sum + (test.duration || 0), 0) / performanceTests.length,
-            slowestTest: performanceTests.reduce((slowest, test) => 
-              (test.duration || 0) > (slowest.duration || 0) ? test : slowest, performanceTests[0]
-            )
+            averageDuration:
+              performanceTests.reduce(
+                (sum, test) => sum + (test.duration || 0),
+                0
+              ) / performanceTests.length,
+            slowestTest: performanceTests.reduce(
+              (slowest, test) =>
+                (test.duration || 0) > (slowest.duration || 0) ? test : slowest,
+              performanceTests[0]
+            ),
           },
-          tests: performanceTests.map(test => ({
+          tests: performanceTests.map((test) => ({
             title: test.title,
             duration: test.duration,
             status: test.status,
-            file: test.file
-          }))
+            file: test.file,
+          })),
         };
 
-        fs.writeFileSync('test-results/performance-report.json', JSON.stringify(performanceReport, null, 2));
+        fs.writeFileSync(
+          'test-results/performance-report.json',
+          JSON.stringify(performanceReport, null, 2)
+        );
         console.log('Performance report: test-results/performance-report.json');
       }
     } catch (error) {
@@ -521,18 +537,18 @@ Generated at: ${new Date().toISOString()}
     for (const service of this.runningServices) {
       try {
         console.log(`Stopping ${service.name}...`);
-        
+
         // Try graceful shutdown first
         service.process.kill('SIGTERM');
-        
+
         // Wait a bit for graceful shutdown
         await this.sleep(2000);
-        
+
         // Force kill if still running
         if (!service.process.killed) {
           service.process.kill('SIGKILL');
         }
-        
+
         console.log(`✅ ${service.name} stopped`);
       } catch (error) {
         console.warn(`Failed to stop ${service.name}:`, error.message);
@@ -559,14 +575,14 @@ Generated at: ${new Date().toISOString()}
    * Utility function to sleep
    */
   sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 }
 
 // Run the test runner if this script is executed directly
 if (require.main === module) {
   const runner = new E2ETestRunner();
-  runner.run().catch(error => {
+  runner.run().catch((error) => {
     console.error('Test runner failed:', error);
     process.exit(1);
   });

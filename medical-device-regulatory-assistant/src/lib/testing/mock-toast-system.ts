@@ -6,7 +6,13 @@
 // Import act dynamically to avoid Jest hook issues during module loading
 
 // Toast types
-export type ToastType = 'default' | 'success' | 'error' | 'warning' | 'info' | 'destructive';
+export type ToastType =
+  | 'default'
+  | 'success'
+  | 'error'
+  | 'warning'
+  | 'info'
+  | 'destructive';
 
 export interface ToastData {
   id: string;
@@ -46,52 +52,55 @@ export class MockToastSystem {
   /**
    * Mock toast function that tracks calls
    */
-  toast = jest.fn((options: {
-    title?: string;
-    description?: string;
-    variant?: ToastType;
-    action?: {
-      label: string;
-      onClick: () => void;
-    };
-    duration?: number;
-  }) => {
-    const id = `toast-${++this.idCounter}`;
-    const timestamp = Date.now();
-    
-    const toastData: ToastData = {
-      id,
-      title: options.title,
-      description: options.description,
-      type: options.variant || 'default',
-      action: options.action,
-      duration: options.duration || 5000,
-      timestamp,
-    };
+  toast = jest.fn(
+    (options: {
+      title?: string;
+      description?: string;
+      variant?: ToastType;
+      action?: {
+        label: string;
+        onClick: () => void;
+      };
+      duration?: number;
+    }) => {
+      const id = `toast-${++this.idCounter}`;
+      const timestamp = Date.now();
 
-    const toastCall: ToastCall = {
-      id,
-      title: options.title,
-      description: options.description,
-      type: options.variant || 'default',
-      action: options.action,
-      duration: options.duration || 5000,
-      calledAt: timestamp,
-    };
+      const toastData: ToastData = {
+        id,
+        title: options.title,
+        description: options.description,
+        type: options.variant || 'default',
+        action: options.action,
+        duration: options.duration || 5000,
+        timestamp,
+      };
 
-    // Use dynamic act() import to wrap state updates
-    const { act } = require('@testing-library/react');
-    act(() => {
-      this.toasts.set(id, toastData);
-      this.toastCalls.push(toastCall);
-    });
+      const toastCall: ToastCall = {
+        id,
+        title: options.title,
+        description: options.description,
+        type: options.variant || 'default',
+        action: options.action,
+        duration: options.duration || 5000,
+        calledAt: timestamp,
+      };
 
-    return {
-      id,
-      dismiss: () => this.dismiss(id),
-      update: (newOptions: Partial<typeof options>) => this.update(id, newOptions),
-    };
-  });
+      // Use dynamic act() import to wrap state updates
+      const { act } = require('@testing-library/react');
+      act(() => {
+        this.toasts.set(id, toastData);
+        this.toastCalls.push(toastCall);
+      });
+
+      return {
+        id,
+        dismiss: () => this.dismiss(id),
+        update: (newOptions: Partial<typeof options>) =>
+          this.update(id, newOptions),
+      };
+    }
+  );
 
   /**
    * Dismiss a toast by ID
@@ -106,32 +115,37 @@ export class MockToastSystem {
   /**
    * Update a toast by ID
    */
-  update = jest.fn((id: string, options: Partial<{
-    title?: string;
-    description?: string;
-    variant?: ToastType;
-    action?: {
-      label: string;
-      onClick: () => void;
-    };
-    duration?: number;
-  }>) => {
-    const existingToast = this.toasts.get(id);
-    if (existingToast) {
-      const { act } = require('@testing-library/react');
-      act(() => {
-        const updatedToast: ToastData = {
-          ...existingToast,
-          title: options.title ?? existingToast.title,
-          description: options.description ?? existingToast.description,
-          type: options.variant ?? existingToast.type,
-          action: options.action ?? existingToast.action,
-          duration: options.duration ?? existingToast.duration,
+  update = jest.fn(
+    (
+      id: string,
+      options: Partial<{
+        title?: string;
+        description?: string;
+        variant?: ToastType;
+        action?: {
+          label: string;
+          onClick: () => void;
         };
-        this.toasts.set(id, updatedToast);
-      });
+        duration?: number;
+      }>
+    ) => {
+      const existingToast = this.toasts.get(id);
+      if (existingToast) {
+        const { act } = require('@testing-library/react');
+        act(() => {
+          const updatedToast: ToastData = {
+            ...existingToast,
+            title: options.title ?? existingToast.title,
+            description: options.description ?? existingToast.description,
+            type: options.variant ?? existingToast.type,
+            action: options.action ?? existingToast.action,
+            duration: options.duration ?? existingToast.duration,
+          };
+          this.toasts.set(id, updatedToast);
+        });
+      }
     }
-  });
+  );
 
   /**
    * Get all active toasts
@@ -158,17 +172,22 @@ export class MockToastSystem {
    * Get toast calls by type
    */
   getToastCallsByType(type: ToastType): ToastCall[] {
-    return this.toastCalls.filter(call => call.type === type);
+    return this.toastCalls.filter((call) => call.type === type);
   }
 
   /**
    * Check if a toast with specific content was called
    */
-  wasToastCalledWith(title?: string, description?: string, type?: ToastType): boolean {
-    return this.toastCalls.some(call => 
-      (!title || call.title === title) &&
-      (!description || call.description === description) &&
-      (!type || call.type === type)
+  wasToastCalledWith(
+    title?: string,
+    description?: string,
+    type?: ToastType
+  ): boolean {
+    return this.toastCalls.some(
+      (call) =>
+        (!title || call.title === title) &&
+        (!description || call.description === description) &&
+        (!type || call.type === type)
     );
   }
 
@@ -231,7 +250,7 @@ export const getMockToastSystem = (): MockToastSystem => {
  */
 export const setupMockToastSystem = (): MockToastSystem => {
   const mockSystem = getMockToastSystem();
-  
+
   // Mock the useToast hook
   jest.doMock('@/hooks/use-toast', () => ({
     useToast: () => ({
@@ -262,7 +281,7 @@ export const cleanupMockToastSystem = (): void => {
     mockToastSystemInstance.clear();
     mockToastSystemInstance.resetMocks();
   }
-  
+
   // Restore original modules
   jest.dontMock('@/hooks/use-toast');
   jest.dontMock('@/components/ui/use-toast');
@@ -276,8 +295,8 @@ export const toastTestUtils = {
    * Assert that a toast was called with specific content
    */
   expectToastCalledWith: (
-    title?: string, 
-    description?: string, 
+    title?: string,
+    description?: string,
     type?: ToastType
   ) => {
     const mockSystem = getMockToastSystem();

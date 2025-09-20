@@ -4,7 +4,13 @@ import { Breadcrumb, BreadcrumbItem } from '../Breadcrumb';
 
 // Mock Next.js Link component
 jest.mock('next/link', () => {
-  return function MockLink({ children, href }: { children: React.ReactNode; href: string }) {
+  return function MockLink({
+    children,
+    href,
+  }: {
+    children: React.ReactNode;
+    href: string;
+  }) {
     return <a href={href}>{children}</a>;
   };
 });

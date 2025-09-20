@@ -1,9 +1,9 @@
 /**
  * Setup Enhanced Form Component Mocks
- * 
+ *
  * Integration setup for enhanced form component mocks with the existing test infrastructure.
  * This file provides the integration layer between component mocks and the test environment.
- * 
+ *
  * Requirements: 2.4, 3.1
  */
 
@@ -34,21 +34,31 @@ export function initializeEnhancedFormComponentMocks(): void {
     // Integrate with existing enhanced form hook mocks
     if (typeof require !== 'undefined') {
       try {
-        const { setupEnhancedFormMocks } = require('./setup-enhanced-form-mocks');
+        const {
+          setupEnhancedFormMocks,
+        } = require('./setup-enhanced-form-mocks');
         if (typeof setupEnhancedFormMocks === 'function') {
           setupEnhancedFormMocks();
         }
       } catch (error) {
-        console.warn('[Enhanced Form Component Mocks] Could not integrate with hook mocks:', error);
+        console.warn(
+          '[Enhanced Form Component Mocks] Could not integrate with hook mocks:',
+          error
+        );
       }
     }
 
     // Add component mocks to Jest module mocks
     setupJestModuleMocks();
 
-    console.log('[Enhanced Form Component Mocks] Initialization completed successfully');
+    console.log(
+      '[Enhanced Form Component Mocks] Initialization completed successfully'
+    );
   } catch (error) {
-    console.error('[Enhanced Form Component Mocks] Initialization failed:', error);
+    console.error(
+      '[Enhanced Form Component Mocks] Initialization failed:',
+      error
+    );
     throw error;
   }
 }
@@ -68,9 +78,14 @@ function setupJestModuleMocks(): void {
       EnhancedTextarea: EnhancedTextareaMock,
       AutoSaveIndicator: AutoSaveIndicatorMock,
     }));
-    console.log('[Enhanced Form Component Mocks] EnhancedFormField mocked successfully');
+    console.log(
+      '[Enhanced Form Component Mocks] EnhancedFormField mocked successfully'
+    );
   } catch (error) {
-    console.warn('[Enhanced Form Component Mocks] Could not mock EnhancedFormField:', error);
+    console.warn(
+      '[Enhanced Form Component Mocks] Could not mock EnhancedFormField:',
+      error
+    );
   }
 
   console.log('[Enhanced Form Component Mocks] Jest module mocks configured');
@@ -83,14 +98,16 @@ function setupJestModuleMocks(): void {
 export function teardownEnhancedFormComponentMocks(): void {
   try {
     cleanupEnhancedFormComponentMocks();
-    
+
     // Clear Jest module mocks if needed
     if (typeof jest !== 'undefined') {
       // Note: We don't clear doMock here as it's typically done globally
       // Individual test files can use jest.clearAllMocks() if needed
     }
 
-    console.log('[Enhanced Form Component Mocks] Teardown completed successfully');
+    console.log(
+      '[Enhanced Form Component Mocks] Teardown completed successfully'
+    );
   } catch (error) {
     console.error('[Enhanced Form Component Mocks] Teardown failed:', error);
   }
@@ -132,7 +149,11 @@ export function validateEnhancedFormComponentMocks(): {
     // Test EnhancedInput mock
     try {
       const inputElement = EnhancedInputMock(testProps);
-      if (!inputElement || !inputElement.props || !inputElement.props['data-testid']) {
+      if (
+        !inputElement ||
+        !inputElement.props ||
+        !inputElement.props['data-testid']
+      ) {
         warnings.push('EnhancedInput mock missing data-testid');
       }
     } catch (error) {
@@ -142,7 +163,11 @@ export function validateEnhancedFormComponentMocks(): {
     // Test EnhancedTextarea mock
     try {
       const textareaElement = EnhancedTextareaMock(testProps);
-      if (!textareaElement || !textareaElement.props || !textareaElement.props['data-testid']) {
+      if (
+        !textareaElement ||
+        !textareaElement.props ||
+        !textareaElement.props['data-testid']
+      ) {
         warnings.push('EnhancedTextarea mock missing data-testid');
       }
     } catch (error) {
@@ -152,7 +177,11 @@ export function validateEnhancedFormComponentMocks(): {
     // Test AutoSaveIndicator mock
     try {
       const indicatorElement = AutoSaveIndicatorMock({ isSaving: false });
-      if (!indicatorElement || !indicatorElement.props || !indicatorElement.props['data-testid']) {
+      if (
+        !indicatorElement ||
+        !indicatorElement.props ||
+        !indicatorElement.props['data-testid']
+      ) {
         warnings.push('AutoSaveIndicator mock missing data-testid');
       }
     } catch (error) {
@@ -161,11 +190,15 @@ export function validateEnhancedFormComponentMocks(): {
 
     // Test FormSubmissionProgress mock
     try {
-      const progressElement = FormSubmissionProgressMock({ 
-        progress: 50, 
-        currentStep: 'Test Step' 
+      const progressElement = FormSubmissionProgressMock({
+        progress: 50,
+        currentStep: 'Test Step',
       });
-      if (!progressElement || !progressElement.props || !progressElement.props['data-testid']) {
+      if (
+        !progressElement ||
+        !progressElement.props ||
+        !progressElement.props['data-testid']
+      ) {
         warnings.push('FormSubmissionProgress mock missing data-testid');
       }
     } catch (error) {
@@ -175,20 +208,23 @@ export function validateEnhancedFormComponentMocks(): {
     // Test EnhancedButton mock
     try {
       const buttonElement = EnhancedButtonMock({ children: 'Test Button' });
-      if (!buttonElement || !buttonElement.props || !buttonElement.props['data-testid']) {
+      if (
+        !buttonElement ||
+        !buttonElement.props ||
+        !buttonElement.props['data-testid']
+      ) {
         warnings.push('EnhancedButton mock missing data-testid');
       }
     } catch (error) {
       warnings.push(`EnhancedButton mock validation failed: ${error}`);
     }
-
   } catch (error) {
     errors.push(`Mock validation failed: ${error}`);
   }
 
   // Check global registry integration
-  if (global.__GLOBAL_MOCK_REGISTRY) {
-    const componentMap = global.__GLOBAL_MOCK_REGISTRY.components;
+  if ((global as any).__GLOBAL_MOCK_REGISTRY) {
+    const componentMap = (global as any).__GLOBAL_MOCK_REGISTRY.components;
     if (!componentMap || componentMap.size === 0) {
       warnings.push('Component mocks not registered in global registry');
     }
@@ -210,7 +246,9 @@ export function validateEnhancedFormComponentMocks(): {
 /**
  * Get mock call history for a specific component
  */
-export function getComponentMockCalls(componentName: keyof typeof componentMocks): any[] {
+export function getComponentMockCalls(
+  componentName: keyof typeof componentMocks
+): any[] {
   const mock = componentMocks[componentName];
   return mock.mock.calls || [];
 }
@@ -219,7 +257,7 @@ export function getComponentMockCalls(componentName: keyof typeof componentMocks
  * Reset all component mock call history
  */
 export function resetComponentMockCalls(): void {
-  Object.values(componentMocks).forEach(mock => {
+  Object.values(componentMocks).forEach((mock) => {
     mock.mockClear();
   });
 }
@@ -273,20 +311,24 @@ export function renderWithEnhancedFormMocks(
 
   // Apply component overrides if provided
   if (options?.mockConfig?.componentOverrides) {
-    Object.entries(options.mockConfig.componentOverrides).forEach(([name, override]) => {
-      if (name in componentMocks && override) {
-        // Temporarily override the mock
-        const originalMock = componentMocks[name as keyof typeof componentMocks];
-        componentMocks[name as keyof typeof componentMocks] = override as any;
-        
-        // Restore after test (this would need to be handled by test cleanup)
-        if (typeof afterEach !== 'undefined') {
-          afterEach(() => {
-            componentMocks[name as keyof typeof componentMocks] = originalMock;
-          });
+    Object.entries(options.mockConfig.componentOverrides).forEach(
+      ([name, override]) => {
+        if (name in componentMocks && override) {
+          // Temporarily override the mock
+          const originalMock =
+            componentMocks[name as keyof typeof componentMocks];
+          componentMocks[name as keyof typeof componentMocks] = override as any;
+
+          // Restore after test (this would need to be handled by test cleanup)
+          if (typeof afterEach !== 'undefined') {
+            afterEach(() => {
+              componentMocks[name as keyof typeof componentMocks] =
+                originalMock;
+            });
+          }
         }
       }
-    });
+    );
   }
 
   // Try to use existing renderWithProviders if available
@@ -295,18 +337,23 @@ export function renderWithEnhancedFormMocks(
     return renderWithProviders(ui, options);
   } catch (error) {
     // Fallback to basic render if renderWithProviders not available
-    console.warn('[Enhanced Form Component Mocks] Using fallback render method');
-    
+    console.warn(
+      '[Enhanced Form Component Mocks] Using fallback render method'
+    );
+
     if (typeof require !== 'undefined') {
       try {
         const { render } = require('@testing-library/react');
         return render(ui);
       } catch (renderError) {
-        console.error('[Enhanced Form Component Mocks] Render fallback failed:', renderError);
+        console.error(
+          '[Enhanced Form Component Mocks] Render fallback failed:',
+          renderError
+        );
         throw renderError;
       }
     }
-    
+
     throw new Error('No render method available');
   }
 }

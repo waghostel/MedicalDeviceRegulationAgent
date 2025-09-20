@@ -1,11 +1,14 @@
 /**
  * Unit tests for HookExecutionTracer
- * 
+ *
  * Tests hook execution tracing capabilities including
  * dependency tracking, state changes, and performance monitoring.
  */
 
-import { HookExecutionTracer, hookExecutionTracer } from '../HookExecutionTracer';
+import {
+  HookExecutionTracer,
+  hookExecutionTracer,
+} from '../HookExecutionTracer';
 
 // Mock hook functions for testing
 const mockUseState = jest.fn((initialValue) => [initialValue, jest.fn()]);
@@ -16,7 +19,7 @@ const mockUseEffect = jest.fn((effect, deps) => {
 });
 const mockUseToast = jest.fn(() => ({
   toast: jest.fn(),
-  dismiss: jest.fn()
+  dismiss: jest.fn(),
 }));
 
 describe('HookExecutionTracer', () => {
@@ -26,7 +29,7 @@ describe('HookExecutionTracer', () => {
     hookExecutionTracer['completedTraces'] = [];
     hookExecutionTracer['renderCycleCounter'] = 0;
     hookExecutionTracer['isTracingEnabled'] = false;
-    
+
     // Reset mocks
     jest.clearAllMocks();
   });
@@ -74,7 +77,7 @@ describe('HookExecutionTracer', () => {
   describe('traceHook', () => {
     it('should trace hook execution successfully', () => {
       hookExecutionTracer.startTracing('TestComponent');
-      
+
       const result = hookExecutionTracer.traceHook(
         'useState',
         'TestComponent',
@@ -107,7 +110,12 @@ describe('HookExecutionTracer', () => {
       hookExecutionTracer.startTracing('TestComponent');
 
       expect(() => {
-        hookExecutionTracer.traceHook('errorHook', 'TestComponent', errorHook, []);
+        hookExecutionTracer.traceHook(
+          'errorHook',
+          'TestComponent',
+          errorHook,
+          []
+        );
       }).toThrow('Hook execution failed');
 
       // Should still create trace with error information
@@ -119,11 +127,13 @@ describe('HookExecutionTracer', () => {
 
     it('should create execution steps during tracing', () => {
       hookExecutionTracer.startTracing('TestComponent');
-      
-      hookExecutionTracer.traceHook('useEffect', 'TestComponent', mockUseEffect, [
-        () => console.log('effect'),
-        []
-      ]);
+
+      hookExecutionTracer.traceHook(
+        'useEffect',
+        'TestComponent',
+        mockUseEffect,
+        [() => console.log('effect'), []]
+      );
 
       const traces = Array.from(hookExecutionTracer['activeTraces'].values());
       expect(traces[0].steps).toHaveLength(1);
@@ -135,10 +145,17 @@ describe('HookExecutionTracer', () => {
   describe('generateHookExecutionReport', () => {
     it('should generate comprehensive execution report', () => {
       const executionId = hookExecutionTracer.startTracing('TestComponent');
-      
-      hookExecutionTracer.traceHook('useState', 'TestComponent', mockUseState, ['test']);
-      hookExecutionTracer.traceHook('useToast', 'TestComponent', mockUseToast, []);
-      
+
+      hookExecutionTracer.traceHook('useState', 'TestComponent', mockUseState, [
+        'test',
+      ]);
+      hookExecutionTracer.traceHook(
+        'useToast',
+        'TestComponent',
+        mockUseToast,
+        []
+      );
+
       const trace = hookExecutionTracer.stopTracing(executionId);
       const report = hookExecutionTracer.generateHookExecutionReport(trace!);
 
@@ -158,13 +175,18 @@ describe('HookExecutionTracer', () => {
       });
 
       const executionId = hookExecutionTracer.startTracing('TestComponent');
-      
+
       try {
-        hookExecutionTracer.traceHook('errorHook', 'TestComponent', errorHook, []);
+        hookExecutionTracer.traceHook(
+          'errorHook',
+          'TestComponent',
+          errorHook,
+          []
+        );
       } catch (error) {
         // Expected error
       }
-      
+
       const trace = hookExecutionTracer.stopTracing(executionId);
       const report = hookExecutionTracer.generateHookExecutionReport(trace!);
 
@@ -175,9 +197,11 @@ describe('HookExecutionTracer', () => {
 
     it('should format performance metrics correctly', () => {
       const executionId = hookExecutionTracer.startTracing('TestComponent');
-      hookExecutionTracer.traceHook('useState', 'TestComponent', mockUseState, ['test']);
+      hookExecutionTracer.traceHook('useState', 'TestComponent', mockUseState, [
+        'test',
+      ]);
       const trace = hookExecutionTracer.stopTracing(executionId);
-      
+
       const report = hookExecutionTracer.generateHookExecutionReport(trace!);
 
       expect(report).toMatch(/\*\*Total Execution Time\*\*: \d+\.\d+ms/);
@@ -201,7 +225,9 @@ describe('HookExecutionTracer', () => {
     it('should calculate statistics correctly with multiple executions', () => {
       // Perform multiple hook traces
       const id1 = hookExecutionTracer.startTracing('Component1');
-      hookExecutionTracer.traceHook('useState', 'Component1', mockUseState, ['test1']);
+      hookExecutionTracer.traceHook('useState', 'Component1', mockUseState, [
+        'test1',
+      ]);
       hookExecutionTracer.stopTracing(id1);
 
       const id2 = hookExecutionTracer.startTracing('Component2');
@@ -209,7 +235,9 @@ describe('HookExecutionTracer', () => {
       hookExecutionTracer.stopTracing(id2);
 
       const id3 = hookExecutionTracer.startTracing('Component3');
-      hookExecutionTracer.traceHook('useState', 'Component3', mockUseState, ['test2']);
+      hookExecutionTracer.traceHook('useState', 'Component3', mockUseState, [
+        'test2',
+      ]);
       hookExecutionTracer.stopTracing(id3);
 
       const stats = hookExecutionTracer.getHookExecutionStatistics();
@@ -246,7 +274,9 @@ describe('HookExecutionTracer', () => {
   describe('analyzeHookPerformance', () => {
     it('should analyze performance and identify issues', () => {
       const executionId = hookExecutionTracer.startTracing('TestComponent');
-      hookExecutionTracer.traceHook('useState', 'TestComponent', mockUseState, ['test']);
+      hookExecutionTracer.traceHook('useState', 'TestComponent', mockUseState, [
+        'test',
+      ]);
       const trace = hookExecutionTracer.stopTracing(executionId);
 
       const analysis = hookExecutionTracer.analyzeHookPerformance(trace!);
@@ -260,7 +290,7 @@ describe('HookExecutionTracer', () => {
 
     it('should identify slow execution issues', () => {
       const executionId = hookExecutionTracer.startTracing('TestComponent');
-      
+
       // Mock a slow hook
       const slowHook = jest.fn(() => {
         // Simulate slow execution by manipulating the trace
@@ -270,51 +300,62 @@ describe('HookExecutionTracer', () => {
         }
         return 'result';
       });
-      
+
       hookExecutionTracer.traceHook('slowHook', 'TestComponent', slowHook, []);
       const trace = hookExecutionTracer.stopTracing(executionId);
 
       const analysis = hookExecutionTracer.analyzeHookPerformance(trace!);
 
-      expect(analysis.issues.some(issue => issue.type === 'SLOW_EXECUTION')).toBe(true);
+      expect(
+        analysis.issues.some((issue) => issue.type === 'SLOW_EXECUTION')
+      ).toBe(true);
     });
 
     it('should provide appropriate suggestions', () => {
       const executionId = hookExecutionTracer.startTracing('TestComponent');
-      hookExecutionTracer.traceHook('useState', 'TestComponent', mockUseState, ['test']);
+      hookExecutionTracer.traceHook('useState', 'TestComponent', mockUseState, [
+        'test',
+      ]);
       const trace = hookExecutionTracer.stopTracing(executionId);
 
       const analysis = hookExecutionTracer.analyzeHookPerformance(trace!);
 
-      expect(analysis.suggestions).toContain('Hook performance is within acceptable limits');
+      expect(analysis.suggestions).toContain(
+        'Hook performance is within acceptable limits'
+      );
     });
   });
 
   describe('error categorization', () => {
     it('should categorize invalid hook call errors', () => {
-      const invalidHookError = new Error('Invalid hook call. Hooks can only be called inside the body of a function component.');
-      
-      const category = hookExecutionTracer['categorizeHookError'](invalidHookError);
+      const invalidHookError = new Error(
+        'Invalid hook call. Hooks can only be called inside the body of a function component.'
+      );
+
+      const category =
+        hookExecutionTracer['categorizeHookError'](invalidHookError);
       expect(category).toBe('INVALID_HOOK_CALL');
     });
 
     it('should categorize dependency errors', () => {
-      const depError = new Error('useEffect dependency array is missing dependencies');
-      
+      const depError = new Error(
+        'useEffect dependency array is missing dependencies'
+      );
+
       const category = hookExecutionTracer['categorizeHookError'](depError);
       expect(category).toBe('DEPENDENCY_ERROR');
     });
 
     it('should categorize state update errors', () => {
       const stateError = new Error('Cannot update state during render');
-      
+
       const category = hookExecutionTracer['categorizeHookError'](stateError);
       expect(category).toBe('STATE_UPDATE_ERROR');
     });
 
     it('should categorize infinite loop errors', () => {
       const loopError = new Error('Maximum update depth exceeded');
-      
+
       const category = hookExecutionTracer['categorizeHookError'](loopError);
       expect(category).toBe('INFINITE_LOOP');
     });
@@ -323,14 +364,15 @@ describe('HookExecutionTracer', () => {
   describe('error recovery assessment', () => {
     it('should identify non-recoverable errors', () => {
       const invalidHookError = new Error('Invalid hook call');
-      
-      const isRecoverable = hookExecutionTracer['isRecoverableError'](invalidHookError);
+
+      const isRecoverable =
+        hookExecutionTracer['isRecoverableError'](invalidHookError);
       expect(isRecoverable).toBe(false);
     });
 
     it('should identify recoverable errors', () => {
       const depError = new Error('useEffect dependency missing');
-      
+
       const isRecoverable = hookExecutionTracer['isRecoverableError'](depError);
       expect(isRecoverable).toBe(true);
     });
@@ -341,16 +383,19 @@ describe('HookExecutionTracer', () => {
       const testCases = [
         {
           error: new Error('Invalid hook call'),
-          expectedSuggestion: 'Ensure hooks are only called at the top level of React components or custom hooks'
+          expectedSuggestion:
+            'Ensure hooks are only called at the top level of React components or custom hooks',
         },
         {
           error: new Error('useEffect dependency missing'),
-          expectedSuggestion: 'Check useEffect dependency arrays and ensure all dependencies are included'
+          expectedSuggestion:
+            'Check useEffect dependency arrays and ensure all dependencies are included',
         },
         {
           error: new Error('setState called during render'),
-          expectedSuggestion: 'Verify state updates are properly handled and not causing infinite loops'
-        }
+          expectedSuggestion:
+            'Verify state updates are properly handled and not causing infinite loops',
+        },
       ];
 
       testCases.forEach(({ error, expectedSuggestion }) => {
@@ -363,7 +408,7 @@ describe('HookExecutionTracer', () => {
   describe('performance metrics calculation', () => {
     it('should calculate performance metrics correctly', () => {
       const executionId = hookExecutionTracer.startTracing('TestComponent');
-      
+
       // Add some mock steps
       const trace = hookExecutionTracer['activeTraces'].get(executionId);
       if (trace) {
@@ -375,7 +420,7 @@ describe('HookExecutionTracer', () => {
             input: {},
             output: {},
             duration: 10,
-            success: true
+            success: true,
           },
           {
             stepId: '2',
@@ -384,8 +429,8 @@ describe('HookExecutionTracer', () => {
             input: {},
             output: {},
             duration: 20,
-            success: true
-          }
+            success: true,
+          },
         ];
         trace.stateChanges = [
           {
@@ -394,13 +439,13 @@ describe('HookExecutionTracer', () => {
             newValue: 1,
             changeType: 'UPDATE',
             trigger: 'user action',
-            timestamp: Date.now()
-          }
+            timestamp: Date.now(),
+          },
         ];
       }
-      
+
       const completedTrace = hookExecutionTracer.stopTracing(executionId);
-      
+
       expect(completedTrace!.performance.averageStepTime).toBe(15); // (10 + 20) / 2
       expect(completedTrace!.performance.slowestStep).toBe('Update');
       expect(completedTrace!.performance.stateUpdateCount).toBe(1);
@@ -412,15 +457,22 @@ describe('HookExecutionTracer', () => {
       // Add traces up to the limit (100)
       for (let i = 0; i < 105; i++) {
         const id = hookExecutionTracer.startTracing(`Component${i}`);
-        hookExecutionTracer.traceHook('useState', `Component${i}`, mockUseState, [`test${i}`]);
+        hookExecutionTracer.traceHook(
+          'useState',
+          `Component${i}`,
+          mockUseState,
+          [`test${i}`]
+        );
         hookExecutionTracer.stopTracing(id);
       }
 
       const completedTraces = hookExecutionTracer['completedTraces'];
       expect(completedTraces).toHaveLength(100);
-      
+
       // Should contain the most recent traces
-      expect(completedTraces[completedTraces.length - 1].componentName).toBe('Component104');
+      expect(completedTraces[completedTraces.length - 1].componentName).toBe(
+        'Component104'
+      );
       expect(completedTraces[0].componentName).toBe('Component5'); // First 5 should be removed
     });
   });
@@ -428,7 +480,7 @@ describe('HookExecutionTracer', () => {
   describe('call stack capture', () => {
     it('should capture call stack information', () => {
       const callStack = hookExecutionTracer['captureCallStack']();
-      
+
       expect(callStack).toBeInstanceOf(Array);
       expect(callStack.length).toBeGreaterThan(0);
       expect(callStack.length).toBeLessThanOrEqual(8); // Limited to 8 frames
@@ -441,9 +493,9 @@ describe('HookExecutionTracer', () => {
         performance: {
           totalExecutionTime: 25, // Good performance
           renderCount: 3, // Reasonable
-          memoryUsage: 10 * 1024 * 1024 // 10MB - reasonable
+          memoryUsage: 10 * 1024 * 1024, // 10MB - reasonable
         },
-        errors: []
+        errors: [],
       } as any;
 
       const score = hookExecutionTracer['calculatePerformanceScore'](mockTrace);
@@ -455,9 +507,9 @@ describe('HookExecutionTracer', () => {
         performance: {
           totalExecutionTime: 75, // Slow but not critical
           renderCount: 8, // High but not excessive
-          memoryUsage: 30 * 1024 * 1024 // 30MB - high but not critical
+          memoryUsage: 30 * 1024 * 1024, // 30MB - high but not critical
         },
-        errors: [{ type: 'PERFORMANCE_WARNING' }]
+        errors: [{ type: 'PERFORMANCE_WARNING' }],
       } as any;
 
       const score = hookExecutionTracer['calculatePerformanceScore'](mockTrace);

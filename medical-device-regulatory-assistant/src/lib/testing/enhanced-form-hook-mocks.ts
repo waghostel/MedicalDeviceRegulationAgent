@@ -5,16 +5,16 @@
  */
 
 import React from 'react';
-import { 
-  UseFormReturn, 
-  FieldValues, 
+import {
+  UseFormReturn,
+  FieldValues,
   UseFormProps,
   FieldError,
   FieldState,
   FormState,
   UseFormRegister,
   UseFormHandleSubmit,
-  Control
+  Control,
 } from 'react-hook-form';
 import { z } from 'zod';
 
@@ -42,10 +42,10 @@ let mockAutoSaveState = {
 
 const mockSaveNow = jest.fn(async () => {
   mockAutoSaveState.isSaving = true;
-  
+
   try {
     // Simulate async save operation
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await new Promise((resolve) => setTimeout(resolve, 100));
     mockAutoSaveState.saveCount++;
     mockAutoSaveState.lastSaved = new Date();
   } catch (error) {
@@ -56,36 +56,38 @@ const mockSaveNow = jest.fn(async () => {
   }
 });
 
-export const mockUseAutoSave = jest.fn((content: string, options: UseAutoSaveOptions): UseAutoSaveReturn => {
-  const { delay = 2000, onSave, enabled = true } = options;
+export const mockUseAutoSave = jest.fn(
+  (content: string, options: UseAutoSaveOptions): UseAutoSaveReturn => {
+    const { delay = 2000, onSave, enabled = true } = options;
 
-  // Simulate auto-save behavior
-  React.useEffect(() => {
-    if (!enabled || !content) return;
+    // Simulate auto-save behavior
+    React.useEffect(() => {
+      if (!enabled || !content) return;
 
-    const timeoutId = setTimeout(async () => {
-      if (content && content !== '""' && content !== 'null') {
-        try {
-          mockAutoSaveState.isSaving = true;
-          await onSave(content);
-          mockAutoSaveState.saveCount++;
-          mockAutoSaveState.lastSaved = new Date();
-        } catch (error) {
-          mockAutoSaveState.errors.push(error as Error);
-        } finally {
-          mockAutoSaveState.isSaving = false;
+      const timeoutId = setTimeout(async () => {
+        if (content && content !== '""' && content !== 'null') {
+          try {
+            mockAutoSaveState.isSaving = true;
+            await onSave(content);
+            mockAutoSaveState.saveCount++;
+            mockAutoSaveState.lastSaved = new Date();
+          } catch (error) {
+            mockAutoSaveState.errors.push(error as Error);
+          } finally {
+            mockAutoSaveState.isSaving = false;
+          }
         }
-      }
-    }, delay);
+      }, delay);
 
-    return () => clearTimeout(timeoutId);
-  }, [content, delay, onSave, enabled]);
+      return () => clearTimeout(timeoutId);
+    }, [content, delay, onSave, enabled]);
 
-  return {
-    saveNow: mockSaveNow,
-    isSaving: mockAutoSaveState.isSaving,
-  };
-});
+    return {
+      saveNow: mockSaveNow,
+      isSaving: mockAutoSaveState.isSaving,
+    };
+  }
+);
 
 // ============================================================================
 // useRealTimeValidation Mock
@@ -99,7 +101,11 @@ export interface ValidationState {
 }
 
 export interface UseRealTimeValidationReturn {
-  validateField: (fieldName: string, value: any, immediate?: boolean) => Promise<void>;
+  validateField: (
+    fieldName: string,
+    value: any,
+    immediate?: boolean
+  ) => Promise<void>;
   getFieldValidation: (fieldName: string) => ValidationState;
   validateAllFields: (formData: Record<string, unknown>) => Promise<void>;
   clearValidation: (fieldName?: string) => void;
@@ -108,54 +114,60 @@ export interface UseRealTimeValidationReturn {
 
 let mockValidationState: Record<string, ValidationState> = {};
 
-const mockValidateField = jest.fn(async (fieldName: string, value: any, immediate = false) => {
-  // Mark as validating
-  mockValidationState[fieldName] = {
-    ...mockValidationState[fieldName],
-    isValidating: !immediate,
-    hasBeenTouched: true,
-  };
+const mockValidateField = jest.fn(
+  async (fieldName: string, value: any, immediate = false) => {
+    // Mark as validating
+    mockValidationState[fieldName] = {
+      ...mockValidationState[fieldName],
+      isValidating: !immediate,
+      hasBeenTouched: true,
+    };
 
-  // Simulate validation delay
-  if (!immediate) {
-    await new Promise(resolve => setTimeout(resolve, 100));
+    // Simulate validation delay
+    if (!immediate) {
+      await new Promise((resolve) => setTimeout(resolve, 100));
+    }
+
+    // Simple validation logic for testing
+    let isValid = true;
+    let message: string | undefined;
+
+    if (!value || (typeof value === 'string' && value.trim() === '')) {
+      isValid = false;
+      message = `${fieldName} is required`;
+    } else if (typeof value === 'string' && value.length < 3) {
+      isValid = false;
+      message = `${fieldName} must be at least 3 characters`;
+    }
+
+    mockValidationState[fieldName] = {
+      isValid,
+      isValidating: false,
+      hasBeenTouched: true,
+      message,
+    };
   }
-
-  // Simple validation logic for testing
-  let isValid = true;
-  let message: string | undefined;
-
-  if (!value || (typeof value === 'string' && value.trim() === '')) {
-    isValid = false;
-    message = `${fieldName} is required`;
-  } else if (typeof value === 'string' && value.length < 3) {
-    isValid = false;
-    message = `${fieldName} must be at least 3 characters`;
-  }
-
-  mockValidationState[fieldName] = {
-    isValid,
-    isValidating: false,
-    hasBeenTouched: true,
-    message,
-  };
-});
+);
 
 const mockGetFieldValidation = jest.fn((fieldName: string): ValidationState => {
-  return mockValidationState[fieldName] || {
-    isValid: false,
-    isValidating: false,
-    hasBeenTouched: false,
-    message: undefined,
-  };
+  return (
+    mockValidationState[fieldName] || {
+      isValid: false,
+      isValidating: false,
+      hasBeenTouched: false,
+      message: undefined,
+    }
+  );
 });
 
-const mockValidateAllFields = jest.fn(async (formData: Record<string, unknown>) => {
-  const promises = Object.entries(formData).map(([fieldName, value]) =>
-    mockValidateField(fieldName, value, true)
-  );
-  await Promise.all(promises);
-});
+const mockValidateAllFields = jest.fn(
+  async (formData: Record<string, unknown>) => {
+    const promises = Object.entries(formData).map(([fieldName, value]) =>
+      mockValidateField(fieldName, value, true)
+    );
+    await Promise.all(promises);
+  }
+);
 
 const mockClearValidation = jest.fn((fieldName?: string) => {
   if (fieldName) {
@@ -165,18 +177,20 @@ const mockClearValidation = jest.fn((fieldName?: string) => {
   }
 });
 
-export const mockUseRealTimeValidation = jest.fn((
-  schema: z.ZodSchema,
-  debounceMs: number = 300
-): UseRealTimeValidationReturn => {
-  return {
-    validateField: mockValidateField,
-    getFieldValidation: mockGetFieldValidation,
-    validateAllFields: mockValidateAllFields,
-    clearValidation: mockClearValidation,
-    validationState: mockValidationState,
-  };
-});
+export const mockUseRealTimeValidation = jest.fn(
+  (
+    schema: z.ZodSchema,
+    debounceMs: number = 300
+  ): UseRealTimeValidationReturn => {
+    return {
+      validateField: mockValidateField,
+      getFieldValidation: mockGetFieldValidation,
+      validateAllFields: mockValidateAllFields,
+      clearValidation: mockClearValidation,
+      validationState: mockValidationState,
+    };
+  }
+);
 
 // ============================================================================
 // useFormToast Mock
@@ -189,12 +203,19 @@ export interface FormToastOptions {
 }
 
 export interface UseFormToastReturn {
-  showValidationError: (field: string, message: string, options?: FormToastOptions) => void;
+  showValidationError: (
+    field: string,
+    message: string,
+    options?: FormToastOptions
+  ) => void;
   showSubmissionSuccess: (message: string, options?: FormToastOptions) => void;
   showSubmissionError: (error: Error, options?: FormToastOptions) => void;
-  showSaveProgress: (progress: number, options?: FormToastOptions) => { 
-    updateProgress: (progress: number) => void; 
-    complete: () => void 
+  showSaveProgress: (
+    progress: number,
+    options?: FormToastOptions
+  ) => {
+    updateProgress: (progress: number) => void;
+    complete: () => void;
   };
   showAutoSaveSuccess: (options?: FormToastOptions) => void;
   showNetworkError: (onRetry: () => void, options?: FormToastOptions) => void;
@@ -208,67 +229,77 @@ let mockFormToastCalls: Array<{
   timestamp: number;
 }> = [];
 
-const mockShowValidationError = jest.fn((field: string, message: string, options: FormToastOptions = {}) => {
-  mockFormToastCalls.push({
-    method: 'showValidationError',
-    args: [field, message, options],
-    timestamp: Date.now(),
-  });
+const mockShowValidationError = jest.fn(
+  (field: string, message: string, options: FormToastOptions = {}) => {
+    mockFormToastCalls.push({
+      method: 'showValidationError',
+      args: [field, message, options],
+      timestamp: Date.now(),
+    });
 
-  // Simulate focus behavior
-  if (options.autoFocus) {
-    setTimeout(() => {
-      const fieldElement = document.querySelector(`[name="${field}"]`) as HTMLElement;
-      if (fieldElement && fieldElement.focus) {
-        fieldElement.focus();
-      }
-    }, 100);
+    // Simulate focus behavior
+    if (options.autoFocus) {
+      setTimeout(() => {
+        const fieldElement = document.querySelector(
+          `[name="${field}"]`
+        ) as HTMLElement;
+        if (fieldElement && fieldElement.focus) {
+          fieldElement.focus();
+        }
+      }, 100);
+    }
   }
-});
+);
 
-const mockShowSubmissionSuccess = jest.fn((message: string, options: FormToastOptions = {}) => {
-  mockFormToastCalls.push({
-    method: 'showSubmissionSuccess',
-    args: [message, options],
-    timestamp: Date.now(),
-  });
-});
+const mockShowSubmissionSuccess = jest.fn(
+  (message: string, options: FormToastOptions = {}) => {
+    mockFormToastCalls.push({
+      method: 'showSubmissionSuccess',
+      args: [message, options],
+      timestamp: Date.now(),
+    });
+  }
+);
 
-const mockShowSubmissionError = jest.fn((error: Error, options: FormToastOptions = {}) => {
-  mockFormToastCalls.push({
-    method: 'showSubmissionError',
-    args: [error, options],
-    timestamp: Date.now(),
-  });
-});
+const mockShowSubmissionError = jest.fn(
+  (error: Error, options: FormToastOptions = {}) => {
+    mockFormToastCalls.push({
+      method: 'showSubmissionError',
+      args: [error, options],
+      timestamp: Date.now(),
+    });
+  }
+);
 
-const mockShowSaveProgress = jest.fn((progress: number, options: FormToastOptions = {}) => {
-  mockFormToastCalls.push({
-    method: 'showSaveProgress',
-    args: [progress, options],
-    timestamp: Date.now(),
-  });
+const mockShowSaveProgress = jest.fn(
+  (progress: number, options: FormToastOptions = {}) => {
+    mockFormToastCalls.push({
+      method: 'showSaveProgress',
+      args: [progress, options],
+      timestamp: Date.now(),
+    });
 
-  let currentProgress = progress;
+    let currentProgress = progress;
 
-  return {
-    updateProgress: jest.fn((newProgress: number) => {
-      currentProgress = newProgress;
-      mockFormToastCalls.push({
-        method: 'updateProgress',
-        args: [newProgress],
-        timestamp: Date.now(),
-      });
-    }),
-    complete: jest.fn(() => {
-      mockFormToastCalls.push({
-        method: 'complete',
-        args: [],
-        timestamp: Date.now(),
-      });
-    }),
-  };
-});
+    return {
+      updateProgress: jest.fn((newProgress: number) => {
+        currentProgress = newProgress;
+        mockFormToastCalls.push({
+          method: 'updateProgress',
+          args: [newProgress],
+          timestamp: Date.now(),
+        });
+      }),
+      complete: jest.fn(() => {
+        mockFormToastCalls.push({
+          method: 'complete',
+          args: [],
+          timestamp: Date.now(),
+        });
+      }),
+    };
+  }
+);
 
 const mockShowAutoSaveSuccess = jest.fn((options: FormToastOptions = {}) => {
   mockFormToastCalls.push({
@@ -278,21 +309,25 @@ const mockShowAutoSaveSuccess = jest.fn((options: FormToastOptions = {}) => {
   });
 });
 
-const mockShowNetworkError = jest.fn((onRetry: () => void, options: FormToastOptions = {}) => {
-  mockFormToastCalls.push({
-    method: 'showNetworkError',
-    args: [onRetry, options],
-    timestamp: Date.now(),
-  });
-});
+const mockShowNetworkError = jest.fn(
+  (onRetry: () => void, options: FormToastOptions = {}) => {
+    mockFormToastCalls.push({
+      method: 'showNetworkError',
+      args: [onRetry, options],
+      timestamp: Date.now(),
+    });
+  }
+);
 
-const mockShowAuthError = jest.fn((onSignIn: () => void, options: FormToastOptions = {}) => {
-  mockFormToastCalls.push({
-    method: 'showAuthError',
-    args: [onSignIn, options],
-    timestamp: Date.now(),
-  });
-});
+const mockShowAuthError = jest.fn(
+  (onSignIn: () => void, options: FormToastOptions = {}) => {
+    mockFormToastCalls.push({
+      method: 'showAuthError',
+      args: [onSignIn, options],
+      timestamp: Date.now(),
+    });
+  }
+);
 
 const mockClearFormToasts = jest.fn(() => {
   mockFormToastCalls.push({
@@ -319,7 +354,8 @@ export const mockUseFormToast = jest.fn((): UseFormToastReturn => {
 // useEnhancedForm Mock
 // ============================================================================
 
-export interface EnhancedFormOptions<T extends FieldValues> extends UseFormProps<T> {
+export interface EnhancedFormOptions<T extends FieldValues>
+  extends UseFormProps<T> {
   schema: z.ZodSchema<T>;
   autoSave?: {
     enabled: boolean;
@@ -338,23 +374,28 @@ export interface EnhancedFormOptions<T extends FieldValues> extends UseFormProps
   formName?: string;
 }
 
-export interface EnhancedFormReturn<T extends FieldValues> extends UseFormReturn<T> {
+export interface EnhancedFormReturn<T extends FieldValues>
+  extends UseFormReturn<T> {
   // Real-time validation
-  validateField: (fieldName: keyof T, value: any, immediate?: boolean) => Promise<void>;
+  validateField: (
+    fieldName: keyof T,
+    value: any,
+    immediate?: boolean
+  ) => Promise<void>;
   getFieldValidation: (fieldName: keyof T) => ValidationState;
-  
+
   // Auto-save functionality
   saveNow: () => Promise<void>;
   isSaving: boolean;
   lastSaved?: Date;
-  
+
   // Enhanced submission
   submitWithFeedback: (onSubmit: (data: T) => Promise<void>) => Promise<void>;
-  
+
   // Form state helpers
   isDirtyField: (fieldName: keyof T) => boolean;
   getTouchedFields: () => (keyof T)[];
-  
+
   // Accessibility helpers
   focusFirstError: () => void;
   announceFormState: (message: string) => void;
@@ -382,11 +423,11 @@ const mockRegister = jest.fn((name: string, options?: any) => ({
   ref: jest.fn(),
 }));
 
-const mockHandleSubmit = jest.fn((onSubmit: (data: any) => void) => 
+const mockHandleSubmit = jest.fn((onSubmit: (data: any) => void) =>
   jest.fn(async (e?: React.FormEvent) => {
     e?.preventDefault();
     mockEnhancedFormState.isSubmitting = true;
-    
+
     try {
       await onSubmit(mockEnhancedFormState.values);
       mockEnhancedFormState.isSubmitSuccessful = true;
@@ -414,16 +455,18 @@ const mockSetValue = jest.fn((name: string, value: any, options?: any) => {
   mockEnhancedFormState.isDirty = true;
 });
 
-const mockGetFieldState = jest.fn((name: string): FieldState => ({
-  invalid: !!mockEnhancedFormState.errors[name],
-  isTouched: !!mockEnhancedFormState.touchedFields[name],
-  isDirty: !!mockEnhancedFormState.dirtyFields[name],
-  error: mockEnhancedFormState.errors[name],
-}));
+const mockGetFieldState = jest.fn(
+  (name: string): FieldState => ({
+    invalid: !!mockEnhancedFormState.errors[name],
+    isTouched: !!mockEnhancedFormState.touchedFields[name],
+    isDirty: !!mockEnhancedFormState.dirtyFields[name],
+    error: mockEnhancedFormState.errors[name],
+  })
+);
 
 const mockTrigger = jest.fn(async (name?: string | string[]) => {
   // Simulate validation
-  await new Promise(resolve => setTimeout(resolve, 50));
+  await new Promise((resolve) => setTimeout(resolve, 50));
   return Object.keys(mockEnhancedFormState.errors).length === 0;
 });
 
@@ -448,7 +491,7 @@ const mockWatch = jest.fn((name?: string | string[]) => {
     return mockEnhancedFormState.values[name];
   }
   if (Array.isArray(name)) {
-    return name.map(n => mockEnhancedFormState.values[n]);
+    return name.map((n) => mockEnhancedFormState.values[n]);
   }
   return mockEnhancedFormState.values;
 });
@@ -487,43 +530,46 @@ const mockControl: Control = {
 };
 
 // Enhanced form specific functions
-const mockEnhancedValidateField = jest.fn(async (fieldName: string, value: any, immediate = false) => {
-  // Mock validation logic - return success by default
-  return { isValid: true, errors: [] };
-});
+const mockEnhancedValidateField = jest.fn(
+  async (fieldName: string, value: any, immediate = false) => {
+    // Mock validation logic - return success by default
+    return { isValid: true, errors: [] };
+  }
+);
 
 const mockEnhancedGetFieldValidation = jest.fn((fieldName: string) => {
   // Mock field validation - return no errors by default
   return { errors: [], isValid: true };
 });
 
-const mockSubmitWithFeedback = jest.fn(async (onSubmit: (data: any) => Promise<void>) => {
-  const formToast = mockUseFormToast();
-  
-  try {
-    // Validate form
-    const isValid = await mockTrigger();
-    
-    if (!isValid) {
-      const errors = Object.keys(mockEnhancedFormState.errors);
-      if (errors.length > 0) {
-        formToast.showValidationError(
-          errors[0],
-          `Please fix ${errors.length} validation error${errors.length > 1 ? 's' : ''}`
-        );
-      }
-      return;
-    }
+const mockSubmitWithFeedback = jest.fn(
+  async (onSubmit: (data: any) => Promise<void>) => {
+    const formToast = mockUseFormToast();
 
-    // Submit form
-    await onSubmit(mockEnhancedFormState.values);
-    formToast.showSubmissionSuccess('Form submitted successfully');
-    
-  } catch (error) {
-    formToast.showSubmissionError(error as Error);
-    throw error;
+    try {
+      // Validate form
+      const isValid = await mockTrigger();
+
+      if (!isValid) {
+        const errors = Object.keys(mockEnhancedFormState.errors);
+        if (errors.length > 0) {
+          formToast.showValidationError(
+            errors[0],
+            `Please fix ${errors.length} validation error${errors.length > 1 ? 's' : ''}`
+          );
+        }
+        return;
+      }
+
+      // Submit form
+      await onSubmit(mockEnhancedFormState.values);
+      formToast.showSubmissionSuccess('Form submitted successfully');
+    } catch (error) {
+      formToast.showSubmissionError(error as Error);
+      throw error;
+    }
   }
-});
+);
 
 const mockIsDirtyField = jest.fn((fieldName: string) => {
   return !!mockEnhancedFormState.dirtyFields[fieldName];
@@ -536,7 +582,9 @@ const mockGetTouchedFields = jest.fn(() => {
 const mockFocusFirstError = jest.fn(() => {
   const firstErrorField = Object.keys(mockEnhancedFormState.errors)[0];
   if (firstErrorField) {
-    const element = document.querySelector(`[name="${firstErrorField}"]`) as HTMLElement;
+    const element = document.querySelector(
+      `[name="${firstErrorField}"]`
+    ) as HTMLElement;
     if (element && element.focus) {
       element.focus();
       element.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -551,9 +599,9 @@ const mockAnnounceFormState = jest.fn((message: string) => {
   announcement.setAttribute('aria-atomic', 'true');
   announcement.className = 'sr-only';
   announcement.textContent = message;
-  
+
   document.body.appendChild(announcement);
-  
+
   // Remove after announcement
   setTimeout(() => {
     if (document.body.contains(announcement)) {
@@ -562,76 +610,86 @@ const mockAnnounceFormState = jest.fn((message: string) => {
   }, 1000);
 });
 
-export const mockUseEnhancedForm = jest.fn(<T extends FieldValues>(
-  options: EnhancedFormOptions<T>
-): EnhancedFormReturn<T> => {
-  const {
-    schema,
-    autoSave,
-    realTimeValidation = { enabled: true, debounceMs: 300 },
-    accessibility = { announceErrors: true, focusFirstError: true },
-    formName,
-    defaultValues,
-    ...formOptions
-  } = options;
+export const mockUseEnhancedForm = jest.fn(
+  <T extends FieldValues>(
+    options: EnhancedFormOptions<T>
+  ): EnhancedFormReturn<T> => {
+    const {
+      schema,
+      autoSave,
+      realTimeValidation = { enabled: true, debounceMs: 300 },
+      accessibility = { announceErrors: true, focusFirstError: true },
+      formName,
+      defaultValues,
+      ...formOptions
+    } = options;
 
-  // Initialize form state with default values
-  if (defaultValues) {
-    mockEnhancedFormState.values = { ...defaultValues };
-    mockEnhancedFormState.defaultValues = { ...defaultValues };
-  }
-
-  // Setup auto-save if enabled
-  const autoSaveHook = autoSave?.enabled ? mockUseAutoSave(
-    JSON.stringify(mockEnhancedFormState.values),
-    {
-      delay: autoSave.interval || 2000,
-      enabled: autoSave.enabled,
-      onSave: async (content: string) => {
-        if (autoSave.onSave) {
-          const data = JSON.parse(content) as T;
-          await autoSave.onSave(data);
-          mockAutoSaveState.lastSaved = new Date();
-          const formToast = mockUseFormToast();
-          formToast.showAutoSaveSuccess({ formName });
-        }
-      },
+    // Initialize form state with default values
+    if (defaultValues) {
+      mockEnhancedFormState.values = { ...defaultValues };
+      mockEnhancedFormState.defaultValues = { ...defaultValues };
     }
-  ) : { saveNow: jest.fn(), isSaving: false };
 
-  // Setup real-time validation
-  const validationHook = mockUseRealTimeValidation(schema, realTimeValidation.debounceMs);
+    // Setup auto-save if enabled
+    const autoSaveHook = autoSave?.enabled
+      ? mockUseAutoSave(JSON.stringify(mockEnhancedFormState.values), {
+          delay: autoSave.interval || 2000,
+          enabled: autoSave.enabled,
+          onSave: async (content: string) => {
+            if (autoSave.onSave) {
+              const data = JSON.parse(content) as T;
+              await autoSave.onSave(data);
+              mockAutoSaveState.lastSaved = new Date();
+              const formToast = mockUseFormToast();
+              formToast.showAutoSaveSuccess({ formName });
+            }
+          },
+        })
+      : { saveNow: jest.fn(), isSaving: false };
 
-  return {
-    // Standard react-hook-form methods
-    register: mockRegister as UseFormRegister<T>,
-    handleSubmit: mockHandleSubmit as UseFormHandleSubmit<T>,
-    watch: mockWatch,
-    getValues: mockGetValues,
-    setValue: mockSetValue,
-    getFieldState: mockGetFieldState,
-    trigger: mockTrigger,
-    reset: mockReset,
-    resetField: jest.fn(),
-    setError: jest.fn(),
-    clearErrors: jest.fn(),
-    unregister: jest.fn(),
-    control: mockControl as Control<T>,
-    formState: mockEnhancedFormState as FormState<T>,
+    // Setup real-time validation
+    const validationHook = mockUseRealTimeValidation(
+      schema,
+      realTimeValidation.debounceMs
+    );
 
-    // Enhanced form methods
-    validateField: mockEnhancedValidateField as (fieldName: keyof T, value: any, immediate?: boolean) => Promise<void>,
-    getFieldValidation: mockEnhancedGetFieldValidation as (fieldName: keyof T) => ValidationState,
-    saveNow: autoSaveHook.saveNow,
-    isSaving: autoSaveHook.isSaving,
-    lastSaved: mockAutoSaveState.lastSaved || undefined,
-    submitWithFeedback: mockSubmitWithFeedback,
-    isDirtyField: mockIsDirtyField as (fieldName: keyof T) => boolean,
-    getTouchedFields: mockGetTouchedFields as () => (keyof T)[],
-    focusFirstError: mockFocusFirstError,
-    announceFormState: mockAnnounceFormState,
-  };
-});
+    return {
+      // Standard react-hook-form methods
+      register: mockRegister as UseFormRegister<T>,
+      handleSubmit: mockHandleSubmit as UseFormHandleSubmit<T>,
+      watch: mockWatch,
+      getValues: mockGetValues,
+      setValue: mockSetValue,
+      getFieldState: mockGetFieldState,
+      trigger: mockTrigger,
+      reset: mockReset,
+      resetField: jest.fn(),
+      setError: jest.fn(),
+      clearErrors: jest.fn(),
+      unregister: jest.fn(),
+      control: mockControl as Control<T>,
+      formState: mockEnhancedFormState as FormState<T>,
+
+      // Enhanced form methods
+      validateField: mockEnhancedValidateField as (
+        fieldName: keyof T,
+        value: any,
+        immediate?: boolean
+      ) => Promise<void>,
+      getFieldValidation: mockEnhancedGetFieldValidation as (
+        fieldName: keyof T
+      ) => ValidationState,
+      saveNow: autoSaveHook.saveNow,
+      isSaving: autoSaveHook.isSaving,
+      lastSaved: mockAutoSaveState.lastSaved || undefined,
+      submitWithFeedback: mockSubmitWithFeedback,
+      isDirtyField: mockIsDirtyField as (fieldName: keyof T) => boolean,
+      getTouchedFields: mockGetTouchedFields as () => (keyof T)[],
+      focusFirstError: mockFocusFirstError,
+      announceFormState: mockAnnounceFormState,
+    };
+  }
+);
 
 // ============================================================================
 // Test Utilities
@@ -716,7 +774,7 @@ export const enhancedFormMockUtils = {
 
     // Clear jest mocks
     jest.clearAllMocks();
-    
+
     // Reset specific mocks
     mockUseAutoSave.mockClear();
     mockUseRealTimeValidation.mockClear();

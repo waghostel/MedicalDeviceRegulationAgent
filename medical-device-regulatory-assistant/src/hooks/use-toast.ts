@@ -9,11 +9,17 @@ export interface Toast {
   id: string;
   title?: string;
   description?: string;
-  variant?: 'default' | 'destructive' | 'success' | 'warning' | 'info' | 'progress';
+  variant?:
+    | 'default'
+    | 'destructive'
+    | 'success'
+    | 'warning'
+    | 'info'
+    | 'progress';
   duration?: number;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
-  
+
   // Enhanced features
   onRetry?: () => void;
   retryLabel?: string;
@@ -55,49 +61,56 @@ const QUEUE_PROCESS_INTERVAL = 500; // Process queue every 500ms
 
 // Contextual error messages for medical device regulatory context
 const CONTEXTUAL_MESSAGES: ToastContextualMessages = {
-  'fda_api_error': {
+  fda_api_error: {
     title: 'FDA API Connection Failed',
-    description: 'Unable to connect to FDA database. This may affect predicate searches and device classifications.',
+    description:
+      'Unable to connect to FDA database. This may affect predicate searches and device classifications.',
     actionLabel: 'Check FDA Status',
     actionUrl: 'https://open.fda.gov/status/',
-    retryLabel: 'Retry Connection'
+    retryLabel: 'Retry Connection',
   },
-  'predicate_search_failed': {
+  predicate_search_failed: {
     title: 'Predicate Search Failed',
-    description: 'Could not complete predicate device search. Please check your search criteria and try again.',
-    retryLabel: 'Retry Search'
+    description:
+      'Could not complete predicate device search. Please check your search criteria and try again.',
+    retryLabel: 'Retry Search',
   },
-  'classification_error': {
+  classification_error: {
     title: 'Device Classification Error',
-    description: 'Unable to classify your device. Please verify device description and intended use.',
+    description:
+      'Unable to classify your device. Please verify device description and intended use.',
     actionLabel: 'Classification Guide',
-    actionUrl: 'https://www.fda.gov/medical-devices/classify-your-medical-device',
-    retryLabel: 'Try Again'
+    actionUrl:
+      'https://www.fda.gov/medical-devices/classify-your-medical-device',
+    retryLabel: 'Try Again',
   },
-  'project_save_failed': {
+  project_save_failed: {
     title: 'Project Save Failed',
-    description: 'Your project changes could not be saved. Your work may be lost if you navigate away.',
-    retryLabel: 'Save Again'
+    description:
+      'Your project changes could not be saved. Your work may be lost if you navigate away.',
+    retryLabel: 'Save Again',
   },
-  'export_failed': {
+  export_failed: {
     title: 'Export Failed',
-    description: 'Could not generate the requested export. Please try a different format or contact support.',
-    retryLabel: 'Retry Export'
+    description:
+      'Could not generate the requested export. Please try a different format or contact support.',
+    retryLabel: 'Retry Export',
   },
-  'validation_error': {
+  validation_error: {
     title: 'Validation Error',
-    description: 'Please check the highlighted fields and ensure all required information is provided.',
+    description:
+      'Please check the highlighted fields and ensure all required information is provided.',
   },
-  'auth_expired': {
+  auth_expired: {
     title: 'Session Expired',
     description: 'Your session has expired. Please sign in again to continue.',
-    actionLabel: 'Sign In'
+    actionLabel: 'Sign In',
   },
-  'network_error': {
+  network_error: {
     title: 'Network Connection Error',
     description: 'Please check your internet connection and try again.',
-    retryLabel: 'Retry'
-  }
+    retryLabel: 'Retry',
+  },
 };
 
 const TOAST_LIMIT_ENHANCED = 5;
@@ -139,7 +152,10 @@ const clearToastTimeout = (toastId: string) => {
 };
 
 const processQueue = () => {
-  if (memoryState.queue.length > 0 && memoryState.toasts.length < TOAST_LIMIT_ENHANCED) {
+  if (
+    memoryState.queue.length > 0 &&
+    memoryState.toasts.length < TOAST_LIMIT_ENHANCED
+  ) {
     const nextToast = memoryState.queue[0];
     dispatch({
       type: 'PROCESS_QUEUE',
@@ -157,13 +173,13 @@ export const reducer = (state: ToastState, action: any): ToastState => {
   switch (action.type) {
     case 'ADD_TOAST': {
       const now = Date.now();
-      
+
       // Reset rate limit counter if window has passed
       if (now - state.lastResetTime > RATE_LIMIT_WINDOW) {
         state.rateLimitCount = 0;
         state.lastResetTime = now;
       }
-      
+
       // Check rate limit
       if (state.rateLimitCount >= RATE_LIMIT_MAX) {
         console.warn('Toast rate limit exceeded. Toast queued.');
@@ -172,7 +188,7 @@ export const reducer = (state: ToastState, action: any): ToastState => {
           queue: [...state.queue, action.toast],
         };
       }
-      
+
       // If we're at the display limit, queue the toast
       if (state.toasts.length >= TOAST_LIMIT_ENHANCED) {
         return {
@@ -180,7 +196,7 @@ export const reducer = (state: ToastState, action: any): ToastState => {
           queue: [...state.queue, action.toast],
         };
       }
-      
+
       return {
         ...state,
         toasts: [action.toast, ...state.toasts],
@@ -191,7 +207,7 @@ export const reducer = (state: ToastState, action: any): ToastState => {
     case 'PROCESS_QUEUE': {
       const [nextToast, ...remainingQueue] = state.queue;
       if (!nextToast) return state;
-      
+
       return {
         ...state,
         toasts: [nextToast, ...state.toasts].slice(0, TOAST_LIMIT_ENHANCED),
@@ -221,7 +237,7 @@ export const reducer = (state: ToastState, action: any): ToastState => {
       const { toastId } = action;
 
       if (toastId) {
-        const toast = state.toasts.find(t => t.id === toastId);
+        const toast = state.toasts.find((t) => t.id === toastId);
         if (toast && !toast.persistent) {
           addToRemoveQueue(toastId, toast.duration);
         }
@@ -248,21 +264,21 @@ export const reducer = (state: ToastState, action: any): ToastState => {
 
     case 'REMOVE_TOAST': {
       const toastId = action.toastId;
-      
+
       if (toastId === undefined) {
         // Clear all timeouts
         toastTimeouts.forEach((timeout) => clearTimeout(timeout));
         toastTimeouts.clear();
         progressIntervals.forEach((interval) => clearInterval(interval));
         progressIntervals.clear();
-        
+
         return {
           ...state,
           toasts: [],
           queue: [],
         };
       }
-      
+
       // Clear specific timeout and progress interval
       clearToastTimeout(toastId);
       const progressInterval = progressIntervals.get(toastId);
@@ -270,7 +286,7 @@ export const reducer = (state: ToastState, action: any): ToastState => {
         clearInterval(progressInterval);
         progressIntervals.delete(toastId);
       }
-      
+
       return {
         ...state,
         toasts: state.toasts.filter((t) => t.id !== toastId),
@@ -279,26 +295,26 @@ export const reducer = (state: ToastState, action: any): ToastState => {
 
     case 'RETRY_TOAST': {
       const { toastId } = action;
-      const toast = state.toasts.find(t => t.id === toastId);
-      
+      const toast = state.toasts.find((t) => t.id === toastId);
+
       if (toast && toast.onRetry) {
         const retryCount = (toast.retryCount || 0) + 1;
         const maxRetries = toast.maxRetries || 3;
-        
+
         if (retryCount <= maxRetries) {
           // Execute retry action
           toast.onRetry();
-          
+
           // Update toast with retry count
           return {
             ...state,
             toasts: state.toasts.map((t) =>
-              t.id === toastId 
-                ? { 
-                    ...t, 
+              t.id === toastId
+                ? {
+                    ...t,
                     retryCount,
-                    description: `${t.description} (Attempt ${retryCount}/${maxRetries})`
-                  } 
+                    description: `${t.description} (Attempt ${retryCount}/${maxRetries})`,
+                  }
                 : t
             ),
           };
@@ -307,21 +323,21 @@ export const reducer = (state: ToastState, action: any): ToastState => {
           return {
             ...state,
             toasts: state.toasts.map((t) =>
-              t.id === toastId 
-                ? { 
-                    ...t, 
+              t.id === toastId
+                ? {
+                    ...t,
                     variant: 'destructive' as const,
                     title: 'Max Retries Reached',
                     description: 'Please try again later or contact support.',
                     onRetry: undefined,
-                    persistent: true
-                  } 
+                    persistent: true,
+                  }
                 : t
             ),
           };
         }
       }
-      
+
       return state;
     }
 
@@ -332,11 +348,11 @@ export const reducer = (state: ToastState, action: any): ToastState => {
 
 const listeners: Array<(state: ToastState) => void> = [];
 
-let memoryState: ToastState = { 
-  toasts: [], 
-  queue: [], 
-  rateLimitCount: 0, 
-  lastResetTime: Date.now() 
+let memoryState: ToastState = {
+  toasts: [],
+  queue: [],
+  rateLimitCount: 0,
+  lastResetTime: Date.now(),
 };
 
 function dispatch(action: unknown) {
@@ -362,12 +378,13 @@ function toast({ ...props }: ToastProps) {
 
   const retry = () => dispatch({ type: 'RETRY_TOAST', toastId: id });
 
-  const updateProgress = (progress: number) => 
+  const updateProgress = (progress: number) =>
     dispatch({ type: 'UPDATE_PROGRESS', toastId: id, progress });
 
   // Auto-dismiss logic (unless persistent)
   const shouldAutoDismiss = !props.persistent && props.variant !== 'progress';
-  const duration = props.duration || (props.variant === 'destructive' ? 8000 : 5000);
+  const duration =
+    props.duration || (props.variant === 'destructive' ? 8000 : 5000);
 
   const toastData: Toast = {
     ...props,
@@ -567,13 +584,19 @@ function useToast() {
     dispatch({ type: 'REMOVE_TOAST' });
   }, []);
 
-  const getToastsByCategory = useCallback((category: string) => {
-    return state.toasts.filter(t => t.category === category);
-  }, [state.toasts]);
+  const getToastsByCategory = useCallback(
+    (category: string) => {
+      return state.toasts.filter((t) => t.category === category);
+    },
+    [state.toasts]
+  );
 
-  const getToastsByPriority = useCallback((priority: 'low' | 'normal' | 'high' | 'critical') => {
-    return state.toasts.filter(t => t.priority === priority);
-  }, [state.toasts]);
+  const getToastsByPriority = useCallback(
+    (priority: 'low' | 'normal' | 'high' | 'critical') => {
+      return state.toasts.filter((t) => t.priority === priority);
+    },
+    [state.toasts]
+  );
 
   return {
     ...state,

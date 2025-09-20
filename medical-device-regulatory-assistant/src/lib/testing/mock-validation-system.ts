@@ -1,6 +1,6 @@
 /**
  * Mock Validation System - Complete Export
- * 
+ *
  * Provides comprehensive mock validation and debugging capabilities
  * Implements requirements 2.4 and 5.4 from the design document
  */
@@ -76,7 +76,11 @@ export const mockValidationUtils = {
   /**
    * Register a mock for validation tracking
    */
-  registerMock: (type: 'hook' | 'component' | 'provider' | 'utility', name: string, mock: any) => {
+  registerMock: (
+    type: 'hook' | 'component' | 'provider' | 'utility',
+    name: string,
+    mock: any
+  ) => {
     mockValidator.registerMock(type, name, mock);
   },
 
@@ -100,31 +104,35 @@ export const mockValidationUtils = {
 export const setupMockValidation = () => {
   // Register global error handler for automatic diagnosis
   const originalConsoleError = console.error;
-  
+
   console.error = (...args) => {
     const message = args[0];
-    
+
     // Check if this looks like a mock-related error
-    if (typeof message === 'string' && (
-      message.includes('is not a function') ||
-      message.includes('Cannot read properties') ||
-      message.includes('TypeError') ||
-      message.includes('ReferenceError')
-    )) {
+    if (
+      typeof message === 'string' &&
+      (message.includes('is not a function') ||
+        message.includes('Cannot read properties') ||
+        message.includes('TypeError') ||
+        message.includes('ReferenceError'))
+    ) {
       // Try to extract mock name from error
       const mockNameMatch = message.match(/(use\w+|Mock\w+|\w+Mock)/i);
       if (mockNameMatch) {
         const mockName = mockNameMatch[1];
         const error = new Error(message);
-        
+
         // Generate diagnosis
         const diagnosis = MockDebugger.diagnoseHookFailure(mockName, error);
-        
+
         // Add to debugger history
         mockDebugger.addDiagnosis(diagnosis);
-        
+
         // Log helpful information in development
-        if (process.env.NODE_ENV === 'development' || process.env.JEST_VERBOSE) {
+        if (
+          process.env.NODE_ENV === 'development' ||
+          process.env.JEST_VERBOSE
+        ) {
           console.warn(`\n🔍 Mock Diagnosis for ${mockName}:`);
           console.warn(`   Category: ${diagnosis.diagnosis.category}`);
           console.warn(`   Severity: ${diagnosis.diagnosis.severity}`);
@@ -136,7 +144,7 @@ export const setupMockValidation = () => {
         }
       }
     }
-    
+
     // Call original console.error
     originalConsoleError.apply(console, args);
   };
@@ -152,22 +160,31 @@ export const jestMockValidation = {
   /**
    * Jest matcher to validate mock structure
    */
-  toBeValidMock: (received: any, mockName: string, mockType: 'hook' | 'component' = 'hook') => {
-    const result = mockType === 'hook' 
-      ? mockValidator.validateHookMock(mockName, received)
-      : mockValidator.validateComponentMock(mockName, received);
+  toBeValidMock: (
+    received: any,
+    mockName: string,
+    mockType: 'hook' | 'component' = 'hook'
+  ) => {
+    const result =
+      mockType === 'hook'
+        ? mockValidator.validateHookMock(mockName, received)
+        : mockValidator.validateComponentMock(mockName, received);
 
     const pass = result.isValid;
-    
+
     if (pass) {
       return {
-        message: () => `Expected ${mockName} mock to be invalid, but it passed validation with score ${result.score}`,
+        message: () =>
+          `Expected ${mockName} mock to be invalid, but it passed validation with score ${result.score}`,
         pass: true,
       };
     } else {
-      const errorMessages = result.errors.map(e => `  - ${e.message}`).join('\n');
+      const errorMessages = result.errors
+        .map((e) => `  - ${e.message}`)
+        .join('\n');
       return {
-        message: () => `Expected ${mockName} mock to be valid, but validation failed:\n${errorMessages}`,
+        message: () =>
+          `Expected ${mockName} mock to be valid, but validation failed:\n${errorMessages}`,
         pass: false,
       };
     }
@@ -176,11 +193,15 @@ export const jestMockValidation = {
   /**
    * Jest matcher to check mock completeness
    */
-  toHaveCompleteCoverage: (received: any, mockName: string, threshold: number = 90) => {
+  toHaveCompleteCoverage: (
+    received: any,
+    mockName: string,
+    threshold: number = 90
+  ) => {
     mockValidator.registerMock('hook', mockName, received);
     const reports = mockValidator.generateMockReport();
-    const report = reports.find(r => r.mockName === mockName);
-    
+    const report = reports.find((r) => r.mockName === mockName);
+
     if (!report) {
       return {
         message: () => `Could not find mock report for ${mockName}`,
@@ -189,15 +210,17 @@ export const jestMockValidation = {
     }
 
     const pass = report.coverage.coveragePercentage >= threshold;
-    
+
     if (pass) {
       return {
-        message: () => `Expected ${mockName} mock coverage to be below ${threshold}%, but it was ${report.coverage.coveragePercentage}%`,
+        message: () =>
+          `Expected ${mockName} mock coverage to be below ${threshold}%, but it was ${report.coverage.coveragePercentage}%`,
         pass: true,
       };
     } else {
       return {
-        message: () => `Expected ${mockName} mock coverage to be at least ${threshold}%, but it was ${report.coverage.coveragePercentage}%. Missing: ${report.coverage.missingItems.join(', ')}`,
+        message: () =>
+          `Expected ${mockName} mock coverage to be at least ${threshold}%, but it was ${report.coverage.coveragePercentage}%. Missing: ${report.coverage.missingItems.join(', ')}`,
         pass: false,
       };
     }

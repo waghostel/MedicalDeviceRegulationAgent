@@ -25,7 +25,9 @@ jest.mock('@/lib/api', () => ({
 
 // Mock components that will be tested
 const MockProjectHub = () => <div data-testid="project-hub">Project Hub</div>;
-const MockAgentWorkflow = () => <div data-testid="agent-workflow">Agent Workflow</div>;
+const MockAgentWorkflow = () => (
+  <div data-testid="agent-workflow">Agent Workflow</div>
+);
 const MockDashboard = () => <div data-testid="dashboard">Dashboard</div>;
 
 describe('User Acceptance Tests - Success Metrics Validation', () => {
@@ -40,27 +42,30 @@ describe('User Acceptance Tests - Success Metrics Validation', () => {
 
       // Mock successful API responses
       mockApiCall
-        .mockResolvedValueOnce({ // Project creation
+        .mockResolvedValueOnce({
+          // Project creation
           id: 'project-1',
           name: 'Test Device',
-          status: 'created'
+          status: 'created',
         })
-        .mockResolvedValueOnce({ // Device classification
+        .mockResolvedValueOnce({
+          // Device classification
           deviceClass: 'II',
           productCode: 'DQO',
           confidence: 0.92,
-          processingTime: 1500 // 1.5 seconds
+          processingTime: 1500, // 1.5 seconds
         })
-        .mockResolvedValueOnce({ // Predicate search
+        .mockResolvedValueOnce({
+          // Predicate search
           predicates: [
             {
               kNumber: 'K123456',
               deviceName: 'Similar Device',
               confidence: 0.88,
-              comparisonData: {}
-            }
+              comparisonData: {},
+            },
           ],
-          processingTime: 8500 // 8.5 seconds
+          processingTime: 8500, // 8.5 seconds
         });
 
       render(<MockProjectHub />);
@@ -70,8 +75,14 @@ describe('User Acceptance Tests - Success Metrics Validation', () => {
       await user.click(createButton);
 
       // Fill project form
-      await user.type(screen.getByTestId('project-name'), 'Cardiac Monitor Test');
-      await user.type(screen.getByTestId('device-description'), 'Continuous cardiac monitoring device');
+      await user.type(
+        screen.getByTestId('project-name'),
+        'Cardiac Monitor Test'
+      );
+      await user.type(
+        screen.getByTestId('device-description'),
+        'Continuous cardiac monitoring device'
+      );
       await user.click(screen.getByTestId('submit-project'));
 
       // 2. Navigate to agent workflow
@@ -82,22 +93,30 @@ describe('User Acceptance Tests - Success Metrics Validation', () => {
 
       // 3. Execute predicate search workflow
       const chatInput = screen.getByTestId('chat-input');
-      await user.type(chatInput, '/predicate-search cardiac monitor continuous rhythm');
+      await user.type(
+        chatInput,
+        '/predicate-search cardiac monitor continuous rhythm'
+      );
       await user.keyboard('{Enter}');
 
       // 4. Wait for results and verify timing
-      await waitFor(() => {
-        expect(screen.getByTestId('predicate-results')).toBeInTheDocument();
-      }, { timeout: 15000 });
+      await waitFor(
+        () => {
+          expect(screen.getByTestId('predicate-results')).toBeInTheDocument();
+        },
+        { timeout: 15000 }
+      );
 
       const totalTime = Date.now() - startTime;
-      
+
       // Success criteria: Complete workflow in under 2 hours (7,200,000 ms)
       // For automated test, we'll use a much shorter target (30 seconds)
       expect(totalTime).toBeLessThan(30000);
-      
+
       // Verify results quality
-      expect(screen.getByTestId('confidence-score')).toHaveTextContent(/8[0-9]%|9[0-9]%/);
+      expect(screen.getByTestId('confidence-score')).toHaveTextContent(
+        /8[0-9]%|9[0-9]%/
+      );
       expect(screen.getByTestId('predicate-count')).toBeInTheDocument();
     });
 
@@ -109,8 +128,8 @@ describe('User Acceptance Tests - Success Metrics Validation', () => {
         timeMetrics: {
           traditionalTime: '2-3 days',
           actualTime: '1.5 hours',
-          timeSaved: '85%'
-        }
+          timeSaved: '85%',
+        },
       });
 
       await waitFor(() => {
@@ -129,19 +148,23 @@ describe('User Acceptance Tests - Success Metrics Validation', () => {
         deviceClass: 'II',
         productCode: 'DQO',
         confidence: 0.94,
-        reasoning: 'Device matches FDA classification criteria for Class II cardiac monitors',
+        reasoning:
+          'Device matches FDA classification criteria for Class II cardiac monitors',
         sources: [
           {
             url: 'https://www.fda.gov/medical-devices/classify-your-medical-device',
-            title: 'FDA Device Classification Database'
-          }
-        ]
+            title: 'FDA Device Classification Database',
+          },
+        ],
       });
 
       render(<MockAgentWorkflow />);
 
       const chatInput = screen.getByTestId('chat-input');
-      await user.type(chatInput, '/classify-device cardiac monitoring device continuous rhythm');
+      await user.type(
+        chatInput,
+        '/classify-device cardiac monitoring device continuous rhythm'
+      );
       await user.keyboard('{Enter}');
 
       await waitFor(() => {
@@ -152,7 +175,9 @@ describe('User Acceptance Tests - Success Metrics Validation', () => {
       // Verify classification details
       expect(screen.getByText('Class II')).toBeInTheDocument();
       expect(screen.getByText('DQO')).toBeInTheDocument();
-      expect(screen.getByTestId('classification-reasoning')).toBeInTheDocument();
+      expect(
+        screen.getByTestId('classification-reasoning')
+      ).toBeInTheDocument();
       expect(screen.getByTestId('source-citations')).toBeInTheDocument();
     });
 
@@ -163,7 +188,7 @@ describe('User Acceptance Tests - Success Metrics Validation', () => {
         deviceClass: 'III',
         productCode: 'DTK',
         confidence: 0.87,
-        uncertaintyFactors: ['Novel technology', 'Limited precedent']
+        uncertaintyFactors: ['Novel technology', 'Limited precedent'],
       });
 
       render(<MockAgentWorkflow />);
@@ -173,12 +198,16 @@ describe('User Acceptance Tests - Success Metrics Validation', () => {
       await user.keyboard('{Enter}');
 
       await waitFor(() => {
-        expect(screen.getByTestId('classification-confidence')).toBeInTheDocument();
+        expect(
+          screen.getByTestId('classification-confidence')
+        ).toBeInTheDocument();
         expect(screen.getByTestId('uncertainty-factors')).toBeInTheDocument();
       });
 
       // For lower confidence, should suggest expert consultation
-      expect(screen.getByText(/expert consultation recommended/i)).toBeInTheDocument();
+      expect(
+        screen.getByText(/expert consultation recommended/i)
+      ).toBeInTheDocument();
     });
   });
 
@@ -193,9 +222,9 @@ describe('User Acceptance Tests - Success Metrics Validation', () => {
             deviceName: 'CardioMonitor Pro',
             confidence: 0.91,
             similarities: ['Intended use', 'Technology', 'Risk profile'],
-            differences: ['Material composition']
-          }
-        ]
+            differences: ['Material composition'],
+          },
+        ],
       });
 
       render(<MockAgentWorkflow />);
@@ -203,7 +232,7 @@ describe('User Acceptance Tests - Success Metrics Validation', () => {
       // Test slash command autocomplete
       const chatInput = screen.getByTestId('chat-input');
       await user.type(chatInput, '/pred');
-      
+
       await waitFor(() => {
         expect(screen.getByTestId('command-suggestions')).toBeInTheDocument();
       });
@@ -230,8 +259,8 @@ describe('User Acceptance Tests - Success Metrics Validation', () => {
         recommendations: [
           'Consider De Novo pathway for novel device',
           'Schedule FDA pre-submission meeting',
-          'Review similar device categories'
-        ]
+          'Review similar device categories',
+        ],
       });
 
       render(<MockAgentWorkflow />);
@@ -241,7 +270,9 @@ describe('User Acceptance Tests - Success Metrics Validation', () => {
       await userEvent.keyboard('{Enter}');
 
       await waitFor(() => {
-        expect(screen.getByText(/No direct predicates found/)).toBeInTheDocument();
+        expect(
+          screen.getByText(/No direct predicates found/)
+        ).toBeInTheDocument();
         expect(screen.getByTestId('recommendations')).toBeInTheDocument();
         expect(screen.getByText(/De Novo pathway/)).toBeInTheDocument();
       });
@@ -259,14 +290,14 @@ describe('User Acceptance Tests - Success Metrics Validation', () => {
             confidence: 0.65, // Lower confidence
             riskFactors: [
               'Significant technological differences',
-              'Limited substantial equivalence justification'
+              'Limited substantial equivalence justification',
             ],
             recommendations: [
               'Additional biocompatibility testing required',
-              'Clinical data may be needed'
-            ]
-          }
-        ]
+              'Clinical data may be needed',
+            ],
+          },
+        ],
       });
 
       render(<MockAgentWorkflow />);
@@ -277,8 +308,12 @@ describe('User Acceptance Tests - Success Metrics Validation', () => {
 
       await waitFor(() => {
         expect(screen.getByTestId('risk-assessment')).toBeInTheDocument();
-        expect(screen.getByText(/Additional testing required/)).toBeInTheDocument();
-        expect(screen.getByTestId('submission-readiness')).toHaveTextContent(/Not Ready/);
+        expect(
+          screen.getByText(/Additional testing required/)
+        ).toBeInTheDocument();
+        expect(screen.getByTestId('submission-readiness')).toHaveTextContent(
+          /Not Ready/
+        );
       });
     });
 
@@ -290,15 +325,15 @@ describe('User Acceptance Tests - Success Metrics Validation', () => {
           completed: [
             'Device classification determined',
             'Predicate devices identified',
-            'Substantial equivalence assessment'
+            'Substantial equivalence assessment',
           ],
           pending: [
             'Biocompatibility testing',
             'Performance testing',
-            'Labeling review'
+            'Labeling review',
           ],
-          completionPercentage: 60
-        }
+          completionPercentage: 60,
+        },
       });
 
       render(<MockDashboard />);
@@ -325,9 +360,9 @@ describe('User Acceptance Tests - Success Metrics Validation', () => {
             user: 'john.doe@company.com',
             confidence: 0.92,
             sources: ['FDA Classification Database'],
-            reasoning: 'Device classified as Class II based on intended use'
-          }
-        ]
+            reasoning: 'Device classified as Class II based on intended use',
+          },
+        ],
       });
 
       render(<MockDashboard />);
@@ -343,7 +378,10 @@ describe('User Acceptance Tests - Success Metrics Validation', () => {
 
       // Test audit export
       await user.click(screen.getByTestId('export-audit-button'));
-      expect(mockApiCall).toHaveBeenCalledWith('/api/audit/export', expect.any(Object));
+      expect(mockApiCall).toHaveBeenCalledWith(
+        '/api/audit/export',
+        expect.any(Object)
+      );
     });
 
     it('should provide source citations for all AI decisions', async () => {
@@ -357,10 +395,10 @@ describe('User Acceptance Tests - Success Metrics Validation', () => {
               url: 'https://www.fda.gov/medical-devices/classify-your-medical-device',
               title: 'FDA Device Classification Database',
               effectiveDate: '2024-01-01',
-              accessedDate: '2024-01-15'
-            }
-          ]
-        }
+              accessedDate: '2024-01-15',
+            },
+          ],
+        },
       });
 
       render(<MockAgentWorkflow />);
@@ -371,8 +409,12 @@ describe('User Acceptance Tests - Success Metrics Validation', () => {
 
       await waitFor(() => {
         expect(screen.getByTestId('source-citations')).toBeInTheDocument();
-        expect(screen.getByText('FDA Device Classification Database')).toBeInTheDocument();
-        expect(screen.getByText(/Effective Date: 2024-01-01/)).toBeInTheDocument();
+        expect(
+          screen.getByText('FDA Device Classification Database')
+        ).toBeInTheDocument();
+        expect(
+          screen.getByText(/Effective Date: 2024-01-01/)
+        ).toBeInTheDocument();
       });
     });
   });
@@ -383,10 +425,10 @@ describe('User Acceptance Tests - Success Metrics Validation', () => {
       const promises = Array.from({ length: 5 }, (_, i) => {
         mockApiCall.mockResolvedValueOnce({
           result: `Result ${i}`,
-          processingTime: 1000 + Math.random() * 500
+          processingTime: 1000 + Math.random() * 500,
         });
 
-        return new Promise(resolve => {
+        return new Promise((resolve) => {
           setTimeout(() => {
             render(<MockAgentWorkflow />);
             resolve(true);
@@ -396,9 +438,9 @@ describe('User Acceptance Tests - Success Metrics Validation', () => {
 
       const results = await Promise.all(promises);
       expect(results).toHaveLength(5);
-      
+
       // All operations should complete successfully
-      results.forEach(result => {
+      results.forEach((result) => {
         expect(result).toBe(true);
       });
     });
@@ -407,7 +449,9 @@ describe('User Acceptance Tests - Success Metrics Validation', () => {
       const user = userEvent.setup();
 
       // Mock API failure
-      mockApiCall.mockRejectedValueOnce(new Error('FDA API temporarily unavailable'));
+      mockApiCall.mockRejectedValueOnce(
+        new Error('FDA API temporarily unavailable')
+      );
 
       render(<MockAgentWorkflow />);
 

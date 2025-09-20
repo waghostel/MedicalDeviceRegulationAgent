@@ -1,25 +1,25 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import { 
-  ChevronRight, 
-  ChevronDown, 
-  BookOpen, 
+import {
+  ChevronRight,
+  ChevronDown,
+  BookOpen,
   Settings,
-  RefreshCw
+  RefreshCw,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { 
-  Collapsible, 
-  CollapsibleContent, 
-  CollapsibleTrigger 
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
 } from '@/components/ui/collapsible';
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from '@/components/ui/select';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
@@ -44,9 +44,10 @@ export function CitationPanel({
   onToggle,
   projectName = 'Current Project',
   onRefresh,
-  className = ''
+  className = '',
 }: CitationPanelProps) {
-  const [filteredCitations, setFilteredCitations] = useState<SourceCitation[]>(citations);
+  const [filteredCitations, setFilteredCitations] =
+    useState<SourceCitation[]>(citations);
   const [citationFormat, setCitationFormat] = useState<CitationFormat>('APA');
   const [validatingUrls, setValidatingUrls] = useState(false);
 
@@ -58,8 +59,8 @@ export function CitationPanel({
   // Group citations by document type
   const groupedCitations = useMemo(() => {
     const groups: Record<string, SourceCitation[]> = {};
-    
-    filteredCitations.forEach(citation => {
+
+    filteredCitations.forEach((citation) => {
       const type = citation.documentType;
       if (!groups[type]) {
         groups[type] = [];
@@ -72,19 +73,18 @@ export function CitationPanel({
 
   const handleValidateAllUrls = async () => {
     setValidatingUrls(true);
-    
+
     try {
       const validationPromises = citations.map(async (citation) => {
         const isValid = await validateSourceUrl(citation.url);
         return { citation, isValid };
       });
-      
+
       const results = await Promise.all(validationPromises);
-      
+
       // In a real implementation, you would update the citation validation status
       // For now, we'll just log the results
       console.log('URL validation results:', results);
-      
     } catch (error) {
       console.error('Failed to validate URLs:', error);
     } finally {
@@ -106,10 +106,7 @@ export function CitationPanel({
     <div className={`border-l bg-background ${className}`}>
       <Collapsible open={isOpen} onOpenChange={onToggle}>
         <CollapsibleTrigger asChild>
-          <Button
-            variant="ghost"
-            className="w-full justify-between p-4 h-auto"
-          >
+          <Button variant="ghost" className="w-full justify-between p-4 h-auto">
             <div className="flex items-center gap-2">
               <BookOpen className="h-4 w-4" />
               <span className="font-medium">Citations & Sources</span>
@@ -124,14 +121,16 @@ export function CitationPanel({
             )}
           </Button>
         </CollapsibleTrigger>
-        
+
         <CollapsibleContent>
           <div className="p-4 space-y-4">
             {/* Controls */}
             <div className="flex items-center justify-between gap-2">
               <Select
                 value={citationFormat}
-                onValueChange={(value: CitationFormat) => setCitationFormat(value)}
+                onValueChange={(value: CitationFormat) =>
+                  setCitationFormat(value)
+                }
               >
                 <SelectTrigger className="w-24">
                   <SelectValue />
@@ -141,7 +140,7 @@ export function CitationPanel({
                   <SelectItem value="MLA">MLA</SelectItem>
                 </SelectContent>
               </Select>
-              
+
               <div className="flex gap-1">
                 {onRefresh && (
                   <Button
@@ -153,7 +152,7 @@ export function CitationPanel({
                     <RefreshCw className="h-3 w-3" />
                   </Button>
                 )}
-                
+
                 <Button
                   variant="ghost"
                   size="sm"
@@ -189,29 +188,33 @@ export function CitationPanel({
                     <BookOpen className="h-8 w-8 mx-auto mb-2 opacity-50" />
                     <p className="text-sm">No citations found</p>
                     <p className="text-xs mt-1">
-                      Citations will appear here as you interact with the AI assistant
+                      Citations will appear here as you interact with the AI
+                      assistant
                     </p>
                   </div>
                 ) : (
-                  Object.entries(groupedCitations).map(([documentType, typeCitations]) => (
-                    <div key={documentType} className="space-y-2">
-                      <h4 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
-                        {documentType.replace('_', ' ')} ({typeCitations.length})
-                      </h4>
-                      
-                      <div className="space-y-3">
-                        {typeCitations.map((citation, index) => (
-                          <CitationCard
-                            key={`${citation.url}-${index}`}
-                            citation={citation}
-                            format={citationFormat}
-                            onCopy={handleCitationCopy}
-                            onVisit={handleCitationVisit}
-                          />
-                        ))}
+                  Object.entries(groupedCitations).map(
+                    ([documentType, typeCitations]) => (
+                      <div key={documentType} className="space-y-2">
+                        <h4 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
+                          {documentType.replace('_', ' ')} (
+                          {typeCitations.length})
+                        </h4>
+
+                        <div className="space-y-3">
+                          {typeCitations.map((citation, index) => (
+                            <CitationCard
+                              key={`${citation.url}-${index}`}
+                              citation={citation}
+                              format={citationFormat}
+                              onCopy={handleCitationCopy}
+                              onVisit={handleCitationVisit}
+                            />
+                          ))}
+                        </div>
                       </div>
-                    </div>
-                  ))
+                    )
+                  )
                 )}
               </div>
             </ScrollArea>

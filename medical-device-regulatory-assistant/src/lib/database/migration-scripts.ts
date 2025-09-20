@@ -98,7 +98,7 @@ export class DatabaseMigrationManager {
       this.createInitialSchemaMigration(),
       this.createTestDataIndexesMigration(),
       this.createAuditTriggersMigration(),
-      this.createPerformanceOptimizationMigration()
+      this.createPerformanceOptimizationMigration(),
     ];
   }
 
@@ -109,7 +109,8 @@ export class DatabaseMigrationManager {
     return {
       id: 'initial-schema',
       name: 'Initial Database Schema',
-      description: 'Create initial database schema for medical device regulatory assistant',
+      description:
+        'Create initial database schema for medical device regulatory assistant',
       version: '1.0.0',
       dependencies: [],
       checksum: this.calculateChecksum('initial-schema'),
@@ -196,7 +197,7 @@ DROP TABLE IF EXISTS predicate_devices;
 DROP TABLE IF EXISTS device_classifications;
 DROP TABLE IF EXISTS projects;
 DROP TABLE IF EXISTS users;
-`
+`,
     };
   }
 
@@ -280,7 +281,7 @@ DROP INDEX IF EXISTS idx_projects_user_id;
 -- Drop user indexes
 DROP INDEX IF EXISTS idx_users_google_id;
 DROP INDEX IF EXISTS idx_users_email;
-`
+`,
     };
   }
 
@@ -291,7 +292,8 @@ DROP INDEX IF EXISTS idx_users_email;
     return {
       id: 'audit-triggers',
       name: 'Audit Trail Triggers',
-      description: 'Add triggers for automatic audit trail and updated_at timestamps',
+      description:
+        'Add triggers for automatic audit trail and updated_at timestamps',
       version: '1.2.0',
       dependencies: ['test-data-indexes'],
       checksum: this.calculateChecksum('audit-triggers'),
@@ -396,7 +398,7 @@ DROP INDEX IF EXISTS idx_audit_logs_table_record;
 
 -- Drop audit log table
 DROP TABLE IF EXISTS audit_logs;
-`
+`,
     };
   }
 
@@ -472,15 +474,18 @@ DROP INDEX IF EXISTS idx_projects_active;
 -- Drop views
 DROP VIEW IF EXISTS user_activity_summary;
 DROP VIEW IF EXISTS project_statistics;
-`
+`,
     };
   }
 
   /**
    * Execute migration
    */
-  async executeMigration(migrationId: string, direction: 'up' | 'down' = 'up'): Promise<MigrationExecutionResult> {
-    const migration = this.migrations.find(m => m.id === migrationId);
+  async executeMigration(
+    migrationId: string,
+    direction: 'up' | 'down' = 'up'
+  ): Promise<MigrationExecutionResult> {
+    const migration = this.migrations.find((m) => m.id === migrationId);
     if (!migration) {
       throw new Error(`Migration ${migrationId} not found`);
     }
@@ -490,7 +495,7 @@ DROP VIEW IF EXISTS project_statistics;
       migrationId,
       success: false,
       executionTime: 0,
-      rollbackAvailable: direction === 'up'
+      rollbackAvailable: direction === 'up',
     };
 
     try {
@@ -500,7 +505,8 @@ DROP VIEW IF EXISTS project_statistics;
       }
 
       // Execute migration script
-      const script = direction === 'up' ? migration.upScript : migration.downScript;
+      const script =
+        direction === 'up' ? migration.upScript : migration.downScript;
       await this.executeMigrationScript(script);
 
       // Record migration execution
@@ -512,7 +518,6 @@ DROP VIEW IF EXISTS project_statistics;
 
       result.success = true;
       result.executionTime = Date.now() - startTime;
-
     } catch (error) {
       result.success = false;
       result.error = error instanceof Error ? error.message : String(error);
@@ -548,7 +553,9 @@ DROP VIEW IF EXISTS project_statistics;
   /**
    * Rollback migration
    */
-  async rollbackMigration(migrationId: string): Promise<MigrationExecutionResult> {
+  async rollbackMigration(
+    migrationId: string
+  ): Promise<MigrationExecutionResult> {
     return this.executeMigration(migrationId, 'down');
   }
 
@@ -562,14 +569,24 @@ DROP VIEW IF EXISTS project_statistics;
           name: 'users',
           columns: [
             { name: 'id', type: 'INTEGER', nullable: false },
-            { name: 'email', type: 'VARCHAR(255)', nullable: false, unique: true },
+            {
+              name: 'email',
+              type: 'VARCHAR(255)',
+              nullable: false,
+              unique: true,
+            },
             { name: 'name', type: 'VARCHAR(255)', nullable: false },
-            { name: 'google_id', type: 'VARCHAR(255)', nullable: false, unique: true },
+            {
+              name: 'google_id',
+              type: 'VARCHAR(255)',
+              nullable: false,
+              unique: true,
+            },
             { name: 'created_at', type: 'TIMESTAMP', nullable: false },
-            { name: 'updated_at', type: 'TIMESTAMP', nullable: false }
+            { name: 'updated_at', type: 'TIMESTAMP', nullable: false },
           ],
           primaryKey: ['id'],
-          foreignKeys: []
+          foreignKeys: [],
         },
         {
           name: 'projects',
@@ -580,9 +597,14 @@ DROP VIEW IF EXISTS project_statistics;
             { name: 'description', type: 'TEXT', nullable: true },
             { name: 'device_type', type: 'VARCHAR(255)', nullable: true },
             { name: 'intended_use', type: 'TEXT', nullable: true },
-            { name: 'status', type: 'VARCHAR(50)', nullable: false, defaultValue: 'draft' },
+            {
+              name: 'status',
+              type: 'VARCHAR(50)',
+              nullable: false,
+              defaultValue: 'draft',
+            },
             { name: 'created_at', type: 'TIMESTAMP', nullable: false },
-            { name: 'updated_at', type: 'TIMESTAMP', nullable: false }
+            { name: 'updated_at', type: 'TIMESTAMP', nullable: false },
           ],
           primaryKey: ['id'],
           foreignKeys: [
@@ -592,9 +614,9 @@ DROP VIEW IF EXISTS project_statistics;
               referencedTable: 'users',
               referencedColumns: ['id'],
               onDelete: 'cascade',
-              onUpdate: 'cascade'
-            }
-          ]
+              onUpdate: 'cascade',
+            },
+          ],
         },
         {
           name: 'device_classifications',
@@ -609,7 +631,7 @@ DROP VIEW IF EXISTS project_statistics;
             { name: 'reasoning', type: 'TEXT', nullable: true },
             { name: 'sources', type: 'JSON', nullable: true },
             { name: 'created_at', type: 'TIMESTAMP', nullable: false },
-            { name: 'updated_at', type: 'TIMESTAMP', nullable: false }
+            { name: 'updated_at', type: 'TIMESTAMP', nullable: false },
           ],
           primaryKey: ['id'],
           foreignKeys: [
@@ -619,9 +641,9 @@ DROP VIEW IF EXISTS project_statistics;
               referencedTable: 'projects',
               referencedColumns: ['id'],
               onDelete: 'cascade',
-              onUpdate: 'cascade'
-            }
-          ]
+              onUpdate: 'cascade',
+            },
+          ],
         },
         {
           name: 'predicate_devices',
@@ -635,9 +657,14 @@ DROP VIEW IF EXISTS project_statistics;
             { name: 'clearance_date', type: 'DATE', nullable: true },
             { name: 'confidence_score', type: 'REAL', nullable: true },
             { name: 'comparison_data', type: 'JSON', nullable: true },
-            { name: 'is_selected', type: 'BOOLEAN', nullable: false, defaultValue: 'FALSE' },
+            {
+              name: 'is_selected',
+              type: 'BOOLEAN',
+              nullable: false,
+              defaultValue: 'FALSE',
+            },
             { name: 'created_at', type: 'TIMESTAMP', nullable: false },
-            { name: 'updated_at', type: 'TIMESTAMP', nullable: false }
+            { name: 'updated_at', type: 'TIMESTAMP', nullable: false },
           ],
           primaryKey: ['id'],
           foreignKeys: [
@@ -647,9 +674,9 @@ DROP VIEW IF EXISTS project_statistics;
               referencedTable: 'projects',
               referencedColumns: ['id'],
               onDelete: 'cascade',
-              onUpdate: 'cascade'
-            }
-          ]
+              onUpdate: 'cascade',
+            },
+          ],
         },
         {
           name: 'agent_interactions',
@@ -665,7 +692,7 @@ DROP VIEW IF EXISTS project_statistics;
             { name: 'reasoning', type: 'TEXT', nullable: true },
             { name: 'execution_time_ms', type: 'INTEGER', nullable: true },
             { name: 'created_at', type: 'TIMESTAMP', nullable: false },
-            { name: 'updated_at', type: 'TIMESTAMP', nullable: false }
+            { name: 'updated_at', type: 'TIMESTAMP', nullable: false },
           ],
           primaryKey: ['id'],
           foreignKeys: [
@@ -675,7 +702,7 @@ DROP VIEW IF EXISTS project_statistics;
               referencedTable: 'projects',
               referencedColumns: ['id'],
               onDelete: 'cascade',
-              onUpdate: 'cascade'
+              onUpdate: 'cascade',
             },
             {
               name: 'fk_agent_interactions_user_id',
@@ -683,41 +710,98 @@ DROP VIEW IF EXISTS project_statistics;
               referencedTable: 'users',
               referencedColumns: ['id'],
               onDelete: 'cascade',
-              onUpdate: 'cascade'
-            }
-          ]
-        }
+              onUpdate: 'cascade',
+            },
+          ],
+        },
       ],
       indexes: [
-        { name: 'idx_users_email', table: 'users', columns: ['email'], unique: true, type: 'btree' },
-        { name: 'idx_users_google_id', table: 'users', columns: ['google_id'], unique: true, type: 'btree' },
-        { name: 'idx_projects_user_id', table: 'projects', columns: ['user_id'], unique: false, type: 'btree' },
-        { name: 'idx_projects_status', table: 'projects', columns: ['status'], unique: false, type: 'btree' },
-        { name: 'idx_device_classifications_project_id', table: 'device_classifications', columns: ['project_id'], unique: false, type: 'btree' },
-        { name: 'idx_predicate_devices_project_id', table: 'predicate_devices', columns: ['project_id'], unique: false, type: 'btree' },
-        { name: 'idx_predicate_devices_k_number', table: 'predicate_devices', columns: ['k_number'], unique: false, type: 'btree' },
-        { name: 'idx_agent_interactions_project_id', table: 'agent_interactions', columns: ['project_id'], unique: false, type: 'btree' },
-        { name: 'idx_agent_interactions_user_id', table: 'agent_interactions', columns: ['user_id'], unique: false, type: 'btree' }
+        {
+          name: 'idx_users_email',
+          table: 'users',
+          columns: ['email'],
+          unique: true,
+          type: 'btree',
+        },
+        {
+          name: 'idx_users_google_id',
+          table: 'users',
+          columns: ['google_id'],
+          unique: true,
+          type: 'btree',
+        },
+        {
+          name: 'idx_projects_user_id',
+          table: 'projects',
+          columns: ['user_id'],
+          unique: false,
+          type: 'btree',
+        },
+        {
+          name: 'idx_projects_status',
+          table: 'projects',
+          columns: ['status'],
+          unique: false,
+          type: 'btree',
+        },
+        {
+          name: 'idx_device_classifications_project_id',
+          table: 'device_classifications',
+          columns: ['project_id'],
+          unique: false,
+          type: 'btree',
+        },
+        {
+          name: 'idx_predicate_devices_project_id',
+          table: 'predicate_devices',
+          columns: ['project_id'],
+          unique: false,
+          type: 'btree',
+        },
+        {
+          name: 'idx_predicate_devices_k_number',
+          table: 'predicate_devices',
+          columns: ['k_number'],
+          unique: false,
+          type: 'btree',
+        },
+        {
+          name: 'idx_agent_interactions_project_id',
+          table: 'agent_interactions',
+          columns: ['project_id'],
+          unique: false,
+          type: 'btree',
+        },
+        {
+          name: 'idx_agent_interactions_user_id',
+          table: 'agent_interactions',
+          columns: ['user_id'],
+          unique: false,
+          type: 'btree',
+        },
       ],
       constraints: [
         {
           name: 'chk_confidence_score',
           table: 'device_classifications',
           type: 'check',
-          definition: 'confidence_score IS NULL OR (confidence_score >= 0 AND confidence_score <= 1)'
+          definition:
+            'confidence_score IS NULL OR (confidence_score >= 0 AND confidence_score <= 1)',
         },
         {
           name: 'chk_predicate_confidence_score',
           table: 'predicate_devices',
           type: 'check',
-          definition: 'confidence_score IS NULL OR (confidence_score >= 0 AND confidence_score <= 1)'
+          definition:
+            'confidence_score IS NULL OR (confidence_score >= 0 AND confidence_score <= 1)',
         },
         {
           name: 'chk_agent_confidence_score',
           table: 'agent_interactions',
           type: 'check',
-          definition: 'confidence_score IS NULL OR (confidence_score >= 0 AND confidence_score <= 1)'
-        }
+          definition:
+            'confidence_score IS NULL OR (confidence_score >= 0 AND confidence_score <= 1)',
+        },
       ],
       triggers: [
         {
@@ -725,16 +809,18 @@ DROP VIEW IF EXISTS project_statistics;
           table: 'users',
           event: 'update',
           timing: 'after',
-          function: 'UPDATE users SET updated_at = CURRENT_TIMESTAMP WHERE id = NEW.id'
+          function:
+            'UPDATE users SET updated_at = CURRENT_TIMESTAMP WHERE id = NEW.id',
         },
         {
           name: 'trigger_projects_updated_at',
           table: 'projects',
           event: 'update',
           timing: 'after',
-          function: 'UPDATE projects SET updated_at = CURRENT_TIMESTAMP WHERE id = NEW.id'
-        }
-      ]
+          function:
+            'UPDATE projects SET updated_at = CURRENT_TIMESTAMP WHERE id = NEW.id',
+        },
+      ],
     };
   }
 
@@ -746,7 +832,7 @@ DROP VIEW IF EXISTS project_statistics;
     let hash = 0;
     for (let i = 0; i < content.length; i++) {
       const char = content.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
+      hash = (hash << 5) - hash + char;
       hash = hash & hash; // Convert to 32-bit integer
     }
     return Math.abs(hash).toString(16);
@@ -755,12 +841,16 @@ DROP VIEW IF EXISTS project_statistics;
   /**
    * Validate migration dependencies
    */
-  private async validateMigrationDependencies(migration: DatabaseMigration): Promise<void> {
+  private async validateMigrationDependencies(
+    migration: DatabaseMigration
+  ): Promise<void> {
     const executedMigrations = await this.getExecutedMigrations();
-    
+
     for (const dependency of migration.dependencies) {
       if (!executedMigrations.includes(dependency)) {
-        throw new Error(`Migration dependency ${dependency} not satisfied for ${migration.id}`);
+        throw new Error(
+          `Migration dependency ${dependency} not satisfied for ${migration.id}`
+        );
       }
     }
   }
@@ -780,7 +870,9 @@ DROP VIEW IF EXISTS project_statistics;
   /**
    * Record migration execution (simulated)
    */
-  private async recordMigrationExecution(migration: DatabaseMigration): Promise<void> {
+  private async recordMigrationExecution(
+    migration: DatabaseMigration
+  ): Promise<void> {
     console.log(`Recording migration execution: ${migration.id}`);
     // In real implementation, would insert into migrations table
     migration.executedAt = new Date().toISOString();
@@ -789,7 +881,9 @@ DROP VIEW IF EXISTS project_statistics;
   /**
    * Remove migration record (simulated)
    */
-  private async removeMigrationRecord(migration: DatabaseMigration): Promise<void> {
+  private async removeMigrationRecord(
+    migration: DatabaseMigration
+  ): Promise<void> {
     console.log(`Removing migration record: ${migration.id}`);
     // In real implementation, would delete from migrations table
     migration.executedAt = undefined;
@@ -800,9 +894,7 @@ DROP VIEW IF EXISTS project_statistics;
    */
   private async getExecutedMigrations(): Promise<string[]> {
     // In real implementation, would query migrations table
-    return this.migrations
-      .filter(m => m.executedAt)
-      .map(m => m.id);
+    return this.migrations.filter((m) => m.executedAt).map((m) => m.id);
   }
 
   /**

@@ -5,7 +5,10 @@
 
 import React from 'react';
 import { screen, fireEvent, waitFor } from '@testing-library/react';
-import { renderWithProviders, createMockSession } from '@/lib/testing/test-utils';
+import {
+  renderWithProviders,
+  createMockSession,
+} from '@/lib/testing/test-utils';
 import { ProjectCard, ProjectCardSkeleton } from '../project-card';
 import { generateMockProject } from '@/lib/mock-data';
 import { ProjectStatus } from '@/types/project';
@@ -15,9 +18,11 @@ describe('ProjectCard Component', () => {
   const mockProject = generateMockProject({
     id: 1,
     name: 'Test Cardiac Monitor',
-    description: 'A wireless cardiac monitoring device for continuous patient monitoring',
+    description:
+      'A wireless cardiac monitoring device for continuous patient monitoring',
     device_type: 'Cardiovascular Device',
-    intended_use: 'For continuous monitoring of cardiac rhythm in hospital settings',
+    intended_use:
+      'For continuous monitoring of cardiac rhythm in hospital settings',
     status: ProjectStatus.IN_PROGRESS,
   });
 
@@ -31,17 +36,29 @@ describe('ProjectCard Component', () => {
 
   describe('Basic Rendering', () => {
     it('renders project information correctly', () => {
-      renderWithProviders(<ProjectCard {...defaultProps} />, { session: mockSession });
+      renderWithProviders(<ProjectCard {...defaultProps} />, {
+        session: mockSession,
+      });
 
       expect(screen.getByText('Test Cardiac Monitor')).toBeInTheDocument();
-      expect(screen.getByText('A wireless cardiac monitoring device for continuous patient monitoring')).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          'A wireless cardiac monitoring device for continuous patient monitoring'
+        )
+      ).toBeInTheDocument();
       expect(screen.getByText('Cardiovascular Device')).toBeInTheDocument();
-      expect(screen.getByText('For continuous monitoring of cardiac rhythm in hospital settings')).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          'For continuous monitoring of cardiac rhythm in hospital settings'
+        )
+      ).toBeInTheDocument();
       expect(screen.getByText('In Progress')).toBeInTheDocument();
     });
 
     it('displays project status badge with correct styling', () => {
-      renderWithProviders(<ProjectCard {...defaultProps} />, { session: mockSession });
+      renderWithProviders(<ProjectCard {...defaultProps} />, {
+        session: mockSession,
+      });
 
       const statusBadge = screen.getByText('In Progress');
       expect(statusBadge).toBeInTheDocument();
@@ -49,7 +66,9 @@ describe('ProjectCard Component', () => {
     });
 
     it('shows created and updated dates', () => {
-      renderWithProviders(<ProjectCard {...defaultProps} />, { session: mockSession });
+      renderWithProviders(<ProjectCard {...defaultProps} />, {
+        session: mockSession,
+      });
 
       expect(screen.getByText(/Created/)).toBeInTheDocument();
       expect(screen.getByText(/Updated/)).toBeInTheDocument();
@@ -61,10 +80,9 @@ describe('ProjectCard Component', () => {
         updated_at: new Date().toISOString(), // Very recent update
       });
 
-      renderWithProviders(
-        <ProjectCard project={recentProject} />,
-        { session: mockSession }
-      );
+      renderWithProviders(<ProjectCard project={recentProject} />, {
+        session: mockSession,
+      });
 
       expect(screen.getByText('Recent')).toBeInTheDocument();
     });
@@ -77,10 +95,9 @@ describe('ProjectCard Component', () => {
         status: ProjectStatus.DRAFT,
       });
 
-      renderWithProviders(
-        <ProjectCard project={draftProject} />,
-        { session: mockSession }
-      );
+      renderWithProviders(<ProjectCard project={draftProject} />, {
+        session: mockSession,
+      });
 
       const statusBadge = screen.getByText('Draft');
       expect(statusBadge).toBeInTheDocument();
@@ -93,10 +110,9 @@ describe('ProjectCard Component', () => {
         status: ProjectStatus.COMPLETED,
       });
 
-      renderWithProviders(
-        <ProjectCard project={completedProject} />,
-        { session: mockSession }
-      );
+      renderWithProviders(<ProjectCard project={completedProject} />, {
+        session: mockSession,
+      });
 
       const statusBadge = screen.getByText('Completed');
       expect(statusBadge).toBeInTheDocument();
@@ -119,7 +135,9 @@ describe('ProjectCard Component', () => {
     });
 
     it('opens dropdown menu when menu button is clicked', async () => {
-      renderWithProviders(<ProjectCard {...defaultProps} />, { session: mockSession });
+      renderWithProviders(<ProjectCard {...defaultProps} />, {
+        session: mockSession,
+      });
 
       const menuButton = screen.getByRole('button', { name: /open menu/i });
       fireEvent.click(menuButton);
@@ -202,29 +220,29 @@ describe('ProjectCard Component', () => {
 
   describe('Loading States', () => {
     it('applies loading styles when loading prop is true', () => {
-      renderWithProviders(
-        <ProjectCard {...defaultProps} loading={true} />,
-        { session: mockSession }
-      );
+      renderWithProviders(<ProjectCard {...defaultProps} loading={true} />, {
+        session: mockSession,
+      });
 
       const card = screen.getByTestId('project-card');
       expect(card).toHaveClass('opacity-50', 'pointer-events-none');
     });
 
     it('disables menu button when loading', () => {
-      renderWithProviders(
-        <ProjectCard {...defaultProps} loading={true} />,
-        { session: mockSession }
-      );
+      renderWithProviders(<ProjectCard {...defaultProps} loading={true} />, {
+        session: mockSession,
+      });
 
       const menuButton = screen.getByRole('button', { name: /open menu/i });
       expect(menuButton).toBeDisabled();
     });
 
     it('shows deleting state when delete is in progress', async () => {
-      const mockOnDelete = jest.fn().mockImplementation(
-        () => new Promise(resolve => setTimeout(resolve, 100))
-      );
+      const mockOnDelete = jest
+        .fn()
+        .mockImplementation(
+          () => new Promise((resolve) => setTimeout(resolve, 100))
+        );
 
       renderWithProviders(
         <ProjectCard {...defaultProps} onDelete={mockOnDelete} />,
@@ -249,9 +267,11 @@ describe('ProjectCard Component', () => {
     });
 
     it('shows exporting state when export is in progress', async () => {
-      const mockOnExport = jest.fn().mockImplementation(
-        () => new Promise(resolve => setTimeout(resolve, 100))
-      );
+      const mockOnExport = jest
+        .fn()
+        .mockImplementation(
+          () => new Promise((resolve) => setTimeout(resolve, 100))
+        );
 
       renderWithProviders(
         <ProjectCard {...defaultProps} onExport={mockOnExport} />,
@@ -280,13 +300,14 @@ describe('ProjectCard Component', () => {
         description: undefined,
       });
 
-      renderWithProviders(
-        <ProjectCard project={projectWithoutDescription} />,
-        { session: mockSession }
-      );
+      renderWithProviders(<ProjectCard project={projectWithoutDescription} />, {
+        session: mockSession,
+      });
 
       expect(screen.getByText('Test Cardiac Monitor')).toBeInTheDocument();
-      expect(screen.queryByText('A wireless cardiac monitoring device')).not.toBeInTheDocument();
+      expect(
+        screen.queryByText('A wireless cardiac monitoring device')
+      ).not.toBeInTheDocument();
     });
 
     it('renders without device type when not provided', () => {
@@ -295,13 +316,14 @@ describe('ProjectCard Component', () => {
         device_type: undefined,
       });
 
-      renderWithProviders(
-        <ProjectCard project={projectWithoutDeviceType} />,
-        { session: mockSession }
-      );
+      renderWithProviders(<ProjectCard project={projectWithoutDeviceType} />, {
+        session: mockSession,
+      });
 
       expect(screen.queryByText('Device Type:')).not.toBeInTheDocument();
-      expect(screen.queryByText('Cardiovascular Device')).not.toBeInTheDocument();
+      expect(
+        screen.queryByText('Cardiovascular Device')
+      ).not.toBeInTheDocument();
     });
 
     it('renders without intended use when not provided', () => {
@@ -310,10 +332,9 @@ describe('ProjectCard Component', () => {
         intended_use: undefined,
       });
 
-      renderWithProviders(
-        <ProjectCard project={projectWithoutIntendedUse} />,
-        { session: mockSession }
-      );
+      renderWithProviders(<ProjectCard project={projectWithoutIntendedUse} />, {
+        session: mockSession,
+      });
 
       expect(screen.queryByText('Intended Use:')).not.toBeInTheDocument();
     });
@@ -321,14 +342,18 @@ describe('ProjectCard Component', () => {
 
   describe('Accessibility', () => {
     it('has proper ARIA labels and roles', () => {
-      renderWithProviders(<ProjectCard {...defaultProps} />, { session: mockSession });
+      renderWithProviders(<ProjectCard {...defaultProps} />, {
+        session: mockSession,
+      });
 
       const menuButton = screen.getByRole('button', { name: /open menu/i });
       expect(menuButton).toHaveAttribute('aria-expanded', 'false');
     });
 
     it('supports keyboard navigation', () => {
-      renderWithProviders(<ProjectCard {...defaultProps} />, { session: mockSession });
+      renderWithProviders(<ProjectCard {...defaultProps} />, {
+        session: mockSession,
+      });
 
       const card = screen.getByTestId('project-card');
       const menuButton = screen.getByRole('button', { name: /open menu/i });
@@ -341,18 +366,22 @@ describe('ProjectCard Component', () => {
 
   describe('Error Handling', () => {
     it('handles missing callback props gracefully', () => {
-      renderWithProviders(<ProjectCard project={mockProject} />, { session: mockSession });
+      renderWithProviders(<ProjectCard project={mockProject} />, {
+        session: mockSession,
+      });
 
       const card = screen.getByTestId('project-card');
-      
+
       expect(() => {
         fireEvent.click(card);
       }).not.toThrow();
     });
 
     it('handles async operation errors gracefully', async () => {
-      const mockOnDelete = jest.fn().mockRejectedValue(new Error('Delete failed'));
-      
+      const mockOnDelete = jest
+        .fn()
+        .mockRejectedValue(new Error('Delete failed'));
+
       renderWithProviders(
         <ProjectCard {...defaultProps} onDelete={mockOnDelete} />,
         { session: mockSession }
@@ -376,7 +405,9 @@ describe('ProjectCard Component', () => {
 
 describe('ProjectCardSkeleton Component', () => {
   it('renders skeleton loader correctly', () => {
-    renderWithProviders(<ProjectCardSkeleton />, { session: createMockSession() });
+    renderWithProviders(<ProjectCardSkeleton />, {
+      session: createMockSession(),
+    });
 
     const skeleton = screen.getByTestId('project-card-skeleton');
     expect(skeleton).toBeInTheDocument();
@@ -385,10 +416,9 @@ describe('ProjectCardSkeleton Component', () => {
 
   it('applies custom className', () => {
     const customClass = 'custom-skeleton-class';
-    renderWithProviders(
-      <ProjectCardSkeleton className={customClass} />,
-      { session: createMockSession() }
-    );
+    renderWithProviders(<ProjectCardSkeleton className={customClass} />, {
+      session: createMockSession(),
+    });
 
     const skeleton = screen.getByTestId('project-card-skeleton');
     expect(skeleton).toHaveClass(customClass);

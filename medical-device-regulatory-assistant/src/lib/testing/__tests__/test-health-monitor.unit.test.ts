@@ -1,13 +1,18 @@
 /**
  * Test Health Monitor Tests
- * 
+ *
  * Comprehensive tests for the TestHealthMonitor class to ensure it correctly
  * collects metrics, generates health reports, and supports CI/CD integration.
- * 
+ *
  * Requirements: 5.2 (consistent test results), 8.1 (CI environment success >90% pass rate)
  */
 
-import { TestHealthMonitor, TestResult, TestSuiteResult, HealthThresholds } from '../test-health-monitor';
+import {
+  TestHealthMonitor,
+  TestResult,
+  TestSuiteResult,
+  HealthThresholds,
+} from '../test-health-monitor';
 import { existsSync, rmSync, mkdirSync } from 'fs';
 import { join } from 'path';
 
@@ -17,12 +22,12 @@ describe('TestHealthMonitor', () => {
 
   beforeEach(() => {
     testDataDir = join(__dirname, 'test-health-data-temp');
-    
+
     // Clean up any existing test data
     if (existsSync(testDataDir)) {
       rmSync(testDataDir, { recursive: true, force: true });
     }
-    
+
     // Create fresh monitor instance
     monitor = new TestHealthMonitor(
       {
@@ -32,7 +37,7 @@ describe('TestHealthMonitor', () => {
         minimumConsistency: 0.9,
         maximumFlakiness: 0.1,
         maximumRegressionPercentage: 20,
-        memoryThreshold: 100
+        memoryThreshold: 100,
       },
       testDataDir,
       50 // Smaller history for testing
@@ -54,11 +59,11 @@ describe('TestHealthMonitor', () => {
         status: 'passed',
         executionTime: 100,
         timestamp: Date.now(),
-        memoryUsage: 5
+        memoryUsage: 5,
       };
 
       monitor.recordTestResult(testResult);
-      
+
       const history = monitor.getTestHistory();
       expect(history).toHaveLength(1);
       expect(history[0].testResults).toContain(testResult);
@@ -78,11 +83,11 @@ describe('TestHealthMonitor', () => {
         executionTime: 1000,
         passRate: 0.8,
         timestamp: Date.now(),
-        testResults: []
+        testResults: [],
       };
 
       monitor.recordTestSuite(suiteResult);
-      
+
       const history = monitor.getTestHistory();
       expect(history).toHaveLength(1);
       expect(history[0]).toEqual(suiteResult);
@@ -99,11 +104,11 @@ describe('TestHealthMonitor', () => {
         executionTime: 1000,
         passRate: 0, // Will be calculated
         timestamp: Date.now(),
-        testResults: []
+        testResults: [],
       };
 
       monitor.recordTestSuite(suiteResult);
-      
+
       const history = monitor.getTestHistory();
       expect(history[0].passRate).toBe(0.7);
     });
@@ -119,7 +124,7 @@ describe('TestHealthMonitor', () => {
           status: 'passed',
           executionTime: 100,
           timestamp: Date.now(),
-          memoryUsage: 5
+          memoryUsage: 5,
         },
         {
           testName: 'test2',
@@ -128,7 +133,7 @@ describe('TestHealthMonitor', () => {
           executionTime: 200,
           timestamp: Date.now(),
           memoryUsage: 8,
-          error: 'Test failed'
+          error: 'Test failed',
         },
         {
           testName: 'test3',
@@ -136,8 +141,8 @@ describe('TestHealthMonitor', () => {
           status: 'passed',
           executionTime: 150,
           timestamp: Date.now(),
-          memoryUsage: 6
-        }
+          memoryUsage: 6,
+        },
       ];
 
       const suiteResult: TestSuiteResult = {
@@ -148,9 +153,9 @@ describe('TestHealthMonitor', () => {
         skippedTests: 0,
         pendingTests: 0,
         executionTime: 450,
-        passRate: 2/3,
+        passRate: 2 / 3,
         timestamp: Date.now(),
-        testResults
+        testResults,
       };
 
       monitor.recordTestSuite(suiteResult);
@@ -158,7 +163,7 @@ describe('TestHealthMonitor', () => {
 
     it('should calculate overall pass rate correctly', () => {
       const metrics = monitor.getCurrentHealthMetrics();
-      expect(metrics.overallPassRate).toBeCloseTo(2/3, 2);
+      expect(metrics.overallPassRate).toBeCloseTo(2 / 3, 2);
     });
 
     it('should calculate average execution time correctly', () => {
@@ -188,15 +193,53 @@ describe('TestHealthMonitor', () => {
     it('should identify flaky tests correctly', () => {
       // Add multiple runs of the same test with different outcomes
       const flakyTestResults = [
-        { testName: 'flaky-test', status: 'passed' as const, executionTime: 100, timestamp: Date.now(), testFile: 'flaky.test.ts' },
-        { testName: 'flaky-test', status: 'failed' as const, executionTime: 100, timestamp: Date.now(), testFile: 'flaky.test.ts', error: 'Random failure' },
-        { testName: 'flaky-test', status: 'passed' as const, executionTime: 100, timestamp: Date.now(), testFile: 'flaky.test.ts' },
-        { testName: 'flaky-test', status: 'failed' as const, executionTime: 100, timestamp: Date.now(), testFile: 'flaky.test.ts', error: 'Random failure' },
-        { testName: 'stable-test', status: 'passed' as const, executionTime: 100, timestamp: Date.now(), testFile: 'stable.test.ts' },
-        { testName: 'stable-test', status: 'passed' as const, executionTime: 100, timestamp: Date.now(), testFile: 'stable.test.ts' }
+        {
+          testName: 'flaky-test',
+          status: 'passed' as const,
+          executionTime: 100,
+          timestamp: Date.now(),
+          testFile: 'flaky.test.ts',
+        },
+        {
+          testName: 'flaky-test',
+          status: 'failed' as const,
+          executionTime: 100,
+          timestamp: Date.now(),
+          testFile: 'flaky.test.ts',
+          error: 'Random failure',
+        },
+        {
+          testName: 'flaky-test',
+          status: 'passed' as const,
+          executionTime: 100,
+          timestamp: Date.now(),
+          testFile: 'flaky.test.ts',
+        },
+        {
+          testName: 'flaky-test',
+          status: 'failed' as const,
+          executionTime: 100,
+          timestamp: Date.now(),
+          testFile: 'flaky.test.ts',
+          error: 'Random failure',
+        },
+        {
+          testName: 'stable-test',
+          status: 'passed' as const,
+          executionTime: 100,
+          timestamp: Date.now(),
+          testFile: 'stable.test.ts',
+        },
+        {
+          testName: 'stable-test',
+          status: 'passed' as const,
+          executionTime: 100,
+          timestamp: Date.now(),
+          testFile: 'stable.test.ts',
+        },
       ];
 
-      flakyTestResults.forEach(result => monitor.recordTestResult(result));
+      flakyTestResults.forEach((result) => monitor.recordTestResult(result));
 
       const metrics = monitor.getCurrentHealthMetrics();
       expect(metrics.flakyTests).toHaveLength(1);
@@ -209,12 +252,30 @@ describe('TestHealthMonitor', () => {
   describe('Slow Test Detection', () => {
     it('should identify slow tests correctly', () => {
       const slowTestResults = [
-        { testName: 'slow-test', status: 'passed' as const, executionTime: 2000, timestamp: Date.now(), testFile: 'slow.test.ts' },
-        { testName: 'slow-test', status: 'passed' as const, executionTime: 1800, timestamp: Date.now(), testFile: 'slow.test.ts' },
-        { testName: 'fast-test', status: 'passed' as const, executionTime: 50, timestamp: Date.now(), testFile: 'fast.test.ts' }
+        {
+          testName: 'slow-test',
+          status: 'passed' as const,
+          executionTime: 2000,
+          timestamp: Date.now(),
+          testFile: 'slow.test.ts',
+        },
+        {
+          testName: 'slow-test',
+          status: 'passed' as const,
+          executionTime: 1800,
+          timestamp: Date.now(),
+          testFile: 'slow.test.ts',
+        },
+        {
+          testName: 'fast-test',
+          status: 'passed' as const,
+          executionTime: 50,
+          timestamp: Date.now(),
+          testFile: 'fast.test.ts',
+        },
       ];
 
-      slowTestResults.forEach(result => monitor.recordTestResult(result));
+      slowTestResults.forEach((result) => monitor.recordTestResult(result));
 
       const metrics = monitor.getCurrentHealthMetrics();
       expect(metrics.slowTests).toHaveLength(1);
@@ -237,9 +298,22 @@ describe('TestHealthMonitor', () => {
         passRate: 0.7,
         timestamp: Date.now(),
         testResults: [
-          { testName: 'slow-test', status: 'passed', executionTime: 2000, timestamp: Date.now(), testFile: 'slow.test.ts' },
-          { testName: 'failing-test', status: 'failed', executionTime: 100, timestamp: Date.now(), testFile: 'failing.test.ts', error: 'Assertion failed' }
-        ]
+          {
+            testName: 'slow-test',
+            status: 'passed',
+            executionTime: 2000,
+            timestamp: Date.now(),
+            testFile: 'slow.test.ts',
+          },
+          {
+            testName: 'failing-test',
+            status: 'failed',
+            executionTime: 100,
+            timestamp: Date.now(),
+            testFile: 'failing.test.ts',
+            error: 'Assertion failed',
+          },
+        ],
       };
 
       monitor.recordTestSuite(problematicSuite);
@@ -247,7 +321,7 @@ describe('TestHealthMonitor', () => {
 
     it('should generate health report with correct status', () => {
       const report = monitor.generateHealthReport();
-      
+
       expect(report.status).toBe('critical'); // Should be critical due to very low pass rate (70%)
       expect(report.metrics.overallPassRate).toBeCloseTo(0.5, 1); // 1 failed out of 2 test results
       expect(report.ciStatus.shouldPass).toBe(false); // Should not pass CI
@@ -255,35 +329,41 @@ describe('TestHealthMonitor', () => {
 
     it('should identify pass rate issues', () => {
       const report = monitor.generateHealthReport();
-      
-      const passRateIssue = report.issues.find(issue => 
-        issue.category === 'reliability' && issue.message.includes('Pass rate')
+
+      const passRateIssue = report.issues.find(
+        (issue) =>
+          issue.category === 'reliability' &&
+          issue.message.includes('Pass rate')
       );
-      
+
       expect(passRateIssue).toBeDefined();
       expect(passRateIssue?.severity).toBe('critical');
     });
 
     it('should identify performance issues', () => {
       const report = monitor.generateHealthReport();
-      
-      const performanceIssue = report.issues.find(issue => 
-        issue.category === 'performance' && issue.message.includes('execution time')
+
+      const performanceIssue = report.issues.find(
+        (issue) =>
+          issue.category === 'performance' &&
+          issue.message.includes('execution time')
       );
-      
+
       expect(performanceIssue).toBeDefined();
     });
 
     it('should provide recommendations', () => {
       const report = monitor.generateHealthReport();
-      
+
       expect(report.recommendations.length).toBeGreaterThan(0);
-      expect(report.recommendations.some(rec => rec.includes('slow tests'))).toBe(true);
+      expect(
+        report.recommendations.some((rec) => rec.includes('slow tests'))
+      ).toBe(true);
     });
 
     it('should determine CI status correctly', () => {
       const report = monitor.generateHealthReport();
-      
+
       expect(report.ciStatus.shouldPass).toBe(false);
       expect(report.ciStatus.blockingIssues.length).toBeGreaterThan(0);
     });
@@ -301,11 +381,11 @@ describe('TestHealthMonitor', () => {
         executionTime: 2000, // Under threshold
         passRate: 1.0,
         timestamp: Date.now(),
-        testResults: []
+        testResults: [],
       };
 
       monitor.recordTestSuite(healthySuite);
-      
+
       // Add multiple healthy suites to establish consistency
       for (let i = 0; i < 5; i++) {
         const additionalSuite: TestSuiteResult = {
@@ -318,15 +398,15 @@ describe('TestHealthMonitor', () => {
               testFile: `healthy-${i}.test.ts`,
               status: 'passed',
               executionTime: 100,
-              timestamp: Date.now() + i * 1000
-            }
-          ]
+              timestamp: Date.now() + i * 1000,
+            },
+          ],
         };
         monitor.recordTestSuite(additionalSuite);
       }
-      
+
       expect(monitor.shouldPassCI()).toBe(true);
-      
+
       const report = monitor.generateHealthReport();
       expect(report.status).toBe('healthy');
       expect(report.ciStatus.shouldPass).toBe(true);
@@ -344,13 +424,13 @@ describe('TestHealthMonitor', () => {
         executionTime: 1000,
         passRate: 0.5,
         timestamp: Date.now(),
-        testResults: []
+        testResults: [],
       };
 
       monitor.recordTestSuite(unhealthySuite);
-      
+
       expect(monitor.shouldPassCI()).toBe(false);
-      
+
       const report = monitor.generateHealthReport();
       expect(report.ciStatus.shouldPass).toBe(false);
       expect(report.ciStatus.blockingIssues.length).toBeGreaterThan(0);
@@ -364,11 +444,11 @@ describe('TestHealthMonitor', () => {
         testFile: 'persistent.test.ts',
         status: 'passed',
         executionTime: 100,
-        timestamp: Date.now()
+        timestamp: Date.now(),
       };
 
       monitor.recordTestResult(testResult);
-      
+
       // Force save to disk
       const testSuite: TestSuiteResult = {
         suiteName: 'Persistence Test Suite',
@@ -380,20 +460,20 @@ describe('TestHealthMonitor', () => {
         executionTime: 100,
         passRate: 1,
         timestamp: Date.now(),
-        testResults: [testResult]
+        testResults: [testResult],
       };
       monitor.recordTestSuite(testSuite);
-      
+
       // Wait a bit for file system operations
-      await new Promise(resolve => setTimeout(resolve, 200));
-      
+      await new Promise((resolve) => setTimeout(resolve, 200));
+
       // Create new monitor instance (should load from disk)
       const newMonitor = new TestHealthMonitor(undefined, testDataDir);
       const history = newMonitor.getTestHistory();
-      
+
       expect(history.length).toBeGreaterThanOrEqual(1);
-      const foundSuite = history.find(suite => 
-        suite.testResults.some(test => test.testName === 'persistent test')
+      const foundSuite = history.find((suite) =>
+        suite.testResults.some((test) => test.testName === 'persistent test')
       );
       expect(foundSuite).toBeDefined();
       expect(foundSuite!.testResults[0].testName).toBe('persistent test');
@@ -401,7 +481,7 @@ describe('TestHealthMonitor', () => {
 
     it('should handle missing data files gracefully', () => {
       const nonExistentDir = join(__dirname, 'non-existent-dir');
-      
+
       expect(() => {
         new TestHealthMonitor(undefined, nonExistentDir);
       }).not.toThrow();
@@ -415,13 +495,13 @@ describe('TestHealthMonitor', () => {
         testFile: 'export.test.ts',
         status: 'passed',
         executionTime: 100,
-        timestamp: Date.now()
+        timestamp: Date.now(),
       };
 
       monitor.recordTestResult(testResult);
-      
+
       const exportData = monitor.exportHealthData();
-      
+
       expect(exportData.testHistory).toHaveLength(1);
       expect(exportData.healthHistory).toHaveLength(1);
       expect(exportData.currentReport).toBeDefined();
@@ -433,7 +513,7 @@ describe('TestHealthMonitor', () => {
     it('should maintain history size limit', () => {
       // Create monitor with small history limit
       const smallMonitor = new TestHealthMonitor(undefined, testDataDir, 3);
-      
+
       // Add more suites than the limit
       for (let i = 0; i < 5; i++) {
         const suite: TestSuiteResult = {
@@ -446,12 +526,12 @@ describe('TestHealthMonitor', () => {
           executionTime: 100,
           passRate: 1,
           timestamp: Date.now() + i,
-          testResults: []
+          testResults: [],
         };
-        
+
         smallMonitor.recordTestSuite(suite);
       }
-      
+
       const history = smallMonitor.getTestHistory();
       expect(history).toHaveLength(3); // Should be limited to 3
       expect(history[0].suiteName).toBe('Suite 2'); // Should keep the most recent
@@ -463,13 +543,13 @@ describe('TestHealthMonitor', () => {
         testFile: 'test.ts',
         status: 'passed',
         executionTime: 100,
-        timestamp: Date.now()
+        timestamp: Date.now(),
       });
-      
+
       expect(monitor.getTestHistory()).toHaveLength(1);
-      
+
       monitor.clearHealthData();
-      
+
       expect(monitor.getTestHistory()).toHaveLength(0);
       expect(monitor.getHealthHistory()).toHaveLength(0);
     });

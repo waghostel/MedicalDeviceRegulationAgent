@@ -41,7 +41,7 @@ export enum AllocationStrategy {
   USER_ID_HASH = 'user_id_hash',
   GEOGRAPHIC = 'geographic',
   DEVICE_TYPE = 'device_type',
-  CUSTOM = 'custom'
+  CUSTOM = 'custom',
 }
 
 export interface AllocationRule {
@@ -72,7 +72,7 @@ export enum MetricType {
   ERROR_RATE = 'error_rate',
   USER_SATISFACTION = 'user_satisfaction',
   TASK_COMPLETION = 'task_completion',
-  CUSTOM = 'custom'
+  CUSTOM = 'custom',
 }
 
 export enum MetricAggregation {
@@ -81,7 +81,7 @@ export enum MetricAggregation {
   P95 = 'p95',
   P99 = 'p99',
   COUNT = 'count',
-  SUM = 'sum'
+  SUM = 'sum',
 }
 
 export enum ABTestStatus {
@@ -89,7 +89,7 @@ export enum ABTestStatus {
   RUNNING = 'running',
   PAUSED = 'paused',
   COMPLETED = 'completed',
-  CANCELLED = 'cancelled'
+  CANCELLED = 'cancelled',
 }
 
 export interface ABTestResult {
@@ -173,7 +173,8 @@ export class ABTestManager {
     this.createTest({
       testId: 'migration_performance_comparison',
       name: 'Migration Performance Comparison',
-      description: 'Compare performance between mock and real data implementations',
+      description:
+        'Compare performance between mock and real data implementations',
       variants: [
         {
           id: 'control_mock',
@@ -183,11 +184,11 @@ export class ABTestManager {
           configuration: {
             useRealData: false,
             featureFlags: {
-              'enable_real_database': false,
-              'enable_real_classification_api': false,
-              'enable_real_predicate_api': false
-            }
-          }
+              enable_real_database: false,
+              enable_real_classification_api: false,
+              enable_real_predicate_api: false,
+            },
+          },
         },
         {
           id: 'treatment_real',
@@ -197,12 +198,12 @@ export class ABTestManager {
           configuration: {
             useRealData: true,
             featureFlags: {
-              'enable_real_database': true,
-              'enable_real_classification_api': true,
-              'enable_real_predicate_api': true
-            }
-          }
-        }
+              enable_real_database: true,
+              enable_real_classification_api: true,
+              enable_real_predicate_api: true,
+            },
+          },
+        },
       ],
       trafficAllocation: {
         strategy: AllocationStrategy.USER_ID_HASH,
@@ -210,8 +211,8 @@ export class ABTestManager {
         stickyness: {
           enabled: true,
           duration: 30, // 30 days
-          storageKey: 'ab_test_migration_performance'
-        }
+          storageKey: 'ab_test_migration_performance',
+        },
       },
       metrics: [
         {
@@ -221,7 +222,7 @@ export class ABTestManager {
           aggregation: MetricAggregation.P95,
           target: 2000, // 2 seconds
           threshold: 3000, // 3 seconds max
-          significance: 0.95
+          significance: 0.95,
         },
         {
           id: 'api_response_time',
@@ -230,7 +231,7 @@ export class ABTestManager {
           aggregation: MetricAggregation.MEAN,
           target: 500, // 500ms
           threshold: 1000, // 1 second max
-          significance: 0.95
+          significance: 0.95,
         },
         {
           id: 'error_rate',
@@ -239,7 +240,7 @@ export class ABTestManager {
           aggregation: MetricAggregation.MEAN,
           target: 0.01, // 1%
           threshold: 0.05, // 5% max
-          significance: 0.95
+          significance: 0.95,
         },
         {
           id: 'task_completion_rate',
@@ -248,12 +249,12 @@ export class ABTestManager {
           aggregation: MetricAggregation.MEAN,
           target: 0.95, // 95%
           threshold: 0.85, // 85% min
-          significance: 0.95
-        }
+          significance: 0.95,
+        },
       ],
       duration: 14, // 2 weeks
       startDate: new Date().toISOString(),
-      status: ABTestStatus.DRAFT
+      status: ABTestStatus.DRAFT,
     });
   }
 
@@ -263,7 +264,7 @@ export class ABTestManager {
   createTest(config: ABTestConfig): void {
     // Validate configuration
     this.validateTestConfig(config);
-    
+
     this.tests.set(config.testId, config);
   }
 
@@ -276,7 +277,7 @@ export class ABTestManager {
 
     test.status = ABTestStatus.RUNNING;
     test.startDate = new Date().toISOString();
-    
+
     // Calculate end date
     const endDate = new Date();
     endDate.setDate(endDate.getDate() + test.duration);
@@ -303,10 +304,10 @@ export class ABTestManager {
 
     // Assign based on allocation strategy
     const variantId = this.allocateVariant(test, userId);
-    
+
     // Store assignment
     this.participantAssignments.set(assignmentKey, variantId);
-    
+
     return variantId;
   }
 
@@ -327,10 +328,13 @@ export class ABTestManager {
   /**
    * Allocate by user ID hash
    */
-  private allocateByUserIdHash(variants: ABTestVariant[], userId: string): string {
+  private allocateByUserIdHash(
+    variants: ABTestVariant[],
+    userId: string
+  ): string {
     const hash = this.hashUserId(userId);
     const percentage = hash % 100;
-    
+
     let cumulativeAllocation = 0;
     for (const variant of variants) {
       cumulativeAllocation += variant.allocation;
@@ -338,7 +342,7 @@ export class ABTestManager {
         return variant.id;
       }
     }
-    
+
     return variants[variants.length - 1].id;
   }
 
@@ -347,7 +351,7 @@ export class ABTestManager {
    */
   private allocateRandomly(variants: ABTestVariant[]): string {
     const random = Math.random() * 100;
-    
+
     let cumulativeAllocation = 0;
     for (const variant of variants) {
       cumulativeAllocation += variant.allocation;
@@ -355,7 +359,7 @@ export class ABTestManager {
         return variant.id;
       }
     }
-    
+
     return variants[variants.length - 1].id;
   }
 
@@ -366,7 +370,7 @@ export class ABTestManager {
     let hash = 0;
     for (let i = 0; i < userId.length; i++) {
       const char = userId.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
+      hash = (hash << 5) - hash + char;
       hash = hash & hash; // Convert to 32-bit integer
     }
     return Math.abs(hash);
@@ -386,7 +390,11 @@ export class ABTestManager {
     if (!variantId) return;
 
     // In a real implementation, this would store events in a database
-    console.log(`[ABTest] ${testId} - ${variantId} - ${eventType}:`, value, metadata);
+    console.log(
+      `[ABTest] ${testId} - ${variantId} - ${eventType}:`,
+      value,
+      metadata
+    );
   }
 
   /**
@@ -399,7 +407,7 @@ export class ABTestManager {
     // In a real implementation, this would query actual data
     // For now, generate mock results
     const mockResults = this.generateMockResults(test);
-    
+
     this.results.set(testId, mockResults);
     return mockResults;
   }
@@ -408,32 +416,44 @@ export class ABTestManager {
    * Generate mock results for demonstration
    */
   private generateMockResults(test: ABTestConfig): ABTestResult {
-    const variantResults: VariantResult[] = test.variants.map(variant => {
+    const variantResults: VariantResult[] = test.variants.map((variant) => {
       const participants = Math.floor(Math.random() * 1000) + 500;
-      
+
       // Mock data shows real implementation is slightly slower but more reliable
       const isRealData = variant.configuration.useRealData;
-      
+
       return {
         variantId: variant.id,
         variantName: variant.name,
         participants,
-        metrics: test.metrics.map(metric => this.generateMockMetricResult(metric, isRealData)),
+        metrics: test.metrics.map((metric) =>
+          this.generateMockMetricResult(metric, isRealData)
+        ),
         conversionRate: isRealData ? 0.92 : 0.89,
         averageResponseTime: isRealData ? 650 : 200,
         errorRate: isRealData ? 0.02 : 0.001,
-        userSatisfaction: isRealData ? 4.3 : 4.1
+        userSatisfaction: isRealData ? 4.3 : 4.1,
       };
     });
 
-    const totalParticipants = variantResults.reduce((sum, result) => sum + result.participants, 0);
-    
+    const totalParticipants = variantResults.reduce(
+      (sum, result) => sum + result.participants,
+      0
+    );
+
     // Determine winner (real data wins on reliability, mock on speed)
-    const realDataVariant = variantResults.find(v => v.variantName.includes('Real'));
-    const mockDataVariant = variantResults.find(v => v.variantName.includes('Mock'));
-    
-    const winningVariant = realDataVariant && realDataVariant.conversionRate > (mockDataVariant?.conversionRate || 0) ?
-      realDataVariant.variantId : mockDataVariant?.variantId;
+    const realDataVariant = variantResults.find((v) =>
+      v.variantName.includes('Real')
+    );
+    const mockDataVariant = variantResults.find((v) =>
+      v.variantName.includes('Mock')
+    );
+
+    const winningVariant =
+      realDataVariant &&
+      realDataVariant.conversionRate > (mockDataVariant?.conversionRate || 0)
+        ? realDataVariant.variantId
+        : mockDataVariant?.variantId;
 
     return {
       testId: test.testId,
@@ -443,7 +463,7 @@ export class ABTestManager {
         testDuration: 7, // 7 days so far
         winningVariant,
         liftPercentage: 3.4, // 3.4% improvement
-        confidenceLevel: 0.95
+        confidenceLevel: 0.95,
       },
       statisticalSignificance: {
         isSignificant: true,
@@ -453,20 +473,23 @@ export class ABTestManager {
           achievedPower: 0.85,
           requiredSampleSize: 1000,
           actualSampleSize: totalParticipants,
-          minimumDetectableEffect: 0.05
-        }
+          minimumDetectableEffect: 0.05,
+        },
       },
       recommendations: this.generateRecommendations(variantResults),
-      generatedAt: new Date().toISOString()
+      generatedAt: new Date().toISOString(),
     };
   }
 
   /**
    * Generate mock metric result
    */
-  private generateMockMetricResult(metric: ABTestMetric, isRealData: boolean): MetricResult {
+  private generateMockMetricResult(
+    metric: ABTestMetric,
+    isRealData: boolean
+  ): MetricResult {
     let baseValue: number;
-    
+
     switch (metric.type) {
       case MetricType.RESPONSE_TIME:
         baseValue = isRealData ? 650 : 200; // Real data is slower
@@ -483,26 +506,32 @@ export class ABTestManager {
 
     const variance = baseValue * 0.1; // 10% variance
     const value = baseValue + (Math.random() - 0.5) * variance;
-    
+
     return {
       metricId: metric.id,
       metricName: metric.name,
       value,
       confidenceInterval: [value * 0.9, value * 1.1],
       sampleSize: Math.floor(Math.random() * 500) + 250,
-      standardError: value * 0.05
+      standardError: value * 0.05,
     };
   }
 
   /**
    * Generate recommendations based on results
    */
-  private generateRecommendations(variantResults: VariantResult[]): TestRecommendation[] {
+  private generateRecommendations(
+    variantResults: VariantResult[]
+  ): TestRecommendation[] {
     const recommendations: TestRecommendation[] = [];
-    
-    const realDataResult = variantResults.find(v => v.variantName.includes('Real'));
-    const mockDataResult = variantResults.find(v => v.variantName.includes('Mock'));
-    
+
+    const realDataResult = variantResults.find((v) =>
+      v.variantName.includes('Real')
+    );
+    const mockDataResult = variantResults.find((v) =>
+      v.variantName.includes('Mock')
+    );
+
     if (realDataResult && mockDataResult) {
       // Compare conversion rates
       if (realDataResult.conversionRate! > mockDataResult.conversionRate!) {
@@ -510,18 +539,22 @@ export class ABTestManager {
           type: 'winner',
           priority: 'high',
           title: 'Real Data Implementation Shows Better Results',
-          description: 'Real data implementation has higher task completion rate',
+          description:
+            'Real data implementation has higher task completion rate',
           reasoning: `Real data: ${(realDataResult.conversionRate! * 100).toFixed(1)}% vs Mock data: ${(mockDataResult.conversionRate! * 100).toFixed(1)}%`,
           actions: [
             'Proceed with real data migration',
             'Address performance concerns',
-            'Monitor error rates closely'
-          ]
+            'Monitor error rates closely',
+          ],
         });
       }
-      
+
       // Performance concerns
-      if (realDataResult.averageResponseTime! > mockDataResult.averageResponseTime! * 2) {
+      if (
+        realDataResult.averageResponseTime! >
+        mockDataResult.averageResponseTime! * 2
+      ) {
         recommendations.push({
           type: 'investigate',
           priority: 'medium',
@@ -532,8 +565,8 @@ export class ABTestManager {
             'Optimize API performance',
             'Implement caching',
             'Consider database indexing',
-            'Add performance monitoring'
-          ]
+            'Add performance monitoring',
+          ],
         });
       }
     }
@@ -546,13 +579,18 @@ export class ABTestManager {
    */
   private validateTestConfig(config: ABTestConfig): void {
     // Check variant allocations sum to 100%
-    const totalAllocation = config.variants.reduce((sum, variant) => sum + variant.allocation, 0);
+    const totalAllocation = config.variants.reduce(
+      (sum, variant) => sum + variant.allocation,
+      0
+    );
     if (Math.abs(totalAllocation - 100) > 0.01) {
-      throw new Error(`Variant allocations must sum to 100%, got ${totalAllocation}%`);
+      throw new Error(
+        `Variant allocations must sum to 100%, got ${totalAllocation}%`
+      );
     }
 
     // Check for duplicate variant IDs
-    const variantIds = config.variants.map(v => v.id);
+    const variantIds = config.variants.map((v) => v.id);
     if (new Set(variantIds).size !== variantIds.length) {
       throw new Error('Variant IDs must be unique');
     }
@@ -560,7 +598,9 @@ export class ABTestManager {
     // Validate metrics
     for (const metric of config.metrics) {
       if (metric.significance < 0 || metric.significance > 1) {
-        throw new Error(`Metric significance must be between 0 and 1, got ${metric.significance}`);
+        throw new Error(
+          `Metric significance must be between 0 and 1, got ${metric.significance}`
+        );
       }
     }
   }
@@ -590,21 +630,28 @@ export class ABTestManager {
 /**
  * React Hook for A/B Testing
  */
-export function useABTest(testId: string, userId: string): {
+export function useABTest(
+  testId: string,
+  userId: string
+): {
   variantId: string | null;
   isLoading: boolean;
-  recordEvent: (eventType: string, value?: number, metadata?: Record<string, any>) => void;
+  recordEvent: (
+    eventType: string,
+    value?: number,
+    metadata?: Record<string, any>
+  ) => void;
 } {
   // This would integrate with React in a real implementation
   const manager = new ABTestManager();
   const variantId = manager.assignUserToVariant(testId, userId);
-  
+
   return {
     variantId,
     isLoading: false,
     recordEvent: (eventType, value, metadata) => {
       manager.recordEvent(testId, userId, eventType, value, metadata);
-    }
+    },
   };
 }
 
@@ -626,20 +673,24 @@ export function createMigrationABTest(
         name: 'Control (Mock Data)',
         description: 'Existing mock data implementation',
         allocation: 50,
-        configuration: { useRealData: false, featureFlags: {} }
+        configuration: { useRealData: false, featureFlags: {} },
       },
       {
         id: 'treatment',
         name: 'Treatment (Real Data)',
         description: 'New real data implementation',
         allocation: 50,
-        configuration: { useRealData: true, featureFlags: {} }
-      }
+        configuration: { useRealData: true, featureFlags: {} },
+      },
     ],
     trafficAllocation: {
       strategy: AllocationStrategy.USER_ID_HASH,
       rules: [],
-      stickyness: { enabled: true, duration: 30, storageKey: `ab_test_${testId}` }
+      stickyness: {
+        enabled: true,
+        duration: 30,
+        storageKey: `ab_test_${testId}`,
+      },
     },
     metrics: [
       {
@@ -647,18 +698,18 @@ export function createMigrationABTest(
         name: 'Response Time',
         type: MetricType.RESPONSE_TIME,
         aggregation: MetricAggregation.P95,
-        significance: 0.95
+        significance: 0.95,
       },
       {
         id: 'error_rate',
         name: 'Error Rate',
         type: MetricType.ERROR_RATE,
         aggregation: MetricAggregation.MEAN,
-        significance: 0.95
-      }
+        significance: 0.95,
+      },
     ],
     duration,
     startDate: new Date().toISOString(),
-    status: ABTestStatus.DRAFT
+    status: ABTestStatus.DRAFT,
   };
 }

@@ -1,9 +1,9 @@
 /**
  * Hook Execution Tracer
- * 
+ *
  * Provides detailed tracing and debugging capabilities for React hook execution,
  * including dependency tracking, state changes, and effect monitoring.
- * 
+ *
  * Requirements: 5.4, 6.2
  */
 
@@ -88,14 +88,14 @@ export interface HookPerformanceMetrics {
   stateUpdateCount: number;
 }
 
-export type HookExecutionStatus = 
+export type HookExecutionStatus =
   | 'PENDING'
   | 'EXECUTING'
   | 'COMPLETED'
   | 'ERROR'
   | 'TIMEOUT';
 
-export type HookStepType = 
+export type HookStepType =
   | 'INITIALIZATION'
   | 'STATE_READ'
   | 'STATE_UPDATE'
@@ -107,7 +107,7 @@ export type HookStepType =
   | 'MEMO_CALCULATION'
   | 'REF_UPDATE';
 
-export type DependencyType = 
+export type DependencyType =
   | 'STATE'
   | 'PROPS'
   | 'CONTEXT'
@@ -116,20 +116,16 @@ export type DependencyType =
   | 'MEMO'
   | 'EXTERNAL';
 
-export type StateChangeType = 
-  | 'INITIAL'
-  | 'UPDATE'
-  | 'RESET'
-  | 'BATCH_UPDATE';
+export type StateChangeType = 'INITIAL' | 'UPDATE' | 'RESET' | 'BATCH_UPDATE';
 
-export type EffectType = 
+export type EffectType =
   | 'USE_EFFECT'
   | 'USE_LAYOUT_EFFECT'
   | 'USE_MEMO'
   | 'USE_CALLBACK'
   | 'CUSTOM_EFFECT';
 
-export type HookErrorType = 
+export type HookErrorType =
   | 'INVALID_HOOK_CALL'
   | 'DEPENDENCY_ERROR'
   | 'STATE_UPDATE_ERROR'
@@ -163,11 +159,13 @@ export class HookExecutionTracer {
   startTracing(componentName: string, options: TracingOptions = {}): string {
     this.isTracingEnabled = true;
     this.renderCycleCounter++;
-    
+
     const executionId = `${componentName}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-    
-    console.log(`🔍 Starting hook execution tracing for: ${componentName} (ID: ${executionId})`);
-    
+
+    console.log(
+      `🔍 Starting hook execution tracing for: ${componentName} (ID: ${executionId})`
+    );
+
     return executionId;
   }
 
@@ -196,8 +194,10 @@ export class HookExecutionTracer {
       this.completedTraces.shift();
     }
 
-    console.log(`✅ Hook execution tracing completed for ID: ${executionId} (${trace.duration?.toFixed(2)}ms)`);
-    
+    console.log(
+      `✅ Hook execution tracing completed for ID: ${executionId} (${trace.duration?.toFixed(2)}ms)`
+    );
+
     this.isTracingEnabled = this.activeTraces.size > 0;
     return trace;
   }
@@ -217,18 +217,18 @@ export class HookExecutionTracer {
 
     const executionId = `${componentName}-${hookName}-${Date.now()}`;
     const trace = this.createHookTrace(hookName, componentName, executionId);
-    
+
     this.activeTraces.set(executionId, trace);
 
     try {
       // Execute hook with tracing
       const result = this.executeHookWithTracing(trace, hookFunction, args);
-      
+
       // Update trace status
       trace.status = 'COMPLETED';
       trace.endTime = performance.now();
       trace.duration = trace.endTime - trace.startTime;
-      
+
       return result;
     } catch (error) {
       // Handle hook execution error
@@ -260,36 +260,50 @@ export class HookExecutionTracer {
 - **State Updates**: ${trace.performance.stateUpdateCount}
 
 ## Execution Steps
-${trace.steps.map(step => `
+${trace.steps
+  .map(
+    (step) => `
 ### ${step.stepType}: ${step.description}
 **Duration**: ${step.duration.toFixed(2)}ms
 **Status**: ${step.success ? '✅ Success' : '❌ Failed'}
 ${step.error ? `**Error**: ${step.error}` : ''}
 **Input**: ${JSON.stringify(step.input, null, 2)}
 **Output**: ${JSON.stringify(step.output, null, 2)}
-`).join('\n')}
+`
+  )
+  .join('\n')}
 
 ## Dependencies
-${trace.dependencies.map(dep => `
+${trace.dependencies
+  .map(
+    (dep) => `
 ### ${dep.name} (${dep.type})
 **Changed**: ${dep.changed ? '✅ Yes' : '❌ No'}
 **Current Value**: ${JSON.stringify(dep.value, null, 2)}
 ${dep.previousValue !== undefined ? `**Previous Value**: ${JSON.stringify(dep.previousValue, null, 2)}` : ''}
 **Source**: ${dep.source}
-`).join('\n')}
+`
+  )
+  .join('\n')}
 
 ## State Changes
-${trace.stateChanges.map(change => `
+${trace.stateChanges
+  .map(
+    (change) => `
 ### ${change.stateVariable}
 **Type**: ${change.changeType}
 **Trigger**: ${change.trigger}
 **Previous**: ${JSON.stringify(change.previousValue, null, 2)}
 **New**: ${JSON.stringify(change.newValue, null, 2)}
 **Time**: ${new Date(change.timestamp).toISOString()}
-`).join('\n')}
+`
+  )
+  .join('\n')}
 
 ## Effect Executions
-${trace.effectExecutions.map(effect => `
+${trace.effectExecutions
+  .map(
+    (effect) => `
 ### Effect ${effect.effectId} (${effect.effectType})
 **Dependencies Changed**: ${effect.dependenciesChanged ? '✅ Yes' : '❌ No'}
 **Executed**: ${effect.executed ? '✅ Yes' : '❌ No'}
@@ -297,11 +311,17 @@ ${trace.effectExecutions.map(effect => `
 **Duration**: ${effect.duration.toFixed(2)}ms
 ${effect.error ? `**Error**: ${effect.error}` : ''}
 **Dependencies**: ${JSON.stringify(effect.dependencies, null, 2)}
-`).join('\n')}
+`
+  )
+  .join('\n')}
 
-${trace.errors.length > 0 ? `
+${
+  trace.errors.length > 0
+    ? `
 ## Errors
-${trace.errors.map(error => `
+${trace.errors
+  .map(
+    (error) => `
 ### ${error.errorType}
 **Message**: ${error.message}
 **Recoverable**: ${error.recoverable ? '✅ Yes' : '❌ No'}
@@ -311,8 +331,12 @@ ${error.step ? `**Step**: ${error.step}` : ''}
 \`\`\`
 ${error.stack}
 \`\`\`
-`).join('\n')}
-` : ''}
+`
+  )
+  .join('\n')}
+`
+    : ''
+}
 
 ## Call Stack
 \`\`\`
@@ -328,21 +352,24 @@ ${trace.callStack.join('\n')}
    * Get hook execution statistics
    */
   getHookExecutionStatistics(): HookExecutionStatistics {
-    const allTraces = [...this.completedTraces, ...Array.from(this.activeTraces.values())];
+    const allTraces = [
+      ...this.completedTraces,
+      ...Array.from(this.activeTraces.values()),
+    ];
     const totalExecutions = allTraces.length;
-    
+
     const hookUsage = new Map<string, number>();
     const errorTypes = new Map<HookErrorType, number>();
     let totalDuration = 0;
     let successfulExecutions = 0;
 
-    allTraces.forEach(trace => {
+    allTraces.forEach((trace) => {
       // Count hook usage
       const count = hookUsage.get(trace.hookName) || 0;
       hookUsage.set(trace.hookName, count + 1);
 
       // Count errors
-      trace.errors.forEach(error => {
+      trace.errors.forEach((error) => {
         const errorCount = errorTypes.get(error.errorType) || 0;
         errorTypes.set(error.errorType, errorCount + 1);
       });
@@ -351,7 +378,7 @@ ${trace.callStack.join('\n')}
       if (trace.duration) {
         totalDuration += trace.duration;
       }
-      
+
       if (trace.status === 'COMPLETED') {
         successfulExecutions++;
       }
@@ -360,11 +387,15 @@ ${trace.callStack.join('\n')}
     return {
       totalExecutions,
       successfulExecutions,
-      successRate: totalExecutions > 0 ? (successfulExecutions / totalExecutions) * 100 : 0,
-      averageExecutionTime: totalExecutions > 0 ? totalDuration / totalExecutions : 0,
+      successRate:
+        totalExecutions > 0
+          ? (successfulExecutions / totalExecutions) * 100
+          : 0,
+      averageExecutionTime:
+        totalExecutions > 0 ? totalDuration / totalExecutions : 0,
       hookUsageBreakdown: Object.fromEntries(hookUsage),
       errorBreakdown: Object.fromEntries(errorTypes),
-      recentTraces: this.completedTraces.slice(-10)
+      recentTraces: this.completedTraces.slice(-10),
     };
   }
 
@@ -381,7 +412,8 @@ ${trace.callStack.join('\n')}
         type: 'SLOW_EXECUTION',
         severity: 'high',
         description: `Hook execution took ${trace.performance.totalExecutionTime.toFixed(2)}ms`,
-        suggestion: 'Consider optimizing hook logic or using useMemo/useCallback'
+        suggestion:
+          'Consider optimizing hook logic or using useMemo/useCallback',
       });
     }
 
@@ -391,17 +423,19 @@ ${trace.callStack.join('\n')}
         type: 'EXCESSIVE_RENDERS',
         severity: 'medium',
         description: `Hook triggered ${trace.performance.renderCount} re-renders`,
-        suggestion: 'Check dependency arrays and state update patterns'
+        suggestion: 'Check dependency arrays and state update patterns',
       });
     }
 
     // Check for memory usage
-    if (trace.performance.memoryUsage > 50 * 1024 * 1024) { // 50MB
+    if (trace.performance.memoryUsage > 50 * 1024 * 1024) {
+      // 50MB
       issues.push({
         type: 'HIGH_MEMORY_USAGE',
         severity: 'high',
         description: `Hook used ${(trace.performance.memoryUsage / 1024 / 1024).toFixed(2)}MB of memory`,
-        suggestion: 'Check for memory leaks in effects or large object allocations'
+        suggestion:
+          'Check for memory leaks in effects or large object allocations',
       });
     }
 
@@ -410,7 +444,9 @@ ${trace.callStack.join('\n')}
       suggestions.push('Hook performance is within acceptable limits');
     } else {
       suggestions.push('Consider optimizing hook implementation');
-      suggestions.push('Review dependency arrays for unnecessary re-executions');
+      suggestions.push(
+        'Review dependency arrays for unnecessary re-executions'
+      );
       suggestions.push('Use React DevTools Profiler for detailed analysis');
     }
 
@@ -418,11 +454,15 @@ ${trace.callStack.join('\n')}
       overallScore: this.calculatePerformanceScore(trace),
       issues,
       suggestions,
-      metrics: trace.performance
+      metrics: trace.performance,
     };
   }
 
-  private createHookTrace(hookName: string, componentName: string, executionId: string): HookExecutionTrace {
+  private createHookTrace(
+    hookName: string,
+    componentName: string,
+    executionId: string
+  ): HookExecutionTrace {
     return {
       hookName,
       componentName,
@@ -441,17 +481,21 @@ ${trace.callStack.join('\n')}
         memoryUsage: 0,
         renderCount: 0,
         effectCount: 0,
-        stateUpdateCount: 0
+        stateUpdateCount: 0,
       },
       callStack: this.captureCallStack(),
       renderCycle: this.renderCycleCounter,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     };
   }
 
-  private executeHookWithTracing(trace: HookExecutionTrace, hookFunction: Function, args: any[]): any {
+  private executeHookWithTracing(
+    trace: HookExecutionTrace,
+    hookFunction: Function,
+    args: any[]
+  ): any {
     const stepStartTime = performance.now();
-    
+
     // Add initialization step
     const initStep: HookExecutionStep = {
       stepId: `init-${Date.now()}`,
@@ -460,29 +504,29 @@ ${trace.callStack.join('\n')}
       input: args,
       output: null,
       duration: 0,
-      success: true
+      success: true,
     };
 
     try {
       // Execute the actual hook
       const result = hookFunction.apply(null, args);
-      
+
       // Complete initialization step
       initStep.duration = performance.now() - stepStartTime;
       initStep.output = result;
       initStep.success = true;
-      
+
       trace.steps.push(initStep);
-      
+
       return result;
     } catch (error) {
       // Handle execution error
       initStep.duration = performance.now() - stepStartTime;
       initStep.success = false;
       initStep.error = error instanceof Error ? error.message : 'Unknown error';
-      
+
       trace.steps.push(initStep);
-      
+
       throw error;
     }
   }
@@ -493,7 +537,7 @@ ${trace.callStack.join('\n')}
       message: error.message,
       stack: error.stack || '',
       recoverable: this.isRecoverableError(error),
-      suggestion: this.getErrorSuggestion(error)
+      suggestion: this.getErrorSuggestion(error),
     };
 
     trace.errors.push(hookError);
@@ -502,70 +546,83 @@ ${trace.callStack.join('\n')}
 
   private categorizeHookError(error: Error): HookErrorType {
     const message = error.message.toLowerCase();
-    
-    if (message.includes('invalid hook call') || message.includes('hooks can only be called')) {
+
+    if (
+      message.includes('invalid hook call') ||
+      message.includes('hooks can only be called')
+    ) {
       return 'INVALID_HOOK_CALL';
     }
-    
+
     if (message.includes('dependency') || message.includes('useeffect')) {
       return 'DEPENDENCY_ERROR';
     }
-    
+
     if (message.includes('state') || message.includes('setstate')) {
       return 'STATE_UPDATE_ERROR';
     }
-    
+
     if (message.includes('effect') || message.includes('cleanup')) {
       return 'EFFECT_ERROR';
     }
-    
-    if (message.includes('maximum update depth') || message.includes('infinite')) {
+
+    if (
+      message.includes('maximum update depth') ||
+      message.includes('infinite')
+    ) {
       return 'INFINITE_LOOP';
     }
-    
+
     return 'PERFORMANCE_WARNING';
   }
 
   private isRecoverableError(error: Error): boolean {
     const message = error.message.toLowerCase();
-    
+
     // Invalid hook calls are generally not recoverable
     if (message.includes('invalid hook call')) {
       return false;
     }
-    
+
     // Most other errors can be fixed with proper implementation
     return true;
   }
 
   private getErrorSuggestion(error: Error): string {
     const message = error.message.toLowerCase();
-    
+
     if (message.includes('invalid hook call')) {
       return 'Ensure hooks are only called at the top level of React components or custom hooks';
     }
-    
+
     if (message.includes('dependency')) {
       return 'Check useEffect dependency arrays and ensure all dependencies are included';
     }
-    
+
     if (message.includes('state')) {
       return 'Verify state updates are properly handled and not causing infinite loops';
     }
-    
+
     if (message.includes('effect')) {
       return 'Check effect cleanup functions and dependency arrays';
     }
-    
+
     return 'Review hook implementation and React best practices';
   }
 
-  private calculatePerformanceMetrics(trace: HookExecutionTrace): HookPerformanceMetrics {
+  private calculatePerformanceMetrics(
+    trace: HookExecutionTrace
+  ): HookPerformanceMetrics {
     const totalTime = trace.duration || 0;
-    const stepTimes = trace.steps.map(step => step.duration);
-    const averageStepTime = stepTimes.length > 0 ? stepTimes.reduce((sum, time) => sum + time, 0) / stepTimes.length : 0;
-    const slowestStep = trace.steps.reduce((slowest, step) => 
-      step.duration > (slowest?.duration || 0) ? step : slowest, trace.steps[0]
+    const stepTimes = trace.steps.map((step) => step.duration);
+    const averageStepTime =
+      stepTimes.length > 0
+        ? stepTimes.reduce((sum, time) => sum + time, 0) / stepTimes.length
+        : 0;
+    const slowestStep = trace.steps.reduce(
+      (slowest, step) =>
+        step.duration > (slowest?.duration || 0) ? step : slowest,
+      trace.steps[0]
     );
 
     return {
@@ -575,31 +632,33 @@ ${trace.callStack.join('\n')}
       memoryUsage: (performance as any).memory?.usedJSHeapSize || 0,
       renderCount: trace.stateChanges.length,
       effectCount: trace.effectExecutions.length,
-      stateUpdateCount: trace.stateChanges.filter(change => change.changeType === 'UPDATE').length
+      stateUpdateCount: trace.stateChanges.filter(
+        (change) => change.changeType === 'UPDATE'
+      ).length,
     };
   }
 
   private calculatePerformanceScore(trace: HookExecutionTrace): number {
     let score = 100;
-    
+
     // Deduct points for slow execution
     if (trace.performance.totalExecutionTime > 50) {
       score -= 20;
     }
-    
+
     // Deduct points for excessive renders
     if (trace.performance.renderCount > 5) {
       score -= 15;
     }
-    
+
     // Deduct points for errors
     score -= trace.errors.length * 10;
-    
+
     // Deduct points for high memory usage
     if (trace.performance.memoryUsage > 25 * 1024 * 1024) {
       score -= 10;
     }
-    
+
     return Math.max(0, score);
   }
 
@@ -647,7 +706,11 @@ export interface HookPerformanceAnalysis {
 }
 
 export interface PerformanceIssue {
-  type: 'SLOW_EXECUTION' | 'EXCESSIVE_RENDERS' | 'HIGH_MEMORY_USAGE' | 'MEMORY_LEAK';
+  type:
+    | 'SLOW_EXECUTION'
+    | 'EXCESSIVE_RENDERS'
+    | 'HIGH_MEMORY_USAGE'
+    | 'MEMORY_LEAK';
   severity: 'low' | 'medium' | 'high';
   description: string;
   suggestion: string;

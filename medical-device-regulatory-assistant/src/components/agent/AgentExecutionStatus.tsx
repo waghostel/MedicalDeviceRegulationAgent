@@ -9,13 +9,13 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { 
-  CheckCircle, 
-  Clock, 
-  AlertCircle, 
-  XCircle, 
+import {
+  CheckCircle,
+  Clock,
+  AlertCircle,
+  XCircle,
   Loader2,
-  StopCircle
+  StopCircle,
 } from 'lucide-react';
 import { AgentExecutionStatus } from '@/hooks/useAgentExecution';
 
@@ -32,9 +32,8 @@ export function AgentExecutionStatusComponent({
   onCancel,
   onRetry,
   showDetails = true,
-  className = ''
+  className = '',
 }: AgentExecutionStatusProps) {
-  
   const getStatusIcon = () => {
     switch (status.status) {
       case 'idle':
@@ -88,7 +87,7 @@ export function AgentExecutionStatusComponent({
 
   const formatExecutionTime = (timeMs?: number) => {
     if (!timeMs) return null;
-    
+
     if (timeMs < 1000) {
       return `${timeMs}ms`;
     } else if (timeMs < 60000) {
@@ -101,7 +100,8 @@ export function AgentExecutionStatusComponent({
   };
 
   const canCancel = status.status === 'processing' && onCancel;
-  const canRetry = (status.status === 'error' || status.status === 'cancelled') && onRetry;
+  const canRetry =
+    (status.status === 'error' || status.status === 'cancelled') && onRetry;
 
   return (
     <Card className={`w-full ${className}`}>
@@ -114,7 +114,7 @@ export function AgentExecutionStatusComponent({
               {getStatusText()}
             </Badge>
           </div>
-          
+
           <div className="flex items-center gap-2">
             {canCancel && (
               <Button
@@ -127,7 +127,7 @@ export function AgentExecutionStatusComponent({
                 Cancel
               </Button>
             )}
-            
+
             {canRetry && (
               <Button
                 variant="outline"
@@ -141,25 +141,24 @@ export function AgentExecutionStatusComponent({
           </div>
         </CardTitle>
       </CardHeader>
-      
+
       <CardContent className="pt-0 space-y-3">
         {/* Current Task */}
         {status.currentTask && (
           <div className="text-sm">
             <span className="text-muted-foreground">Current Task:</span>
             <span className="ml-2 font-medium">
-              {status.currentTask.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+              {status.currentTask
+                .replace(/_/g, ' ')
+                .replace(/\b\w/g, (l) => l.toUpperCase())}
             </span>
           </div>
         )}
-        
+
         {/* Progress Bar */}
         {status.status === 'processing' && (
           <div className="space-y-2">
-            <Progress 
-              value={status.progress || undefined} 
-              className="h-2"
-            />
+            <Progress value={status.progress || undefined} className="h-2" />
             {status.progress && (
               <div className="text-xs text-muted-foreground text-right">
                 {Math.round(status.progress)}%
@@ -167,14 +166,12 @@ export function AgentExecutionStatusComponent({
             )}
           </div>
         )}
-        
+
         {/* Status Message */}
         {status.message && (
-          <div className="text-sm text-muted-foreground">
-            {status.message}
-          </div>
+          <div className="text-sm text-muted-foreground">{status.message}</div>
         )}
-        
+
         {/* Error Display */}
         {status.error && (
           <Alert variant="destructive">
@@ -184,7 +181,7 @@ export function AgentExecutionStatusComponent({
             </AlertDescription>
           </Alert>
         )}
-        
+
         {/* Completed Tasks */}
         {showDetails && status.completedTasks.length > 0 && (
           <div className="space-y-2">
@@ -194,21 +191,23 @@ export function AgentExecutionStatusComponent({
                 <div key={index} className="flex items-center gap-2 text-sm">
                   <CheckCircle className="h-3 w-3 text-green-600" />
                   <span className="text-muted-foreground">
-                    {task.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                    {task
+                      .replace(/_/g, ' ')
+                      .replace(/\b\w/g, (l) => l.toUpperCase())}
                   </span>
                 </div>
               ))}
             </div>
           </div>
         )}
-        
+
         {/* Execution Time */}
         {status.executionTime && (
           <div className="text-xs text-muted-foreground">
             Execution time: {formatExecutionTime(status.executionTime)}
           </div>
         )}
-        
+
         {/* Session ID (for debugging) */}
         {showDetails && status.sessionId && (
           <div className="text-xs text-muted-foreground font-mono">
@@ -224,9 +223,8 @@ export function AgentExecutionStatusComponent({
 export function AgentExecutionStatusInline({
   status,
   onCancel,
-  className = ''
+  className = '',
 }: Pick<AgentExecutionStatusProps, 'status' | 'onCancel' | 'className'>) {
-  
   const getStatusIcon = () => {
     switch (status.status) {
       case 'processing':
@@ -245,11 +243,11 @@ export function AgentExecutionStatusInline({
   return (
     <div className={`flex items-center gap-2 text-sm ${className}`}>
       {getStatusIcon()}
-      
+
       <span className="text-muted-foreground">
         {status.message || status.status}
       </span>
-      
+
       {status.status === 'processing' && onCancel && (
         <Button
           variant="ghost"

@@ -49,8 +49,11 @@ class ErrorReportingService {
     // Set up global error handlers
     if (typeof window !== 'undefined') {
       window.addEventListener('error', this.handleGlobalError);
-      window.addEventListener('unhandledrejection', this.handleUnhandledRejection);
-      
+      window.addEventListener(
+        'unhandledrejection',
+        this.handleUnhandledRejection
+      );
+
       // Add navigation breadcrumb
       this.addBreadcrumb('Navigation', 'info', {
         url: window.location.href,
@@ -77,7 +80,11 @@ class ErrorReportingService {
   /**
    * Add breadcrumb for tracking user actions
    */
-  addBreadcrumb(message: string, level: Breadcrumb['level'] = 'info', data?: any) {
+  addBreadcrumb(
+    message: string,
+    level: Breadcrumb['level'] = 'info',
+    data?: any
+  ) {
     const breadcrumb: Breadcrumb = {
       timestamp: new Date().toISOString(),
       message,
@@ -93,7 +100,10 @@ class ErrorReportingService {
     }
 
     // Log to console in development
-    if (this.config.enableConsoleLogging && this.config.environment === 'development') {
+    if (
+      this.config.enableConsoleLogging &&
+      this.config.environment === 'development'
+    ) {
       console.log(`[Breadcrumb] ${level.toUpperCase()}: ${message}`, data);
     }
   }
@@ -101,13 +111,17 @@ class ErrorReportingService {
   /**
    * Report an error
    */
-  async reportError(error: APIError | Error, context?: Record<string, any>): Promise<void> {
+  async reportError(
+    error: APIError | Error,
+    context?: Record<string, any>
+  ): Promise<void> {
     if (!this.config.enabled) {
       return;
     }
 
-    const apiError = error instanceof APIError ? error : APIError.fromError(error);
-    
+    const apiError =
+      error instanceof APIError ? error : APIError.fromError(error);
+
     const errorReport: ErrorReport = {
       error: apiError,
       context: {
@@ -139,7 +153,7 @@ class ErrorReportingService {
         const stored = localStorage.getItem('error_reports') || '[]';
         const reports = JSON.parse(stored);
         reports.push(errorReport);
-        
+
         // Keep only last 10 reports
         const recentReports = reports.slice(-10);
         localStorage.setItem('error_reports', JSON.stringify(recentReports));
@@ -170,7 +184,7 @@ class ErrorReportingService {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${this.config.apiKey}`,
+        Authorization: `Bearer ${this.config.apiKey}`,
       },
       body: JSON.stringify(errorReport),
     });
@@ -220,13 +234,22 @@ class ErrorReportingService {
   /**
    * Track API calls
    */
-  trackAPICall(method: string, endpoint: string, status?: number, duration?: number) {
-    this.addBreadcrumb(`API: ${method} ${endpoint}`, status && status >= 400 ? 'error' : 'info', {
-      method,
-      endpoint,
-      status,
-      duration,
-    });
+  trackAPICall(
+    method: string,
+    endpoint: string,
+    status?: number,
+    duration?: number
+  ) {
+    this.addBreadcrumb(
+      `API: ${method} ${endpoint}`,
+      status && status >= 400 ? 'error' : 'info',
+      {
+        method,
+        endpoint,
+        status,
+        duration,
+      }
+    );
   }
 
   /**
@@ -239,7 +262,11 @@ class ErrorReportingService {
   /**
    * Track project operations
    */
-  trackProjectOperation(operation: string, projectId?: number, success?: boolean) {
+  trackProjectOperation(
+    operation: string,
+    projectId?: number,
+    success?: boolean
+  ) {
     this.addBreadcrumb(
       `Project ${operation}${projectId ? ` (ID: ${projectId})` : ''}`,
       success === false ? 'error' : 'info',
@@ -311,7 +338,10 @@ class ErrorReportingService {
   destroy(): void {
     if (typeof window !== 'undefined') {
       window.removeEventListener('error', this.handleGlobalError);
-      window.removeEventListener('unhandledrejection', this.handleUnhandledRejection);
+      window.removeEventListener(
+        'unhandledrejection',
+        this.handleUnhandledRejection
+      );
     }
   }
 }
@@ -326,7 +356,10 @@ export const errorReporting = new ErrorReportingService({
 export { ErrorReportingService };
 
 // Convenience functions
-export const reportError = (error: APIError | Error, context?: Record<string, any>) => {
+export const reportError = (
+  error: APIError | Error,
+  context?: Record<string, any>
+) => {
   return errorReporting.reportError(error, context);
 };
 
@@ -334,14 +367,27 @@ export const trackAction = (action: string, data?: Record<string, any>) => {
   errorReporting.trackAction(action, data);
 };
 
-export const trackAPICall = (method: string, endpoint: string, status?: number, duration?: number) => {
+export const trackAPICall = (
+  method: string,
+  endpoint: string,
+  status?: number,
+  duration?: number
+) => {
   errorReporting.trackAPICall(method, endpoint, status, duration);
 };
 
-export const trackProjectOperation = (operation: string, projectId?: number, success?: boolean) => {
+export const trackProjectOperation = (
+  operation: string,
+  projectId?: number,
+  success?: boolean
+) => {
   errorReporting.trackProjectOperation(operation, projectId, success);
 };
 
-export const addBreadcrumb = (message: string, level?: 'info' | 'warning' | 'error', data?: any) => {
+export const addBreadcrumb = (
+  message: string,
+  level?: 'info' | 'warning' | 'error',
+  data?: any
+) => {
   errorReporting.addBreadcrumb(message, level, data);
 };

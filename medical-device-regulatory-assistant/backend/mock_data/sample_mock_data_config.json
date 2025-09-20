@@ -138,7 +138,7 @@
       "product_code": "LZG",
       "regulatory_pathway": "510k",
       "cfr_sections": ["21 CFR 880.5725"],
-      "confidence_score": 0.90,
+      "confidence_score": 0.9,
       "reasoning": "Insulin infusion pump with established regulatory pathway and predicate devices"
     }
   ],
@@ -420,8 +420,16 @@
       },
       "output_data": {
         "similarity_score": 0.87,
-        "key_similarities": ["orthopedic application", "real-time tracking", "3D imaging"],
-        "key_differences": ["enhanced accuracy", "additional procedures", "improved UI"],
+        "key_similarities": [
+          "orthopedic application",
+          "real-time tracking",
+          "3D imaging"
+        ],
+        "key_differences": [
+          "enhanced accuracy",
+          "additional procedures",
+          "improved UI"
+        ],
         "substantial_equivalence": "likely"
       },
       "confidence_score": 0.83,

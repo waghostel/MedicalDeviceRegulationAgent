@@ -37,7 +37,9 @@ describe('CommandPalette', () => {
     );
 
     expect(screen.getByText('Command Palette')).toBeInTheDocument();
-    expect(screen.getByPlaceholderText('Type a command or search...')).toBeInTheDocument();
+    expect(
+      screen.getByPlaceholderText('Type a command or search...')
+    ).toBeInTheDocument();
   });
 
   it('does not render when closed', () => {
@@ -63,7 +65,9 @@ describe('CommandPalette', () => {
 
     // Find the close button - it's the button with the X icon
     const buttons = screen.getAllByRole('button');
-    const closeButton = buttons.find(button => button.innerHTML.includes('lucide-x'));
+    const closeButton = buttons.find((button) =>
+      button.innerHTML.includes('lucide-x')
+    );
     expect(closeButton).toBeDefined();
     fireEvent.click(closeButton!);
 
@@ -79,12 +83,16 @@ describe('CommandPalette', () => {
       />
     );
 
-    const searchInput = screen.getByPlaceholderText('Type a command or search...');
+    const searchInput = screen.getByPlaceholderText(
+      'Type a command or search...'
+    );
     fireEvent.change(searchInput, { target: { value: 'predicate' } });
 
     await waitFor(() => {
       expect(screen.getByText('Find Similar Predicates')).toBeInTheDocument();
-      expect(screen.queryByText('Check Classification')).not.toBeInTheDocument();
+      expect(
+        screen.queryByText('Check Classification')
+      ).not.toBeInTheDocument();
     });
   });
 
@@ -97,7 +105,9 @@ describe('CommandPalette', () => {
       />
     );
 
-    const searchInput = screen.getByPlaceholderText('Type a command or search...');
+    const searchInput = screen.getByPlaceholderText(
+      'Type a command or search...'
+    );
 
     // Test Escape key
     fireEvent.keyDown(searchInput, { key: 'Escape' });
@@ -129,7 +139,9 @@ describe('CommandPalette', () => {
       />
     );
 
-    const searchInput = screen.getByPlaceholderText('Type a command or search...');
+    const searchInput = screen.getByPlaceholderText(
+      'Type a command or search...'
+    );
     fireEvent.change(searchInput, { target: { value: 'nonexistent' } });
 
     await waitFor(() => {

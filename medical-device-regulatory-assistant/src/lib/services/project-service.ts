@@ -24,7 +24,8 @@ const MOCK_PROJECTS: Project[] = [
     name: 'Cardiac Monitor Device',
     description: 'Portable cardiac monitoring device for home use',
     device_type: 'Cardiac Monitor',
-    intended_use: 'Continuous monitoring of cardiac rhythm for patients with arrhythmia',
+    intended_use:
+      'Continuous monitoring of cardiac rhythm for patients with arrhythmia',
     status: ProjectStatus.IN_PROGRESS,
     created_at: '2024-01-15T10:00:00Z',
     updated_at: '2024-01-20T14:30:00Z',
@@ -35,7 +36,8 @@ const MOCK_PROJECTS: Project[] = [
     name: 'Blood Glucose Meter',
     description: 'Digital blood glucose monitoring system',
     device_type: 'Glucose Meter',
-    intended_use: 'Self-monitoring of blood glucose levels for diabetes management',
+    intended_use:
+      'Self-monitoring of blood glucose levels for diabetes management',
     status: ProjectStatus.DRAFT,
     created_at: '2024-01-10T09:00:00Z',
     updated_at: '2024-01-10T09:00:00Z',
@@ -44,7 +46,10 @@ const MOCK_PROJECTS: Project[] = [
 
 class ProjectService {
   private baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-  private cache = new Map<string, { data: any; timestamp: number; ttl: number }>();
+  private cache = new Map<
+    string,
+    { data: any; timestamp: number; ttl: number }
+  >();
   private readonly CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
   /**
@@ -95,7 +100,9 @@ class ProjectService {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || `HTTP ${response.status}: ${response.statusText}`);
+        throw new Error(
+          errorData.message || `HTTP ${response.status}: ${response.statusText}`
+        );
       }
 
       return await response.json();
@@ -141,7 +148,9 @@ class ProjectService {
       }
 
       if (filters.device_type) {
-        projects = projects.filter((p) => p.device_type === filters.device_type);
+        projects = projects.filter(
+          (p) => p.device_type === filters.device_type
+        );
       }
 
       // Apply pagination
@@ -301,14 +310,16 @@ class ProjectService {
           has_classification: project.id === 1, // Mock: only first project has classification
           device_class: project.id === 1 ? DeviceClass.CLASS_II : undefined,
           product_code: project.id === 1 ? 'DPS' : undefined,
-          regulatory_pathway: project.id === 1 ? RegulatoryPathway.FIVE_TEN_K : undefined,
+          regulatory_pathway:
+            project.id === 1 ? RegulatoryPathway.FIVE_TEN_K : undefined,
           confidence_score: project.id === 1 ? 0.85 : undefined,
         },
         predicate_summary: {
           total_predicates: project.id === 1 ? 5 : 0,
           selected_predicates: project.id === 1 ? 2 : 0,
           top_confidence_score: project.id === 1 ? 0.92 : undefined,
-          last_search_date: project.id === 1 ? '2024-01-20T10:00:00Z' : undefined,
+          last_search_date:
+            project.id === 1 ? '2024-01-20T10:00:00Z' : undefined,
         },
         document_summary: {
           total_documents: 3,
@@ -320,7 +331,11 @@ class ProjectService {
         },
         interaction_summary: {
           total_interactions: 8,
-          recent_actions: ['Device Classification', 'Predicate Search', 'Document Upload'],
+          recent_actions: [
+            'Device Classification',
+            'Predicate Search',
+            'Document Upload',
+          ],
           last_interaction_date: '2024-01-20T14:30:00Z',
         },
         completion_percentage: project.id === 1 ? 65 : 15,
@@ -329,7 +344,10 @@ class ProjectService {
       this.setCache(cacheKey, dashboardData);
       return dashboardData;
     } catch (error) {
-      console.error(`Failed to fetch dashboard data for project ${projectId}:`, error);
+      console.error(
+        `Failed to fetch dashboard data for project ${projectId}:`,
+        error
+      );
       throw error;
     }
   }
@@ -355,18 +373,26 @@ class ProjectService {
 
       const stats = {
         total: projects.length,
-        by_status: projects.reduce((acc, project) => {
-          acc[project.status] = (acc[project.status] || 0) + 1;
-          return acc;
-        }, {} as Record<string, number>),
-        by_device_type: projects.reduce((acc, project) => {
-          if (project.device_type) {
-            acc[project.device_type] = (acc[project.device_type] || 0) + 1;
-          }
-          return acc;
-        }, {} as Record<string, number>),
+        by_status: projects.reduce(
+          (acc, project) => {
+            acc[project.status] = (acc[project.status] || 0) + 1;
+            return acc;
+          },
+          {} as Record<string, number>
+        ),
+        by_device_type: projects.reduce(
+          (acc, project) => {
+            if (project.device_type) {
+              acc[project.device_type] = (acc[project.device_type] || 0) + 1;
+            }
+            return acc;
+          },
+          {} as Record<string, number>
+        ),
         recent_activity: projects.filter(
-          (p) => Date.now() - new Date(p.updated_at).getTime() < 7 * 24 * 60 * 60 * 1000
+          (p) =>
+            Date.now() - new Date(p.updated_at).getTime() <
+            7 * 24 * 60 * 60 * 1000
         ).length,
       };
 
@@ -381,7 +407,10 @@ class ProjectService {
   /**
    * Export project data
    */
-  async exportProject(projectId: number, format: 'json' | 'pdf' = 'json'): Promise<Blob> {
+  async exportProject(
+    projectId: number,
+    format: 'json' | 'pdf' = 'json'
+  ): Promise<Blob> {
     try {
       // For now, create mock export. Replace with API call when backend is ready
       const project = await this.getProject(projectId);

@@ -52,22 +52,22 @@ from services.openfda import create_production_openfda_service
 async def validate_config():
     service = await create_production_openfda_service()
     validation = await service.validate_api_configuration()
-    
+
     print('Configuration Validation Results:')
     print(f'API Key Configured: {validation[\"api_key_configured\"]}')
     print(f'Base URL Accessible: {validation[\"base_url_accessible\"]}')
     print(f'Cache Configured: {validation[\"cache_configured\"]}')
-    
+
     if validation['errors']:
         print('\\nErrors:')
         for error in validation['errors']:
             print(f'  - {error}')
-    
+
     if validation['warnings']:
         print('\\nWarnings:')
         for warning in validation['warnings']:
             print(f'  - {warning}')
-    
+
     await service.close()
 
 asyncio.run(validate_config())
@@ -79,10 +79,12 @@ asyncio.run(validate_config())
 ### Issue 1: "Database manager not initialized"
 
 **Symptoms:**
+
 - API endpoints return 500 errors
 - Error message: "Database manager not initialized"
 
 **Diagnosis:**
+
 ```bash
 # Check if database is accessible
 poetry run python -c "
@@ -97,7 +99,9 @@ except Exception as e:
 ```
 
 **Solutions:**
+
 1. **Initialize Database:**
+
    ```bash
    poetry run python -c "
    from database.connection import initialize_database_manager
@@ -107,6 +111,7 @@ except Exception as e:
    ```
 
 2. **Check Database File Permissions:**
+
    ```bash
    ls -la medical_device_assistant.db
    chmod 664 medical_device_assistant.db
@@ -121,16 +126,20 @@ except Exception as e:
 ### Issue 2: "No module named 'services.openfda'"
 
 **Symptoms:**
+
 - Import errors when trying to use FDA service
 - Module not found errors
 
 **Solutions:**
+
 1. **Check Python Path:**
+
    ```bash
    poetry run python -c "import sys; print('\\n'.join(sys.path))"
    ```
 
 2. **Reinstall Dependencies:**
+
    ```bash
    poetry install --no-cache
    ```
@@ -144,11 +153,14 @@ except Exception as e:
 ### Issue 3: "Connection pool is closed"
 
 **Symptoms:**
+
 - HTTP connection errors
 - "Connection pool is closed" messages
 
 **Solutions:**
+
 1. **Proper Service Cleanup:**
+
    ```python
    # Always close service properly
    async def main():
@@ -161,10 +173,11 @@ except Exception as e:
    ```
 
 2. **Check Connection Limits:**
+
    ```python
    # Increase connection limits
    import httpx
-   
+
    http_client = httpx.AsyncClient(
        limits=httpx.Limits(
            max_keepalive_connections=20,
@@ -178,18 +191,21 @@ except Exception as e:
 ### Issue: "Authentication failed - check FDA_API_KEY"
 
 **Symptoms:**
+
 - 401 Unauthorized errors
 - Authentication failed messages
 
 **Diagnosis Steps:**
 
 1. **Check API Key Configuration:**
+
    ```bash
    echo $FDA_API_KEY
    # Should output your API key (if set)
    ```
 
 2. **Verify API Key Format:**
+
    ```bash
    poetry run python -c "
    import os
@@ -210,6 +226,7 @@ except Exception as e:
 **Solutions:**
 
 1. **Set API Key:**
+
    ```bash
    export FDA_API_KEY="your-actual-api-key"
    # Or add to .env.local file
@@ -231,6 +248,7 @@ except Exception as e:
 ### Issue: "Access forbidden - API key may be invalid or expired"
 
 **Symptoms:**
+
 - 403 Forbidden errors
 - API key expired messages
 
@@ -253,6 +271,7 @@ except Exception as e:
 ### Issue: "Rate limit exceeded after X attempts"
 
 **Symptoms:**
+
 - 429 Too Many Requests errors
 - Long delays in API responses
 - Rate limit exceeded messages
@@ -260,17 +279,18 @@ except Exception as e:
 **Diagnosis:**
 
 1. **Check Current Rate Limit Status:**
+
    ```bash
    poetry run python -c "
    import asyncio
    from services.openfda import create_production_openfda_service
-   
+
    async def check_rate_limit():
        service = await create_production_openfda_service()
        health = await service.health_check()
        print(f'Rate limiter requests: {health.get(\"rate_limiter_requests\", 0)}/240')
        await service.close()
-   
+
    asyncio.run(check_rate_limit())
    "
    ```
@@ -284,6 +304,7 @@ except Exception as e:
 **Solutions:**
 
 1. **Implement Request Batching:**
+
    ```python
    # Batch multiple searches
    async def batch_searches(search_terms_list):
@@ -296,6 +317,7 @@ except Exception as e:
    ```
 
 2. **Increase Cache TTL:**
+
    ```python
    service = OpenFDAService(
        cache_ttl=7200  # 2 hours instead of 1
@@ -303,18 +325,20 @@ except Exception as e:
    ```
 
 3. **Use API Key for Higher Limits:**
+
    ```bash
    # API key provides 240 requests/minute vs 40/minute without
    export FDA_API_KEY="your-api-key"
    ```
 
 4. **Implement Request Queuing:**
+
    ```python
    import asyncio
    from asyncio import Queue
-   
+
    request_queue = Queue(maxsize=100)
-   
+
    async def queue_processor():
        while True:
            request = await request_queue.get()
@@ -332,6 +356,7 @@ except Exception as e:
 ### Issue: "Network error after X attempts"
 
 **Symptoms:**
+
 - Connection timeout errors
 - Network unreachable messages
 - DNS resolution failures
@@ -339,23 +364,25 @@ except Exception as e:
 **Diagnosis:**
 
 1. **Test Basic Connectivity:**
+
    ```bash
    # Test DNS resolution
    nslookup api.fda.gov
-   
+
    # Test HTTP connectivity
    curl -I https://api.fda.gov/device/510k.json
-   
+
    # Test with timeout
    curl --max-time 30 "https://api.fda.gov/device/510k.json?search=device_class:II&limit=1"
    ```
 
 2. **Check Network Configuration:**
+
    ```bash
    # Check proxy settings
    echo $HTTP_PROXY
    echo $HTTPS_PROXY
-   
+
    # Check firewall rules
    sudo iptables -L | grep 443
    ```
@@ -363,19 +390,21 @@ except Exception as e:
 **Solutions:**
 
 1. **Configure Proxy Settings:**
+
    ```python
    import httpx
-   
+
    proxies = {
        "http://": "http://proxy.company.com:8080",
        "https://": "http://proxy.company.com:8080"
    }
-   
+
    http_client = httpx.AsyncClient(proxies=proxies)
    service = OpenFDAService(http_client=http_client)
    ```
 
 2. **Increase Timeout Values:**
+
    ```python
    service = OpenFDAService(
        timeout=60,  # Increase from 30 to 60 seconds
@@ -393,28 +422,31 @@ except Exception as e:
 ### Issue: "SSL Certificate verification failed"
 
 **Symptoms:**
+
 - SSL/TLS certificate errors
 - Certificate verification failures
 
 **Solutions:**
 
 1. **Update CA Certificates:**
+
    ```bash
    # Ubuntu/Debian
    sudo apt-get update && sudo apt-get install ca-certificates
-   
+
    # CentOS/RHEL
    sudo yum update ca-certificates
-   
+
    # macOS
    brew install ca-certificates
    ```
 
 2. **Configure Certificate Bundle:**
+
    ```python
    import httpx
    import certifi
-   
+
    http_client = httpx.AsyncClient(
        verify=certifi.where()
    )
@@ -431,6 +463,7 @@ except Exception as e:
 ### Issue: "Redis connection failed"
 
 **Symptoms:**
+
 - Cache errors in logs
 - Slower API responses
 - Redis connection timeouts
@@ -438,10 +471,11 @@ except Exception as e:
 **Diagnosis:**
 
 1. **Test Redis Connectivity:**
+
    ```bash
    # Test Redis connection
    redis-cli ping
-   
+
    # Check Redis status
    redis-cli info server
    ```
@@ -455,18 +489,20 @@ except Exception as e:
 **Solutions:**
 
 1. **Start Redis Server:**
+
    ```bash
    # Ubuntu/Debian
    sudo systemctl start redis-server
-   
+
    # macOS with Homebrew
    brew services start redis
-   
+
    # Docker
    docker run -d -p 6379:6379 redis:alpine
    ```
 
 2. **Configure Redis URL:**
+
    ```bash
    export REDIS_URL="redis://localhost:6379"
    # Or for remote Redis
@@ -482,6 +518,7 @@ except Exception as e:
 ### Issue: "Cache key collision" or "Invalid cache data"
 
 **Symptoms:**
+
 - Unexpected search results
 - Cache-related errors
 - Inconsistent data
@@ -489,6 +526,7 @@ except Exception as e:
 **Solutions:**
 
 1. **Clear Cache:**
+
    ```bash
    redis-cli FLUSHDB
    # Or clear specific keys
@@ -496,6 +534,7 @@ except Exception as e:
    ```
 
 2. **Update Cache Key Generation:**
+
    ```python
    # Force cache refresh
    results = await service._make_request(
@@ -517,6 +556,7 @@ except Exception as e:
 ### Issue: "Slow API responses"
 
 **Symptoms:**
+
 - High response times (>10 seconds)
 - Timeout errors
 - Poor user experience
@@ -524,24 +564,25 @@ except Exception as e:
 **Diagnosis:**
 
 1. **Measure Response Times:**
+
    ```bash
    poetry run python -c "
    import asyncio
    import time
    from services.openfda import create_production_openfda_service
-   
+
    async def measure_performance():
        service = await create_production_openfda_service()
-       
+
        start_time = time.time()
        results = await service.search_predicates(['pacemaker'])
        end_time = time.time()
-       
+
        print(f'Response time: {end_time - start_time:.2f} seconds')
        print(f'Results count: {len(results)}')
-       
+
        await service.close()
-   
+
    asyncio.run(measure_performance())
    "
    ```
@@ -554,6 +595,7 @@ except Exception as e:
 **Solutions:**
 
 1. **Optimize Query Parameters:**
+
    ```python
    # Use specific search terms
    results = await service.search_predicates(
@@ -564,9 +606,10 @@ except Exception as e:
    ```
 
 2. **Implement Connection Pooling:**
+
    ```python
    import httpx
-   
+
    http_client = httpx.AsyncClient(
        limits=httpx.Limits(
            max_keepalive_connections=20,
@@ -590,6 +633,7 @@ except Exception as e:
 ### Issue: "Memory usage growing over time"
 
 **Symptoms:**
+
 - Increasing memory consumption
 - Out of memory errors
 - Performance degradation
@@ -597,6 +641,7 @@ except Exception as e:
 **Solutions:**
 
 1. **Implement Proper Cleanup:**
+
    ```python
    async def process_searches():
        service = await create_openfda_service()
@@ -608,6 +653,7 @@ except Exception as e:
    ```
 
 2. **Limit Cache Size:**
+
    ```bash
    # Configure Redis memory limit
    redis-cli CONFIG SET maxmemory 100mb
@@ -615,10 +661,11 @@ except Exception as e:
    ```
 
 3. **Monitor Memory Usage:**
+
    ```python
    import psutil
    import gc
-   
+
    def monitor_memory():
        process = psutil.Process()
        print(f"Memory usage: {process.memory_info().rss / 1024 / 1024:.2f} MB")
@@ -630,6 +677,7 @@ except Exception as e:
 ### Issue: "Circuit breaker is OPEN - API temporarily unavailable"
 
 **Symptoms:**
+
 - All API requests failing immediately
 - Circuit breaker OPEN state
 - No actual API calls being made
@@ -637,17 +685,18 @@ except Exception as e:
 **Diagnosis:**
 
 1. **Check Circuit Breaker State:**
+
    ```bash
    poetry run python -c "
    import asyncio
    from services.openfda import create_production_openfda_service
-   
+
    async def check_circuit_breaker():
        service = await create_production_openfda_service()
        health = await service.health_check()
        print(f'Circuit breaker state: {health[\"circuit_breaker_state\"]}')
        await service.close()
-   
+
    asyncio.run(check_circuit_breaker())
    "
    ```
@@ -655,6 +704,7 @@ except Exception as e:
 **Solutions:**
 
 1. **Wait for Recovery:**
+
    ```bash
    # Circuit breaker will automatically attempt recovery after timeout
    # Default recovery timeout: 60 seconds
@@ -662,6 +712,7 @@ except Exception as e:
    ```
 
 2. **Manual Reset (if needed):**
+
    ```python
    # Reset circuit breaker manually
    service.circuit_breaker.state = "CLOSED"
@@ -669,9 +720,10 @@ except Exception as e:
    ```
 
 3. **Adjust Circuit Breaker Settings:**
+
    ```python
    from services.openfda import CircuitBreaker
-   
+
    # More lenient settings
    circuit_breaker = CircuitBreaker(
        failure_threshold=10,    # Allow more failures
@@ -684,6 +736,7 @@ except Exception as e:
 ### Issue: "Unexpected or missing data in results"
 
 **Symptoms:**
+
 - Empty search results for valid queries
 - Missing fields in returned data
 - Inconsistent data formats
@@ -691,6 +744,7 @@ except Exception as e:
 **Diagnosis:**
 
 1. **Test Query Directly:**
+
    ```bash
    curl "https://api.fda.gov/device/510k.json?search=device_class:II&limit=5" | jq .
    ```
@@ -706,6 +760,7 @@ except Exception as e:
 **Solutions:**
 
 1. **Improve Query Building:**
+
    ```python
    # Use more flexible search terms
    results = await service.search_predicates(
@@ -715,6 +770,7 @@ except Exception as e:
    ```
 
 2. **Handle Missing Fields:**
+
    ```python
    # Robust data extraction
    device_name = item.get("device_name", "Unknown Device")
@@ -722,6 +778,7 @@ except Exception as e:
    ```
 
 3. **Validate Data Quality:**
+
    ```python
    def validate_fda_result(result: FDASearchResult) -> bool:
        return (
@@ -729,7 +786,7 @@ except Exception as e:
            result.device_name and
            len(result.k_number) >= 7  # K-numbers are at least 7 characters
        )
-   
+
    # Filter valid results
    valid_results = [r for r in results if validate_fda_result(r)]
    ```
@@ -758,7 +815,7 @@ class FDAAPIMonitor:
         self.request_count = 0
         self.error_count = 0
         self.total_response_time = 0
-    
+
     async def monitor_request(self, func, *args, **kwargs):
         start_time = time.time()
         try:
@@ -770,10 +827,10 @@ class FDAAPIMonitor:
             raise
         finally:
             self.total_response_time += time.time() - start_time
-    
+
     def get_stats(self):
         avg_response_time = (
-            self.total_response_time / self.request_count 
+            self.total_response_time / self.request_count
             if self.request_count > 0 else 0
         )
         return {

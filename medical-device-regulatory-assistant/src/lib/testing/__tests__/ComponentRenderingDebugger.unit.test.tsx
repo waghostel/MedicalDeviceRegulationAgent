@@ -1,20 +1,23 @@
 /**
  * Unit tests for ComponentRenderingDebugger
- * 
+ *
  * Tests component rendering debugging capabilities including
  * props analysis, context validation, and DOM structure inspection.
  */
 
 import React from 'react';
-import { ComponentRenderingDebugger, componentRenderingDebugger } from '../ComponentRenderingDebugger';
+import {
+  ComponentRenderingDebugger,
+  componentRenderingDebugger,
+} from '../ComponentRenderingDebugger';
 import { render } from '@testing-library/react';
 
 // Mock component for testing
-const TestComponent: React.FC<{ title?: string; required: string; onClick?: () => void }> = ({ 
-  title = 'Default Title', 
-  required, 
-  onClick 
-}) => (
+const TestComponent: React.FC<{
+  title?: string;
+  required: string;
+  onClick?: () => void;
+}> = ({ title = 'Default Title', required, onClick }) => (
   <div data-testid="test-component" onClick={onClick}>
     <h1>{title}</h1>
     <p>{required}</p>
@@ -34,7 +37,7 @@ const ComponentWithPropTypes: React.FC<any> = ({ name, age, isActive }) => (
 (ComponentWithPropTypes as any).propTypes = {
   name: { isRequired: true },
   age: { isRequired: false },
-  isActive: { isRequired: true }
+  isActive: { isRequired: true },
 };
 
 describe('ComponentRenderingDebugger', () => {
@@ -46,8 +49,11 @@ describe('ComponentRenderingDebugger', () => {
   describe('debugComponentRendering', () => {
     it('should successfully debug a simple component', () => {
       const props = { required: 'Test content' };
-      
-      const report = componentRenderingDebugger.debugComponentRendering(TestComponent, props);
+
+      const report = componentRenderingDebugger.debugComponentRendering(
+        TestComponent,
+        props
+      );
 
       expect(report.componentName).toBe('TestComponent');
       expect(report.renderingStatus).toBe('SUCCESS');
@@ -58,24 +64,32 @@ describe('ComponentRenderingDebugger', () => {
 
     it('should identify missing required props', () => {
       const props = { title: 'Test Title' }; // Missing 'required' prop
-      
-      const report = componentRenderingDebugger.debugComponentRendering(ComponentWithPropTypes, {
-        age: 25 // Missing 'name' and 'isActive'
-      });
+
+      const report = componentRenderingDebugger.debugComponentRendering(
+        ComponentWithPropTypes,
+        {
+          age: 25, // Missing 'name' and 'isActive'
+        }
+      );
 
       expect(report.propsAnalysis.missingProps).toContain('name');
       expect(report.propsAnalysis.missingProps).toContain('isActive');
-      expect(report.issues.some(issue => issue.type === 'MISSING_PROPS')).toBe(true);
+      expect(
+        report.issues.some((issue) => issue.type === 'MISSING_PROPS')
+      ).toBe(true);
     });
 
     it('should detect invalid prop types', () => {
       const props = {
         name: 'John',
         age: 'twenty-five', // Should be number
-        isActive: 'yes' // Should be boolean
+        isActive: 'yes', // Should be boolean
       };
-      
-      const report = componentRenderingDebugger.debugComponentRendering(ComponentWithPropTypes, props);
+
+      const report = componentRenderingDebugger.debugComponentRendering(
+        ComponentWithPropTypes,
+        props
+      );
 
       expect(report.propsAnalysis.invalidProps).toHaveLength(2);
       expect(report.propsAnalysis.invalidProps[0].propName).toBe('age');
@@ -84,10 +98,17 @@ describe('ComponentRenderingDebugger', () => {
     });
 
     it('should analyze context requirements', () => {
-      const contexts = [{ theme: 'dark' }, { user: { id: 1, name: 'Test User' } }];
+      const contexts = [
+        { theme: 'dark' },
+        { user: { id: 1, name: 'Test User' } },
+      ];
       const options = { contexts };
-      
-      const report = componentRenderingDebugger.debugComponentRendering(TestComponent, { required: 'test' }, options);
+
+      const report = componentRenderingDebugger.debugComponentRendering(
+        TestComponent,
+        { required: 'test' },
+        options
+      );
 
       expect(report.contextAnalysis.availableContexts).toHaveLength(2);
       expect(report.contextAnalysis.contextValues).toHaveProperty('Context0');
@@ -99,46 +120,72 @@ describe('ComponentRenderingDebugger', () => {
       const ErrorComponent: React.FC = () => {
         throw new Error('Component render error');
       };
-      
-      const report = componentRenderingDebugger.debugComponentRendering(ErrorComponent, {});
+
+      const report = componentRenderingDebugger.debugComponentRendering(
+        ErrorComponent,
+        {}
+      );
 
       expect(report.renderingStatus).toBe('RENDER_ERROR');
       expect(report.issues).toHaveLength(1);
       expect(report.issues[0].type).toBe('RENDER_ERROR');
       expect(report.issues[0].severity).toBe('critical');
-      expect(report.suggestions).toContain('Verify all required props are provided');
+      expect(report.suggestions).toContain(
+        'Verify all required props are provided'
+      );
     });
 
     it('should track performance metrics', () => {
-      const report = componentRenderingDebugger.debugComponentRendering(TestComponent, { required: 'test' });
+      const report = componentRenderingDebugger.debugComponentRendering(
+        TestComponent,
+        { required: 'test' }
+      );
 
       expect(report.performanceMetrics.renderTime).toBeGreaterThan(0);
       expect(report.performanceMetrics.reRenderCount).toBe(1);
       expect(report.performanceMetrics.memoryUsage).toBeGreaterThanOrEqual(0);
-      expect(report.performanceMetrics.componentTreeDepth).toBeGreaterThanOrEqual(0);
+      expect(
+        report.performanceMetrics.componentTreeDepth
+      ).toBeGreaterThanOrEqual(0);
     });
 
     it('should analyze DOM structure when rendering succeeds', () => {
-      const report = componentRenderingDebugger.debugComponentRendering(TestComponent, { required: 'test' });
+      const report = componentRenderingDebugger.debugComponentRendering(
+        TestComponent,
+        { required: 'test' }
+      );
 
       expect(report.domAnalysis.elementCount).toBeGreaterThanOrEqual(0);
       expect(report.domAnalysis.testIdCoverage).toBeDefined();
-      expect(report.domAnalysis.testIdCoverage.coverage).toBeGreaterThanOrEqual(0);
+      expect(report.domAnalysis.testIdCoverage.coverage).toBeGreaterThanOrEqual(
+        0
+      );
     });
 
     it('should generate appropriate suggestions based on issues', () => {
-      const report = componentRenderingDebugger.debugComponentRendering(ComponentWithPropTypes, {});
+      const report = componentRenderingDebugger.debugComponentRendering(
+        ComponentWithPropTypes,
+        {}
+      );
 
-      expect(report.suggestions).toContain('Verify all required props are provided');
+      expect(report.suggestions).toContain(
+        'Verify all required props are provided'
+      );
       expect(report.suggestions.length).toBeGreaterThan(0);
     });
   });
 
   describe('generateRenderingTroubleshootingGuide', () => {
     it('should generate comprehensive troubleshooting guide', () => {
-      const report = componentRenderingDebugger.debugComponentRendering(TestComponent, { required: 'test' });
-      
-      const guide = componentRenderingDebugger.generateRenderingTroubleshootingGuide(report);
+      const report = componentRenderingDebugger.debugComponentRendering(
+        TestComponent,
+        { required: 'test' }
+      );
+
+      const guide =
+        componentRenderingDebugger.generateRenderingTroubleshootingGuide(
+          report
+        );
 
       expect(guide).toContain('# Component Rendering Troubleshooting Guide');
       expect(guide).toContain('## Component: TestComponent');
@@ -151,9 +198,15 @@ describe('ComponentRenderingDebugger', () => {
     });
 
     it('should include missing props section when applicable', () => {
-      const report = componentRenderingDebugger.debugComponentRendering(ComponentWithPropTypes, { age: 25 });
-      
-      const guide = componentRenderingDebugger.generateRenderingTroubleshootingGuide(report);
+      const report = componentRenderingDebugger.debugComponentRendering(
+        ComponentWithPropTypes,
+        { age: 25 }
+      );
+
+      const guide =
+        componentRenderingDebugger.generateRenderingTroubleshootingGuide(
+          report
+        );
 
       expect(guide).toContain('**Missing Props**:');
       expect(guide).toContain('- name');
@@ -161,22 +214,34 @@ describe('ComponentRenderingDebugger', () => {
     });
 
     it('should include invalid props section when applicable', () => {
-      const report = componentRenderingDebugger.debugComponentRendering(ComponentWithPropTypes, {
-        name: 'John',
-        age: 'invalid',
-        isActive: true
-      });
-      
-      const guide = componentRenderingDebugger.generateRenderingTroubleshootingGuide(report);
+      const report = componentRenderingDebugger.debugComponentRendering(
+        ComponentWithPropTypes,
+        {
+          name: 'John',
+          age: 'invalid',
+          isActive: true,
+        }
+      );
+
+      const guide =
+        componentRenderingDebugger.generateRenderingTroubleshootingGuide(
+          report
+        );
 
       expect(guide).toContain('**Invalid Props**:');
       expect(guide).toContain('Expected number, got string');
     });
 
     it('should include debugging steps with timing information', () => {
-      const report = componentRenderingDebugger.debugComponentRendering(TestComponent, { required: 'test' });
-      
-      const guide = componentRenderingDebugger.generateRenderingTroubleshootingGuide(report);
+      const report = componentRenderingDebugger.debugComponentRendering(
+        TestComponent,
+        { required: 'test' }
+      );
+
+      const guide =
+        componentRenderingDebugger.generateRenderingTroubleshootingGuide(
+          report
+        );
 
       expect(guide).toContain('## Debugging Steps');
       report.debugTrace.forEach((step, index) => {
@@ -198,9 +263,16 @@ describe('ComponentRenderingDebugger', () => {
 
     it('should calculate statistics correctly with multiple renders', () => {
       // Perform multiple renders
-      componentRenderingDebugger.debugComponentRendering(TestComponent, { required: 'test1' });
-      componentRenderingDebugger.debugComponentRendering(TestComponent, { required: 'test2' });
-      componentRenderingDebugger.debugComponentRendering(ComponentWithPropTypes, { name: 'John', isActive: true });
+      componentRenderingDebugger.debugComponentRendering(TestComponent, {
+        required: 'test1',
+      });
+      componentRenderingDebugger.debugComponentRendering(TestComponent, {
+        required: 'test2',
+      });
+      componentRenderingDebugger.debugComponentRendering(
+        ComponentWithPropTypes,
+        { name: 'John', isActive: true }
+      );
 
       const stats = componentRenderingDebugger.getRenderingStatistics();
 
@@ -213,8 +285,14 @@ describe('ComponentRenderingDebugger', () => {
 
     it('should track issue types in statistics', () => {
       // Create renders with different issues
-      componentRenderingDebugger.debugComponentRendering(ComponentWithPropTypes, {}); // Missing props
-      componentRenderingDebugger.debugComponentRendering(ComponentWithPropTypes, { name: 'John', age: 'invalid', isActive: true }); // Invalid props
+      componentRenderingDebugger.debugComponentRendering(
+        ComponentWithPropTypes,
+        {}
+      ); // Missing props
+      componentRenderingDebugger.debugComponentRendering(
+        ComponentWithPropTypes,
+        { name: 'John', age: 'invalid', isActive: true }
+      ); // Invalid props
 
       const stats = componentRenderingDebugger.getRenderingStatistics();
 
@@ -232,7 +310,10 @@ describe('ComponentRenderingDebugger', () => {
         </div>
       );
 
-      const report = componentRenderingDebugger.debugComponentRendering(ImageComponent, {});
+      const report = componentRenderingDebugger.debugComponentRendering(
+        ImageComponent,
+        {}
+      );
 
       // Note: This test would need actual DOM rendering to work properly
       // In a real implementation, you'd need to integrate with actual rendering
@@ -249,7 +330,10 @@ describe('ComponentRenderingDebugger', () => {
         </form>
       );
 
-      const report = componentRenderingDebugger.debugComponentRendering(FormComponent, {});
+      const report = componentRenderingDebugger.debugComponentRendering(
+        FormComponent,
+        {}
+      );
 
       expect(report.domAnalysis.accessibilityIssues).toBeDefined();
     });
@@ -265,21 +349,28 @@ describe('ComponentRenderingDebugger', () => {
         </div>
       );
 
-      const report = componentRenderingDebugger.debugComponentRendering(ComponentWithTestIds, {});
+      const report = componentRenderingDebugger.debugComponentRendering(
+        ComponentWithTestIds,
+        {}
+      );
 
       // In a real implementation with actual DOM rendering:
       // expect(report.domAnalysis.testIdCoverage.coverage).toBe(75); // 3 out of 4 elements
       expect(report.domAnalysis.testIdCoverage).toBeDefined();
-      expect(report.domAnalysis.testIdCoverage.coverage).toBeGreaterThanOrEqual(0);
+      expect(report.domAnalysis.testIdCoverage.coverage).toBeGreaterThanOrEqual(
+        0
+      );
     });
   });
 
   describe('performance monitoring', () => {
     it('should complete debugging within reasonable time', () => {
       const startTime = performance.now();
-      
-      componentRenderingDebugger.debugComponentRendering(TestComponent, { required: 'performance test' });
-      
+
+      componentRenderingDebugger.debugComponentRendering(TestComponent, {
+        required: 'performance test',
+      });
+
       const duration = performance.now() - startTime;
       expect(duration).toBeLessThan(100); // Should complete in less than 100ms
     });
@@ -297,7 +388,10 @@ describe('ComponentRenderingDebugger', () => {
       );
 
       const startTime = performance.now();
-      const report = componentRenderingDebugger.debugComponentRendering(ComplexComponent, {});
+      const report = componentRenderingDebugger.debugComponentRendering(
+        ComplexComponent,
+        {}
+      );
       const duration = performance.now() - startTime;
 
       expect(report).toBeDefined();
@@ -308,8 +402,11 @@ describe('ComponentRenderingDebugger', () => {
   describe('edge cases', () => {
     it('should handle components without display names', () => {
       const AnonymousComponent = () => <div>Anonymous</div>;
-      
-      const report = componentRenderingDebugger.debugComponentRendering(AnonymousComponent, {});
+
+      const report = componentRenderingDebugger.debugComponentRendering(
+        AnonymousComponent,
+        {}
+      );
 
       expect(report.componentName).toBe('UnknownComponent');
       expect(report.renderingStatus).toBe('SUCCESS');
@@ -317,8 +414,11 @@ describe('ComponentRenderingDebugger', () => {
 
     it('should handle components with no props', () => {
       const NoPropsComponent: React.FC = () => <div>No props needed</div>;
-      
-      const report = componentRenderingDebugger.debugComponentRendering(NoPropsComponent, {});
+
+      const report = componentRenderingDebugger.debugComponentRendering(
+        NoPropsComponent,
+        {}
+      );
 
       expect(report.propsAnalysis.providedProps).toEqual({});
       expect(report.propsAnalysis.missingProps).toHaveLength(0);
@@ -332,8 +432,11 @@ describe('ComponentRenderingDebugger', () => {
           {undefined}
         </div>
       );
-      
-      const report = componentRenderingDebugger.debugComponentRendering(ConditionalComponent, { show: false });
+
+      const report = componentRenderingDebugger.debugComponentRendering(
+        ConditionalComponent,
+        { show: false }
+      );
 
       expect(report.childrenAnalysis).toBeDefined();
       expect(report.renderingStatus).toBe('SUCCESS');
@@ -344,14 +447,18 @@ describe('ComponentRenderingDebugger', () => {
     it('should maintain rendering history with size limit', () => {
       // Add renders up to the limit (30)
       for (let i = 0; i < 35; i++) {
-        componentRenderingDebugger.debugComponentRendering(TestComponent, { required: `test${i}` });
+        componentRenderingDebugger.debugComponentRendering(TestComponent, {
+          required: `test${i}`,
+        });
       }
 
       const history = componentRenderingDebugger['renderingHistory'];
       expect(history).toHaveLength(30);
-      
+
       // Should contain the most recent renders
-      expect(history[history.length - 1].timestamp).toBeGreaterThan(history[0].timestamp);
+      expect(history[history.length - 1].timestamp).toBeGreaterThan(
+        history[0].timestamp
+      );
     });
   });
 });

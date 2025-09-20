@@ -81,7 +81,8 @@ export class DatabaseMigrationManager {
       id: '001_initial_schema',
       name: 'Initial Database Schema',
       version: '1.0.0',
-      description: 'Create initial database schema for medical device regulatory assistant',
+      description:
+        'Create initial database schema for medical device regulatory assistant',
       up: {
         sql: [
           `CREATE TABLE IF NOT EXISTS migration_history (
@@ -164,16 +165,16 @@ export class DatabaseMigrationManager {
             created_at TEXT NOT NULL,
             FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE,
             FOREIGN KEY (user_id) REFERENCES users(id)
-          )`
+          )`,
         ],
         validations: [
           {
             name: 'Check users table exists',
             sql: 'SELECT name FROM sqlite_master WHERE type="table" AND name="users"',
             expectedResult: [{ name: 'users' }],
-            errorMessage: 'Users table was not created'
-          }
-        ]
+            errorMessage: 'Users table was not created',
+          },
+        ],
       },
       down: {
         sql: [
@@ -183,11 +184,11 @@ export class DatabaseMigrationManager {
           'DROP TABLE IF EXISTS device_classifications',
           'DROP TABLE IF EXISTS projects',
           'DROP TABLE IF EXISTS users',
-          'DROP TABLE IF EXISTS migration_history'
-        ]
+          'DROP TABLE IF EXISTS migration_history',
+        ],
       },
       dependencies: [],
-      tags: ['schema', 'initial']
+      tags: ['schema', 'initial'],
     });
 
     // Add indexes migration
@@ -209,16 +210,16 @@ export class DatabaseMigrationManager {
           'CREATE INDEX IF NOT EXISTS idx_interactions_project_id ON agent_interactions(project_id)',
           'CREATE INDEX IF NOT EXISTS idx_interactions_user_id ON agent_interactions(user_id)',
           'CREATE INDEX IF NOT EXISTS idx_interactions_created_at ON agent_interactions(created_at)',
-          'CREATE INDEX IF NOT EXISTS idx_interactions_action ON agent_interactions(agent_action)'
+          'CREATE INDEX IF NOT EXISTS idx_interactions_action ON agent_interactions(agent_action)',
         ],
         validations: [
           {
             name: 'Check project user_id index exists',
             sql: 'SELECT name FROM sqlite_master WHERE type="index" AND name="idx_projects_user_id"',
             expectedResult: [{ name: 'idx_projects_user_id' }],
-            errorMessage: 'Project user_id index was not created'
-          }
-        ]
+            errorMessage: 'Project user_id index was not created',
+          },
+        ],
       },
       down: {
         sql: [
@@ -233,11 +234,11 @@ export class DatabaseMigrationManager {
           'DROP INDEX IF EXISTS idx_interactions_project_id',
           'DROP INDEX IF EXISTS idx_interactions_user_id',
           'DROP INDEX IF EXISTS idx_interactions_created_at',
-          'DROP INDEX IF EXISTS idx_interactions_action'
-        ]
+          'DROP INDEX IF EXISTS idx_interactions_action',
+        ],
       },
       dependencies: ['001_initial_schema'],
-      tags: ['performance', 'indexes']
+      tags: ['performance', 'indexes'],
     });
 
     // Add test data migration
@@ -263,7 +264,7 @@ export class DatabaseMigrationManager {
             completed_at TEXT,
             results TEXT,
             FOREIGN KEY (scenario_id) REFERENCES test_scenarios(id)
-          )`
+          )`,
         ],
         dataTransforms: [
           {
@@ -272,10 +273,11 @@ export class DatabaseMigrationManager {
             data: {
               id: 'new_user_onboarding',
               name: 'New User Onboarding',
-              description: 'Test scenario for new user registration and first project creation',
+              description:
+                'Test scenario for new user registration and first project creation',
               data_seed: JSON.stringify({ userCount: 1, projectCount: 0 }),
-              created_at: new Date().toISOString()
-            }
+              created_at: new Date().toISOString(),
+            },
           },
           {
             table: 'test_scenarios',
@@ -285,19 +287,19 @@ export class DatabaseMigrationManager {
               name: 'Existing Project Workflow',
               description: 'Test scenario with existing projects and data',
               data_seed: JSON.stringify({ userCount: 1, projectCount: 3 }),
-              created_at: new Date().toISOString()
-            }
-          }
-        ]
+              created_at: new Date().toISOString(),
+            },
+          },
+        ],
       },
       down: {
         sql: [
           'DROP TABLE IF EXISTS test_runs',
-          'DROP TABLE IF EXISTS test_scenarios'
-        ]
+          'DROP TABLE IF EXISTS test_scenarios',
+        ],
       },
       dependencies: ['002_add_indexes'],
-      tags: ['testing', 'data']
+      tags: ['testing', 'data'],
     });
 
     // Add data validation constraints
@@ -315,47 +317,47 @@ export class DatabaseMigrationManager {
            BEGIN
              SELECT RAISE(ABORT, 'Invalid project status');
            END`,
-          
+
           `CREATE TRIGGER IF NOT EXISTS validate_device_class
            BEFORE INSERT ON device_classifications
            WHEN NEW.device_class NOT IN ('I', 'II', 'III')
            BEGIN
              SELECT RAISE(ABORT, 'Invalid device class');
            END`,
-          
+
           `CREATE TRIGGER IF NOT EXISTS validate_confidence_score
            BEFORE INSERT ON device_classifications
            WHEN NEW.confidence_score < 0 OR NEW.confidence_score > 1
            BEGIN
              SELECT RAISE(ABORT, 'Confidence score must be between 0 and 1');
            END`,
-          
+
           // Add updated_at trigger for projects
           `CREATE TRIGGER IF NOT EXISTS update_project_timestamp
            AFTER UPDATE ON projects
            BEGIN
              UPDATE projects SET updated_at = datetime('now') WHERE id = NEW.id;
-           END`
+           END`,
         ],
         validations: [
           {
             name: 'Check project status trigger exists',
             sql: 'SELECT name FROM sqlite_master WHERE type="trigger" AND name="validate_project_status"',
             expectedResult: [{ name: 'validate_project_status' }],
-            errorMessage: 'Project status validation trigger was not created'
-          }
-        ]
+            errorMessage: 'Project status validation trigger was not created',
+          },
+        ],
       },
       down: {
         sql: [
           'DROP TRIGGER IF EXISTS validate_project_status',
           'DROP TRIGGER IF EXISTS validate_device_class',
           'DROP TRIGGER IF EXISTS validate_confidence_score',
-          'DROP TRIGGER IF EXISTS update_project_timestamp'
-        ]
+          'DROP TRIGGER IF EXISTS update_project_timestamp',
+        ],
       },
       dependencies: ['003_test_data_setup'],
-      tags: ['validation', 'constraints']
+      tags: ['validation', 'constraints'],
     });
 
     // Add performance optimization migration
@@ -388,7 +390,7 @@ export class DatabaseMigrationManager {
            LEFT JOIN project_documents doc ON p.id = doc.project_id
            LEFT JOIN agent_interactions ai ON p.id = ai.project_id
            GROUP BY p.id`,
-          
+
           // Create view for user activity summary
           `CREATE VIEW IF NOT EXISTS user_activity_view AS
            SELECT 
@@ -403,20 +405,20 @@ export class DatabaseMigrationManager {
            LEFT JOIN projects p ON u.id = p.user_id
            LEFT JOIN agent_interactions ai ON u.id = ai.user_id
            GROUP BY u.id`,
-          
+
           // Add composite indexes for common queries
           'CREATE INDEX IF NOT EXISTS idx_projects_user_status ON projects(user_id, status)',
           'CREATE INDEX IF NOT EXISTS idx_predicates_project_selected ON predicate_devices(project_id, is_selected)',
-          'CREATE INDEX IF NOT EXISTS idx_interactions_project_action ON agent_interactions(project_id, agent_action)'
+          'CREATE INDEX IF NOT EXISTS idx_interactions_project_action ON agent_interactions(project_id, agent_action)',
         ],
         validations: [
           {
             name: 'Check project dashboard view exists',
             sql: 'SELECT name FROM sqlite_master WHERE type="view" AND name="project_dashboard_view"',
             expectedResult: [{ name: 'project_dashboard_view' }],
-            errorMessage: 'Project dashboard view was not created'
-          }
-        ]
+            errorMessage: 'Project dashboard view was not created',
+          },
+        ],
       },
       down: {
         sql: [
@@ -424,11 +426,11 @@ export class DatabaseMigrationManager {
           'DROP VIEW IF EXISTS user_activity_view',
           'DROP INDEX IF EXISTS idx_projects_user_status',
           'DROP INDEX IF EXISTS idx_predicates_project_selected',
-          'DROP INDEX IF EXISTS idx_interactions_project_action'
-        ]
+          'DROP INDEX IF EXISTS idx_interactions_project_action',
+        ],
       },
       dependencies: ['004_data_validation'],
-      tags: ['performance', 'views']
+      tags: ['performance', 'views'],
     });
   }
 
@@ -458,10 +460,10 @@ export class DatabaseMigrationManager {
    */
   async getPendingMigrations(): Promise<Migration[]> {
     const appliedMigrations = await this.getAppliedMigrations();
-    const appliedIds = new Set(appliedMigrations.map(m => m.id));
-    
+    const appliedIds = new Set(appliedMigrations.map((m) => m.id));
+
     return this.getMigrations()
-      .filter(migration => !appliedIds.has(migration.id))
+      .filter((migration) => !appliedIds.has(migration.id))
       .sort((a, b) => a.id.localeCompare(b.id));
   }
 
@@ -475,14 +477,14 @@ export class DatabaseMigrationManager {
         FROM migration_history
         ORDER BY applied_at
       `);
-      
+
       return (result || []).map((row: any) => ({
         id: row.id,
         name: row.name,
         version: row.version,
         applied: true,
         appliedAt: row.applied_at,
-        checksum: row.checksum
+        checksum: row.checksum,
       }));
     } catch (error) {
       // Migration history table doesn't exist yet
@@ -500,7 +502,7 @@ export class DatabaseMigrationManager {
 
     try {
       const pendingMigrations = await this.getPendingMigrations();
-      
+
       for (const migration of pendingMigrations) {
         try {
           await this.runMigration(migration);
@@ -510,7 +512,7 @@ export class DatabaseMigrationManager {
             migrationId: migration.id,
             step: 'execution',
             error: String(error),
-            timestamp: new Date().toISOString()
+            timestamp: new Date().toISOString(),
           });
           break; // Stop on first error
         }
@@ -521,21 +523,22 @@ export class DatabaseMigrationManager {
         migrationsApplied,
         errors,
         duration: Date.now() - startTime,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
-
     } catch (error) {
       return {
         success: false,
         migrationsApplied,
-        errors: [{
-          migrationId: 'general',
-          step: 'migration_process',
-          error: String(error),
-          timestamp: new Date().toISOString()
-        }],
+        errors: [
+          {
+            migrationId: 'general',
+            step: 'migration_process',
+            error: String(error),
+            timestamp: new Date().toISOString(),
+          },
+        ],
         duration: Date.now() - startTime,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
     }
   }
@@ -591,10 +594,9 @@ export class DatabaseMigrationManager {
       }
 
       // Remove from migration history
-      await tx.execute(
-        'DELETE FROM migration_history WHERE id = ?',
-        [migration.id]
-      );
+      await tx.execute('DELETE FROM migration_history WHERE id = ?', [
+        migration.id,
+      ]);
     });
 
     console.log(`Migration rolled back: ${migration.id}`);
@@ -603,14 +605,17 @@ export class DatabaseMigrationManager {
   /**
    * Execute data transform
    */
-  private async executeDataTransform(tx: any, transform: DataTransform): Promise<void> {
+  private async executeDataTransform(
+    tx: any,
+    transform: DataTransform
+  ): Promise<void> {
     switch (transform.operation) {
       case 'insert':
         if (transform.data) {
           const columns = Object.keys(transform.data);
           const values = Object.values(transform.data);
           const placeholders = columns.map(() => '?').join(', ');
-          
+
           await tx.execute(
             `INSERT INTO ${transform.table} (${columns.join(', ')}) VALUES (${placeholders})`,
             values
@@ -621,9 +626,9 @@ export class DatabaseMigrationManager {
       case 'update':
         if (transform.data && transform.condition) {
           const setClause = Object.keys(transform.data)
-            .map(key => `${key} = ?`)
+            .map((key) => `${key} = ?`)
             .join(', ');
-          
+
           await tx.execute(
             `UPDATE ${transform.table} SET ${setClause} WHERE ${transform.condition}`,
             Object.values(transform.data)
@@ -643,14 +648,14 @@ export class DatabaseMigrationManager {
         if (transform.transform) {
           // Get all rows
           const rows = await tx.execute(`SELECT * FROM ${transform.table}`);
-          
+
           // Transform each row
           for (const row of rows || []) {
             const transformedRow = transform.transform(row);
             const setClause = Object.keys(transformedRow)
-              .map(key => `${key} = ?`)
+              .map((key) => `${key} = ?`)
               .join(', ');
-            
+
             await tx.execute(
               `UPDATE ${transform.table} SET ${setClause} WHERE id = ?`,
               [...Object.values(transformedRow), row.id]
@@ -664,12 +669,17 @@ export class DatabaseMigrationManager {
   /**
    * Run validation
    */
-  private async runValidation(tx: any, validation: ValidationRule): Promise<void> {
+  private async runValidation(
+    tx: any,
+    validation: ValidationRule
+  ): Promise<void> {
     const result = await tx.execute(validation.sql);
-    
+
     // Simple validation - check if result matches expected
     if (JSON.stringify(result) !== JSON.stringify(validation.expectedResult)) {
-      throw new Error(`Validation failed: ${validation.name} - ${validation.errorMessage}`);
+      throw new Error(
+        `Validation failed: ${validation.name} - ${validation.errorMessage}`
+      );
     }
   }
 
@@ -678,7 +688,7 @@ export class DatabaseMigrationManager {
    */
   private async recordMigration(tx: any, migration: Migration): Promise<void> {
     const checksum = this.calculateChecksum(migration);
-    
+
     await tx.execute(
       `INSERT INTO migration_history (id, name, version, applied_at, checksum)
        VALUES (?, ?, ?, ?, ?)`,
@@ -687,7 +697,7 @@ export class DatabaseMigrationManager {
         migration.name,
         migration.version,
         new Date().toISOString(),
-        checksum
+        checksum,
       ]
     );
   }
@@ -699,17 +709,17 @@ export class DatabaseMigrationManager {
     const content = JSON.stringify({
       id: migration.id,
       sql: migration.up.sql,
-      dataTransforms: migration.up.dataTransforms
+      dataTransforms: migration.up.dataTransforms,
     });
-    
+
     // Simple checksum calculation (in real implementation, use proper hash)
     let hash = 0;
     for (let i = 0; i < content.length; i++) {
       const char = content.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
+      hash = (hash << 5) - hash + char;
       hash = hash & hash; // Convert to 32-bit integer
     }
-    
+
     return hash.toString(16);
   }
 
@@ -739,7 +749,9 @@ export class DatabaseMigrationManager {
 
     try {
       // Check foreign key integrity
-      const fkResult = await this.connection.execute('PRAGMA foreign_key_check');
+      const fkResult = await this.connection.execute(
+        'PRAGMA foreign_key_check'
+      );
       if (fkResult && fkResult.length > 0) {
         issues.push(`Foreign key violations found: ${fkResult.length}`);
       }
@@ -750,9 +762,11 @@ export class DatabaseMigrationManager {
         LEFT JOIN users u ON p.user_id = u.id
         WHERE u.id IS NULL
       `);
-      
+
       if (orphanedProjects[0]?.count > 0) {
-        issues.push(`Found ${orphanedProjects[0].count} projects with invalid user references`);
+        issues.push(
+          `Found ${orphanedProjects[0].count} projects with invalid user references`
+        );
       }
 
       // Check data consistency
@@ -760,20 +774,21 @@ export class DatabaseMigrationManager {
         SELECT COUNT(*) as count FROM device_classifications
         WHERE confidence_score < 0 OR confidence_score > 1
       `);
-      
+
       if (invalidClassifications[0]?.count > 0) {
-        issues.push(`Found ${invalidClassifications[0].count} classifications with invalid confidence scores`);
+        issues.push(
+          `Found ${invalidClassifications[0].count} classifications with invalid confidence scores`
+        );
       }
 
       return {
         valid: issues.length === 0,
-        issues
+        issues,
       };
-
     } catch (error) {
       return {
         valid: false,
-        issues: [`Database validation failed: ${error}`]
+        issues: [`Database validation failed: ${error}`],
       };
     }
   }
@@ -792,7 +807,9 @@ export async function resetTestDatabase(connection: any): Promise<void> {
   await manager.resetDatabase();
 }
 
-export async function validateDatabaseIntegrity(connection: any): Promise<{ valid: boolean; issues: string[] }> {
+export async function validateDatabaseIntegrity(
+  connection: any
+): Promise<{ valid: boolean; issues: string[] }> {
   const manager = new DatabaseMigrationManager(connection);
   return await manager.validateDatabase();
 }
@@ -812,6 +829,6 @@ export function createCustomMigration(
     up: { sql: upSql },
     down: { sql: downSql },
     dependencies: [],
-    tags: ['custom']
+    tags: ['custom'],
   };
 }

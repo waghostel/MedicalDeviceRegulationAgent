@@ -32,44 +32,50 @@ jest.mock('@/hooks/use-toast', () => ({
 // Mock server setup
 const server = setupServer(
   rest.get('/api/projects', (req, res, ctx) => {
-    return res(ctx.json([
-      {
-        id: 1,
-        name: 'Test Project',
-        description: 'A test project',
-        device_type: 'Class II',
-        intended_use: 'Testing',
-        status: ProjectStatus.DRAFT,
-        created_at: '2024-01-01T00:00:00Z',
-        updated_at: '2024-01-01T00:00:00Z',
-      }
-    ]));
+    return res(
+      ctx.json([
+        {
+          id: 1,
+          name: 'Test Project',
+          description: 'A test project',
+          device_type: 'Class II',
+          intended_use: 'Testing',
+          status: ProjectStatus.DRAFT,
+          created_at: '2024-01-01T00:00:00Z',
+          updated_at: '2024-01-01T00:00:00Z',
+        },
+      ])
+    );
   }),
 
   rest.post('/api/projects', (req, res, ctx) => {
-    return res(ctx.json({
-      id: 2,
-      name: 'New Project',
-      description: 'Created offline',
-      device_type: 'Class I',
-      intended_use: 'Testing offline creation',
-      status: ProjectStatus.DRAFT,
-      created_at: '2024-01-01T00:00:00Z',
-      updated_at: '2024-01-01T00:00:00Z',
-    }));
+    return res(
+      ctx.json({
+        id: 2,
+        name: 'New Project',
+        description: 'Created offline',
+        device_type: 'Class I',
+        intended_use: 'Testing offline creation',
+        status: ProjectStatus.DRAFT,
+        created_at: '2024-01-01T00:00:00Z',
+        updated_at: '2024-01-01T00:00:00Z',
+      })
+    );
   }),
 
   rest.put('/api/projects/:id', (req, res, ctx) => {
-    return res(ctx.json({
-      id: parseInt(req.params.id as string),
-      name: 'Updated Project',
-      description: 'Updated offline',
-      device_type: 'Class II',
-      intended_use: 'Testing offline updates',
-      status: ProjectStatus.IN_PROGRESS,
-      created_at: '2024-01-01T00:00:00Z',
-      updated_at: '2024-01-01T01:00:00Z',
-    }));
+    return res(
+      ctx.json({
+        id: parseInt(req.params.id as string),
+        name: 'Updated Project',
+        description: 'Updated offline',
+        device_type: 'Class II',
+        intended_use: 'Testing offline updates',
+        status: ProjectStatus.IN_PROGRESS,
+        created_at: '2024-01-01T00:00:00Z',
+        updated_at: '2024-01-01T01:00:00Z',
+      })
+    );
   }),
 
   rest.delete('/api/projects/:id', (req, res, ctx) => {
@@ -153,7 +159,9 @@ describe('Offline Functionality Tests', () => {
     });
 
     test('should sync pending actions when coming back online', async () => {
-      const { result } = renderHook(() => useOffline({ syncOnReconnect: true }));
+      const { result } = renderHook(() =>
+        useOffline({ syncOnReconnect: true })
+      );
 
       // Start offline with pending actions
       act(() => {
@@ -174,9 +182,12 @@ describe('Offline Functionality Tests', () => {
       });
 
       // Wait for sync to complete
-      await waitFor(() => {
-        expect(result.current.pendingActions).toHaveLength(0);
-      }, { timeout: 3000 });
+      await waitFor(
+        () => {
+          expect(result.current.pendingActions).toHaveLength(0);
+        },
+        { timeout: 3000 }
+      );
 
       expect(result.current.syncInProgress).toBe(false);
     });
@@ -207,7 +218,7 @@ describe('Offline Functionality Tests', () => {
           data: { name: 'Stored Project' },
           timestamp: Date.now(),
           retryCount: 0,
-        }
+        },
       ]);
 
       localStorageMock.getItem.mockReturnValue(storedActions);
@@ -216,7 +227,9 @@ describe('Offline Functionality Tests', () => {
 
       await waitFor(() => {
         expect(result.current.pendingActions).toHaveLength(1);
-        expect(result.current.pendingActions[0].data.name).toBe('Stored Project');
+        expect(result.current.pendingActions[0].data.name).toBe(
+          'Stored Project'
+        );
       });
     });
 
@@ -232,7 +245,9 @@ describe('Offline Functionality Tests', () => {
         })
       );
 
-      const { result } = renderHook(() => useOffline({ maxRetries: 3, retryDelay: 100 }));
+      const { result } = renderHook(() =>
+        useOffline({ maxRetries: 3, retryDelay: 100 })
+      );
 
       // Add action and sync
       act(() => {
@@ -248,9 +263,12 @@ describe('Offline Functionality Tests', () => {
       });
 
       // Wait for retries to complete
-      await waitFor(() => {
-        expect(result.current.pendingActions).toHaveLength(0);
-      }, { timeout: 5000 });
+      await waitFor(
+        () => {
+          expect(result.current.pendingActions).toHaveLength(0);
+        },
+        { timeout: 5000 }
+      );
 
       expect(requestCount).toBe(3);
     });
@@ -262,7 +280,9 @@ describe('Offline Functionality Tests', () => {
         })
       );
 
-      const { result } = renderHook(() => useOffline({ maxRetries: 2, retryDelay: 100 }));
+      const { result } = renderHook(() =>
+        useOffline({ maxRetries: 2, retryDelay: 100 })
+      );
 
       act(() => {
         result.current.addPendingAction({
@@ -277,9 +297,12 @@ describe('Offline Functionality Tests', () => {
       });
 
       // Wait for all retries to fail
-      await waitFor(() => {
-        expect(result.current.syncInProgress).toBe(false);
-      }, { timeout: 3000 });
+      await waitFor(
+        () => {
+          expect(result.current.syncInProgress).toBe(false);
+        },
+        { timeout: 3000 }
+      );
 
       // Action should be discarded after max retries
       expect(result.current.pendingActions).toHaveLength(0);
@@ -354,7 +377,7 @@ describe('Offline Functionality Tests', () => {
           status: ProjectStatus.DRAFT,
           created_at: '2024-01-01T00:00:00Z',
           updated_at: '2024-01-01T00:00:00Z',
-        }
+        },
       ];
 
       // This would require more complex mocking of the useProjects hook
@@ -390,25 +413,27 @@ describe('Offline Functionality Tests', () => {
     });
 
     test('should sync offline changes when reconnected', async () => {
-      const { result } = renderHook(() => useOffline({ syncOnReconnect: true }));
+      const { result } = renderHook(() =>
+        useOffline({ syncOnReconnect: true })
+      );
 
       // Start offline with multiple pending actions
       act(() => {
         Object.defineProperty(navigator, 'onLine', { value: false });
-        
+
         // Add multiple actions
         result.current.addPendingAction({
           type: 'create',
           endpoint: '/api/projects',
           data: { name: 'Offline Project 1' },
         });
-        
+
         result.current.addPendingAction({
           type: 'update',
           endpoint: '/api/projects/1',
           data: { name: 'Updated Offline' },
         });
-        
+
         result.current.addPendingAction({
           type: 'delete',
           endpoint: '/api/projects/2',
@@ -424,10 +449,13 @@ describe('Offline Functionality Tests', () => {
       });
 
       // Wait for all actions to sync
-      await waitFor(() => {
-        expect(result.current.pendingActions).toHaveLength(0);
-        expect(result.current.syncInProgress).toBe(false);
-      }, { timeout: 5000 });
+      await waitFor(
+        () => {
+          expect(result.current.pendingActions).toHaveLength(0);
+          expect(result.current.syncInProgress).toBe(false);
+        },
+        { timeout: 5000 }
+      );
     });
 
     test('should handle partial sync failures', async () => {
@@ -441,14 +469,16 @@ describe('Offline Functionality Tests', () => {
           }
           return res(ctx.status(500), ctx.json({ error: 'Server error' }));
         }),
-        
+
         // Update succeeds
         rest.put('/api/projects/1', (req, res, ctx) => {
           return res(ctx.json({ id: 1, name: 'Updated' }));
         })
       );
 
-      const { result } = renderHook(() => useOffline({ maxRetries: 1, retryDelay: 100 }));
+      const { result } = renderHook(() =>
+        useOffline({ maxRetries: 1, retryDelay: 100 })
+      );
 
       act(() => {
         // Add actions that will have mixed success
@@ -457,13 +487,13 @@ describe('Offline Functionality Tests', () => {
           endpoint: '/api/projects',
           data: { name: 'Success Project' },
         });
-        
+
         result.current.addPendingAction({
           type: 'create',
           endpoint: '/api/projects',
           data: { name: 'Fail Project' },
         });
-        
+
         result.current.addPendingAction({
           type: 'update',
           endpoint: '/api/projects/1',
@@ -476,9 +506,12 @@ describe('Offline Functionality Tests', () => {
       });
 
       // Wait for sync to complete
-      await waitFor(() => {
-        expect(result.current.syncInProgress).toBe(false);
-      }, { timeout: 3000 });
+      await waitFor(
+        () => {
+          expect(result.current.syncInProgress).toBe(false);
+        },
+        { timeout: 3000 }
+      );
 
       // Should have one failed action remaining (after retries)
       expect(result.current.pendingActions).toHaveLength(0); // Failed actions are discarded after max retries
@@ -504,7 +537,9 @@ describe('Offline Functionality Tests', () => {
       });
 
       expect(result.current.pendingActions).toHaveLength(0);
-      expect(localStorageMock.removeItem).toHaveBeenCalledWith('pendingActions');
+      expect(localStorageMock.removeItem).toHaveBeenCalledWith(
+        'pendingActions'
+      );
     });
 
     test('should force sync when online', async () => {
@@ -522,9 +557,12 @@ describe('Offline Functionality Tests', () => {
         result.current.forcSync();
       });
 
-      await waitFor(() => {
-        expect(result.current.pendingActions).toHaveLength(0);
-      }, { timeout: 2000 });
+      await waitFor(
+        () => {
+          expect(result.current.pendingActions).toHaveLength(0);
+        },
+        { timeout: 2000 }
+      );
     });
 
     test('should not sync when offline and show error', async () => {
@@ -555,7 +593,8 @@ describe('Offline Functionality Tests', () => {
 
       expect(toast).toHaveBeenCalledWith({
         title: 'Cannot Sync',
-        description: 'You are currently offline. Sync will happen automatically when connection is restored.',
+        description:
+          'You are currently offline. Sync will happen automatically when connection is restored.',
         variant: 'destructive',
       });
 

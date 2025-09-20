@@ -1,9 +1,9 @@
 /**
  * MockRegistry - Centralized Mock Management System
- * 
+ *
  * Implements centralized mock management with dynamic loading, configuration,
  * and compatibility checking for the test infrastructure.
- * 
+ *
  * Requirements: 2.4, 6.1
  */
 
@@ -150,7 +150,9 @@ export class MockRegistry {
   // Configuration Management
   // ============================================================================
 
-  private mergeConfig(userConfig?: Partial<MockRegistryConfig>): MockRegistryConfig {
+  private mergeConfig(
+    userConfig?: Partial<MockRegistryConfig>
+  ): MockRegistryConfig {
     const defaultConfig: MockRegistryConfig = {
       version: '1.0.0',
       react: {
@@ -171,14 +173,17 @@ export class MockRegistry {
       ...defaultConfig,
       ...userConfig,
       react: { ...defaultConfig.react, ...userConfig?.react },
-      globalOptions: { ...defaultConfig.globalOptions, ...userConfig?.globalOptions },
+      globalOptions: {
+        ...defaultConfig.globalOptions,
+        ...userConfig?.globalOptions,
+      },
       mocks: { ...defaultConfig.mocks, ...userConfig?.mocks },
     };
   }
 
   public updateConfig(updates: Partial<MockRegistryConfig>): void {
     const newConfig = this.mergeConfig(updates);
-    
+
     // Validate configuration
     try {
       MockRegistryConfigSchema.parse(newConfig);
@@ -223,7 +228,9 @@ export class MockRegistry {
         version: metadata.version || '1.0.0',
         type: metadata.type || 'utility',
         dependencies: metadata.dependencies || [],
-        compatibleVersions: metadata.compatibleVersions || [this.config.react.version],
+        compatibleVersions: metadata.compatibleVersions || [
+          this.config.react.version,
+        ],
         description: metadata.description || `Mock for ${name}`,
         author: metadata.author,
         createdAt: metadata.createdAt || new Date(),
@@ -246,7 +253,10 @@ export class MockRegistry {
 
       // Check compatibility
       const compatibilityResult = this.checkCompatibility(name, fullMetadata);
-      if (!compatibilityResult.compatible && this.config.globalOptions.strictMode) {
+      if (
+        !compatibilityResult.compatible &&
+        this.config.globalOptions.strictMode
+      ) {
         errors.push(...compatibilityResult.issues);
       } else if (!compatibilityResult.compatible) {
         warnings.push(...compatibilityResult.issues);
@@ -268,7 +278,9 @@ export class MockRegistry {
       this.updateStats();
 
       const loadTime = performance.now() - startTime;
-      this.logDebug(`Mock '${name}' registered successfully in ${loadTime.toFixed(2)}ms`);
+      this.logDebug(
+        `Mock '${name}' registered successfully in ${loadTime.toFixed(2)}ms`
+      );
 
       return {
         success: errors.length === 0,
@@ -278,7 +290,6 @@ export class MockRegistry {
         warnings,
         loadTime,
       };
-
     } catch (error) {
       errors.push(`Failed to register mock '${name}': ${error}`);
       return {
@@ -292,7 +303,10 @@ export class MockRegistry {
     }
   }
 
-  public async load(name: string, options?: Record<string, any>): Promise<MockLoadResult> {
+  public async load(
+    name: string,
+    options?: Record<string, any>
+  ): Promise<MockLoadResult> {
     const startTime = performance.now();
     const errors: string[] = [];
     const warnings: string[] = [];
@@ -333,13 +347,18 @@ export class MockRegistry {
       for (const dependency of entry.metadata.dependencies) {
         const depResult = await this.load(dependency);
         if (!depResult.success) {
-          errors.push(`Failed to load dependency '${dependency}' for mock '${name}'`);
+          errors.push(
+            `Failed to load dependency '${dependency}' for mock '${name}'`
+          );
         }
       }
 
       // Apply options and overrides
       if (options) {
-        entry.configuration.options = { ...entry.configuration.options, ...options };
+        entry.configuration.options = {
+          ...entry.configuration.options,
+          ...options,
+        };
       }
 
       // Mark as loaded
@@ -358,7 +377,9 @@ export class MockRegistry {
 
       this.updateStats();
       const loadTime = performance.now() - startTime;
-      this.logDebug(`Mock '${name}' loaded successfully in ${loadTime.toFixed(2)}ms`);
+      this.logDebug(
+        `Mock '${name}' loaded successfully in ${loadTime.toFixed(2)}ms`
+      );
 
       return {
         success: errors.length === 0,
@@ -368,7 +389,6 @@ export class MockRegistry {
         warnings,
         loadTime,
       };
-
     } catch (error) {
       errors.push(`Failed to load mock '${name}': ${error}`);
       return {
@@ -393,12 +413,16 @@ export class MockRegistry {
       // Check for dependents
       const dependents = this.getDependents(name);
       if (dependents.length > 0 && this.config.globalOptions.strictMode) {
-        throw new Error(`Cannot unload mock '${name}' - it has dependents: ${dependents.join(', ')}`);
+        throw new Error(
+          `Cannot unload mock '${name}' - it has dependents: ${dependents.join(', ')}`
+        );
       }
 
       // Unload from global registry
       if (global.__GLOBAL_MOCK_REGISTRY) {
-        const registryMap = global.__GLOBAL_MOCK_REGISTRY[entry.metadata.type + 's'] as Map<string, any>;
+        const registryMap = global.__GLOBAL_MOCK_REGISTRY[
+          entry.metadata.type + 's'
+        ] as Map<string, any>;
         if (registryMap && registryMap.delete) {
           registryMap.delete(name);
         }
@@ -411,7 +435,6 @@ export class MockRegistry {
       this.updateStats();
       this.logDebug(`Mock '${name}' unloaded successfully`);
       return true;
-
     } catch (error) {
       this.logDebug(`Failed to unload mock '${name}': ${error}`);
       return false;
@@ -457,17 +480,21 @@ export class MockRegistry {
 
     if (filter) {
       if (filter.type) {
-        entries = entries.filter(entry => entry.metadata.type === filter.type);
+        entries = entries.filter(
+          (entry) => entry.metadata.type === filter.type
+        );
       }
       if (filter.enabled !== undefined) {
-        entries = entries.filter(entry => entry.configuration.enabled === filter.enabled);
+        entries = entries.filter(
+          (entry) => entry.configuration.enabled === filter.enabled
+        );
       }
       if (filter.loaded !== undefined) {
-        entries = entries.filter(entry => entry.isLoaded === filter.loaded);
+        entries = entries.filter((entry) => entry.isLoaded === filter.loaded);
       }
       if (filter.tags && filter.tags.length > 0) {
-        entries = entries.filter(entry => 
-          filter.tags!.some(tag => entry.metadata.tags.includes(tag))
+        entries = entries.filter((entry) =>
+          filter.tags!.some((tag) => entry.metadata.tags.includes(tag))
         );
       }
     }
@@ -479,19 +506,26 @@ export class MockRegistry {
   // Compatibility and Versioning
   // ============================================================================
 
-  public checkCompatibility(name: string, metadata: MockMetadata): MockCompatibilityResult {
+  public checkCompatibility(
+    name: string,
+    metadata: MockMetadata
+  ): MockCompatibilityResult {
     const issues: string[] = [];
     const suggestions: string[] = [];
 
     // Check React version compatibility
     const reactVersion = this.config.react.version;
-    const isReactCompatible = metadata.compatibleVersions.some(version => 
+    const isReactCompatible = metadata.compatibleVersions.some((version) =>
       this.isVersionCompatible(reactVersion, version)
     );
 
     if (!isReactCompatible) {
-      issues.push(`Mock '${name}' is not compatible with React ${reactVersion}`);
-      suggestions.push(`Update mock to support React ${reactVersion} or use compatibility mode`);
+      issues.push(
+        `Mock '${name}' is not compatible with React ${reactVersion}`
+      );
+      suggestions.push(
+        `Update mock to support React ${reactVersion} or use compatibility mode`
+      );
     }
 
     // Check dependency compatibility
@@ -499,10 +533,16 @@ export class MockRegistry {
       const depEntry = this.registry.get(dependency);
       if (!depEntry) {
         issues.push(`Missing dependency '${dependency}' for mock '${name}'`);
-        suggestions.push(`Register dependency '${dependency}' before loading '${name}'`);
+        suggestions.push(
+          `Register dependency '${dependency}' before loading '${name}'`
+        );
       } else if (!depEntry.configuration.enabled) {
-        issues.push(`Dependency '${dependency}' is disabled for mock '${name}'`);
-        suggestions.push(`Enable dependency '${dependency}' or remove it from '${name}'`);
+        issues.push(
+          `Dependency '${dependency}' is disabled for mock '${name}'`
+        );
+        suggestions.push(
+          `Enable dependency '${dependency}' or remove it from '${name}'`
+        );
       }
     }
 
@@ -534,7 +574,11 @@ export class MockRegistry {
     }
   }
 
-  private hasCircularDependency(name: string, dependencies: string[], visited: Set<string> = new Set()): boolean {
+  private hasCircularDependency(
+    name: string,
+    dependencies: string[],
+    visited: Set<string> = new Set()
+  ): boolean {
     if (visited.has(name)) {
       return true;
     }
@@ -543,7 +587,14 @@ export class MockRegistry {
 
     for (const dependency of dependencies) {
       const depEntry = this.registry.get(dependency);
-      if (depEntry && this.hasCircularDependency(dependency, depEntry.metadata.dependencies, visited)) {
+      if (
+        depEntry &&
+        this.hasCircularDependency(
+          dependency,
+          depEntry.metadata.dependencies,
+          visited
+        )
+      ) {
         return true;
       }
     }
@@ -562,7 +613,7 @@ export class MockRegistry {
 
   private getDependents(name: string): string[] {
     const dependents: string[] = [];
-    
+
     for (const [mockName, dependencies] of this.dependencyGraph.entries()) {
       if (dependencies.has(name)) {
         dependents.push(mockName);
@@ -602,7 +653,11 @@ export class MockRegistry {
     maxAge?: number; // in milliseconds
     force?: boolean;
   }): void {
-    const { unloadUnused = true, maxAge = 30 * 60 * 1000, force = false } = options || {};
+    const {
+      unloadUnused = true,
+      maxAge = 30 * 60 * 1000,
+      force = false,
+    } = options || {};
     const now = new Date();
 
     for (const [name, entry] of this.registry.entries()) {
@@ -666,12 +721,14 @@ export class MockRegistry {
 
   private updateStats(): void {
     const entries = Array.from(this.registry.values());
-    
+
     this.stats.totalMocks = entries.length;
-    this.stats.loadedMocks = entries.filter(e => e.isLoaded).length;
-    this.stats.enabledMocks = entries.filter(e => e.configuration.enabled).length;
+    this.stats.loadedMocks = entries.filter((e) => e.isLoaded).length;
+    this.stats.enabledMocks = entries.filter(
+      (e) => e.configuration.enabled
+    ).length;
     this.stats.totalUsage = entries.reduce((sum, e) => sum + e.usageCount, 0);
-    
+
     // Estimate memory usage (rough calculation)
     this.stats.memoryUsage = entries.reduce((sum, entry) => {
       const size = JSON.stringify(entry).length * 2; // Rough byte estimate
@@ -699,7 +756,9 @@ export class MockRegistry {
 
       // Setup cleanup on window unload (browser environment)
       if (typeof window !== 'undefined') {
-        window.addEventListener('beforeunload', () => this.cleanup({ force: true }));
+        window.addEventListener('beforeunload', () =>
+          this.cleanup({ force: true })
+        );
       }
     }
   }
@@ -721,7 +780,9 @@ export class MockRegistry {
   } {
     return {
       config: this.getConfig(),
-      metadata: Array.from(this.registry.values()).map(entry => entry.metadata),
+      metadata: Array.from(this.registry.values()).map(
+        (entry) => entry.metadata
+      ),
       stats: this.getStats(),
     };
   }
@@ -786,10 +847,18 @@ export function registerMock(
   metadata: Partial<MockMetadata>,
   configuration?: Partial<MockConfiguration>
 ): MockLoadResult {
-  return getDefaultRegistry().register(name, mockImplementation, metadata, configuration);
+  return getDefaultRegistry().register(
+    name,
+    mockImplementation,
+    metadata,
+    configuration
+  );
 }
 
-export function loadMock(name: string, options?: Record<string, any>): Promise<MockLoadResult> {
+export function loadMock(
+  name: string,
+  options?: Record<string, any>
+): Promise<MockLoadResult> {
   return getDefaultRegistry().load(name, options);
 }
 
@@ -801,15 +870,22 @@ export function unloadMock(name: string): boolean {
   return getDefaultRegistry().unload(name);
 }
 
-export function listMocks(filter?: Parameters<MockRegistry['list']>[0]): MockRegistryEntry[] {
+export function listMocks(
+  filter?: Parameters<MockRegistry['list']>[0]
+): MockRegistryEntry[] {
   return getDefaultRegistry().list(filter);
 }
 
-export function checkMockCompatibility(name: string, metadata: MockMetadata): MockCompatibilityResult {
+export function checkMockCompatibility(
+  name: string,
+  metadata: MockMetadata
+): MockCompatibilityResult {
   return getDefaultRegistry().checkCompatibility(name, metadata);
 }
 
-export function cleanupMocks(options?: Parameters<MockRegistry['cleanup']>[0]): void {
+export function cleanupMocks(
+  options?: Parameters<MockRegistry['cleanup']>[0]
+): void {
   return getDefaultRegistry().cleanup(options);
 }
 

@@ -8,7 +8,7 @@ export {
   DatabaseSeedGenerator,
   DatabaseSeedExecutor,
   type DatabaseSeedScript,
-  type SeedExecutionResult
+  type SeedExecutionResult,
 } from './seed-generator';
 
 // Migration scripts exports
@@ -22,7 +22,7 @@ export {
   type IndexDefinition,
   type ConstraintDefinition,
   type ForeignKeyDefinition,
-  type TriggerDefinition
+  type TriggerDefinition,
 } from './migration-scripts';
 
 // Test utilities exports
@@ -36,7 +36,7 @@ export {
   type DatabaseStatistics,
   type TableStatistics,
   type IntegrityCheckResult,
-  type IntegrityCheck
+  type IntegrityCheck,
 } from './test-utilities';
 
 // Data integrity exports
@@ -46,7 +46,7 @@ export {
   type DataIntegrityResult,
   type ValidationDetail,
   type IntegrityReport,
-  type IntegritySummary
+  type IntegritySummary,
 } from './data-integrity';
 
 /**
@@ -62,7 +62,7 @@ export class DatabaseIntegrationManager {
 
   constructor(databaseUrl: string, config?: Partial<DatabaseTestConfig>) {
     const testConfig = { ...DatabaseTestManager.getDefaultConfig(), ...config };
-    
+
     this.seedGenerator = new DatabaseSeedGenerator();
     this.seedExecutor = new DatabaseSeedExecutor(databaseUrl);
     this.migrationManager = new DatabaseMigrationManager();
@@ -78,7 +78,7 @@ export class DatabaseIntegrationManager {
       success: false,
       steps: [],
       errors: [],
-      executionTime: 0
+      executionTime: 0,
     };
 
     const startTime = Date.now();
@@ -86,14 +86,15 @@ export class DatabaseIntegrationManager {
     try {
       // Step 1: Run database migrations
       console.log('Running database migrations...');
-      const migrationResults = await this.migrationManager.executeAllMigrations();
+      const migrationResults =
+        await this.migrationManager.executeAllMigrations();
       result.steps.push({
         name: 'Database Migrations',
-        success: migrationResults.every(r => r.success),
-        details: `${migrationResults.filter(r => r.success).length}/${migrationResults.length} migrations successful`
+        success: migrationResults.every((r) => r.success),
+        details: `${migrationResults.filter((r) => r.success).length}/${migrationResults.length} migrations successful`,
       });
 
-      if (!migrationResults.every(r => r.success)) {
+      if (!migrationResults.every((r) => r.success)) {
         result.errors.push('Some database migrations failed');
       }
 
@@ -103,49 +104,57 @@ export class DatabaseIntegrationManager {
       result.steps.push({
         name: 'Seed Script Generation',
         success: true,
-        details: `Generated ${seedScripts.length} seed scripts`
+        details: `Generated ${seedScripts.length} seed scripts`,
       });
 
       console.log('Executing seed scripts...');
       const seedResults = await this.seedExecutor.executeAllSeedScripts();
       result.steps.push({
         name: 'Seed Script Execution',
-        success: seedResults.every(r => r.success),
-        details: `${seedResults.filter(r => r.success).length}/${seedResults.length} seed scripts successful`
+        success: seedResults.every((r) => r.success),
+        details: `${seedResults.filter((r) => r.success).length}/${seedResults.length} seed scripts successful`,
       });
 
-      if (!seedResults.every(r => r.success)) {
+      if (!seedResults.every((r) => r.success)) {
         result.errors.push('Some seed scripts failed');
       }
 
       // Step 3: Validate data integrity
       console.log('Validating data integrity...');
-      const integrityReport = await this.integrityValidator.validateDataIntegrity('main');
+      const integrityReport =
+        await this.integrityValidator.validateDataIntegrity('main');
       result.steps.push({
         name: 'Data Integrity Validation',
         success: integrityReport.overallScore >= 90,
-        details: `Integrity score: ${integrityReport.overallScore}% (${integrityReport.passedRules}/${integrityReport.totalRules} rules passed)`
+        details: `Integrity score: ${integrityReport.overallScore}% (${integrityReport.passedRules}/${integrityReport.totalRules} rules passed)`,
       });
 
       if (integrityReport.overallScore < 90) {
-        result.errors.push(`Data integrity score below threshold: ${integrityReport.overallScore}%`);
+        result.errors.push(
+          `Data integrity score below threshold: ${integrityReport.overallScore}%`
+        );
       }
 
       // Step 4: Create initial database snapshot
       console.log('Creating initial database snapshot...');
-      const testInstance = await this.testManager.setupTestDatabase('initialization');
-      const snapshot = await this.testManager.createSnapshot(testInstance.id, 'initial_state');
+      const testInstance =
+        await this.testManager.setupTestDatabase('initialization');
+      const snapshot = await this.testManager.createSnapshot(
+        testInstance.id,
+        'initial_state'
+      );
       result.steps.push({
         name: 'Initial Snapshot Creation',
         success: true,
-        details: `Created snapshot: ${snapshot.id} (${snapshot.tables.length} tables)`
+        details: `Created snapshot: ${snapshot.id} (${snapshot.tables.length} tables)`,
       });
 
       result.success = result.errors.length === 0;
       result.executionTime = Date.now() - startTime;
 
-      console.log(`Database infrastructure initialization ${result.success ? 'completed' : 'failed'} in ${result.executionTime}ms`);
-
+      console.log(
+        `Database infrastructure initialization ${result.success ? 'completed' : 'failed'} in ${result.executionTime}ms`
+      );
     } catch (error) {
       result.success = false;
       result.errors.push(`Infrastructure initialization failed: ${error}`);
@@ -158,41 +167,57 @@ export class DatabaseIntegrationManager {
   /**
    * Setup test environment for specific test suite
    */
-  async setupTestEnvironment(testSuite: string, testFile?: string): Promise<TestEnvironmentSetup> {
+  async setupTestEnvironment(
+    testSuite: string,
+    testFile?: string
+  ): Promise<TestEnvironmentSetup> {
     const setup: TestEnvironmentSetup = {
       testInstance: null,
       seedResults: [],
       integrityReport: null,
       snapshot: null,
       success: false,
-      errors: []
+      errors: [],
     };
 
     try {
       // Create test database instance
-      setup.testInstance = await this.testManager.setupTestDatabase(testSuite, testFile);
-      
+      setup.testInstance = await this.testManager.setupTestDatabase(
+        testSuite,
+        testFile
+      );
+
       // Execute relevant seed scripts
-      const seedScripts = DatabaseSeedGenerator.generateAllSeedScripts()
-        .filter(script => script.scenario === 'default' || script.scenario.toString().includes(testSuite.toLowerCase()));
-      
+      const seedScripts = DatabaseSeedGenerator.generateAllSeedScripts().filter(
+        (script) =>
+          script.scenario === 'default' ||
+          script.scenario.toString().includes(testSuite.toLowerCase())
+      );
+
       for (const script of seedScripts) {
         const result = await this.seedExecutor.executeSeedScript(script);
         setup.seedResults.push(result);
       }
 
       // Validate test data integrity
-      setup.integrityReport = await this.integrityValidator.validateDataIntegrity(setup.testInstance.id);
+      setup.integrityReport =
+        await this.integrityValidator.validateDataIntegrity(
+          setup.testInstance.id
+        );
 
       // Create test snapshot
-      setup.snapshot = await this.testManager.createSnapshot(setup.testInstance.id, `${testSuite}_baseline`);
+      setup.snapshot = await this.testManager.createSnapshot(
+        setup.testInstance.id,
+        `${testSuite}_baseline`
+      );
 
-      setup.success = setup.seedResults.every(r => r.success) && setup.integrityReport.overallScore >= 85;
+      setup.success =
+        setup.seedResults.every((r) => r.success) &&
+        setup.integrityReport.overallScore >= 85;
 
       if (!setup.success) {
         setup.errors.push('Test environment setup validation failed');
       }
-
     } catch (error) {
       setup.success = false;
       setup.errors.push(`Test environment setup failed: ${error}`);
@@ -213,7 +238,7 @@ export class DatabaseIntegrationManager {
         tablesCleared: [],
         recordsDeleted: 0,
         executionTime: 0,
-        errors: [error instanceof Error ? error.message : String(error)]
+        errors: [error instanceof Error ? error.message : String(error)],
       };
     }
   }
@@ -227,33 +252,38 @@ export class DatabaseIntegrationManager {
       issues: [],
       recommendations: [],
       schemaValidation: null,
-      dataValidation: null
+      dataValidation: null,
     };
 
     try {
       // Get database schema
       const schema = this.migrationManager.getDatabaseSchema();
-      
+
       // Validate schema compatibility
       report.schemaValidation = await this.validateSchemaCompatibility(schema);
-      
+
       // Validate data compatibility
-      report.dataValidation = await this.integrityValidator.validateDataIntegrity('compatibility_check');
-      
+      report.dataValidation =
+        await this.integrityValidator.validateDataIntegrity(
+          'compatibility_check'
+        );
+
       // Check for compatibility issues
       if (report.schemaValidation.issues.length > 0) {
         report.compatible = false;
         report.issues.push(...report.schemaValidation.issues);
       }
-      
+
       if (report.dataValidation.overallScore < 95) {
         report.compatible = false;
-        report.issues.push(`Data validation score below threshold: ${report.dataValidation.overallScore}%`);
+        report.issues.push(
+          `Data validation score below threshold: ${report.dataValidation.overallScore}%`
+        );
       }
 
       // Generate recommendations
-      report.recommendations = this.generateCompatibilityRecommendations(report);
-
+      report.recommendations =
+        this.generateCompatibilityRecommendations(report);
     } catch (error) {
       report.compatible = false;
       report.issues.push(`Compatibility validation failed: ${error}`);
@@ -275,22 +305,24 @@ export class DatabaseIntegrationManager {
       snapshots: this.testManager.getSnapshots(),
       integrityReport: null,
       statistics: null,
-      recommendations: []
+      recommendations: [],
     };
 
     try {
       // Get integrity report
-      report.integrityReport = await this.integrityValidator.validateDataIntegrity('main');
-      
+      report.integrityReport =
+        await this.integrityValidator.validateDataIntegrity('main');
+
       // Get database statistics (if test instance exists)
       const activeInstances = this.testManager.getActiveInstances();
       if (activeInstances.length > 0) {
-        report.statistics = await this.testManager.getDatabaseStatistics(activeInstances[0].id);
+        report.statistics = await this.testManager.getDatabaseStatistics(
+          activeInstances[0].id
+        );
       }
 
       // Generate recommendations
       report.recommendations = this.generateDatabaseRecommendations(report);
-
     } catch (error) {
       report.recommendations.push(`Report generation error: ${error}`);
     }
@@ -301,11 +333,13 @@ export class DatabaseIntegrationManager {
   /**
    * Validate schema compatibility (simulated)
    */
-  private async validateSchemaCompatibility(schema: DatabaseSchema): Promise<SchemaValidationResult> {
+  private async validateSchemaCompatibility(
+    schema: DatabaseSchema
+  ): Promise<SchemaValidationResult> {
     const result: SchemaValidationResult = {
       valid: true,
       issues: [],
-      warnings: []
+      warnings: [],
     };
 
     // Simulate schema validation
@@ -313,17 +347,23 @@ export class DatabaseIntegrationManager {
       // Check for required columns
       const requiredColumns = ['id', 'created_at', 'updated_at'];
       for (const requiredCol of requiredColumns) {
-        if (!table.columns.some(col => col.name === requiredCol)) {
-          result.issues.push(`Table ${table.name} missing required column: ${requiredCol}`);
+        if (!table.columns.some((col) => col.name === requiredCol)) {
+          result.issues.push(
+            `Table ${table.name} missing required column: ${requiredCol}`
+          );
           result.valid = false;
         }
       }
 
       // Check foreign key constraints
       for (const fk of table.foreignKeys) {
-        const referencedTable = schema.tables.find(t => t.name === fk.referencedTable);
+        const referencedTable = schema.tables.find(
+          (t) => t.name === fk.referencedTable
+        );
         if (!referencedTable) {
-          result.issues.push(`Table ${table.name} references non-existent table: ${fk.referencedTable}`);
+          result.issues.push(
+            `Table ${table.name} references non-existent table: ${fk.referencedTable}`
+          );
           result.valid = false;
         }
       }
@@ -335,23 +375,33 @@ export class DatabaseIntegrationManager {
   /**
    * Generate compatibility recommendations
    */
-  private generateCompatibilityRecommendations(report: CompatibilityReport): string[] {
+  private generateCompatibilityRecommendations(
+    report: CompatibilityReport
+  ): string[] {
     const recommendations: string[] = [];
 
     if (!report.compatible) {
-      recommendations.push('Address compatibility issues before proceeding with migration');
+      recommendations.push(
+        'Address compatibility issues before proceeding with migration'
+      );
     }
 
     if (report.schemaValidation?.issues.length) {
-      recommendations.push('Update database schema to resolve structural issues');
+      recommendations.push(
+        'Update database schema to resolve structural issues'
+      );
     }
 
     if (report.dataValidation && report.dataValidation.overallScore < 95) {
-      recommendations.push('Improve mock data quality to match database constraints');
+      recommendations.push(
+        'Improve mock data quality to match database constraints'
+      );
     }
 
     if (recommendations.length === 0) {
-      recommendations.push('Mock data is fully compatible with database schema');
+      recommendations.push(
+        'Mock data is fully compatible with database schema'
+      );
     }
 
     return recommendations;
@@ -364,20 +414,28 @@ export class DatabaseIntegrationManager {
     const recommendations: string[] = [];
 
     if (report.integrityReport && report.integrityReport.overallScore < 90) {
-      recommendations.push('Address data integrity issues to improve database quality');
+      recommendations.push(
+        'Address data integrity issues to improve database quality'
+      );
     }
 
     if (report.testInstances.length > 5) {
-      recommendations.push('Consider cleaning up unused test database instances');
+      recommendations.push(
+        'Consider cleaning up unused test database instances'
+      );
     }
 
     if (report.snapshots.length > 10) {
-      recommendations.push('Archive old database snapshots to save storage space');
+      recommendations.push(
+        'Archive old database snapshots to save storage space'
+      );
     }
 
-    const failedMigrations = report.migrations.filter(m => !m.executedAt);
+    const failedMigrations = report.migrations.filter((m) => !m.executedAt);
     if (failedMigrations.length > 0) {
-      recommendations.push(`Execute ${failedMigrations.length} pending database migrations`);
+      recommendations.push(
+        `Execute ${failedMigrations.length} pending database migrations`
+      );
     }
 
     return recommendations;
@@ -483,7 +541,7 @@ export class DatabaseIntegrationFactory {
       cleanupStrategy: 'truncate',
       seedData: true,
       enableForeignKeys: true,
-      enableTriggers: false
+      enableTriggers: false,
     };
 
     return new DatabaseIntegrationManager(testDatabaseUrl, config);
@@ -492,14 +550,16 @@ export class DatabaseIntegrationFactory {
   /**
    * Create database integration manager for development
    */
-  static createForDevelopment(databaseUrl?: string): DatabaseIntegrationManager {
+  static createForDevelopment(
+    databaseUrl?: string
+  ): DatabaseIntegrationManager {
     const devDatabaseUrl = databaseUrl || 'sqlite+aiosqlite:///./dev.db';
     const config: Partial<DatabaseTestConfig> = {
       isolationLevel: 'suite',
       cleanupStrategy: 'delete',
       seedData: true,
       enableForeignKeys: true,
-      enableTriggers: true
+      enableTriggers: true,
     };
 
     return new DatabaseIntegrationManager(devDatabaseUrl, config);
@@ -514,7 +574,7 @@ export class DatabaseIntegrationFactory {
       cleanupStrategy: 'recreate',
       seedData: false,
       enableForeignKeys: true,
-      enableTriggers: true
+      enableTriggers: true,
     };
 
     return new DatabaseIntegrationManager(databaseUrl, config);

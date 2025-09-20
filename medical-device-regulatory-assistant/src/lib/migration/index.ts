@@ -30,7 +30,7 @@ export {
   type SuccessMetrics,
   MigrationPriority,
   RiskLevel,
-  MigrationAction
+  MigrationAction,
 } from './migration-strategy';
 
 // Rollback strategy exports
@@ -47,7 +47,7 @@ export {
   type RollbackExecution,
   type RollbackStepExecution,
   type ValidationResult,
-  type RollbackLog
+  type RollbackLog,
 } from './rollback-strategy';
 
 // Validation criteria exports
@@ -65,7 +65,7 @@ export {
   type ValidationExecution,
   type ValidationResult as ValidationCriterionResult,
   type ValidationSummary,
-  type Issue
+  type Issue,
 } from './validation-criteria';
 
 // Timeline and resource allocation exports
@@ -80,7 +80,7 @@ export {
   type ProjectTimeline,
   type ContingencyPlan,
   type ReportingSchedule,
-  type TimelineProgressReport
+  type TimelineProgressReport,
 } from './timeline-generator';
 
 /**
@@ -91,9 +91,12 @@ export class MigrationStrategyFactory {
   /**
    * Create a complete migration strategy with all components
    */
-  static createComprehensiveStrategy(options?: MigrationStrategyOptions): ComprehensiveMigrationStrategy {
+  static createComprehensiveStrategy(
+    options?: MigrationStrategyOptions
+  ): ComprehensiveMigrationStrategy {
     const strategy = MigrationStrategyGenerator.generateComprehensiveStrategy();
-    const validationSuite = MigrationValidationSuiteGenerator.generateComprehensiveValidationSuite();
+    const validationSuite =
+      MigrationValidationSuiteGenerator.generateComprehensiveValidationSuite();
     const timeline = MigrationTimelineGenerator.generateComprehensiveTimeline(
       options?.startDate,
       options?.teamSize,
@@ -108,11 +111,13 @@ export class MigrationStrategyFactory {
       rollbackConfig,
       documentation: {
         strategyDocument: this.generateStrategyDocument(strategy),
-        rollbackProcedure: RollbackDocumentationGenerator.generateRollbackProcedure(),
-        rollbackChecklist: RollbackDocumentationGenerator.generateRollbackChecklist(),
+        rollbackProcedure:
+          RollbackDocumentationGenerator.generateRollbackProcedure(),
+        rollbackChecklist:
+          RollbackDocumentationGenerator.generateRollbackChecklist(),
         validationPlan: this.generateValidationPlan(validationSuite),
-        timelineSummary: this.generateTimelineSummary(timeline)
-      }
+        timelineSummary: this.generateTimelineSummary(timeline),
+      },
     };
   }
 
@@ -133,7 +138,9 @@ This document outlines the comprehensive strategy for migrating the Medical Devi
 - **Success Criteria**: ${strategy.successMetrics.functionalityPreserved}% functionality preserved
 
 ## Migration Phases
-${strategy.phases.map((phase, index) => `
+${strategy.phases
+  .map(
+    (phase, index) => `
 ### Phase ${index + 1}: ${phase.name}
 - **Duration**: ${phase.estimatedDuration} hours
 - **Risk Level**: ${phase.riskLevel}
@@ -141,19 +148,25 @@ ${strategy.phases.map((phase, index) => `
 - **Dependencies**: ${phase.dependencies.join(', ') || 'None'}
 
 **Deliverables:**
-${phase.deliverables.map(d => `- ${d}`).join('\n')}
-`).join('\n')}
+${phase.deliverables.map((d) => `- ${d}`).join('\n')}
+`
+  )
+  .join('\n')}
 
 ## Risk Assessment
 **Overall Risk**: ${strategy.riskAssessment.overallRisk}
 
 **Key Risk Factors:**
-${strategy.riskAssessment.riskFactors.map(rf => `
+${strategy.riskAssessment.riskFactors
+  .map(
+    (rf) => `
 - **${rf.category}**: ${rf.description}
   - Impact: ${rf.impact}/10
   - Probability: ${Math.round(rf.probability * 100)}%
   - Mitigation: ${rf.mitigation}
-`).join('')}
+`
+  )
+  .join('')}
 
 ## Resource Requirements
 - **Developers**: ${strategy.resourceRequirements.developers}
@@ -173,10 +186,14 @@ ${strategy.riskAssessment.riskFactors.map(rf => `
 **End Date**: ${strategy.timeline.endDate}
 
 **Key Milestones:**
-${strategy.timeline.milestones.map(m => `
+${strategy.timeline.milestones
+  .map(
+    (m) => `
 - **${m.name}**: ${m.targetDate}
   - ${m.description}
-`).join('')}
+`
+  )
+  .join('')}
 
 ---
 *Generated on: ${new Date().toISOString()}*
@@ -187,7 +204,9 @@ ${strategy.timeline.milestones.map(m => `
   /**
    * Generate validation plan documentation
    */
-  private static generateValidationPlan(validationSuite: ValidationSuite): string {
+  private static generateValidationPlan(
+    validationSuite: ValidationSuite
+  ): string {
     return `
 # Migration Validation Plan
 
@@ -195,21 +214,29 @@ ${strategy.timeline.milestones.map(m => `
 This validation plan ensures the migration maintains functionality, performance, and user experience standards.
 
 ## Validation Categories
-${validationSuite.categories.map(category => `
+${validationSuite.categories
+  .map(
+    (category) => `
 ### ${category.name} (Weight: ${Math.round(category.weight * 100)}%)
 ${category.description}
 
 **Pass Threshold**: ${category.passThreshold}%
 
 **Criteria:**
-${category.criteria.map(criterion => `
+${category.criteria
+  .map(
+    (criterion) => `
 - **${criterion.name}** (${criterion.priority} priority)
   - Type: ${criterion.type}
   - Automated Tests: ${criterion.automatedTests.length}
   - Manual Tests: ${criterion.manualTests.length}
   - Acceptance Criteria: ${criterion.acceptanceCriteria.length}
-`).join('')}
-`).join('')}
+`
+  )
+  .join('')}
+`
+  )
+  .join('')}
 
 ## Execution Order
 ${validationSuite.executionOrder.map((categoryId, index) => `${index + 1}. ${categoryId}`).join('\n')}
@@ -239,26 +266,34 @@ ${validationSuite.executionOrder.map((categoryId, index) => `${index + 1}. ${cat
 - **Buffer Time**: ${timeline.bufferTime} hours
 
 ## Phases Overview
-${timeline.phases.map((phase, index) => `
+${timeline.phases
+  .map(
+    (phase, index) => `
 ### Phase ${index + 1}: ${phase.name}
 - **Duration**: ${phase.duration} hours
 - **Start**: ${new Date(phase.startDate).toLocaleDateString()}
 - **End**: ${new Date(phase.endDate).toLocaleDateString()}
 - **Tasks**: ${phase.tasks.length}
 - **Status**: ${phase.status}
-`).join('')}
+`
+  )
+  .join('')}
 
 ## Resource Allocation
-${timeline.resources.map(resource => `
+${timeline.resources
+  .map(
+    (resource) => `
 ### ${resource.name}
 - **Type**: ${resource.type}
 - **Availability**: ${Math.round(resource.availability * 100)}%
 - **Skills**: ${resource.skills.join(', ')}
 - **Assignments**: ${resource.assignments.length}
-`).join('')}
+`
+  )
+  .join('')}
 
 ## Critical Path
-${timeline.criticalPath.map(phaseId => `- ${phaseId}`).join('\n')}
+${timeline.criticalPath.map((phaseId) => `- ${phaseId}`).join('\n')}
 
 ## Reporting Schedule
 - **Frequency**: ${timeline.reportingSchedule.frequency}
@@ -306,8 +341,10 @@ export class MigrationProgressMonitor {
    * Generate current progress report
    */
   generateProgressReport(): MigrationProgressReport {
-    const timelineReport = TimelineProgressTracker.generateProgressReport(this.strategy.timeline);
-    
+    const timelineReport = TimelineProgressTracker.generateProgressReport(
+      this.strategy.timeline
+    );
+
     return {
       timestamp: new Date().toISOString(),
       overallProgress: timelineReport.overallProgress,
@@ -318,7 +355,7 @@ export class MigrationProgressMonitor {
       activeBlockers: timelineReport.blockers,
       recommendations: timelineReport.recommendations,
       riskStatus: this.assessCurrentRisks(),
-      resourceUtilization: this.calculateResourceUtilization()
+      resourceUtilization: this.calculateResourceUtilization(),
     };
   }
 
@@ -327,12 +364,16 @@ export class MigrationProgressMonitor {
    */
   private assessCurrentRisks(): RiskStatus {
     const activeBlockers = this.strategy.timeline.phases
-      .flatMap(phase => phase.tasks)
-      .flatMap(task => task.blockers)
-      .filter(blocker => !blocker.resolvedDate);
+      .flatMap((phase) => phase.tasks)
+      .flatMap((task) => task.blockers)
+      .filter((blocker) => !blocker.resolvedDate);
 
-    const criticalBlockers = activeBlockers.filter(b => b.severity === 'critical').length;
-    const highBlockers = activeBlockers.filter(b => b.severity === 'high').length;
+    const criticalBlockers = activeBlockers.filter(
+      (b) => b.severity === 'critical'
+    ).length;
+    const highBlockers = activeBlockers.filter(
+      (b) => b.severity === 'high'
+    ).length;
 
     let riskLevel: 'low' | 'medium' | 'high' | 'critical' = 'low';
     if (criticalBlockers > 0) riskLevel = 'critical';
@@ -344,7 +385,10 @@ export class MigrationProgressMonitor {
       activeBlockers: activeBlockers.length,
       criticalBlockers,
       highBlockers,
-      recommendations: this.generateRiskRecommendations(riskLevel, activeBlockers.length)
+      recommendations: this.generateRiskRecommendations(
+        riskLevel,
+        activeBlockers.length
+      ),
     };
   }
 
@@ -353,28 +397,32 @@ export class MigrationProgressMonitor {
    */
   private calculateResourceUtilization(): ResourceUtilization {
     const resources = this.strategy.timeline.resources;
-    const utilization = resources.map(resource => {
-      const totalAssigned = resource.assignments.reduce((sum, assignment) => 
-        sum + assignment.hoursAllocated, 0
+    const utilization = resources.map((resource) => {
+      const totalAssigned = resource.assignments.reduce(
+        (sum, assignment) => sum + assignment.hoursAllocated,
+        0
       );
       const totalAvailable = this.calculateAvailableHours(resource);
-      
+
       return {
         resourceId: resource.id,
         name: resource.name,
-        utilizationPercentage: Math.round((totalAssigned / totalAvailable) * 100),
+        utilizationPercentage: Math.round(
+          (totalAssigned / totalAvailable) * 100
+        ),
         assignedHours: totalAssigned,
         availableHours: totalAvailable,
-        overAllocated: totalAssigned > totalAvailable
+        overAllocated: totalAssigned > totalAvailable,
       };
     });
 
     return {
       resources: utilization,
       averageUtilization: Math.round(
-        utilization.reduce((sum, r) => sum + r.utilizationPercentage, 0) / utilization.length
+        utilization.reduce((sum, r) => sum + r.utilizationPercentage, 0) /
+          utilization.length
       ),
-      overAllocatedResources: utilization.filter(r => r.overAllocated).length
+      overAllocatedResources: utilization.filter((r) => r.overAllocated).length,
     };
   }
 
@@ -383,11 +431,16 @@ export class MigrationProgressMonitor {
     return 40 * 8 * resource.availability; // 40 weeks * 8 hours * availability
   }
 
-  private generateRiskRecommendations(riskLevel: string, blockerCount: number): string[] {
+  private generateRiskRecommendations(
+    riskLevel: string,
+    blockerCount: number
+  ): string[] {
     const recommendations: string[] = [];
 
     if (riskLevel === 'critical') {
-      recommendations.push('Immediate escalation required - critical blockers present');
+      recommendations.push(
+        'Immediate escalation required - critical blockers present'
+      );
       recommendations.push('Consider emergency resource allocation');
     } else if (riskLevel === 'high') {
       recommendations.push('Prioritize blocker resolution');
@@ -437,4 +490,8 @@ export interface ResourceUtilizationInfo {
 }
 
 // Re-export types for convenience
-export type { PhaseProgressInfo, PhaseMilestone, Blocker } from './timeline-generator';
+export type {
+  PhaseProgressInfo,
+  PhaseMilestone,
+  Blocker,
+} from './timeline-generator';

@@ -53,7 +53,13 @@ export * from './HookExecutionTracer';
 export * from './TestDebuggingTools';
 
 // Re-export commonly used testing libraries
-export { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
+export {
+  render,
+  screen,
+  fireEvent,
+  waitFor,
+  act,
+} from '@testing-library/react';
 export { default as userEvent } from '@testing-library/user-event';
 export { axe, toHaveNoViolations } from 'jest-axe';
 
@@ -89,17 +95,17 @@ export const defaultTestConfig: TestConfig = {
 // Test setup helper
 export const setupTestSuite = async (config: Partial<TestConfig> = {}) => {
   const finalConfig = { ...defaultTestConfig, ...config };
-  
+
   if (finalConfig.enableMSW) {
     const { setupTestMocks } = await import('./test-setup');
     setupTestMocks();
   }
-  
+
   if (finalConfig.enableDatabase) {
     const { setupTestDatabase } = await import('./database-utils');
     await setupTestDatabase(finalConfig.databaseConfig);
   }
-  
+
   return finalConfig;
 };
 
@@ -109,7 +115,7 @@ export const cleanupTestSuite = async (config: TestConfig) => {
     const { teardownTestMocks } = await import('./test-setup');
     teardownTestMocks();
   }
-  
+
   if (config.enableDatabase) {
     const { closeTestDatabase } = await import('./database-utils');
     await closeTestDatabase();

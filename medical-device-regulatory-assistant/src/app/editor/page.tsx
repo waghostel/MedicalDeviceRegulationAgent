@@ -16,7 +16,7 @@ export default function EditorPage() {
           </div>
         </div>
       </header>
-      
+
       <main className="flex-1 overflow-hidden">
         <DocumentEditor projectId={projectId} />
       </main>

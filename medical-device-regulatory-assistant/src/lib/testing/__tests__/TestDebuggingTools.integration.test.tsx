@@ -1,24 +1,34 @@
 /**
  * Integration tests for TestDebuggingTools
- * 
+ *
  * Tests the integrated debugging system that combines test failure analysis,
  * component rendering debugging, and hook execution tracing.
  */
 
 import React from 'react';
-import { TestDebuggingTools, testDebuggingTools, debugTest, quickDebugGuide } from '../TestDebuggingTools';
+import {
+  TestDebuggingTools,
+  testDebuggingTools,
+  debugTest,
+  quickDebugGuide,
+} from '../TestDebuggingTools';
 
 // Mock component for testing
-const TestComponent: React.FC<{ title: string; onClick?: () => void }> = ({ title, onClick }) => (
+const TestComponent: React.FC<{ title: string; onClick?: () => void }> = ({
+  title,
+  onClick,
+}) => (
   <div data-testid="test-component" onClick={onClick}>
     <h1>{title}</h1>
   </div>
 );
 
 // Component that uses hooks
-const HookComponent: React.FC<{ initialCount?: number }> = ({ initialCount = 0 }) => {
+const HookComponent: React.FC<{ initialCount?: number }> = ({
+  initialCount = 0,
+}) => {
   const [count, setCount] = React.useState(initialCount);
-  
+
   React.useEffect(() => {
     console.log(`Count changed to: ${count}`);
   }, [count]);
@@ -44,15 +54,23 @@ describe('TestDebuggingTools Integration', () => {
       const options = {
         component: TestComponent,
         props: { title: 'Test Title' },
-        enableHookTracing: false // Disable for simpler test
+        enableHookTracing: false, // Disable for simpler test
       };
 
-      const report = await testDebuggingTools.debugTestFailure('Hook mock test', error, options);
+      const report = await testDebuggingTools.debugTestFailure(
+        'Hook mock test',
+        error,
+        options
+      );
 
       expect(report.testName).toBe('Hook mock test');
       expect(report.componentName).toBe('TestComponent');
-      expect(report.debuggingSession.toolsUsed).toContain('TestFailureAnalyzer');
-      expect(report.debuggingSession.toolsUsed).toContain('ComponentRenderingDebugger');
+      expect(report.debuggingSession.toolsUsed).toContain(
+        'TestFailureAnalyzer'
+      );
+      expect(report.debuggingSession.toolsUsed).toContain(
+        'ComponentRenderingDebugger'
+      );
       expect(report.failureAnalysis).toBeDefined();
       expect(report.renderingAnalysis).toBeDefined();
       expect(report.overallAssessment.severity).toBe('high');
@@ -61,23 +79,36 @@ describe('TestDebuggingTools Integration', () => {
 
     it('should handle React 19 AggregateError with comprehensive analysis', async () => {
       const aggregateError = new AggregateError(
-        [new Error('Component render failed'), new Error('Hook execution failed')],
+        [
+          new Error('Component render failed'),
+          new Error('Hook execution failed'),
+        ],
         'Multiple React 19 errors'
       );
-      
+
       const options = {
         component: TestComponent,
         props: { title: 'Test Title' },
-        enableHookTracing: false
+        enableHookTracing: false,
       };
 
-      const report = await testDebuggingTools.debugTestFailure('React 19 test', aggregateError, options);
+      const report = await testDebuggingTools.debugTestFailure(
+        'React 19 test',
+        aggregateError,
+        options
+      );
 
-      expect(report.failureAnalysis?.analysis.category).toBe('REACT_19_COMPATIBILITY');
+      expect(report.failureAnalysis?.analysis.category).toBe(
+        'REACT_19_COMPATIBILITY'
+      );
       expect(report.overallAssessment.severity).toBe('critical');
-      expect(report.actionableRecommendations.some(rec => 
-        rec.category === 'TEST_ENVIRONMENT' && rec.title.includes('React 19')
-      )).toBe(true);
+      expect(
+        report.actionableRecommendations.some(
+          (rec) =>
+            rec.category === 'TEST_ENVIRONMENT' &&
+            rec.title.includes('React 19')
+        )
+      ).toBe(true);
     });
 
     it('should integrate hook tracing when enabled', async () => {
@@ -86,13 +117,23 @@ describe('TestDebuggingTools Integration', () => {
         component: HookComponent,
         props: { initialCount: 5 },
         enableHookTracing: true,
-        tracingOptions: { includePerformanceMetrics: true }
+        tracingOptions: { includePerformanceMetrics: true },
       };
 
-      const report = await testDebuggingTools.debugTestFailure('Hook tracing test', error, options);
+      const report = await testDebuggingTools.debugTestFailure(
+        'Hook tracing test',
+        error,
+        options
+      );
 
-      expect(report.debuggingSession.toolsUsed).toContain('HookExecutionTracer');
-      expect(report.debuggingSession.phases.some(phase => phase.phase === 'HOOK_TRACING')).toBe(true);
+      expect(report.debuggingSession.toolsUsed).toContain(
+        'HookExecutionTracer'
+      );
+      expect(
+        report.debuggingSession.phases.some(
+          (phase) => phase.phase === 'HOOK_TRACING'
+        )
+      ).toBe(true);
     });
 
     it('should generate appropriate recommendations based on multiple analyses', async () => {
@@ -100,33 +141,47 @@ describe('TestDebuggingTools Integration', () => {
       const options = {
         component: TestComponent,
         props: {}, // Missing required 'title' prop
-        enableHookTracing: false
+        enableHookTracing: false,
       };
 
-      const report = await testDebuggingTools.debugTestFailure('Multi-issue test', error, options);
+      const report = await testDebuggingTools.debugTestFailure(
+        'Multi-issue test',
+        error,
+        options
+      );
 
       // Should have recommendations for both hook mock and missing props
-      expect(report.actionableRecommendations.some(rec => 
-        rec.category === 'MOCK_CONFIGURATION'
-      )).toBe(true);
-      
-      expect(report.actionableRecommendations.some(rec => 
-        rec.category === 'COMPONENT_PROPS'
-      )).toBe(true);
+      expect(
+        report.actionableRecommendations.some(
+          (rec) => rec.category === 'MOCK_CONFIGURATION'
+        )
+      ).toBe(true);
+
+      expect(
+        report.actionableRecommendations.some(
+          (rec) => rec.category === 'COMPONENT_PROPS'
+        )
+      ).toBe(true);
     });
 
     it('should handle debugging errors gracefully', async () => {
       const error = new Error('Test error');
       const options = {
         component: null as any, // Invalid component to trigger debugging error
-        enableHookTracing: false
+        enableHookTracing: false,
       };
 
-      const report = await testDebuggingTools.debugTestFailure('Error handling test', error, options);
+      const report = await testDebuggingTools.debugTestFailure(
+        'Error handling test',
+        error,
+        options
+      );
 
       expect(report.overallAssessment.severity).toBe('critical');
       expect(report.overallAssessment.isFixable).toBe(false);
-      expect(report.actionableRecommendations[0].title).toBe('Manual Investigation Required');
+      expect(report.actionableRecommendations[0].title).toBe(
+        'Manual Investigation Required'
+      );
     });
 
     it('should track debugging session metrics', async () => {
@@ -134,10 +189,14 @@ describe('TestDebuggingTools Integration', () => {
       const options = {
         component: TestComponent,
         props: { title: 'Test' },
-        enableHookTracing: false
+        enableHookTracing: false,
       };
 
-      const report = await testDebuggingTools.debugTestFailure('Metrics test', error, options);
+      const report = await testDebuggingTools.debugTestFailure(
+        'Metrics test',
+        error,
+        options
+      );
 
       expect(report.debuggingSession.duration).toBeGreaterThan(0);
       expect(report.debuggingSession.phases.length).toBeGreaterThan(0);
@@ -152,11 +211,16 @@ describe('TestDebuggingTools Integration', () => {
       const options = {
         component: TestComponent,
         props: { title: 'Test Title' },
-        enableHookTracing: false
+        enableHookTracing: false,
       };
 
-      const report = await testDebuggingTools.debugTestFailure('Guide test', error, options);
-      const guide = testDebuggingTools.generateInteractiveDebuggingGuide(report);
+      const report = await testDebuggingTools.debugTestFailure(
+        'Guide test',
+        error,
+        options
+      );
+      const guide =
+        testDebuggingTools.generateInteractiveDebuggingGuide(report);
 
       expect(guide).toContain('# Interactive Test Debugging Guide');
       expect(guide).toContain('## Test: Guide test');
@@ -173,11 +237,15 @@ describe('TestDebuggingTools Integration', () => {
       const options = {
         component: TestComponent,
         props: {},
-        enableHookTracing: false
+        enableHookTracing: false,
       };
 
-      const report = await testDebuggingTools.debugTestFailure('Priority test', error, options);
-      
+      const report = await testDebuggingTools.debugTestFailure(
+        'Priority test',
+        error,
+        options
+      );
+
       // Manually add recommendations with different priorities for testing
       report.actionableRecommendations = [
         {
@@ -187,7 +255,7 @@ describe('TestDebuggingTools Integration', () => {
           description: 'Low priority description',
           steps: ['Step 1'],
           relatedFiles: [],
-          estimatedTime: '5 minutes'
+          estimatedTime: '5 minutes',
         },
         {
           priority: 'high',
@@ -196,7 +264,7 @@ describe('TestDebuggingTools Integration', () => {
           description: 'High priority description',
           steps: ['Step 1'],
           relatedFiles: [],
-          estimatedTime: '30 minutes'
+          estimatedTime: '30 minutes',
         },
         {
           priority: 'medium',
@@ -205,11 +273,12 @@ describe('TestDebuggingTools Integration', () => {
           description: 'Medium priority description',
           steps: ['Step 1'],
           relatedFiles: [],
-          estimatedTime: '15 minutes'
-        }
+          estimatedTime: '15 minutes',
+        },
       ];
 
-      const guide = testDebuggingTools.generateInteractiveDebuggingGuide(report);
+      const guide =
+        testDebuggingTools.generateInteractiveDebuggingGuide(report);
 
       // High priority should come first
       const highPriorityIndex = guide.indexOf('High Priority Task');
@@ -225,11 +294,16 @@ describe('TestDebuggingTools Integration', () => {
       const options = {
         component: TestComponent,
         props: { title: 'Test' },
-        enableHookTracing: false
+        enableHookTracing: false,
       };
 
-      const report = await testDebuggingTools.debugTestFailure('Code example test', error, options);
-      const guide = testDebuggingTools.generateInteractiveDebuggingGuide(report);
+      const report = await testDebuggingTools.debugTestFailure(
+        'Code example test',
+        error,
+        options
+      );
+      const guide =
+        testDebuggingTools.generateInteractiveDebuggingGuide(report);
 
       // Should include code example for hook mock configuration
       expect(guide).toContain('**Code Example**:');
@@ -252,23 +326,35 @@ describe('TestDebuggingTools Integration', () => {
 
     it('should calculate statistics correctly with multiple sessions', async () => {
       // Perform multiple debugging sessions
-      await testDebuggingTools.debugTestFailure('Test 1', new Error('Error 1'), {
-        component: TestComponent,
-        props: { title: 'Test 1' },
-        enableHookTracing: false
-      });
+      await testDebuggingTools.debugTestFailure(
+        'Test 1',
+        new Error('Error 1'),
+        {
+          component: TestComponent,
+          props: { title: 'Test 1' },
+          enableHookTracing: false,
+        }
+      );
 
-      await testDebuggingTools.debugTestFailure('Test 2', new AggregateError([], 'Error 2'), {
-        component: TestComponent,
-        props: { title: 'Test 2' },
-        enableHookTracing: false
-      });
+      await testDebuggingTools.debugTestFailure(
+        'Test 2',
+        new AggregateError([], 'Error 2'),
+        {
+          component: TestComponent,
+          props: { title: 'Test 2' },
+          enableHookTracing: false,
+        }
+      );
 
-      await testDebuggingTools.debugTestFailure('Test 3', new Error('Error 3'), {
-        component: TestComponent,
-        props: { title: 'Test 3' },
-        enableHookTracing: false
-      });
+      await testDebuggingTools.debugTestFailure(
+        'Test 3',
+        new Error('Error 3'),
+        {
+          component: TestComponent,
+          props: { title: 'Test 3' },
+          enableHookTracing: false,
+        }
+      );
 
       const stats = testDebuggingTools.getDebuggingStatistics();
 
@@ -286,7 +372,7 @@ describe('TestDebuggingTools Integration', () => {
       const options = {
         component: TestComponent,
         props: { title: 'Quick Test' },
-        enableHookTracing: false
+        enableHookTracing: false,
       };
 
       const report = await debugTest('Quick debug test', error, options);
@@ -301,7 +387,7 @@ describe('TestDebuggingTools Integration', () => {
       const options = {
         component: TestComponent,
         props: { title: 'Guide Test' },
-        enableHookTracing: false
+        enableHookTracing: false,
       };
 
       const report = await debugTest('Guide test', error, options);
@@ -318,14 +404,18 @@ describe('TestDebuggingTools Integration', () => {
       const options = {
         component: TestComponent,
         props: {}, // Missing props to create rendering issues
-        enableHookTracing: false
+        enableHookTracing: false,
       };
 
-      const report = await testDebuggingTools.debugTestFailure('Integration test', error, options);
+      const report = await testDebuggingTools.debugTestFailure(
+        'Integration test',
+        error,
+        options
+      );
 
       // Should identify that hook mock issues may be causing rendering problems
       const integrationPhase = report.debuggingSession.phases.find(
-        phase => phase.phase === 'INTEGRATION_ANALYSIS'
+        (phase) => phase.phase === 'INTEGRATION_ANALYSIS'
       );
 
       expect(integrationPhase).toBeDefined();
@@ -336,37 +426,53 @@ describe('TestDebuggingTools Integration', () => {
   describe('performance and reliability', () => {
     it('should complete comprehensive debugging within reasonable time', async () => {
       const startTime = performance.now();
-      
+
       const error = new Error('Performance test');
       const options = {
         component: TestComponent,
         props: { title: 'Performance Test' },
-        enableHookTracing: true
+        enableHookTracing: true,
       };
 
-      await testDebuggingTools.debugTestFailure('Performance test', error, options);
-      
+      await testDebuggingTools.debugTestFailure(
+        'Performance test',
+        error,
+        options
+      );
+
       const duration = performance.now() - startTime;
       expect(duration).toBeLessThan(1000); // Should complete in less than 1 second
     });
 
     it('should handle concurrent debugging sessions', async () => {
       const promises = [
-        testDebuggingTools.debugTestFailure('Concurrent 1', new Error('Error 1'), {
-          component: TestComponent,
-          props: { title: 'Test 1' },
-          enableHookTracing: false
-        }),
-        testDebuggingTools.debugTestFailure('Concurrent 2', new Error('Error 2'), {
-          component: TestComponent,
-          props: { title: 'Test 2' },
-          enableHookTracing: false
-        }),
-        testDebuggingTools.debugTestFailure('Concurrent 3', new Error('Error 3'), {
-          component: TestComponent,
-          props: { title: 'Test 3' },
-          enableHookTracing: false
-        })
+        testDebuggingTools.debugTestFailure(
+          'Concurrent 1',
+          new Error('Error 1'),
+          {
+            component: TestComponent,
+            props: { title: 'Test 1' },
+            enableHookTracing: false,
+          }
+        ),
+        testDebuggingTools.debugTestFailure(
+          'Concurrent 2',
+          new Error('Error 2'),
+          {
+            component: TestComponent,
+            props: { title: 'Test 2' },
+            enableHookTracing: false,
+          }
+        ),
+        testDebuggingTools.debugTestFailure(
+          'Concurrent 3',
+          new Error('Error 3'),
+          {
+            component: TestComponent,
+            props: { title: 'Test 3' },
+            enableHookTracing: false,
+          }
+        ),
       ];
 
       const reports = await Promise.all(promises);
@@ -381,16 +487,20 @@ describe('TestDebuggingTools Integration', () => {
     it('should maintain debugging history with size limit', async () => {
       // Perform debugging sessions up to the limit (50)
       for (let i = 0; i < 55; i++) {
-        await testDebuggingTools.debugTestFailure(`Test ${i}`, new Error(`Error ${i}`), {
-          component: TestComponent,
-          props: { title: `Test ${i}` },
-          enableHookTracing: false
-        });
+        await testDebuggingTools.debugTestFailure(
+          `Test ${i}`,
+          new Error(`Error ${i}`),
+          {
+            component: TestComponent,
+            props: { title: `Test ${i}` },
+            enableHookTracing: false,
+          }
+        );
       }
 
       const history = testDebuggingTools['debugHistory'];
       expect(history).toHaveLength(50);
-      
+
       // Should contain the most recent sessions
       expect(history[history.length - 1].testName).toBe('Test 54');
       expect(history[0].testName).toBe('Test 5'); // First 5 should be removed
@@ -402,10 +512,14 @@ describe('TestDebuggingTools Integration', () => {
       const error = new Error('Undefined component test');
       const options = {
         component: undefined as any,
-        enableHookTracing: false
+        enableHookTracing: false,
       };
 
-      const report = await testDebuggingTools.debugTestFailure('Undefined component test', error, options);
+      const report = await testDebuggingTools.debugTestFailure(
+        'Undefined component test',
+        error,
+        options
+      );
 
       expect(report.componentName).toBe('Unknown');
       expect(report.overallAssessment.isFixable).toBe(false);
@@ -416,28 +530,39 @@ describe('TestDebuggingTools Integration', () => {
       const options = {
         component: TestComponent,
         props: {},
-        enableHookTracing: false
+        enableHookTracing: false,
       };
 
-      const report = await testDebuggingTools.debugTestFailure('Empty props test', error, options);
+      const report = await testDebuggingTools.debugTestFailure(
+        'Empty props test',
+        error,
+        options
+      );
 
       expect(report.renderingAnalysis?.propsAnalysis.providedProps).toEqual({});
     });
 
     it('should handle complex error objects', async () => {
-      const complexError = new AggregateError([
-        new Error('First error'),
-        new TypeError('Type error'),
-        new ReferenceError('Reference error')
-      ], 'Complex aggregate error');
+      const complexError = new AggregateError(
+        [
+          new Error('First error'),
+          new TypeError('Type error'),
+          new ReferenceError('Reference error'),
+        ],
+        'Complex aggregate error'
+      );
 
       const options = {
         component: TestComponent,
         props: { title: 'Complex Error Test' },
-        enableHookTracing: false
+        enableHookTracing: false,
       };
 
-      const report = await testDebuggingTools.debugTestFailure('Complex error test', complexError, options);
+      const report = await testDebuggingTools.debugTestFailure(
+        'Complex error test',
+        complexError,
+        options
+      );
 
       expect(report.failureAnalysis?.failureType).toBe('AGGREGATE_ERROR');
       expect(report.overallAssessment.severity).toBe('critical');

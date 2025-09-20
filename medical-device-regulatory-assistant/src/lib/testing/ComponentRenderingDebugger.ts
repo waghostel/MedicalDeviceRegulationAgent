@@ -1,9 +1,9 @@
 /**
  * Component Rendering Debugger
- * 
+ *
  * Provides detailed debugging capabilities for component rendering issues,
  * including prop analysis, context validation, and render tree inspection.
- * 
+ *
  * Requirements: 5.4, 6.2
  */
 
@@ -122,7 +122,7 @@ export interface TestIdCoverage {
   missingTestIds: string[];
 }
 
-export type RenderingStatus = 
+export type RenderingStatus =
   | 'SUCCESS'
   | 'PARTIAL_RENDER'
   | 'RENDER_ERROR'
@@ -130,7 +130,7 @@ export type RenderingStatus =
   | 'CONTEXT_ERROR'
   | 'CHILDREN_ERROR';
 
-export type RenderingIssueType = 
+export type RenderingIssueType =
   | 'MISSING_PROPS'
   | 'INVALID_PROPS'
   | 'MISSING_CONTEXT'
@@ -139,7 +139,7 @@ export type RenderingIssueType =
   | 'ACCESSIBILITY'
   | 'PERFORMANCE';
 
-export type RenderingPhase = 
+export type RenderingPhase =
   | 'PROPS_VALIDATION'
   | 'CONTEXT_SETUP'
   | 'COMPONENT_MOUNT'
@@ -172,13 +172,14 @@ export class ComponentRenderingDebugger {
     options: RenderingDebugOptions = {}
   ): ComponentRenderingReport {
     const startTime = performance.now();
-    const componentName = component.displayName || component.name || 'UnknownComponent';
-    
+    const componentName =
+      component.displayName || component.name || 'UnknownComponent';
+
     console.log(`🔍 Starting component rendering debug for: ${componentName}`);
 
     const debugTrace: RenderingStep[] = [];
     let renderResult: RenderResult | null = null;
-    let renderingError: Error | null = null;
+    const renderingError: Error | null = null;
 
     try {
       // Step 1: Validate props
@@ -206,13 +207,16 @@ export class ComponentRenderingDebugger {
         childTypes: [],
         renderableChildren: 0,
         nonRenderableChildren: 0,
-        childrenIssues: []
+        childrenIssues: [],
       };
 
       if (renderResult) {
-        const childrenStep = this.executeRenderingStep('CHILDREN_RENDER', () => {
-          return this.analyzeChildren(renderResult!);
-        });
+        const childrenStep = this.executeRenderingStep(
+          'CHILDREN_RENDER',
+          () => {
+            return this.analyzeChildren(renderResult!);
+          }
+        );
         debugTrace.push(childrenStep);
         childrenAnalysis = childrenStep.data || childrenAnalysis;
       }
@@ -222,8 +226,13 @@ export class ComponentRenderingDebugger {
         elementCount: 0,
         domStructure: [],
         accessibilityIssues: [],
-        testIdCoverage: { totalElements: 0, elementsWithTestId: 0, coverage: 0, missingTestIds: [] },
-        cssClasses: []
+        testIdCoverage: {
+          totalElements: 0,
+          elementsWithTestId: 0,
+          coverage: 0,
+          missingTestIds: [],
+        },
+        cssClasses: [],
       };
 
       if (renderResult) {
@@ -237,16 +246,29 @@ export class ComponentRenderingDebugger {
       // Generate comprehensive report
       const report: ComponentRenderingReport = {
         componentName,
-        renderingStatus: this.determineRenderingStatus(debugTrace, renderResult),
-        propsAnalysis: debugTrace.find(s => s.phase === 'PROPS_VALIDATION')?.data || this.getEmptyPropsAnalysis(),
-        contextAnalysis: debugTrace.find(s => s.phase === 'CONTEXT_SETUP')?.data || this.getEmptyContextAnalysis(),
+        renderingStatus: this.determineRenderingStatus(
+          debugTrace,
+          renderResult
+        ),
+        propsAnalysis:
+          debugTrace.find((s) => s.phase === 'PROPS_VALIDATION')?.data ||
+          this.getEmptyPropsAnalysis(),
+        contextAnalysis:
+          debugTrace.find((s) => s.phase === 'CONTEXT_SETUP')?.data ||
+          this.getEmptyContextAnalysis(),
         childrenAnalysis,
         domAnalysis,
-        performanceMetrics: this.calculatePerformanceMetrics(debugTrace, renderResult),
+        performanceMetrics: this.calculatePerformanceMetrics(
+          debugTrace,
+          renderResult
+        ),
         issues: this.identifyRenderingIssues(debugTrace, renderResult),
-        suggestions: this.generateRenderingSuggestions(debugTrace, renderResult),
+        suggestions: this.generateRenderingSuggestions(
+          debugTrace,
+          renderResult
+        ),
         debugTrace,
-        timestamp: Date.now()
+        timestamp: Date.now(),
       };
 
       // Store in history
@@ -255,12 +277,13 @@ export class ComponentRenderingDebugger {
         this.renderingHistory.shift();
       }
 
-      console.log(`✅ Component rendering debug completed in ${performance.now() - startTime}ms`);
+      console.log(
+        `✅ Component rendering debug completed in ${performance.now() - startTime}ms`
+      );
       return report;
-
     } catch (error) {
       console.error(`❌ Component rendering debug failed:`, error);
-      
+
       // Return error report
       return {
         componentName,
@@ -272,36 +295,46 @@ export class ComponentRenderingDebugger {
           childTypes: [],
           renderableChildren: 0,
           nonRenderableChildren: 0,
-          childrenIssues: [`Rendering failed: ${error instanceof Error ? error.message : 'Unknown error'}`]
+          childrenIssues: [
+            `Rendering failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+          ],
         },
         domAnalysis: {
           elementCount: 0,
           domStructure: [],
           accessibilityIssues: [],
-          testIdCoverage: { totalElements: 0, elementsWithTestId: 0, coverage: 0, missingTestIds: [] },
-          cssClasses: []
+          testIdCoverage: {
+            totalElements: 0,
+            elementsWithTestId: 0,
+            coverage: 0,
+            missingTestIds: [],
+          },
+          cssClasses: [],
         },
         performanceMetrics: {
           renderTime: performance.now() - startTime,
           reRenderCount: 0,
           memoryUsage: 0,
           domNodeCount: 0,
-          componentTreeDepth: 0
+          componentTreeDepth: 0,
         },
-        issues: [{
-          type: 'RENDER_ERROR' as RenderingIssueType,
-          severity: 'critical',
-          description: `Component failed to render: ${error instanceof Error ? error.message : 'Unknown error'}`,
-          location: componentName,
-          suggestion: 'Check component props, context requirements, and dependencies'
-        }],
+        issues: [
+          {
+            type: 'RENDER_ERROR' as RenderingIssueType,
+            severity: 'critical',
+            description: `Component failed to render: ${error instanceof Error ? error.message : 'Unknown error'}`,
+            location: componentName,
+            suggestion:
+              'Check component props, context requirements, and dependencies',
+          },
+        ],
         suggestions: [
           'Verify all required props are provided',
           'Check that all context providers are available',
-          'Ensure component dependencies are properly mocked in tests'
+          'Ensure component dependencies are properly mocked in tests',
         ],
         debugTrace,
-        timestamp: Date.now()
+        timestamp: Date.now(),
       };
     }
   }
@@ -309,7 +342,9 @@ export class ComponentRenderingDebugger {
   /**
    * Generate detailed rendering troubleshooting guide
    */
-  generateRenderingTroubleshootingGuide(report: ComponentRenderingReport): string {
+  generateRenderingTroubleshootingGuide(
+    report: ComponentRenderingReport
+  ): string {
     return `
 # Component Rendering Troubleshooting Guide
 
@@ -325,26 +360,41 @@ export class ComponentRenderingDebugger {
 **Missing Required Props**: ${report.propsAnalysis.missingProps.length}
 **Invalid Props**: ${report.propsAnalysis.invalidProps.length}
 
-${report.propsAnalysis.missingProps.length > 0 ? `
+${
+  report.propsAnalysis.missingProps.length > 0
+    ? `
 **Missing Props**:
-${report.propsAnalysis.missingProps.map(prop => `- ${prop}`).join('\n')}
-` : ''}
+${report.propsAnalysis.missingProps.map((prop) => `- ${prop}`).join('\n')}
+`
+    : ''
+}
 
-${report.propsAnalysis.invalidProps.length > 0 ? `
+${
+  report.propsAnalysis.invalidProps.length > 0
+    ? `
 **Invalid Props**:
-${report.propsAnalysis.invalidProps.map(prop => 
-  `- ${prop.propName}: Expected ${prop.expectedType}, got ${prop.actualType}`
-).join('\n')}
-` : ''}
+${report.propsAnalysis.invalidProps
+  .map(
+    (prop) =>
+      `- ${prop.propName}: Expected ${prop.expectedType}, got ${prop.actualType}`
+  )
+  .join('\n')}
+`
+    : ''
+}
 
 ### Context Analysis
 **Available Contexts**: ${report.contextAnalysis.availableContexts.length}
 **Missing Contexts**: ${report.contextAnalysis.missingContexts.length}
 
-${report.contextAnalysis.missingContexts.length > 0 ? `
+${
+  report.contextAnalysis.missingContexts.length > 0
+    ? `
 **Missing Contexts**:
-${report.contextAnalysis.missingContexts.map(ctx => `- ${ctx}`).join('\n')}
-` : ''}
+${report.contextAnalysis.missingContexts.map((ctx) => `- ${ctx}`).join('\n')}
+`
+    : ''
+}
 
 ### DOM Analysis
 **Elements**: ${report.domAnalysis.elementCount}
@@ -352,25 +402,33 @@ ${report.contextAnalysis.missingContexts.map(ctx => `- ${ctx}`).join('\n')}
 **Accessibility Issues**: ${report.domAnalysis.accessibilityIssues.length}
 
 ## Issues Detected
-${report.issues.map(issue => `
+${report.issues
+  .map(
+    (issue) => `
 ### ${issue.type} (${issue.severity})
 **Description**: ${issue.description}
 **Location**: ${issue.location}
 **Suggestion**: ${issue.suggestion}
 ${issue.code ? `**Code**: \`${issue.code}\`` : ''}
-`).join('\n')}
+`
+  )
+  .join('\n')}
 
 ## Debugging Steps
-${report.debugTrace.map(step => `
+${report.debugTrace
+  .map(
+    (step) => `
 ### Step ${step.step}: ${step.phase}
 **Description**: ${step.description}
 **Duration**: ${step.duration.toFixed(2)}ms
 **Status**: ${step.success ? '✅ Success' : '❌ Failed'}
 ${step.error ? `**Error**: ${step.error}` : ''}
-`).join('\n')}
+`
+  )
+  .join('\n')}
 
 ## Suggestions
-${report.suggestions.map(suggestion => `- ${suggestion}`).join('\n')}
+${report.suggestions.map((suggestion) => `- ${suggestion}`).join('\n')}
 
 ## Performance Metrics
 - **Render Time**: ${report.performanceMetrics.renderTime.toFixed(2)}ms
@@ -388,12 +446,18 @@ ${report.suggestions.map(suggestion => `- ${suggestion}`).join('\n')}
    */
   getRenderingStatistics(): RenderingStatistics {
     const totalRenders = this.renderingHistory.length;
-    const successfulRenders = this.renderingHistory.filter(r => r.renderingStatus === 'SUCCESS').length;
-    const averageRenderTime = this.renderingHistory.reduce((sum, r) => sum + r.performanceMetrics.renderTime, 0) / totalRenders;
-    
+    const successfulRenders = this.renderingHistory.filter(
+      (r) => r.renderingStatus === 'SUCCESS'
+    ).length;
+    const averageRenderTime =
+      this.renderingHistory.reduce(
+        (sum, r) => sum + r.performanceMetrics.renderTime,
+        0
+      ) / totalRenders;
+
     const issueTypes = new Map<RenderingIssueType, number>();
-    this.renderingHistory.forEach(report => {
-      report.issues.forEach(issue => {
+    this.renderingHistory.forEach((report) => {
+      report.issues.forEach((issue) => {
         const count = issueTypes.get(issue.type) || 0;
         issueTypes.set(issue.type, count + 1);
       });
@@ -405,11 +469,14 @@ ${report.suggestions.map(suggestion => `- ${suggestion}`).join('\n')}
       successRate: (successfulRenders / totalRenders) * 100,
       averageRenderTime,
       issueBreakdown: Object.fromEntries(issueTypes),
-      recentRenders: this.renderingHistory.slice(-10)
+      recentRenders: this.renderingHistory.slice(-10),
     };
   }
 
-  private executeRenderingStep(phase: RenderingPhase, operation: () => any): RenderingStep {
+  private executeRenderingStep(
+    phase: RenderingPhase,
+    operation: () => any
+  ): RenderingStep {
     const startTime = performance.now();
     let success = true;
     let error: string | undefined;
@@ -429,7 +496,7 @@ ${report.suggestions.map(suggestion => `- ${suggestion}`).join('\n')}
       duration: performance.now() - startTime,
       success,
       error,
-      data
+      data,
     };
   }
 
@@ -452,34 +519,39 @@ ${report.suggestions.map(suggestion => `- ${suggestion}`).join('\n')}
     }
   }
 
-  private analyzeProps(component: React.ComponentType<any>, props: any): PropsAnalysis {
+  private analyzeProps(
+    component: React.ComponentType<any>,
+    props: any
+  ): PropsAnalysis {
     // Extract prop types if available (for development)
     const propTypes = (component as any).propTypes || {};
     const defaultProps = (component as any).defaultProps || {};
-    
+
     const providedProps = { ...props };
-    const requiredProps = Object.keys(propTypes).filter(key => {
+    const requiredProps = Object.keys(propTypes).filter((key) => {
       const propType = propTypes[key];
       return propType && propType.isRequired;
     });
-    
-    const missingProps = requiredProps.filter(prop => !(prop in providedProps));
+
+    const missingProps = requiredProps.filter(
+      (prop) => !(prop in providedProps)
+    );
     const invalidProps: PropValidationError[] = [];
 
     // Validate prop types (basic validation)
-    Object.keys(propTypes).forEach(propName => {
+    Object.keys(propTypes).forEach((propName) => {
       if (propName in providedProps) {
         const value = providedProps[propName];
         const expectedType = this.getExpectedType(propTypes[propName]);
         const actualType = typeof value;
-        
+
         if (expectedType !== 'any' && actualType !== expectedType) {
           invalidProps.push({
             propName,
             expectedType,
             actualType,
             value,
-            isRequired: requiredProps.includes(propName)
+            isRequired: requiredProps.includes(propName),
           });
         }
       }
@@ -490,32 +562,41 @@ ${report.suggestions.map(suggestion => `- ${suggestion}`).join('\n')}
       requiredProps,
       missingProps,
       invalidProps,
-      propTypes: Object.keys(propTypes).reduce((acc, key) => {
-        acc[key] = this.getExpectedType(propTypes[key]);
-        return acc;
-      }, {} as Record<string, string>),
-      defaultProps
+      propTypes: Object.keys(propTypes).reduce(
+        (acc, key) => {
+          acc[key] = this.getExpectedType(propTypes[key]);
+          return acc;
+        },
+        {} as Record<string, string>
+      ),
+      defaultProps,
     };
   }
 
-  private analyzeContext(component: React.ComponentType<any>, contexts: any[]): ContextAnalysis {
+  private analyzeContext(
+    component: React.ComponentType<any>,
+    contexts: any[]
+  ): ContextAnalysis {
     // This is a simplified context analysis
     // In a real implementation, you'd need to inspect the component's context usage
     const availableContexts: ContextInfo[] = contexts.map((ctx, index) => ({
       name: `Context${index}`,
       value: ctx,
       provider: 'TestProvider',
-      isAvailable: true
+      isAvailable: true,
     }));
 
     return {
       availableContexts,
       missingContexts: [],
-      contextValues: contexts.reduce((acc, ctx, index) => {
-        acc[`Context${index}`] = ctx;
-        return acc;
-      }, {} as Record<string, any>),
-      providerChain: ['TestProvider']
+      contextValues: contexts.reduce(
+        (acc, ctx, index) => {
+          acc[`Context${index}`] = ctx;
+          return acc;
+        },
+        {} as Record<string, any>
+      ),
+      providerChain: ['TestProvider'],
     };
   }
 
@@ -533,7 +614,7 @@ ${report.suggestions.map(suggestion => `- ${suggestion}`).join('\n')}
       rerender: () => {},
       unmount: () => {},
       asFragment: () => document.createDocumentFragment(),
-      ...queries
+      ...queries,
     } as RenderResult;
 
     return { renderResult: mockRenderResult };
@@ -542,13 +623,15 @@ ${report.suggestions.map(suggestion => `- ${suggestion}`).join('\n')}
   private analyzeChildren(renderResult: RenderResult): ChildrenAnalysis {
     const container = renderResult.container;
     const allElements = container.querySelectorAll('*');
-    
+
     return {
       childCount: allElements.length,
-      childTypes: Array.from(new Set(Array.from(allElements).map(el => el.tagName.toLowerCase()))),
+      childTypes: Array.from(
+        new Set(Array.from(allElements).map((el) => el.tagName.toLowerCase()))
+      ),
       renderableChildren: allElements.length,
       nonRenderableChildren: 0,
-      childrenIssues: []
+      childrenIssues: [],
     };
   }
 
@@ -556,12 +639,12 @@ ${report.suggestions.map(suggestion => `- ${suggestion}`).join('\n')}
     const container = renderResult.container;
     const allElements = container.querySelectorAll('*');
     const elementsWithTestId = container.querySelectorAll('[data-testid]');
-    
+
     const domStructure = this.buildDOMTree(container);
     const accessibilityIssues = this.checkAccessibility(container);
-    const cssClasses = Array.from(new Set(
-      Array.from(allElements).flatMap(el => Array.from(el.classList))
-    ));
+    const cssClasses = Array.from(
+      new Set(Array.from(allElements).flatMap((el) => Array.from(el.classList)))
+    );
 
     return {
       elementCount: allElements.length,
@@ -570,59 +653,66 @@ ${report.suggestions.map(suggestion => `- ${suggestion}`).join('\n')}
       testIdCoverage: {
         totalElements: allElements.length,
         elementsWithTestId: elementsWithTestId.length,
-        coverage: allElements.length > 0 ? (elementsWithTestId.length / allElements.length) * 100 : 0,
+        coverage:
+          allElements.length > 0
+            ? (elementsWithTestId.length / allElements.length) * 100
+            : 0,
         missingTestIds: Array.from(allElements)
-          .filter(el => !el.hasAttribute('data-testid'))
-          .map(el => el.tagName.toLowerCase())
+          .filter((el) => !el.hasAttribute('data-testid'))
+          .map((el) => el.tagName.toLowerCase()),
       },
-      cssClasses
+      cssClasses,
     };
   }
 
   private buildDOMTree(element: Element): DOMNode[] {
-    return Array.from(element.children).map(child => ({
+    return Array.from(element.children).map((child) => ({
       tagName: child.tagName.toLowerCase(),
-      attributes: Array.from(child.attributes).reduce((acc, attr) => {
-        acc[attr.name] = attr.value;
-        return acc;
-      }, {} as Record<string, string>),
+      attributes: Array.from(child.attributes).reduce(
+        (acc, attr) => {
+          acc[attr.name] = attr.value;
+          return acc;
+        },
+        {} as Record<string, string>
+      ),
       children: this.buildDOMTree(child),
       textContent: child.textContent || undefined,
-      testId: child.getAttribute('data-testid') || undefined
+      testId: child.getAttribute('data-testid') || undefined,
     }));
   }
 
   private checkAccessibility(container: Element): AccessibilityIssue[] {
     const issues: AccessibilityIssue[] = [];
-    
+
     // Check for missing alt text on images
     const images = container.querySelectorAll('img');
-    images.forEach(img => {
+    images.forEach((img) => {
       if (!img.hasAttribute('alt')) {
         issues.push({
           type: 'missing-alt-text',
           element: 'img',
           description: 'Image missing alt text',
           severity: 'medium',
-          wcagRule: 'WCAG 1.1.1'
+          wcagRule: 'WCAG 1.1.1',
         });
       }
     });
 
     // Check for missing labels on form inputs
     const inputs = container.querySelectorAll('input, textarea, select');
-    inputs.forEach(input => {
-      const hasLabel = input.hasAttribute('aria-label') || 
-                     input.hasAttribute('aria-labelledby') ||
-                     container.querySelector(`label[for="${input.id}"]`);
-      
+    inputs.forEach((input) => {
+      const hasLabel =
+        input.hasAttribute('aria-label') ||
+        input.hasAttribute('aria-labelledby') ||
+        container.querySelector(`label[for="${input.id}"]`);
+
       if (!hasLabel) {
         issues.push({
           type: 'missing-label',
           element: input.tagName.toLowerCase(),
           description: 'Form input missing accessible label',
           severity: 'high',
-          wcagRule: 'WCAG 1.3.1'
+          wcagRule: 'WCAG 1.3.1',
         });
       }
     });
@@ -630,56 +720,70 @@ ${report.suggestions.map(suggestion => `- ${suggestion}`).join('\n')}
     return issues;
   }
 
-  private determineRenderingStatus(debugTrace: RenderingStep[], renderResult: RenderResult | null): RenderingStatus {
-    const hasErrors = debugTrace.some(step => !step.success);
-    
+  private determineRenderingStatus(
+    debugTrace: RenderingStep[],
+    renderResult: RenderResult | null
+  ): RenderingStatus {
+    const hasErrors = debugTrace.some((step) => !step.success);
+
     if (!renderResult) {
       return 'RENDER_ERROR';
     }
-    
+
     if (hasErrors) {
       return 'PARTIAL_RENDER';
     }
-    
+
     return 'SUCCESS';
   }
 
-  private calculatePerformanceMetrics(debugTrace: RenderingStep[], renderResult: RenderResult | null): RenderingPerformanceMetrics {
-    const totalRenderTime = debugTrace.reduce((sum, step) => sum + step.duration, 0);
-    const domNodeCount = renderResult ? renderResult.container.querySelectorAll('*').length : 0;
-    
+  private calculatePerformanceMetrics(
+    debugTrace: RenderingStep[],
+    renderResult: RenderResult | null
+  ): RenderingPerformanceMetrics {
+    const totalRenderTime = debugTrace.reduce(
+      (sum, step) => sum + step.duration,
+      0
+    );
+    const domNodeCount = renderResult
+      ? renderResult.container.querySelectorAll('*').length
+      : 0;
+
     return {
       renderTime: totalRenderTime,
       reRenderCount: 1, // Would need to track this during actual rendering
       memoryUsage: (performance as any).memory?.usedJSHeapSize || 0,
       domNodeCount,
-      componentTreeDepth: this.calculateTreeDepth(renderResult?.container)
+      componentTreeDepth: this.calculateTreeDepth(renderResult?.container),
     };
   }
 
   private calculateTreeDepth(element?: Element): number {
     if (!element || !element.children.length) return 0;
-    
+
     let maxDepth = 0;
-    Array.from(element.children).forEach(child => {
+    Array.from(element.children).forEach((child) => {
       const depth = this.calculateTreeDepth(child);
       maxDepth = Math.max(maxDepth, depth);
     });
-    
+
     return maxDepth + 1;
   }
 
-  private identifyRenderingIssues(debugTrace: RenderingStep[], renderResult: RenderResult | null): RenderingIssue[] {
+  private identifyRenderingIssues(
+    debugTrace: RenderingStep[],
+    renderResult: RenderResult | null
+  ): RenderingIssue[] {
     const issues: RenderingIssue[] = [];
-    
-    debugTrace.forEach(step => {
+
+    debugTrace.forEach((step) => {
       if (!step.success && step.error) {
         issues.push({
           type: this.mapPhaseToIssueType(step.phase),
           severity: this.mapPhaseToSeverity(step.phase),
           description: step.error,
           location: step.phase,
-          suggestion: this.getSuggestionForPhase(step.phase)
+          suggestion: this.getSuggestionForPhase(step.phase),
         });
       }
     });
@@ -702,7 +806,9 @@ ${report.suggestions.map(suggestion => `- ${suggestion}`).join('\n')}
     }
   }
 
-  private mapPhaseToSeverity(phase: RenderingPhase): 'low' | 'medium' | 'high' | 'critical' {
+  private mapPhaseToSeverity(
+    phase: RenderingPhase
+  ): 'low' | 'medium' | 'high' | 'critical' {
     switch (phase) {
       case 'PROPS_VALIDATION':
         return 'high';
@@ -736,39 +842,44 @@ ${report.suggestions.map(suggestion => `- ${suggestion}`).join('\n')}
     }
   }
 
-  private generateRenderingSuggestions(debugTrace: RenderingStep[], renderResult: RenderResult | null): string[] {
+  private generateRenderingSuggestions(
+    debugTrace: RenderingStep[],
+    renderResult: RenderResult | null
+  ): string[] {
     const suggestions: string[] = [];
-    
+
     if (!renderResult) {
-      suggestions.push('Component failed to render - check props and context setup');
+      suggestions.push(
+        'Component failed to render - check props and context setup'
+      );
     }
-    
-    const failedSteps = debugTrace.filter(step => !step.success);
-    failedSteps.forEach(step => {
+
+    const failedSteps = debugTrace.filter((step) => !step.success);
+    failedSteps.forEach((step) => {
       suggestions.push(this.getSuggestionForPhase(step.phase));
     });
-    
+
     if (suggestions.length === 0) {
       suggestions.push('Component rendered successfully - no issues detected');
     }
-    
+
     return suggestions;
   }
 
   private getExpectedType(propType: any): string {
     if (!propType) return 'any';
-    
+
     // This is a simplified prop type detection
     // In a real implementation, you'd need to handle PropTypes properly
     const typeString = propType.toString();
-    
+
     if (typeString.includes('string')) return 'string';
     if (typeString.includes('number')) return 'number';
     if (typeString.includes('boolean')) return 'boolean';
     if (typeString.includes('function')) return 'function';
     if (typeString.includes('object')) return 'object';
     if (typeString.includes('array')) return 'array';
-    
+
     return 'any';
   }
 
@@ -779,7 +890,7 @@ ${report.suggestions.map(suggestion => `- ${suggestion}`).join('\n')}
       missingProps: [],
       invalidProps: [],
       propTypes: {},
-      defaultProps: {}
+      defaultProps: {},
     };
   }
 
@@ -788,7 +899,7 @@ ${report.suggestions.map(suggestion => `- ${suggestion}`).join('\n')}
       availableContexts: [],
       missingContexts: [],
       contextValues: {},
-      providerChain: []
+      providerChain: [],
     };
   }
 
@@ -819,4 +930,5 @@ export interface RenderingStatistics {
 }
 
 // Export singleton instance
-export const componentRenderingDebugger = ComponentRenderingDebugger.getInstance();
+export const componentRenderingDebugger =
+  ComponentRenderingDebugger.getInstance();

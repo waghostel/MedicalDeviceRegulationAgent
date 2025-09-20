@@ -12,23 +12,23 @@ jest.mock('../citation-card', () => ({
       <button onClick={() => onCopy?.(citation)}>Copy</button>
       <button onClick={() => onVisit?.(citation)}>Visit</button>
     </div>
-  )
+  ),
 }));
 
 jest.mock('../citation-search', () => ({
   CitationSearch: ({ citations, onFilteredResults }: any) => (
     <div data-testid="citation-search">
-      <input 
+      <input
         placeholder="Search citations..."
         onChange={(e) => {
-          const filtered = citations.filter((c: SourceCitation) => 
+          const filtered = citations.filter((c: SourceCitation) =>
             c.title.toLowerCase().includes(e.target.value.toLowerCase())
           );
           onFilteredResults(filtered);
         }}
       />
     </div>
-  )
+  ),
 }));
 
 jest.mock('../citation-exporter', () => ({
@@ -36,13 +36,13 @@ jest.mock('../citation-exporter', () => ({
     <div data-testid="citation-exporter">
       Export {citations.length} citations
     </div>
-  )
+  ),
 }));
 
 // Mock validateSourceUrl
 jest.mock('../citation-utils', () => ({
   ...jest.requireActual('../citation-utils'),
-  validateSourceUrl: jest.fn(() => Promise.resolve(true))
+  validateSourceUrl: jest.fn(() => Promise.resolve(true)),
 }));
 
 describe('CitationPanel', () => {
@@ -52,22 +52,22 @@ describe('CitationPanel', () => {
       title: 'Cardiac Monitor 510(k) Summary',
       effectiveDate: '2023-01-15',
       documentType: 'FDA_510K',
-      accessedDate: '2024-01-15'
+      accessedDate: '2024-01-15',
     },
     {
       url: 'https://www.fda.gov/regulatory-information/search-fda-guidance-documents/software-medical-device',
       title: 'Software as Medical Device Guidance',
       effectiveDate: '2022-06-10',
       documentType: 'FDA_GUIDANCE',
-      accessedDate: '2024-01-10'
+      accessedDate: '2024-01-10',
     },
     {
       url: 'https://www.ecfr.gov/current/title-21/chapter-I/subchapter-H/part-820',
       title: '21 CFR 820 - Quality System Regulation',
       effectiveDate: '2021-12-01',
       documentType: 'CFR_SECTION',
-      accessedDate: '2024-01-05'
-    }
+      accessedDate: '2024-01-05',
+    },
   ];
 
   const mockOnToggle = jest.fn();
@@ -87,14 +87,16 @@ describe('CitationPanel', () => {
   it('should be collapsible', async () => {
     const user = userEvent.setup();
     render(
-      <CitationPanel 
-        citations={mockCitations} 
+      <CitationPanel
+        citations={mockCitations}
         isOpen={true}
         onToggle={mockOnToggle}
       />
     );
 
-    const toggleButton = screen.getByRole('button', { name: /citations & sources/i });
+    const toggleButton = screen.getByRole('button', {
+      name: /citations & sources/i,
+    });
     await user.click(toggleButton);
 
     expect(mockOnToggle).toHaveBeenCalledWith(false);
@@ -125,16 +127,26 @@ describe('CitationPanel', () => {
     render(<CitationPanel citations={mockCitations} />);
 
     expect(screen.getAllByTestId('citation-card')).toHaveLength(3);
-    expect(screen.getByText('Cardiac Monitor 510(k) Summary')).toBeInTheDocument();
-    expect(screen.getByText('Software as Medical Device Guidance')).toBeInTheDocument();
-    expect(screen.getByText('21 CFR 820 - Quality System Regulation')).toBeInTheDocument();
+    expect(
+      screen.getByText('Cardiac Monitor 510(k) Summary')
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText('Software as Medical Device Guidance')
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText('21 CFR 820 - Quality System Regulation')
+    ).toBeInTheDocument();
   });
 
   it('should show empty state when no citations', () => {
     render(<CitationPanel citations={[]} />);
 
     expect(screen.getByText('No citations found')).toBeInTheDocument();
-    expect(screen.getByText('Citations will appear here as you interact with the AI assistant')).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        'Citations will appear here as you interact with the AI assistant'
+      )
+    ).toBeInTheDocument();
   });
 
   it('should change citation format', async () => {
@@ -143,7 +155,7 @@ describe('CitationPanel', () => {
 
     const formatSelect = screen.getByRole('combobox');
     await user.click(formatSelect);
-    
+
     const mlaOption = screen.getByText('MLA');
     await user.click(mlaOption);
 
@@ -154,10 +166,7 @@ describe('CitationPanel', () => {
   it('should handle refresh action', async () => {
     const user = userEvent.setup();
     render(
-      <CitationPanel 
-        citations={mockCitations} 
-        onRefresh={mockOnRefresh}
-      />
+      <CitationPanel citations={mockCitations} onRefresh={mockOnRefresh} />
     );
 
     const refreshButton = screen.getByTitle('Refresh citations');
@@ -169,7 +178,7 @@ describe('CitationPanel', () => {
   it('should handle URL validation', async () => {
     const user = userEvent.setup();
     const { validateSourceUrl } = require('../citation-utils');
-    
+
     render(<CitationPanel citations={mockCitations} />);
 
     const validateButton = screen.getByTitle('Validate all URLs');
@@ -183,7 +192,7 @@ describe('CitationPanel', () => {
   it('should handle citation copy callback', async () => {
     const user = userEvent.setup();
     const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
-    
+
     render(<CitationPanel citations={mockCitations} />);
 
     const copyButtons = screen.getAllByText('Copy');
@@ -200,7 +209,7 @@ describe('CitationPanel', () => {
   it('should handle citation visit callback', async () => {
     const user = userEvent.setup();
     const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
-    
+
     render(<CitationPanel citations={mockCitations} />);
 
     const visitButtons = screen.getAllByText('Visit');
@@ -222,8 +231,12 @@ describe('CitationPanel', () => {
     await user.type(searchInput, 'cardiac');
 
     // Should only show the cardiac monitor citation
-    expect(screen.getByText('Cardiac Monitor 510(k) Summary')).toBeInTheDocument();
-    expect(screen.queryByText('Software as Medical Device Guidance')).not.toBeInTheDocument();
+    expect(
+      screen.getByText('Cardiac Monitor 510(k) Summary')
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByText('Software as Medical Device Guidance')
+    ).not.toBeInTheDocument();
   });
 
   it('should apply custom className', () => {
@@ -237,10 +250,7 @@ describe('CitationPanel', () => {
 
   it('should use custom project name', () => {
     render(
-      <CitationPanel 
-        citations={mockCitations} 
-        projectName="Custom Project"
-      />
+      <CitationPanel citations={mockCitations} projectName="Custom Project" />
     );
 
     // The project name would be passed to the exporter component
@@ -252,9 +262,9 @@ describe('CitationPanel', () => {
     const user = userEvent.setup();
     const { validateSourceUrl } = require('../citation-utils');
     const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
-    
+
     validateSourceUrl.mockRejectedValueOnce(new Error('Validation failed'));
-    
+
     render(<CitationPanel citations={mockCitations} />);
 
     const validateButton = screen.getByTitle('Validate all URLs');

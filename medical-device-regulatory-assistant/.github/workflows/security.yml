@@ -2,124 +2,124 @@ name: Security Scanning
 
 on:
   schedule:
-    - cron: '0 2 * * 1'  # Weekly on Monday at 2 AM
+    - cron: '0 2 * * 1' # Weekly on Monday at 2 AM
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   dependency-scan:
     name: Dependency Vulnerability Scan
     runs-on: ubuntu-latest
-    
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '18'
-        
-    - name: Setup Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.11'
-        
-    - name: Install Poetry
-      uses: snok/install-poetry@v1
-      
-    - name: Frontend dependency audit
-      run: |
-        cd medical-device-regulatory-assistant
-        corepack enable
-        pnpm audit --audit-level moderate
-        
-    - name: Backend dependency audit
-      run: |
-        cd medical-device-regulatory-assistant/backend
-        poetry audit
-        
-    - name: Run Snyk security scan
-      uses: snyk/actions/node@master
-      env:
-        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-      with:
-        args: --severity-threshold=high
-        
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+
+      - name: Frontend dependency audit
+        run: |
+          cd medical-device-regulatory-assistant
+          corepack enable
+          pnpm audit --audit-level moderate
+
+      - name: Backend dependency audit
+        run: |
+          cd medical-device-regulatory-assistant/backend
+          poetry audit
+
+      - name: Run Snyk security scan
+        uses: snyk/actions/node@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --severity-threshold=high
+
   container-scan:
     name: Container Security Scan
     runs-on: ubuntu-latest
-    
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Build frontend image
-      run: |
-        cd medical-device-regulatory-assistant
-        docker build -f Dockerfile.frontend -t frontend-security-scan .
-        
-    - name: Build backend image
-      run: |
-        cd medical-device-regulatory-assistant
-        docker build -f Dockerfile.backend -t backend-security-scan .
-        
-    - name: Scan frontend image
-      uses: aquasecurity/trivy-action@master
-      with:
-        image-ref: 'frontend-security-scan'
-        format: 'sarif'
-        output: 'frontend-trivy-results.sarif'
-        
-    - name: Scan backend image
-      uses: aquasecurity/trivy-action@master
-      with:
-        image-ref: 'backend-security-scan'
-        format: 'sarif'
-        output: 'backend-trivy-results.sarif'
-        
-    - name: Upload Trivy scan results
-      uses: github/codeql-action/upload-sarif@v2
-      with:
-        sarif_file: 'frontend-trivy-results.sarif'
-        
-    - name: Upload Trivy scan results
-      uses: github/codeql-action/upload-sarif@v2
-      with:
-        sarif_file: 'backend-trivy-results.sarif'
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build frontend image
+        run: |
+          cd medical-device-regulatory-assistant
+          docker build -f Dockerfile.frontend -t frontend-security-scan .
+
+      - name: Build backend image
+        run: |
+          cd medical-device-regulatory-assistant
+          docker build -f Dockerfile.backend -t backend-security-scan .
+
+      - name: Scan frontend image
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 'frontend-security-scan'
+          format: 'sarif'
+          output: 'frontend-trivy-results.sarif'
+
+      - name: Scan backend image
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 'backend-security-scan'
+          format: 'sarif'
+          output: 'backend-trivy-results.sarif'
+
+      - name: Upload Trivy scan results
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: 'frontend-trivy-results.sarif'
+
+      - name: Upload Trivy scan results
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: 'backend-trivy-results.sarif'
 
   code-scan:
     name: Static Code Analysis
     runs-on: ubuntu-latest
-    
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Initialize CodeQL
-      uses: github/codeql-action/init@v2
-      with:
-        languages: javascript, python
-        
-    - name: Autobuild
-      uses: github/codeql-action/autobuild@v2
-      
-    - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@v2
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v2
+        with:
+          languages: javascript, python
+
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v2
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v2
 
   secrets-scan:
     name: Secrets Detection
     runs-on: ubuntu-latest
-    
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Run TruffleHog
-      uses: trufflesecurity/trufflehog@main
-      with:
-        path: ./
-        base: main
-        head: HEAD
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run TruffleHog
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
+          base: main
+          head: HEAD

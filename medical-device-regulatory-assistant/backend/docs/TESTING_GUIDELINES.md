@@ -9,11 +9,13 @@ This document provides guidelines for writing tests in the Medical Device Regula
 ### 1. Avoid Global State in Tests
 
 **❌ DO NOT:**
+
 - Use the global `db_manager` instance in tests
 - Share database connections between tests
 - Rely on external state or configuration
 
 **✅ DO:**
+
 - Use the provided `test_db_session` fixture for all database operations
 - Create isolated test data using the `test_data_factory` fixture
 - Ensure each test is completely independent
@@ -21,6 +23,7 @@ This document provides guidelines for writing tests in the Medical Device Regula
 ### 2. Use Centralized Test Environment
 
 All tests automatically run with a centralized test environment that provides:
+
 - `TESTING=true` environment variable
 - In-memory SQLite database (`sqlite+aiosqlite:///:memory:`)
 - Disabled Redis (`REDIS_URL=""`)
@@ -41,7 +44,7 @@ async def test_user_creation(test_db_session, test_data_factory):
         name="Test User"
     )
     await test_db_session.commit()
-    
+
     # Verify the user was created
     assert user.id is not None
     assert user.email == "test@example.com"
@@ -73,6 +76,7 @@ predicate = await test_data_factory.create_predicate_device(
 #### Use TestClient for API Testing
 
 **❌ DO NOT:**
+
 ```python
 # Don't use httpx.AsyncClient with FastAPI apps
 async with httpx.AsyncClient(app=app) as client:
@@ -80,6 +84,7 @@ async with httpx.AsyncClient(app=app) as client:
 ```
 
 **✅ DO:**
+
 ```python
 def test_api_endpoint(test_client):
     """Use TestClient for synchronous API testing"""
@@ -105,7 +110,7 @@ Use the `mock_services` fixture for external dependencies:
 async def test_fda_integration(mock_services):
     """Test with mocked external services"""
     openfda_mock = mock_services["openfda"]
-    
+
     # Mock returns predefined data
     results = await openfda_mock.search_predicates("test device")
     assert len(results) == 1
@@ -141,13 +146,13 @@ from tests.test_utils import APITestUtils
 
 def test_api_response(test_client):
     response = test_client.get("/api/endpoint")
-    
+
     # Assert successful response
     data = APITestUtils.assert_success_response(response, 200)
-    
+
     # Assert error response
     error_data = APITestUtils.assert_error_response(response, 400, "VALIDATION_ERROR")
-    
+
     # Assert validation error
     validation_data = APITestUtils.assert_validation_error(response, "email")
 ```
@@ -160,13 +165,13 @@ from tests.test_utils import DatabaseTestUtils
 @pytest.mark.asyncio
 async def test_database_operations(test_db_session):
     from models.user import User
-    
+
     # Count records
     count = await DatabaseTestUtils.count_records(test_db_session, User)
-    
+
     # Get record by ID
     user = await DatabaseTestUtils.get_record_by_id(test_db_session, User, user_id)
-    
+
     # Delete all records (for cleanup)
     deleted_count = await DatabaseTestUtils.delete_all_records(test_db_session, User)
 ```
@@ -210,12 +215,12 @@ async def test_user_model(test_db_session, test_data_factory):
         name="Test User"
     )
     await test_db_session.commit()
-    
+
     # Test model attributes
     assert user.id is not None
     assert user.email == "test@example.com"
     assert user.created_at is not None
-    
+
     # Test model methods
     user_dict = user.to_dict()
     assert "email" in user_dict
@@ -231,12 +236,12 @@ def test_create_user_endpoint(test_client):
         "email": "test@example.com",
         "name": "Test User"
     }
-    
+
     response = test_client.post("/api/users", json=user_data)
-    
+
     from tests.test_utils import APITestUtils
     data = APITestUtils.assert_success_response(response, 201)
-    
+
     assert data["email"] == user_data["email"]
     assert data["name"] == user_data["name"]
     assert "id" in data
@@ -249,16 +254,16 @@ def test_create_user_endpoint(test_client):
 async def test_user_service(test_db_session, test_data_factory):
     """Test user service functionality"""
     from services.user_service import UserService
-    
+
     # Create service with test database session
     user_service = UserService(db_session=test_db_session)
-    
+
     # Test service method
     user = await user_service.create_user(
         email="test@example.com",
         name="Test User"
     )
-    
+
     assert user.id is not None
     assert user.email == "test@example.com"
 ```

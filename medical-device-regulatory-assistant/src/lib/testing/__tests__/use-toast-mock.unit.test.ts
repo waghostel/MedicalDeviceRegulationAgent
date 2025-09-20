@@ -4,7 +4,10 @@
  */
 
 import { useToastMock, toastMockUtils } from '../use-toast-mock';
-import { setupUseToastMock, cleanupUseToastMock } from '../setup-use-toast-mock';
+import {
+  setupUseToastMock,
+  cleanupUseToastMock,
+} from '../setup-use-toast-mock';
 
 describe('useToast Mock Structure', () => {
   beforeEach(() => {
@@ -64,14 +67,14 @@ describe('useToast Mock Structure', () => {
       expect(contextualToast).toHaveProperty('info');
 
       // Verify all are jest mocks
-      Object.values(contextualToast).forEach(method => {
+      Object.values(contextualToast).forEach((method) => {
         expect(jest.isMockFunction(method)).toBe(true);
       });
     });
 
     it('should return toast object with correct methods when toast is called', () => {
       const mockReturn = useToastMock.useToast();
-      
+
       const toastResult = mockReturn.toast({
         title: 'Test Toast',
         description: 'Test description',
@@ -95,7 +98,7 @@ describe('useToast Mock Structure', () => {
   describe('Mock Functionality', () => {
     it('should track toast calls correctly', () => {
       const mockReturn = useToastMock.useToast();
-      
+
       expect(toastMockUtils.getCallCount()).toBe(0);
 
       mockReturn.toast({
@@ -122,7 +125,7 @@ describe('useToast Mock Structure', () => {
 
     it('should track contextual toast calls', () => {
       const mockReturn = useToastMock.useToast();
-      
+
       mockReturn.contextualToast.fdaApiError();
       mockReturn.contextualToast.validationError('Custom validation message');
       mockReturn.contextualToast.success('Operation completed');
@@ -138,7 +141,7 @@ describe('useToast Mock Structure', () => {
 
     it('should filter calls by variant correctly', () => {
       const mockReturn = useToastMock.useToast();
-      
+
       mockReturn.toast({ title: 'Success', variant: 'success' });
       mockReturn.toast({ title: 'Error', variant: 'destructive' });
       mockReturn.toast({ title: 'Warning', variant: 'warning' });
@@ -155,7 +158,7 @@ describe('useToast Mock Structure', () => {
 
     it('should filter calls by category correctly', () => {
       const mockReturn = useToastMock.useToast();
-      
+
       mockReturn.contextualToast.fdaApiError(); // category: 'api'
       mockReturn.contextualToast.validationError(); // category: 'validation'
       mockReturn.contextualToast.projectSaveFailed(); // category: 'user'
@@ -174,7 +177,7 @@ describe('useToast Mock Structure', () => {
 
     it('should check if toast was called with specific content', () => {
       const mockReturn = useToastMock.useToast();
-      
+
       mockReturn.toast({
         title: 'Specific Title',
         description: 'Specific Description',
@@ -182,15 +185,25 @@ describe('useToast Mock Structure', () => {
       });
 
       expect(toastMockUtils.wasCalledWith('Specific Title')).toBe(true);
-      expect(toastMockUtils.wasCalledWith('Specific Title', 'Specific Description')).toBe(true);
-      expect(toastMockUtils.wasCalledWith('Specific Title', 'Specific Description', 'info')).toBe(true);
+      expect(
+        toastMockUtils.wasCalledWith('Specific Title', 'Specific Description')
+      ).toBe(true);
+      expect(
+        toastMockUtils.wasCalledWith(
+          'Specific Title',
+          'Specific Description',
+          'info'
+        )
+      ).toBe(true);
       expect(toastMockUtils.wasCalledWith('Wrong Title')).toBe(false);
-      expect(toastMockUtils.wasCalledWith('Specific Title', 'Wrong Description')).toBe(false);
+      expect(
+        toastMockUtils.wasCalledWith('Specific Title', 'Wrong Description')
+      ).toBe(false);
     });
 
     it('should clear mock data correctly', () => {
       const mockReturn = useToastMock.useToast();
-      
+
       mockReturn.toast({ title: 'Test' });
       mockReturn.contextualToast.success('Success');
 
@@ -204,7 +217,7 @@ describe('useToast Mock Structure', () => {
 
     it('should reset mocks correctly', () => {
       const mockReturn = useToastMock.useToast();
-      
+
       mockReturn.toast({ title: 'Test' });
       mockReturn.dismiss('test-id');
       mockReturn.contextualToast.success('Success');
@@ -225,7 +238,7 @@ describe('useToast Mock Structure', () => {
   describe('Mock State Management', () => {
     it('should maintain mock state correctly', () => {
       const mockReturn = useToastMock.useToast();
-      
+
       // Initial state should be empty
       expect(mockReturn.toasts).toHaveLength(0);
       expect(mockReturn.queue).toHaveLength(0);
@@ -241,7 +254,7 @@ describe('useToast Mock Structure', () => {
 
     it('should handle getToastsByCategory correctly', () => {
       const mockReturn = useToastMock.useToast();
-      
+
       mockReturn.contextualToast.fdaApiError(); // category: 'api'
       mockReturn.contextualToast.validationError(); // category: 'validation'
       mockReturn.contextualToast.networkError(); // category: 'system'
@@ -257,7 +270,7 @@ describe('useToast Mock Structure', () => {
 
     it('should handle getToastsByPriority correctly', () => {
       const mockReturn = useToastMock.useToast();
-      
+
       mockReturn.contextualToast.fdaApiError(); // priority: 'high'
       mockReturn.contextualToast.projectSaveFailed(); // priority: 'critical'
       mockReturn.contextualToast.info('Info message'); // priority: 'low'
@@ -275,14 +288,16 @@ describe('useToast Mock Structure', () => {
   describe('Integration with Jest Mocks', () => {
     it('should work with jest mock assertions', () => {
       const mockReturn = useToastMock.useToast();
-      
+
       mockReturn.toast({ title: 'Test' });
       mockReturn.dismiss('test-id');
       mockReturn.contextualToast.success('Success');
 
       expect(mockReturn.toast).toHaveBeenCalledWith({ title: 'Test' });
       expect(mockReturn.dismiss).toHaveBeenCalledWith('test-id');
-      expect(mockReturn.contextualToast.success).toHaveBeenCalledWith('Success');
+      expect(mockReturn.contextualToast.success).toHaveBeenCalledWith(
+        'Success'
+      );
 
       // contextualToast.success calls the main toast function internally, so expect 2 calls
       expect(mockReturn.toast).toHaveBeenCalledTimes(2);
@@ -292,10 +307,10 @@ describe('useToast Mock Structure', () => {
 
     it('should support jest mock return values', () => {
       const mockReturn = useToastMock.useToast();
-      
+
       // Mock a specific return value
       (mockReturn.getToastsByCategory as jest.Mock).mockReturnValue([
-        { id: 'test', title: 'Mocked Toast', category: 'test' }
+        { id: 'test', title: 'Mocked Toast', category: 'test' },
       ]);
 
       const result = mockReturn.getToastsByCategory('test');

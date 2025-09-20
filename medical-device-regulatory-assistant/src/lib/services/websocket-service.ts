@@ -5,7 +5,11 @@
 
 import { WebSocketMessage } from '@/types/project';
 
-export type ConnectionStatus = 'connecting' | 'connected' | 'disconnected' | 'error';
+export type ConnectionStatus =
+  | 'connecting'
+  | 'connected'
+  | 'disconnected'
+  | 'error';
 
 export interface WebSocketConfig {
   url: string;
@@ -51,7 +55,11 @@ export class WebSocketService {
    * Establish WebSocket connection
    */
   public connect(): void {
-    if (this.isDestroyed || this.connectionStatus === 'connected' || this.connectionStatus === 'connecting') {
+    if (
+      this.isDestroyed ||
+      this.connectionStatus === 'connected' ||
+      this.connectionStatus === 'connecting'
+    ) {
       return;
     }
 
@@ -113,7 +121,10 @@ export class WebSocketService {
   /**
    * Subscribe to specific message types
    */
-  public subscribe<T = any>(messageType: string, handler: MessageHandler<T>): () => void {
+  public subscribe<T = any>(
+    messageType: string,
+    handler: MessageHandler<T>
+  ): () => void {
     if (!this.messageHandlers.has(messageType)) {
       this.messageHandlers.set(messageType, new Set());
     }
@@ -184,7 +195,7 @@ export class WebSocketService {
 
     this.ws.onclose = (event) => {
       this.clearHeartbeat();
-      
+
       if (event.code === 1000) {
         // Normal closure
         this.setConnectionStatus('disconnected');
@@ -206,7 +217,7 @@ export class WebSocketService {
   private handleMessage(message: WebSocketMessage): void {
     const handlers = this.messageHandlers.get(message.type);
     if (handlers) {
-      handlers.forEach(handler => {
+      handlers.forEach((handler) => {
         try {
           handler(message);
         } catch (error) {
@@ -221,7 +232,7 @@ export class WebSocketService {
    */
   private setConnectionStatus(status: ConnectionStatus, error?: Error): void {
     this.connectionStatus = status;
-    this.statusHandlers.forEach(handler => {
+    this.statusHandlers.forEach((handler) => {
       try {
         handler(status, error);
       } catch (err) {
@@ -243,7 +254,10 @@ export class WebSocketService {
    * Attempt reconnection with exponential backoff
    */
   private attemptReconnection(): void {
-    if (this.isDestroyed || this.reconnectAttempts >= this.config.maxReconnectAttempts) {
+    if (
+      this.isDestroyed ||
+      this.reconnectAttempts >= this.config.maxReconnectAttempts
+    ) {
       return;
     }
 
@@ -275,7 +289,7 @@ export class WebSocketService {
    */
   private startHeartbeat(): void {
     this.clearHeartbeat();
-    
+
     this.heartbeatInterval = setInterval(() => {
       if (this.connectionStatus === 'connected') {
         this.sendMessage({
@@ -311,7 +325,10 @@ export class WebSocketService {
    * Process queued messages when connection is restored
    */
   private processMessageQueue(): void {
-    while (this.messageQueue.length > 0 && this.connectionStatus === 'connected') {
+    while (
+      this.messageQueue.length > 0 &&
+      this.connectionStatus === 'connected'
+    ) {
       const message = this.messageQueue.shift();
       if (message) {
         this.sendMessage(message);
@@ -326,7 +343,9 @@ let globalWebSocketService: WebSocketService | null = null;
 /**
  * Get or create global WebSocket service instance
  */
-export function getWebSocketService(config?: Partial<WebSocketConfig>): WebSocketService {
+export function getWebSocketService(
+  config?: Partial<WebSocketConfig>
+): WebSocketService {
   if (!globalWebSocketService) {
     globalWebSocketService = new WebSocketService(config);
   }

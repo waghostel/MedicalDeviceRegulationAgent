@@ -1,21 +1,24 @@
 /**
  * Performance Monitoring System Tests
- * 
+ *
  * Tests for the performance monitoring implementation
  * Validates Requirements 5.1 and 5.2 functionality
  */
 
-import { 
-  TestPerformanceTracker, 
-  getPerformanceTracker, 
-  resetPerformanceTracker 
+import {
+  TestPerformanceTracker,
+  getPerformanceTracker,
+  resetPerformanceTracker,
 } from '../test-performance-tracker';
-import { 
+import {
   PerformanceThresholdValidator,
   validateTestPerformance,
-  validateSuitePerformance 
+  validateSuitePerformance,
 } from '../performance-threshold-validator';
-import { performanceTest, performanceAssertions } from '../jest-performance-setup';
+import {
+  performanceTest,
+  performanceAssertions,
+} from '../jest-performance-setup';
 
 describe('Performance Monitoring System', () => {
   let tracker: TestPerformanceTracker;
@@ -40,7 +43,7 @@ describe('Performance Monitoring System', () => {
       const testId = tracker.startTest(testName, suiteName);
 
       // Simulate test execution
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise((resolve) => setTimeout(resolve, 100));
 
       const metrics = tracker.endTest(testId, 'passed');
       const suiteMetrics = tracker.endSuite(suiteName);
@@ -84,14 +87,14 @@ describe('Performance Monitoring System', () => {
       // Configure strict thresholds
       const strictTracker = new TestPerformanceTracker({
         maxTestExecutionTime: 50, // Very strict 50ms limit
-        maxMemoryUsage: 1 // Very strict 1MB limit
+        maxMemoryUsage: 1, // Very strict 1MB limit
       });
 
       strictTracker.startSuite(suiteName);
       const testId = strictTracker.startTest(testName, suiteName);
 
       // Simulate slow test
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise((resolve) => setTimeout(resolve, 100));
 
       const metrics = strictTracker.endTest(testId, 'passed');
       const suiteMetrics = strictTracker.endSuite(suiteName);
@@ -108,10 +111,10 @@ describe('Performance Monitoring System', () => {
 
       // Run multiple tests with varying execution times
       const executionTimes = [100, 110, 95, 105, 102]; // Consistent times
-      
+
       for (let i = 0; i < executionTimes.length; i++) {
         const testId = tracker.startTest(`test-${i}`, suiteName);
-        await new Promise(resolve => setTimeout(resolve, executionTimes[i]));
+        await new Promise((resolve) => setTimeout(resolve, executionTimes[i]));
         tracker.endTest(testId, 'passed');
       }
 
@@ -128,7 +131,7 @@ describe('Performance Monitoring System', () => {
       const testId = tracker.startTest('quick-test', suiteName);
 
       // Simulate quick test (well under 30 seconds)
-      await new Promise(resolve => setTimeout(resolve, 50));
+      await new Promise((resolve) => setTimeout(resolve, 50));
 
       tracker.endTest(testId, 'passed');
       const suiteMetrics = tracker.endSuite(suiteName);
@@ -151,7 +154,7 @@ describe('Performance Monitoring System', () => {
           heapUsed: 1024 * 1024, // 1MB
           heapTotal: 2048 * 1024,
           external: 0,
-          rss: 1024 * 1024
+          rss: 1024 * 1024,
         },
         startTime: 0,
         endTime: 100,
@@ -162,8 +165,8 @@ describe('Performance Monitoring System', () => {
           nodeVersion: 'v18.0.0',
           reactVersion: '19.1.0',
           testEnvironment: 'jsdom',
-          ci: false
-        }
+          ci: false,
+        },
       };
 
       const result = validateTestPerformance(testMetrics);
@@ -182,7 +185,7 @@ describe('Performance Monitoring System', () => {
           heapUsed: 600 * 1024 * 1024, // 600MB - exceeds 512MB threshold
           heapTotal: 1024 * 1024 * 1024,
           external: 0,
-          rss: 600 * 1024 * 1024
+          rss: 600 * 1024 * 1024,
         },
         startTime: 0,
         endTime: 10000,
@@ -193,16 +196,16 @@ describe('Performance Monitoring System', () => {
           nodeVersion: 'v18.0.0',
           reactVersion: '19.1.0',
           testEnvironment: 'jsdom',
-          ci: false
-        }
+          ci: false,
+        },
       };
 
       const result = validateTestPerformance(slowTestMetrics);
 
       expect(result.passed).toBe(false);
       expect(result.violations.length).toBeGreaterThan(0);
-      expect(result.violations.some(v => v.type === 'test_time')).toBe(true);
-      expect(result.violations.some(v => v.type === 'memory')).toBe(true);
+      expect(result.violations.some((v) => v.type === 'test_time')).toBe(true);
+      expect(result.violations.some((v) => v.type === 'memory')).toBe(true);
       expect(result.score).toBeLessThan(70);
     });
 
@@ -220,18 +223,20 @@ describe('Performance Monitoring System', () => {
         memoryPeak: 100,
         memoryAverage: 80,
         consistencyScore: 0.9,
-        thresholdViolations: []
+        thresholdViolations: [],
       };
 
       const result = validateSuitePerformance(suiteMetrics);
 
       expect(result.passed).toBe(false);
-      expect(result.violations.some(v => 
-        v.type === 'suite_time' && v.severity === 'critical'
-      )).toBe(true);
-      expect(result.violations.some(v => 
-        v.message.includes('Requirement 5.1')
-      )).toBe(true);
+      expect(
+        result.violations.some(
+          (v) => v.type === 'suite_time' && v.severity === 'critical'
+        )
+      ).toBe(true);
+      expect(
+        result.violations.some((v) => v.message.includes('Requirement 5.1'))
+      ).toBe(true);
     });
 
     it('should validate consistency for Requirement 5.2', () => {
@@ -248,31 +253,38 @@ describe('Performance Monitoring System', () => {
         memoryPeak: 100,
         memoryAverage: 80,
         consistencyScore: 0.5, // Poor consistency (below 80% threshold)
-        thresholdViolations: []
+        thresholdViolations: [],
       };
 
       const result = validateSuitePerformance(inconsistentSuiteMetrics);
 
       expect(result.passed).toBe(false);
-      expect(result.violations.some(v => 
-        v.type === 'consistency' && v.severity === 'critical'
-      )).toBe(true);
-      expect(result.violations.some(v => 
-        v.message.includes('Requirement 5.2')
-      )).toBe(true);
+      expect(
+        result.violations.some(
+          (v) => v.type === 'consistency' && v.severity === 'critical'
+        )
+      ).toBe(true);
+      expect(
+        result.violations.some((v) => v.message.includes('Requirement 5.2'))
+      ).toBe(true);
     });
   });
 
   describe('Jest Integration', () => {
-    it('should provide performance test wrapper', 
-      performanceTest('performance-wrapper-test', async () => {
-        // Simulate test work
-        await new Promise(resolve => setTimeout(resolve, 50));
-        expect(true).toBe(true);
-      }, {
-        maxExecutionTime: 100,
-        maxMemoryUsage: 10
-      })
+    it(
+      'should provide performance test wrapper',
+      performanceTest(
+        'performance-wrapper-test',
+        async () => {
+          // Simulate test work
+          await new Promise((resolve) => setTimeout(resolve, 50));
+          expect(true).toBe(true);
+        },
+        {
+          maxExecutionTime: 100,
+          maxMemoryUsage: 10,
+        }
+      )
     );
 
     it('should provide performance assertions', () => {
@@ -297,7 +309,7 @@ describe('Performance Monitoring System', () => {
       // Add multiple tests
       for (let i = 0; i < 3; i++) {
         const testId = tracker.startTest(`test-${i}`, suiteName);
-        await new Promise(resolve => setTimeout(resolve, 50 + i * 10));
+        await new Promise((resolve) => setTimeout(resolve, 50 + i * 10));
         tracker.endTest(testId, i === 2 ? 'failed' : 'passed');
       }
 
@@ -317,7 +329,7 @@ describe('Performance Monitoring System', () => {
       // First run
       tracker.startSuite('regression-test');
       let testId = tracker.startTest('baseline-test', 'regression-test');
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise((resolve) => setTimeout(resolve, 100));
       tracker.endTest(testId, 'passed');
       tracker.endSuite('regression-test');
 
@@ -329,13 +341,15 @@ describe('Performance Monitoring System', () => {
 
       tracker.startSuite('regression-test');
       testId = tracker.startTest('baseline-test', 'regression-test');
-      await new Promise(resolve => setTimeout(resolve, 200)); // Slower
+      await new Promise((resolve) => setTimeout(resolve, 200)); // Slower
       tracker.endTest(testId, 'passed');
       tracker.endSuite('regression-test');
 
       const secondReport = tracker.generateReport();
 
-      expect(secondReport.overallExecutionTime).toBeGreaterThan(firstReport.overallExecutionTime);
+      expect(secondReport.overallExecutionTime).toBeGreaterThan(
+        firstReport.overallExecutionTime
+      );
     });
   });
 });
@@ -344,18 +358,18 @@ describe('Performance Monitoring Integration', () => {
   it('should automatically track performance in real test environment', async () => {
     // This test verifies that the performance monitoring is working
     // in the actual Jest environment
-    
+
     const startTime = performance.now();
-    
+
     // Simulate some test work
-    await new Promise(resolve => setTimeout(resolve, 100));
-    
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
     const endTime = performance.now();
     const executionTime = endTime - startTime;
-    
+
     expect(executionTime).toBeGreaterThan(90);
     expect(executionTime).toBeLessThan(200);
-    
+
     // Verify memory tracking is available
     const memUsage = process.memoryUsage();
     expect(memUsage.heapUsed).toBeGreaterThan(0);
@@ -365,38 +379,42 @@ describe('Performance Monitoring Integration', () => {
   it('should meet Requirement 5.1 (30-second suite limit)', () => {
     // This test should complete well within the 30-second limit
     const testStartTime = Date.now();
-    
+
     // Simulate multiple quick operations
     for (let i = 0; i < 100; i++) {
       expect(i).toBeLessThan(100);
     }
-    
+
     const testEndTime = Date.now();
     const executionTime = testEndTime - testStartTime;
-    
+
     expect(executionTime).toBeLessThan(1000); // Should be under 1 second
   });
 
   it('should meet Requirement 5.2 (consistency)', async () => {
     // Run the same operation multiple times and verify consistency
     const executionTimes: number[] = [];
-    
+
     for (let i = 0; i < 5; i++) {
       const start = performance.now();
-      
+
       // Consistent operation
-      await new Promise(resolve => setTimeout(resolve, 50));
-      
+      await new Promise((resolve) => setTimeout(resolve, 50));
+
       const end = performance.now();
       executionTimes.push(end - start);
     }
-    
+
     // Calculate coefficient of variation
-    const mean = executionTimes.reduce((sum, time) => sum + time, 0) / executionTimes.length;
-    const variance = executionTimes.reduce((sum, time) => sum + Math.pow(time - mean, 2), 0) / executionTimes.length;
+    const mean =
+      executionTimes.reduce((sum, time) => sum + time, 0) /
+      executionTimes.length;
+    const variance =
+      executionTimes.reduce((sum, time) => sum + Math.pow(time - mean, 2), 0) /
+      executionTimes.length;
     const standardDeviation = Math.sqrt(variance);
     const coefficientOfVariation = standardDeviation / mean;
-    
+
     // Should be consistent (CV < 0.2 for 20% variance threshold)
     expect(coefficientOfVariation).toBeLessThan(0.2);
   });

@@ -5,7 +5,10 @@
 
 import React from 'react';
 import { screen, fireEvent } from '@testing-library/react';
-import { renderWithProviders, createMockSession } from '@/lib/testing/test-utils';
+import {
+  renderWithProviders,
+  createMockSession,
+} from '@/lib/testing/test-utils';
 import { Header } from '../Header';
 
 // Mock Next.js Link component
@@ -31,7 +34,9 @@ describe('Header Component', () => {
     it('renders header with application title and MVP badge', () => {
       renderWithProviders(<Header />, { session: mockSession });
 
-      expect(screen.getByText('Medical Device Regulatory Assistant')).toBeInTheDocument();
+      expect(
+        screen.getByText('Medical Device Regulatory Assistant')
+      ).toBeInTheDocument();
       expect(screen.getByText('MVP')).toBeInTheDocument();
     });
 
@@ -39,11 +44,13 @@ describe('Header Component', () => {
       renderWithProviders(<Header />, { session: mockSession });
 
       const dashboardLink = screen.getByRole('link', { name: /dashboard/i });
-      const aiAssistantLink = screen.getByRole('link', { name: /ai assistant/i });
+      const aiAssistantLink = screen.getByRole('link', {
+        name: /ai assistant/i,
+      });
 
       expect(dashboardLink).toBeInTheDocument();
       expect(dashboardLink).toHaveAttribute('href', '/');
-      
+
       expect(aiAssistantLink).toBeInTheDocument();
       expect(aiAssistantLink).toHaveAttribute('href', '/agent');
     });
@@ -71,10 +78,9 @@ describe('Header Component', () => {
     });
 
     it('does not render menu toggle button when showMenuButton is false', () => {
-      renderWithProviders(
-        <Header showMenuButton={false} />,
-        { session: mockSession }
-      );
+      renderWithProviders(<Header showMenuButton={false} />, {
+        session: mockSession,
+      });
 
       const menuButton = screen.queryByRole('button', { name: /toggle menu/i });
       expect(menuButton).not.toBeInTheDocument();
@@ -94,13 +100,12 @@ describe('Header Component', () => {
     });
 
     it('handles missing onMenuToggle prop gracefully', () => {
-      renderWithProviders(
-        <Header showMenuButton={true} />,
-        { session: mockSession }
-      );
+      renderWithProviders(<Header showMenuButton={true} />, {
+        session: mockSession,
+      });
 
       const menuButton = screen.getByRole('button', { name: /toggle menu/i });
-      
+
       expect(() => {
         fireEvent.click(menuButton);
       }).not.toThrow();
@@ -130,7 +135,7 @@ describe('Header Component', () => {
 
       const header = screen.getByRole('banner');
       expect(header).toHaveClass('sticky', 'top-0', 'z-50', 'w-full');
-      
+
       const container = header.querySelector('.container');
       expect(container).toHaveClass('flex', 'h-14', 'items-center');
     });
@@ -141,14 +146,16 @@ describe('Header Component', () => {
       renderWithProviders(<Header />, { session: mockSession });
 
       const dashboardLink = screen.getByRole('link', { name: /dashboard/i });
-      const aiAssistantLink = screen.getByRole('link', { name: /ai assistant/i });
+      const aiAssistantLink = screen.getByRole('link', {
+        name: /ai assistant/i,
+      });
 
       expect(dashboardLink).toHaveClass(
         'transition-colors',
         'hover:text-foreground/80',
         'text-foreground/60'
       );
-      
+
       expect(aiAssistantLink).toHaveClass(
         'transition-colors',
         'hover:text-foreground/80',
@@ -159,7 +166,9 @@ describe('Header Component', () => {
     it('has proper link structure and accessibility', () => {
       renderWithProviders(<Header />, { session: mockSession });
 
-      const homeLink = screen.getByRole('link', { name: /medical device regulatory assistant mvp/i });
+      const homeLink = screen.getByRole('link', {
+        name: /medical device regulatory assistant mvp/i,
+      });
       expect(homeLink).toHaveAttribute('href', '/');
       expect(homeLink).toHaveClass('mr-6', 'flex', 'items-center', 'space-x-2');
     });
@@ -171,7 +180,7 @@ describe('Header Component', () => {
 
       const userButton = screen.getByRole('button', { name: /user menu/i });
       expect(userButton).toHaveClass('variant-ghost', 'size-sm');
-      
+
       // Check for User icon (Lucide icon)
       const userIcon = userButton.querySelector('svg');
       expect(userIcon).toBeInTheDocument();
@@ -183,7 +192,7 @@ describe('Header Component', () => {
 
       const settingsButton = screen.getByRole('button', { name: /settings/i });
       expect(settingsButton).toHaveClass('variant-ghost', 'size-sm');
-      
+
       // Check for Settings icon (Lucide icon)
       const settingsIcon = settingsButton.querySelector('svg');
       expect(settingsIcon).toBeInTheDocument();
@@ -247,7 +256,7 @@ describe('Header Component', () => {
 
       // Header should be a banner landmark
       expect(screen.getByRole('banner')).toBeInTheDocument();
-      
+
       // Navigation should be a navigation landmark
       expect(screen.getByRole('navigation')).toBeInTheDocument();
     });
@@ -286,7 +295,7 @@ describe('Header Component', () => {
       );
 
       const menuButton = screen.getByRole('button', { name: /toggle menu/i });
-      
+
       // Button should have focus-visible classes
       expect(menuButton).toHaveClass(
         'focus-visible:bg-transparent',
@@ -300,9 +309,15 @@ describe('Header Component', () => {
     it('renders without session data', () => {
       renderWithProviders(<Header />, { session: null });
 
-      expect(screen.getByText('Medical Device Regulatory Assistant')).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: /user menu/i })).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: /settings/i })).toBeInTheDocument();
+      expect(
+        screen.getByText('Medical Device Regulatory Assistant')
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole('button', { name: /user menu/i })
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole('button', { name: /settings/i })
+      ).toBeInTheDocument();
     });
 
     it('handles undefined props gracefully', () => {
@@ -322,16 +337,24 @@ describe('Header Component', () => {
       renderWithProviders(<Header />, { session: authenticatedSession });
 
       // Header should render normally with authenticated session
-      expect(screen.getByText('Medical Device Regulatory Assistant')).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: /user menu/i })).toBeInTheDocument();
+      expect(
+        screen.getByText('Medical Device Regulatory Assistant')
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole('button', { name: /user menu/i })
+      ).toBeInTheDocument();
     });
 
     it('renders correctly without authentication', () => {
       renderWithProviders(<Header />, { session: null });
 
       // Header should still render without session
-      expect(screen.getByText('Medical Device Regulatory Assistant')).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: /user menu/i })).toBeInTheDocument();
+      expect(
+        screen.getByText('Medical Device Regulatory Assistant')
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole('button', { name: /user menu/i })
+      ).toBeInTheDocument();
     });
   });
 });

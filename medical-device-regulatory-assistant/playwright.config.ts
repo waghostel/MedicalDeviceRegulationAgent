@@ -35,10 +35,10 @@ export default defineConfig({
     actionTimeout: 10000,
     navigationTimeout: 30000,
   },
-  
+
   /* Global test timeout */
   timeout: 30000,
-  
+
   /* Expect timeout for assertions */
   expect: {
     /* Visual comparison threshold */
@@ -59,29 +59,29 @@ export default defineConfig({
     // Desktop browsers for cross-browser testing
     {
       name: 'chromium',
-      use: { 
+      use: {
         ...devices['Desktop Chrome'],
         viewport: { width: 1280, height: 720 },
       },
     },
     {
       name: 'firefox',
-      use: { 
+      use: {
         ...devices['Desktop Firefox'],
         viewport: { width: 1280, height: 720 },
       },
     },
     {
       name: 'webkit',
-      use: { 
+      use: {
         ...devices['Desktop Safari'],
         viewport: { width: 1280, height: 720 },
       },
     },
     {
       name: 'edge',
-      use: { 
-        ...devices['Desktop Edge'], 
+      use: {
+        ...devices['Desktop Edge'],
         channel: 'msedge',
         viewport: { width: 1280, height: 720 },
       },
@@ -90,7 +90,7 @@ export default defineConfig({
     // Mobile viewports for responsive testing
     {
       name: 'mobile-chrome',
-      use: { 
+      use: {
         ...devices['Pixel 5'],
         isMobile: true,
         hasTouch: true,
@@ -98,7 +98,7 @@ export default defineConfig({
     },
     {
       name: 'mobile-safari',
-      use: { 
+      use: {
         ...devices['iPhone 12'],
         isMobile: true,
         hasTouch: true,
@@ -169,7 +169,8 @@ export default defineConfig({
   /* Run your local dev server before starting the tests */
   webServer: [
     {
-      command: 'cd backend && poetry run uvicorn main:app --host 0.0.0.0 --port 8000',
+      command:
+        'cd backend && poetry run uvicorn main:app --host 0.0.0.0 --port 8000',
       port: 8000,
       reuseExistingServer: !process.env.CI,
     },

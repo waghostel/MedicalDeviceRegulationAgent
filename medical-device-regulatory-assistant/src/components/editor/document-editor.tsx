@@ -23,69 +23,88 @@ export function DocumentEditor({ projectId }: DocumentEditorProps) {
     deleteDocument,
     getDocument,
     getDocumentTree,
-    getMentionItems
+    getMentionItems,
   } = useDocuments(projectId);
 
-  const [selectedDocumentId, setSelectedDocumentId] = useState<string | null>(null);
+  const [selectedDocumentId, setSelectedDocumentId] = useState<string | null>(
+    null
+  );
   const [isTemplateDialogOpen, setIsTemplateDialogOpen] = useState(false);
 
-  const selectedDocument = selectedDocumentId ? getDocument(selectedDocumentId) : null;
+  const selectedDocument = selectedDocumentId
+    ? getDocument(selectedDocumentId)
+    : null;
   const documentTree = getDocumentTree();
   const mentionItems = getMentionItems();
 
-  const handleCreateDocument = useCallback(async (
-    name: string,
-    type: Document['type'],
-    parentId?: string
-  ) => {
-    try {
-      const newDoc = await createDocument(name, '', type, parentId);
-      if (!newDoc.isFolder) {
+  const handleCreateDocument = useCallback(
+    async (name: string, type: Document['type'], parentId?: string) => {
+      try {
+        const newDoc = await createDocument(name, '', type, parentId);
+        if (!newDoc.isFolder) {
+          setSelectedDocumentId(newDoc.id);
+        }
+      } catch (error) {
+        console.error('Failed to create document:', error);
+      }
+    },
+    [createDocument]
+  );
+
+  const handleDeleteDocument = useCallback(
+    async (id: string) => {
+      try {
+        await deleteDocument(id);
+        if (selectedDocumentId === id) {
+          setSelectedDocumentId(null);
+        }
+      } catch (error) {
+        console.error('Failed to delete document:', error);
+      }
+    },
+    [deleteDocument, selectedDocumentId]
+  );
+
+  const handleRenameDocument = useCallback(
+    async (id: string, newName: string) => {
+      try {
+        await updateDocument(id, { name: newName });
+      } catch (error) {
+        console.error('Failed to rename document:', error);
+      }
+    },
+    [updateDocument]
+  );
+
+  const handleSaveDocument = useCallback(
+    async (content: string) => {
+      if (!selectedDocumentId) return;
+
+      try {
+        await updateDocument(selectedDocumentId, { content });
+      } catch (error) {
+        console.error('Failed to save document:', error);
+        throw error;
+      }
+    },
+    [selectedDocumentId, updateDocument]
+  );
+
+  const handleTemplateSelect = useCallback(
+    async (content: string, templateName: string) => {
+      try {
+        const newDoc = await createDocument(
+          templateName,
+          content,
+          'general-note'
+        );
         setSelectedDocumentId(newDoc.id);
+      } catch (error) {
+        console.error('Failed to create document from template:', error);
       }
-    } catch (error) {
-      console.error('Failed to create document:', error);
-    }
-  }, [createDocument]);
-
-  const handleDeleteDocument = useCallback(async (id: string) => {
-    try {
-      await deleteDocument(id);
-      if (selectedDocumentId === id) {
-        setSelectedDocumentId(null);
-      }
-    } catch (error) {
-      console.error('Failed to delete document:', error);
-    }
-  }, [deleteDocument, selectedDocumentId]);
-
-  const handleRenameDocument = useCallback(async (id: string, newName: string) => {
-    try {
-      await updateDocument(id, { name: newName });
-    } catch (error) {
-      console.error('Failed to rename document:', error);
-    }
-  }, [updateDocument]);
-
-  const handleSaveDocument = useCallback(async (content: string) => {
-    if (!selectedDocumentId) return;
-    
-    try {
-      await updateDocument(selectedDocumentId, { content });
-    } catch (error) {
-      console.error('Failed to save document:', error);
-      throw error;
-    }
-  }, [selectedDocumentId, updateDocument]);
-
-  const handleTemplateSelect = useCallback(async (content: string, templateName: string) => {
-    try {
-      const newDoc = await createDocument(templateName, content, 'general-note');
-      setSelectedDocumentId(newDoc.id);
-    } catch (error) {
-      console.error('Failed to create document from template:', error);
-    }
-  }, [createDocument]);
+    },
+    [createDocument]
+  );
 
   if (loading) {
     return (
@@ -132,11 +151,18 @@ export function DocumentEditor({ projectId }: DocumentEditorProps) {
                   Folder: {selectedDocument.name}
                 </h3>
                 <p className="text-gray-600 mb-4">
-                  This is a folder. Select a document to edit or create a new one.
+                  This is a folder. Select a document to edit or create a new
+                  one.
                 </p>
                 <div className="flex gap-2 justify-center">
                   <Button
-                    onClick={() => handleCreateDocument('New Document', 'general-note', selectedDocument.id)}
+                    onClick={() =>
+                      handleCreateDocument(
+                        'New Document',
+                        'general-note',
+                        selectedDocument.id
+                      )
+                    }
                   >
                     <FileText className="h-4 w-4 mr-2" />
                     New Document
@@ -167,11 +193,14 @@ export function DocumentEditor({ projectId }: DocumentEditorProps) {
                 No Document Selected
               </h3>
               <p className="text-gray-600 mb-4">
-                Select a document from the sidebar to start editing, or create a new one.
+                Select a document from the sidebar to start editing, or create a
+                new one.
               </p>
               <div className="flex gap-2 justify-center">
                 <Button
-                  onClick={() => handleCreateDocument('New Document', 'general-note')}
+                  onClick={() =>
+                    handleCreateDocument('New Document', 'general-note')
+                  }
                 >
                   <FileText className="h-4 w-4 mr-2" />
                   New Document

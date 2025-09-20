@@ -5,13 +5,13 @@
 
 import React from 'react';
 import { screen, fireEvent, waitFor } from '@testing-library/react';
-import { 
-  renderWithProviders, 
+import {
+  renderWithProviders,
   createMockSession,
   setupTestEnvironment,
   cleanupTestEnvironment,
   waitForAsyncUpdates,
-  fireEventWithAct
+  fireEventWithAct,
 } from '@/lib/testing/react-test-utils';
 import { AppLayout } from '../AppLayout';
 
@@ -19,61 +19,109 @@ import { AppLayout } from '../AppLayout';
 jest.mock('../Header', () => ({
   Header: (props) => {
     const mockReact = require('react');
-    return mockReact.createElement('div', {
-      'data-testid': 'mock-header'
-    }, [
-      props.showMenuButton && mockReact.createElement('button', {
-        key: 'menu-toggle',
-        onClick: props.onMenuToggle,
-        'data-testid': 'menu-toggle'
-      }, 'Menu'),
-      'Header Component'
-    ]);
-  }
+    return mockReact.createElement(
+      'div',
+      {
+        'data-testid': 'mock-header',
+      },
+      [
+        props.showMenuButton &&
+          mockReact.createElement(
+            'button',
+            {
+              key: 'menu-toggle',
+              onClick: props.onMenuToggle,
+              'data-testid': 'menu-toggle',
+            },
+            'Menu'
+          ),
+        'Header Component',
+      ]
+    );
+  },
 }));
 
 jest.mock('../Sidebar', () => ({
   Sidebar: () => {
     const mockReact = require('react');
-    return mockReact.createElement('div', {
-      'data-testid': 'mock-sidebar'
-    }, 'Sidebar Component');
-  }
+    return mockReact.createElement(
+      'div',
+      {
+        'data-testid': 'mock-sidebar',
+      },
+      'Sidebar Component'
+    );
+  },
 }));
 
 jest.mock('../QuickActionsToolbar', () => ({
-  QuickActionsToolbar: (props) => React.createElement('div', {
-    'data-testid': 'mock-quick-actions'
-  }, React.createElement('button', {
-    onClick: () => props.onAction('test-action'),
-    'data-testid': 'quick-action-btn'
-  }, 'Quick Action'))
+  QuickActionsToolbar: (props) =>
+    React.createElement(
+      'div',
+      {
+        'data-testid': 'mock-quick-actions',
+      },
+      React.createElement(
+        'button',
+        {
+          onClick: () => props.onAction('test-action'),
+          'data-testid': 'quick-action-btn',
+        },
+        'Quick Action'
+      )
+    ),
 }));
 
 jest.mock('../CommandPalette', () => ({
-  CommandPalette: (props) => props.isOpen ? React.createElement('div', {
-    'data-testid': 'mock-command-palette'
-  }, [
-    React.createElement('button', {
-      key: 'close',
-      onClick: props.onClose,
-      'data-testid': 'close-palette'
-    }, 'Close'),
-    React.createElement('button', {
-      key: 'action',
-      onClick: () => props.onAction('palette-action'),
-      'data-testid': 'palette-action'
-    }, 'Palette Action')
-  ]) : null
+  CommandPalette: (props) =>
+    props.isOpen
+      ? React.createElement(
+          'div',
+          {
+            'data-testid': 'mock-command-palette',
+          },
+          [
+            React.createElement(
+              'button',
+              {
+                key: 'close',
+                onClick: props.onClose,
+                'data-testid': 'close-palette',
+              },
+              'Close'
+            ),
+            React.createElement(
+              'button',
+              {
+                key: 'action',
+                onClick: () => props.onAction('palette-action'),
+                'data-testid': 'palette-action',
+              },
+              'Palette Action'
+            ),
+          ]
+        )
+      : null,
 }));
 
 jest.mock('../Breadcrumb', () => ({
-  Breadcrumb: (props) => React.createElement('div', {
-    'data-testid': 'mock-breadcrumb'
-  }, props.items.map((item, index) => React.createElement('span', {
-    key: index,
-    'data-testid': `breadcrumb-item-${index}`
-  }, item.label)))
+  Breadcrumb: (props) =>
+    React.createElement(
+      'div',
+      {
+        'data-testid': 'mock-breadcrumb',
+      },
+      props.items.map((item, index) =>
+        React.createElement(
+          'span',
+          {
+            key: index,
+            'data-testid': `breadcrumb-item-${index}`,
+          },
+          item.label
+        )
+      )
+    ),
 }));
 
 // Mock keyboard shortcuts hook
@@ -85,9 +133,13 @@ jest.mock('@/hooks/useKeyboardShortcuts', () => ({
 describe('AppLayout Component', () => {
   const mockSession = createMockSession();
   const defaultProps = {
-    children: React.createElement('div', {
-      'data-testid': 'main-content'
-    }, 'Main Content'),
+    children: React.createElement(
+      'div',
+      {
+        'data-testid': 'main-content',
+      },
+      'Main Content'
+    ),
   };
 
   beforeEach(() => {
@@ -96,7 +148,9 @@ describe('AppLayout Component', () => {
 
   describe('Basic Rendering', () => {
     it('renders header, sidebar, and main content correctly', () => {
-      renderWithProviders(React.createElement(AppLayout, defaultProps), { session: mockSession });
+      renderWithProviders(React.createElement(AppLayout, defaultProps), {
+        session: mockSession,
+      });
 
       expect(screen.getByTestId('mock-header')).toBeInTheDocument();
       expect(screen.getByTestId('mock-sidebar')).toBeInTheDocument();
@@ -118,7 +172,10 @@ describe('AppLayout Component', () => {
     it('applies custom className to main content', () => {
       const customClass = 'custom-layout-class';
       renderWithProviders(
-        React.createElement(AppLayout, { ...defaultProps, className: customClass }),
+        React.createElement(AppLayout, {
+          ...defaultProps,
+          className: customClass,
+        }),
         { session: mockSession }
       );
 
@@ -131,7 +188,10 @@ describe('AppLayout Component', () => {
     it('handles quick action callbacks correctly', () => {
       const mockOnQuickAction = jest.fn();
       renderWithProviders(
-        React.createElement(AppLayout, { ...defaultProps, onQuickAction: mockOnQuickAction }),
+        React.createElement(AppLayout, {
+          ...defaultProps,
+          onQuickAction: mockOnQuickAction,
+        }),
         { session: mockSession }
       );
 
@@ -144,10 +204,12 @@ describe('AppLayout Component', () => {
 
   describe('Error Handling', () => {
     it('handles missing onQuickAction prop gracefully', () => {
-      renderWithProviders(React.createElement(AppLayout, defaultProps), { session: mockSession });
+      renderWithProviders(React.createElement(AppLayout, defaultProps), {
+        session: mockSession,
+      });
 
       const quickActionBtn = screen.getByTestId('quick-action-btn');
-      
+
       // Should not throw error when onQuickAction is not provided
       expect(() => {
         fireEvent.click(quickActionBtn);

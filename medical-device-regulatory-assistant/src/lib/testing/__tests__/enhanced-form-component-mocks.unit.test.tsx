@@ -1,9 +1,9 @@
 /**
  * Enhanced Form Component Mocks Tests
- * 
+ *
  * Tests for the enhanced form component mocks to ensure they work correctly
  * and provide the expected functionality for testing scenarios.
- * 
+ *
  * Requirements: 2.4, 3.1
  */
 
@@ -40,7 +40,7 @@ describe('Enhanced Form Component Mocks', () => {
   describe('EnhancedInputMock', () => {
     it('should render with basic props', () => {
       const mockOnChange = jest.fn();
-      
+
       render(
         <EnhancedInputMock
           label="Test Input"
@@ -51,7 +51,9 @@ describe('Enhanced Form Component Mocks', () => {
       );
 
       expect(screen.getByTestId('enhanced-input-wrapper')).toBeInTheDocument();
-      expect(screen.getByTestId('enhanced-input-label')).toHaveTextContent('Test Input');
+      expect(screen.getByTestId('enhanced-input-label')).toHaveTextContent(
+        'Test Input'
+      );
       expect(screen.getByTestId('enhanced-input')).toHaveValue('test value');
     });
 
@@ -65,12 +67,15 @@ describe('Enhanced Form Component Mocks', () => {
       );
 
       expect(screen.getByTestId('required-indicator')).toBeInTheDocument();
-      expect(screen.getByTestId('enhanced-input')).toHaveAttribute('aria-required', 'true');
+      expect(screen.getByTestId('enhanced-input')).toHaveAttribute(
+        'aria-required',
+        'true'
+      );
     });
 
     it('should display error messages', () => {
       const error = { message: 'This field is required' };
-      
+
       render(
         <EnhancedInputMock
           label="Error Field"
@@ -79,8 +84,13 @@ describe('Enhanced Form Component Mocks', () => {
         />
       );
 
-      expect(screen.getByTestId('input-error')).toHaveTextContent('This field is required');
-      expect(screen.getByTestId('enhanced-input')).toHaveAttribute('aria-invalid', 'true');
+      expect(screen.getByTestId('input-error')).toHaveTextContent(
+        'This field is required'
+      );
+      expect(screen.getByTestId('enhanced-input')).toHaveAttribute(
+        'aria-invalid',
+        'true'
+      );
     });
 
     it('should show character count when enabled', () => {
@@ -110,13 +120,18 @@ describe('Enhanced Form Component Mocks', () => {
         />
       );
 
-      expect(screen.getByTestId('validation-message')).toHaveTextContent('Field is valid');
-      expect(screen.getByTestId('enhanced-input')).toHaveAttribute('data-valid', 'true');
+      expect(screen.getByTestId('validation-message')).toHaveTextContent(
+        'Field is valid'
+      );
+      expect(screen.getByTestId('enhanced-input')).toHaveAttribute(
+        'data-valid',
+        'true'
+      );
     });
 
     it('should call onChange when input changes', () => {
       const mockOnChange = jest.fn();
-      
+
       render(
         <EnhancedInputMock
           label="Change Test"
@@ -135,7 +150,7 @@ describe('Enhanced Form Component Mocks', () => {
   describe('EnhancedTextareaMock', () => {
     it('should render with basic props', () => {
       const mockOnChange = jest.fn();
-      
+
       render(
         <EnhancedTextareaMock
           label="Test Textarea"
@@ -145,9 +160,15 @@ describe('Enhanced Form Component Mocks', () => {
         />
       );
 
-      expect(screen.getByTestId('enhanced-textarea-wrapper')).toBeInTheDocument();
-      expect(screen.getByTestId('enhanced-textarea-label')).toHaveTextContent('Test Textarea');
-      expect(screen.getByTestId('enhanced-textarea')).toHaveValue('test content');
+      expect(
+        screen.getByTestId('enhanced-textarea-wrapper')
+      ).toBeInTheDocument();
+      expect(screen.getByTestId('enhanced-textarea-label')).toHaveTextContent(
+        'Test Textarea'
+      );
+      expect(screen.getByTestId('enhanced-textarea')).toHaveValue(
+        'test content'
+      );
     });
 
     it('should handle resize property', () => {
@@ -168,7 +189,7 @@ describe('Enhanced Form Component Mocks', () => {
 
     it('should call onChange when textarea changes', () => {
       const mockOnChange = jest.fn();
-      
+
       render(
         <EnhancedTextareaMock
           label="Change Test"
@@ -188,17 +209,23 @@ describe('Enhanced Form Component Mocks', () => {
     it('should show saving state', () => {
       render(<AutoSaveIndicatorMock isSaving={true} />);
 
-      expect(screen.getByTestId('auto-save-indicator')).toHaveAttribute('data-saving', 'true');
+      expect(screen.getByTestId('auto-save-indicator')).toHaveAttribute(
+        'data-saving',
+        'true'
+      );
       expect(screen.getByTestId('saving-text')).toHaveTextContent('Saving...');
       expect(screen.getByTestId('saving-icon')).toBeInTheDocument();
     });
 
     it('should show saved state with timestamp', () => {
       const lastSaved = new Date('2023-01-01T12:00:00Z');
-      
+
       render(<AutoSaveIndicatorMock isSaving={false} lastSaved={lastSaved} />);
 
-      expect(screen.getByTestId('auto-save-indicator')).toHaveAttribute('data-saving', 'false');
+      expect(screen.getByTestId('auto-save-indicator')).toHaveAttribute(
+        'data-saving',
+        'false'
+      );
       expect(screen.getByTestId('saved-text')).toBeInTheDocument();
       expect(screen.getByTestId('saved-icon')).toBeInTheDocument();
     });
@@ -223,9 +250,16 @@ describe('Enhanced Form Component Mocks', () => {
         />
       );
 
-      expect(screen.getByTestId('form-submission-progress')).toHaveAttribute('data-progress', '75');
-      expect(screen.getByTestId('current-step-text')).toHaveTextContent('Validating data');
-      expect(screen.getByTestId('progress-percentage')).toHaveTextContent('75%');
+      expect(screen.getByTestId('form-submission-progress')).toHaveAttribute(
+        'data-progress',
+        '75'
+      );
+      expect(screen.getByTestId('current-step-text')).toHaveTextContent(
+        'Validating data'
+      );
+      expect(screen.getByTestId('progress-percentage')).toHaveTextContent(
+        '75%'
+      );
     });
 
     it('should handle progress bounds correctly', () => {
@@ -236,15 +270,15 @@ describe('Enhanced Form Component Mocks', () => {
         />
       );
 
-      expect(screen.getByTestId('form-submission-progress')).toHaveAttribute('data-progress', '100');
+      expect(screen.getByTestId('form-submission-progress')).toHaveAttribute(
+        'data-progress',
+        '100'
+      );
     });
 
     it('should have proper accessibility attributes', () => {
       render(
-        <FormSubmissionProgressMock
-          progress={50}
-          currentStep="Processing"
-        />
+        <FormSubmissionProgressMock progress={50} currentStep="Processing" />
       );
 
       const progressBar = screen.getByTestId('form-submission-progress');
@@ -258,51 +292,55 @@ describe('Enhanced Form Component Mocks', () => {
   describe('EnhancedButtonMock', () => {
     it('should render with basic props', () => {
       const mockOnClick = jest.fn();
-      
+
       render(
-        <EnhancedButtonMock onClick={mockOnClick}>
-          Click me
-        </EnhancedButtonMock>
+        <EnhancedButtonMock onClick={mockOnClick}>Click me</EnhancedButtonMock>
       );
 
       expect(screen.getByTestId('enhanced-button')).toBeInTheDocument();
-      expect(screen.getByTestId('button-content')).toHaveTextContent('Click me');
+      expect(screen.getByTestId('button-content')).toHaveTextContent(
+        'Click me'
+      );
     });
 
     it('should handle loading state', () => {
       const mockOnClick = jest.fn();
-      
+
       render(
         <EnhancedButtonMock loading onClick={mockOnClick}>
           Submit
         </EnhancedButtonMock>
       );
 
-      expect(screen.getByTestId('enhanced-button')).toHaveAttribute('data-loading', 'true');
+      expect(screen.getByTestId('enhanced-button')).toHaveAttribute(
+        'data-loading',
+        'true'
+      );
       expect(screen.getByTestId('loading-icon')).toBeInTheDocument();
       expect(screen.getByTestId('enhanced-button')).toBeDisabled();
     });
 
     it('should handle disabled state', () => {
       const mockOnClick = jest.fn();
-      
+
       render(
         <EnhancedButtonMock disabled onClick={mockOnClick}>
           Disabled
         </EnhancedButtonMock>
       );
 
-      expect(screen.getByTestId('enhanced-button')).toHaveAttribute('data-disabled', 'true');
+      expect(screen.getByTestId('enhanced-button')).toHaveAttribute(
+        'data-disabled',
+        'true'
+      );
       expect(screen.getByTestId('enhanced-button')).toBeDisabled();
     });
 
     it('should call onClick when clicked and not disabled', () => {
       const mockOnClick = jest.fn();
-      
+
       render(
-        <EnhancedButtonMock onClick={mockOnClick}>
-          Click me
-        </EnhancedButtonMock>
+        <EnhancedButtonMock onClick={mockOnClick}>Click me</EnhancedButtonMock>
       );
 
       fireEvent.click(screen.getByTestId('enhanced-button'));
@@ -311,7 +349,7 @@ describe('Enhanced Form Component Mocks', () => {
 
     it('should not call onClick when disabled', () => {
       const mockOnClick = jest.fn();
-      
+
       render(
         <EnhancedButtonMock disabled onClick={mockOnClick}>
           Disabled
@@ -324,7 +362,7 @@ describe('Enhanced Form Component Mocks', () => {
 
     it('should not call onClick when loading', () => {
       const mockOnClick = jest.fn();
-      
+
       render(
         <EnhancedButtonMock loading onClick={mockOnClick}>
           Loading
@@ -337,12 +375,13 @@ describe('Enhanced Form Component Mocks', () => {
 
     it('should handle different variants', () => {
       render(
-        <EnhancedButtonMock variant="destructive">
-          Delete
-        </EnhancedButtonMock>
+        <EnhancedButtonMock variant="destructive">Delete</EnhancedButtonMock>
       );
 
-      expect(screen.getByTestId('enhanced-button')).toHaveAttribute('data-variant', 'destructive');
+      expect(screen.getByTestId('enhanced-button')).toHaveAttribute(
+        'data-variant',
+        'destructive'
+      );
     });
   });
 
@@ -357,7 +396,7 @@ describe('Enhanced Form Component Mocks', () => {
 
     it('should validate mock configuration', () => {
       const validation = validateEnhancedFormComponentMocks();
-      
+
       expect(validation.isValid).toBe(true);
       expect(validation.errors).toHaveLength(0);
     });
@@ -368,7 +407,7 @@ describe('Enhanced Form Component Mocks', () => {
       render(<EnhancedButtonMock>Test</EnhancedButtonMock>);
 
       const stats = getComponentMockStats();
-      
+
       expect(stats.totalMocks).toBe(5);
       expect(stats.totalCalls).toBeGreaterThan(0);
       expect(stats.mockCallCounts.EnhancedInput).toBeGreaterThan(0);
@@ -378,11 +417,11 @@ describe('Enhanced Form Component Mocks', () => {
     it('should reset mock calls', () => {
       // Call mocks to generate call history
       render(<EnhancedInputMock label="Test" name="test" />);
-      
+
       expect(componentMocks.EnhancedInput.mock.calls.length).toBeGreaterThan(0);
-      
+
       resetComponentMockCalls();
-      
+
       expect(componentMocks.EnhancedInput.mock.calls.length).toBe(0);
     });
   });
@@ -396,22 +435,24 @@ describe('Enhanced Form Component Mocks', () => {
 
     it('should track call history', () => {
       const testProps = { label: 'Test', name: 'test' };
-      
+
       EnhancedInputMock(testProps);
-      
+
       expect(EnhancedInputMock.mock.calls).toHaveLength(1);
       expect(EnhancedInputMock.mock.calls[0][0]).toEqual(testProps);
     });
 
     it('should allow mock implementation changes', () => {
-      const customMock = jest.fn(() => React.createElement('div', { 'data-testid': 'custom' }));
-      
+      const customMock = jest.fn(() =>
+        React.createElement('div', { 'data-testid': 'custom' })
+      );
+
       componentMocks.EnhancedInput.mockImplementation(customMock);
-      
+
       render(<componentMocks.EnhancedInput label="Test" name="test" />);
-      
+
       expect(screen.getByTestId('custom')).toBeInTheDocument();
-      
+
       // Restore original implementation
       componentMocks.EnhancedInput.mockRestore();
     });
@@ -427,22 +468,22 @@ describe('Setup and Teardown Functions', () => {
 
   it('should validate component mocks after initialization', () => {
     initializeEnhancedFormComponentMocks();
-    
+
     const validation = validateEnhancedFormComponentMocks();
-    
+
     // Log validation details for debugging
     if (!validation.isValid) {
       console.log('Validation errors:', validation.errors);
       console.log('Validation warnings:', validation.warnings);
     }
-    
+
     // For now, just check that there are no critical errors
     expect(validation.errors.length).toBe(0);
   });
 
   it('should handle cleanup without errors', () => {
     initializeEnhancedFormComponentMocks();
-    
+
     expect(() => {
       cleanupEnhancedFormComponentMocks();
     }).not.toThrow();

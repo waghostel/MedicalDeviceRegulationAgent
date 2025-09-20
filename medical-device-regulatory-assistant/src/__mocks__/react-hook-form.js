@@ -61,7 +61,7 @@ const createMockControl = () => ({
 // Mock useForm hook
 const useForm = jest.fn((options = {}) => {
   const control = createMockControl();
-  
+
   return {
     register: jest.fn((name, options) => ({
       name,
@@ -141,30 +141,32 @@ const useFieldArray = jest.fn((props = {}) => ({
 }));
 
 // Mock Controller component
-const Controller = jest.fn(({ render, name, control, defaultValue, ...props }) => {
-  const field = {
-    name,
-    value: defaultValue || '',
-    onChange: jest.fn(),
-    onBlur: jest.fn(),
-    ref: jest.fn(),
-  };
-  
-  const fieldState = {
-    invalid: false,
-    isTouched: false,
-    isDirty: false,
-    error: undefined,
-  };
-  
-  const formState = createMockFormState();
-  
-  if (typeof render === 'function') {
-    return render({ field, fieldState, formState });
+const Controller = jest.fn(
+  ({ render, name, control, defaultValue, ...props }) => {
+    const field = {
+      name,
+      value: defaultValue || '',
+      onChange: jest.fn(),
+      onBlur: jest.fn(),
+      ref: jest.fn(),
+    };
+
+    const fieldState = {
+      invalid: false,
+      isTouched: false,
+      isDirty: false,
+      error: undefined,
+    };
+
+    const formState = createMockFormState();
+
+    if (typeof render === 'function') {
+      return render({ field, fieldState, formState });
+    }
+
+    return React.createElement('div', { 'data-testid': `controller-${name}` });
   }
-  
-  return React.createElement('div', { 'data-testid': `controller-${name}` });
-});
+);
 
 // Mock FormProvider component
 const FormProvider = jest.fn(({ children, ...methods }) => {

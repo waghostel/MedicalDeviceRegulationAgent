@@ -3,7 +3,12 @@
  * Handles API communication with the backend for audit logging and compliance reporting
  */
 
-import { AgentInteraction, AuditLogFilter, ComplianceReport, AuditIntegrityResult } from '@/types/audit';
+import {
+  AgentInteraction,
+  AuditLogFilter,
+  ComplianceReport,
+  AuditIntegrityResult,
+} from '@/types/audit';
 
 export interface AuditTrailResponse {
   interactions: AgentInteraction[];
@@ -45,7 +50,9 @@ class AuditAPI {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || `HTTP ${response.status}: ${response.statusText}`);
+        throw new Error(
+          errorData.message || `HTTP ${response.status}: ${response.statusText}`
+        );
       }
 
       return await response.json();
@@ -93,7 +100,8 @@ class AuditAPI {
               accessed_date: '2024-01-20T10:00:00Z',
             },
           ],
-          reasoning: 'Device classified as Class II based on intended use for cardiac monitoring and comparison with existing product codes.',
+          reasoning:
+            'Device classified as Class II based on intended use for cardiac monitoring and comparison with existing product codes.',
           execution_time_ms: 2500,
           created_at: '2024-01-20T10:00:00Z',
         },
@@ -131,7 +139,8 @@ class AuditAPI {
               accessed_date: '2024-01-20T11:00:00Z',
             },
           ],
-          reasoning: 'Found 5 potential predicates with high similarity in intended use and technological characteristics.',
+          reasoning:
+            'Found 5 potential predicates with high similarity in intended use and technological characteristics.',
           execution_time_ms: 8500,
           created_at: '2024-01-20T11:00:00Z',
         },
@@ -148,44 +157,67 @@ class AuditAPI {
 
       if (filters.confidence_min !== undefined) {
         filteredInteractions = filteredInteractions.filter(
-          (interaction) => (interaction.confidence_score || 0) >= filters.confidence_min!
+          (interaction) =>
+            (interaction.confidence_score || 0) >= filters.confidence_min!
         );
       }
 
       if (filters.date_from) {
         filteredInteractions = filteredInteractions.filter(
-          (interaction) => new Date(interaction.created_at) >= new Date(filters.date_from!)
+          (interaction) =>
+            new Date(interaction.created_at) >= new Date(filters.date_from!)
         );
       }
 
       if (filters.date_to) {
         filteredInteractions = filteredInteractions.filter(
-          (interaction) => new Date(interaction.created_at) <= new Date(filters.date_to!)
+          (interaction) =>
+            new Date(interaction.created_at) <= new Date(filters.date_to!)
         );
       }
 
       // Pagination
       const startIndex = (page - 1) * size;
-      const paginatedInteractions = filteredInteractions.slice(startIndex, startIndex + size);
+      const paginatedInteractions = filteredInteractions.slice(
+        startIndex,
+        startIndex + size
+      );
 
       return {
         interactions: paginatedInteractions,
         summary: {
           total_interactions: filteredInteractions.length,
           confidence_distribution: {
-            'high (>0.8)': filteredInteractions.filter((i) => (i.confidence_score || 0) > 0.8).length,
-            'medium (0.5-0.8)': filteredInteractions.filter(
-              (i) => (i.confidence_score || 0) >= 0.5 && (i.confidence_score || 0) <= 0.8
+            'high (>0.8)': filteredInteractions.filter(
+              (i) => (i.confidence_score || 0) > 0.8
             ).length,
-            'low (<0.5)': filteredInteractions.filter((i) => (i.confidence_score || 0) < 0.5).length,
+            'medium (0.5-0.8)': filteredInteractions.filter(
+              (i) =>
+                (i.confidence_score || 0) >= 0.5 &&
+                (i.confidence_score || 0) <= 0.8
+            ).length,
+            'low (<0.5)': filteredInteractions.filter(
+              (i) => (i.confidence_score || 0) < 0.5
+            ).length,
           },
-          action_types: filteredInteractions.reduce((acc, interaction) => {
-            acc[interaction.agent_action] = (acc[interaction.agent_action] || 0) + 1;
-            return acc;
-          }, {} as Record<string, number>),
+          action_types: filteredInteractions.reduce(
+            (acc, interaction) => {
+              acc[interaction.agent_action] =
+                (acc[interaction.agent_action] || 0) + 1;
+              return acc;
+            },
+            {} as Record<string, number>
+          ),
           date_range: {
-            start: filteredInteractions.length > 0 ? filteredInteractions[filteredInteractions.length - 1].created_at : '',
-            end: filteredInteractions.length > 0 ? filteredInteractions[0].created_at : '',
+            start:
+              filteredInteractions.length > 0
+                ? filteredInteractions[filteredInteractions.length - 1]
+                    .created_at
+                : '',
+            end:
+              filteredInteractions.length > 0
+                ? filteredInteractions[0].created_at
+                : '',
           },
         },
         pagination: {
@@ -231,9 +263,9 @@ class AuditAPI {
           human_approvals: 12,
           pending_approvals: 3,
           confidence_distribution: {
-            'high': 10,
-            'medium': 4,
-            'low': 1,
+            high: 10,
+            medium: 4,
+            low: 1,
           },
         },
         regulatory_readiness: {
@@ -300,7 +332,13 @@ class AuditAPI {
         return new Blob([jsonString], { type: 'application/json' });
       } else if (format === 'csv') {
         // Simple CSV export
-        const headers = ['ID', 'Action', 'Confidence', 'Created At', 'Reasoning'];
+        const headers = [
+          'ID',
+          'Action',
+          'Confidence',
+          'Created At',
+          'Reasoning',
+        ];
         const rows = auditData.interactions.map((interaction) => [
           interaction.id.toString(),
           interaction.agent_action,
@@ -309,7 +347,9 @@ class AuditAPI {
           interaction.reasoning || '',
         ]);
 
-        const csvContent = [headers, ...rows].map((row) => row.join(',')).join('\n');
+        const csvContent = [headers, ...rows]
+          .map((row) => row.join(','))
+          .join('\n');
         return new Blob([csvContent], { type: 'text/csv' });
       } else {
         // For PDF, we'd need a PDF generation library

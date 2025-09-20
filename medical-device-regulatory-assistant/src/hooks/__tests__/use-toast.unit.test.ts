@@ -85,7 +85,7 @@ describe('Enhanced useToast Hook', () => {
       });
 
       // All toasts should be marked as closed
-      result.current.toasts.forEach(t => {
+      result.current.toasts.forEach((t) => {
         expect(t.open).toBe(false);
       });
 
@@ -118,9 +118,15 @@ describe('Enhanced useToast Hook', () => {
       });
 
       expect(result.current.toasts).toHaveLength(3);
-      expect(result.current.toasts.find(t => t.title === 'Success Toast')?.variant).toBe('success');
-      expect(result.current.toasts.find(t => t.title === 'Error Toast')?.variant).toBe('destructive');
-      expect(result.current.toasts.find(t => t.title === 'Warning Toast')?.variant).toBe('warning');
+      expect(
+        result.current.toasts.find((t) => t.title === 'Success Toast')?.variant
+      ).toBe('success');
+      expect(
+        result.current.toasts.find((t) => t.title === 'Error Toast')?.variant
+      ).toBe('destructive');
+      expect(
+        result.current.toasts.find((t) => t.title === 'Warning Toast')?.variant
+      ).toBe('warning');
     });
 
     it('should handle persistent toasts', () => {
@@ -281,7 +287,9 @@ describe('Enhanced useToast Hook', () => {
 
       expect(result.current.toasts).toHaveLength(5); // Should have processed queue
       expect(result.current.queue).toHaveLength(0);
-      expect(result.current.toasts.some(t => t.title === 'Queued Toast')).toBe(true);
+      expect(
+        result.current.toasts.some((t) => t.title === 'Queued Toast')
+      ).toBe(true);
     });
 
     it('should enforce rate limiting', () => {
@@ -351,7 +359,9 @@ describe('Enhanced useToast Hook', () => {
       expect(toast.category).toBe('regulatory');
       expect(toast.priority).toBe('high');
       expect(toast.onRetry).toBe(mockRetry);
-      expect(toast.actionUrl).toBe('https://www.fda.gov/medical-devices/classify-your-medical-device');
+      expect(toast.actionUrl).toBe(
+        'https://www.fda.gov/medical-devices/classify-your-medical-device'
+      );
     });
 
     it('should create project save failed toast', () => {
@@ -376,7 +386,10 @@ describe('Enhanced useToast Hook', () => {
       const { result } = renderHook(() => useToast());
 
       act(() => {
-        contextualToast.progress('Processing Data', 'Please wait while we process your request...');
+        contextualToast.progress(
+          'Processing Data',
+          'Please wait while we process your request...'
+        );
       });
 
       expect(result.current.toasts).toHaveLength(1);
@@ -393,7 +406,10 @@ describe('Enhanced useToast Hook', () => {
       const { result } = renderHook(() => useToast());
 
       act(() => {
-        contextualToast.success('Operation Successful', 'Your request has been completed.');
+        contextualToast.success(
+          'Operation Successful',
+          'Your request has been completed.'
+        );
       });
 
       expect(result.current.toasts).toHaveLength(1);

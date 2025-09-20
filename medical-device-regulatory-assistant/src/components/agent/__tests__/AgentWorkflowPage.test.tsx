@@ -20,7 +20,7 @@ jest.mock('../AgentWorkflowPage', () => ({
         <div>No Project Selected</div>
       )}
     </div>
-  )
+  ),
 }));
 
 import { AgentWorkflowPage } from '../AgentWorkflowPage';
@@ -31,7 +31,7 @@ const mockProject = {
   description: 'A test cardiac monitoring device',
   deviceType: 'Class II Medical Device',
   intendedUse: 'For testing cardiac rhythm monitoring',
-  status: 'in-progress' as const
+  status: 'in-progress' as const,
 };
 
 describe('AgentWorkflowPage', () => {
@@ -41,7 +41,7 @@ describe('AgentWorkflowPage', () => {
         <AgentWorkflowPage />
       </ProjectContextProvider>
     );
-    
+
     expect(screen.getByTestId('agent-workflow-page')).toBeInTheDocument();
     expect(screen.getByText('Regulatory Assistant')).toBeInTheDocument();
   });
@@ -52,13 +52,17 @@ describe('AgentWorkflowPage', () => {
         <AgentWorkflowPage initialProject={mockProject} />
       </ProjectContextProvider>
     );
-    
-    expect(screen.getByText((content, element) => {
-      return element?.textContent === 'Current Project: Test Cardiac Device';
-    })).toBeInTheDocument();
-    expect(screen.getByText((content, element) => {
-      return element?.textContent === 'Device Type: Class II Medical Device';
-    })).toBeInTheDocument();
+
+    expect(
+      screen.getByText((content, element) => {
+        return element?.textContent === 'Current Project: Test Cardiac Device';
+      })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText((content, element) => {
+        return element?.textContent === 'Device Type: Class II Medical Device';
+      })
+    ).toBeInTheDocument();
   });
 
   it('should show "No Project Selected" message when no project is provided', () => {
@@ -67,7 +71,7 @@ describe('AgentWorkflowPage', () => {
         <AgentWorkflowPage />
       </ProjectContextProvider>
     );
-    
+
     expect(screen.getByText('No Project Selected')).toBeInTheDocument();
   });
 
@@ -77,7 +81,7 @@ describe('AgentWorkflowPage', () => {
         <AgentWorkflowPage initialProject={mockProject} />
       </ProjectContextProvider>
     );
-    
+
     expect(screen.getByText('/predicate-search')).toBeInTheDocument();
     expect(screen.getByText('/classify-device')).toBeInTheDocument();
     expect(screen.getByText('/compare-predicate')).toBeInTheDocument();

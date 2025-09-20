@@ -26,7 +26,11 @@ export interface TestErrorReport {
 
 export interface React19ErrorBoundaryProps {
   children: ReactNode;
-  onError?: (error: Error | AggregateError, errorInfo: ErrorInfo, report: TestErrorReport) => void;
+  onError?: (
+    error: Error | AggregateError,
+    errorInfo: ErrorInfo,
+    report: TestErrorReport
+  ) => void;
   fallback?: React.ComponentType<{
     error: Error | AggregateError;
     errorReport: TestErrorReport;
@@ -53,7 +57,7 @@ export interface React19ErrorBoundaryState {
 if (typeof AggregateError === 'undefined') {
   (global as any).AggregateError = class AggregateError extends Error {
     errors: Error[];
-    
+
     constructor(errors: Error[], message?: string) {
       super(message || 'Multiple errors occurred');
       this.name = 'AggregateError';
@@ -115,7 +119,10 @@ const DefaultErrorFallback: React.FC<{
   </div>
 );
 
-export class React19ErrorBoundary extends Component<React19ErrorBoundaryProps, React19ErrorBoundaryState> {
+export class React19ErrorBoundary extends Component<
+  React19ErrorBoundaryProps,
+  React19ErrorBoundaryState
+> {
   constructor(props: React19ErrorBoundaryProps) {
     super(props);
     this.state = {
@@ -125,7 +132,9 @@ export class React19ErrorBoundary extends Component<React19ErrorBoundaryProps, R
     };
   }
 
-  static getDerivedStateFromError(error: Error | AggregateError): Partial<React19ErrorBoundaryState> {
+  static getDerivedStateFromError(
+    error: Error | AggregateError
+  ): Partial<React19ErrorBoundaryState> {
     return { hasError: true, error };
   }
 
@@ -135,9 +144,10 @@ export class React19ErrorBoundary extends Component<React19ErrorBoundaryProps, R
       componentName: this.props.componentName || 'React19ErrorBoundary',
     };
 
-    const errorReport = error instanceof AggregateError
-      ? React19ErrorHandler.handleAggregateError(error, errorInfo, context)
-      : React19ErrorHandler.handleStandardError(error, errorInfo, context);
+    const errorReport =
+      error instanceof AggregateError
+        ? React19ErrorHandler.handleAggregateError(error, errorInfo, context)
+        : React19ErrorHandler.handleStandardError(error, errorInfo, context);
 
     this.setState({
       errorInfo,
@@ -153,9 +163,9 @@ export class React19ErrorBoundary extends Component<React19ErrorBoundaryProps, R
 
   handleRetry = () => {
     const { retryCount, maxRetries } = this.state;
-    
+
     if (retryCount < maxRetries) {
-      this.setState(prevState => ({
+      this.setState((prevState) => ({
         hasError: false,
         error: undefined,
         errorInfo: undefined,

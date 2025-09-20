@@ -1,9 +1,9 @@
 /**
  * Test Failure Analysis Tools
- * 
+ *
  * Provides comprehensive analysis of test failures with detailed reports,
  * error categorization, and actionable debugging suggestions.
- * 
+ *
  * Requirements: 5.4, 6.2
  */
 
@@ -76,16 +76,16 @@ export interface HookExecutionStep {
   timestamp: number;
 }
 
-export type FailureType = 
+export type FailureType =
   | 'RENDER_ERROR'
-  | 'HOOK_ERROR' 
+  | 'HOOK_ERROR'
   | 'MOCK_ERROR'
   | 'ASSERTION_ERROR'
   | 'TIMEOUT_ERROR'
   | 'AGGREGATE_ERROR'
   | 'UNKNOWN_ERROR';
 
-export type FailureCategory = 
+export type FailureCategory =
   | 'REACT_19_COMPATIBILITY'
   | 'HOOK_MOCK_CONFIGURATION'
   | 'COMPONENT_RENDERING'
@@ -137,7 +137,7 @@ export class TestFailureAnalyzer {
       debuggingSteps,
       relatedFiles,
       confidence: this.calculateConfidence(analysis, error),
-      timestamp: Date.now()
+      timestamp: Date.now(),
     };
 
     // Store in history (limit to last 50 failures)
@@ -146,7 +146,9 @@ export class TestFailureAnalyzer {
       this.failureHistory.shift();
     }
 
-    console.log(`Test failure analysis completed in ${performance.now() - startTime}ms`);
+    console.log(
+      `Test failure analysis completed in ${performance.now() - startTime}ms`
+    );
     return report;
   }
 
@@ -173,20 +175,24 @@ ${report.errorMessage}
 **Affected Components**: ${report.analysis.affectedComponents.join(', ')}
 
 ## Debugging Steps
-${report.debuggingSteps.map(step => `
+${report.debuggingSteps
+  .map(
+    (step) => `
 ### Step ${step.step}: ${step.description}
 ${step.command ? `**Command**: \`${step.command}\`` : ''}
 **Expected Result**: ${step.expectedResult}
 
 **Troubleshooting Tips**:
-${step.troubleshootingTips.map(tip => `- ${tip}`).join('\n')}
-`).join('\n')}
+${step.troubleshootingTips.map((tip) => `- ${tip}`).join('\n')}
+`
+  )
+  .join('\n')}
 
 ## Suggested Fixes
-${report.suggestions.map(suggestion => `- ${suggestion}`).join('\n')}
+${report.suggestions.map((suggestion) => `- ${suggestion}`).join('\n')}
 
 ## Related Files to Check
-${report.relatedFiles.map(file => `- ${file}`).join('\n')}
+${report.relatedFiles.map((file) => `- ${file}`).join('\n')}
 
 ${this.generateMockIssuesSection(report.analysis.mockIssues)}
 ${this.generateRenderingIssuesSection(report.analysis.renderingIssues)}
@@ -208,9 +214,10 @@ ${this.generateHookIssuesSection(report.analysis.hookIssues)}
     const typeCount = new Map<FailureType, number>();
     const severityCount = new Map<string, number>();
 
-    this.failureHistory.forEach(failure => {
+    this.failureHistory.forEach((failure) => {
       // Count by category
-      const currentCategoryCount = categoryCount.get(failure.analysis.category) || 0;
+      const currentCategoryCount =
+        categoryCount.get(failure.analysis.category) || 0;
       categoryCount.set(failure.analysis.category, currentCategoryCount + 1);
 
       // Count by type
@@ -218,7 +225,8 @@ ${this.generateHookIssuesSection(report.analysis.hookIssues)}
       typeCount.set(failure.failureType, currentTypeCount + 1);
 
       // Count by severity
-      const currentSeverityCount = severityCount.get(failure.analysis.severity) || 0;
+      const currentSeverityCount =
+        severityCount.get(failure.analysis.severity) || 0;
       severityCount.set(failure.analysis.severity, currentSeverityCount + 1);
     });
 
@@ -227,10 +235,12 @@ ${this.generateHookIssuesSection(report.analysis.hookIssues)}
       categoryBreakdown: Object.fromEntries(categoryCount),
       typeBreakdown: Object.fromEntries(typeCount),
       severityBreakdown: Object.fromEntries(severityCount),
-      averageConfidence: this.failureHistory.reduce((sum, f) => sum + f.confidence, 0) / totalFailures,
+      averageConfidence:
+        this.failureHistory.reduce((sum, f) => sum + f.confidence, 0) /
+        totalFailures,
       mostCommonCategory: this.getMostCommon(categoryCount),
       mostCommonType: this.getMostCommon(typeCount),
-      recentFailures: this.failureHistory.slice(-10)
+      recentFailures: this.failureHistory.slice(-10),
     };
   }
 
@@ -246,26 +256,45 @@ ${this.generateHookIssuesSection(report.analysis.hookIssues)}
       return 'TIMEOUT_ERROR';
     }
 
-    if (message.includes('hook') || stack.includes('usehook') || stack.includes('useeffect')) {
+    if (
+      message.includes('hook') ||
+      stack.includes('usehook') ||
+      stack.includes('useeffect')
+    ) {
       return 'HOOK_ERROR';
     }
 
-    if (message.includes('render') || message.includes('component') || stack.includes('render')) {
+    if (
+      message.includes('render') ||
+      message.includes('component') ||
+      stack.includes('render')
+    ) {
       return 'RENDER_ERROR';
     }
 
-    if (message.includes('mock') || message.includes('jest.fn') || message.includes('not a function')) {
+    if (
+      message.includes('mock') ||
+      message.includes('jest.fn') ||
+      message.includes('not a function')
+    ) {
       return 'MOCK_ERROR';
     }
 
-    if (message.includes('expect') || message.includes('assertion') || message.includes('received')) {
+    if (
+      message.includes('expect') ||
+      message.includes('assertion') ||
+      message.includes('received')
+    ) {
       return 'ASSERTION_ERROR';
     }
 
     return 'UNKNOWN_ERROR';
   }
 
-  private performFailureAnalysis(error: Error | AggregateError, context?: TestFailureContext): FailureAnalysis {
+  private performFailureAnalysis(
+    error: Error | AggregateError,
+    context?: TestFailureContext
+  ): FailureAnalysis {
     const category = this.determineFailureCategory(error, context);
     const rootCause = this.identifyRootCause(error, category);
     const affectedComponents = this.extractAffectedComponents(error, context);
@@ -283,11 +312,14 @@ ${this.generateHookIssuesSection(report.analysis.hookIssues)}
       renderingIssues,
       hookIssues,
       severity,
-      isRecoverable
+      isRecoverable,
     };
   }
 
-  private determineFailureCategory(error: Error | AggregateError, context?: TestFailureContext): FailureCategory {
+  private determineFailureCategory(
+    error: Error | AggregateError,
+    context?: TestFailureContext
+  ): FailureCategory {
     const message = error.message.toLowerCase();
     const stack = error.stack?.toLowerCase() || '';
 
@@ -295,11 +327,19 @@ ${this.generateHookIssuesSection(report.analysis.hookIssues)}
       return 'REACT_19_COMPATIBILITY';
     }
 
-    if (message.includes('usetoast') || message.includes('useenhancedform') || message.includes('not a function')) {
+    if (
+      message.includes('usetoast') ||
+      message.includes('useenhancedform') ||
+      message.includes('not a function')
+    ) {
       return 'HOOK_MOCK_CONFIGURATION';
     }
 
-    if (message.includes('render') || message.includes('component') || stack.includes('render')) {
+    if (
+      message.includes('render') ||
+      message.includes('component') ||
+      stack.includes('render')
+    ) {
       return 'COMPONENT_RENDERING';
     }
 
@@ -318,7 +358,10 @@ ${this.generateHookIssuesSection(report.analysis.hookIssues)}
     return 'TEST_ENVIRONMENT';
   }
 
-  private identifyRootCause(error: Error | AggregateError, category: FailureCategory): string {
+  private identifyRootCause(
+    error: Error | AggregateError,
+    category: FailureCategory
+  ): string {
     const message = error.message;
 
     switch (category) {
@@ -339,14 +382,17 @@ ${this.generateHookIssuesSection(report.analysis.hookIssues)}
     }
   }
 
-  private extractAffectedComponents(error: Error | AggregateError, context?: TestFailureContext): string[] {
+  private extractAffectedComponents(
+    error: Error | AggregateError,
+    context?: TestFailureContext
+  ): string[] {
     const components: string[] = [];
     const stack = error.stack || '';
     const componentStack = context?.componentStack || '';
 
     // Extract component names from stack traces
     const componentMatches = stack.match(/at\s+(\w+)\s+/g) || [];
-    componentMatches.forEach(match => {
+    componentMatches.forEach((match) => {
       const componentName = match.replace(/at\s+/, '').trim();
       if (componentName && !components.includes(componentName)) {
         components.push(componentName);
@@ -356,7 +402,7 @@ ${this.generateHookIssuesSection(report.analysis.hookIssues)}
     // Extract from component stack if available
     if (componentStack) {
       const componentStackMatches = componentStack.match(/\w+/g) || [];
-      componentStackMatches.forEach(component => {
+      componentStackMatches.forEach((component) => {
         if (!components.includes(component)) {
           components.push(component);
         }
@@ -366,7 +412,10 @@ ${this.generateHookIssuesSection(report.analysis.hookIssues)}
     return components.slice(0, 5); // Limit to top 5 components
   }
 
-  private analyzeMockIssues(error: Error | AggregateError, context?: TestFailureContext): MockIssue[] {
+  private analyzeMockIssues(
+    error: Error | AggregateError,
+    context?: TestFailureContext
+  ): MockIssue[] {
     const issues: MockIssue[] = [];
     const message = error.message.toLowerCase();
 
@@ -376,7 +425,8 @@ ${this.generateHookIssuesSection(report.analysis.hookIssues)}
         issue: 'Hook mock not properly exported as function',
         expectedStructure: { useToast: 'function' },
         actualStructure: { useToast: 'undefined or not function' },
-        fixSuggestion: 'Ensure useToast is exported as jest.fn(() => ({ toast: jest.fn(), ... }))'
+        fixSuggestion:
+          'Ensure useToast is exported as jest.fn(() => ({ toast: jest.fn(), ... }))',
       });
     }
 
@@ -384,16 +434,24 @@ ${this.generateHookIssuesSection(report.analysis.hookIssues)}
       issues.push({
         mockName: 'useEnhancedForm',
         issue: 'Enhanced form hook mock missing required methods',
-        expectedStructure: { register: 'function', handleSubmit: 'function', formState: 'object' },
+        expectedStructure: {
+          register: 'function',
+          handleSubmit: 'function',
+          formState: 'object',
+        },
         actualStructure: { incomplete: 'mock structure' },
-        fixSuggestion: 'Include all react-hook-form methods plus enhanced form methods'
+        fixSuggestion:
+          'Include all react-hook-form methods plus enhanced form methods',
       });
     }
 
     return issues;
   }
 
-  private analyzeRenderingIssues(error: Error | AggregateError, context?: TestFailureContext): RenderingIssue[] {
+  private analyzeRenderingIssues(
+    error: Error | AggregateError,
+    context?: TestFailureContext
+  ): RenderingIssue[] {
     const issues: RenderingIssue[] = [];
     const message = error.message.toLowerCase();
 
@@ -401,7 +459,8 @@ ${this.generateHookIssuesSection(report.analysis.hookIssues)}
       issues.push({
         component: 'Provider wrapper',
         issue: 'Missing required providers in test setup',
-        fixSuggestion: 'Add all required providers to renderWithProviders wrapper'
+        fixSuggestion:
+          'Add all required providers to renderWithProviders wrapper',
       });
     }
 
@@ -410,14 +469,18 @@ ${this.generateHookIssuesSection(report.analysis.hookIssues)}
         component: 'Component under test',
         issue: 'Missing required props for component rendering',
         props: context?.props,
-        fixSuggestion: 'Provide all required props or use default props in test'
+        fixSuggestion:
+          'Provide all required props or use default props in test',
       });
     }
 
     return issues;
   }
 
-  private analyzeHookIssues(error: Error | AggregateError, context?: TestFailureContext): HookIssue[] {
+  private analyzeHookIssues(
+    error: Error | AggregateError,
+    context?: TestFailureContext
+  ): HookIssue[] {
     const issues: HookIssue[] = [];
     const message = error.message.toLowerCase();
 
@@ -426,14 +489,18 @@ ${this.generateHookIssuesSection(report.analysis.hookIssues)}
         hookName: 'Unknown hook',
         issue: 'Hook called outside of component render',
         executionTrace: [],
-        fixSuggestion: 'Ensure hooks are only called within React components or custom hooks'
+        fixSuggestion:
+          'Ensure hooks are only called within React components or custom hooks',
       });
     }
 
     return issues;
   }
 
-  private determineSeverity(error: Error | AggregateError, category: FailureCategory): 'low' | 'medium' | 'high' | 'critical' {
+  private determineSeverity(
+    error: Error | AggregateError,
+    category: FailureCategory
+  ): 'low' | 'medium' | 'high' | 'critical' {
     if (error instanceof AggregateError) {
       return 'critical';
     }
@@ -454,7 +521,10 @@ ${this.generateHookIssuesSection(report.analysis.hookIssues)}
     }
   }
 
-  private isRecoverable(error: Error | AggregateError, category: FailureCategory): boolean {
+  private isRecoverable(
+    error: Error | AggregateError,
+    category: FailureCategory
+  ): boolean {
     if (error instanceof AggregateError) {
       return true; // Can be fixed with proper error boundary
     }
@@ -477,17 +547,24 @@ ${this.generateHookIssuesSection(report.analysis.hookIssues)}
     }
   }
 
-  private generateSuggestions(analysis: FailureAnalysis, error: Error | AggregateError): string[] {
+  private generateSuggestions(
+    analysis: FailureAnalysis,
+    error: Error | AggregateError
+  ): string[] {
     const suggestions: string[] = [];
 
     switch (analysis.category) {
       case 'REACT_19_COMPATIBILITY':
         suggestions.push('Wrap component in React19ErrorBoundary');
-        suggestions.push('Update @testing-library/react to React 19 compatible version');
+        suggestions.push(
+          'Update @testing-library/react to React 19 compatible version'
+        );
         suggestions.push('Check renderWithProviders configuration');
         break;
       case 'HOOK_MOCK_CONFIGURATION':
-        suggestions.push('Verify hook mock structure matches actual implementation');
+        suggestions.push(
+          'Verify hook mock structure matches actual implementation'
+        );
         suggestions.push('Check mock export format (should be jest.fn())');
         suggestions.push('Ensure all hook dependencies are properly mocked');
         break;
@@ -506,18 +583,22 @@ ${this.generateHookIssuesSection(report.analysis.hookIssues)}
     return suggestions;
   }
 
-  private generateDebuggingSteps(analysis: FailureAnalysis, failureType: FailureType): DebuggingStep[] {
+  private generateDebuggingSteps(
+    analysis: FailureAnalysis,
+    failureType: FailureType
+  ): DebuggingStep[] {
     const steps: DebuggingStep[] = [];
 
     steps.push({
       step: 1,
       description: 'Examine the error message and stack trace',
-      expectedResult: 'Identify the specific line and component causing the failure',
+      expectedResult:
+        'Identify the specific line and component causing the failure',
       troubleshootingTips: [
         'Look for the first occurrence in your code (not node_modules)',
         'Check if error mentions specific hooks or components',
-        'Note any React error boundaries in the stack'
-      ]
+        'Note any React error boundaries in the stack',
+      ],
     });
 
     if (analysis.category === 'HOOK_MOCK_CONFIGURATION') {
@@ -529,8 +610,8 @@ ${this.generateHookIssuesSection(report.analysis.hookIssues)}
         troubleshootingTips: [
           'Compare mock methods with actual hook methods',
           'Ensure all required properties are present',
-          'Check that functions are properly mocked with jest.fn()'
-        ]
+          'Check that functions are properly mocked with jest.fn()',
+        ],
       });
     }
 
@@ -543,8 +624,8 @@ ${this.generateHookIssuesSection(report.analysis.hookIssues)}
         troubleshootingTips: [
           'Verify required props are not undefined',
           'Check if component expects specific context providers',
-          'Ensure prop types match expected types'
-        ]
+          'Ensure prop types match expected types',
+        ],
       });
     }
 
@@ -556,14 +637,17 @@ ${this.generateHookIssuesSection(report.analysis.hookIssues)}
       troubleshootingTips: [
         'Check if failure is consistent in isolation',
         'Look for test setup/teardown issues',
-        'Verify mock cleanup between tests'
-      ]
+        'Verify mock cleanup between tests',
+      ],
     });
 
     return steps;
   }
 
-  private identifyRelatedFiles(analysis: FailureAnalysis, context?: TestFailureContext): string[] {
+  private identifyRelatedFiles(
+    analysis: FailureAnalysis,
+    context?: TestFailureContext
+  ): string[] {
     const files: string[] = [];
 
     // Always include test setup files
@@ -594,7 +678,10 @@ ${this.generateHookIssuesSection(report.analysis.hookIssues)}
     return files;
   }
 
-  private calculateConfidence(analysis: FailureAnalysis, error: Error | AggregateError): number {
+  private calculateConfidence(
+    analysis: FailureAnalysis,
+    error: Error | AggregateError
+  ): number {
     let confidence = 0.5; // Base confidence
 
     // Increase confidence based on error pattern recognition
@@ -621,19 +708,19 @@ ${this.generateHookIssuesSection(report.analysis.hookIssues)}
     this.errorPatterns.set('useToast is not a function', {
       category: 'HOOK_MOCK_CONFIGURATION',
       solution: 'Export useToast as jest.fn(() => ({ toast: jest.fn(), ... }))',
-      confidence: 0.9
+      confidence: 0.9,
     });
 
     this.errorPatterns.set('Cannot read property of undefined', {
       category: 'COMPONENT_RENDERING',
       solution: 'Check if required props or context values are provided',
-      confidence: 0.8
+      confidence: 0.8,
     });
 
     this.errorPatterns.set('AggregateError', {
       category: 'REACT_19_COMPATIBILITY',
       solution: 'Wrap component in React19ErrorBoundary',
-      confidence: 0.95
+      confidence: 0.95,
     });
   }
 
@@ -642,7 +729,9 @@ ${this.generateHookIssuesSection(report.analysis.hookIssues)}
 
     return `
 ## Mock Issues Detected
-${mockIssues.map(issue => `
+${mockIssues
+  .map(
+    (issue) => `
 ### ${issue.mockName}
 **Issue**: ${issue.issue}
 **Fix**: ${issue.fixSuggestion}
@@ -656,20 +745,28 @@ ${JSON.stringify(issue.expectedStructure, null, 2)}
 \`\`\`json
 ${JSON.stringify(issue.actualStructure, null, 2)}
 \`\`\`
-`).join('\n')}`;
+`
+  )
+  .join('\n')}`;
   }
 
-  private generateRenderingIssuesSection(renderingIssues: RenderingIssue[]): string {
+  private generateRenderingIssuesSection(
+    renderingIssues: RenderingIssue[]
+  ): string {
     if (renderingIssues.length === 0) return '';
 
     return `
 ## Rendering Issues Detected
-${renderingIssues.map(issue => `
+${renderingIssues
+  .map(
+    (issue) => `
 ### ${issue.component}
 **Issue**: ${issue.issue}
 **Fix**: ${issue.fixSuggestion}
 ${issue.props ? `**Props**: ${JSON.stringify(issue.props, null, 2)}` : ''}
-`).join('\n')}`;
+`
+  )
+  .join('\n')}`;
   }
 
   private generateHookIssuesSection(hookIssues: HookIssue[]): string {
@@ -677,11 +774,15 @@ ${issue.props ? `**Props**: ${JSON.stringify(issue.props, null, 2)}` : ''}
 
     return `
 ## Hook Issues Detected
-${hookIssues.map(issue => `
+${hookIssues
+  .map(
+    (issue) => `
 ### ${issue.hookName}
 **Issue**: ${issue.issue}
 **Fix**: ${issue.fixSuggestion}
-`).join('\n')}`;
+`
+  )
+  .join('\n')}`;
   }
 
   private getMostCommon<T>(map: Map<T, number>): T | undefined {

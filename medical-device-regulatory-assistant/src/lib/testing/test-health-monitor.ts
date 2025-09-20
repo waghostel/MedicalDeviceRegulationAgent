@@ -114,9 +114,9 @@ export class TestHealthMonitor {
   startMonitoring(): void {
     this.startTime = performance.now();
     this.memoryBaseline = process.memoryUsage().heapUsed;
-    
-    if (global.__REACT_19_ERROR_TRACKER) {
-      global.__REACT_19_ERROR_TRACKER.clear();
+
+    if ((global as any).__REACT_19_ERROR_TRACKER) {
+      (global as any).__REACT_19_ERROR_TRACKER.clear();
     }
   }
 
@@ -126,12 +126,12 @@ export class TestHealthMonitor {
   async collectMetrics(): Promise<TestHealthMetrics> {
     const currentTime = performance.now();
     const memoryUsage = process.memoryUsage();
-    
+
     // Get React 19 error tracking data
-    const react19Errors = global.__REACT_19_ERROR_TRACKER || {
+    const react19Errors = (global as any).__REACT_19_ERROR_TRACKER || {
       aggregateErrors: [],
       hookErrors: [],
-      renderErrors: []
+      renderErrors: [],
     };
 
     const metrics: TestHealthMetrics = {
@@ -150,7 +150,8 @@ export class TestHealthMonitor {
         aggregateErrors: react19Errors.aggregateErrors.length,
         renderErrors: react19Errors.renderErrors.length,
         hookErrors: react19Errors.hookErrors.length,
-        compatibilityScore: this.calculateReact19CompatibilityScore(react19Errors),
+        compatibilityScore:
+          this.calculateReact19CompatibilityScore(react19Errors),
       },
     };
 
@@ -183,7 +184,10 @@ export class TestHealthMonitor {
     if (metrics.executionTime > this.thresholds.executionTime) {
       issues.push({
         type: 'performance',
-        severity: metrics.executionTime > this.thresholds.executionTime * 2 ? 'critical' : 'high',
+        severity:
+          metrics.executionTime > this.thresholds.executionTime * 2
+            ? 'critical'
+            : 'high',
         message: `Test execution time (${(metrics.executionTime / 1000).toFixed(1)}s) exceeds threshold (${(this.thresholds.executionTime / 1000).toFixed(1)}s)`,
         metric: 'executionTime',
         actual: metrics.executionTime,
@@ -209,12 +213,16 @@ export class TestHealthMonitor {
     if (metrics.react19Compatibility.compatibilityScore < 90) {
       issues.push({
         type: 'react19',
-        severity: metrics.react19Compatibility.compatibilityScore < 70 ? 'critical' : 'high',
+        severity:
+          metrics.react19Compatibility.compatibilityScore < 70
+            ? 'critical'
+            : 'high',
         message: `React 19 compatibility score (${metrics.react19Compatibility.compatibilityScore}%) is low`,
         metric: 'react19CompatibilityScore',
         actual: metrics.react19Compatibility.compatibilityScore,
         expected: 90,
-        suggestion: 'Review React 19 error handling and update test infrastructure',
+        suggestion:
+          'Review React 19 error handling and update test infrastructure',
       });
     }
 
@@ -238,13 +246,17 @@ export class TestHealthMonitor {
 
     // Generate recommendations
     if (issues.length === 0 && warnings.length === 0) {
-      recommendations.push('Test health is excellent! Continue current practices.');
+      recommendations.push(
+        'Test health is excellent! Continue current practices.'
+      );
     } else {
       recommendations.push(...this.generateRecommendations(issues, warnings));
     }
 
     return {
-      isHealthy: issues.filter(i => i.severity === 'critical' || i.severity === 'high').length === 0,
+      isHealthy:
+        issues.filter((i) => i.severity === 'critical' || i.severity === 'high')
+          .length === 0,
       issues,
       warnings,
       recommendations,
@@ -257,7 +269,7 @@ export class TestHealthMonitor {
   async createHealthReport(): Promise<HealthReport> {
     const metrics = await this.collectMetrics();
     const validation = this.validateThresholds(metrics);
-    
+
     const overallScore = this.calculateOverallHealthScore(metrics, validation);
     const overallHealth = this.determineOverallHealth(validation, overallScore);
 
@@ -278,20 +290,23 @@ export class TestHealthMonitor {
   /**
    * Save health report to file
    */
-  async saveHealthReport(report: HealthReport, outputDir: string = 'test-reports'): Promise<string> {
+  async saveHealthReport(
+    report: HealthReport,
+    outputDir: string = 'test-reports'
+  ): Promise<string> {
     try {
       await fs.mkdir(outputDir, { recursive: true });
-      
+
       const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
       const filename = `test-health-report-${timestamp}.json`;
       const filepath = path.join(outputDir, filename);
-      
+
       await fs.writeFile(filepath, JSON.stringify(report, null, 2));
-      
+
       // Also save as latest report
       const latestPath = path.join(outputDir, 'test-health-report.json');
       await fs.writeFile(latestPath, JSON.stringify(report, null, 2));
-      
+
       return filepath;
     } catch (error) {
       console.error('Failed to save health report:', error);
@@ -302,9 +317,11 @@ export class TestHealthMonitor {
   /**
    * Generate alerts for critical issues
    */
-  generateAlerts(validation: ValidationResult): Array<{ level: string; message: string; action: string }> {
+  generateAlerts(
+    validation: ValidationResult
+  ): Array<{ level: string; message: string; action: string }> {
     const alerts = [];
-    
+
     for (const issue of validation.issues) {
       if (issue.severity === 'critical') {
         alerts.push({
@@ -320,7 +337,7 @@ export class TestHealthMonitor {
         });
       }
     }
-    
+
     return alerts;
   }
 
@@ -340,7 +357,11 @@ export class TestHealthMonitor {
   private async getCoverageMetrics(): Promise<number> {
     try {
       // Try to read coverage summary
-      const coveragePath = path.join(process.cwd(), 'coverage', 'coverage-summary.json');
+      const coveragePath = path.join(
+        process.cwd(),
+        'coverage',
+        'coverage-summary.json'
+      );
       const coverageData = await fs.readFile(coveragePath, 'utf-8');
       const coverage = JSON.parse(coverageData);
       return coverage.total?.lines?.pct || 0;
@@ -359,29 +380,36 @@ export class TestHealthMonitor {
     };
   }
 
-  private async identifySlowTests(): Promise<Array<{ name: string; duration: number; threshold: number }>> {
+  private async identifySlowTests(): Promise<
+    Array<{ name: string; duration: number; threshold: number }>
+  > {
     // This would be implemented to identify slow tests from test results
     return [];
   }
 
-  private detectMemoryLeaks(memoryUsage: NodeJS.MemoryUsage): Array<{ test: string; memoryDelta: number }> {
+  private detectMemoryLeaks(
+    memoryUsage: NodeJS.MemoryUsage
+  ): Array<{ test: string; memoryDelta: number }> {
     const memoryDelta = memoryUsage.heapUsed - this.memoryBaseline;
-    
+
     if (memoryDelta > this.thresholds.memoryLeakThreshold) {
-      return [{
-        test: 'overall',
-        memoryDelta,
-      }];
+      return [
+        {
+          test: 'overall',
+          memoryDelta,
+        },
+      ];
     }
-    
+
     return [];
   }
 
   private calculateReact19CompatibilityScore(errorTracker: any): number {
-    const totalErrors = errorTracker.aggregateErrors.length + 
-                       errorTracker.renderErrors.length + 
-                       errorTracker.hookErrors.length;
-    
+    const totalErrors =
+      errorTracker.aggregateErrors.length +
+      errorTracker.renderErrors.length +
+      errorTracker.hookErrors.length;
+
     if (totalErrors === 0) return 100;
     if (totalErrors <= 5) return 90;
     if (totalErrors <= 10) return 75;
@@ -389,30 +417,42 @@ export class TestHealthMonitor {
     return 25;
   }
 
-  private generateRecommendations(issues: ValidationIssue[], warnings: ValidationWarning[]): string[] {
+  private generateRecommendations(
+    issues: ValidationIssue[],
+    warnings: ValidationWarning[]
+  ): string[] {
     const recommendations = [];
-    
-    const criticalIssues = issues.filter(i => i.severity === 'critical');
-    const highIssues = issues.filter(i => i.severity === 'high');
-    
+
+    const criticalIssues = issues.filter((i) => i.severity === 'critical');
+    const highIssues = issues.filter((i) => i.severity === 'high');
+
     if (criticalIssues.length > 0) {
-      recommendations.push('🚨 Address critical issues immediately before deployment');
+      recommendations.push(
+        '🚨 Address critical issues immediately before deployment'
+      );
     }
-    
+
     if (highIssues.length > 0) {
-      recommendations.push('⚠️ High priority issues should be resolved in next sprint');
+      recommendations.push(
+        '⚠️ High priority issues should be resolved in next sprint'
+      );
     }
-    
+
     if (warnings.length > 0) {
-      recommendations.push('💡 Consider addressing warnings to improve test quality');
+      recommendations.push(
+        '💡 Consider addressing warnings to improve test quality'
+      );
     }
-    
+
     return recommendations;
   }
 
-  private calculateOverallHealthScore(metrics: TestHealthMetrics, validation: ValidationResult): number {
+  private calculateOverallHealthScore(
+    metrics: TestHealthMetrics,
+    validation: ValidationResult
+  ): number {
     let score = 100;
-    
+
     for (const issue of validation.issues) {
       switch (issue.severity) {
         case 'critical':
@@ -429,27 +469,34 @@ export class TestHealthMonitor {
           break;
       }
     }
-    
+
     for (const warning of validation.warnings) {
       score -= 2;
     }
-    
+
     return Math.max(0, score);
   }
 
-  private determineOverallHealth(validation: ValidationResult, score: number): 'healthy' | 'warning' | 'critical' {
+  private determineOverallHealth(
+    validation: ValidationResult,
+    score: number
+  ): 'healthy' | 'warning' | 'critical' {
     if (!validation.isHealthy || score < 50) return 'critical';
     if (validation.warnings.length > 0 || score < 80) return 'warning';
     return 'healthy';
   }
 
-  private calculateTrends(): { passRateTrend: number[]; performanceTrend: number[]; coverageTrend: number[] } {
+  private calculateTrends(): {
+    passRateTrend: number[];
+    performanceTrend: number[];
+    coverageTrend: number[];
+  } {
     const recentMetrics = this.metricsHistory.slice(-10);
-    
+
     return {
-      passRateTrend: recentMetrics.map(m => m.passRate),
-      performanceTrend: recentMetrics.map(m => m.executionTime),
-      coverageTrend: recentMetrics.map(m => m.coverage),
+      passRateTrend: recentMetrics.map((m) => m.passRate),
+      performanceTrend: recentMetrics.map((m) => m.executionTime),
+      coverageTrend: recentMetrics.map((m) => m.coverage),
     };
   }
 }

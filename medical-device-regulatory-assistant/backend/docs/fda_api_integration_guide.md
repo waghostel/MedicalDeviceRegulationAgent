@@ -117,6 +117,7 @@ results = await service.search_predicates(
 ```
 
 **Search Parameters:**
+
 - `search_terms`: List of keywords for device name and intended use
 - `product_code`: FDA product code filter (e.g., "DXX", "MKJ")
 - `device_class`: Device class filter ("I", "II", "III")
@@ -227,6 +228,7 @@ service = OpenFDAService(
 ### Cache Key Strategy
 
 Cache keys are generated using MD5 hashes of:
+
 - API endpoint
 - Query parameters (sorted for consistency)
 - Request method
@@ -276,14 +278,14 @@ except FDAAPIError as e:
 
 ### HTTP Status Code Handling
 
-| Status Code | Error Type | Description | Action |
-|-------------|------------|-------------|---------|
-| 200 | Success | Request successful | Return data |
-| 401 | Authentication | Invalid API key | Check FDA_API_KEY |
-| 403 | Forbidden | API key expired/invalid | Renew API key |
-| 404 | Not Found | No data found | Return empty results |
-| 429 | Rate Limited | Too many requests | Automatic retry with backoff |
-| 500+ | Server Error | FDA server issues | Retry with exponential backoff |
+| Status Code | Error Type     | Description             | Action                         |
+| ----------- | -------------- | ----------------------- | ------------------------------ |
+| 200         | Success        | Request successful      | Return data                    |
+| 401         | Authentication | Invalid API key         | Check FDA_API_KEY              |
+| 403         | Forbidden      | API key expired/invalid | Renew API key                  |
+| 404         | Not Found      | No data found           | Return empty results           |
+| 429         | Rate Limited   | Too many requests       | Automatic retry with backoff   |
+| 500+        | Server Error   | FDA server issues       | Retry with exponential backoff |
 
 ### Retry Strategy
 
@@ -296,6 +298,7 @@ service = OpenFDAService(
 ```
 
 **Retry Logic:**
+
 1. **Network Errors**: Exponential backoff (2^attempt seconds)
 2. **Rate Limits**: Respect `Retry-After` header
 3. **Server Errors**: Exponential backoff up to max_retries
@@ -360,7 +363,7 @@ async def process_k_numbers(k_numbers: List[str]):
     for k_number in k_numbers:
         task = service.get_device_details(k_number)
         tasks.append(task)
-    
+
     # Process in parallel (respecting rate limits)
     results = await asyncio.gather(*tasks, return_exceptions=True)
     return results
@@ -482,7 +485,7 @@ except FDAAPIError as e:
 # Singleton pattern for service instance
 class FDAServiceManager:
     _instance = None
-    
+
     @classmethod
     async def get_instance(cls):
         if cls._instance is None:

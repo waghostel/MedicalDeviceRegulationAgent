@@ -3,7 +3,11 @@
  * Validates mock validation system functionality
  */
 
-import { MockValidator, ValidationResult, ValidationError } from '../MockValidator';
+import {
+  MockValidator,
+  ValidationResult,
+  ValidationError,
+} from '../MockValidator';
 import { jest } from '@jest/globals';
 
 describe('MockValidator', () => {
@@ -51,10 +55,12 @@ describe('MockValidator', () => {
 
       expect(result.isValid).toBe(false);
       expect(result.errors.length).toBeGreaterThan(0);
-      
-      const missingMethods = result.errors.filter(e => e.type === 'MISSING_METHOD');
+
+      const missingMethods = result.errors.filter(
+        (e) => e.type === 'MISSING_METHOD'
+      );
       expect(missingMethods.length).toBeGreaterThan(0);
-      expect(missingMethods.some(e => e.path.includes('dismiss'))).toBe(true);
+      expect(missingMethods.some((e) => e.path.includes('dismiss'))).toBe(true);
     });
 
     it('should detect type mismatches in hook mock', () => {
@@ -72,7 +78,9 @@ describe('MockValidator', () => {
       const result = validator.validateHookMock('useToast', wrongTypeMock);
 
       expect(result.isValid).toBe(false);
-      const typeMismatches = result.errors.filter(e => e.type === 'TYPE_MISMATCH');
+      const typeMismatches = result.errors.filter(
+        (e) => e.type === 'TYPE_MISMATCH'
+      );
       expect(typeMismatches.length).toBeGreaterThan(0);
     });
 
@@ -84,7 +92,7 @@ describe('MockValidator', () => {
       const result = validator.validateHookMock('useToast', nonFunctionMock);
 
       expect(result.isValid).toBe(false);
-      expect(result.errors.some(e => e.type === 'TYPE_MISMATCH')).toBe(true);
+      expect(result.errors.some((e) => e.type === 'TYPE_MISMATCH')).toBe(true);
     });
 
     it('should handle unknown hook gracefully', () => {
@@ -93,7 +101,9 @@ describe('MockValidator', () => {
       const result = validator.validateHookMock('unknownHook', unknownMock);
 
       expect(result.isValid).toBe(false);
-      expect(result.errors.some(e => e.type === 'STRUCTURE_MISMATCH')).toBe(true);
+      expect(result.errors.some((e) => e.type === 'STRUCTURE_MISMATCH')).toBe(
+        true
+      );
     });
 
     it('should validate useEnhancedForm mock correctly', () => {
@@ -109,7 +119,7 @@ describe('MockValidator', () => {
         reset: jest.fn(),
         control: {},
         formState: {},
-        
+
         // Enhanced methods
         validateField: jest.fn(),
         getFieldValidation: jest.fn(),
@@ -121,7 +131,10 @@ describe('MockValidator', () => {
         announceFormState: jest.fn(),
       }));
 
-      const result = validator.validateHookMock('useEnhancedForm', mockUseEnhancedForm);
+      const result = validator.validateHookMock(
+        'useEnhancedForm',
+        mockUseEnhancedForm
+      );
 
       expect(result.isValid).toBe(true);
       expect(result.score).toBeGreaterThan(70);
@@ -138,7 +151,10 @@ describe('MockValidator', () => {
         },
       }));
 
-      const result = validator.validateComponentMock('EnhancedInput', mockEnhancedInput);
+      const result = validator.validateComponentMock(
+        'EnhancedInput',
+        mockEnhancedInput
+      );
 
       expect(result.isValid).toBe(true);
       expect(result.errors).toHaveLength(0);
@@ -149,10 +165,13 @@ describe('MockValidator', () => {
         type: 'div',
       };
 
-      const result = validator.validateComponentMock('EnhancedInput', nonFunctionMock);
+      const result = validator.validateComponentMock(
+        'EnhancedInput',
+        nonFunctionMock
+      );
 
       expect(result.isValid).toBe(false);
-      expect(result.errors.some(e => e.type === 'TYPE_MISMATCH')).toBe(true);
+      expect(result.errors.some((e) => e.type === 'TYPE_MISMATCH')).toBe(true);
     });
 
     it('should warn about missing test ID', () => {
@@ -161,11 +180,16 @@ describe('MockValidator', () => {
         props: props,
       }));
 
-      const result = validator.validateComponentMock('EnhancedInput', mockWithoutTestId);
+      const result = validator.validateComponentMock(
+        'EnhancedInput',
+        mockWithoutTestId
+      );
 
       // Should still be valid but have warnings
       expect(result.warnings.length).toBeGreaterThan(0);
-      expect(result.warnings.some(w => w.message.includes('data-testid'))).toBe(true);
+      expect(
+        result.warnings.some((w) => w.message.includes('data-testid'))
+      ).toBe(true);
     });
 
     it('should handle component that throws error', () => {
@@ -173,10 +197,15 @@ describe('MockValidator', () => {
         throw new Error('Mock component error');
       });
 
-      const result = validator.validateComponentMock('EnhancedInput', throwingMock);
+      const result = validator.validateComponentMock(
+        'EnhancedInput',
+        throwingMock
+      );
 
       expect(result.isValid).toBe(false);
-      expect(result.errors.some(e => e.type === 'MOCK_FUNCTION_MISSING')).toBe(true);
+      expect(
+        result.errors.some((e) => e.type === 'MOCK_FUNCTION_MISSING')
+      ).toBe(true);
     });
 
     it('should validate AutoSaveIndicator mock', () => {
@@ -185,11 +214,16 @@ describe('MockValidator', () => {
         props: {
           'data-testid': 'auto-save-indicator',
           'data-saving': props.isSaving,
-          children: props.isSaving ? 'Saving...' : `Last saved: ${props.lastSaved}`,
+          children: props.isSaving
+            ? 'Saving...'
+            : `Last saved: ${props.lastSaved}`,
         },
       }));
 
-      const result = validator.validateComponentMock('AutoSaveIndicator', mockAutoSaveIndicator);
+      const result = validator.validateComponentMock(
+        'AutoSaveIndicator',
+        mockAutoSaveIndicator
+      );
 
       expect(result.isValid).toBe(true);
     });
@@ -198,17 +232,25 @@ describe('MockValidator', () => {
   describe('generateMockReport', () => {
     it('should generate comprehensive report for registered mocks', () => {
       // Register some test mocks
-      validator.registerMock('hook', 'useToast', jest.fn(() => ({
-        toast: jest.fn(),
-        dismiss: jest.fn(),
-        toasts: [],
-        queue: [],
-      })));
+      validator.registerMock(
+        'hook',
+        'useToast',
+        jest.fn(() => ({
+          toast: jest.fn(),
+          dismiss: jest.fn(),
+          toasts: [],
+          queue: [],
+        }))
+      );
 
-      validator.registerMock('component', 'TestComponent', jest.fn(() => ({
-        type: 'div',
-        props: { 'data-testid': 'test-component' },
-      })));
+      validator.registerMock(
+        'component',
+        'TestComponent',
+        jest.fn(() => ({
+          type: 'div',
+          props: { 'data-testid': 'test-component' },
+        }))
+      );
 
       const reports = validator.generateMockReport();
 
@@ -219,7 +261,7 @@ describe('MockValidator', () => {
       expect(reports[1].mockType).toBe('component');
 
       // Each report should have all required fields
-      reports.forEach(report => {
+      reports.forEach((report) => {
         expect(report).toHaveProperty('validationResult');
         expect(report).toHaveProperty('coverage');
         expect(report).toHaveProperty('recommendations');
@@ -238,7 +280,7 @@ describe('MockValidator', () => {
 
       validator.registerMock('hook', 'useToast', incompleteMock);
       const reports = validator.generateMockReport();
-      const report = reports.find(r => r.mockName === 'useToast');
+      const report = reports.find((r) => r.mockName === 'useToast');
 
       expect(report).toBeDefined();
       expect(report!.coverage.coveragePercentage).toBeLessThan(100);
@@ -276,9 +318,9 @@ describe('MockValidator', () => {
       const suggestions = validator.suggestFixes(failures);
 
       expect(suggestions.length).toBeGreaterThan(0);
-      expect(suggestions.some(s => s.type === 'ADD_METHOD')).toBe(true);
-      expect(suggestions.some(s => s.type === 'FIX_TYPE')).toBe(true);
-      
+      expect(suggestions.some((s) => s.type === 'ADD_METHOD')).toBe(true);
+      expect(suggestions.some((s) => s.type === 'FIX_TYPE')).toBe(true);
+
       // Should be sorted by priority
       expect(suggestions[0].priority).toBe('critical');
     });
@@ -302,7 +344,7 @@ describe('MockValidator', () => {
       ];
 
       const suggestions = validator.suggestFixes(failures);
-      const methodSuggestion = suggestions.find(s => s.type === 'ADD_METHOD');
+      const methodSuggestion = suggestions.find((s) => s.type === 'ADD_METHOD');
 
       expect(methodSuggestion).toBeDefined();
       expect(methodSuggestion!.codeExample).toBeDefined();
@@ -313,11 +355,11 @@ describe('MockValidator', () => {
   describe('validation history', () => {
     it('should track validation history', () => {
       const mock = jest.fn(() => ({ toast: jest.fn() }));
-      
+
       // Run validation multiple times
       validator.validateHookMock('useToast', mock);
       validator.validateHookMock('useToast', mock);
-      
+
       const history = validator.getValidationHistory('useToast');
       expect(history).toHaveLength(2);
       expect(history[0]).toHaveProperty('timestamp');
@@ -326,12 +368,12 @@ describe('MockValidator', () => {
 
     it('should limit history size', () => {
       const mock = jest.fn(() => ({ toast: jest.fn() }));
-      
+
       // Run validation 15 times (more than the 10 limit)
       for (let i = 0; i < 15; i++) {
         validator.validateHookMock('useToast', mock);
       }
-      
+
       const history = validator.getValidationHistory('useToast');
       expect(history).toHaveLength(10); // Should be limited to 10
     });
@@ -339,9 +381,9 @@ describe('MockValidator', () => {
     it('should clear history when requested', () => {
       const mock = jest.fn(() => ({ toast: jest.fn() }));
       validator.validateHookMock('useToast', mock);
-      
+
       expect(validator.getValidationHistory('useToast')).toHaveLength(1);
-      
+
       validator.clearHistory();
       expect(validator.getValidationHistory('useToast')).toHaveLength(0);
     });
@@ -351,7 +393,7 @@ describe('MockValidator', () => {
     it('should register and retrieve mocks', () => {
       const testMock = jest.fn();
       validator.registerMock('hook', 'testHook', testMock);
-      
+
       const registered = validator.getRegisteredMocks();
       expect(registered.has('hook:testHook')).toBe(true);
       expect(registered.get('hook:testHook')).toBe(testMock);
@@ -362,7 +404,7 @@ describe('MockValidator', () => {
       validator.registerMock('component', 'TestComponent', jest.fn());
       validator.registerMock('provider', 'TestProvider', jest.fn());
       validator.registerMock('utility', 'testUtil', jest.fn());
-      
+
       const registered = validator.getRegisteredMocks();
       expect(registered.size).toBe(4);
       expect(registered.has('hook:testHook')).toBe(true);
@@ -415,8 +457,14 @@ describe('MockValidator', () => {
         queue: [],
       }));
 
-      const criticalResult = validator.validateHookMock('useToast', mockWithCriticalError);
-      const warningResult = validator.validateHookMock('useToast', mockWithWarnings);
+      const criticalResult = validator.validateHookMock(
+        'useToast',
+        mockWithCriticalError
+      );
+      const warningResult = validator.validateHookMock(
+        'useToast',
+        mockWithWarnings
+      );
 
       expect(criticalResult.score).toBeLessThan(warningResult.score);
     });

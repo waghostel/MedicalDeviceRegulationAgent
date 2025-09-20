@@ -44,7 +44,9 @@ class ApiClient {
   private defaultHeaders: Record<string, string>;
   private defaultRetryConfig: RetryConfig;
 
-  constructor(baseUrl: string = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000') {
+  constructor(
+    baseUrl: string = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+  ) {
     this.baseUrl = baseUrl.replace(/\/$/, ''); // Remove trailing slash
     this.defaultHeaders = {
       'Content-Type': 'application/json',
@@ -81,13 +83,13 @@ class ApiClient {
     const url = `${this.baseUrl}${endpoint}`;
     const retryConfig = { ...this.defaultRetryConfig, ...config.retry };
     const startTime = Date.now();
-    
+
     let lastError: APIError;
-    
+
     for (let attempt = 0; attempt <= retryConfig.maxRetries; attempt++) {
       try {
         const response = await this.makeRequest<T>(url, config);
-        
+
         // Track successful API call
         trackAPICall(
           config.method || 'GET',
@@ -95,11 +97,11 @@ class ApiClient {
           response.status,
           Date.now() - startTime
         );
-        
+
         return response;
       } catch (error) {
         lastError = this.normalizeError(error, endpoint, config.method);
-        
+
         // Track failed API call
         trackAPICall(
           config.method || 'GET',
@@ -107,31 +109,31 @@ class ApiClient {
           lastError.status,
           Date.now() - startTime
         );
-        
+
         // Don't retry if it's the last attempt or retry condition is not met
-        if (
-          attempt === retryConfig.maxRetries ||
-          !lastError.retryable
-        ) {
+        if (attempt === retryConfig.maxRetries || !lastError.retryable) {
           break;
         }
-        
+
         // Calculate delay with exponential backoff
         const delay = Math.min(
           retryConfig.baseDelay * Math.pow(2, attempt),
           retryConfig.maxDelay
         );
-        
-        console.warn(`API request failed (attempt ${attempt + 1}/${retryConfig.maxRetries + 1}), retrying in ${delay}ms:`, lastError);
+
+        console.warn(
+          `API request failed (attempt ${attempt + 1}/${retryConfig.maxRetries + 1}), retrying in ${delay}ms:`,
+          lastError
+        );
         await this.sleep(delay);
       }
     }
-    
+
     // Show error toast unless explicitly disabled
     if (!config.skipErrorToast) {
       this.showErrorToast(lastError);
     }
-    
+
     throw lastError;
   }
 
@@ -144,18 +146,18 @@ class ApiClient {
   ): Promise<ApiResponse<T>> {
     const controller = new AbortController();
     const timeout = config.timeout || 30000; // 30 second default timeout
-    
+
     const timeoutId = setTimeout(() => controller.abort(), timeout);
-    
+
     try {
       const headers = { ...this.defaultHeaders, ...config.headers };
-      
+
       const fetchConfig: RequestInit = {
         method: config.method || 'GET',
         headers,
         signal: controller.signal,
       };
-      
+
       // Add body for non-GET requests
       if (config.body && config.method !== 'GET') {
         if (headers['Content-Type'] === 'application/json') {
@@ -164,32 +166,34 @@ class ApiClient {
           fetchConfig.body = config.body;
         }
       }
-      
+
       const response = await fetch(url, fetchConfig);
-      
+
       clearTimeout(timeoutId);
-      
+
       // Parse response
       let data: T;
       const contentType = response.headers.get('content-type');
-      
+
       if (contentType?.includes('application/json')) {
         data = await response.json();
       } else {
         data = (await response.text()) as unknown as T;
       }
-      
+
       // Handle HTTP errors
       if (!response.ok) {
         throw {
-          message: (data as any)?.message || `HTTP ${response.status}: ${response.statusText}`,
+          message:
+            (data as any)?.message ||
+            `HTTP ${response.status}: ${response.statusText}`,
           status: response.status,
           code: (data as any)?.code,
           details: data,
           suggestions: (data as any)?.suggestions,
         };
       }
-      
+
       return {
         data,
         status: response.status,
@@ -198,14 +202,14 @@ class ApiClient {
       };
     } catch (error) {
       clearTimeout(timeoutId);
-      
+
       if (error.name === 'AbortError') {
         throw {
           message: 'Request timeout',
           code: 'TIMEOUT',
         };
       }
-      
+
       throw error;
     }
   }
@@ -213,12 +217,16 @@ class ApiClient {
   /**
    * Normalize different error types into a consistent APIError format
    */
-  private normalizeError(error: any, endpoint?: string, method?: string): APIError {
+  private normalizeError(
+    error: any,
+    endpoint?: string,
+    method?: string
+  ): APIError {
     // If already an APIError, return as-is
     if (error instanceof APIError) {
       return error;
     }
-    
+
     // Handle fetch/network errors
     if (error instanceof TypeError && error.message.includes('fetch')) {
       return APIError.network('Network request failed', {
@@ -226,7 +234,7 @@ class ApiClient {
         isOnline: navigator.onLine,
       });
     }
-    
+
     // Handle timeout errors
     if (error.name === 'AbortError' || error.code === 'TIMEOUT') {
       return APIError.fromError(error, {
@@ -234,7 +242,7 @@ class ApiClient {
         operation: `${method || 'GET'} ${endpoint}`,
       });
     }
-    
+
     // Handle HTTP errors with status codes
     if (error.status) {
       if (error.status === 401) {
@@ -243,19 +251,19 @@ class ApiClient {
           redirectUrl: '/auth/signin',
         });
       }
-      
+
       if (error.status === 400) {
         return APIError.validation('Request validation failed', {
           fieldErrors: error.details?.fieldErrors,
         });
       }
-      
+
       if (error.status === 403) {
         return APIError.auth('Access denied', {
           isTokenExpired: false,
         });
       }
-      
+
       if (error.status === 404) {
         return APIError.fromError(error, {
           type: 'server',
@@ -263,7 +271,7 @@ class ApiClient {
           userMessage: 'The requested resource was not found.',
         });
       }
-      
+
       if (error.status >= 500) {
         return APIError.fromError(error, {
           type: 'server',
@@ -272,7 +280,7 @@ class ApiClient {
         });
       }
     }
-    
+
     // Handle FDA API specific errors
     if (endpoint?.includes('fda') || endpoint?.includes('predicate')) {
       return APIError.fdaAPI('FDA service unavailable', {
@@ -280,7 +288,7 @@ class ApiClient {
         isServiceDown: true,
       });
     }
-    
+
     // Default to generic server error
     return APIError.fromError(error, {
       type: 'server',
@@ -298,14 +306,14 @@ class ApiClient {
       // Auth errors are typically handled by auth middleware
       return;
     }
-    
+
     toast({
       title: this.getErrorTitle(error),
       description: error.userMessage || error.message,
       variant: 'destructive',
     });
   }
-  
+
   /**
    * Get appropriate error title based on error type
    */
@@ -332,27 +340,45 @@ class ApiClient {
    * Sleep utility for retry delays
    */
   private sleep(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   // Convenience methods for common HTTP verbs
-  async get<T = any>(endpoint: string, config?: Omit<RequestConfig, 'method' | 'body'>): Promise<ApiResponse<T>> {
+  async get<T = any>(
+    endpoint: string,
+    config?: Omit<RequestConfig, 'method' | 'body'>
+  ): Promise<ApiResponse<T>> {
     return this.request<T>(endpoint, { ...config, method: 'GET' });
   }
 
-  async post<T = any>(endpoint: string, body?: any, config?: Omit<RequestConfig, 'method'>): Promise<ApiResponse<T>> {
+  async post<T = any>(
+    endpoint: string,
+    body?: any,
+    config?: Omit<RequestConfig, 'method'>
+  ): Promise<ApiResponse<T>> {
     return this.request<T>(endpoint, { ...config, method: 'POST', body });
   }
 
-  async put<T = any>(endpoint: string, body?: any, config?: Omit<RequestConfig, 'method'>): Promise<ApiResponse<T>> {
+  async put<T = any>(
+    endpoint: string,
+    body?: any,
+    config?: Omit<RequestConfig, 'method'>
+  ): Promise<ApiResponse<T>> {
     return this.request<T>(endpoint, { ...config, method: 'PUT', body });
   }
 
-  async patch<T = any>(endpoint: string, body?: any, config?: Omit<RequestConfig, 'method'>): Promise<ApiResponse<T>> {
+  async patch<T = any>(
+    endpoint: string,
+    body?: any,
+    config?: Omit<RequestConfig, 'method'>
+  ): Promise<ApiResponse<T>> {
     return this.request<T>(endpoint, { ...config, method: 'PATCH', body });
   }
 
-  async delete<T = any>(endpoint: string, config?: Omit<RequestConfig, 'method' | 'body'>): Promise<ApiResponse<T>> {
+  async delete<T = any>(
+    endpoint: string,
+    config?: Omit<RequestConfig, 'method' | 'body'>
+  ): Promise<ApiResponse<T>> {
     return this.request<T>(endpoint, { ...config, method: 'DELETE' });
   }
 }

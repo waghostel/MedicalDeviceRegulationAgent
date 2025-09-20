@@ -11,14 +11,14 @@ const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:8000';
 
 async function getAuthHeaders(request: NextRequest) {
   const session = await getServerSession(authOptions);
-  
+
   if (!session?.user?.email) {
     throw new Error('Unauthorized');
   }
 
   return {
-    'Authorization': `Bearer ${session.accessToken || 'mock-token'}`,
-    'Accept': 'text/event-stream',
+    Authorization: `Bearer ${session.accessToken || 'mock-token'}`,
+    Accept: 'text/event-stream',
     'Cache-Control': 'no-cache',
   };
 }
@@ -30,23 +30,26 @@ export async function GET(
   try {
     const headers = await getAuthHeaders(request);
     const sessionId = params.sessionId;
-    
+
     // Create a readable stream that proxies the backend SSE stream
     const stream = new ReadableStream({
       async start(controller) {
         try {
-          const response = await fetch(`${BACKEND_URL}/api/agent/session/${sessionId}/stream`, {
-            method: 'GET',
-            headers,
-          });
+          const response = await fetch(
+            `${BACKEND_URL}/api/agent/session/${sessionId}/stream`,
+            {
+              method: 'GET',
+              headers,
+            }
+          );
 
           if (!response.ok) {
             const errorData = await response.json().catch(() => ({}));
             const errorMessage = `data: ${JSON.stringify({
               event: 'error',
-              data: errorData.message || `Backend error: ${response.status}`
+              data: errorData.message || `Backend error: ${response.status}`,
             })}\n\n`;
-            
+
             controller.enqueue(new TextEncoder().encode(errorMessage));
             controller.close();
             return;
@@ -63,7 +66,7 @@ export async function GET(
           try {
             while (true) {
               const { done, value } = await reader.read();
-              
+
               if (done) {
                 break;
               }
@@ -75,14 +78,13 @@ export async function GET(
             reader.releaseLock();
             controller.close();
           }
-
         } catch (error) {
           console.error('SSE proxy error:', error);
           const errorMessage = `data: ${JSON.stringify({
             event: 'error',
-            data: `Stream error: ${error.message}`
+            data: `Stream error: ${error.message}`,
           })}\n\n`;
-          
+
           controller.enqueue(new TextEncoder().encode(errorMessage));
           controller.close();
         }
@@ -91,23 +93,22 @@ export async function GET(
       cancel() {
         // Handle client disconnect
         console.log('SSE stream cancelled by client');
-      }
+      },
     });
 
     return new NextResponse(stream, {
       headers: {
         'Content-Type': 'text/event-stream',
         'Cache-Control': 'no-cache, no-transform',
-        'Connection': 'keep-alive',
+        Connection: 'keep-alive',
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Methods': 'GET',
         'Access-Control-Allow-Headers': 'Cache-Control',
       },
     });
-
   } catch (error) {
     console.error('Agent session stream API error:', error);
-    
+
     if (error.message === 'Unauthorized') {
       return NextResponse.json(
         { message: 'Authentication required' },

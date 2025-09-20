@@ -36,7 +36,7 @@ export const setupProviderMockSystem = (options: ProviderMockOptions = {}) => {
 
   // Initialize provider states based on options
   if (toast.enabled && toast.initialToasts) {
-    toast.initialToasts.forEach(toastData => {
+    toast.initialToasts.forEach((toastData) => {
       providerMockUtils.addMockToast(toastData);
     });
   }
@@ -51,7 +51,8 @@ export const setupProviderMockSystem = (options: ProviderMockOptions = {}) => {
   if (theme.enabled && theme.defaultTheme) {
     providerMockUtils.setThemeState({
       theme: theme.defaultTheme,
-      resolvedTheme: theme.defaultTheme === 'system' ? 'light' : theme.defaultTheme,
+      resolvedTheme:
+        theme.defaultTheme === 'system' ? 'light' : theme.defaultTheme,
     });
   }
 
@@ -85,7 +86,9 @@ export const resetProviderMockSystem = () => {
  * Create a test wrapper with provider mocks
  * Useful for individual test files that need specific provider setup
  */
-export const createProviderTestWrapper = (options: ProviderMockOptions = {}) => {
+export const createProviderTestWrapper = (
+  options: ProviderMockOptions = {}
+) => {
   return ({ children }: { children: React.ReactNode }) => {
     return React.createElement(MockProviderStack, { options }, children);
   };
@@ -94,7 +97,9 @@ export const createProviderTestWrapper = (options: ProviderMockOptions = {}) => 
 /**
  * Create a mock session for testing
  */
-export const createMockSession = (overrides: Partial<Session> = {}): Session => {
+export const createMockSession = (
+  overrides: Partial<Session> = {}
+): Session => {
   return {
     user: {
       id: 'test-user-id',
@@ -117,11 +122,11 @@ export const simulateProviderInteractions = {
   addToast: (toast: any) => {
     return providerMockUtils.addMockToast(toast);
   },
-  
+
   removeToast: (id: string) => {
     const state = providerMockUtils.getToastState();
     providerMockUtils.setToastState({
-      toasts: state.toasts.filter(t => t.id !== id),
+      toasts: state.toasts.filter((t) => t.id !== id),
     });
   },
 
@@ -143,11 +148,11 @@ export const simulateProviderInteractions = {
 
   submitForm: async () => {
     providerMockUtils.setFormState({ isSubmitting: true });
-    
+
     // Simulate async submission
-    await new Promise(resolve => setTimeout(resolve, 100));
-    
-    providerMockUtils.setFormState({ 
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
+    providerMockUtils.setFormState({
       isSubmitting: false,
       isDirty: false,
     });
@@ -202,7 +207,7 @@ export const providerMockScenarios = {
   // Authenticated user with form data
   authenticatedWithForm: (): ProviderMockOptions => ({
     toast: { enabled: true },
-    form: { 
+    form: {
       enabled: true,
       formId: 'project-form',
       initialValues: {
@@ -212,7 +217,7 @@ export const providerMockScenarios = {
       },
     },
     theme: { enabled: true, defaultTheme: 'light' },
-    session: { 
+    session: {
       enabled: true,
       session: createMockSession(),
     },
@@ -220,7 +225,7 @@ export const providerMockScenarios = {
 
   // Dark theme with notifications
   darkThemeWithToasts: (): ProviderMockOptions => ({
-    toast: { 
+    toast: {
       enabled: true,
       initialToasts: [
         {
@@ -238,7 +243,7 @@ export const providerMockScenarios = {
   // Form with validation errors
   formWithErrors: (): ProviderMockOptions => {
     const options = providerMockScenarios.authenticatedWithForm();
-    
+
     // Set up form errors after initialization
     setTimeout(() => {
       simulateProviderInteractions.setFormError('name', {
@@ -250,7 +255,7 @@ export const providerMockScenarios = {
         message: 'Description must be at least 10 characters',
       });
     }, 0);
-    
+
     return options;
   },
 
@@ -259,7 +264,7 @@ export const providerMockScenarios = {
     toast: { enabled: true },
     form: { enabled: true },
     theme: { enabled: true, defaultTheme: 'light' },
-    session: { 
+    session: {
       enabled: true,
       session: null,
     },
@@ -268,13 +273,13 @@ export const providerMockScenarios = {
   // Loading states
   loading: (): ProviderMockOptions => {
     const options = providerMockScenarios.authenticatedWithForm();
-    
+
     // Set loading states
     setTimeout(() => {
       providerMockUtils.setFormState({ isSubmitting: true });
       providerMockUtils.setSessionState({ status: 'loading' });
     }, 0);
-    
+
     return options;
   },
 };
@@ -285,12 +290,12 @@ export const providerMockScenarios = {
  */
 export const validateProviderMockSetup = () => {
   const validation = providerMockUtils.validateProviderMocks();
-  
+
   if (!validation.allValid) {
     console.warn('Provider mock validation failed:', validation.results);
     return false;
   }
-  
+
   console.log('✅ All provider mocks are properly configured');
   return true;
 };

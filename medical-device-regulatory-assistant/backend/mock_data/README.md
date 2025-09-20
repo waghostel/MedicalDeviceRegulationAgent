@@ -30,7 +30,7 @@ mock_data/
 Select the appropriate configuration for your needs:
 
 - **`minimal_test_config.json`** - Quick testing with 2 simple projects
-- **`sample_mock_data_config.json`** - Original sample with 6 basic projects  
+- **`sample_mock_data_config.json`** - Original sample with 6 basic projects
 - **`comprehensive_mock_data_config.json`** - Full dataset with 20+ diverse projects
 - **`edge_cases_mock_data_config.json`** - Edge cases and error scenarios
 
@@ -80,19 +80,22 @@ else:
 ### Core Configurations
 
 #### `comprehensive_mock_data_config.json`
+
 - **20+ diverse medical device projects** covering various device classes
 - **Multiple device types**: Cardiac monitors, glucose meters, surgical systems, AI software, implantable devices
 - **All regulatory pathways**: 510(k), PMA, De Novo
 - **Complete related data**: Classifications, predicates, agent interactions
 - **Use case**: Full feature testing, demonstrations, comprehensive development
 
-#### `sample_mock_data_config.json`  
+#### `sample_mock_data_config.json`
+
 - **6 basic medical device projects** with standard configurations
 - **Common device types**: Cardiac monitor, glucose meter, surgical navigation, wound dressing, pulse oximeter, insulin pump
 - **Standard pathways**: Primarily 510(k) with some PMA
 - **Use case**: Basic testing, getting started, simple demonstrations
 
 #### `minimal_test_config.json`
+
 - **2 simple projects** for quick testing
 - **Basic device types**: Cardiac monitor, glucose meter
 - **Standard 510(k) pathway** only
@@ -101,6 +104,7 @@ else:
 ### Specialized Testing Configurations
 
 #### `edge_cases_mock_data_config.json`
+
 - **Edge case scenarios** for robust testing
 - **Data validation testing**: Empty fields, extremely long text, special characters, Unicode
 - **Error scenarios**: Invalid K-numbers, malformed data, API timeouts
@@ -108,10 +112,11 @@ else:
 - **Use case**: Error handling validation, UI stress testing, data validation
 
 #### Performance Testing Configurations
+
 - **`performance_test_config.json`** - Base configuration for performance testing
 - **Generated configurations** via `generate_performance_data.py`:
   - `high_volume_small_config.json` - 5 projects, 100 predicates, 50 interactions
-  - `high_volume_medium_config.json` - 10 projects, 500 predicates, 200 interactions  
+  - `high_volume_medium_config.json` - 10 projects, 500 predicates, 200 interactions
   - `high_volume_large_config.json` - 25 projects, 2500 predicates, 1250 interactions
 - **Use case**: Load testing, performance validation, stress testing
 
@@ -120,24 +125,31 @@ else:
 The comprehensive configuration includes:
 
 ### Cardiovascular (Class II & III)
+
 - Cardiac Monitoring Device, Pacemaker, Defibrillator
 
-### Diabetes Management (Class II)  
+### Diabetes Management (Class II)
+
 - Blood Glucose Meter, Insulin Pump, Continuous Glucose Monitor
 
 ### Surgical Systems (Class II)
+
 - Surgical Navigation System, Robotic Surgical System, Surgical Mesh
 
 ### Diagnostic Imaging (Class II)
+
 - Pulse Oximeter, Ultrasound System, AI Diagnostic Software
 
 ### Implantable Devices (Class II & III)
+
 - Neural Stimulator, Intraocular Lens, Dental Implant System
 
 ### Critical Care (Class II & III)
+
 - Ventilator, Hemodialysis Machine
 
 ### Specialty Devices (Class II)
+
 - Wound Care Dressing, Bone Graft Substitute, Contact Lens
 
 ## Configuration File Format
@@ -303,6 +315,7 @@ The validator provides detailed error messages with:
 - **Business Rule Context**: Explains referential integrity violations
 
 Example error output:
+
 ```
 ❌ Configuration is INVALID
 Found 3 error(s):
@@ -325,6 +338,7 @@ poetry run python test_json_schema_validation.py
 ```
 
 This tests:
+
 - Schema validation functionality
 - Sample data validation
 - Error handling for invalid data

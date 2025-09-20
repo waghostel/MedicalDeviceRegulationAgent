@@ -1,14 +1,10 @@
 /**
  * MockRegistry Basic Unit Test Suite
- * 
+ *
  * Basic tests for the centralized mock management system
  */
 
-import {
-  MockRegistry,
-  MockMetadata,
-  MockConfiguration,
-} from '../MockRegistry';
+import { MockRegistry, MockMetadata, MockConfiguration } from '../MockRegistry';
 
 describe('MockRegistry Basic Functionality', () => {
   let registry: MockRegistry;
@@ -42,7 +38,11 @@ describe('MockRegistry Basic Functionality', () => {
         tags: ['test'],
       };
 
-      const result = registry.register('testMock', mockImplementation, metadata);
+      const result = registry.register(
+        'testMock',
+        mockImplementation,
+        metadata
+      );
 
       expect(result.success).toBe(true);
       expect(result.mockName).toBe('testMock');
@@ -156,7 +156,7 @@ describe('MockRegistry Basic Functionality', () => {
 
     it('should unload mocks correctly', () => {
       const mockImplementation = jest.fn();
-      
+
       registry.register('testMock', mockImplementation, {
         name: 'testMock',
         version: '1.0.0',
@@ -188,7 +188,7 @@ describe('MockRegistry Basic Functionality', () => {
       };
 
       expect(() => registry.updateConfig(newConfig)).not.toThrow();
-      
+
       const config = registry.getConfig();
       expect(config.globalOptions.debugMode).toBe(true);
       expect(config.globalOptions.strictMode).toBe(true);
@@ -196,7 +196,7 @@ describe('MockRegistry Basic Functionality', () => {
 
     it('should provide registry statistics', () => {
       const mockImplementation = jest.fn();
-      
+
       registry.register('testMock', mockImplementation, {
         name: 'testMock',
         version: '1.0.0',
@@ -208,7 +208,7 @@ describe('MockRegistry Basic Functionality', () => {
       });
 
       const stats = registry.getStats();
-      
+
       expect(stats.totalMocks).toBe(1);
       expect(stats.enabledMocks).toBe(1);
       // Note: Mock is automatically marked as loaded during registration
@@ -229,13 +229,15 @@ describe('MockRegistry Basic Functionality', () => {
       const result = await registry.load('nonExistentMock');
 
       expect(result.success).toBe(false);
-      expect(result.errors).toContain("Mock 'nonExistentMock' is not registered");
+      expect(result.errors).toContain(
+        "Mock 'nonExistentMock' is not registered"
+      );
     });
 
     it('should handle duplicate registration in non-strict mode', () => {
       const mockImplementation1 = jest.fn(() => ({ version: 1 }));
       const mockImplementation2 = jest.fn(() => ({ version: 2 }));
-      
+
       const metadata = {
         name: 'duplicateMock',
         version: '1.0.0',
@@ -247,11 +249,19 @@ describe('MockRegistry Basic Functionality', () => {
       };
 
       // First registration should succeed
-      const result1 = registry.register('duplicateMock', mockImplementation1, metadata);
+      const result1 = registry.register(
+        'duplicateMock',
+        mockImplementation1,
+        metadata
+      );
       expect(result1.success).toBe(true);
 
       // Second registration should succeed with warning (non-strict mode)
-      const result2 = registry.register('duplicateMock', mockImplementation2, metadata);
+      const result2 = registry.register(
+        'duplicateMock',
+        mockImplementation2,
+        metadata
+      );
       expect(result2.success).toBe(true);
       expect(result2.warnings.length).toBeGreaterThan(0);
     });
@@ -260,7 +270,7 @@ describe('MockRegistry Basic Functionality', () => {
   describe('Cleanup and Reset', () => {
     it('should cleanup unused mocks', () => {
       const mockImplementation = jest.fn();
-      
+
       registry.register('testMock', mockImplementation, {
         name: 'testMock',
         version: '1.0.0',
@@ -280,7 +290,7 @@ describe('MockRegistry Basic Functionality', () => {
 
     it('should reset registry completely', () => {
       const mockImplementation = jest.fn();
-      
+
       registry.register('testMock', mockImplementation, {
         name: 'testMock',
         version: '1.0.0',

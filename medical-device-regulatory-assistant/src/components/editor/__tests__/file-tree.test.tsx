@@ -10,7 +10,7 @@ const mockTree: DocumentTreeNode[] = [
     name: 'Project Overview',
     type: 'general-note',
     isFolder: false,
-    parentId: undefined
+    parentId: undefined,
   },
   {
     id: '2',
@@ -24,17 +24,17 @@ const mockTree: DocumentTreeNode[] = [
         name: 'Predicate Analysis',
         type: 'predicate-analysis',
         isFolder: false,
-        parentId: '2'
+        parentId: '2',
       },
       {
         id: '4',
         name: 'Device Classification',
         type: 'device-classification',
         isFolder: false,
-        parentId: '2'
-      }
-    ]
-  }
+        parentId: '2',
+      },
+    ],
+  },
 ];
 
 describe('FileTree', () => {
@@ -49,7 +49,7 @@ describe('FileTree', () => {
     onSelectDocument: mockOnSelectDocument,
     onCreateDocument: mockOnCreateDocument,
     onDeleteDocument: mockOnDeleteDocument,
-    onRenameDocument: mockOnRenameDocument
+    onRenameDocument: mockOnRenameDocument,
   };
 
   beforeEach(() => {
@@ -69,7 +69,9 @@ describe('FileTree', () => {
     render(<FileTree {...defaultProps} selectedDocumentId="1" />);
 
     // Find the parent container that should have the selected styling
-    const selectedItem = screen.getByText('Project Overview').closest('.bg-blue-100');
+    const selectedItem = screen
+      .getByText('Project Overview')
+      .closest('.bg-blue-100');
     expect(selectedItem).toBeInTheDocument();
   });
 
@@ -91,11 +93,12 @@ describe('FileTree', () => {
 
     // Find and click the collapse button (chevron button)
     const buttons = screen.getAllByRole('button');
-    const collapseButton = buttons.find(button => 
-      button.querySelector('svg') && 
-      button.closest('div')?.textContent?.includes('Regulatory Documents')
+    const collapseButton = buttons.find(
+      (button) =>
+        button.querySelector('svg') &&
+        button.closest('div')?.textContent?.includes('Regulatory Documents')
     );
-    
+
     if (collapseButton) {
       await user.click(collapseButton);
       // Note: The actual collapse behavior depends on the component implementation
@@ -132,7 +135,10 @@ describe('FileTree', () => {
     // Click new document
     await user.click(screen.getByText('New Document'));
 
-    expect(mockOnCreateDocument).toHaveBeenCalledWith('New Document', 'general-note');
+    expect(mockOnCreateDocument).toHaveBeenCalledWith(
+      'New Document',
+      'general-note'
+    );
   });
 
   it('creates new folder from root level', async () => {
@@ -154,7 +160,7 @@ describe('FileTree', () => {
     // This test would need to trigger the rename mode
     // The exact implementation depends on how the context menu is triggered
     // For now, we'll test that the rename function is called correctly
-    
+
     // Simulate rename action
     mockOnRenameDocument('1', 'New Name');
     expect(mockOnRenameDocument).toHaveBeenCalledWith('1', 'New Name');
@@ -173,7 +179,9 @@ describe('FileTree', () => {
 
     // We can't easily test the specific icons, but we can verify
     // that different elements are rendered for different types
-    const items = screen.getAllByText(/Project Overview|Regulatory Documents|Predicate Analysis|Device Classification/);
+    const items = screen.getAllByText(
+      /Project Overview|Regulatory Documents|Predicate Analysis|Device Classification/
+    );
     expect(items).toHaveLength(4);
   });
 
@@ -183,7 +191,7 @@ describe('FileTree', () => {
     // Test that Enter key on rename input saves the name
     const input = document.createElement('input');
     input.value = 'New Name';
-    
+
     fireEvent.keyDown(input, { key: 'Enter' });
     // The actual behavior would depend on the implementation
   });
@@ -193,7 +201,7 @@ describe('FileTree', () => {
 
     const input = document.createElement('input');
     input.value = 'New Name';
-    
+
     fireEvent.keyDown(input, { key: 'Escape' });
     // The actual behavior would depend on the implementation
   });
@@ -204,7 +212,7 @@ describe('FileTree', () => {
     // Child items should have more padding/indentation
     const childItem = screen.getByText('Predicate Analysis').closest('div');
     const parentItem = screen.getByText('Project Overview').closest('div');
-    
+
     // We can't easily test the exact padding, but we can verify
     // that the structure is rendered correctly
     expect(childItem).toBeInTheDocument();

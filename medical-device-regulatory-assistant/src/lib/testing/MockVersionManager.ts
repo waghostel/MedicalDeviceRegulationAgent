@@ -1,9 +1,9 @@
 /**
  * MockVersionManager - Mock Versioning and Compatibility System
- * 
+ *
  * Provides comprehensive versioning and compatibility checking for mock implementations
  * to ensure proper mock behavior across different React and library versions.
- * 
+ *
  * Requirements: 2.4, 6.1
  */
 
@@ -59,7 +59,11 @@ export interface VersionCompatibilityResult {
 
 export interface CompatibilityIssue {
   type: 'error' | 'warning' | 'info';
-  category: 'breaking-change' | 'deprecation' | 'version-mismatch' | 'dependency-conflict';
+  category:
+    | 'breaking-change'
+    | 'deprecation'
+    | 'version-mismatch'
+    | 'dependency-conflict';
   message: string;
   affectedFeatures: string[];
   severity: 'critical' | 'high' | 'medium' | 'low';
@@ -126,7 +130,8 @@ const CompatibilityMatrixSchema = z.object({
 export class MockVersionManager {
   private versions: Map<string, Map<string, MockVersion>> = new Map(); // mockName -> version -> MockVersion
   private config: VersionManagerConfig;
-  private compatibilityCache: Map<string, VersionCompatibilityResult> = new Map();
+  private compatibilityCache: Map<string, VersionCompatibilityResult> =
+    new Map();
   private migrationCache: Map<string, MigrationPath> = new Map();
 
   constructor(config?: Partial<VersionManagerConfig>) {
@@ -138,7 +143,9 @@ export class MockVersionManager {
   // Configuration Management
   // ============================================================================
 
-  private mergeConfig(userConfig?: Partial<VersionManagerConfig>): VersionManagerConfig {
+  private mergeConfig(
+    userConfig?: Partial<VersionManagerConfig>
+  ): VersionManagerConfig {
     const defaultConfig: VersionManagerConfig = {
       strictMode: true,
       allowPrerelease: false,
@@ -166,29 +173,37 @@ export class MockVersionManager {
 
     const mockVersions = this.versions.get(mockName)!;
     const versionString = this.versionToString(version.version);
-    
+
     // Validate version data
     try {
       SemanticVersionSchema.parse(version.version);
       CompatibilityMatrixSchema.parse(version.compatibilityMatrix);
     } catch (error) {
-      throw new Error(`Invalid version data for ${mockName}@${versionString}: ${error}`);
+      throw new Error(
+        `Invalid version data for ${mockName}@${versionString}: ${error}`
+      );
     }
 
     mockVersions.set(versionString, version);
-    
+
     // Clear related caches
     this.clearCacheForMock(mockName);
-    
+
     this.logDebug(`Registered version ${versionString} for mock '${mockName}'`);
   }
 
-  public getVersion(mockName: string, versionString: string): MockVersion | undefined {
+  public getVersion(
+    mockName: string,
+    versionString: string
+  ): MockVersion | undefined {
     const mockVersions = this.versions.get(mockName);
     return mockVersions?.get(versionString);
   }
 
-  public getLatestVersion(mockName: string, includePrerelease = false): MockVersion | undefined {
+  public getLatestVersion(
+    mockName: string,
+    includePrerelease = false
+  ): MockVersion | undefined {
     const mockVersions = this.versions.get(mockName);
     if (!mockVersions) return undefined;
 
@@ -200,7 +215,10 @@ export class MockVersionManager {
         continue;
       }
 
-      if (!latestSemVer || this.compareVersions(version.version, latestSemVer) > 0) {
+      if (
+        !latestSemVer ||
+        this.compareVersions(version.version, latestSemVer) > 0
+      ) {
         latestVersion = version;
         latestSemVer = version.version;
       }
@@ -213,8 +231,8 @@ export class MockVersionManager {
     const mockVersions = this.versions.get(mockName);
     if (!mockVersions) return [];
 
-    return Array.from(mockVersions.values()).sort((a, b) => 
-      this.compareVersions(b.version, a.version) // Newest first
+    return Array.from(mockVersions.values()).sort(
+      (a, b) => this.compareVersions(b.version, a.version) // Newest first
     );
   }
 
@@ -238,7 +256,7 @@ export class MockVersionManager {
     }
   ): VersionCompatibilityResult {
     const cacheKey = `${mockName}@${mockVersion}:${JSON.stringify(targetEnvironment)}`;
-    
+
     if (this.config.cacheVersionData && this.compatibilityCache.has(cacheKey)) {
       return this.compatibilityCache.get(cacheKey)!;
     }
@@ -250,14 +268,18 @@ export class MockVersionManager {
         mockName,
         mockVersion,
         targetVersion: 'unknown',
-        issues: [{
-          type: 'error',
-          category: 'version-mismatch',
-          message: `Version ${mockVersion} not found for mock '${mockName}'`,
-          affectedFeatures: ['all'],
-          severity: 'critical',
-        }],
-        recommendations: [`Register version ${mockVersion} for mock '${mockName}'`],
+        issues: [
+          {
+            type: 'error',
+            category: 'version-mismatch',
+            message: `Version ${mockVersion} not found for mock '${mockName}'`,
+            affectedFeatures: ['all'],
+            severity: 'critical',
+          },
+        ],
+        recommendations: [
+          `Register version ${mockVersion} for mock '${mockName}'`,
+        ],
         migrationRequired: false,
       };
 
@@ -278,7 +300,7 @@ export class MockVersionManager {
         this.parseVersion(targetEnvironment.react),
         version.compatibilityMatrix.react
       );
-      
+
       if (!reactCompatibility.compatible) {
         compatible = false;
         issues.push({
@@ -298,7 +320,7 @@ export class MockVersionManager {
         this.parseVersion(targetEnvironment.reactTestingLibrary),
         version.compatibilityMatrix.reactTestingLibrary
       );
-      
+
       if (!rtlCompatibility.compatible) {
         issues.push({
           type: rtlCompatibility.severity === 'critical' ? 'error' : 'warning',
@@ -321,7 +343,7 @@ export class MockVersionManager {
         this.parseVersion(targetEnvironment.jest),
         version.compatibilityMatrix.jest
       );
-      
+
       if (!jestCompatibility.compatible) {
         issues.push({
           type: jestCompatibility.severity === 'critical' ? 'error' : 'warning',
@@ -344,7 +366,7 @@ export class MockVersionManager {
         this.parseVersion(targetEnvironment.typescript),
         version.compatibilityMatrix.typescript
       );
-      
+
       if (!tsCompatibility.compatible) {
         issues.push({
           type: 'warning',
@@ -359,17 +381,20 @@ export class MockVersionManager {
 
     // Check dependency compatibility
     if (targetEnvironment.dependencies) {
-      for (const [depName, depVersion] of Object.entries(targetEnvironment.dependencies)) {
+      for (const [depName, depVersion] of Object.entries(
+        targetEnvironment.dependencies
+      )) {
         const depRange = version.compatibilityMatrix.dependencies[depName];
         if (depRange) {
           const depCompatibility = this.checkVersionRange(
             this.parseVersion(depVersion),
             depRange
           );
-          
+
           if (!depCompatibility.compatible) {
             issues.push({
-              type: depCompatibility.severity === 'critical' ? 'error' : 'warning',
+              type:
+                depCompatibility.severity === 'critical' ? 'error' : 'warning',
               category: 'dependency-conflict',
               message: `Dependency ${depName}@${depVersion} may cause compatibility issues`,
               affectedFeatures: ['integration'],
@@ -391,13 +416,18 @@ export class MockVersionManager {
 
     // Generate migration path if needed
     let migrationPath: MigrationPath | undefined;
-    const migrationRequired = issues.some(issue => 
-      issue.category === 'breaking-change' || 
-      (issue.category === 'version-mismatch' && issue.severity === 'critical')
+    const migrationRequired = issues.some(
+      (issue) =>
+        issue.category === 'breaking-change' ||
+        (issue.category === 'version-mismatch' && issue.severity === 'critical')
     );
 
     if (migrationRequired) {
-      migrationPath = this.generateMigrationPath(mockName, mockVersion, targetEnvironment);
+      migrationPath = this.generateMigrationPath(
+        mockName,
+        mockVersion,
+        targetEnvironment
+      );
     }
 
     const result: VersionCompatibilityResult = {
@@ -470,9 +500,11 @@ export class MockVersionManager {
       });
 
       recommendations.push('Review the migration guide for breaking changes');
-      
+
       if (version.migrationGuide) {
-        recommendations.push(`Follow migration guide: ${version.migrationGuide}`);
+        recommendations.push(
+          `Follow migration guide: ${version.migrationGuide}`
+        );
       }
     }
   }
@@ -492,7 +524,9 @@ export class MockVersionManager {
         resolution: 'Update code to use non-deprecated APIs',
       });
 
-      recommendations.push('Update deprecated API usage before next major version');
+      recommendations.push(
+        'Update deprecated API usage before next major version'
+      );
     }
   }
 
@@ -506,7 +540,7 @@ export class MockVersionManager {
     targetEnvironment: any
   ): MigrationPath | undefined {
     const cacheKey = `${mockName}:${fromVersion}->target`;
-    
+
     if (this.config.cacheVersionData && this.migrationCache.has(cacheKey)) {
       return this.migrationCache.get(cacheKey);
     }
@@ -578,7 +612,8 @@ export class MockVersionManager {
   // ============================================================================
 
   public parseVersion(versionString: string): SemanticVersion {
-    const regex = /^(\d+)\.(\d+)\.(\d+)(?:-([a-zA-Z0-9.-]+))?(?:\+([a-zA-Z0-9.-]+))?$/;
+    const regex =
+      /^(\d+)\.(\d+)\.(\d+)(?:-([a-zA-Z0-9.-]+))?(?:\+([a-zA-Z0-9.-]+))?$/;
     const match = versionString.match(regex);
 
     if (!match) {
@@ -596,15 +631,15 @@ export class MockVersionManager {
 
   public versionToString(version: SemanticVersion): string {
     let versionString = `${version.major}.${version.minor}.${version.patch}`;
-    
+
     if (version.prerelease) {
       versionString += `-${version.prerelease}`;
     }
-    
+
     if (version.build) {
       versionString += `+${version.build}`;
     }
-    
+
     return versionString;
   }
 
@@ -630,11 +665,11 @@ export class MockVersionManager {
     }
 
     const parts: string[] = [];
-    
+
     if (range.min) {
       parts.push(`>=${this.versionToString(range.min)}`);
     }
-    
+
     if (range.max) {
       parts.push(`<=${this.versionToString(range.max)}`);
     }
@@ -712,7 +747,7 @@ export class MockVersionManager {
         typescript: { min: { major: 4, minor: 5, patch: 0 } },
         dependencies: {
           'react-hook-form': { min: { major: 7, minor: 0, patch: 0 } },
-          'zod': { min: { major: 3, minor: 0, patch: 0 } },
+          zod: { min: { major: 3, minor: 0, patch: 0 } },
         },
       },
     });
@@ -741,13 +776,13 @@ export class MockVersionManager {
 
   private clearCacheForMock(mockName: string): void {
     const keysToDelete: string[] = [];
-    
+
     for (const key of this.compatibilityCache.keys()) {
       if (key.startsWith(`${mockName}@`)) {
         keysToDelete.push(key);
       }
     }
-    
+
     for (const key of keysToDelete) {
       this.compatibilityCache.delete(key);
     }
@@ -808,15 +843,28 @@ export function checkMockCompatibility(
   mockVersion: string,
   targetEnvironment: Parameters<MockVersionManager['checkCompatibility']>[2]
 ): VersionCompatibilityResult {
-  return getDefaultVersionManager().checkCompatibility(mockName, mockVersion, targetEnvironment);
+  return getDefaultVersionManager().checkCompatibility(
+    mockName,
+    mockVersion,
+    targetEnvironment
+  );
 }
 
-export function getMockVersion(mockName: string, versionString: string): MockVersion | undefined {
+export function getMockVersion(
+  mockName: string,
+  versionString: string
+): MockVersion | undefined {
   return getDefaultVersionManager().getVersion(mockName, versionString);
 }
 
-export function getLatestMockVersion(mockName: string, includePrerelease = false): MockVersion | undefined {
-  return getDefaultVersionManager().getLatestVersion(mockName, includePrerelease);
+export function getLatestMockVersion(
+  mockName: string,
+  includePrerelease = false
+): MockVersion | undefined {
+  return getDefaultVersionManager().getLatestVersion(
+    mockName,
+    includePrerelease
+  );
 }
 
 export function listMockVersions(mockName: string): MockVersion[] {
@@ -828,7 +876,11 @@ export function generateMockMigrationPath(
   fromVersion: string,
   targetEnvironment: any
 ): MigrationPath | undefined {
-  return getDefaultVersionManager().generateMigrationPath(mockName, fromVersion, targetEnvironment);
+  return getDefaultVersionManager().generateMigrationPath(
+    mockName,
+    fromVersion,
+    targetEnvironment
+  );
 }
 
 // Export types

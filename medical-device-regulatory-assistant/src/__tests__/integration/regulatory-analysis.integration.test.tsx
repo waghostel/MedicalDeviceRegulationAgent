@@ -4,16 +4,29 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
+import {
+  render,
+  screen,
+  fireEvent,
+  waitFor,
+  within,
+} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { setupMockAPI, teardownMockAPI, addMockHandlers } from '@/lib/testing/msw-utils';
-import { renderWithProviders, createMockSession } from '@/lib/testing/test-utils';
-import { 
-  generateMockDeviceClassification, 
-  generateMockPredicateDevices, 
+import {
+  setupMockAPI,
+  teardownMockAPI,
+  addMockHandlers,
+} from '@/lib/testing/msw-utils';
+import {
+  renderWithProviders,
+  createMockSession,
+} from '@/lib/testing/test-utils';
+import {
+  generateMockDeviceClassification,
+  generateMockPredicateDevices,
   generateMockAgentInteraction,
   generateMockUser,
-  generateMockProject
+  generateMockProject,
 } from '@/lib/mock-data';
 import { ClassificationWidget } from '@/components/dashboard/classification-widget';
 import { PredicateWidget } from '@/components/dashboard/predicate-widget';
@@ -23,7 +36,9 @@ import { ProjectContext } from '@/types/copilot';
 
 // Mock CopilotKit components
 jest.mock('@copilotkit/react-core', () => ({
-  CopilotKit: ({ children }: any) => <div data-testid="copilot-kit">{children}</div>,
+  CopilotKit: ({ children }: any) => (
+    <div data-testid="copilot-kit">{children}</div>
+  ),
   CopilotChat: () => <div data-testid="copilot-chat">Chat Interface</div>,
 }));
 
@@ -58,7 +73,10 @@ jest.mock('@/components/providers/ProjectContextProvider', () => ({
       availableCommands: [
         { command: '/predicate-search', description: 'Find predicate devices' },
         { command: '/classify-device', description: 'Classify device' },
-        { command: '/compare-predicate', description: 'Compare with predicate' },
+        {
+          command: '/compare-predicate',
+          description: 'Compare with predicate',
+        },
         { command: '/find-guidance', description: 'Find FDA guidance' },
       ],
     },
@@ -70,7 +88,8 @@ jest.mock('@/components/providers/ProjectContextProvider', () => ({
 
 // Test wrapper for regulatory analysis workflows
 const RegulatoryAnalysisTestWrapper: React.FC = () => {
-  const [classification, setClassification] = React.useState<DeviceClassification | null>(null);
+  const [classification, setClassification] =
+    React.useState<DeviceClassification | null>(null);
   const [predicates, setPredicates] = React.useState<PredicateDevice[]>([]);
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
@@ -78,7 +97,7 @@ const RegulatoryAnalysisTestWrapper: React.FC = () => {
   const handleStartClassification = async () => {
     setLoading(true);
     setError(null);
-    
+
     try {
       const response = await fetch('/api/projects/1/classification', {
         method: 'POST',
@@ -105,7 +124,7 @@ const RegulatoryAnalysisTestWrapper: React.FC = () => {
   const handleSearchPredicates = async () => {
     setLoading(true);
     setError(null);
-    
+
     try {
       const response = await fetch('/api/projects/1/predicates/search', {
         method: 'POST',
@@ -131,11 +150,9 @@ const RegulatoryAnalysisTestWrapper: React.FC = () => {
   };
 
   const handleSelectPredicate = (predicate: PredicateDevice) => {
-    setPredicates(prev => 
-      prev.map(p => 
-        p.id === predicate.id 
-          ? { ...p, isSelected: !p.isSelected }
-          : p
+    setPredicates((prev) =>
+      prev.map((p) =>
+        p.id === predicate.id ? { ...p, isSelected: !p.isSelected } : p
       )
     );
   };
@@ -155,7 +172,7 @@ const RegulatoryAnalysisTestWrapper: React.FC = () => {
           onStartClassification={handleStartClassification}
           onRefresh={handleRefresh}
         />
-        
+
         <PredicateWidget
           predicates={predicates}
           loading={loading}
@@ -190,7 +207,8 @@ describe('Regulatory Analysis Integration Tests', () => {
         productCode: 'LRH',
         regulatoryPathway: '510k',
         confidenceScore: 0.87,
-        reasoning: 'Device classified as Class II based on intended use and risk profile',
+        reasoning:
+          'Device classified as Class II based on intended use and risk profile',
       });
 
       // Mock classification API
@@ -208,7 +226,9 @@ describe('Regulatory Analysis Integration Tests', () => {
       });
 
       // Initially should show pending state
-      expect(screen.getByText('Start Classification Analysis')).toBeInTheDocument();
+      expect(
+        screen.getByText('Start Classification Analysis')
+      ).toBeInTheDocument();
 
       // Start classification
       const startBtn = screen.getByText('Start Classification Analysis');
@@ -220,16 +240,21 @@ describe('Regulatory Analysis Integration Tests', () => {
       });
 
       // Wait for classification to complete
-      await waitFor(() => {
-        expect(screen.getByText('Completed')).toBeInTheDocument();
-        expect(screen.getByText('Class II')).toBeInTheDocument();
-        expect(screen.getByText('LRH')).toBeInTheDocument();
-        expect(screen.getByText('510k')).toBeInTheDocument();
-        expect(screen.getByText('87%')).toBeInTheDocument();
-      }, { timeout: 3000 });
+      await waitFor(
+        () => {
+          expect(screen.getByText('Completed')).toBeInTheDocument();
+          expect(screen.getByText('Class II')).toBeInTheDocument();
+          expect(screen.getByText('LRH')).toBeInTheDocument();
+          expect(screen.getByText('510k')).toBeInTheDocument();
+          expect(screen.getByText('87%')).toBeInTheDocument();
+        },
+        { timeout: 3000 }
+      );
 
       // Verify reasoning is displayed
-      expect(screen.getByText(/Device classified as Class II/)).toBeInTheDocument();
+      expect(
+        screen.getByText(/Device classified as Class II/)
+      ).toBeInTheDocument();
     });
 
     it('should handle classification errors gracefully', async () => {
@@ -240,7 +265,9 @@ describe('Regulatory Analysis Integration Tests', () => {
         {
           method: 'POST',
           path: '/api/projects/1/classification',
-          response: { error: 'Insufficient device information for classification' },
+          response: {
+            error: 'Insufficient device information for classification',
+          },
           error: true,
           statusCode: 400,
         },
@@ -256,7 +283,9 @@ describe('Regulatory Analysis Integration Tests', () => {
       // Should show error state
       await waitFor(() => {
         expect(screen.getByText('Error')).toBeInTheDocument();
-        expect(screen.getByText(/Insufficient device information/)).toBeInTheDocument();
+        expect(
+          screen.getByText(/Insufficient device information/)
+        ).toBeInTheDocument();
         expect(screen.getByText('Retry')).toBeInTheDocument();
       });
     });
@@ -286,30 +315,35 @@ describe('Regulatory Analysis Integration Tests', () => {
       const startBtn = screen.getByText('Start Classification Analysis');
       await user.click(startBtn);
 
-      await waitFor(() => {
-        // Check confidence score display
-        expect(screen.getByText('95%')).toBeInTheDocument();
-        
-        // Check device class
-        expect(screen.getByText('Class I')).toBeInTheDocument();
-        
-        // Check regulatory pathway
-        expect(screen.getByText('510k')).toBeInTheDocument();
-        
-        // Check CFR sections (should show first 3 + more indicator)
-        expect(screen.getByText('21 CFR 870.2300')).toBeInTheDocument();
-        expect(screen.getByText('+0 more')).toBeInTheDocument();
-      }, { timeout: 1000 });
+      await waitFor(
+        () => {
+          // Check confidence score display
+          expect(screen.getByText('95%')).toBeInTheDocument();
+
+          // Check device class
+          expect(screen.getByText('Class I')).toBeInTheDocument();
+
+          // Check regulatory pathway
+          expect(screen.getByText('510k')).toBeInTheDocument();
+
+          // Check CFR sections (should show first 3 + more indicator)
+          expect(screen.getByText('21 CFR 870.2300')).toBeInTheDocument();
+          expect(screen.getByText('+0 more')).toBeInTheDocument();
+        },
+        { timeout: 1000 }
+      );
     });
   });
 
   describe('Predicate Search with Mock FDA Database Responses', () => {
     it('should search and display predicate devices with result ranking', async () => {
       const user = userEvent.setup();
-      const mockPredicates = generateMockPredicateDevices(8).map((p, index) => ({
-        ...p,
-        confidenceScore: 0.9 - (index * 0.05), // Decreasing confidence scores
-      }));
+      const mockPredicates = generateMockPredicateDevices(8).map(
+        (p, index) => ({
+          ...p,
+          confidenceScore: 0.9 - index * 0.05, // Decreasing confidence scores
+        })
+      );
 
       addMockHandlers([
         {
@@ -337,10 +371,13 @@ describe('Regulatory Analysis Integration Tests', () => {
       });
 
       // Wait for search to complete
-      await waitFor(() => {
-        expect(screen.getByText('8 Found')).toBeInTheDocument();
-        expect(screen.getByText('Top Matches')).toBeInTheDocument();
-      }, { timeout: 4000 });
+      await waitFor(
+        () => {
+          expect(screen.getByText('8 Found')).toBeInTheDocument();
+          expect(screen.getByText('Top Matches')).toBeInTheDocument();
+        },
+        { timeout: 4000 }
+      );
 
       // Check that predicates are ranked by confidence
       const topMatchesTab = screen.getByText('Top Matches');
@@ -350,12 +387,14 @@ describe('Regulatory Analysis Integration Tests', () => {
         // Should show highest confidence first
         const confidenceElements = screen.getAllByText(/\d+%/);
         const confidenceValues = confidenceElements
-          .map(el => parseInt(el.textContent?.replace('%', '') || '0'))
-          .filter(val => val > 0);
-        
+          .map((el) => parseInt(el.textContent?.replace('%', '') || '0'))
+          .filter((val) => val > 0);
+
         // Verify descending order
         for (let i = 1; i < confidenceValues.length; i++) {
-          expect(confidenceValues[i]).toBeLessThanOrEqual(confidenceValues[i - 1]);
+          expect(confidenceValues[i]).toBeLessThanOrEqual(
+            confidenceValues[i - 1]
+          );
         }
       });
     });
@@ -381,9 +420,12 @@ describe('Regulatory Analysis Integration Tests', () => {
       const searchBtn = screen.getByText('Search Predicates');
       await user.click(searchBtn);
 
-      await waitFor(() => {
-        expect(screen.getByText('3 Found')).toBeInTheDocument();
-      }, { timeout: 1000 });
+      await waitFor(
+        () => {
+          expect(screen.getByText('3 Found')).toBeInTheDocument();
+        },
+        { timeout: 1000 }
+      );
 
       // Go to top matches tab
       const topMatchesTab = screen.getByText('Top Matches');
@@ -407,17 +449,21 @@ describe('Regulatory Analysis Integration Tests', () => {
 
       // Should show empty selected state
       await waitFor(() => {
-        expect(screen.getByText('No predicate devices selected yet')).toBeInTheDocument();
+        expect(
+          screen.getByText('No predicate devices selected yet')
+        ).toBeInTheDocument();
       });
     });
 
     it('should display predicate search statistics correctly', async () => {
       const user = userEvent.setup();
-      const mockPredicates = generateMockPredicateDevices(10).map((p, index) => ({
-        ...p,
-        isSelected: index < 3, // First 3 are selected
-        confidenceScore: 0.8 + (Math.random() * 0.2), // Random confidence 0.8-1.0
-      }));
+      const mockPredicates = generateMockPredicateDevices(10).map(
+        (p, index) => ({
+          ...p,
+          isSelected: index < 3, // First 3 are selected
+          confidenceScore: 0.8 + Math.random() * 0.2, // Random confidence 0.8-1.0
+        })
+      );
 
       addMockHandlers([
         {
@@ -435,15 +481,18 @@ describe('Regulatory Analysis Integration Tests', () => {
       const searchBtn = screen.getByText('Search Predicates');
       await user.click(searchBtn);
 
-      await waitFor(() => {
-        // Check overview statistics
-        expect(screen.getByText('10')).toBeInTheDocument(); // Total found
-        expect(screen.getByText('3')).toBeInTheDocument(); // Selected count
-        
-        // Check average confidence is displayed
-        const avgConfidenceElements = screen.getAllByText(/\d+%/);
-        expect(avgConfidenceElements.length).toBeGreaterThan(0);
-      }, { timeout: 1000 });
+      await waitFor(
+        () => {
+          // Check overview statistics
+          expect(screen.getByText('10')).toBeInTheDocument(); // Total found
+          expect(screen.getByText('3')).toBeInTheDocument(); // Selected count
+
+          // Check average confidence is displayed
+          const avgConfidenceElements = screen.getAllByText(/\d+%/);
+          expect(avgConfidenceElements.length).toBeGreaterThan(0);
+        },
+        { timeout: 1000 }
+      );
     });
   });
 
@@ -459,7 +508,8 @@ describe('Regulatory Analysis Integration Tests', () => {
             predicateDevice: 'Continuous cardiac monitoring',
             similarity: 'identical',
             impact: 'none',
-            justification: 'Both devices have identical intended use statements',
+            justification:
+              'Both devices have identical intended use statements',
           },
         ],
         differences: [
@@ -469,12 +519,16 @@ describe('Regulatory Analysis Integration Tests', () => {
             predicateDevice: 'Disposable alkaline battery',
             similarity: 'different',
             impact: 'medium',
-            justification: 'Different power source may require additional testing',
+            justification:
+              'Different power source may require additional testing',
           },
         ],
         riskAssessment: 'low',
-        testingRecommendations: ['Biocompatibility testing for battery materials'],
-        substantialEquivalenceAssessment: 'Device demonstrates substantial equivalence',
+        testingRecommendations: [
+          'Biocompatibility testing for battery materials',
+        ],
+        substantialEquivalenceAssessment:
+          'Device demonstrates substantial equivalence',
       };
 
       // Mock comparison API
@@ -499,17 +553,20 @@ describe('Regulatory Analysis Integration Tests', () => {
         const handleCompare = async () => {
           setLoading(true);
           try {
-            const response = await fetch(`/api/projects/1/predicates/${mockPredicate.kNumber}/compare`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                user_device: {
-                  name: 'Test Cardiac Monitor',
-                  intended_use: 'Continuous cardiac monitoring',
-                },
-              }),
-            });
-            
+            const response = await fetch(
+              `/api/projects/1/predicates/${mockPredicate.kNumber}/compare`,
+              {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  user_device: {
+                    name: 'Test Cardiac Monitor',
+                    intended_use: 'Continuous cardiac monitoring',
+                  },
+                }),
+              }
+            );
+
             if (response.ok) {
               const result = await response.json();
               setComparison(result);
@@ -524,35 +581,41 @@ describe('Regulatory Analysis Integration Tests', () => {
             <button onClick={handleCompare} disabled={loading}>
               {loading ? 'Comparing...' : 'Compare with Predicate'}
             </button>
-            
+
             {comparison && (
               <div data-testid="comparison-results">
                 <div data-testid="similarities">
                   <h3>Similarities</h3>
-                  {comparison.comparison.similarities.map((sim: any, index: number) => (
-                    <div key={index} data-testid={`similarity-${index}`}>
-                      {sim.category}: {sim.similarity}
-                    </div>
-                  ))}
+                  {comparison.comparison.similarities.map(
+                    (sim: any, index: number) => (
+                      <div key={index} data-testid={`similarity-${index}`}>
+                        {sim.category}: {sim.similarity}
+                      </div>
+                    )
+                  )}
                 </div>
-                
+
                 <div data-testid="differences">
                   <h3>Differences</h3>
-                  {comparison.comparison.differences.map((diff: any, index: number) => (
-                    <div key={index} data-testid={`difference-${index}`}>
-                      {diff.category}: {diff.impact} impact
-                    </div>
-                  ))}
+                  {comparison.comparison.differences.map(
+                    (diff: any, index: number) => (
+                      <div key={index} data-testid={`difference-${index}`}>
+                        {diff.category}: {diff.impact} impact
+                      </div>
+                    )
+                  )}
                 </div>
-                
+
                 <div data-testid="risk-assessment">
                   Risk: {comparison.comparison.riskAssessment}
                 </div>
-                
+
                 <div data-testid="testing-recommendations">
-                  {comparison.comparison.testingRecommendations.map((rec: string, index: number) => (
-                    <div key={index}>{rec}</div>
-                  ))}
+                  {comparison.comparison.testingRecommendations.map(
+                    (rec: string, index: number) => (
+                      <div key={index}>{rec}</div>
+                    )
+                  )}
                 </div>
               </div>
             )}
@@ -573,15 +636,24 @@ describe('Regulatory Analysis Integration Tests', () => {
       });
 
       // Wait for comparison results
-      await waitFor(() => {
-        expect(screen.getByTestId('comparison-results')).toBeInTheDocument();
-        expect(screen.getByText('Similarities')).toBeInTheDocument();
-        expect(screen.getByText('Differences')).toBeInTheDocument();
-        expect(screen.getByTestId('similarity-0')).toHaveTextContent('Intended Use: identical');
-        expect(screen.getByTestId('difference-0')).toHaveTextContent('Power Source: medium impact');
-        expect(screen.getByText('Risk: low')).toBeInTheDocument();
-        expect(screen.getByText('Biocompatibility testing for battery materials')).toBeInTheDocument();
-      }, { timeout: 2000 });
+      await waitFor(
+        () => {
+          expect(screen.getByTestId('comparison-results')).toBeInTheDocument();
+          expect(screen.getByText('Similarities')).toBeInTheDocument();
+          expect(screen.getByText('Differences')).toBeInTheDocument();
+          expect(screen.getByTestId('similarity-0')).toHaveTextContent(
+            'Intended Use: identical'
+          );
+          expect(screen.getByTestId('difference-0')).toHaveTextContent(
+            'Power Source: medium impact'
+          );
+          expect(screen.getByText('Risk: low')).toBeInTheDocument();
+          expect(
+            screen.getByText('Biocompatibility testing for battery materials')
+          ).toBeInTheDocument();
+        },
+        { timeout: 2000 }
+      );
     });
   });
 
@@ -619,13 +691,17 @@ describe('Regulatory Analysis Integration Tests', () => {
       ]);
 
       // Mock the useProjectContext hook to return our test project
-      const mockUseProjectContext = require('@/components/providers/ProjectContextProvider').useProjectContext;
+      const mockUseProjectContext =
+        require('@/components/providers/ProjectContextProvider').useProjectContext;
       mockUseProjectContext.mockReturnValue({
         state: {
           currentProject: mockProject,
           isLoading: false,
           availableCommands: [
-            { command: '/predicate-search', description: 'Find predicate devices' },
+            {
+              command: '/predicate-search',
+              description: 'Find predicate devices',
+            },
             { command: '/classify-device', description: 'Classify device' },
           ],
         },
@@ -646,12 +722,14 @@ describe('Regulatory Analysis Integration Tests', () => {
 
       // Should show chat interface
       expect(screen.getByTestId('copilot-sidebar')).toBeInTheDocument();
-      expect(screen.getByPlaceholderText('Type your message...')).toBeInTheDocument();
+      expect(
+        screen.getByPlaceholderText('Type your message...')
+      ).toBeInTheDocument();
 
       // Test slash command execution
       const chatInput = screen.getByPlaceholderText('Type your message...');
       await user.type(chatInput, '/predicate-search');
-      
+
       const sendBtn = screen.getByText('Send');
       await user.click(sendBtn);
 
@@ -669,7 +747,8 @@ describe('Regulatory Analysis Integration Tests', () => {
         status: 'draft',
       };
 
-      const mockUseProjectContext = require('@/components/providers/ProjectContextProvider').useProjectContext;
+      const mockUseProjectContext =
+        require('@/components/providers/ProjectContextProvider').useProjectContext;
       mockUseProjectContext.mockReturnValue({
         state: {
           currentProject: mockProject,
@@ -697,7 +776,7 @@ describe('Regulatory Analysis Integration Tests', () => {
   describe('Citation Panel Updates', () => {
     it('should update citation panel when agent provides new sources', async () => {
       const user = userEvent.setup();
-      
+
       // Mock citation panel component
       const CitationPanelTest: React.FC = () => {
         const [citations, setCitations] = React.useState<any[]>([]);
@@ -714,7 +793,7 @@ describe('Regulatory Analysis Integration Tests', () => {
                 input: { device_type: 'cardiovascular' },
               }),
             });
-            
+
             if (response.ok) {
               const result = await response.json();
               setCitations(result.sources || []);
@@ -729,11 +808,15 @@ describe('Regulatory Analysis Integration Tests', () => {
             <button onClick={handleAgentResponse} disabled={loading}>
               {loading ? 'Searching...' : 'Search Guidance'}
             </button>
-            
+
             <div data-testid="citations-list">
               {citations.map((citation, index) => (
                 <div key={index} data-testid={`citation-${index}`}>
-                  <a href={citation.url} target="_blank" rel="noopener noreferrer">
+                  <a
+                    href={citation.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
                     {citation.title}
                   </a>
                   <span> - {citation.effectiveDate}</span>
@@ -782,12 +865,19 @@ describe('Regulatory Analysis Integration Tests', () => {
         expect(screen.getByText('Searching...')).toBeInTheDocument();
       });
 
-      await waitFor(() => {
-        expect(screen.getByTestId('citation-0')).toBeInTheDocument();
-        expect(screen.getByTestId('citation-1')).toBeInTheDocument();
-        expect(screen.getByText('FDA Guidance for Cardiovascular Devices')).toBeInTheDocument();
-        expect(screen.getByText('FDA 510(k) Database - K123456')).toBeInTheDocument();
-      }, { timeout: 1500 });
+      await waitFor(
+        () => {
+          expect(screen.getByTestId('citation-0')).toBeInTheDocument();
+          expect(screen.getByTestId('citation-1')).toBeInTheDocument();
+          expect(
+            screen.getByText('FDA Guidance for Cardiovascular Devices')
+          ).toBeInTheDocument();
+          expect(
+            screen.getByText('FDA 510(k) Database - K123456')
+          ).toBeInTheDocument();
+        },
+        { timeout: 1500 }
+      );
 
       // Verify external links
       const links = screen.getAllByRole('link');
@@ -835,9 +925,12 @@ describe('Regulatory Analysis Integration Tests', () => {
       const retryBtn = screen.getByText('Retry');
       await user.click(retryBtn);
 
-      await waitFor(() => {
-        expect(screen.getByText('Completed')).toBeInTheDocument();
-      }, { timeout: 2000 });
+      await waitFor(
+        () => {
+          expect(screen.getByText('Completed')).toBeInTheDocument();
+        },
+        { timeout: 2000 }
+      );
     });
 
     it('should handle network timeouts and connection issues', async () => {
@@ -863,9 +956,12 @@ describe('Regulatory Analysis Integration Tests', () => {
       await user.click(searchBtn);
 
       // Should eventually show error state
-      await waitFor(() => {
-        expect(screen.getByText('Error')).toBeInTheDocument();
-      }, { timeout: 6000 });
+      await waitFor(
+        () => {
+          expect(screen.getByText('Error')).toBeInTheDocument();
+        },
+        { timeout: 6000 }
+      );
     });
   });
 });

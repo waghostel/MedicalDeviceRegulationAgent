@@ -83,7 +83,12 @@ export class ABTestManager {
   /**
    * Record a metric for an A/B test
    */
-  public recordMetric(metric: Omit<ABTestMetric, 'sessionId' | 'timestamp' | 'userAgent' | 'viewport'>): void {
+  public recordMetric(
+    metric: Omit<
+      ABTestMetric,
+      'sessionId' | 'timestamp' | 'userAgent' | 'viewport'
+    >
+  ): void {
     const fullMetric: ABTestMetric = {
       ...metric,
       sessionId: this.sessionId,
@@ -91,8 +96,8 @@ export class ABTestManager {
       userAgent: navigator.userAgent,
       viewport: {
         width: window.innerWidth,
-        height: window.innerHeight
-      }
+        height: window.innerHeight,
+      },
     };
 
     this.metrics.push(fullMetric);
@@ -108,7 +113,7 @@ export class ABTestManager {
    * Get metrics for a specific test
    */
   public getTestMetrics(testId: string): ABTestMetric[] {
-    return this.metrics.filter(metric => metric.testId === testId);
+    return this.metrics.filter((metric) => metric.testId === testId);
   }
 
   /**
@@ -122,8 +127,8 @@ export class ABTestManager {
     }
 
     const testMetrics = this.getTestMetrics(testId);
-    const mockMetrics = testMetrics.filter(m => m.variant === 'mock');
-    const realMetrics = testMetrics.filter(m => m.variant === 'real');
+    const mockMetrics = testMetrics.filter((m) => m.variant === 'mock');
+    const realMetrics = testMetrics.filter((m) => m.variant === 'real');
 
     if (mockMetrics.length === 0 || realMetrics.length === 0) {
       return null; // Need both variants to compare
@@ -133,10 +138,19 @@ export class ABTestManager {
     const realStats = this.calculateStatistics(realMetrics);
 
     // Perform statistical significance test (simplified t-test)
-    const significance = this.performSignificanceTest(mockMetrics, realMetrics, testConfig.confidenceLevel);
+    const significance = this.performSignificanceTest(
+      mockMetrics,
+      realMetrics,
+      testConfig.confidenceLevel
+    );
 
     // Generate recommendation based on results
-    const recommendation = this.generateRecommendation(mockStats, realStats, significance, testConfig);
+    const recommendation = this.generateRecommendation(
+      mockStats,
+      realStats,
+      significance,
+      testConfig
+    );
 
     return {
       testId,
@@ -144,10 +158,10 @@ export class ABTestManager {
       sampleSize: testMetrics.length,
       metrics: {
         mock: mockStats,
-        real: realStats
+        real: realStats,
       },
       significance,
-      recommendation
+      recommendation,
     };
   }
 
@@ -156,7 +170,7 @@ export class ABTestManager {
    */
   public getActiveTests(): ABTestConfiguration[] {
     const now = new Date();
-    return Array.from(this.tests.values()).filter(test => {
+    return Array.from(this.tests.values()).filter((test) => {
       const startDate = new Date(test.startDate);
       const endDate = new Date(test.endDate);
       return test.enabled && now >= startDate && now <= endDate;
@@ -218,16 +232,20 @@ export class ABTestManager {
     errorCount: any;
     userInteractions: any;
   } {
-    const renderTimes = metrics.map(m => m.metrics.renderTime);
-    const apiResponseTimes = metrics.map(m => m.metrics.apiResponseTime).filter(Boolean) as number[];
-    const errorCounts = metrics.map(m => m.metrics.errorCount);
-    const userInteractions = metrics.map(m => m.metrics.userInteractions);
+    const renderTimes = metrics.map((m) => m.metrics.renderTime);
+    const apiResponseTimes = metrics
+      .map((m) => m.metrics.apiResponseTime)
+      .filter(Boolean) as number[];
+    const errorCounts = metrics.map((m) => m.metrics.errorCount);
+    const userInteractions = metrics.map((m) => m.metrics.userInteractions);
 
     return {
       renderTime: this.calculateMetricStats(renderTimes),
-      ...(apiResponseTimes.length > 0 && { apiResponseTime: this.calculateMetricStats(apiResponseTimes) }),
+      ...(apiResponseTimes.length > 0 && {
+        apiResponseTime: this.calculateMetricStats(apiResponseTimes),
+      }),
       errorCount: this.calculateMetricStats(errorCounts),
-      userInteractions: this.calculateMetricStats(userInteractions)
+      userInteractions: this.calculateMetricStats(userInteractions),
     };
   }
 
@@ -235,7 +253,9 @@ export class ABTestManager {
     const sorted = [...values].sort((a, b) => a - b);
     const mean = values.reduce((sum, val) => sum + val, 0) / values.length;
     const median = sorted[Math.floor(sorted.length / 2)];
-    const variance = values.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / values.length;
+    const variance =
+      values.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) /
+      values.length;
     const standardDeviation = Math.sqrt(variance);
     const percentile95Index = Math.floor(sorted.length * 0.95);
 
@@ -245,7 +265,7 @@ export class ABTestManager {
       standardDeviation,
       min: sorted[0],
       max: sorted[sorted.length - 1],
-      percentile95: sorted[percentile95Index]
+      percentile95: sorted[percentile95Index],
     };
   }
 
@@ -253,25 +273,44 @@ export class ABTestManager {
     mockMetrics: ABTestMetric[],
     realMetrics: ABTestMetric[],
     confidenceLevel: number
-  ): { pValue: number; isSignificant: boolean; confidenceInterval: [number, number] } {
+  ): {
+    pValue: number;
+    isSignificant: boolean;
+    confidenceInterval: [number, number];
+  } {
     // Simplified t-test implementation
     // In production, use a proper statistical library like jStat
-    
-    const mockRenderTimes = mockMetrics.map(m => m.metrics.renderTime);
-    const realRenderTimes = realMetrics.map(m => m.metrics.renderTime);
 
-    const mockMean = mockRenderTimes.reduce((sum, val) => sum + val, 0) / mockRenderTimes.length;
-    const realMean = realRenderTimes.reduce((sum, val) => sum + val, 0) / realRenderTimes.length;
+    const mockRenderTimes = mockMetrics.map((m) => m.metrics.renderTime);
+    const realRenderTimes = realMetrics.map((m) => m.metrics.renderTime);
 
-    const mockVariance = mockRenderTimes.reduce((sum, val) => sum + Math.pow(val - mockMean, 2), 0) / (mockRenderTimes.length - 1);
-    const realVariance = realRenderTimes.reduce((sum, val) => sum + Math.pow(val - realMean, 2), 0) / (realRenderTimes.length - 1);
+    const mockMean =
+      mockRenderTimes.reduce((sum, val) => sum + val, 0) /
+      mockRenderTimes.length;
+    const realMean =
+      realRenderTimes.reduce((sum, val) => sum + val, 0) /
+      realRenderTimes.length;
+
+    const mockVariance =
+      mockRenderTimes.reduce(
+        (sum, val) => sum + Math.pow(val - mockMean, 2),
+        0
+      ) /
+      (mockRenderTimes.length - 1);
+    const realVariance =
+      realRenderTimes.reduce(
+        (sum, val) => sum + Math.pow(val - realMean, 2),
+        0
+      ) /
+      (realRenderTimes.length - 1);
 
     const pooledStandardError = Math.sqrt(
-      (mockVariance / mockRenderTimes.length) + (realVariance / realRenderTimes.length)
+      mockVariance / mockRenderTimes.length +
+        realVariance / realRenderTimes.length
     );
 
     const tStatistic = (realMean - mockMean) / pooledStandardError;
-    
+
     // Simplified p-value calculation (use proper statistical library in production)
     const pValue = 2 * (1 - this.normalCDF(Math.abs(tStatistic)));
     const alpha = 1 - confidenceLevel;
@@ -280,14 +319,14 @@ export class ABTestManager {
     // Simplified confidence interval
     const marginOfError = 1.96 * pooledStandardError; // 95% CI
     const confidenceInterval: [number, number] = [
-      (realMean - mockMean) - marginOfError,
-      (realMean - mockMean) + marginOfError
+      realMean - mockMean - marginOfError,
+      realMean - mockMean + marginOfError,
     ];
 
     return {
       pValue,
       isSignificant,
-      confidenceInterval
+      confidenceInterval,
     };
   }
 
@@ -299,18 +338,20 @@ export class ABTestManager {
 
   private erf(x: number): number {
     // Simplified error function approximation
-    const a1 =  0.254829592;
+    const a1 = 0.254829592;
     const a2 = -0.284496736;
-    const a3 =  1.421413741;
+    const a3 = 1.421413741;
     const a4 = -1.453152027;
-    const a5 =  1.061405429;
-    const p  =  0.3275911;
+    const a5 = 1.061405429;
+    const p = 0.3275911;
 
     const sign = x >= 0 ? 1 : -1;
     x = Math.abs(x);
 
     const t = 1.0 / (1.0 + p * x);
-    const y = 1.0 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * Math.exp(-x * x);
+    const y =
+      1.0 -
+      ((((a5 * t + a4) * t + a3) * t + a2) * t + a1) * t * Math.exp(-x * x);
 
     return sign * y;
   }
@@ -333,11 +374,18 @@ export class ABTestManager {
     }
 
     // Check if real implementation performs better
-    const renderTimeImprovement = (mockStats.renderTime.mean - realStats.renderTime.mean) / mockStats.renderTime.mean;
-    const errorRateImprovement = (mockStats.errorCount.mean - realStats.errorCount.mean) / Math.max(mockStats.errorCount.mean, 1);
+    const renderTimeImprovement =
+      (mockStats.renderTime.mean - realStats.renderTime.mean) /
+      mockStats.renderTime.mean;
+    const errorRateImprovement =
+      (mockStats.errorCount.mean - realStats.errorCount.mean) /
+      Math.max(mockStats.errorCount.mean, 1);
 
     // Real implementation is better if it has significantly better performance
-    if (renderTimeImprovement > config.minimumDetectableEffect / 100 && errorRateImprovement >= 0) {
+    if (
+      renderTimeImprovement > config.minimumDetectableEffect / 100 &&
+      errorRateImprovement >= 0
+    ) {
       return 'migrate_to_real';
     }
 
@@ -352,19 +400,22 @@ export function useABTest(testId: string, component: string) {
   const abTestManager = React.useRef(new ABTestManager()).current;
   const [isRecording, setIsRecording] = React.useState(false);
 
-  const recordMetric = React.useCallback((
-    variant: 'mock' | 'real',
-    metrics: ABTestMetric['metrics'],
-    userId?: string
-  ) => {
-    abTestManager.recordMetric({
-      testId,
-      variant,
-      component,
-      userId,
-      metrics
-    });
-  }, [testId, component, abTestManager]);
+  const recordMetric = React.useCallback(
+    (
+      variant: 'mock' | 'real',
+      metrics: ABTestMetric['metrics'],
+      userId?: string
+    ) => {
+      abTestManager.recordMetric({
+        testId,
+        variant,
+        component,
+        userId,
+        metrics,
+      });
+    },
+    [testId, component, abTestManager]
+  );
 
   const startRecording = React.useCallback(() => {
     setIsRecording(true);
@@ -383,7 +434,7 @@ export function useABTest(testId: string, component: string) {
     startRecording,
     stopRecording,
     isRecording,
-    getResults
+    getResults,
   };
 }
 
@@ -393,7 +444,11 @@ import React from 'react';
 /**
  * Performance monitoring hook for A/B testing
  */
-export function usePerformanceMonitoring(testId: string, variant: 'mock' | 'real', component: string) {
+export function usePerformanceMonitoring(
+  testId: string,
+  variant: 'mock' | 'real',
+  component: string
+) {
   const { recordMetric } = useABTest(testId, component);
   const startTime = React.useRef<number>(0);
   const errorCount = React.useRef<number>(0);
@@ -413,22 +468,25 @@ export function usePerformanceMonitoring(testId: string, variant: 'mock' | 'real
     interactionCount.current += 1;
   }, []);
 
-  const finishMeasurement = React.useCallback((apiResponseTime?: number) => {
-    const renderTime = performance.now() - startTime.current;
-    
-    recordMetric(variant, {
-      renderTime,
-      apiResponseTime,
-      errorCount: errorCount.current,
-      userInteractions: interactionCount.current,
-      memoryUsage: (performance as any).memory?.usedJSHeapSize
-    });
-  }, [variant, recordMetric]);
+  const finishMeasurement = React.useCallback(
+    (apiResponseTime?: number) => {
+      const renderTime = performance.now() - startTime.current;
+
+      recordMetric(variant, {
+        renderTime,
+        apiResponseTime,
+        errorCount: errorCount.current,
+        userInteractions: interactionCount.current,
+        memoryUsage: (performance as any).memory?.usedJSHeapSize,
+      });
+    },
+    [variant, recordMetric]
+  );
 
   return {
     startMeasurement,
     recordError,
     recordInteraction,
-    finishMeasurement
+    finishMeasurement,
   };
 }

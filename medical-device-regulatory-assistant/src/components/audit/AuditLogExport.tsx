@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
-import { 
+import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -13,27 +13,27 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from '@/components/ui/select';
 import { Calendar } from '@/components/ui/calendar';
-import { 
+import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import { 
-  Download, 
-  FileText, 
-  Table, 
+import {
+  Download,
+  FileText,
+  Table,
   CalendarIcon,
   Loader,
   CheckCircle,
-  AlertCircle
+  AlertCircle,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { AgentInteraction, AuditLogExportOptions } from '@/types/audit';
@@ -51,29 +51,37 @@ export function AuditLogExport({ interactions, onClose }: AuditLogExportProps) {
   });
   const [customFilename, setCustomFilename] = useState('');
   const [isExporting, setIsExporting] = useState(false);
-  const [exportStatus, setExportStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [exportStatus, setExportStatus] = useState<
+    'idle' | 'success' | 'error'
+  >('idle');
 
-  const handleExportOptionChange = (key: keyof AuditLogExportOptions, value: any) => {
-    setExportOptions(prev => ({
+  const handleExportOptionChange = (
+    key: keyof AuditLogExportOptions,
+    value: any
+  ) => {
+    setExportOptions((prev) => ({
       ...prev,
-      [key]: value
+      [key]: value,
     }));
   };
 
-  const handleDateRangeChange = (field: 'start' | 'end', date: Date | undefined) => {
+  const handleDateRangeChange = (
+    field: 'start' | 'end',
+    date: Date | undefined
+  ) => {
     if (!date) return;
-    
-    const currentRange = exportOptions.dateRange || { 
+
+    const currentRange = exportOptions.dateRange || {
       start: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), // 30 days ago
-      end: new Date() 
+      end: new Date(),
     };
-    
-    setExportOptions(prev => ({
+
+    setExportOptions((prev) => ({
       ...prev,
       dateRange: {
         ...currentRange,
-        [field]: date
-      }
+        [field]: date,
+      },
     }));
   };
 
@@ -81,7 +89,7 @@ export function AuditLogExport({ interactions, onClose }: AuditLogExportProps) {
     if (customFilename.trim()) {
       return customFilename.trim();
     }
-    
+
     const timestamp = format(new Date(), 'yyyy-MM-dd_HH-mm');
     const extension = exportOptions.format.toLowerCase();
     return `audit-trail_${timestamp}.${extension}`;
@@ -90,13 +98,13 @@ export function AuditLogExport({ interactions, onClose }: AuditLogExportProps) {
   const exportToPDF = async (filteredInteractions: AgentInteraction[]) => {
     // In a real implementation, this would use a PDF generation library like jsPDF or Puppeteer
     // For now, we'll simulate the export process
-    
+
     const content = generatePDFContent(filteredInteractions);
-    
+
     // Create a blob with HTML content that could be converted to PDF
     const blob = new Blob([content], { type: 'text/html' });
     const url = URL.createObjectURL(blob);
-    
+
     const link = document.createElement('a');
     link.href = url;
     link.download = generateFilename();
@@ -108,10 +116,10 @@ export function AuditLogExport({ interactions, onClose }: AuditLogExportProps) {
 
   const exportToCSV = async (filteredInteractions: AgentInteraction[]) => {
     const csvContent = generateCSVContent(filteredInteractions);
-    
+
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
-    
+
     const link = document.createElement('a');
     link.href = url;
     link.download = generateFilename();
@@ -145,15 +153,21 @@ export function AuditLogExport({ interactions, onClose }: AuditLogExportProps) {
           <h2>Audit Trail Report</h2>
           <p>Generated on: ${format(new Date(), 'MMMM dd, yyyy at h:mm a')}</p>
           <p>Total Interactions: ${interactions.length}</p>
-          ${exportOptions.dateRange ? `
+          ${
+            exportOptions.dateRange
+              ? `
             <p>Date Range: ${format(exportOptions.dateRange.start, 'MMM dd, yyyy')} - ${format(exportOptions.dateRange.end, 'MMM dd, yyyy')}</p>
-          ` : ''}
+          `
+              : ''
+          }
         </div>
         
-        ${interactions.map((interaction, index) => `
+        ${interactions
+          .map(
+            (interaction, index) => `
           <div class="interaction">
             <div class="interaction-header">
-              <h3>Interaction ${index + 1}: ${interaction.agentAction.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}</h3>
+              <h3>Interaction ${index + 1}: ${interaction.agentAction.replace('-', ' ').replace(/\b\w/g, (l) => l.toUpperCase())}</h3>
               <p><strong>Date:</strong> ${format(interaction.createdAt, 'MMMM dd, yyyy at h:mm a')}</p>
               <p><strong>Status:</strong> ${interaction.status}</p>
               <p><strong>Execution Time:</strong> ${(interaction.executionTimeMs / 1000).toFixed(1)}s</p>
@@ -169,15 +183,23 @@ export function AuditLogExport({ interactions, onClose }: AuditLogExportProps) {
             <h4>Output Data:</h4>
             <pre>${JSON.stringify(interaction.outputData, null, 2)}</pre>
             
-            ${exportOptions.includeReasoningTraces ? `
+            ${
+              exportOptions.includeReasoningTraces
+                ? `
               <h4>Reasoning:</h4>
               <div class="reasoning">${interaction.reasoning}</div>
-            ` : ''}
+            `
+                : ''
+            }
             
-            ${exportOptions.includeSources && interaction.sources.length > 0 ? `
+            ${
+              exportOptions.includeSources && interaction.sources.length > 0
+                ? `
               <h4>Sources (${interaction.sources.length}):</h4>
               <div class="sources">
-                ${interaction.sources.map(source => `
+                ${interaction.sources
+                  .map(
+                    (source) => `
                   <div class="source">
                     <strong>${source.title}</strong><br>
                     Type: ${source.documentType}<br>
@@ -185,11 +207,17 @@ export function AuditLogExport({ interactions, onClose }: AuditLogExportProps) {
                     Effective Date: ${source.effectiveDate}<br>
                     Accessed: ${source.accessedDate}
                   </div>
-                `).join('')}
+                `
+                  )
+                  .join('')}
               </div>
-            ` : ''}
+            `
+                : ''
+            }
           </div>
-        `).join('')}
+        `
+          )
+          .join('')}
         
         <div class="footer" style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd; font-size: 12px; color: #666;">
           <p><strong>Disclaimer:</strong> This audit trail is generated by an AI system and should be reviewed by qualified regulatory professionals before use in formal submissions.</p>
@@ -202,7 +230,7 @@ export function AuditLogExport({ interactions, onClose }: AuditLogExportProps) {
       </body>
       </html>
     `;
-    
+
     return html;
   };
 
@@ -215,7 +243,7 @@ export function AuditLogExport({ interactions, onClose }: AuditLogExportProps) {
       'Confidence Score',
       'Execution Time (ms)',
       'Input Data',
-      'Output Data'
+      'Output Data',
     ];
 
     if (exportOptions.includeReasoningTraces) {
@@ -228,7 +256,7 @@ export function AuditLogExport({ interactions, onClose }: AuditLogExportProps) {
 
     const csvRows = [headers.join(',')];
 
-    interactions.forEach(interaction => {
+    interactions.forEach((interaction) => {
       const row = [
         interaction.id,
         format(interaction.createdAt, 'yyyy-MM-dd HH:mm:ss'),
@@ -237,7 +265,7 @@ export function AuditLogExport({ interactions, onClose }: AuditLogExportProps) {
         interaction.confidenceScore.toFixed(3),
         interaction.executionTimeMs.toString(),
         `"${JSON.stringify(interaction.inputData).replace(/"/g, '""')}"`,
-        `"${JSON.stringify(interaction.outputData).replace(/"/g, '""')}"`
+        `"${JSON.stringify(interaction.outputData).replace(/"/g, '""')}"`,
       ];
 
       if (exportOptions.includeReasoningTraces) {
@@ -246,7 +274,7 @@ export function AuditLogExport({ interactions, onClose }: AuditLogExportProps) {
 
       if (exportOptions.includeSources) {
         row.push(interaction.sources.length.toString());
-        row.push(`"${interaction.sources.map(s => s.url).join('; ')}"`);
+        row.push(`"${interaction.sources.map((s) => s.url).join('; ')}"`);
       }
 
       csvRows.push(row.join(','));
@@ -262,11 +290,12 @@ export function AuditLogExport({ interactions, onClose }: AuditLogExportProps) {
     try {
       // Filter interactions by date range if specified
       let filteredInteractions = interactions;
-      
+
       if (exportOptions.dateRange) {
-        filteredInteractions = interactions.filter(interaction => 
-          interaction.createdAt >= exportOptions.dateRange!.start &&
-          interaction.createdAt <= exportOptions.dateRange!.end
+        filteredInteractions = interactions.filter(
+          (interaction) =>
+            interaction.createdAt >= exportOptions.dateRange!.start &&
+            interaction.createdAt <= exportOptions.dateRange!.end
         );
       }
 
@@ -277,12 +306,11 @@ export function AuditLogExport({ interactions, onClose }: AuditLogExportProps) {
       }
 
       setExportStatus('success');
-      
+
       // Auto-close after successful export
       setTimeout(() => {
         onClose();
       }, 2000);
-      
     } catch (error) {
       console.error('Export failed:', error);
       setExportStatus('error');
@@ -293,10 +321,11 @@ export function AuditLogExport({ interactions, onClose }: AuditLogExportProps) {
 
   const getFilteredCount = () => {
     if (!exportOptions.dateRange) return interactions.length;
-    
-    return interactions.filter(interaction => 
-      interaction.createdAt >= exportOptions.dateRange!.start &&
-      interaction.createdAt <= exportOptions.dateRange!.end
+
+    return interactions.filter(
+      (interaction) =>
+        interaction.createdAt >= exportOptions.dateRange!.start &&
+        interaction.createdAt <= exportOptions.dateRange!.end
     ).length;
   };
 
@@ -319,7 +348,9 @@ export function AuditLogExport({ interactions, onClose }: AuditLogExportProps) {
             <Label>Export Format</Label>
             <Select
               value={exportOptions.format}
-              onValueChange={(value: 'PDF' | 'CSV') => handleExportOptionChange('format', value)}
+              onValueChange={(value: 'PDF' | 'CSV') =>
+                handleExportOptionChange('format', value)
+              }
             >
               <SelectTrigger>
                 <SelectValue />
@@ -364,7 +395,9 @@ export function AuditLogExport({ interactions, onClose }: AuditLogExportProps) {
                     className="flex-1 justify-start text-left font-normal"
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
-                    {exportOptions.dateRange?.start ? format(exportOptions.dateRange.start, 'MMM dd') : 'From'}
+                    {exportOptions.dateRange?.start
+                      ? format(exportOptions.dateRange.start, 'MMM dd')
+                      : 'From'}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
@@ -376,7 +409,7 @@ export function AuditLogExport({ interactions, onClose }: AuditLogExportProps) {
                   />
                 </PopoverContent>
               </Popover>
-              
+
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
@@ -385,7 +418,9 @@ export function AuditLogExport({ interactions, onClose }: AuditLogExportProps) {
                     className="flex-1 justify-start text-left font-normal"
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
-                    {exportOptions.dateRange?.end ? format(exportOptions.dateRange.end, 'MMM dd') : 'To'}
+                    {exportOptions.dateRange?.end
+                      ? format(exportOptions.dateRange.end, 'MMM dd')
+                      : 'To'}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
@@ -403,12 +438,12 @@ export function AuditLogExport({ interactions, onClose }: AuditLogExportProps) {
           {/* Export Options */}
           <div className="space-y-3">
             <Label>Include in Export</Label>
-            
+
             <div className="flex items-center space-x-2">
               <Checkbox
                 id="reasoning"
                 checked={exportOptions.includeReasoningTraces}
-                onCheckedChange={(checked) => 
+                onCheckedChange={(checked) =>
                   handleExportOptionChange('includeReasoningTraces', checked)
                 }
               />
@@ -416,12 +451,12 @@ export function AuditLogExport({ interactions, onClose }: AuditLogExportProps) {
                 Reasoning traces and analysis steps
               </Label>
             </div>
-            
+
             <div className="flex items-center space-x-2">
               <Checkbox
                 id="sources"
                 checked={exportOptions.includeSources}
-                onCheckedChange={(checked) => 
+                onCheckedChange={(checked) =>
                   handleExportOptionChange('includeSources', checked)
                 }
               />
@@ -433,8 +468,13 @@ export function AuditLogExport({ interactions, onClose }: AuditLogExportProps) {
 
           {/* Export Summary */}
           <div className="bg-muted p-3 rounded-md text-sm">
-            <p><strong>Export Summary:</strong></p>
-            <p>• {getFilteredCount()} interaction{getFilteredCount() !== 1 ? 's' : ''} will be exported</p>
+            <p>
+              <strong>Export Summary:</strong>
+            </p>
+            <p>
+              • {getFilteredCount()} interaction
+              {getFilteredCount() !== 1 ? 's' : ''} will be exported
+            </p>
             <p>• Format: {exportOptions.format}</p>
             <p>• Filename: {generateFilename()}</p>
           </div>
@@ -459,7 +499,10 @@ export function AuditLogExport({ interactions, onClose }: AuditLogExportProps) {
           <Button variant="outline" onClick={onClose} disabled={isExporting}>
             Cancel
           </Button>
-          <Button onClick={handleExport} disabled={isExporting || getFilteredCount() === 0}>
+          <Button
+            onClick={handleExport}
+            disabled={isExporting || getFilteredCount() === 0}
+          >
             {isExporting ? (
               <>
                 <Loader className="h-4 w-4 mr-2 animate-spin" />

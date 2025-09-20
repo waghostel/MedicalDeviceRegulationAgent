@@ -9,9 +9,7 @@ const mockProjects = [
   { id: 2, name: 'Test Project 2', status: 'in_progress' },
 ];
 
-const mockUsers = [
-  { id: '1', name: 'Test User', email: 'test@example.com' },
-];
+const mockUsers = [{ id: '1', name: 'Test User', email: 'test@example.com' }];
 
 // Mock server implementation
 export const server = {
@@ -56,14 +54,14 @@ export function addMockHandlers(...newHandlers: Parameters<typeof server.use>) {
  */
 export class MockWebSocketServer {
   private clients: Set<MockWebSocket> = new Set();
-  
+
   constructor() {
     // Replace global WebSocket with mock
     (global as any).WebSocket = MockWebSocket;
   }
 
   broadcast(message: any) {
-    this.clients.forEach(client => {
+    this.clients.forEach((client) => {
       if (client.readyState === MockWebSocket.OPEN) {
         client.simulateMessage(message);
       }
@@ -79,7 +77,7 @@ export class MockWebSocketServer {
   }
 
   close() {
-    this.clients.forEach(client => client.close());
+    this.clients.forEach((client) => client.close());
     this.clients.clear();
   }
 }
@@ -102,7 +100,7 @@ export class MockWebSocket {
 
   constructor(url: string) {
     this.url = url;
-    
+
     // Simulate connection opening
     setTimeout(() => {
       this.readyState = MockWebSocket.OPEN;
@@ -132,7 +130,9 @@ export class MockWebSocket {
   // Helper method to simulate receiving messages
   simulateMessage(data: any) {
     if (this.readyState === MockWebSocket.OPEN && this.onmessage) {
-      this.onmessage(new MessageEvent('message', { data: JSON.stringify(data) }));
+      this.onmessage(
+        new MessageEvent('message', { data: JSON.stringify(data) })
+      );
     }
   }
 

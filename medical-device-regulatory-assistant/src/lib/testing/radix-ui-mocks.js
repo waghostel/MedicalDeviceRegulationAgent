@@ -13,16 +13,18 @@ const SelectContext = React.createContext({
   setIsOpen: () => {},
 });
 
-const MockSelectRoot = ({ 
-  children, 
-  value, 
-  onValueChange, 
+const MockSelectRoot = ({
+  children,
+  value,
+  onValueChange,
   defaultValue,
   disabled = false,
   name,
-  required = false
+  required = false,
 }) => {
-  const [internalValue, setInternalValue] = useState(value || defaultValue || '');
+  const [internalValue, setInternalValue] = useState(
+    value || defaultValue || ''
+  );
   const [isOpen, setIsOpen] = useState(false);
 
   const handleValueChange = (newValue) => {
@@ -44,44 +46,47 @@ const MockSelectRoot = ({
     React.createElement(
       'div',
       { 'data-testid': 'select-root', 'data-disabled': disabled },
-      name && React.createElement('input', {
-        type: 'hidden',
-        name: name,
-        value: value || internalValue,
-        required: required,
-      }),
+      name &&
+        React.createElement('input', {
+          type: 'hidden',
+          name: name,
+          value: value || internalValue,
+          required: required,
+        }),
       children
     )
   );
 };
 
-const MockSelectTrigger = forwardRef(({ children, className, disabled, ...props }, ref) => {
-  const { isOpen, setIsOpen } = React.useContext(SelectContext);
+const MockSelectTrigger = forwardRef(
+  ({ children, className, disabled, ...props }, ref) => {
+    const { isOpen, setIsOpen } = React.useContext(SelectContext);
 
-  const handleClick = () => {
-    if (!disabled) {
-      setIsOpen(!isOpen);
-    }
-  };
+    const handleClick = () => {
+      if (!disabled) {
+        setIsOpen(!isOpen);
+      }
+    };
 
-  return React.createElement(
-    'button',
-    {
-      ref: ref,
-      type: 'button',
-      role: 'combobox',
-      'aria-expanded': isOpen,
-      'aria-haspopup': 'listbox',
-      className: className,
-      disabled: disabled,
-      onClick: handleClick,
-      'data-testid': 'select-trigger',
-      'data-state': isOpen ? 'open' : 'closed',
-      ...props
-    },
-    children
-  );
-});
+    return React.createElement(
+      'button',
+      {
+        ref: ref,
+        type: 'button',
+        role: 'combobox',
+        'aria-expanded': isOpen,
+        'aria-haspopup': 'listbox',
+        className: className,
+        disabled: disabled,
+        onClick: handleClick,
+        'data-testid': 'select-trigger',
+        'data-state': isOpen ? 'open' : 'closed',
+        ...props,
+      },
+      children
+    );
+  }
+);
 
 MockSelectTrigger.displayName = 'MockSelectTrigger';
 
@@ -99,7 +104,7 @@ const MockSelectContent = ({ children, className, ...props }) => {
       className: className,
       'data-testid': 'select-content',
       'data-state': 'open',
-      ...props
+      ...props,
     },
     children
   );
@@ -129,7 +134,10 @@ const MockSelectItem = ({ children, value, className, disabled = false }) => {
   );
 };
 
-const MockSelectValue = ({ placeholder = 'Select an option...', className }) => {
+const MockSelectValue = ({
+  placeholder = 'Select an option...',
+  className,
+}) => {
   const { value } = React.useContext(SelectContext);
 
   return React.createElement(
@@ -145,7 +153,12 @@ const DialogContext = React.createContext({
   setIsOpen: () => {},
 });
 
-const MockDialogRoot = ({ children, open, onOpenChange, defaultOpen = false }) => {
+const MockDialogRoot = ({
+  children,
+  open,
+  onOpenChange,
+  defaultOpen = false,
+}) => {
   const [internalOpen, setInternalOpen] = useState(open ?? defaultOpen);
 
   const handleOpenChange = (newOpen) => {
@@ -205,7 +218,12 @@ const MockDialogOverlay = ({ className }) => {
   });
 };
 
-const MockDialogContent = ({ children, className, onEscapeKeyDown, onPointerDownOutside }) => {
+const MockDialogContent = ({
+  children,
+  className,
+  onEscapeKeyDown,
+  onPointerDownOutside,
+}) => {
   const { isOpen, setIsOpen } = React.useContext(DialogContext);
 
   React.useEffect(() => {
@@ -268,14 +286,29 @@ const setupRadixUIMocks = () => {
     Item: RadixUIMocks.Select.Item,
     Value: RadixUIMocks.Select.Value,
     Portal: ({ children }) => children,
-    Viewport: ({ children }) => React.createElement('div', { 'data-testid': 'select-viewport' }, children),
-    Group: ({ children }) => React.createElement('div', { 'data-testid': 'select-group' }, children),
-    Label: ({ children, ...props }) => React.createElement('div', { 'data-testid': 'select-label', ...props }, children),
-    Separator: () => React.createElement('div', { 'data-testid': 'select-separator' }),
+    Viewport: ({ children }) =>
+      React.createElement(
+        'div',
+        { 'data-testid': 'select-viewport' },
+        children
+      ),
+    Group: ({ children }) =>
+      React.createElement('div', { 'data-testid': 'select-group' }, children),
+    Label: ({ children, ...props }) =>
+      React.createElement(
+        'div',
+        { 'data-testid': 'select-label', ...props },
+        children
+      ),
+    Separator: () =>
+      React.createElement('div', { 'data-testid': 'select-separator' }),
     Arrow: () => React.createElement('div', { 'data-testid': 'select-arrow' }),
-    Icon: ({ children }) => React.createElement('span', { 'data-testid': 'select-icon' }, children),
-    ScrollUpButton: () => React.createElement('button', { 'data-testid': 'select-scroll-up' }),
-    ScrollDownButton: () => React.createElement('button', { 'data-testid': 'select-scroll-down' }),
+    Icon: ({ children }) =>
+      React.createElement('span', { 'data-testid': 'select-icon' }, children),
+    ScrollUpButton: () =>
+      React.createElement('button', { 'data-testid': 'select-scroll-up' }),
+    ScrollDownButton: () =>
+      React.createElement('button', { 'data-testid': 'select-scroll-down' }),
   }));
 
   // Mock @radix-ui/react-dialog
@@ -285,14 +318,30 @@ const setupRadixUIMocks = () => {
     Overlay: RadixUIMocks.Dialog.Overlay,
     Content: RadixUIMocks.Dialog.Content,
     Portal: ({ children }) => children,
-    Title: ({ children, ...props }) => React.createElement('h2', { 'data-testid': 'dialog-title', ...props }, children),
-    Description: ({ children, ...props }) => React.createElement('p', { 'data-testid': 'dialog-description', ...props }, children),
-    Close: ({ children, ...props }) => React.createElement('button', { 'data-testid': 'dialog-close', ...props }, children),
+    Title: ({ children, ...props }) =>
+      React.createElement(
+        'h2',
+        { 'data-testid': 'dialog-title', ...props },
+        children
+      ),
+    Description: ({ children, ...props }) =>
+      React.createElement(
+        'p',
+        { 'data-testid': 'dialog-description', ...props },
+        children
+      ),
+    Close: ({ children, ...props }) =>
+      React.createElement(
+        'button',
+        { 'data-testid': 'dialog-close', ...props },
+        children
+      ),
   }));
 
   // Mock other commonly used Radix UI components
   jest.doMock('@radix-ui/react-dropdown-menu', () => ({
-    Root: ({ children }) => React.createElement('div', { 'data-testid': 'dropdown-root' }, children),
+    Root: ({ children }) =>
+      React.createElement('div', { 'data-testid': 'dropdown-root' }, children),
     Trigger: ({ children, asChild, ...props }) => {
       if (asChild && React.isValidElement(children)) {
         return React.cloneElement(children, {
@@ -300,32 +349,96 @@ const setupRadixUIMocks = () => {
           ...props,
         });
       }
-      return React.createElement('button', { 'data-testid': 'dropdown-trigger', ...props }, children);
+      return React.createElement(
+        'button',
+        { 'data-testid': 'dropdown-trigger', ...props },
+        children
+      );
     },
-    Content: ({ children }) => React.createElement('div', { 'data-testid': 'dropdown-content' }, children),
-    Item: ({ children, ...props }) => React.createElement('div', { 'data-testid': 'dropdown-item', ...props }, children),
+    Content: ({ children }) =>
+      React.createElement(
+        'div',
+        { 'data-testid': 'dropdown-content' },
+        children
+      ),
+    Item: ({ children, ...props }) =>
+      React.createElement(
+        'div',
+        { 'data-testid': 'dropdown-item', ...props },
+        children
+      ),
     Portal: ({ children }) => children,
-    Sub: ({ children }) => React.createElement('div', { 'data-testid': 'dropdown-sub' }, children),
+    Sub: ({ children }) =>
+      React.createElement('div', { 'data-testid': 'dropdown-sub' }, children),
     SubTrigger: Object.assign(
-      ({ children, ...props }) => React.createElement('button', { 'data-testid': 'dropdown-sub-trigger', ...props }, children),
+      ({ children, ...props }) =>
+        React.createElement(
+          'button',
+          { 'data-testid': 'dropdown-sub-trigger', ...props },
+          children
+        ),
       { displayName: 'DropdownMenuSubTrigger' }
     ),
-    SubContent: ({ children }) => React.createElement('div', { 'data-testid': 'dropdown-sub-content' }, children),
-    Group: ({ children }) => React.createElement('div', { 'data-testid': 'dropdown-group' }, children),
-    Label: ({ children, ...props }) => React.createElement('div', { 'data-testid': 'dropdown-label', ...props }, children),
-    Separator: () => React.createElement('div', { 'data-testid': 'dropdown-separator' }),
-    CheckboxItem: ({ children, ...props }) => React.createElement('div', { 'data-testid': 'dropdown-checkbox-item', ...props }, children),
-    RadioGroup: ({ children }) => React.createElement('div', { 'data-testid': 'dropdown-radio-group' }, children),
-    RadioItem: ({ children, ...props }) => React.createElement('div', { 'data-testid': 'dropdown-radio-item', ...props }, children),
-    ItemIndicator: ({ children }) => React.createElement('span', { 'data-testid': 'dropdown-item-indicator' }, children),
-    Arrow: () => React.createElement('div', { 'data-testid': 'dropdown-arrow' }),
+    SubContent: ({ children }) =>
+      React.createElement(
+        'div',
+        { 'data-testid': 'dropdown-sub-content' },
+        children
+      ),
+    Group: ({ children }) =>
+      React.createElement('div', { 'data-testid': 'dropdown-group' }, children),
+    Label: ({ children, ...props }) =>
+      React.createElement(
+        'div',
+        { 'data-testid': 'dropdown-label', ...props },
+        children
+      ),
+    Separator: () =>
+      React.createElement('div', { 'data-testid': 'dropdown-separator' }),
+    CheckboxItem: ({ children, ...props }) =>
+      React.createElement(
+        'div',
+        { 'data-testid': 'dropdown-checkbox-item', ...props },
+        children
+      ),
+    RadioGroup: ({ children }) =>
+      React.createElement(
+        'div',
+        { 'data-testid': 'dropdown-radio-group' },
+        children
+      ),
+    RadioItem: ({ children, ...props }) =>
+      React.createElement(
+        'div',
+        { 'data-testid': 'dropdown-radio-item', ...props },
+        children
+      ),
+    ItemIndicator: ({ children }) =>
+      React.createElement(
+        'span',
+        { 'data-testid': 'dropdown-item-indicator' },
+        children
+      ),
+    Arrow: () =>
+      React.createElement('div', { 'data-testid': 'dropdown-arrow' }),
   }));
 
   jest.doMock('@radix-ui/react-tooltip', () => ({
     Provider: ({ children }) => children,
-    Root: ({ children }) => React.createElement('div', { 'data-testid': 'tooltip-root' }, children),
-    Trigger: ({ children, ...props }) => React.createElement('div', { 'data-testid': 'tooltip-trigger', ...props }, children),
-    Content: ({ children }) => React.createElement('div', { 'data-testid': 'tooltip-content' }, children),
+    Root: ({ children }) =>
+      React.createElement('div', { 'data-testid': 'tooltip-root' }, children),
+    Trigger: ({ children, ...props }) =>
+      React.createElement(
+        'div',
+        { 'data-testid': 'tooltip-trigger', ...props },
+        children
+      ),
+    Content: ({ children }) =>
+      React.createElement(
+        'div',
+        { 'data-testid': 'tooltip-content' },
+        children
+      ),
     Portal: ({ children }) => children,
   }));
 };

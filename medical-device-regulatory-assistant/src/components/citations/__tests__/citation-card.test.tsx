@@ -24,7 +24,7 @@ describe('CitationCard', () => {
     title: 'Test Medical Device 510(k) Summary',
     effectiveDate: '2023-01-15',
     documentType: 'FDA_510K',
-    accessedDate: '2024-01-15'
+    accessedDate: '2024-01-15',
   };
 
   const mockOnCopy = jest.fn();
@@ -46,7 +46,9 @@ describe('CitationCard', () => {
   it('should display formatted citation in APA style by default', () => {
     render(<CitationCard citation={mockCitation} />);
 
-    const citationText = screen.getByText(/U\.S\. Food and Drug Administration/);
+    const citationText = screen.getByText(
+      /U\.S\. Food and Drug Administration/
+    );
     expect(citationText).toBeInTheDocument();
     expect(citationText.textContent).toContain('Retrieved January 15, 2024');
   });
@@ -54,7 +56,9 @@ describe('CitationCard', () => {
   it('should display formatted citation in MLA style when specified', () => {
     render(<CitationCard citation={mockCitation} format="MLA" />);
 
-    const citationText = screen.getByText(/U\.S\. Food and Drug Administration/);
+    const citationText = screen.getByText(
+      /U\.S\. Food and Drug Administration/
+    );
     expect(citationText).toBeInTheDocument();
     expect(citationText.textContent).toContain('Accessed 15 January 2024');
   });
@@ -71,7 +75,7 @@ describe('CitationCard', () => {
     const invalidCitation: SourceCitation = {
       ...mockCitation,
       title: '',
-      url: 'invalid-url'
+      url: 'invalid-url',
     };
 
     render(<CitationCard citation={invalidCitation} showValidation={true} />);
@@ -83,12 +87,7 @@ describe('CitationCard', () => {
 
   it('should copy citation to clipboard when copy button is clicked', async () => {
     const user = userEvent.setup();
-    render(
-      <CitationCard 
-        citation={mockCitation} 
-        onCopy={mockOnCopy}
-      />
-    );
+    render(<CitationCard citation={mockCitation} onCopy={mockOnCopy} />);
 
     const copyButton = screen.getByRole('button', { name: /copy citation/i });
     await user.click(copyButton);
@@ -103,12 +102,7 @@ describe('CitationCard', () => {
 
   it('should open source URL when visit button is clicked', async () => {
     const user = userEvent.setup();
-    render(
-      <CitationCard 
-        citation={mockCitation} 
-        onVisit={mockOnVisit}
-      />
-    );
+    render(<CitationCard citation={mockCitation} onVisit={mockOnVisit} />);
 
     const visitButton = screen.getByRole('button', { name: /visit source/i });
     await user.click(visitButton);
@@ -124,11 +118,9 @@ describe('CitationCard', () => {
   it('should handle copy error gracefully', async () => {
     const user = userEvent.setup();
     const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
-    
+
     // Mock clipboard to throw error
-    mockWriteText.mockRejectedValueOnce(
-      new Error('Clipboard error')
-    );
+    mockWriteText.mockRejectedValueOnce(new Error('Clipboard error'));
 
     render(<CitationCard citation={mockCitation} />);
 
@@ -165,7 +157,8 @@ describe('CitationCard', () => {
   it('should truncate long titles with title attribute', () => {
     const longTitleCitation: SourceCitation = {
       ...mockCitation,
-      title: 'This is a very long title that should be truncated in the display but still available in the title attribute for accessibility'
+      title:
+        'This is a very long title that should be truncated in the display but still available in the title attribute for accessibility',
     };
 
     render(<CitationCard citation={longTitleCitation} />);

@@ -15,7 +15,7 @@ class SimpleCIHealthChecker {
       criticalThreshold: parseInt(process.env.CI_CRITICAL_THRESHOLD) || 50,
       warningThreshold: parseInt(process.env.CI_WARNING_THRESHOLD) || 80,
     };
-    
+
     this.startTime = Date.now();
   }
 
@@ -23,47 +23,46 @@ class SimpleCIHealthChecker {
     console.log('🚀 Starting CI Health Check...');
     console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);
     console.log(`🔧 CI: ${process.env.CI ? 'true' : 'false'}`);
-    
+
     try {
       // Create reports directory
       await fs.mkdir(this.config.outputDir, { recursive: true });
-      
+
       // Generate basic health report
       const healthReport = await this.generateBasicHealthReport();
-      
+
       // Save report
       await this.saveHealthReport(healthReport);
-      
+
       // Generate dashboard
       const dashboardPath = await this.generateBasicDashboard(healthReport);
-      
+
       // Output results
       console.log('\n' + '='.repeat(60));
       console.log('📋 TEST HEALTH SUMMARY');
       console.log('='.repeat(60));
       console.log(healthReport.summary);
-      
+
       if (healthReport.details) {
         console.log('\n📝 DETAILS:');
         console.log(healthReport.details);
       }
-      
+
       console.log(`\n📊 Dashboard: ${dashboardPath}`);
       console.log('='.repeat(60));
-      
+
       // Set GitHub Actions outputs if in CI
       if (process.env.GITHUB_ACTIONS) {
         await this.setGitHubOutputs(healthReport, dashboardPath);
       }
-      
+
       // Generate step summary for GitHub Actions
       if (process.env.GITHUB_STEP_SUMMARY) {
         await this.generateStepSummary(healthReport);
       }
-      
+
       // Exit with appropriate code
       process.exit(healthReport.exitCode);
-      
     } catch (error) {
       console.error('❌ CI Health Check failed:', error);
       process.exit(1);
@@ -73,7 +72,7 @@ class SimpleCIHealthChecker {
   async generateBasicHealthReport() {
     const metrics = await this.collectBasicMetrics();
     const validation = this.validateMetrics(metrics);
-    
+
     let exitCode = 0;
     let summary = '';
     let details = '';
@@ -81,14 +80,23 @@ class SimpleCIHealthChecker {
     if (validation.criticalIssues > 0) {
       exitCode = 1;
       summary = `❌ CRITICAL: ${validation.criticalIssues} critical issues found`;
-      details = validation.issues.filter(i => i.severity === 'critical').map(i => `- ${i.message}`).join('\n');
+      details = validation.issues
+        .filter((i) => i.severity === 'critical')
+        .map((i) => `- ${i.message}`)
+        .join('\n');
     } else if (validation.highIssues > 0) {
       exitCode = process.env.CI_FAIL_ON_HIGH_ISSUES === 'true' ? 1 : 0;
       summary = `⚠️ WARNING: ${validation.highIssues} high priority issues found`;
-      details = validation.issues.filter(i => i.severity === 'high').map(i => `- ${i.message}`).join('\n');
+      details = validation.issues
+        .filter((i) => i.severity === 'high')
+        .map((i) => `- ${i.message}`)
+        .join('\n');
     } else if (validation.warnings > 0) {
       summary = `💡 INFO: ${validation.warnings} warnings found`;
-      details = validation.issues.filter(i => i.severity === 'warning').map(i => `- ${i.message}`).join('\n');
+      details = validation.issues
+        .filter((i) => i.severity === 'warning')
+        .map((i) => `- ${i.message}`)
+        .join('\n');
     } else {
       summary = `✅ SUCCESS: All tests healthy (Score: ${metrics.healthScore}/100)`;
       details = `
@@ -110,24 +118,26 @@ CI Environment: ${process.env.CI ? 'Yes' : 'No'}
 
   async collectBasicMetrics() {
     const executionTime = Date.now() - this.startTime;
-    
+
     // Check if React 19 is installed
     let react19Compatible = false;
     try {
-      const packageJson = JSON.parse(await fs.readFile('package.json', 'utf-8'));
+      const packageJson = JSON.parse(
+        await fs.readFile('package.json', 'utf-8')
+      );
       const reactVersion = packageJson.dependencies?.react || '';
       react19Compatible = reactVersion.startsWith('19.');
     } catch (error) {
       console.warn('Could not check React version');
     }
-    
+
     // Basic health score calculation
     let healthScore = 100;
-    
+
     if (executionTime > 30000) healthScore -= 20; // Slow execution
-    if (!react19Compatible) healthScore -= 30;    // Not React 19
-    if (!process.env.CI) healthScore -= 10;       // Not in CI
-    
+    if (!react19Compatible) healthScore -= 30; // Not React 19
+    if (!process.env.CI) healthScore -= 10; // Not in CI
+
     return {
       healthScore: Math.max(0, healthScore),
       executionTime,
@@ -143,7 +153,7 @@ CI Environment: ${process.env.CI ? 'Yes' : 'No'}
 
   validateMetrics(metrics) {
     const issues = [];
-    
+
     // Performance validation
     if (metrics.executionTime > 30000) {
       issues.push({
@@ -158,7 +168,7 @@ CI Environment: ${process.env.CI ? 'Yes' : 'No'}
         suggestion: 'Monitor CI pipeline performance',
       });
     }
-    
+
     // React 19 compatibility
     if (!metrics.react19Compatible) {
       issues.push({
@@ -167,7 +177,7 @@ CI Environment: ${process.env.CI ? 'Yes' : 'No'}
         suggestion: 'Ensure React 19 is properly installed',
       });
     }
-    
+
     // Health score validation
     if (metrics.healthScore < this.config.criticalThreshold) {
       issues.push({
@@ -182,24 +192,27 @@ CI Environment: ${process.env.CI ? 'Yes' : 'No'}
         suggestion: 'Consider addressing identified issues',
       });
     }
-    
+
     return {
       issues,
-      criticalIssues: issues.filter(i => i.severity === 'critical').length,
-      highIssues: issues.filter(i => i.severity === 'high').length,
-      warnings: issues.filter(i => i.severity === 'warning').length,
+      criticalIssues: issues.filter((i) => i.severity === 'critical').length,
+      highIssues: issues.filter((i) => i.severity === 'high').length,
+      warnings: issues.filter((i) => i.severity === 'warning').length,
     };
   }
 
   async saveHealthReport(report) {
-    const reportPath = path.join(this.config.outputDir, 'ci-health-report.json');
+    const reportPath = path.join(
+      this.config.outputDir,
+      'ci-health-report.json'
+    );
     await fs.writeFile(reportPath, JSON.stringify(report, null, 2));
     console.log(`📊 Health report saved: ${reportPath}`);
   }
 
   async generateBasicDashboard(report) {
     const dashboardPath = path.join(this.config.outputDir, 'dashboard.html');
-    
+
     const html = `
 <!DOCTYPE html>
 <html lang="en">
@@ -244,17 +257,25 @@ CI Environment: ${process.env.CI ? 'Yes' : 'No'}
             <div>React 19 Compatible</div>
         </div>
 
-        ${report.validation.issues.length > 0 ? `
+        ${
+          report.validation.issues.length > 0
+            ? `
         <div class="issues">
             <h2>Issues</h2>
-            ${report.validation.issues.map(issue => `
+            ${report.validation.issues
+              .map(
+                (issue) => `
                 <div class="issue ${issue.severity}">
                     <strong>${issue.severity.toUpperCase()}:</strong> ${issue.message}
                     <br><small>💡 ${issue.suggestion}</small>
                 </div>
-            `).join('')}
+            `
+              )
+              .join('')}
         </div>
-        ` : '<div class="issues"><h2>✅ No Issues Found</h2></div>'}
+        `
+            : '<div class="issues"><h2>✅ No Issues Found</h2></div>'
+        }
 
         <div class="metric">
             <h3>Environment</h3>
@@ -266,7 +287,7 @@ CI Environment: ${process.env.CI ? 'Yes' : 'No'}
 </body>
 </html>
     `.trim();
-    
+
     await fs.writeFile(dashboardPath, html);
     console.log(`📊 Dashboard generated: ${dashboardPath}`);
     return dashboardPath;
@@ -280,7 +301,7 @@ CI Environment: ${process.env.CI ? 'Yes' : 'No'}
       `summary=${report.summary.replace(/\n/g, ' ')}`,
       `react19-compatible=${report.metrics.react19Compatible}`,
     ];
-    
+
     const outputFile = process.env.GITHUB_OUTPUT;
     if (outputFile) {
       await fs.appendFile(outputFile, outputs.join('\n') + '\n');
@@ -291,7 +312,7 @@ CI Environment: ${process.env.CI ? 'Yes' : 'No'}
   async generateStepSummary(report) {
     const summaryFile = process.env.GITHUB_STEP_SUMMARY;
     if (!summaryFile) return;
-    
+
     const summary = `
 # 🧪 CI Health Check Report
 
@@ -310,14 +331,14 @@ CI Environment: ${process.env.CI ? 'Yes' : 'No'}
 ## 🚨 Issues
 
 ${report.validation.issues.length === 0 ? '✅ No issues found!' : ''}
-${report.validation.issues.map(issue => 
-  `- **${issue.severity.toUpperCase()}**: ${issue.message}`
-).join('\n')}
+${report.validation.issues
+  .map((issue) => `- **${issue.severity.toUpperCase()}**: ${issue.message}`)
+  .join('\n')}
 
 ---
 *Generated at ${report.timestamp}*
     `.trim();
-    
+
     await fs.writeFile(summaryFile, summary);
     console.log('📝 GitHub step summary generated');
   }
@@ -326,7 +347,7 @@ ${report.validation.issues.map(issue =>
 // Run if called directly
 if (require.main === module) {
   const checker = new SimpleCIHealthChecker();
-  checker.run().catch(error => {
+  checker.run().catch((error) => {
     console.error('Fatal error:', error);
     process.exit(1);
   });

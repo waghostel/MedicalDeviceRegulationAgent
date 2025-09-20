@@ -19,7 +19,14 @@ export interface FeatureFlag {
 
 export interface FeatureFlagCondition {
   type: 'user' | 'environment' | 'time' | 'custom';
-  operator: 'equals' | 'not_equals' | 'in' | 'not_in' | 'greater_than' | 'less_than' | 'contains';
+  operator:
+    | 'equals'
+    | 'not_equals'
+    | 'in'
+    | 'not_in'
+    | 'greater_than'
+    | 'less_than'
+    | 'contains';
   property: string;
   value: any;
 }
@@ -92,9 +99,13 @@ export class FeatureFlagManager {
   /**
    * Get singleton instance
    */
-  public static getInstance(config?: FeatureFlagConfiguration): FeatureFlagManager {
+  public static getInstance(
+    config?: FeatureFlagConfiguration
+  ): FeatureFlagManager {
     if (!globalFeatureFlagManager) {
-      globalFeatureFlagManager = new FeatureFlagManager(config || DEFAULT_MIGRATION_CONFIG);
+      globalFeatureFlagManager = new FeatureFlagManager(
+        config || DEFAULT_MIGRATION_CONFIG
+      );
     }
     return globalFeatureFlagManager;
   }
@@ -111,7 +122,7 @@ export class FeatureFlagManager {
    */
   private loadFlags(flags: FeatureFlag[]): void {
     this.flags.clear();
-    flags.forEach(flag => {
+    flags.forEach((flag) => {
       this.flags.set(flag.key, flag);
     });
   }
@@ -119,9 +130,12 @@ export class FeatureFlagManager {
   /**
    * Evaluate a feature flag for the given context
    */
-  public async evaluate(flagKey: string, context: FeatureFlagContext): Promise<FeatureFlagEvaluation> {
+  public async evaluate(
+    flagKey: string,
+    context: FeatureFlagContext
+  ): Promise<FeatureFlagEvaluation> {
     const cacheKey = this.getCacheKey(flagKey, context);
-    
+
     // Check cache first
     if (this.config.cacheTtl > 0) {
       const cached = this.cache.get(cacheKey);
@@ -132,22 +146,48 @@ export class FeatureFlagManager {
 
     const flag = this.flags.get(flagKey);
     if (!flag) {
-      return this.createEvaluation(flagKey, this.config.defaultEnabled, 'Flag not found', [], context);
+      return this.createEvaluation(
+        flagKey,
+        this.config.defaultEnabled,
+        'Flag not found',
+        [],
+        context
+      );
     }
 
     // Check if flag is globally disabled
     if (!flag.enabled) {
-      return this.createEvaluation(flagKey, false, 'Flag globally disabled', [], context);
+      return this.createEvaluation(
+        flagKey,
+        false,
+        'Flag globally disabled',
+        [],
+        context
+      );
     }
 
     // Evaluate rollout percentage
-    if (!this.isInRollout(context.userId || context.userEmail || '', flag.rolloutPercentage)) {
-      return this.createEvaluation(flagKey, false, 'Not in rollout percentage', [], context);
+    if (
+      !this.isInRollout(
+        context.userId || context.userEmail || '',
+        flag.rolloutPercentage
+      )
+    ) {
+      return this.createEvaluation(
+        flagKey,
+        false,
+        'Not in rollout percentage',
+        [],
+        context
+      );
     }
 
     // Evaluate conditions
-    const conditionResults = await this.evaluateConditions(flag.conditions, context);
-    const allConditionsMet = conditionResults.every(result => result.result);
+    const conditionResults = await this.evaluateConditions(
+      flag.conditions,
+      context
+    );
+    const allConditionsMet = conditionResults.every((result) => result.result);
 
     const evaluation = this.createEvaluation(
       flagKey,
@@ -173,7 +213,10 @@ export class FeatureFlagManager {
   /**
    * Simple boolean check for feature flag
    */
-  public async isEnabled(flagKey: string, context: FeatureFlagContext): Promise<boolean> {
+  public async isEnabled(
+    flagKey: string,
+    context: FeatureFlagContext
+  ): Promise<boolean> {
     const evaluation = await this.evaluate(flagKey, context);
     return evaluation.enabled;
   }
@@ -223,9 +266,9 @@ export class FeatureFlagManager {
       metadata: {
         context,
         evaluatedBy: 'FeatureFlagManager',
-        version: '1.0.0'
+        version: '1.0.0',
       },
-      evaluatedAt: new Date().toISOString()
+      evaluatedAt: new Date().toISOString(),
     };
   }
 
@@ -234,7 +277,7 @@ export class FeatureFlagManager {
       userId: context.userId,
       userEmail: context.userEmail,
       environment: context.environment,
-      component: context.component
+      component: context.component,
     });
     return `${flagKey}:${contextKey}`;
   }
@@ -252,14 +295,14 @@ export class FeatureFlagManager {
 
     // Use consistent hash-based rollout
     const hash = this.simpleHash(identifier);
-    return (hash % 100) < percentage;
+    return hash % 100 < percentage;
   }
 
   private simpleHash(str: string): number {
     let hash = 0;
     for (let i = 0; i < str.length; i++) {
       const char = str.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
+      hash = (hash << 5) - hash + char;
       hash = hash & hash; // Convert to 32-bit integer
     }
     return Math.abs(hash);
@@ -270,7 +313,7 @@ export class FeatureFlagManager {
     context: FeatureFlagContext
   ): Promise<ConditionEvaluation[]> {
     return Promise.all(
-      conditions.map(condition => this.evaluateCondition(condition, context))
+      conditions.map((condition) => this.evaluateCondition(condition, context))
     );
   }
 
@@ -280,49 +323,61 @@ export class FeatureFlagManager {
   ): Promise<ConditionEvaluation> {
     try {
       const contextValue = this.getContextValue(condition.property, context);
-      const result = this.compareValues(contextValue, condition.operator, condition.value);
-      
+      const result = this.compareValues(
+        contextValue,
+        condition.operator,
+        condition.value
+      );
+
       return {
         condition,
         result,
-        reason: result 
+        reason: result
           ? `Condition met: ${condition.property} ${condition.operator} ${condition.value}`
-          : `Condition failed: ${condition.property} (${contextValue}) ${condition.operator} ${condition.value}`
+          : `Condition failed: ${condition.property} (${contextValue}) ${condition.operator} ${condition.value}`,
       };
     } catch (error) {
       return {
         condition,
         result: false,
-        reason: `Condition evaluation error: ${error instanceof Error ? error.message : 'Unknown error'}`
+        reason: `Condition evaluation error: ${error instanceof Error ? error.message : 'Unknown error'}`,
       };
     }
   }
 
   private getContextValue(property: string, context: FeatureFlagContext): any {
     const propertyMap: Record<string, any> = {
-      'userId': context.userId,
-      'userEmail': context.userEmail,
-      'userRole': context.userRole,
-      'environment': context.environment,
-      'component': context.component,
-      'testSuite': context.testSuite,
-      'timestamp': context.timestamp,
-      ...context.customProperties
+      userId: context.userId,
+      userEmail: context.userEmail,
+      userRole: context.userRole,
+      environment: context.environment,
+      component: context.component,
+      testSuite: context.testSuite,
+      timestamp: context.timestamp,
+      ...context.customProperties,
     };
 
     return propertyMap[property];
   }
 
-  private compareValues(contextValue: any, operator: string, expectedValue: any): boolean {
+  private compareValues(
+    contextValue: any,
+    operator: string,
+    expectedValue: any
+  ): boolean {
     switch (operator) {
       case 'equals':
         return contextValue === expectedValue;
       case 'not_equals':
         return contextValue !== expectedValue;
       case 'in':
-        return Array.isArray(expectedValue) && expectedValue.includes(contextValue);
+        return (
+          Array.isArray(expectedValue) && expectedValue.includes(contextValue)
+        );
       case 'not_in':
-        return Array.isArray(expectedValue) && !expectedValue.includes(contextValue);
+        return (
+          Array.isArray(expectedValue) && !expectedValue.includes(contextValue)
+        );
       case 'greater_than':
         return Number(contextValue) > Number(expectedValue);
       case 'less_than':
@@ -345,17 +400,17 @@ export const MIGRATION_FLAGS = {
   USE_REAL_PREDICATE_DATA: 'use_real_predicate_data',
   USE_REAL_AGENT_BACKEND: 'use_real_agent_backend',
   USE_REAL_AUTH_FLOW: 'use_real_auth_flow',
-  
+
   // Feature rollout flags
   ENABLE_WEBSOCKET_UPDATES: 'enable_websocket_updates',
   ENABLE_ADVANCED_SEARCH: 'enable_advanced_search',
   ENABLE_BATCH_OPERATIONS: 'enable_batch_operations',
   ENABLE_AUDIT_LOGGING: 'enable_audit_logging',
-  
+
   // Testing and debugging flags
   ENABLE_DEBUG_MODE: 'enable_debug_mode',
   ENABLE_PERFORMANCE_MONITORING: 'enable_performance_monitoring',
-  ENABLE_ERROR_REPORTING: 'enable_error_reporting'
+  ENABLE_ERROR_REPORTING: 'enable_error_reporting',
 } as const;
 
 /**
@@ -366,7 +421,8 @@ export const DEFAULT_MIGRATION_CONFIG: FeatureFlagConfiguration = {
     {
       key: MIGRATION_FLAGS.USE_REAL_PROJECT_DATA,
       name: 'Use Real Project Data',
-      description: 'Enable real backend API calls for project data instead of mock data',
+      description:
+        'Enable real backend API calls for project data instead of mock data',
       enabled: false,
       rolloutPercentage: 0,
       conditions: [
@@ -374,8 +430,8 @@ export const DEFAULT_MIGRATION_CONFIG: FeatureFlagConfiguration = {
           type: 'environment',
           operator: 'in',
           property: 'environment',
-          value: ['development', 'staging']
-        }
+          value: ['development', 'staging'],
+        },
       ],
       metadata: {
         owner: 'frontend-team',
@@ -384,10 +440,14 @@ export const DEFAULT_MIGRATION_CONFIG: FeatureFlagConfiguration = {
         component: 'ProjectCard',
         riskLevel: 'low',
         rollbackPlan: 'Disable flag to revert to mock data',
-        successMetrics: ['component_render_time', 'api_response_time', 'error_rate']
+        successMetrics: [
+          'component_render_time',
+          'api_response_time',
+          'error_rate',
+        ],
       },
       createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+      updatedAt: new Date().toISOString(),
     },
     {
       key: MIGRATION_FLAGS.USE_REAL_CLASSIFICATION_DATA,
@@ -400,8 +460,8 @@ export const DEFAULT_MIGRATION_CONFIG: FeatureFlagConfiguration = {
           type: 'environment',
           operator: 'equals',
           property: 'environment',
-          value: 'development'
-        }
+          value: 'development',
+        },
       ],
       metadata: {
         owner: 'backend-team',
@@ -410,27 +470,35 @@ export const DEFAULT_MIGRATION_CONFIG: FeatureFlagConfiguration = {
         component: 'ClassificationWidget',
         riskLevel: 'medium',
         rollbackPlan: 'Disable flag and use cached mock responses',
-        successMetrics: ['classification_accuracy', 'api_latency', 'user_satisfaction']
+        successMetrics: [
+          'classification_accuracy',
+          'api_latency',
+          'user_satisfaction',
+        ],
       },
       createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    }
+      updatedAt: new Date().toISOString(),
+    },
   ],
   defaultEnabled: false,
   evaluationMode: 'strict',
   cacheTtl: 300, // 5 minutes
   enableLogging: true,
   enableMetrics: true,
-  fallbackBehavior: 'mock'
+  fallbackBehavior: 'mock',
 };
 
 /**
  * React hook for using feature flags in components
  */
-export function useFeatureFlag(flagKey: string, context?: Partial<FeatureFlagContext>) {
+export function useFeatureFlag(
+  flagKey: string,
+  context?: Partial<FeatureFlagContext>
+) {
   const [isEnabled, setIsEnabled] = React.useState<boolean>(false);
   const [isLoading, setIsLoading] = React.useState<boolean>(true);
-  const [evaluation, setEvaluation] = React.useState<FeatureFlagEvaluation | null>(null);
+  const [evaluation, setEvaluation] =
+    React.useState<FeatureFlagEvaluation | null>(null);
 
   React.useEffect(() => {
     const evaluateFlag = async () => {
@@ -441,7 +509,7 @@ export function useFeatureFlag(flagKey: string, context?: Partial<FeatureFlagCon
           environment: process.env.NODE_ENV || 'development',
           timestamp: new Date().toISOString(),
           customProperties: {},
-          ...context
+          ...context,
         };
 
         const result = await flagManager.evaluate(flagKey, fullContext);
@@ -461,6 +529,6 @@ export function useFeatureFlag(flagKey: string, context?: Partial<FeatureFlagCon
   return {
     isEnabled,
     isLoading,
-    evaluation
+    evaluation,
   };
 }

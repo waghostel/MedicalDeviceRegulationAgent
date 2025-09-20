@@ -8,13 +8,16 @@ export interface MockSessionProviderProps {
   session?: any;
 }
 
-export const MockSessionProvider: React.FC<MockSessionProviderProps> = ({ 
-  children, 
-  session = null 
+export const MockSessionProvider: React.FC<MockSessionProviderProps> = ({
+  children,
+  session = null,
 }) => {
   // Create a simple context provider that doesn't use next-auth internals
   return (
-    <div data-testid="mock-session-provider" data-session={session ? 'authenticated' : 'unauthenticated'}>
+    <div
+      data-testid="mock-session-provider"
+      data-session={session ? 'authenticated' : 'unauthenticated'}
+    >
       {children}
     </div>
   );

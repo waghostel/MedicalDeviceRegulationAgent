@@ -58,6 +58,6 @@ export function useAutoSave(content: string, options: UseAutoSaveOptions) {
 
   return {
     saveNow,
-    isSaving: isSavingRef.current
+    isSaving: isSavingRef.current,
   };
 }

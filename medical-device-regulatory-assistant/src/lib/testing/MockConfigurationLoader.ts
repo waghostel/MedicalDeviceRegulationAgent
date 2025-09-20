@@ -1,20 +1,20 @@
 /**
  * MockConfigurationLoader - Dynamic Mock Loading and Configuration
- * 
+ *
  * Provides dynamic loading capabilities for mock configurations from various sources
  * including JSON files, environment variables, and runtime configurations.
- * 
+ *
  * Requirements: 2.4, 6.1
  */
 
 import { z } from 'zod';
-import { 
-  MockRegistry, 
-  MockRegistryConfig, 
-  MockMetadata, 
+import {
+  MockRegistry,
+  MockRegistryConfig,
+  MockMetadata,
   MockConfiguration,
   MockLoadResult,
-  getDefaultRegistry 
+  getDefaultRegistry,
 } from './MockRegistry';
 
 // ============================================================================
@@ -40,16 +40,22 @@ export interface MockConfigurationFile {
     updatedAt: string;
   };
   registry: MockRegistryConfig;
-  mocks: Record<string, {
-    metadata: Omit<MockMetadata, 'createdAt' | 'updatedAt'>;
-    configuration: MockConfiguration;
-    implementation?: string; // Path to implementation file
-  }>;
-  presets?: Record<string, {
-    description: string;
-    mocks: string[];
-    configuration: Partial<MockRegistryConfig>;
-  }>;
+  mocks: Record<
+    string,
+    {
+      metadata: Omit<MockMetadata, 'createdAt' | 'updatedAt'>;
+      configuration: MockConfiguration;
+      implementation?: string; // Path to implementation file
+    }
+  >;
+  presets?: Record<
+    string,
+    {
+      description: string;
+      mocks: string[];
+      configuration: Partial<MockRegistryConfig>;
+    }
+  >;
 }
 
 export interface LoaderOptions {
@@ -93,16 +99,22 @@ const MockConfigurationFileSchema = z.object({
     updatedAt: z.string(),
   }),
   registry: z.any(), // Will be validated by MockRegistry
-  mocks: z.record(z.object({
-    metadata: z.any(), // Will be validated by MockRegistry
-    configuration: z.any(), // Will be validated by MockRegistry
-    implementation: z.string().optional(),
-  })),
-  presets: z.record(z.object({
-    description: z.string(),
-    mocks: z.array(z.string()),
-    configuration: z.any(),
-  })).optional(),
+  mocks: z.record(
+    z.object({
+      metadata: z.any(), // Will be validated by MockRegistry
+      configuration: z.any(), // Will be validated by MockRegistry
+      implementation: z.string().optional(),
+    })
+  ),
+  presets: z
+    .record(
+      z.object({
+        description: z.string(),
+        mocks: z.array(z.string()),
+        configuration: z.any(),
+      })
+    )
+    .optional(),
 });
 
 // ============================================================================
@@ -124,7 +136,9 @@ export class MockConfigurationLoader {
   // Configuration Loading
   // ============================================================================
 
-  public async loadConfiguration(sources?: ConfigurationSource[]): Promise<LoaderResult> {
+  public async loadConfiguration(
+    sources?: ConfigurationSource[]
+  ): Promise<LoaderResult> {
     const startTime = performance.now();
     const sourcesToLoad = sources || this.options.sources;
     const errors: string[] = [];
@@ -135,7 +149,7 @@ export class MockConfigurationLoader {
     try {
       // Sort sources by priority (higher priority first)
       const sortedSources = [...sourcesToLoad]
-        .filter(source => source.enabled)
+        .filter((source) => source.enabled)
         .sort((a, b) => b.priority - a.priority);
 
       // Load configurations from each source
@@ -143,8 +157,11 @@ export class MockConfigurationLoader {
         try {
           const config = await this.loadFromSource(source);
           if (config) {
-            this.loadedConfigurations.set(source.path || source.url || `runtime-${Date.now()}`, config);
-            
+            this.loadedConfigurations.set(
+              source.path || source.url || `runtime-${Date.now()}`,
+              config
+            );
+
             // Apply registry configuration
             if (config.registry) {
               this.registry.updateConfig(config.registry);
@@ -153,7 +170,7 @@ export class MockConfigurationLoader {
             // Load mocks from configuration
             const results = await this.loadMocksFromConfig(config);
             mockResults.push(...results);
-            
+
             loadedSources++;
             this.logDebug(`Loaded configuration from ${source.type} source`);
           }
@@ -174,7 +191,9 @@ export class MockConfigurationLoader {
       }
 
       const loadTime = performance.now() - startTime;
-      this.logDebug(`Configuration loading completed in ${loadTime.toFixed(2)}ms`);
+      this.logDebug(
+        `Configuration loading completed in ${loadTime.toFixed(2)}ms`
+      );
 
       return {
         success: errors.length === 0,
@@ -185,7 +204,6 @@ export class MockConfigurationLoader {
         warnings,
         loadTime,
       };
-
     } catch (error) {
       errors.push(`Configuration loading failed: ${error}`);
       return {
@@ -200,7 +218,9 @@ export class MockConfigurationLoader {
     }
   }
 
-  private async loadFromSource(source: ConfigurationSource): Promise<MockConfigurationFile | null> {
+  private async loadFromSource(
+    source: ConfigurationSource
+  ): Promise<MockConfigurationFile | null> {
     switch (source.type) {
       case 'file':
         return this.loadFromFile(source.path!);
@@ -215,18 +235,20 @@ export class MockConfigurationLoader {
     }
   }
 
-  private async loadFromFile(path: string): Promise<MockConfigurationFile | null> {
+  private async loadFromFile(
+    path: string
+  ): Promise<MockConfigurationFile | null> {
     try {
       // In a real implementation, this would use fs.readFile or similar
       // For testing environment, we'll simulate file loading
       const mockFileContent = this.getMockFileContent(path);
-      
+
       if (!mockFileContent) {
         throw new Error(`Configuration file not found: ${path}`);
       }
 
       const config = JSON.parse(mockFileContent);
-      
+
       if (this.options.validateOnLoad) {
         MockConfigurationFileSchema.parse(config);
       }
@@ -245,18 +267,22 @@ export class MockConfigurationLoader {
       }
 
       const config = JSON.parse(envConfig);
-      
+
       if (this.options.validateOnLoad) {
         MockConfigurationFileSchema.parse(config);
       }
 
       return config;
     } catch (error) {
-      throw new Error(`Failed to load configuration from environment: ${error}`);
+      throw new Error(
+        `Failed to load configuration from environment: ${error}`
+      );
     }
   }
 
-  private async loadFromRuntime(data: any): Promise<MockConfigurationFile | null> {
+  private async loadFromRuntime(
+    data: any
+  ): Promise<MockConfigurationFile | null> {
     try {
       if (!data) {
         return null;
@@ -272,11 +298,15 @@ export class MockConfigurationLoader {
     }
   }
 
-  private async loadFromRemote(url: string): Promise<MockConfigurationFile | null> {
+  private async loadFromRemote(
+    url: string
+  ): Promise<MockConfigurationFile | null> {
     try {
       // In a real implementation, this would use fetch or similar
       // For testing environment, we'll simulate remote loading
-      throw new Error('Remote configuration loading not implemented in test environment');
+      throw new Error(
+        'Remote configuration loading not implemented in test environment'
+      );
     } catch (error) {
       throw new Error(`Failed to load configuration from '${url}': ${error}`);
     }
@@ -286,16 +316,20 @@ export class MockConfigurationLoader {
   // Mock Loading from Configuration
   // ============================================================================
 
-  private async loadMocksFromConfig(config: MockConfigurationFile): Promise<MockLoadResult[]> {
+  private async loadMocksFromConfig(
+    config: MockConfigurationFile
+  ): Promise<MockLoadResult[]> {
     const results: MockLoadResult[] = [];
 
     for (const [mockName, mockConfig] of Object.entries(config.mocks)) {
       try {
         // Load mock implementation
         let mockImplementation: any;
-        
+
         if (mockConfig.implementation) {
-          mockImplementation = await this.loadImplementation(mockConfig.implementation);
+          mockImplementation = await this.loadImplementation(
+            mockConfig.implementation
+          );
         } else {
           // Use built-in mock implementations
           mockImplementation = this.getBuiltInMock(mockName);
@@ -337,7 +371,6 @@ export class MockConfigurationLoader {
             results.push(loadResult);
           }
         }
-
       } catch (error) {
         results.push({
           success: false,
@@ -363,7 +396,7 @@ export class MockConfigurationLoader {
       // In a real implementation, this would dynamically import the module
       // For testing environment, we'll use built-in implementations
       const implementation = this.getBuiltInMock(implementationPath);
-      
+
       if (implementation) {
         this.implementationCache.set(implementationPath, implementation);
         return implementation;
@@ -371,7 +404,9 @@ export class MockConfigurationLoader {
 
       throw new Error(`Implementation not found: ${implementationPath}`);
     } catch (error) {
-      throw new Error(`Failed to load implementation '${implementationPath}': ${error}`);
+      throw new Error(
+        `Failed to load implementation '${implementationPath}': ${error}`
+      );
     }
   }
 
@@ -381,14 +416,14 @@ export class MockConfigurationLoader {
 
   private getBuiltInMock(name: string): any {
     const builtInMocks: Record<string, any> = {
-      'useToast': this.createUseToastMock(),
-      'useEnhancedForm': this.createUseEnhancedFormMock(),
-      'useAutoSave': this.createUseAutoSaveMock(),
-      'useRealTimeValidation': this.createUseRealTimeValidationMock(),
-      'localStorage': this.createLocalStorageMock(),
-      'timers': this.createTimersMock(),
-      'fetch': this.createFetchMock(),
-      'WebSocket': this.createWebSocketMock(),
+      useToast: this.createUseToastMock(),
+      useEnhancedForm: this.createUseEnhancedFormMock(),
+      useAutoSave: this.createUseAutoSaveMock(),
+      useRealTimeValidation: this.createUseRealTimeValidationMock(),
+      localStorage: this.createLocalStorageMock(),
+      timers: this.createTimersMock(),
+      fetch: this.createFetchMock(),
+      WebSocket: this.createWebSocketMock(),
     };
 
     return builtInMocks[name];
@@ -486,7 +521,10 @@ export class MockConfigurationLoader {
   // Preset Management
   // ============================================================================
 
-  public async loadPreset(presetName: string, configName?: string): Promise<LoaderResult> {
+  public async loadPreset(
+    presetName: string,
+    configName?: string
+  ): Promise<LoaderResult> {
     const startTime = performance.now();
     const errors: string[] = [];
     const warnings: string[] = [];
@@ -495,7 +533,7 @@ export class MockConfigurationLoader {
     try {
       // Find the configuration containing the preset
       let targetConfig: MockConfigurationFile | null = null;
-      
+
       if (configName) {
         targetConfig = this.loadedConfigurations.get(configName) || null;
       } else {
@@ -508,7 +546,11 @@ export class MockConfigurationLoader {
         }
       }
 
-      if (!targetConfig || !targetConfig.presets || !targetConfig.presets[presetName]) {
+      if (
+        !targetConfig ||
+        !targetConfig.presets ||
+        !targetConfig.presets[presetName]
+      ) {
         errors.push(`Preset '${presetName}' not found`);
         return {
           success: false,
@@ -535,7 +577,9 @@ export class MockConfigurationLoader {
       }
 
       const loadTime = performance.now() - startTime;
-      this.logDebug(`Preset '${presetName}' loaded in ${loadTime.toFixed(2)}ms`);
+      this.logDebug(
+        `Preset '${presetName}' loaded in ${loadTime.toFixed(2)}ms`
+      );
 
       return {
         success: errors.length === 0,
@@ -546,7 +590,6 @@ export class MockConfigurationLoader {
         warnings,
         loadTime,
       };
-
     } catch (error) {
       errors.push(`Failed to load preset '${presetName}': ${error}`);
       return {
@@ -561,8 +604,16 @@ export class MockConfigurationLoader {
     }
   }
 
-  public listPresets(): Array<{ name: string; description: string; mocks: string[] }> {
-    const presets: Array<{ name: string; description: string; mocks: string[] }> = [];
+  public listPresets(): Array<{
+    name: string;
+    description: string;
+    mocks: string[];
+  }> {
+    const presets: Array<{
+      name: string;
+      description: string;
+      mocks: string[];
+    }> = [];
 
     for (const config of this.loadedConfigurations.values()) {
       if (config.presets) {
@@ -585,12 +636,14 @@ export class MockConfigurationLoader {
 
   private async autoLoadMocks(): Promise<void> {
     const enabledMocks = this.registry.list({ enabled: true, loaded: false });
-    
+
     for (const entry of enabledMocks) {
       try {
         await this.registry.load(entry.metadata.name);
       } catch (error) {
-        this.logDebug(`Failed to auto-load mock '${entry.metadata.name}': ${error}`);
+        this.logDebug(
+          `Failed to auto-load mock '${entry.metadata.name}': ${error}`
+        );
       }
     }
   }
@@ -614,72 +667,76 @@ export class MockConfigurationLoader {
   private getMockFileContent(path: string): string | null {
     // Simulate file content for common configuration files
     const mockFiles: Record<string, string> = {
-      'mock-config.json': JSON.stringify({
-        version: '1.0.0',
-        metadata: {
-          name: 'Test Mock Configuration',
-          description: 'Configuration for test infrastructure mocks',
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        },
-        registry: {
+      'mock-config.json': JSON.stringify(
+        {
           version: '1.0.0',
-          react: {
-            version: '19.1.0',
-            compatibility: 'strict',
-            errorHandling: 'aggregate',
+          metadata: {
+            name: 'Test Mock Configuration',
+            description: 'Configuration for test infrastructure mocks',
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
           },
-          mocks: {},
-          globalOptions: {
-            autoCleanup: true,
-            performanceTracking: true,
-            debugMode: true,
-            strictMode: false,
-          },
-        },
-        mocks: {
-          useToast: {
-            metadata: {
-              name: 'useToast',
-              version: '1.0.0',
-              type: 'hook',
-              dependencies: [],
-              compatibleVersions: ['19.1.0'],
-              description: 'Mock for useToast hook',
-              tags: ['hook', 'toast', 'ui'],
+          registry: {
+            version: '1.0.0',
+            react: {
+              version: '19.1.0',
+              compatibility: 'strict',
+              errorHandling: 'aggregate',
             },
-            configuration: {
-              enabled: true,
+            mocks: {},
+            globalOptions: {
+              autoCleanup: true,
+              performanceTracking: true,
+              debugMode: true,
+              strictMode: false,
             },
           },
-          useEnhancedForm: {
-            metadata: {
-              name: 'useEnhancedForm',
-              version: '1.0.0',
-              type: 'hook',
-              dependencies: ['useToast'],
-              compatibleVersions: ['19.1.0'],
-              description: 'Mock for useEnhancedForm hook',
-              tags: ['hook', 'form', 'validation'],
+          mocks: {
+            useToast: {
+              metadata: {
+                name: 'useToast',
+                version: '1.0.0',
+                type: 'hook',
+                dependencies: [],
+                compatibleVersions: ['19.1.0'],
+                description: 'Mock for useToast hook',
+                tags: ['hook', 'toast', 'ui'],
+              },
+              configuration: {
+                enabled: true,
+              },
             },
-            configuration: {
-              enabled: true,
+            useEnhancedForm: {
+              metadata: {
+                name: 'useEnhancedForm',
+                version: '1.0.0',
+                type: 'hook',
+                dependencies: ['useToast'],
+                compatibleVersions: ['19.1.0'],
+                description: 'Mock for useEnhancedForm hook',
+                tags: ['hook', 'form', 'validation'],
+              },
+              configuration: {
+                enabled: true,
+              },
             },
           },
-        },
-        presets: {
-          'enhanced-forms': {
-            description: 'Complete enhanced form testing setup',
-            mocks: ['useToast', 'useEnhancedForm', 'localStorage', 'timers'],
-            configuration: {
-              globalOptions: {
-                debugMode: true,
-                strictMode: false,
+          presets: {
+            'enhanced-forms': {
+              description: 'Complete enhanced form testing setup',
+              mocks: ['useToast', 'useEnhancedForm', 'localStorage', 'timers'],
+              configuration: {
+                globalOptions: {
+                  debugMode: true,
+                  strictMode: false,
+                },
               },
             },
           },
         },
-      }, null, 2),
+        null,
+        2
+      ),
     };
 
     return mockFiles[path] || null;
@@ -722,15 +779,24 @@ export function getDefaultLoader(): MockConfigurationLoader {
   return defaultLoader;
 }
 
-export function loadMockConfiguration(sources?: ConfigurationSource[]): Promise<LoaderResult> {
+export function loadMockConfiguration(
+  sources?: ConfigurationSource[]
+): Promise<LoaderResult> {
   return getDefaultLoader().loadConfiguration(sources);
 }
 
-export function loadMockPreset(presetName: string, configName?: string): Promise<LoaderResult> {
+export function loadMockPreset(
+  presetName: string,
+  configName?: string
+): Promise<LoaderResult> {
   return getDefaultLoader().loadPreset(presetName, configName);
 }
 
-export function listMockPresets(): Array<{ name: string; description: string; mocks: string[] }> {
+export function listMockPresets(): Array<{
+  name: string;
+  description: string;
+  mocks: string[];
+}> {
   return getDefaultLoader().listPresets();
 }
 

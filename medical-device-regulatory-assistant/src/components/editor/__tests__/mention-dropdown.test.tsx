@@ -10,22 +10,25 @@ const mockMentionItems: MentionItem[] = [
     type: 'document',
     label: 'Predicate Analysis Report',
     value: '@predicate-analysis-report',
-    metadata: { type: 'predicate-analysis', updatedAt: new Date('2024-01-01') }
+    metadata: { type: 'predicate-analysis', updatedAt: new Date('2024-01-01') },
   },
   {
     id: '2',
     type: 'project',
     label: 'Device Classification Study',
     value: '@device-classification-study',
-    metadata: { type: 'device-classification', updatedAt: new Date('2024-01-02') }
+    metadata: {
+      type: 'device-classification',
+      updatedAt: new Date('2024-01-02'),
+    },
   },
   {
     id: '3',
     type: 'predicate',
     label: 'K123456 - Similar Device',
     value: '@k123456-similar-device',
-    metadata: { kNumber: 'K123456' }
-  }
+    metadata: { kNumber: 'K123456' },
+  },
 ];
 
 describe('MentionDropdown', () => {
@@ -36,7 +39,7 @@ describe('MentionDropdown', () => {
     query: '',
     position: { top: 100, left: 50 },
     onSelect: mockOnSelect,
-    onClose: mockOnClose
+    onClose: mockOnClose,
   };
 
   beforeEach(() => {
@@ -56,13 +59,17 @@ describe('MentionDropdown', () => {
 
     expect(screen.getByText('Predicate Analysis Report')).toBeInTheDocument();
     expect(screen.getByText('K123456 - Similar Device')).toBeInTheDocument();
-    expect(screen.queryByText('Device Classification Study')).not.toBeInTheDocument();
+    expect(
+      screen.queryByText('Device Classification Study')
+    ).not.toBeInTheDocument();
   });
 
   it('shows no results message when no items match query', () => {
     render(<MentionDropdown {...defaultProps} query="nonexistent" />);
 
-    expect(screen.getByText('No items found for "nonexistent"')).toBeInTheDocument();
+    expect(
+      screen.getByText('No items found for "nonexistent"')
+    ).toBeInTheDocument();
   });
 
   it('calls onSelect when item is clicked', async () => {
@@ -78,13 +85,17 @@ describe('MentionDropdown', () => {
     render(<MentionDropdown {...defaultProps} />);
 
     // First item should be selected by default
-    expect(screen.getByText('Predicate Analysis Report').closest('div')).toHaveClass('bg-blue-50');
+    expect(
+      screen.getByText('Predicate Analysis Report').closest('div')
+    ).toHaveClass('bg-blue-50');
 
     // Press arrow down
     fireEvent.keyDown(document, { key: 'ArrowDown' });
-    
+
     // Second item should be selected
-    expect(screen.getByText('Device Classification Study').closest('div')).toHaveClass('bg-blue-50');
+    expect(
+      screen.getByText('Device Classification Study').closest('div')
+    ).toHaveClass('bg-blue-50');
   });
 
   it('selects item with Enter key', () => {
@@ -122,12 +133,15 @@ describe('MentionDropdown', () => {
 
     // Check that different icons are rendered (we can't easily test the specific icons,
     // but we can verify they're different elements)
-    const items = screen.getAllByRole('generic').filter(el => 
-      el.textContent?.includes('document') || 
-      el.textContent?.includes('project') || 
-      el.textContent?.includes('predicate')
-    );
-    
+    const items = screen
+      .getAllByRole('generic')
+      .filter(
+        (el) =>
+          el.textContent?.includes('document') ||
+          el.textContent?.includes('project') ||
+          el.textContent?.includes('predicate')
+      );
+
     expect(items.length).toBeGreaterThan(0);
   });
 
@@ -141,11 +155,11 @@ describe('MentionDropdown', () => {
 
   it('positions dropdown correctly', () => {
     const { container } = render(<MentionDropdown {...defaultProps} />);
-    
+
     const dropdown = container.firstChild as HTMLElement;
     expect(dropdown).toHaveStyle({
       top: '100px',
-      left: '50px'
+      left: '50px',
     });
   });
 
@@ -155,11 +169,13 @@ describe('MentionDropdown', () => {
     // Navigate to last item
     fireEvent.keyDown(document, { key: 'ArrowDown' });
     fireEvent.keyDown(document, { key: 'ArrowDown' });
-    
+
     // Navigate past last item should wrap to first
     fireEvent.keyDown(document, { key: 'ArrowDown' });
-    
-    expect(screen.getByText('Predicate Analysis Report').closest('div')).toHaveClass('bg-blue-50');
+
+    expect(
+      screen.getByText('Predicate Analysis Report').closest('div')
+    ).toHaveClass('bg-blue-50');
   });
 
   it('handles case-insensitive filtering', () => {

@@ -91,7 +91,8 @@ Based on the intended use and technological characteristics, this device is clas
     id: 'predicate-comparison',
     name: 'Predicate Device Comparison',
     category: '510(k) Submission',
-    description: 'Side-by-side comparison with predicate devices for substantial equivalence',
+    description:
+      'Side-by-side comparison with predicate devices for substantial equivalence',
     placeholders: [
       {
         key: 'device_name',
@@ -397,7 +398,8 @@ export function renderTemplate(
 
   // Replace all placeholders with provided values
   template.placeholders.forEach((placeholder) => {
-    const value = placeholderValues[placeholder.key] || `[${placeholder.label}]`;
+    const value =
+      placeholderValues[placeholder.key] || `[${placeholder.label}]`;
     const regex = new RegExp(`{{${placeholder.key}}}`, 'g');
     renderedContent = renderedContent.replace(regex, value);
   });
@@ -409,7 +411,10 @@ export function renderTemplate(
       const key = match.replace(/[{}]/g, '');
       const placeholder = template.placeholders.find((p) => p.key === key);
       if (placeholder) {
-        renderedContent = renderedContent.replace(match, `[${placeholder.label}]`);
+        renderedContent = renderedContent.replace(
+          match,
+          `[${placeholder.label}]`
+        );
       }
     });
   }
@@ -420,7 +425,9 @@ export function renderTemplate(
 /**
  * Get template by ID
  */
-export function getTemplateById(templateId: string): DocumentTemplate | undefined {
+export function getTemplateById(
+  templateId: string
+): DocumentTemplate | undefined {
   return documentTemplates.find((template) => template.id === templateId);
 }
 
@@ -453,9 +460,15 @@ export function validatePlaceholderValues(
       errors.push(`${placeholder.label} is required`);
     }
 
-    if (placeholder.type === 'select' && placeholder.options && values[placeholder.key]) {
+    if (
+      placeholder.type === 'select' &&
+      placeholder.options &&
+      values[placeholder.key]
+    ) {
       if (!placeholder.options.includes(values[placeholder.key])) {
-        errors.push(`${placeholder.label} must be one of: ${placeholder.options.join(', ')}`);
+        errors.push(
+          `${placeholder.label} must be one of: ${placeholder.options.join(', ')}`
+        );
       }
     }
 

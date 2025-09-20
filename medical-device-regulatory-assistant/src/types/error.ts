@@ -1,3 +1,18 @@
+// Type guard for error objects
+function isErrorWithStatus(error: unknown): error is {
+  status: number;
+  message?: string;
+  details?: Record<string, unknown>;
+} {
+  return typeof error === 'object' && error !== null && 'status' in error;
+}
+
+function isErrorWithName(
+  error: unknown
+): error is { name: string; code?: string } {
+  return typeof error === 'object' && error !== null && 'name' in error;
+}
+
 /**
  * Comprehensive error types for the Medical Device Regulatory Assistant
  */
@@ -55,24 +70,24 @@ export interface ProjectError extends BaseError {
   type: 'project';
   projectId?: number;
   operation?: 'create' | 'read' | 'update' | 'delete' | 'export';
-  conflictData?: any;
+  conflictData?: Record<string, unknown>;
 }
 
 export interface AgentError extends BaseError {
   type: 'agent';
   agentType?: string;
   step?: string;
-  context?: Record<string, any>;
+  context?: Record<string, unknown>;
 }
 
-export type AppError = 
-  | NetworkError 
-  | AuthenticationError 
-  | ValidationError 
-  | FDAAPIError 
-  | ServerError 
-  | TimeoutError 
-  | ProjectError 
+export type AppError =
+  | NetworkError
+  | AuthenticationError
+  | ValidationError
+  | FDAAPIError
+  | ServerError
+  | TimeoutError
+  | ProjectError
   | AgentError;
 
 /**
@@ -86,7 +101,7 @@ export class APIError extends Error {
   public readonly requestId?: string;
   public readonly userMessage?: string;
   public readonly suggestions: string[];
-  public readonly details?: any;
+  public readonly details?: Record<string, unknown>;
   public readonly retryable: boolean;
   public readonly retryAfter?: number;
 
@@ -100,16 +115,16 @@ export class APIError extends Error {
     this.userMessage = error.userMessage || this.generateUserMessage(error);
     this.suggestions = error.suggestions || this.generateSuggestions(error);
     this.details = originalError;
-    
+
     // Determine if error is retryable
     this.retryable = this.isRetryable(error);
     this.retryAfter = this.getRetryAfter(error);
-    
+
     // Set status for HTTP errors
     if ('status' in error) {
       this.status = error.status;
     }
-    
+
     // Maintain proper stack trace
     if (Error.captureStackTrace) {
       Error.captureStackTrace(this, APIError);
@@ -130,7 +145,7 @@ export class APIError extends Error {
       case 'fda-api':
         return 'FDA database is temporarily unavailable. You can continue with cached data or try again later.';
       case 'server':
-        return error.status >= 500 
+        return error.status >= 500
           ? 'Server is experiencing issues. Please try again in a few minutes.'
           : 'The request could not be completed. Please check your input and try again.';
       case 'timeout':
@@ -154,70 +169,70 @@ export class APIError extends Error {
           'Check your internet connection',
           'Try refreshing the page',
           'Disable VPN if using one',
-          'Contact your network administrator'
+          'Contact your network administrator',
         ];
       case 'auth':
         return [
           'Sign out and sign back in',
           'Clear browser cache and cookies',
           'Try using an incognito/private window',
-          'Contact support if issue persists'
+          'Contact support if issue persists',
         ];
       case 'validation':
         return [
           'Check all required fields are filled',
           'Ensure data formats are correct',
           'Review field-specific requirements',
-          'Contact support for validation rules'
+          'Contact support for validation rules',
         ];
       case 'fda-api':
         return [
           'Try again in a few minutes',
           'Use cached results if available',
           'Perform manual searches as backup',
-          'Check FDA.gov status page'
+          'Check FDA.gov status page',
         ];
       case 'server':
-        return error.status >= 500 
+        return error.status >= 500
           ? [
               'Wait a few minutes and try again',
               'Check system status page',
               'Contact support if issue persists',
-              'Try a different browser'
+              'Try a different browser',
             ]
           : [
               'Check your input data',
               'Ensure you have proper permissions',
               'Try refreshing the page',
-              'Contact support with error details'
+              'Contact support with error details',
             ];
       case 'timeout':
         return [
           'Try the operation again',
           'Break large requests into smaller parts',
           'Check your internet connection speed',
-          'Contact support for complex operations'
+          'Contact support for complex operations',
         ];
       case 'project':
         return [
           'Refresh the project data',
           'Check if another user modified the project',
           'Try the operation again',
-          'Contact support if issue persists'
+          'Contact support if issue persists',
         ];
       case 'agent':
         return [
           'Try rephrasing your request',
           'Break complex requests into steps',
           'Check if FDA services are available',
-          'Use manual tools as backup'
+          'Use manual tools as backup',
         ];
       default:
         return [
           'Try refreshing the page',
           'Clear browser cache',
           'Try again in a few minutes',
-          'Contact support with error details'
+          'Contact support with error details',
         ];
     }
   }
@@ -247,7 +262,7 @@ export class APIError extends Error {
     if ('retryAfter' in error && error.retryAfter) {
       return error.retryAfter;
     }
-    
+
     switch (error.type) {
       case 'network':
         return 5;
@@ -285,7 +300,10 @@ export class APIError extends Error {
   /**
    * Create APIError from various error sources
    */
-  static fromError(error: any, context?: Partial<AppError>): APIError {
+  static fromError(
+    error: Error | unknown,
+    context?: Partial<AppError>
+  ): APIError {
     // If already an APIError, return as-is
     if (error instanceof APIError) {
       return error;
@@ -303,7 +321,10 @@ export class APIError extends Error {
     }
 
     // Handle timeout errors
-    if (error.name === 'AbortError' || error.code === 'TIMEOUT') {
+    if (
+      isErrorWithName(error) &&
+      (error.name === 'AbortError' || error.code === 'TIMEOUT')
+    ) {
       const timeoutError: TimeoutError = {
         type: 'timeout',
         message: 'Request timeout',
@@ -315,7 +336,7 @@ export class APIError extends Error {
     }
 
     // Handle HTTP errors
-    if (error.status) {
+    if (isErrorWithStatus(error)) {
       if (error.status === 401) {
         const authError: AuthenticationError = {
           type: 'auth',
@@ -375,7 +396,10 @@ export class APIError extends Error {
     return new APIError(networkError);
   }
 
-  static auth(message?: string, options?: Partial<AuthenticationError>): APIError {
+  static auth(
+    message?: string,
+    options?: Partial<AuthenticationError>
+  ): APIError {
     const authError: AuthenticationError = {
       type: 'auth',
       message: message || 'Authentication failed',
@@ -385,7 +409,10 @@ export class APIError extends Error {
     return new APIError(authError);
   }
 
-  static validation(message?: string, options?: Partial<ValidationError>): APIError {
+  static validation(
+    message?: string,
+    options?: Partial<ValidationError>
+  ): APIError {
     const validationError: ValidationError = {
       type: 'validation',
       message: message || 'Validation failed',
@@ -405,7 +432,11 @@ export class APIError extends Error {
     return new APIError(fdaError);
   }
 
-  static project(operation: ProjectError['operation'], message?: string, options?: Partial<ProjectError>): APIError {
+  static project(
+    operation: ProjectError['operation'],
+    message?: string,
+    options?: Partial<ProjectError>
+  ): APIError {
     const projectError: ProjectError = {
       type: 'project',
       message: message || `Project ${operation} failed`,
@@ -444,6 +475,6 @@ export interface ErrorReport {
     timestamp: string;
     message: string;
     level: 'info' | 'warning' | 'error';
-    data?: any;
+    data?: unknown;
   }>;
 }

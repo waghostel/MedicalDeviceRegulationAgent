@@ -5,7 +5,10 @@
 
 import React from 'react';
 import { screen, fireEvent, waitFor } from '@testing-library/react';
-import { renderWithProviders, createMockSession } from '@/lib/testing/test-utils';
+import {
+  renderWithProviders,
+  createMockSession,
+} from '@/lib/testing/test-utils';
 import { ClassificationWidget } from '../classification-widget';
 import { generateMockDeviceClassification } from '@/lib/mock-data';
 
@@ -16,7 +19,8 @@ describe('ClassificationWidget Component', () => {
     productCode: 'LRH',
     regulatoryPathway: '510k',
     confidenceScore: 0.87,
-    reasoning: 'Device matches Class II cardiovascular monitoring device characteristics',
+    reasoning:
+      'Device matches Class II cardiovascular monitoring device characteristics',
     cfrSections: ['21 CFR 870.2300', '21 CFR 870.2310', '21 CFR 870.2320'],
   });
 
@@ -31,26 +35,38 @@ describe('ClassificationWidget Component', () => {
 
   describe('Pending State', () => {
     it('renders pending state when no classification is provided', () => {
-      renderWithProviders(
-        <ClassificationWidget {...defaultProps} />,
-        { session: mockSession }
-      );
+      renderWithProviders(<ClassificationWidget {...defaultProps} />, {
+        session: mockSession,
+      });
 
       expect(screen.getByText('Device Classification')).toBeInTheDocument();
       expect(screen.getByText('Pending')).toBeInTheDocument();
-      expect(screen.getByText('Determine FDA device class and regulatory pathway')).toBeInTheDocument();
-      expect(screen.getByText('Device classification analysis has not been performed yet.')).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: /start classification analysis/i })).toBeInTheDocument();
+      expect(
+        screen.getByText('Determine FDA device class and regulatory pathway')
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          'Device classification analysis has not been performed yet.'
+        )
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole('button', { name: /start classification analysis/i })
+      ).toBeInTheDocument();
     });
 
     it('calls onStartClassification when start button is clicked', () => {
       const mockOnStartClassification = jest.fn();
       renderWithProviders(
-        <ClassificationWidget {...defaultProps} onStartClassification={mockOnStartClassification} />,
+        <ClassificationWidget
+          {...defaultProps}
+          onStartClassification={mockOnStartClassification}
+        />,
         { session: mockSession }
       );
 
-      const startButton = screen.getByRole('button', { name: /start classification analysis/i });
+      const startButton = screen.getByRole('button', {
+        name: /start classification analysis/i,
+      });
       fireEvent.click(startButton);
 
       expect(mockOnStartClassification).toHaveBeenCalled();
@@ -65,12 +81,16 @@ describe('ClassificationWidget Component', () => {
       );
 
       expect(screen.getByText('Analyzing...')).toBeInTheDocument();
-      expect(screen.getByText('Analyzing device characteristics and FDA regulations...')).toBeInTheDocument();
-      
+      expect(
+        screen.getByText(
+          'Analyzing device characteristics and FDA regulations...'
+        )
+      ).toBeInTheDocument();
+
       // Should show loading spinner
       const spinner = document.querySelector('.animate-spin');
       expect(spinner).toBeInTheDocument();
-      
+
       // Should show skeleton loading
       const skeletonElements = document.querySelectorAll('.animate-pulse');
       expect(skeletonElements.length).toBeGreaterThan(0);
@@ -96,17 +116,21 @@ describe('ClassificationWidget Component', () => {
 
       expect(screen.getByText('Error')).toBeInTheDocument();
       expect(screen.getByText(errorMessage)).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: /retry/i })).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: /start classification/i })).toBeInTheDocument();
+      expect(
+        screen.getByRole('button', { name: /retry/i })
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole('button', { name: /start classification/i })
+      ).toBeInTheDocument();
     });
 
     it('calls onRefresh when retry button is clicked', () => {
       const mockOnRefresh = jest.fn();
       renderWithProviders(
-        <ClassificationWidget 
-          {...defaultProps} 
-          error="Test error" 
-          onRefresh={mockOnRefresh} 
+        <ClassificationWidget
+          {...defaultProps}
+          error="Test error"
+          onRefresh={mockOnRefresh}
         />,
         { session: mockSession }
       );
@@ -120,15 +144,17 @@ describe('ClassificationWidget Component', () => {
     it('calls onStartClassification when start classification button is clicked in error state', () => {
       const mockOnStartClassification = jest.fn();
       renderWithProviders(
-        <ClassificationWidget 
-          {...defaultProps} 
-          error="Test error" 
-          onStartClassification={mockOnStartClassification} 
+        <ClassificationWidget
+          {...defaultProps}
+          error="Test error"
+          onStartClassification={mockOnStartClassification}
         />,
         { session: mockSession }
       );
 
-      const startButton = screen.getByRole('button', { name: /start classification/i });
+      const startButton = screen.getByRole('button', {
+        name: /start classification/i,
+      });
       fireEvent.click(startButton);
 
       expect(mockOnStartClassification).toHaveBeenCalled();
@@ -138,7 +164,10 @@ describe('ClassificationWidget Component', () => {
   describe('Completed State', () => {
     it('renders classification results correctly', () => {
       renderWithProviders(
-        <ClassificationWidget {...defaultProps} classification={mockClassification} />,
+        <ClassificationWidget
+          {...defaultProps}
+          classification={mockClassification}
+        />,
         { session: mockSession }
       );
 
@@ -151,7 +180,10 @@ describe('ClassificationWidget Component', () => {
 
     it('displays device class with correct styling', () => {
       renderWithProviders(
-        <ClassificationWidget {...defaultProps} classification={mockClassification} />,
+        <ClassificationWidget
+          {...defaultProps}
+          classification={mockClassification}
+        />,
         { session: mockSession }
       );
 
@@ -162,22 +194,31 @@ describe('ClassificationWidget Component', () => {
 
     it('displays product code with external link', () => {
       renderWithProviders(
-        <ClassificationWidget {...defaultProps} classification={mockClassification} />,
+        <ClassificationWidget
+          {...defaultProps}
+          classification={mockClassification}
+        />,
         { session: mockSession }
       );
 
       const productCode = screen.getByText('LRH');
       expect(productCode).toBeInTheDocument();
-      
+
       // Should have external link button
       const externalLink = screen.getByRole('link');
-      expect(externalLink).toHaveAttribute('href', expect.stringContaining('LRH'));
+      expect(externalLink).toHaveAttribute(
+        'href',
+        expect.stringContaining('LRH')
+      );
       expect(externalLink).toHaveAttribute('target', '_blank');
     });
 
     it('displays regulatory pathway with correct badge variant', () => {
       renderWithProviders(
-        <ClassificationWidget {...defaultProps} classification={mockClassification} />,
+        <ClassificationWidget
+          {...defaultProps}
+          classification={mockClassification}
+        />,
         { session: mockSession }
       );
 
@@ -187,7 +228,10 @@ describe('ClassificationWidget Component', () => {
 
     it('displays CFR sections correctly', () => {
       renderWithProviders(
-        <ClassificationWidget {...defaultProps} classification={mockClassification} />,
+        <ClassificationWidget
+          {...defaultProps}
+          classification={mockClassification}
+        />,
         { session: mockSession }
       );
 
@@ -199,11 +243,20 @@ describe('ClassificationWidget Component', () => {
     it('shows truncated CFR sections when more than 3', () => {
       const classificationWithManyCFRs = generateMockDeviceClassification({
         ...mockClassification,
-        cfrSections: ['21 CFR 870.2300', '21 CFR 870.2310', '21 CFR 870.2320', '21 CFR 870.2330', '21 CFR 870.2340'],
+        cfrSections: [
+          '21 CFR 870.2300',
+          '21 CFR 870.2310',
+          '21 CFR 870.2320',
+          '21 CFR 870.2330',
+          '21 CFR 870.2340',
+        ],
       });
 
       renderWithProviders(
-        <ClassificationWidget {...defaultProps} classification={classificationWithManyCFRs} />,
+        <ClassificationWidget
+          {...defaultProps}
+          classification={classificationWithManyCFRs}
+        />,
         { session: mockSession }
       );
 
@@ -221,7 +274,10 @@ describe('ClassificationWidget Component', () => {
       });
 
       const { rerender } = renderWithProviders(
-        <ClassificationWidget {...defaultProps} classification={highConfidenceClassification} />,
+        <ClassificationWidget
+          {...defaultProps}
+          classification={highConfidenceClassification}
+        />,
         { session: mockSession }
       );
 
@@ -234,7 +290,12 @@ describe('ClassificationWidget Component', () => {
         confidenceScore: 0.7,
       });
 
-      rerender(<ClassificationWidget {...defaultProps} classification={mediumConfidenceClassification} />);
+      rerender(
+        <ClassificationWidget
+          {...defaultProps}
+          classification={mediumConfidenceClassification}
+        />
+      );
 
       confidenceText = screen.getByText('70%');
       expect(confidenceText).toHaveClass('text-yellow-600');
@@ -245,7 +306,12 @@ describe('ClassificationWidget Component', () => {
         confidenceScore: 0.4,
       });
 
-      rerender(<ClassificationWidget {...defaultProps} classification={lowConfidenceClassification} />);
+      rerender(
+        <ClassificationWidget
+          {...defaultProps}
+          classification={lowConfidenceClassification}
+        />
+      );
 
       confidenceText = screen.getByText('40%');
       expect(confidenceText).toHaveClass('text-red-600');
@@ -253,17 +319,27 @@ describe('ClassificationWidget Component', () => {
 
     it('displays reasoning when provided', () => {
       renderWithProviders(
-        <ClassificationWidget {...defaultProps} classification={mockClassification} />,
+        <ClassificationWidget
+          {...defaultProps}
+          classification={mockClassification}
+        />,
         { session: mockSession }
       );
 
       expect(screen.getByText('Analysis Reasoning')).toBeInTheDocument();
-      expect(screen.getByText('Device matches Class II cardiovascular monitoring device characteristics')).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          'Device matches Class II cardiovascular monitoring device characteristics'
+        )
+      ).toBeInTheDocument();
     });
 
     it('displays creation timestamp', () => {
       renderWithProviders(
-        <ClassificationWidget {...defaultProps} classification={mockClassification} />,
+        <ClassificationWidget
+          {...defaultProps}
+          classification={mockClassification}
+        />,
         { session: mockSession }
       );
 
@@ -274,21 +350,28 @@ describe('ClassificationWidget Component', () => {
   describe('Action Buttons', () => {
     it('renders refresh and re-analyze buttons in completed state', () => {
       renderWithProviders(
-        <ClassificationWidget {...defaultProps} classification={mockClassification} />,
+        <ClassificationWidget
+          {...defaultProps}
+          classification={mockClassification}
+        />,
         { session: mockSession }
       );
 
-      expect(screen.getByRole('button', { name: /refresh/i })).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: /re-analyze/i })).toBeInTheDocument();
+      expect(
+        screen.getByRole('button', { name: /refresh/i })
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole('button', { name: /re-analyze/i })
+      ).toBeInTheDocument();
     });
 
     it('calls onRefresh when refresh button is clicked', () => {
       const mockOnRefresh = jest.fn();
       renderWithProviders(
-        <ClassificationWidget 
-          {...defaultProps} 
-          classification={mockClassification} 
-          onRefresh={mockOnRefresh} 
+        <ClassificationWidget
+          {...defaultProps}
+          classification={mockClassification}
+          onRefresh={mockOnRefresh}
         />,
         { session: mockSession }
       );
@@ -302,15 +385,17 @@ describe('ClassificationWidget Component', () => {
     it('calls onStartClassification when re-analyze button is clicked', () => {
       const mockOnStartClassification = jest.fn();
       renderWithProviders(
-        <ClassificationWidget 
-          {...defaultProps} 
-          classification={mockClassification} 
-          onStartClassification={mockOnStartClassification} 
+        <ClassificationWidget
+          {...defaultProps}
+          classification={mockClassification}
+          onStartClassification={mockOnStartClassification}
         />,
         { session: mockSession }
       );
 
-      const reAnalyzeButton = screen.getByRole('button', { name: /re-analyze/i });
+      const reAnalyzeButton = screen.getByRole('button', {
+        name: /re-analyze/i,
+      });
       fireEvent.click(reAnalyzeButton);
 
       expect(mockOnStartClassification).toHaveBeenCalled();
@@ -318,16 +403,18 @@ describe('ClassificationWidget Component', () => {
 
     it('disables buttons when loading', () => {
       renderWithProviders(
-        <ClassificationWidget 
-          {...defaultProps} 
-          classification={mockClassification} 
-          loading={true} 
+        <ClassificationWidget
+          {...defaultProps}
+          classification={mockClassification}
+          loading={true}
         />,
         { session: mockSession }
       );
 
       const refreshButton = screen.getByRole('button', { name: /refresh/i });
-      const reAnalyzeButton = screen.getByRole('button', { name: /re-analyze/i });
+      const reAnalyzeButton = screen.getByRole('button', {
+        name: /re-analyze/i,
+      });
 
       expect(refreshButton).toBeDisabled();
       expect(reAnalyzeButton).toBeDisabled();
@@ -337,7 +424,10 @@ describe('ClassificationWidget Component', () => {
   describe('Regulatory Pathway Badge Variants', () => {
     it('shows correct badge variant for 510k pathway', () => {
       renderWithProviders(
-        <ClassificationWidget {...defaultProps} classification={mockClassification} />,
+        <ClassificationWidget
+          {...defaultProps}
+          classification={mockClassification}
+        />,
         { session: mockSession }
       );
 
@@ -352,7 +442,10 @@ describe('ClassificationWidget Component', () => {
       });
 
       renderWithProviders(
-        <ClassificationWidget {...defaultProps} classification={pmaClassification} />,
+        <ClassificationWidget
+          {...defaultProps}
+          classification={pmaClassification}
+        />,
         { session: mockSession }
       );
 
@@ -367,7 +460,10 @@ describe('ClassificationWidget Component', () => {
       });
 
       renderWithProviders(
-        <ClassificationWidget {...defaultProps} classification={deNovoClassification} />,
+        <ClassificationWidget
+          {...defaultProps}
+          classification={deNovoClassification}
+        />,
         { session: mockSession }
       );
 
@@ -384,7 +480,10 @@ describe('ClassificationWidget Component', () => {
       });
 
       renderWithProviders(
-        <ClassificationWidget {...defaultProps} classification={classificationWithoutReasoning} />,
+        <ClassificationWidget
+          {...defaultProps}
+          classification={classificationWithoutReasoning}
+        />,
         { session: mockSession }
       );
 
@@ -398,7 +497,10 @@ describe('ClassificationWidget Component', () => {
       });
 
       renderWithProviders(
-        <ClassificationWidget {...defaultProps} classification={classificationWithoutCFR} />,
+        <ClassificationWidget
+          {...defaultProps}
+          classification={classificationWithoutCFR}
+        />,
         { session: mockSession }
       );
 
@@ -412,7 +514,10 @@ describe('ClassificationWidget Component', () => {
       });
 
       renderWithProviders(
-        <ClassificationWidget {...defaultProps} classification={classificationWithEmptyCFR} />,
+        <ClassificationWidget
+          {...defaultProps}
+          classification={classificationWithEmptyCFR}
+        />,
         { session: mockSession }
       );
 
@@ -423,12 +528,17 @@ describe('ClassificationWidget Component', () => {
   describe('Accessibility', () => {
     it('has proper ARIA labels and roles', () => {
       renderWithProviders(
-        <ClassificationWidget {...defaultProps} classification={mockClassification} />,
+        <ClassificationWidget
+          {...defaultProps}
+          classification={mockClassification}
+        />,
         { session: mockSession }
       );
 
       const refreshButton = screen.getByRole('button', { name: /refresh/i });
-      const reAnalyzeButton = screen.getByRole('button', { name: /re-analyze/i });
+      const reAnalyzeButton = screen.getByRole('button', {
+        name: /re-analyze/i,
+      });
 
       expect(refreshButton).toBeInTheDocument();
       expect(reAnalyzeButton).toBeInTheDocument();
@@ -436,7 +546,10 @@ describe('ClassificationWidget Component', () => {
 
     it('provides screen reader text for external links', () => {
       renderWithProviders(
-        <ClassificationWidget {...defaultProps} classification={mockClassification} />,
+        <ClassificationWidget
+          {...defaultProps}
+          classification={mockClassification}
+        />,
         { session: mockSession }
       );
 
@@ -453,7 +566,9 @@ describe('ClassificationWidget Component', () => {
       );
 
       const refreshButton = screen.getByRole('button', { name: /refresh/i });
-      const reAnalyzeButton = screen.getByRole('button', { name: /re-analyze/i });
+      const reAnalyzeButton = screen.getByRole('button', {
+        name: /re-analyze/i,
+      });
 
       expect(() => {
         fireEvent.click(refreshButton);

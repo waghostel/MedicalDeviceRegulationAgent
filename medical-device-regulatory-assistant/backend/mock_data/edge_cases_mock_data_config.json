@@ -21,7 +21,13 @@
       "intended_use": "For the treatment of rare conditions that have never been addressed by medical devices before, requiring extensive regulatory review and potentially novel regulatory pathways",
       "status": "draft",
       "priority": "high",
-      "tags": ["edge-case", "long-text", "novel-technology", "rare-disease", "regulatory-challenge"],
+      "tags": [
+        "edge-case",
+        "long-text",
+        "novel-technology",
+        "rare-disease",
+        "regulatory-challenge"
+      ],
       "user_email": "test.user@startup.com"
     },
     {
@@ -101,7 +107,7 @@
       "product_code": "TST",
       "regulatory_pathway": "510k",
       "cfr_sections": ["21 CFR 999.9999"],
-      "confidence_score": 0.50,
+      "confidence_score": 0.5,
       "reasoning": "Classification uncertain due to special characters and internationalization requirements"
     },
     {
@@ -163,7 +169,7 @@
       "intended_use": "Performance testing predicate device 3",
       "product_code": "PER",
       "clearance_date": "2020-03-01",
-      "confidence_score": 0.80,
+      "confidence_score": 0.8,
       "is_selected": false,
       "comparison_data": {
         "similarities": ["Performance testing", "Similar design"],
@@ -261,7 +267,9 @@
         "unicode_support": true,
         "special_chars_handled": true,
         "encoding": "UTF-8",
-        "warnings": ["Some special characters may not display correctly in all browsers"]
+        "warnings": [
+          "Some special characters may not display correctly in all browsers"
+        ]
       },
       "confidence_score": 0.75,
       "reasoning": "System successfully handled Unicode and special characters with minor display warnings.",

@@ -4,7 +4,7 @@
   "description": "Automatically analyzes git conflict files, finds suitable solutions, resolves conflicts, stages changes, commits with appropriate message, and pushes to remote repository",
   "version": "1",
   "when": {
-    "type": "fileEdited",
+    "type": "userTriggered",
     "patterns": [
       "**/*"
     ]

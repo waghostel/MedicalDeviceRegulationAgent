@@ -8,7 +8,11 @@ import { jest } from '@jest/globals';
 import { AuditLogPage } from '../AuditLogPage';
 import { ComplianceDashboard } from '../ComplianceDashboard';
 import { auditAPI } from '@/lib/api/audit';
-import { AgentInteraction, ComplianceReport, AuditIntegrityResult } from '@/types/audit';
+import {
+  AgentInteraction,
+  ComplianceReport,
+  AuditIntegrityResult,
+} from '@/types/audit';
 
 // Mock the audit API
 jest.mock('@/lib/api/audit', () => ({
@@ -126,14 +130,14 @@ const mockIntegrityResult: AuditIntegrityResult = {
 describe('AuditLogPage Integration', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    
+
     (auditAPI.getAuditTrail as jest.Mock).mockResolvedValue({
       audit_entries: mockAuditEntries,
       summary: mockAuditSummary,
       total_count: 2,
       filters_applied: { limit: 100 },
     });
-    
+
     (auditAPI.subscribeToAuditUpdates as jest.Mock).mockReturnValue(() => {});
   });
 
@@ -202,7 +206,9 @@ describe('AuditLogPage Integration', () => {
   });
 
   test('handles API errors gracefully', async () => {
-    (auditAPI.getAuditTrail as jest.Mock).mockRejectedValue(new Error('API Error'));
+    (auditAPI.getAuditTrail as jest.Mock).mockRejectedValue(
+      new Error('API Error')
+    );
 
     render(<AuditLogPage projectId="1" />);
 
@@ -216,9 +222,13 @@ describe('AuditLogPage Integration', () => {
 describe('ComplianceDashboard Integration', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    
-    (auditAPI.generateComplianceReport as jest.Mock).mockResolvedValue(mockComplianceReport);
-    (auditAPI.verifyAuditIntegrity as jest.Mock).mockResolvedValue(mockIntegrityResult);
+
+    (auditAPI.generateComplianceReport as jest.Mock).mockResolvedValue(
+      mockComplianceReport
+    );
+    (auditAPI.verifyAuditIntegrity as jest.Mock).mockResolvedValue(
+      mockIntegrityResult
+    );
   });
 
   test('renders compliance dashboard with data', async () => {
@@ -322,17 +332,23 @@ describe('ComplianceDashboard Integration', () => {
     // Should show integrity issues
     expect(screen.getByText('Integrity Issues Detected')).toBeInTheDocument();
     expect(screen.getByText('50% Valid')).toBeInTheDocument();
-    expect(screen.getByText(/1 entries show signs of tampering/)).toBeInTheDocument();
+    expect(
+      screen.getByText(/1 entries show signs of tampering/)
+    ).toBeInTheDocument();
   });
 
   test('handles API errors gracefully', async () => {
-    (auditAPI.generateComplianceReport as jest.Mock).mockRejectedValue(new Error('API Error'));
+    (auditAPI.generateComplianceReport as jest.Mock).mockRejectedValue(
+      new Error('API Error')
+    );
 
     render(<ComplianceDashboard projectId="1" />);
 
     await waitFor(() => {
       // Should show error message or fallback state
-      expect(screen.getByText(/No compliance data available/)).toBeInTheDocument();
+      expect(
+        screen.getByText(/No compliance data available/)
+      ).toBeInTheDocument();
     });
   });
 });
@@ -380,7 +396,9 @@ describe('Real-time Updates', () => {
 
 describe('Error Handling', () => {
   test('handles network errors', async () => {
-    (auditAPI.getAuditTrail as jest.Mock).mockRejectedValue(new Error('Network Error'));
+    (auditAPI.getAuditTrail as jest.Mock).mockRejectedValue(
+      new Error('Network Error')
+    );
 
     render(<AuditLogPage projectId="1" />);
 
@@ -407,11 +425,15 @@ describe('Accessibility', () => {
     });
 
     // Check for proper heading structure
-    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Audit Trail');
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(
+      'Audit Trail'
+    );
 
     // Check for proper button labels
     expect(screen.getByRole('button', { name: /export/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /filters/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: /filters/i })
+    ).toBeInTheDocument();
   });
 
   test('supports keyboard navigation', async () => {

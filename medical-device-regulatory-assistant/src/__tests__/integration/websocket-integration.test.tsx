@@ -16,7 +16,7 @@ class MockWebSocket {
   readyState = MockWebSocket.CONNECTING;
   url: string;
   protocols?: string | string[];
-  
+
   onopen: ((event: Event) => void) | null = null;
   onclose: ((event: CloseEvent) => void) | null = null;
   onmessage: ((event: MessageEvent) => void) | null = null;
@@ -25,7 +25,7 @@ class MockWebSocket {
   constructor(url: string, protocols?: string | string[]) {
     this.url = url;
     this.protocols = protocols;
-    
+
     // Simulate connection after a short delay
     setTimeout(() => {
       this.readyState = MockWebSocket.OPEN;
@@ -39,15 +39,17 @@ class MockWebSocket {
     if (this.readyState !== MockWebSocket.OPEN) {
       throw new Error('WebSocket is not open');
     }
-    
+
     // Echo back certain messages for testing
     const message = JSON.parse(data);
     if (message.type === 'ping') {
       setTimeout(() => {
         if (this.onmessage) {
-          this.onmessage(new MessageEvent('message', {
-            data: JSON.stringify({ type: 'pong' })
-          }));
+          this.onmessage(
+            new MessageEvent('message', {
+              data: JSON.stringify({ type: 'pong' }),
+            })
+          );
         }
       }, 50);
     }
@@ -63,9 +65,11 @@ class MockWebSocket {
   // Helper method to simulate receiving messages
   simulateMessage(message: WebSocketMessage) {
     if (this.onmessage) {
-      this.onmessage(new MessageEvent('message', {
-        data: JSON.stringify(message)
-      }));
+      this.onmessage(
+        new MessageEvent('message', {
+          data: JSON.stringify(message),
+        })
+      );
     }
   }
 
@@ -95,7 +99,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  mockWebSocketInstances.forEach(ws => ws.close());
+  mockWebSocketInstances.forEach((ws) => ws.close());
   mockWebSocketInstances = [];
 });
 
@@ -106,10 +110,12 @@ afterAll(() => {
 describe('WebSocket Integration Tests', () => {
   describe('useWebSocket Hook', () => {
     test('should establish WebSocket connection', async () => {
-      const { result } = renderHook(() => useWebSocket({
-        url: 'ws://localhost:8000/ws',
-        enabled: true,
-      }));
+      const { result } = renderHook(() =>
+        useWebSocket({
+          url: 'ws://localhost:8000/ws',
+          enabled: true,
+        })
+      );
 
       // Initially connecting
       expect(result.current.connecting).toBe(true);
@@ -126,26 +132,33 @@ describe('WebSocket Integration Tests', () => {
     });
 
     test('should handle connection with protocols', async () => {
-      const { result } = renderHook(() => useWebSocket({
-        url: 'ws://localhost:8000/ws',
-        protocols: ['protocol1', 'protocol2'],
-        enabled: true,
-      }));
+      const { result } = renderHook(() =>
+        useWebSocket({
+          url: 'ws://localhost:8000/ws',
+          protocols: ['protocol1', 'protocol2'],
+          enabled: true,
+        })
+      );
 
       await waitFor(() => {
         expect(result.current.connected).toBe(true);
       });
 
-      expect(mockWebSocketInstances[0].protocols).toEqual(['protocol1', 'protocol2']);
+      expect(mockWebSocketInstances[0].protocols).toEqual([
+        'protocol1',
+        'protocol2',
+      ]);
     });
 
     test('should handle incoming messages', async () => {
       const onMessage = jest.fn();
-      const { result } = renderHook(() => useWebSocket({
-        url: 'ws://localhost:8000/ws',
-        onMessage,
-        enabled: true,
-      }));
+      const { result } = renderHook(() =>
+        useWebSocket({
+          url: 'ws://localhost:8000/ws',
+          onMessage,
+          enabled: true,
+        })
+      );
 
       await waitFor(() => {
         expect(result.current.connected).toBe(true);
@@ -168,10 +181,12 @@ describe('WebSocket Integration Tests', () => {
     });
 
     test('should send messages when connected', async () => {
-      const { result } = renderHook(() => useWebSocket({
-        url: 'ws://localhost:8000/ws',
-        enabled: true,
-      }));
+      const { result } = renderHook(() =>
+        useWebSocket({
+          url: 'ws://localhost:8000/ws',
+          enabled: true,
+        })
+      );
 
       await waitFor(() => {
         expect(result.current.connected).toBe(true);
@@ -187,10 +202,12 @@ describe('WebSocket Integration Tests', () => {
     });
 
     test('should not send messages when disconnected', async () => {
-      const { result } = renderHook(() => useWebSocket({
-        url: 'ws://localhost:8000/ws',
-        enabled: true,
-      }));
+      const { result } = renderHook(() =>
+        useWebSocket({
+          url: 'ws://localhost:8000/ws',
+          enabled: true,
+        })
+      );
 
       // Don't wait for connection
       const testMessage = { type: 'ping' };
@@ -201,11 +218,13 @@ describe('WebSocket Integration Tests', () => {
 
     test('should handle connection errors', async () => {
       const onError = jest.fn();
-      const { result } = renderHook(() => useWebSocket({
-        url: 'ws://localhost:8000/ws',
-        onError,
-        enabled: true,
-      }));
+      const { result } = renderHook(() =>
+        useWebSocket({
+          url: 'ws://localhost:8000/ws',
+          onError,
+          enabled: true,
+        })
+      );
 
       await waitFor(() => {
         expect(result.current.connected).toBe(true);
@@ -222,11 +241,13 @@ describe('WebSocket Integration Tests', () => {
 
     test('should handle connection close', async () => {
       const onDisconnect = jest.fn();
-      const { result } = renderHook(() => useWebSocket({
-        url: 'ws://localhost:8000/ws',
-        onDisconnect,
-        enabled: true,
-      }));
+      const { result } = renderHook(() =>
+        useWebSocket({
+          url: 'ws://localhost:8000/ws',
+          onDisconnect,
+          enabled: true,
+        })
+      );
 
       await waitFor(() => {
         expect(result.current.connected).toBe(true);
@@ -245,12 +266,14 @@ describe('WebSocket Integration Tests', () => {
     });
 
     test('should attempt reconnection on close', async () => {
-      const { result } = renderHook(() => useWebSocket({
-        url: 'ws://localhost:8000/ws',
-        reconnectAttempts: 2,
-        reconnectInterval: 100,
-        enabled: true,
-      }));
+      const { result } = renderHook(() =>
+        useWebSocket({
+          url: 'ws://localhost:8000/ws',
+          reconnectAttempts: 2,
+          reconnectInterval: 100,
+          enabled: true,
+        })
+      );
 
       await waitFor(() => {
         expect(result.current.connected).toBe(true);
@@ -264,9 +287,12 @@ describe('WebSocket Integration Tests', () => {
       });
 
       // Wait for reconnection attempt
-      await waitFor(() => {
-        expect(mockWebSocketInstances.length).toBe(initialInstanceCount + 1);
-      }, { timeout: 500 });
+      await waitFor(
+        () => {
+          expect(mockWebSocketInstances.length).toBe(initialInstanceCount + 1);
+        },
+        { timeout: 500 }
+      );
     });
 
     test('should stop reconnecting after max attempts', async () => {
@@ -275,7 +301,7 @@ describe('WebSocket Integration Tests', () => {
         constructor(url: string, protocols?: string | string[]) {
           super(url, protocols);
           mockWebSocketInstances.push(this);
-          
+
           // Immediately close to simulate connection failure
           setTimeout(() => {
             this.readyState = MockWebSocket.CLOSED;
@@ -286,26 +312,33 @@ describe('WebSocket Integration Tests', () => {
         }
       } as any;
 
-      const { result } = renderHook(() => useWebSocket({
-        url: 'ws://localhost:8000/ws',
-        reconnectAttempts: 2,
-        reconnectInterval: 100,
-        enabled: true,
-      }));
+      const { result } = renderHook(() =>
+        useWebSocket({
+          url: 'ws://localhost:8000/ws',
+          reconnectAttempts: 2,
+          reconnectInterval: 100,
+          enabled: true,
+        })
+      );
 
       // Wait for all reconnection attempts to complete
-      await waitFor(() => {
-        expect(mockWebSocketInstances.length).toBe(3); // Initial + 2 reconnect attempts
-      }, { timeout: 1000 });
+      await waitFor(
+        () => {
+          expect(mockWebSocketInstances.length).toBe(3); // Initial + 2 reconnect attempts
+        },
+        { timeout: 1000 }
+      );
 
       expect(result.current.connected).toBe(false);
     });
 
     test('should disconnect cleanly', async () => {
-      const { result } = renderHook(() => useWebSocket({
-        url: 'ws://localhost:8000/ws',
-        enabled: true,
-      }));
+      const { result } = renderHook(() =>
+        useWebSocket({
+          url: 'ws://localhost:8000/ws',
+          enabled: true,
+        })
+      );
 
       await waitFor(() => {
         expect(result.current.connected).toBe(true);
@@ -318,17 +351,19 @@ describe('WebSocket Integration Tests', () => {
       });
 
       expect(closeSpy).toHaveBeenCalled();
-      
+
       await waitFor(() => {
         expect(result.current.connected).toBe(false);
       });
     });
 
     test('should reconnect manually', async () => {
-      const { result } = renderHook(() => useWebSocket({
-        url: 'ws://localhost:8000/ws',
-        enabled: true,
-      }));
+      const { result } = renderHook(() =>
+        useWebSocket({
+          url: 'ws://localhost:8000/ws',
+          enabled: true,
+        })
+      );
 
       await waitFor(() => {
         expect(result.current.connected).toBe(true);
@@ -347,13 +382,15 @@ describe('WebSocket Integration Tests', () => {
     });
 
     test('should not connect when disabled', async () => {
-      const { result } = renderHook(() => useWebSocket({
-        url: 'ws://localhost:8000/ws',
-        enabled: false,
-      }));
+      const { result } = renderHook(() =>
+        useWebSocket({
+          url: 'ws://localhost:8000/ws',
+          enabled: false,
+        })
+      );
 
       // Wait a bit to ensure no connection is attempted
-      await new Promise(resolve => setTimeout(resolve, 200));
+      await new Promise((resolve) => setTimeout(resolve, 200));
 
       expect(result.current.connected).toBe(false);
       expect(result.current.connecting).toBe(false);
@@ -366,7 +403,9 @@ describe('WebSocket Integration Tests', () => {
       const onUpdate = jest.fn();
       const projectId = 123;
 
-      const { result } = renderHook(() => useProjectWebSocket(projectId, onUpdate));
+      const { result } = renderHook(() =>
+        useProjectWebSocket(projectId, onUpdate)
+      );
 
       await waitFor(() => {
         expect(result.current.connected).toBe(true);
@@ -416,10 +455,12 @@ describe('WebSocket Integration Tests', () => {
         result.current.subscribeToProject(456);
       });
 
-      expect(sendSpy).toHaveBeenCalledWith(JSON.stringify({
-        type: 'subscribe',
-        project_id: 456,
-      }));
+      expect(sendSpy).toHaveBeenCalledWith(
+        JSON.stringify({
+          type: 'subscribe',
+          project_id: 456,
+        })
+      );
     });
 
     test('should unsubscribe from project updates', async () => {
@@ -436,10 +477,12 @@ describe('WebSocket Integration Tests', () => {
         result.current.unsubscribeFromProject(456);
       });
 
-      expect(sendSpy).toHaveBeenCalledWith(JSON.stringify({
-        type: 'unsubscribe',
-        project_id: 456,
-      }));
+      expect(sendSpy).toHaveBeenCalledWith(
+        JSON.stringify({
+          type: 'unsubscribe',
+          project_id: 456,
+        })
+      );
     });
 
     test('should auto-subscribe when project ID changes', async () => {
@@ -458,10 +501,12 @@ describe('WebSocket Integration Tests', () => {
       rerender({ projectId: 456 });
 
       await waitFor(() => {
-        expect(sendSpy).toHaveBeenCalledWith(JSON.stringify({
-          type: 'subscribe',
-          project_id: 456,
-        }));
+        expect(sendSpy).toHaveBeenCalledWith(
+          JSON.stringify({
+            type: 'subscribe',
+            project_id: 456,
+          })
+        );
       });
     });
 
@@ -469,7 +514,7 @@ describe('WebSocket Integration Tests', () => {
       const { result } = renderHook(() => useProjectWebSocket(null));
 
       // Wait a bit to ensure no connection is attempted
-      await new Promise(resolve => setTimeout(resolve, 200));
+      await new Promise((resolve) => setTimeout(resolve, 200));
 
       expect(result.current.connected).toBe(false);
       expect(mockWebSocketInstances).toHaveLength(0);
@@ -481,7 +526,9 @@ describe('WebSocket Integration Tests', () => {
       const onUpdate = jest.fn();
       const projectId = 123;
 
-      const { result } = renderHook(() => useProjectWebSocket(projectId, onUpdate));
+      const { result } = renderHook(() =>
+        useProjectWebSocket(projectId, onUpdate)
+      );
 
       await waitFor(() => {
         expect(result.current.connected).toBe(true);
@@ -511,7 +558,9 @@ describe('WebSocket Integration Tests', () => {
       const onUpdate = jest.fn();
       const projectId = 123;
 
-      const { result } = renderHook(() => useProjectWebSocket(projectId, onUpdate));
+      const { result } = renderHook(() =>
+        useProjectWebSocket(projectId, onUpdate)
+      );
 
       await waitFor(() => {
         expect(result.current.connected).toBe(true);
@@ -540,7 +589,9 @@ describe('WebSocket Integration Tests', () => {
       const onUpdate = jest.fn();
       const projectId = 123;
 
-      const { result } = renderHook(() => useProjectWebSocket(projectId, onUpdate));
+      const { result } = renderHook(() =>
+        useProjectWebSocket(projectId, onUpdate)
+      );
 
       await waitFor(() => {
         expect(result.current.connected).toBe(true);
@@ -555,7 +606,7 @@ describe('WebSocket Integration Tests', () => {
               k_number: 'K123456',
               device_name: 'Similar Device',
               confidence_score: 0.92,
-            }
+            },
           ],
           search_query: 'cardiac monitor',
           total_results: 15,
@@ -574,7 +625,9 @@ describe('WebSocket Integration Tests', () => {
       const onUpdate = jest.fn();
       const projectId = 123;
 
-      const { result } = renderHook(() => useProjectWebSocket(projectId, onUpdate));
+      const { result } = renderHook(() =>
+        useProjectWebSocket(projectId, onUpdate)
+      );
 
       await waitFor(() => {
         expect(result.current.connected).toBe(true);
@@ -602,15 +655,19 @@ describe('WebSocket Integration Tests', () => {
 
   describe('Connection Management', () => {
     test('should handle multiple concurrent connections', async () => {
-      const { result: result1 } = renderHook(() => useWebSocket({
-        url: 'ws://localhost:8000/ws',
-        enabled: true,
-      }));
+      const { result: result1 } = renderHook(() =>
+        useWebSocket({
+          url: 'ws://localhost:8000/ws',
+          enabled: true,
+        })
+      );
 
-      const { result: result2 } = renderHook(() => useWebSocket({
-        url: 'ws://localhost:8000/ws',
-        enabled: true,
-      }));
+      const { result: result2 } = renderHook(() =>
+        useWebSocket({
+          url: 'ws://localhost:8000/ws',
+          enabled: true,
+        })
+      );
 
       await waitFor(() => {
         expect(result1.current.connected).toBe(true);
@@ -621,10 +678,12 @@ describe('WebSocket Integration Tests', () => {
     });
 
     test('should clean up connections on unmount', async () => {
-      const { result, unmount } = renderHook(() => useWebSocket({
-        url: 'ws://localhost:8000/ws',
-        enabled: true,
-      }));
+      const { result, unmount } = renderHook(() =>
+        useWebSocket({
+          url: 'ws://localhost:8000/ws',
+          enabled: true,
+        })
+      );
 
       await waitFor(() => {
         expect(result.current.connected).toBe(true);

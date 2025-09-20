@@ -142,16 +142,16 @@ const Toast = React.forwardRef<
           <div className="flex-1 min-w-0">
             <div className="flex flex-col space-y-1">
               {title && (
-                <ToastPrimitives.Title 
-                  className="text-sm font-semibold" 
+                <ToastPrimitives.Title
+                  className="text-sm font-semibold"
                   data-testid="toast-title"
                 >
                   {title}
                 </ToastPrimitives.Title>
               )}
               {description && (
-                <ToastPrimitives.Description 
-                  className="text-sm opacity-90" 
+                <ToastPrimitives.Description
+                  className="text-sm opacity-90"
                   data-testid="toast-description"
                 >
                   {description}

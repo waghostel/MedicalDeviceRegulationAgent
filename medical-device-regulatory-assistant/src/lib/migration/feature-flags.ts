@@ -29,7 +29,7 @@ export enum ConditionType {
   COMPONENT_PATH = 'component_path',
   ENVIRONMENT = 'environment',
   TIME_WINDOW = 'time_window',
-  RANDOM_PERCENTAGE = 'random_percentage'
+  RANDOM_PERCENTAGE = 'random_percentage',
 }
 
 export enum ConditionOperator {
@@ -40,7 +40,7 @@ export enum ConditionOperator {
   GREATER_THAN = 'greater_than',
   LESS_THAN = 'less_than',
   CONTAINS = 'contains',
-  MATCHES = 'matches'
+  MATCHES = 'matches',
 }
 
 export interface FlagMetadata {
@@ -105,7 +105,8 @@ export class FeatureFlagManager {
   private flags: Map<string, FeatureFlag> = new Map();
   private config: FlagConfiguration;
   private metrics: Map<string, FlagMetrics> = new Map();
-  private cache: Map<string, { result: FlagEvaluationResult; expiry: number }> = new Map();
+  private cache: Map<string, { result: FlagEvaluationResult; expiry: number }> =
+    new Map();
 
   constructor(config?: Partial<FlagConfiguration>) {
     this.config = {
@@ -114,7 +115,7 @@ export class FeatureFlagManager {
       evaluationMode: 'strict',
       cacheTtl: 300, // 5 minutes
       metricsEnabled: true,
-      ...config
+      ...config,
     };
 
     this.initializeMigrationFlags();
@@ -136,8 +137,8 @@ export class FeatureFlagManager {
           type: ConditionType.ENVIRONMENT,
           operator: ConditionOperator.IN,
           value: ['development', 'staging'],
-          description: 'Only enable in development and staging environments'
-        }
+          description: 'Only enable in development and staging environments',
+        },
       ],
       metadata: {
         riskLevel: 'critical',
@@ -146,28 +147,29 @@ export class FeatureFlagManager {
             metric: 'error_rate',
             threshold: 5, // 5% error rate
             timeWindow: 15,
-            action: 'disable'
+            action: 'disable',
           },
           {
             metric: 'response_time_p95',
             threshold: 5000, // 5 seconds
             timeWindow: 10,
-            action: 'reduce_rollout'
-          }
+            action: 'reduce_rollout',
+          },
         ],
         owner: 'migration-team',
         reviewers: ['tech-lead', 'qa-lead'],
-        tags: ['migration', 'database', 'critical']
+        tags: ['migration', 'database', 'critical'],
       },
       createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+      updatedAt: new Date().toISOString(),
     });
 
     // Component-specific flags
     this.addFlag({
       key: 'enable_real_classification_api',
       name: 'Enable Real Classification API',
-      description: 'Use real API for device classification instead of mock data',
+      description:
+        'Use real API for device classification instead of mock data',
       enabled: false,
       rolloutPercentage: 0,
       conditions: [
@@ -175,8 +177,8 @@ export class FeatureFlagManager {
           type: ConditionType.COMPONENT_PATH,
           operator: ConditionOperator.CONTAINS,
           value: 'classification-widget',
-          description: 'Only apply to classification widget component'
-        }
+          description: 'Only apply to classification widget component',
+        },
       ],
       metadata: {
         component: 'ClassificationWidget',
@@ -187,15 +189,15 @@ export class FeatureFlagManager {
             metric: 'classification_success_rate',
             threshold: 90, // 90% success rate
             timeWindow: 30,
-            action: 'disable'
-          }
+            action: 'disable',
+          },
         ],
         owner: 'frontend-team',
         reviewers: ['tech-lead'],
-        tags: ['migration', 'classification', 'api']
+        tags: ['migration', 'classification', 'api'],
       },
       createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+      updatedAt: new Date().toISOString(),
     });
 
     this.addFlag({
@@ -209,8 +211,8 @@ export class FeatureFlagManager {
           type: ConditionType.COMPONENT_PATH,
           operator: ConditionOperator.CONTAINS,
           value: 'predicate-widget',
-          description: 'Only apply to predicate widget component'
-        }
+          description: 'Only apply to predicate widget component',
+        },
       ],
       metadata: {
         component: 'PredicateWidget',
@@ -221,15 +223,15 @@ export class FeatureFlagManager {
             metric: 'predicate_search_success_rate',
             threshold: 85, // 85% success rate
             timeWindow: 30,
-            action: 'disable'
-          }
+            action: 'disable',
+          },
         ],
         owner: 'frontend-team',
         reviewers: ['tech-lead'],
-        tags: ['migration', 'predicate', 'api']
+        tags: ['migration', 'predicate', 'api'],
       },
       createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+      updatedAt: new Date().toISOString(),
     });
 
     this.addFlag({
@@ -243,8 +245,8 @@ export class FeatureFlagManager {
           type: ConditionType.COMPONENT_PATH,
           operator: ConditionOperator.IN,
           value: ['project-card', 'project-list', 'project-form'],
-          description: 'Apply to project management components'
-        }
+          description: 'Apply to project management components',
+        },
       ],
       metadata: {
         component: 'ProjectComponents',
@@ -255,15 +257,15 @@ export class FeatureFlagManager {
             metric: 'project_operation_success_rate',
             threshold: 95, // 95% success rate
             timeWindow: 20,
-            action: 'disable'
-          }
+            action: 'disable',
+          },
         ],
         owner: 'frontend-team',
         reviewers: ['product-owner'],
-        tags: ['migration', 'projects', 'api']
+        tags: ['migration', 'projects', 'api'],
       },
       createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+      updatedAt: new Date().toISOString(),
     });
 
     // Gradual rollout flags
@@ -278,8 +280,8 @@ export class FeatureFlagManager {
           type: ConditionType.RANDOM_PERCENTAGE,
           operator: ConditionOperator.LESS_THAN,
           value: 10,
-          description: 'Roll out to 10% of users randomly'
-        }
+          description: 'Roll out to 10% of users randomly',
+        },
       ],
       metadata: {
         riskLevel: 'medium',
@@ -288,22 +290,23 @@ export class FeatureFlagManager {
             metric: 'user_satisfaction_score',
             threshold: 4.0, // 4.0/5.0 satisfaction
             timeWindow: 60,
-            action: 'reduce_rollout'
-          }
+            action: 'reduce_rollout',
+          },
         ],
         owner: 'product-team',
         reviewers: ['tech-lead', 'product-owner'],
-        tags: ['migration', 'rollout', 'gradual']
+        tags: ['migration', 'rollout', 'gradual'],
       },
       createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+      updatedAt: new Date().toISOString(),
     });
 
     // A/B testing flag
     this.addFlag({
       key: 'ab_test_migration_performance',
       name: 'A/B Test Migration Performance',
-      description: 'Compare performance between mock and real data implementations',
+      description:
+        'Compare performance between mock and real data implementations',
       enabled: false,
       rolloutPercentage: 50, // 50/50 split
       conditions: [
@@ -311,18 +314,18 @@ export class FeatureFlagManager {
           type: ConditionType.USER_ID,
           operator: ConditionOperator.MATCHES,
           value: /[02468]$/, // Users with even-ending IDs get real data
-          description: 'Split users based on user ID for A/B testing'
-        }
+          description: 'Split users based on user ID for A/B testing',
+        },
       ],
       metadata: {
         riskLevel: 'low',
         rollbackTriggers: [],
         owner: 'data-team',
         reviewers: ['tech-lead', 'data-analyst'],
-        tags: ['migration', 'ab-test', 'performance']
+        tags: ['migration', 'ab-test', 'performance'],
       },
       createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+      updatedAt: new Date().toISOString(),
     });
   }
 
@@ -331,7 +334,7 @@ export class FeatureFlagManager {
    */
   addFlag(flag: FeatureFlag): void {
     this.flags.set(flag.key, flag);
-    
+
     // Initialize metrics
     if (this.config.metricsEnabled) {
       this.metrics.set(flag.key, {
@@ -341,7 +344,7 @@ export class FeatureFlagManager {
         disabledCount: 0,
         errorCount: 0,
         lastEvaluated: new Date().toISOString(),
-        averageEvaluationTime: 0
+        averageEvaluationTime: 0,
       });
     }
   }
@@ -363,7 +366,7 @@ export class FeatureFlagManager {
     const updatedFlag = {
       ...flag,
       ...updates,
-      updatedAt: new Date().toISOString()
+      updatedAt: new Date().toISOString(),
     };
 
     this.flags.set(key, updatedFlag);
@@ -375,9 +378,9 @@ export class FeatureFlagManager {
    * Enable feature flag
    */
   enableFlag(key: string, rolloutPercentage: number = 100): boolean {
-    return this.updateFlag(key, { 
-      enabled: true, 
-      rolloutPercentage: Math.max(0, Math.min(100, rolloutPercentage))
+    return this.updateFlag(key, {
+      enabled: true,
+      rolloutPercentage: Math.max(0, Math.min(100, rolloutPercentage)),
     });
   }
 
@@ -391,9 +394,12 @@ export class FeatureFlagManager {
   /**
    * Evaluate feature flag
    */
-  evaluateFlag(key: string, context: FlagEvaluationContext): FlagEvaluationResult {
+  evaluateFlag(
+    key: string,
+    context: FlagEvaluationContext
+  ): FlagEvaluationResult {
     const startTime = Date.now();
-    
+
     try {
       // Check cache first
       const cacheKey = this.getCacheKey(key, context);
@@ -404,13 +410,13 @@ export class FeatureFlagManager {
       }
 
       const flag = this.flags.get(key);
-      
+
       // Flag not found
       if (!flag) {
         const result: FlagEvaluationResult = {
           flagKey: key,
           enabled: this.config.defaultEnabled,
-          reason: 'Flag not found, using default value'
+          reason: 'Flag not found, using default value',
         };
         this.updateMetrics(key, result.enabled, Date.now() - startTime, true);
         return result;
@@ -421,7 +427,7 @@ export class FeatureFlagManager {
         const result: FlagEvaluationResult = {
           flagKey: key,
           enabled: false,
-          reason: 'Flag is disabled'
+          reason: 'Flag is disabled',
         };
         this.cacheResult(cacheKey, result);
         this.updateMetrics(key, result.enabled, Date.now() - startTime);
@@ -434,7 +440,7 @@ export class FeatureFlagManager {
         const result: FlagEvaluationResult = {
           flagKey: key,
           enabled: false,
-          reason: `Condition not met: ${conditionResult.reason}`
+          reason: `Condition not met: ${conditionResult.reason}`,
         };
         this.cacheResult(cacheKey, result);
         this.updateMetrics(key, result.enabled, Date.now() - startTime);
@@ -442,28 +448,32 @@ export class FeatureFlagManager {
       }
 
       // Check rollout percentage
-      const rolloutResult = this.evaluateRollout(flag.rolloutPercentage, context);
+      const rolloutResult = this.evaluateRollout(
+        flag.rolloutPercentage,
+        context
+      );
       const enabled = rolloutResult.included;
-      
+
       const result: FlagEvaluationResult = {
         flagKey: key,
         enabled,
-        reason: enabled ? 'Flag enabled and conditions met' : rolloutResult.reason,
+        reason: enabled
+          ? 'Flag enabled and conditions met'
+          : rolloutResult.reason,
         metadata: {
           rolloutPercentage: flag.rolloutPercentage,
-          conditionsEvaluated: flag.conditions.length
-        }
+          conditionsEvaluated: flag.conditions.length,
+        },
       };
 
       this.cacheResult(cacheKey, result);
       this.updateMetrics(key, result.enabled, Date.now() - startTime);
       return result;
-
     } catch (error) {
       const result: FlagEvaluationResult = {
         flagKey: key,
         enabled: this.config.defaultEnabled,
-        reason: `Evaluation error: ${error}`
+        reason: `Evaluation error: ${error}`,
       };
       this.updateMetrics(key, result.enabled, Date.now() - startTime, true);
       return result;
@@ -473,13 +483,16 @@ export class FeatureFlagManager {
   /**
    * Evaluate multiple flags at once
    */
-  evaluateFlags(keys: string[], context: FlagEvaluationContext): Record<string, FlagEvaluationResult> {
+  evaluateFlags(
+    keys: string[],
+    context: FlagEvaluationContext
+  ): Record<string, FlagEvaluationResult> {
     const results: Record<string, FlagEvaluationResult> = {};
-    
+
     for (const key of keys) {
       results[key] = this.evaluateFlag(key, context);
     }
-    
+
     return results;
   }
 
@@ -487,7 +500,7 @@ export class FeatureFlagManager {
    * Evaluate conditions
    */
   private evaluateConditions(
-    conditions: FlagCondition[], 
+    conditions: FlagCondition[],
     context: FlagEvaluationContext
   ): { passed: boolean; reason: string } {
     if (conditions.length === 0) {
@@ -508,7 +521,7 @@ export class FeatureFlagManager {
    * Evaluate single condition
    */
   private evaluateCondition(
-    condition: FlagCondition, 
+    condition: FlagCondition,
     context: FlagEvaluationContext
   ): { passed: boolean; reason: string } {
     let contextValue: any;
@@ -537,33 +550,49 @@ export class FeatureFlagManager {
         contextValue = this.generateRandomPercentage(context);
         break;
       default:
-        return { passed: false, reason: `Unknown condition type: ${condition.type}` };
+        return {
+          passed: false,
+          reason: `Unknown condition type: ${condition.type}`,
+        };
     }
 
     // Evaluate based on operator
-    const passed = this.evaluateOperator(condition.operator, contextValue, condition.value);
-    
+    const passed = this.evaluateOperator(
+      condition.operator,
+      contextValue,
+      condition.value
+    );
+
     return {
       passed,
-      reason: passed ? 
-        `Condition passed: ${condition.description}` : 
-        `Condition failed: ${condition.description} (${contextValue} ${condition.operator} ${condition.value})`
+      reason: passed
+        ? `Condition passed: ${condition.description}`
+        : `Condition failed: ${condition.description} (${contextValue} ${condition.operator} ${condition.value})`,
     };
   }
 
   /**
    * Evaluate operator
    */
-  private evaluateOperator(operator: ConditionOperator, contextValue: any, conditionValue: any): boolean {
+  private evaluateOperator(
+    operator: ConditionOperator,
+    contextValue: any,
+    conditionValue: any
+  ): boolean {
     switch (operator) {
       case ConditionOperator.EQUALS:
         return contextValue === conditionValue;
       case ConditionOperator.NOT_EQUALS:
         return contextValue !== conditionValue;
       case ConditionOperator.IN:
-        return Array.isArray(conditionValue) && conditionValue.includes(contextValue);
+        return (
+          Array.isArray(conditionValue) && conditionValue.includes(contextValue)
+        );
       case ConditionOperator.NOT_IN:
-        return Array.isArray(conditionValue) && !conditionValue.includes(contextValue);
+        return (
+          Array.isArray(conditionValue) &&
+          !conditionValue.includes(contextValue)
+        );
       case ConditionOperator.GREATER_THAN:
         return contextValue > conditionValue;
       case ConditionOperator.LESS_THAN:
@@ -571,9 +600,9 @@ export class FeatureFlagManager {
       case ConditionOperator.CONTAINS:
         return String(contextValue).includes(String(conditionValue));
       case ConditionOperator.MATCHES:
-        return conditionValue instanceof RegExp ? 
-          conditionValue.test(String(contextValue)) : 
-          String(contextValue) === String(conditionValue);
+        return conditionValue instanceof RegExp
+          ? conditionValue.test(String(contextValue))
+          : String(contextValue) === String(conditionValue);
       default:
         return false;
     }
@@ -583,7 +612,7 @@ export class FeatureFlagManager {
    * Evaluate rollout percentage
    */
   private evaluateRollout(
-    rolloutPercentage: number, 
+    rolloutPercentage: number,
     context: FlagEvaluationContext
   ): { included: boolean; reason: string } {
     if (rolloutPercentage >= 100) {
@@ -600,12 +629,12 @@ export class FeatureFlagManager {
     const userPercentage = hash % 100;
 
     const included = userPercentage < rolloutPercentage;
-    
+
     return {
       included,
-      reason: included ? 
-        `Included in ${rolloutPercentage}% rollout` : 
-        `Not included in ${rolloutPercentage}% rollout`
+      reason: included
+        ? `Included in ${rolloutPercentage}% rollout`
+        : `Not included in ${rolloutPercentage}% rollout`,
     };
   }
 
@@ -626,7 +655,7 @@ export class FeatureFlagManager {
     let hash = 0;
     for (let i = 0; i < str.length; i++) {
       const char = str.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
+      hash = (hash << 5) - hash + char;
       hash = hash & hash; // Convert to 32-bit integer
     }
     return Math.abs(hash);
@@ -640,7 +669,7 @@ export class FeatureFlagManager {
       flagKey,
       context.userId || 'anonymous',
       context.environment,
-      context.componentPath || 'global'
+      context.componentPath || 'global',
     ];
     return keyParts.join(':');
   }
@@ -649,7 +678,7 @@ export class FeatureFlagManager {
    * Cache evaluation result
    */
   private cacheResult(cacheKey: string, result: FlagEvaluationResult): void {
-    const expiry = Date.now() + (this.config.cacheTtl * 1000);
+    const expiry = Date.now() + this.config.cacheTtl * 1000;
     this.cache.set(cacheKey, { result, expiry });
   }
 
@@ -674,9 +703,9 @@ export class FeatureFlagManager {
    * Update metrics
    */
   private updateMetrics(
-    flagKey: string, 
-    enabled: boolean, 
-    evaluationTime: number, 
+    flagKey: string,
+    enabled: boolean,
+    evaluationTime: number,
     error: boolean = false
   ): void {
     if (!this.config.metricsEnabled) return;
@@ -688,11 +717,13 @@ export class FeatureFlagManager {
     if (enabled) metrics.enabledCount++;
     else metrics.disabledCount++;
     if (error) metrics.errorCount++;
-    
+
     // Update average evaluation time
-    metrics.averageEvaluationTime = 
-      (metrics.averageEvaluationTime * (metrics.evaluations - 1) + evaluationTime) / metrics.evaluations;
-    
+    metrics.averageEvaluationTime =
+      (metrics.averageEvaluationTime * (metrics.evaluations - 1) +
+        evaluationTime) /
+      metrics.evaluations;
+
     metrics.lastEvaluated = new Date().toISOString();
   }
 
@@ -701,15 +732,17 @@ export class FeatureFlagManager {
    */
   getMetrics(flagKey?: string): FlagMetrics | Record<string, FlagMetrics> {
     if (flagKey) {
-      return this.metrics.get(flagKey) || {
-        flagKey,
-        evaluations: 0,
-        enabledCount: 0,
-        disabledCount: 0,
-        errorCount: 0,
-        lastEvaluated: new Date().toISOString(),
-        averageEvaluationTime: 0
-      };
+      return (
+        this.metrics.get(flagKey) || {
+          flagKey,
+          evaluations: 0,
+          enabledCount: 0,
+          disabledCount: 0,
+          errorCount: 0,
+          lastEvaluated: new Date().toISOString(),
+          averageEvaluationTime: 0,
+        }
+      );
     }
 
     const allMetrics: Record<string, FlagMetrics> = {};
@@ -732,7 +765,7 @@ export class FeatureFlagManager {
   exportConfiguration(): FlagConfiguration {
     return {
       ...this.config,
-      flags: this.getAllFlags()
+      flags: this.getAllFlags(),
     };
   }
 
@@ -755,16 +788,16 @@ export class FeatureFlagManager {
  * React Hook for Feature Flags
  */
 export function useFeatureFlag(
-  flagKey: string, 
+  flagKey: string,
   context?: Partial<FlagEvaluationContext>
 ): FlagEvaluationResult {
   // This would integrate with React context in a real implementation
   const manager = new FeatureFlagManager();
-  
+
   const evaluationContext: FlagEvaluationContext = {
     environment: 'development',
     timestamp: Date.now(),
-    ...context
+    ...context,
   };
 
   return manager.evaluateFlag(flagKey, evaluationContext);
@@ -779,7 +812,7 @@ export function createMigrationFlag(
   riskLevel: 'low' | 'medium' | 'high' | 'critical' = 'medium'
 ): FeatureFlag {
   const key = `enable_real_${component.toLowerCase().replace(/[^a-z0-9]/g, '_')}_api`;
-  
+
   return {
     key,
     name: `Enable Real ${component} API`,
@@ -791,8 +824,8 @@ export function createMigrationFlag(
         type: ConditionType.COMPONENT_PATH,
         operator: ConditionOperator.CONTAINS,
         value: component.toLowerCase(),
-        description: `Only apply to ${component} component`
-      }
+        description: `Only apply to ${component} component`,
+      },
     ],
     metadata: {
       component,
@@ -803,15 +836,15 @@ export function createMigrationFlag(
           metric: `${component.toLowerCase()}_success_rate`,
           threshold: 90,
           timeWindow: 30,
-          action: 'disable'
-        }
+          action: 'disable',
+        },
       ],
       owner: 'migration-team',
       reviewers: ['tech-lead'],
-      tags: ['migration', component.toLowerCase(), 'api']
+      tags: ['migration', component.toLowerCase(), 'api'],
     },
     createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
+    updatedAt: new Date().toISOString(),
   };
 }
 
@@ -825,6 +858,6 @@ export function createGradualRolloutContext(
     componentPath,
     environment,
     timestamp: Date.now(),
-    sessionId: `session_${userId}_${Date.now()}`
+    sessionId: `session_${userId}_${Date.now()}`,
   };
 }

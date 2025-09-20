@@ -53,7 +53,7 @@ class PerformanceTestRunner {
       actualValue: fcp,
       expectedValue: 1800,
       unit: 'ms',
-      details: 'Time until first content is painted'
+      details: 'Time until first content is painted',
     });
 
     // Test Largest Contentful Paint
@@ -64,7 +64,7 @@ class PerformanceTestRunner {
       actualValue: lcp,
       expectedValue: 2500,
       unit: 'ms',
-      details: 'Time until largest content element is painted'
+      details: 'Time until largest content element is painted',
     });
 
     // Test First Input Delay
@@ -75,7 +75,7 @@ class PerformanceTestRunner {
       actualValue: fid,
       expectedValue: 100,
       unit: 'ms',
-      details: 'Time from first user interaction to browser response'
+      details: 'Time from first user interaction to browser response',
     });
 
     // Test Cumulative Layout Shift
@@ -86,7 +86,7 @@ class PerformanceTestRunner {
       actualValue: cls,
       expectedValue: 0.1,
       unit: 'score',
-      details: 'Visual stability score'
+      details: 'Visual stability score',
     });
 
     suite.overallScore = this.calculateSuiteScore(suite.results);
@@ -110,7 +110,7 @@ class PerformanceTestRunner {
       actualValue: renderTime,
       expectedValue: 16,
       unit: 'ms',
-      details: 'Average time to render React components'
+      details: 'Average time to render React components',
     });
 
     // Test virtual scrolling performance
@@ -121,7 +121,7 @@ class PerformanceTestRunner {
       actualValue: scrollPerformance,
       expectedValue: 5,
       unit: 'ms',
-      details: 'Time to update virtual scroll viewport'
+      details: 'Time to update virtual scroll viewport',
     });
 
     // Test memo optimization effectiveness
@@ -132,7 +132,7 @@ class PerformanceTestRunner {
       actualValue: memoEffectiveness,
       expectedValue: 80,
       unit: '%',
-      details: 'Percentage of prevented re-renders'
+      details: 'Percentage of prevented re-renders',
     });
 
     suite.overallScore = this.calculateSuiteScore(suite.results);
@@ -150,7 +150,7 @@ class PerformanceTestRunner {
 
     if ('memory' in performance) {
       const memory = (performance as any).memory;
-      
+
       // Test heap usage
       const heapUsage = (memory.usedJSHeapSize / memory.jsHeapSizeLimit) * 100;
       suite.results.push({
@@ -159,7 +159,7 @@ class PerformanceTestRunner {
         actualValue: heapUsage,
         expectedValue: 70,
         unit: '%',
-        details: 'Percentage of JavaScript heap used'
+        details: 'Percentage of JavaScript heap used',
       });
 
       // Test memory growth over time
@@ -170,7 +170,7 @@ class PerformanceTestRunner {
         actualValue: memoryGrowth,
         expectedValue: 5,
         unit: 'MB/min',
-        details: 'Rate of memory increase over time'
+        details: 'Rate of memory increase over time',
       });
     } else {
       suite.results.push({
@@ -179,7 +179,7 @@ class PerformanceTestRunner {
         actualValue: 0,
         expectedValue: 1,
         unit: 'boolean',
-        details: 'Browser does not support memory API'
+        details: 'Browser does not support memory API',
       });
     }
 
@@ -204,7 +204,7 @@ class PerformanceTestRunner {
       actualValue: bundleSize,
       expectedValue: 1000,
       unit: 'KB',
-      details: 'Total size of JavaScript bundles'
+      details: 'Total size of JavaScript bundles',
     });
 
     // Test code splitting effectiveness
@@ -215,7 +215,7 @@ class PerformanceTestRunner {
       actualValue: codeSplitting,
       expectedValue: 60,
       unit: '%',
-      details: 'Percentage of code that is split into async chunks'
+      details: 'Percentage of code that is split into async chunks',
     });
 
     // Test tree shaking effectiveness
@@ -226,7 +226,7 @@ class PerformanceTestRunner {
       actualValue: treeShaking,
       expectedValue: 70,
       unit: '%',
-      details: 'Percentage of unused code eliminated'
+      details: 'Percentage of unused code eliminated',
     });
 
     suite.overallScore = this.calculateSuiteScore(suite.results);
@@ -250,7 +250,7 @@ class PerformanceTestRunner {
       actualValue: lazyLoading,
       expectedValue: 80,
       unit: '%',
-      details: 'Percentage of images loaded only when needed'
+      details: 'Percentage of images loaded only when needed',
     });
 
     // Test image optimization
@@ -261,7 +261,7 @@ class PerformanceTestRunner {
       actualValue: imageOptimization,
       expectedValue: 70,
       unit: '%',
-      details: 'Percentage reduction in image file sizes'
+      details: 'Percentage reduction in image file sizes',
     });
 
     suite.overallScore = this.calculateSuiteScore(suite.results);
@@ -283,7 +283,7 @@ class PerformanceTestRunner {
           }
         });
         observer.observe({ entryTypes: ['paint'] });
-        
+
         // Fallback timeout
         setTimeout(() => {
           observer.disconnect();
@@ -306,7 +306,7 @@ class PerformanceTestRunner {
           }
         });
         observer.observe({ entryTypes: ['largest-contentful-paint'] });
-        
+
         setTimeout(() => {
           observer.disconnect();
           resolve(0);
@@ -328,7 +328,7 @@ class PerformanceTestRunner {
           }
         });
         observer.observe({ entryTypes: ['first-input'] });
-        
+
         setTimeout(() => {
           observer.disconnect();
           resolve(0);
@@ -342,7 +342,7 @@ class PerformanceTestRunner {
   private async measureCumulativeLayoutShift(): Promise<number> {
     return new Promise((resolve) => {
       let clsValue = 0;
-      
+
       if ('PerformanceObserver' in window) {
         const observer = new PerformanceObserver((list) => {
           for (const entry of list.getEntries()) {
@@ -352,7 +352,7 @@ class PerformanceTestRunner {
           }
         });
         observer.observe({ entryTypes: ['layout-shift'] });
-        
+
         setTimeout(() => {
           observer.disconnect();
           resolve(clsValue);
@@ -371,16 +371,16 @@ class PerformanceTestRunner {
   private async testVirtualScrolling(): Promise<number> {
     // Simulate virtual scrolling performance test
     const startTime = performance.now();
-    
+
     // Simulate scroll event handling
     for (let i = 0; i < 100; i++) {
       // Simulate virtual scroll calculations
       const visibleStart = Math.floor(i / 10);
       const visibleEnd = Math.min(visibleStart + 10, 100);
       // Simulate DOM updates
-      await new Promise(resolve => setTimeout(resolve, 0));
+      await new Promise((resolve) => setTimeout(resolve, 0));
     }
-    
+
     return performance.now() - startTime;
   }
 
@@ -392,34 +392,40 @@ class PerformanceTestRunner {
 
   private async measureMemoryGrowth(): Promise<number> {
     if (!('memory' in performance)) return 0;
-    
+
     const initialMemory = (performance as any).memory.usedJSHeapSize;
-    
+
     // Wait 1 minute and measure again
-    await new Promise(resolve => setTimeout(resolve, 60000));
-    
+    await new Promise((resolve) => setTimeout(resolve, 60000));
+
     const finalMemory = (performance as any).memory.usedJSHeapSize;
     const growthMB = (finalMemory - initialMemory) / 1024 / 1024;
-    
+
     return growthMB;
   }
 
   private async measureBundleSize(): Promise<number> {
-    const resources = performance.getEntriesByType('resource') as PerformanceResourceTiming[];
-    const jsResources = resources.filter(r => r.name.includes('.js'));
-    
-    return jsResources.reduce((total, resource) => {
-      return total + (resource.transferSize || 0);
-    }, 0) / 1024; // Convert to KB
+    const resources = performance.getEntriesByType(
+      'resource'
+    ) as PerformanceResourceTiming[];
+    const jsResources = resources.filter((r) => r.name.includes('.js'));
+
+    return (
+      jsResources.reduce((total, resource) => {
+        return total + (resource.transferSize || 0);
+      }, 0) / 1024
+    ); // Convert to KB
   }
 
   private async testCodeSplitting(): Promise<number> {
-    const resources = performance.getEntriesByType('resource') as PerformanceResourceTiming[];
-    const jsResources = resources.filter(r => r.name.includes('.js'));
-    const asyncChunks = jsResources.filter(r => 
-      /\d+\.[a-f0-9]+\.js$/.test(r.name) || r.name.includes('chunk')
+    const resources = performance.getEntriesByType(
+      'resource'
+    ) as PerformanceResourceTiming[];
+    const jsResources = resources.filter((r) => r.name.includes('.js'));
+    const asyncChunks = jsResources.filter(
+      (r) => /\d+\.[a-f0-9]+\.js$/.test(r.name) || r.name.includes('chunk')
     );
-    
+
     return (asyncChunks.length / jsResources.length) * 100;
   }
 
@@ -432,7 +438,7 @@ class PerformanceTestRunner {
   private async testLazyLoading(): Promise<number> {
     const images = document.querySelectorAll('img');
     const lazyImages = document.querySelectorAll('img[loading="lazy"]');
-    
+
     return images.length > 0 ? (lazyImages.length / images.length) * 100 : 0;
   }
 
@@ -444,8 +450,8 @@ class PerformanceTestRunner {
 
   private calculateSuiteScore(results: PerformanceTestResult[]): number {
     if (results.length === 0) return 0;
-    
-    const passedTests = results.filter(r => r.passed).length;
+
+    const passedTests = results.filter((r) => r.passed).length;
     return (passedTests / results.length) * 100;
   }
 
@@ -455,11 +461,11 @@ class PerformanceTestRunner {
 
   generateReport(): string {
     let report = '# Performance Test Report\n\n';
-    
+
     for (const suite of this.results) {
       report += `## ${suite.name}\n`;
       report += `**Overall Score:** ${suite.overallScore.toFixed(1)}/100 ${suite.passed ? '✅' : '❌'}\n\n`;
-      
+
       for (const result of suite.results) {
         const status = result.passed ? '✅' : '❌';
         report += `- **${result.testName}:** ${status}\n`;
@@ -471,7 +477,7 @@ class PerformanceTestRunner {
         report += '\n';
       }
     }
-    
+
     return report;
   }
 }

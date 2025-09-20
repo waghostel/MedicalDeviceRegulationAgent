@@ -88,8 +88,11 @@ describe('API Client', () => {
 
   describe('Error handling', () => {
     test('should handle HTTP errors', async () => {
-      const errorResponse = { error: 'Not found', message: 'Resource not found' };
-      
+      const errorResponse = {
+        error: 'Not found',
+        message: 'Resource not found',
+      };
+
       (global.fetch as jest.Mock).mockResolvedValueOnce({
         ok: false,
         status: 404,
@@ -119,7 +122,7 @@ describe('API Client', () => {
     test('should handle timeout errors', async () => {
       // Mock a request that takes longer than the timeout
       (global.fetch as jest.Mock).mockImplementationOnce(
-        () => new Promise(resolve => setTimeout(resolve, 35000))
+        () => new Promise((resolve) => setTimeout(resolve, 35000))
       );
 
       await expect(apiClient.get('/test')).rejects.toMatchObject({
@@ -195,7 +198,7 @@ describe('API Client', () => {
   describe('Request configuration', () => {
     test('should skip error toast when requested', async () => {
       const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
-      
+
       (global.fetch as jest.Mock).mockResolvedValueOnce({
         ok: false,
         status: 500,
@@ -215,9 +218,9 @@ describe('API Client', () => {
 
     test('should use custom timeout', async () => {
       const shortTimeout = 100;
-      
+
       (global.fetch as jest.Mock).mockImplementationOnce(
-        () => new Promise(resolve => setTimeout(resolve, 200))
+        () => new Promise((resolve) => setTimeout(resolve, 200))
       );
 
       await expect(

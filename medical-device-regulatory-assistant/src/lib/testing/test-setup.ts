@@ -1,11 +1,15 @@
 /**
  * Consolidated Test Setup - Simplified MSW Integration
- * 
+ *
  * This file provides a single, unified test setup that handles all mocking needs
  * without complex imports or TypeScript/JavaScript conflicts.
  */
 
-import { generateMockProject, generateMockDeviceClassification, generateMockPredicateDevices } from '@/lib/mock-data';
+import {
+  generateMockProject,
+  generateMockDeviceClassification,
+  generateMockPredicateDevices,
+} from '@/lib/mock-data';
 
 // Mock endpoint configuration
 export interface MockEndpoint {
@@ -18,11 +22,11 @@ export interface MockEndpoint {
 }
 
 // Simple mock server state
-let mockEndpoints: Map<string, MockEndpoint> = new Map();
+const mockEndpoints: Map<string, MockEndpoint> = new Map();
 let originalFetch: typeof global.fetch;
 
 // Helper function to simulate delay
-const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 // Mock Response class for test environment
 class MockResponse {
@@ -30,7 +34,10 @@ class MockResponse {
   private _status: number;
   private _headers: Record<string, string>;
 
-  constructor(body: string, init?: { status?: number; headers?: Record<string, string> }) {
+  constructor(
+    body: string,
+    init?: { status?: number; headers?: Record<string, string> }
+  ) {
     this._body = body;
     this._status = init?.status || 200;
     this._headers = init?.headers || {};
@@ -76,69 +83,77 @@ const createDefaultMockData = () => ({
 export const setupTestMocks = (customEndpoints: MockEndpoint[] = []): void => {
   // Store original fetch
   originalFetch = global.fetch;
-  
+
   // Setup mock endpoints
-  customEndpoints.forEach(endpoint => {
+  customEndpoints.forEach((endpoint) => {
     const key = `${endpoint.method}:${endpoint.path}`;
     mockEndpoints.set(key, endpoint);
   });
 
   // Mock fetch function
-  global.fetch = jest.fn().mockImplementation(async (url: string, options: RequestInit = {}) => {
-    const method = (options.method || 'GET').toUpperCase();
-    const key = `${method}:${url}`;
-    
-    const endpoint = mockEndpoints.get(key);
-    if (endpoint) {
-      // Simulate delay if specified
-      if (endpoint.delay) {
-        await delay(endpoint.delay);
+  global.fetch = jest
+    .fn()
+    .mockImplementation(async (url: string, options: RequestInit = {}) => {
+      const method = (options.method || 'GET').toUpperCase();
+      const key = `${method}:${url}`;
+
+      const endpoint = mockEndpoints.get(key);
+      if (endpoint) {
+        // Simulate delay if specified
+        if (endpoint.delay) {
+          await delay(endpoint.delay);
+        }
+
+        // Return error if specified
+        if (endpoint.error) {
+          throw new Error(`Mock API error for ${key}`);
+        }
+
+        // Return mock response
+        return new MockResponse(JSON.stringify(endpoint.response), {
+          status: endpoint.statusCode || 200,
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
       }
-      
-      // Return error if specified
-      if (endpoint.error) {
-        throw new Error(`Mock API error for ${key}`);
+
+      // Default mock responses for common endpoints
+      const mockData = createDefaultMockData();
+
+      if (url.includes('/api/projects') && method === 'GET') {
+        return new MockResponse(
+          JSON.stringify({ projects: mockData.projects, total: 3 }),
+          {
+            status: 200,
+            headers: { 'Content-Type': 'application/json' },
+          }
+        );
       }
-      
-      // Return mock response
-      return new MockResponse(JSON.stringify(endpoint.response), {
-        status: endpoint.statusCode || 200,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-    }
-    
-    // Default mock responses for common endpoints
-    const mockData = createDefaultMockData();
-    
-    if (url.includes('/api/projects') && method === 'GET') {
-      return new MockResponse(JSON.stringify({ projects: mockData.projects, total: 3 }), {
-        status: 200,
-        headers: { 'Content-Type': 'application/json' },
-      });
-    }
-    
-    if (url.includes('/api/projects') && method === 'POST') {
-      const newProject = generateMockProject({ 
-        id: Date.now(), 
-        name: 'New Project',
-        status: 'draft' as any
-      });
-      return new MockResponse(JSON.stringify(newProject), {
-        status: 201,
-        headers: { 'Content-Type': 'application/json' },
-      });
-    }
-    
-    // Default mock response for unmatched endpoints
-    return new MockResponse(JSON.stringify({ message: 'Mock API response' }), {
-      status: 200,
-      headers: {
-        'Content-Type': 'application/json',
-      },
+
+      if (url.includes('/api/projects') && method === 'POST') {
+        const newProject = generateMockProject({
+          id: Date.now(),
+          name: 'New Project',
+          status: 'draft' as any,
+        });
+        return new MockResponse(JSON.stringify(newProject), {
+          status: 201,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      }
+
+      // Default mock response for unmatched endpoints
+      return new MockResponse(
+        JSON.stringify({ message: 'Mock API response' }),
+        {
+          status: 200,
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
     });
-  });
 };
 
 /**
@@ -149,10 +164,10 @@ export const teardownTestMocks = (): void => {
   if (originalFetch) {
     global.fetch = originalFetch;
   }
-  
+
   // Clear mock endpoints
   mockEndpoints.clear();
-  
+
   // Clear fetch mock
   if (jest.isMockFunction(global.fetch)) {
     (global.fetch as jest.MockedFunction<typeof fetch>).mockRestore();
@@ -173,7 +188,7 @@ export const resetTestMocks = (): void => {
  * Add runtime handlers to existing mock server
  */
 export const addMockHandlers = (endpoints: MockEndpoint[]): void => {
-  endpoints.forEach(endpoint => {
+  endpoints.forEach((endpoint) => {
     const key = `${endpoint.method}:${endpoint.path}`;
     mockEndpoints.set(key, endpoint);
   });
@@ -243,12 +258,14 @@ export const setupComponentMocks = (): void => {
  * Complete test environment setup
  * This is the main function to call in test setup
  */
-export const setupTestEnvironment = (options: {
-  mockAPI?: boolean;
-  mockWebSocket?: boolean;
-  mockComponents?: boolean;
-  customEndpoints?: MockEndpoint[];
-} = {}): void => {
+export const setupTestEnvironment = (
+  options: {
+    mockAPI?: boolean;
+    mockWebSocket?: boolean;
+    mockComponents?: boolean;
+    customEndpoints?: MockEndpoint[];
+  } = {}
+): void => {
   const {
     mockAPI = true,
     mockWebSocket = true,

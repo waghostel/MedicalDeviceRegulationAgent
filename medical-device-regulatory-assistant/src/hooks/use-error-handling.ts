@@ -67,45 +67,51 @@ export function useErrorHandling(
     operationRef.current = operation;
   }, [operation]);
 
-  const handleError = useCallback((error: any, errorContext?: string) => {
-    const apiError = error instanceof APIError ? error : APIError.fromError(error, {
-      type: 'server',
-      code: 'OPERATION_ERROR',
-    });
+  const handleError = useCallback(
+    (error: any, errorContext?: string) => {
+      const apiError =
+        error instanceof APIError
+          ? error
+          : APIError.fromError(error, {
+              type: 'server',
+              code: 'OPERATION_ERROR',
+            });
 
-    setErrorState(prev => ({
-      ...prev,
-      error: apiError,
-      isRetrying: false,
-    }));
+      setErrorState((prev) => ({
+        ...prev,
+        error: apiError,
+        isRetrying: false,
+      }));
 
-    // Track error
-    trackAction(`Error: ${errorContext || context}`, {
-      errorType: apiError.type,
-      errorCode: apiError.code,
-      retryable: apiError.retryable,
-    });
-
-    // Report error
-    if (reportError) {
-      errorReporting.reportError(apiError, {
-        context: errorContext || context,
-        retryCount: errorState.retryCount,
+      // Track error
+      trackAction(`Error: ${errorContext || context}`, {
+        errorType: apiError.type,
+        errorCode: apiError.code,
+        retryable: apiError.retryable,
       });
-    }
 
-    // Show toast notification
-    if (showToast) {
-      toast({
-        title: 'Error',
-        description: apiError.userMessage,
-        variant: 'destructive',
-      });
-    }
+      // Report error
+      if (reportError) {
+        errorReporting.reportError(apiError, {
+          context: errorContext || context,
+          retryCount: errorState.retryCount,
+        });
+      }
 
-    // Call custom error handler
-    onError?.(apiError);
-  }, [context, reportError, showToast, onError, errorState.retryCount]);
+      // Show toast notification
+      if (showToast) {
+        toast({
+          title: 'Error',
+          description: apiError.userMessage,
+          variant: 'destructive',
+        });
+      }
+
+      // Call custom error handler
+      onError?.(apiError);
+    },
+    [context, reportError, showToast, onError, errorState.retryCount]
+  );
 
   const retry = useCallback(async () => {
     if (!operationRef.current || !errorState.error || errorState.isRetrying) {
@@ -119,13 +125,14 @@ export function useErrorHandling(
       onMaxRetriesReached?.(errorState.error);
       toast({
         title: 'Max Retries Reached',
-        description: 'The operation failed after multiple attempts. Please try again later.',
+        description:
+          'The operation failed after multiple attempts. Please try again later.',
         variant: 'destructive',
       });
       return;
     }
 
-    setErrorState(prev => ({
+    setErrorState((prev) => ({
       ...prev,
       isRetrying: true,
       retryCount: newRetryCount,
@@ -144,8 +151,11 @@ export function useErrorHandling(
     try {
       // Add delay before retry
       if (retryDelay > 0) {
-        await new Promise(resolve => {
-          retryTimeoutRef.current = setTimeout(resolve, retryDelay * newRetryCount);
+        await new Promise((resolve) => {
+          retryTimeoutRef.current = setTimeout(
+            resolve,
+            retryDelay * newRetryCount
+          );
         });
       }
 
@@ -163,7 +173,6 @@ export function useErrorHandling(
         title: 'Success',
         description: 'Operation completed successfully.',
       });
-
     } catch (error) {
       // Retry failed - handle the new error
       handleError(error, `${context} (retry ${newRetryCount})`);
@@ -193,7 +202,8 @@ export function useErrorHandling(
     });
   }, []);
 
-  const canRetry = errorState.error?.retryable && errorState.retryCount < maxRetries;
+  const canRetry =
+    errorState.error?.retryable && errorState.retryCount < maxRetries;
 
   // Cleanup on unmount
   useEffect(() => {
@@ -224,7 +234,7 @@ export function useAsyncOperation<T = any>(
 ) {
   const [data, setData] = useState<T | null>(null);
   const [loading, setLoading] = useState(false);
-  
+
   const errorHandling = useErrorHandling(operation, options);
 
   const execute = useCallback(async (): Promise<T | null> => {
@@ -271,24 +281,28 @@ export function useAsyncOperation<T = any>(
  */
 export function useFormErrorHandling(options: UseErrorHandlingOptions = {}) {
   const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
-  
+
   const errorHandling = useErrorHandling(undefined, {
     ...options,
     showToast: false, // Handle form errors differently
   });
 
-  const handleFormError = useCallback((error: any) => {
-    const apiError = error instanceof APIError ? error : APIError.fromError(error);
-    
-    // Extract field errors for validation errors
-    if (apiError.type === 'validation' && apiError.details?.fieldErrors) {
-      setFieldErrors(apiError.details.fieldErrors);
-    } else {
-      setFieldErrors({});
-    }
+  const handleFormError = useCallback(
+    (error: any) => {
+      const apiError =
+        error instanceof APIError ? error : APIError.fromError(error);
 
-    errorHandling.handleError(apiError, 'form submission');
-  }, [errorHandling]);
+      // Extract field errors for validation errors
+      if (apiError.type === 'validation' && apiError.details?.fieldErrors) {
+        setFieldErrors(apiError.details.fieldErrors);
+      } else {
+        setFieldErrors({});
+      }
+
+      errorHandling.handleError(apiError, 'form submission');
+    },
+    [errorHandling]
+  );
 
   const clearFieldErrors = useCallback(() => {
     setFieldErrors({});
@@ -310,14 +324,18 @@ export function useFormErrorHandling(options: UseErrorHandlingOptions = {}) {
 export function useAPIErrorHandling(options: UseErrorHandlingOptions = {}) {
   const errorHandling = useErrorHandling(undefined, options);
 
-  const handleAPIError = useCallback((error: any, endpoint?: string, method?: string) => {
-    const apiError = error instanceof APIError ? error : APIError.fromError(error);
-    
-    // Add API-specific context
-    const context = `API ${method || 'call'}${endpoint ? ` to ${endpoint}` : ''}`;
-    
-    errorHandling.handleError(apiError, context);
-  }, [errorHandling]);
+  const handleAPIError = useCallback(
+    (error: any, endpoint?: string, method?: string) => {
+      const apiError =
+        error instanceof APIError ? error : APIError.fromError(error);
+
+      // Add API-specific context
+      const context = `API ${method || 'call'}${endpoint ? ` to ${endpoint}` : ''}`;
+
+      errorHandling.handleError(apiError, context);
+    },
+    [errorHandling]
+  );
 
   return {
     ...errorHandling,
@@ -328,22 +346,32 @@ export function useAPIErrorHandling(options: UseErrorHandlingOptions = {}) {
 /**
  * Hook for handling project-specific errors
  */
-export function useProjectErrorHandling(projectId?: number, options: UseErrorHandlingOptions = {}) {
+export function useProjectErrorHandling(
+  projectId?: number,
+  options: UseErrorHandlingOptions = {}
+) {
   const errorHandling = useErrorHandling(undefined, {
     ...options,
     context: `project ${projectId || 'operation'}`,
   });
 
-  const handleProjectError = useCallback((
-    error: any, 
-    operation?: 'create' | 'read' | 'update' | 'delete' | 'export'
-  ) => {
-    const apiError = error instanceof APIError 
-      ? error 
-      : APIError.project(operation || 'read', error.message, { projectId });
-    
-    errorHandling.handleError(apiError, `project ${operation || 'operation'}`);
-  }, [errorHandling, projectId]);
+  const handleProjectError = useCallback(
+    (
+      error: any,
+      operation?: 'create' | 'read' | 'update' | 'delete' | 'export'
+    ) => {
+      const apiError =
+        error instanceof APIError
+          ? error
+          : APIError.project(operation || 'read', error.message, { projectId });
+
+      errorHandling.handleError(
+        apiError,
+        `project ${operation || 'operation'}`
+      );
+    },
+    [errorHandling, projectId]
+  );
 
   return {
     ...errorHandling,
@@ -354,19 +382,26 @@ export function useProjectErrorHandling(projectId?: number, options: UseErrorHan
 /**
  * Hook for handling agent-specific errors
  */
-export function useAgentErrorHandling(agentType?: string, options: UseErrorHandlingOptions = {}) {
+export function useAgentErrorHandling(
+  agentType?: string,
+  options: UseErrorHandlingOptions = {}
+) {
   const errorHandling = useErrorHandling(undefined, {
     ...options,
     context: `agent ${agentType || 'operation'}`,
   });
 
-  const handleAgentError = useCallback((error: unknown, step?: string) => {
-    const apiError = error instanceof APIError 
-      ? error 
-      : APIError.agent(error.message, { agentType, step });
-    
-    errorHandling.handleError(apiError, `agent ${step || 'operation'}`);
-  }, [errorHandling, agentType]);
+  const handleAgentError = useCallback(
+    (error: unknown, step?: string) => {
+      const apiError =
+        error instanceof APIError
+          ? error
+          : APIError.agent(error.message, { agentType, step });
+
+      errorHandling.handleError(apiError, `agent ${step || 'operation'}`);
+    },
+    [errorHandling, agentType]
+  );
 
   return {
     ...errorHandling,

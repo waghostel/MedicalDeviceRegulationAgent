@@ -2,7 +2,7 @@
 
 /**
  * Quality Metrics Reporter
- * 
+ *
  * Generates comprehensive quality metrics reports with trend analysis,
  * quality gates validation, and actionable recommendations.
  */
@@ -19,7 +19,7 @@ const COLORS = {
   MAGENTA: '\x1b[35m',
   CYAN: '\x1b[36m',
   RESET: '\x1b[0m',
-  BOLD: '\x1b[1m'
+  BOLD: '\x1b[1m',
 };
 
 /**
@@ -32,19 +32,19 @@ const QUALITY_GATES = {
   test_coverage: 85,
   performance: 70,
   security: 90,
-  
+
   // Maximum allowed issues
   critical_issues: 0,
   high_severity_issues: 5,
-  
+
   // Coverage thresholds
   frontend_coverage: 85,
   backend_coverage: 90,
-  
+
   // Performance thresholds
   test_execution_time: 30, // seconds
   bundle_size: 500, // KB
-  memory_usage: 100 // MB
+  memory_usage: 100, // MB
 };
 
 /**
@@ -72,17 +72,20 @@ class QualityMetricsReporter {
    */
   async collectQualityMetrics() {
     this.logSection('Collecting Quality Metrics');
-    
+
     const metrics = {
       timestamp: this.timestamp,
       frontend: await this.collectFrontendMetrics(),
       backend: await this.collectBackendMetrics(),
-      overall: {}
+      overall: {},
     };
 
     // Calculate overall metrics
-    metrics.overall = this.calculateOverallMetrics(metrics.frontend, metrics.backend);
-    
+    metrics.overall = this.calculateOverallMetrics(
+      metrics.frontend,
+      metrics.backend
+    );
+
     return metrics;
   }
 
@@ -91,13 +94,13 @@ class QualityMetricsReporter {
    */
   async collectFrontendMetrics() {
     this.log('📊 Collecting frontend metrics...', COLORS.YELLOW);
-    
+
     const metrics = {
       code_quality: await this.getFrontendCodeQuality(),
       test_coverage: await this.getFrontendTestCoverage(),
       performance: await this.getFrontendPerformance(),
       bundle_analysis: await this.getBundleAnalysis(),
-      dependencies: await this.getFrontendDependencies()
+      dependencies: await this.getFrontendDependencies(),
     };
 
     return metrics;
@@ -108,13 +111,13 @@ class QualityMetricsReporter {
    */
   async collectBackendMetrics() {
     this.log('📊 Collecting backend metrics...', COLORS.YELLOW);
-    
+
     const metrics = {
       code_quality: await this.getBackendCodeQuality(),
       test_coverage: await this.getBackendTestCoverage(),
       performance: await this.getBackendPerformance(),
       security: await this.getBackendSecurity(),
-      dependencies: await this.getBackendDependencies()
+      dependencies: await this.getBackendDependencies(),
     };
 
     return metrics;
@@ -126,19 +129,21 @@ class QualityMetricsReporter {
   async getFrontendCodeQuality() {
     try {
       // Run ESLint with JSON output
-      const eslintResult = await this.runCommand('pnpm lint --format json', { silent: true });
-      
+      const eslintResult = await this.runCommand('pnpm lint --format json', {
+        silent: true,
+      });
+
       let eslintIssues = [];
       if (eslintResult.output) {
         try {
           const eslintData = JSON.parse(eslintResult.output);
-          eslintIssues = eslintData.flatMap(file => 
-            file.messages.map(msg => ({
+          eslintIssues = eslintData.flatMap((file) =>
+            file.messages.map((msg) => ({
               file: file.filePath,
               line: msg.line,
               severity: msg.severity === 2 ? 'error' : 'warning',
               message: msg.message,
-              rule: msg.ruleId
+              rule: msg.ruleId,
             }))
           );
         } catch (e) {
@@ -147,14 +152,18 @@ class QualityMetricsReporter {
       }
 
       // TypeScript compilation check
-      const tscResult = await this.runCommand('pnpm type-check', { silent: true });
-      
+      const tscResult = await this.runCommand('pnpm type-check', {
+        silent: true,
+      });
+
       return {
         eslint_issues: eslintIssues.length,
-        eslint_errors: eslintIssues.filter(i => i.severity === 'error').length,
-        eslint_warnings: eslintIssues.filter(i => i.severity === 'warning').length,
+        eslint_errors: eslintIssues.filter((i) => i.severity === 'error')
+          .length,
+        eslint_warnings: eslintIssues.filter((i) => i.severity === 'warning')
+          .length,
         typescript_errors: !tscResult.success,
-        score: this.calculateCodeQualityScore(eslintIssues, tscResult.success)
+        score: this.calculateCodeQualityScore(eslintIssues, tscResult.success),
       };
     } catch (error) {
       return { error: error.message, score: 0 };
@@ -166,12 +175,18 @@ class QualityMetricsReporter {
    */
   async getFrontendTestCoverage() {
     try {
-      const coveragePath = path.join(this.projectRoot, 'coverage', 'coverage-summary.json');
-      
+      const coveragePath = path.join(
+        this.projectRoot,
+        'coverage',
+        'coverage-summary.json'
+      );
+
       try {
-        const coverageData = JSON.parse(await fs.readFile(coveragePath, 'utf8'));
+        const coverageData = JSON.parse(
+          await fs.readFile(coveragePath, 'utf8')
+        );
         const total = coverageData.total;
-        
+
         return {
           statements: total.statements.pct,
           branches: total.branches.pct,
@@ -179,15 +194,22 @@ class QualityMetricsReporter {
           lines: total.lines.pct,
           covered_statements: total.statements.covered,
           total_statements: total.statements.total,
-          score: (total.statements.pct + total.branches.pct + total.functions.pct + total.lines.pct) / 4
+          score:
+            (total.statements.pct +
+              total.branches.pct +
+              total.functions.pct +
+              total.lines.pct) /
+            4,
         };
       } catch (e) {
         // Run coverage if report doesn't exist
         await this.runCommand('pnpm test:coverage --silent', { silent: true });
-        
-        const coverageData = JSON.parse(await fs.readFile(coveragePath, 'utf8'));
+
+        const coverageData = JSON.parse(
+          await fs.readFile(coveragePath, 'utf8')
+        );
         const total = coverageData.total;
-        
+
         return {
           statements: total.statements.pct,
           branches: total.branches.pct,
@@ -195,7 +217,12 @@ class QualityMetricsReporter {
           lines: total.lines.pct,
           covered_statements: total.statements.covered,
           total_statements: total.statements.total,
-          score: (total.statements.pct + total.branches.pct + total.functions.pct + total.lines.pct) / 4
+          score:
+            (total.statements.pct +
+              total.branches.pct +
+              total.functions.pct +
+              total.lines.pct) /
+            4,
         };
       }
     } catch (error) {
@@ -209,16 +236,19 @@ class QualityMetricsReporter {
   async getFrontendPerformance() {
     try {
       const startTime = Date.now();
-      const testResult = await this.runCommand('pnpm test --passWithNoTests --silent', { silent: true });
+      const testResult = await this.runCommand(
+        'pnpm test --passWithNoTests --silent',
+        { silent: true }
+      );
       const testExecutionTime = (Date.now() - startTime) / 1000;
 
       // Bundle size analysis
       const bundleSize = await this.getBundleSize();
-      
+
       return {
         test_execution_time: testExecutionTime,
         bundle_size: bundleSize,
-        score: this.calculatePerformanceScore(testExecutionTime, bundleSize)
+        score: this.calculatePerformanceScore(testExecutionTime, bundleSize),
       };
     } catch (error) {
       return { error: error.message, score: 0 };
@@ -232,7 +262,7 @@ class QualityMetricsReporter {
     try {
       // Build the project
       const buildResult = await this.runCommand('pnpm build', { silent: true });
-      
+
       if (!buildResult.success) {
         return { error: 'Build failed', total_size: 0 };
       }
@@ -240,21 +270,21 @@ class QualityMetricsReporter {
       // Analyze .next directory
       const nextDir = path.join(this.projectRoot, '.next');
       const staticDir = path.join(nextDir, 'static');
-      
+
       let totalSize = 0;
       const chunks = [];
 
       if (await this.pathExists(staticDir)) {
         const chunkFiles = await this.getFilesRecursively(staticDir, '.js');
-        
+
         for (const file of chunkFiles) {
           const stats = await fs.stat(file);
           const size = Math.round(stats.size / 1024); // KB
           totalSize += size;
-          
+
           chunks.push({
             file: path.relative(staticDir, file),
-            size: size
+            size: size,
           });
         }
       }
@@ -262,7 +292,7 @@ class QualityMetricsReporter {
       return {
         total_size: totalSize,
         chunks: chunks.sort((a, b) => b.size - a.size).slice(0, 10), // Top 10 largest chunks
-        chunk_count: chunks.length
+        chunk_count: chunks.length,
       };
     } catch (error) {
       return { error: error.message, total_size: 0 };
@@ -275,15 +305,22 @@ class QualityMetricsReporter {
   async getFrontendDependencies() {
     try {
       const packageJsonPath = path.join(this.projectRoot, 'package.json');
-      const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf8'));
-      
+      const packageJson = JSON.parse(
+        await fs.readFile(packageJsonPath, 'utf8')
+      );
+
       const totalDeps = Object.keys(packageJson.dependencies || {}).length;
-      const totalDevDeps = Object.keys(packageJson.devDependencies || {}).length;
-      
+      const totalDevDeps = Object.keys(
+        packageJson.devDependencies || {}
+      ).length;
+
       // Check for outdated packages
-      const outdatedResult = await this.runCommand('pnpm outdated --format json', { silent: true });
+      const outdatedResult = await this.runCommand(
+        'pnpm outdated --format json',
+        { silent: true }
+      );
       let outdatedCount = 0;
-      
+
       if (outdatedResult.output) {
         try {
           const outdatedData = JSON.parse(outdatedResult.output);
@@ -297,7 +334,7 @@ class QualityMetricsReporter {
         total_dependencies: totalDeps,
         total_dev_dependencies: totalDevDeps,
         outdated_dependencies: outdatedCount,
-        score: Math.max(0, 100 - (outdatedCount * 5))
+        score: Math.max(0, 100 - outdatedCount * 5),
       };
     } catch (error) {
       return { error: error.message, score: 0 };
@@ -310,31 +347,35 @@ class QualityMetricsReporter {
   async getBackendCodeQuality() {
     try {
       const backendDir = path.join(this.projectRoot, 'backend');
-      
+
       // Run quality checker if available
       const qualityReportPath = path.join(backendDir, 'quality-report.json');
-      
+
       try {
-        const qualityData = JSON.parse(await fs.readFile(qualityReportPath, 'utf8'));
+        const qualityData = JSON.parse(
+          await fs.readFile(qualityReportPath, 'utf8')
+        );
         return {
           overall_score: qualityData.summary?.overall_score || 0,
           critical_issues: qualityData.summary?.critical_issues || 0,
           warnings: qualityData.summary?.warnings || 0,
-          score: qualityData.summary?.overall_score || 0
+          score: qualityData.summary?.overall_score || 0,
         };
       } catch (e) {
         // Run quality checker
-        await this.runCommand('poetry run python testing/quality_checker.py', { 
-          cwd: backendDir, 
-          silent: true 
+        await this.runCommand('poetry run python testing/quality_checker.py', {
+          cwd: backendDir,
+          silent: true,
         });
-        
-        const qualityData = JSON.parse(await fs.readFile(qualityReportPath, 'utf8'));
+
+        const qualityData = JSON.parse(
+          await fs.readFile(qualityReportPath, 'utf8')
+        );
         return {
           overall_score: qualityData.summary?.overall_score || 0,
           critical_issues: qualityData.summary?.critical_issues || 0,
           warnings: qualityData.summary?.warnings || 0,
-          score: qualityData.summary?.overall_score || 0
+          score: qualityData.summary?.overall_score || 0,
         };
       }
     } catch (error) {
@@ -349,14 +390,16 @@ class QualityMetricsReporter {
     try {
       const backendDir = path.join(this.projectRoot, 'backend');
       const coveragePath = path.join(backendDir, 'coverage.json');
-      
+
       try {
-        const coverageData = JSON.parse(await fs.readFile(coveragePath, 'utf8'));
+        const coverageData = JSON.parse(
+          await fs.readFile(coveragePath, 'utf8')
+        );
         const coverage = coverageData.totals?.percent_covered || 0;
-        
+
         return {
           coverage: coverage,
-          score: coverage
+          score: coverage,
         };
       } catch (e) {
         // Run coverage
@@ -364,13 +407,15 @@ class QualityMetricsReporter {
           'poetry run python -m pytest tests/ --cov=backend --cov-report=json -q',
           { cwd: backendDir, silent: true }
         );
-        
-        const coverageData = JSON.parse(await fs.readFile(coveragePath, 'utf8'));
+
+        const coverageData = JSON.parse(
+          await fs.readFile(coveragePath, 'utf8')
+        );
         const coverage = coverageData.totals?.percent_covered || 0;
-        
+
         return {
           coverage: coverage,
-          score: coverage
+          score: coverage,
         };
       }
     } catch (error) {
@@ -384,7 +429,7 @@ class QualityMetricsReporter {
   async getBackendPerformance() {
     try {
       const backendDir = path.join(this.projectRoot, 'backend');
-      
+
       const startTime = Date.now();
       const testResult = await this.runCommand(
         'poetry run python -m pytest tests/ -q --tb=no',
@@ -394,7 +439,10 @@ class QualityMetricsReporter {
 
       return {
         test_execution_time: testExecutionTime,
-        score: testExecutionTime <= 30 ? 100 : Math.max(0, 100 - (testExecutionTime - 30) * 2)
+        score:
+          testExecutionTime <= 30
+            ? 100
+            : Math.max(0, 100 - (testExecutionTime - 30) * 2),
       };
     } catch (error) {
       return { error: error.message, score: 0 };
@@ -407,13 +455,16 @@ class QualityMetricsReporter {
   async getBackendSecurity() {
     try {
       const backendDir = path.join(this.projectRoot, 'backend');
-      
+
       // Run safety check
-      const safetyResult = await this.runCommand('poetry run safety check --json', { 
-        cwd: backendDir, 
-        silent: true 
-      });
-      
+      const safetyResult = await this.runCommand(
+        'poetry run safety check --json',
+        {
+          cwd: backendDir,
+          silent: true,
+        }
+      );
+
       let vulnerabilities = [];
       if (!safetyResult.success && safetyResult.output) {
         try {
@@ -423,14 +474,15 @@ class QualityMetricsReporter {
         }
       }
 
-      const criticalVulns = vulnerabilities.filter(v => 
-        v.severity === 'high' || v.severity === 'critical'
+      const criticalVulns = vulnerabilities.filter(
+        (v) => v.severity === 'high' || v.severity === 'critical'
       ).length;
 
       return {
         total_vulnerabilities: vulnerabilities.length,
         critical_vulnerabilities: criticalVulns,
-        score: criticalVulns === 0 ? 100 : Math.max(0, 100 - criticalVulns * 20)
+        score:
+          criticalVulns === 0 ? 100 : Math.max(0, 100 - criticalVulns * 20),
       };
     } catch (error) {
       return { error: error.message, score: 100 }; // Assume secure if check fails
@@ -443,18 +495,19 @@ class QualityMetricsReporter {
   async getBackendDependencies() {
     try {
       const backendDir = path.join(this.projectRoot, 'backend');
-      
-      const outdatedResult = await this.runCommand('poetry show --outdated', { 
-        cwd: backendDir, 
-        silent: true 
+
+      const outdatedResult = await this.runCommand('poetry show --outdated', {
+        cwd: backendDir,
+        silent: true,
       });
-      
-      const outdatedCount = outdatedResult.output ? 
-        outdatedResult.output.split('\n').filter(line => line.trim()).length : 0;
+
+      const outdatedCount = outdatedResult.output
+        ? outdatedResult.output.split('\n').filter((line) => line.trim()).length
+        : 0;
 
       return {
         outdated_dependencies: outdatedCount,
-        score: Math.max(0, 100 - (outdatedCount * 5))
+        score: Math.max(0, 100 - outdatedCount * 5),
       };
     } catch (error) {
       return { error: error.message, score: 0 };
@@ -470,36 +523,40 @@ class QualityMetricsReporter {
       test_coverage: 0.25,
       performance: 0.2,
       security: 0.15,
-      dependencies: 0.15
+      dependencies: 0.15,
     };
 
     let totalScore = 0;
     let totalWeight = 0;
 
     // Frontend contribution (50%)
-    const frontendScore = (
-      (frontend.code_quality?.score || 0) * weights.code_quality +
-      (frontend.test_coverage?.score || 0) * weights.test_coverage +
-      (frontend.performance?.score || 0) * weights.performance +
-      (frontend.dependencies?.score || 0) * weights.dependencies
-    ) * 0.5;
+    const frontendScore =
+      ((frontend.code_quality?.score || 0) * weights.code_quality +
+        (frontend.test_coverage?.score || 0) * weights.test_coverage +
+        (frontend.performance?.score || 0) * weights.performance +
+        (frontend.dependencies?.score || 0) * weights.dependencies) *
+      0.5;
 
     // Backend contribution (50%)
-    const backendScore = (
-      (backend.code_quality?.score || 0) * weights.code_quality +
-      (backend.test_coverage?.score || 0) * weights.test_coverage +
-      (backend.performance?.score || 0) * weights.performance +
-      (backend.security?.score || 0) * weights.security +
-      (backend.dependencies?.score || 0) * weights.dependencies
-    ) * 0.5;
+    const backendScore =
+      ((backend.code_quality?.score || 0) * weights.code_quality +
+        (backend.test_coverage?.score || 0) * weights.test_coverage +
+        (backend.performance?.score || 0) * weights.performance +
+        (backend.security?.score || 0) * weights.security +
+        (backend.dependencies?.score || 0) * weights.dependencies) *
+      0.5;
 
     const overallScore = frontendScore + backendScore;
 
     return {
       overall_score: Math.round(overallScore),
       frontend_score: Math.round(frontendScore * 2), // Convert back to 0-100 scale
-      backend_score: Math.round(backendScore * 2),   // Convert back to 0-100 scale
-      quality_gate_status: this.evaluateQualityGates(frontend, backend, overallScore)
+      backend_score: Math.round(backendScore * 2), // Convert back to 0-100 scale
+      quality_gate_status: this.evaluateQualityGates(
+        frontend,
+        backend,
+        overallScore
+      ),
     };
   }
 
@@ -514,7 +571,7 @@ class QualityMetricsReporter {
       name: 'Overall Score',
       passed: overallScore >= QUALITY_GATES.overall_score,
       actual: overallScore,
-      threshold: QUALITY_GATES.overall_score
+      threshold: QUALITY_GATES.overall_score,
     });
 
     // Frontend coverage gate
@@ -523,7 +580,7 @@ class QualityMetricsReporter {
         name: 'Frontend Coverage',
         passed: frontend.test_coverage.score >= QUALITY_GATES.frontend_coverage,
         actual: frontend.test_coverage.score,
-        threshold: QUALITY_GATES.frontend_coverage
+        threshold: QUALITY_GATES.frontend_coverage,
       });
     }
 
@@ -533,7 +590,7 @@ class QualityMetricsReporter {
         name: 'Backend Coverage',
         passed: backend.test_coverage.score >= QUALITY_GATES.backend_coverage,
         actual: backend.test_coverage.score,
-        threshold: QUALITY_GATES.backend_coverage
+        threshold: QUALITY_GATES.backend_coverage,
       });
     }
 
@@ -541,18 +598,22 @@ class QualityMetricsReporter {
     if (frontend.performance?.test_execution_time) {
       gates.push({
         name: 'Frontend Test Performance',
-        passed: frontend.performance.test_execution_time <= QUALITY_GATES.test_execution_time,
+        passed:
+          frontend.performance.test_execution_time <=
+          QUALITY_GATES.test_execution_time,
         actual: frontend.performance.test_execution_time,
-        threshold: QUALITY_GATES.test_execution_time
+        threshold: QUALITY_GATES.test_execution_time,
       });
     }
 
     if (backend.performance?.test_execution_time) {
       gates.push({
         name: 'Backend Test Performance',
-        passed: backend.performance.test_execution_time <= QUALITY_GATES.test_execution_time,
+        passed:
+          backend.performance.test_execution_time <=
+          QUALITY_GATES.test_execution_time,
         actual: backend.performance.test_execution_time,
-        threshold: QUALITY_GATES.test_execution_time
+        threshold: QUALITY_GATES.test_execution_time,
       });
     }
 
@@ -560,20 +621,22 @@ class QualityMetricsReporter {
     if (backend.security?.critical_vulnerabilities !== undefined) {
       gates.push({
         name: 'Security Vulnerabilities',
-        passed: backend.security.critical_vulnerabilities <= QUALITY_GATES.critical_issues,
+        passed:
+          backend.security.critical_vulnerabilities <=
+          QUALITY_GATES.critical_issues,
         actual: backend.security.critical_vulnerabilities,
-        threshold: QUALITY_GATES.critical_issues
+        threshold: QUALITY_GATES.critical_issues,
       });
     }
 
-    const passedGates = gates.filter(g => g.passed).length;
+    const passedGates = gates.filter((g) => g.passed).length;
     const totalGates = gates.length;
 
     return {
       passed: passedGates === totalGates,
       gates: gates,
       passed_count: passedGates,
-      total_count: totalGates
+      total_count: totalGates,
     };
   }
 
@@ -583,7 +646,7 @@ class QualityMetricsReporter {
   async generateTrendAnalysis(currentMetrics) {
     try {
       const historicalReports = await this.getHistoricalReports();
-      
+
       if (historicalReports.length < 2) {
         return { message: 'Insufficient historical data for trend analysis' };
       }
@@ -595,18 +658,24 @@ class QualityMetricsReporter {
         overall_score: {
           current: currentMetrics.overall.overall_score,
           previous: latest.overall?.overall_score || 0,
-          change: currentMetrics.overall.overall_score - (latest.overall?.overall_score || 0)
+          change:
+            currentMetrics.overall.overall_score -
+            (latest.overall?.overall_score || 0),
         },
         frontend_coverage: {
           current: currentMetrics.frontend.test_coverage?.score || 0,
           previous: latest.frontend?.test_coverage?.score || 0,
-          change: (currentMetrics.frontend.test_coverage?.score || 0) - (latest.frontend?.test_coverage?.score || 0)
+          change:
+            (currentMetrics.frontend.test_coverage?.score || 0) -
+            (latest.frontend?.test_coverage?.score || 0),
         },
         backend_coverage: {
           current: currentMetrics.backend.test_coverage?.score || 0,
           previous: latest.backend?.test_coverage?.score || 0,
-          change: (currentMetrics.backend.test_coverage?.score || 0) - (latest.backend?.test_coverage?.score || 0)
-        }
+          change:
+            (currentMetrics.backend.test_coverage?.score || 0) -
+            (latest.backend?.test_coverage?.score || 0),
+        },
       };
 
       return trends;
@@ -622,7 +691,7 @@ class QualityMetricsReporter {
     try {
       const files = await fs.readdir(this.reportsDir);
       const reportFiles = files
-        .filter(f => f.startsWith('quality-metrics-') && f.endsWith('.json'))
+        .filter((f) => f.startsWith('quality-metrics-') && f.endsWith('.json'))
         .sort()
         .slice(-10); // Last 10 reports
 
@@ -648,27 +717,27 @@ class QualityMetricsReporter {
    */
   async generateReport() {
     this.logSection('Quality Metrics Report Generation');
-    
+
     const metrics = await this.collectQualityMetrics();
     const trends = await this.generateTrendAnalysis(metrics);
-    
+
     const report = {
       ...metrics,
       trends,
       recommendations: this.generateRecommendations(metrics),
-      quality_gates: metrics.overall.quality_gate_status
+      quality_gates: metrics.overall.quality_gate_status,
     };
 
     // Save report
     await this.ensureReportsDirectory();
     const reportFileName = `quality-metrics-${this.timestamp.split('T')[0]}.json`;
     const reportPath = path.join(this.reportsDir, reportFileName);
-    
+
     await fs.writeFile(reportPath, JSON.stringify(report, null, 2));
-    
+
     // Generate HTML report
     await this.generateHTMLReport(report, reportPath.replace('.json', '.html'));
-    
+
     return report;
   }
 
@@ -684,7 +753,7 @@ class QualityMetricsReporter {
         category: 'Code Quality',
         priority: 'high',
         message: 'Frontend code quality is below threshold',
-        action: 'Run `pnpm lint:fix` and address TypeScript errors'
+        action: 'Run `pnpm lint:fix` and address TypeScript errors',
       });
     }
 
@@ -693,45 +762,57 @@ class QualityMetricsReporter {
         category: 'Code Quality',
         priority: 'high',
         message: 'Backend code quality is below threshold',
-        action: 'Run Black, isort, flake8, and mypy to fix issues'
+        action: 'Run Black, isort, flake8, and mypy to fix issues',
       });
     }
 
     // Coverage recommendations
-    if ((metrics.frontend.test_coverage?.score || 0) < QUALITY_GATES.frontend_coverage) {
+    if (
+      (metrics.frontend.test_coverage?.score || 0) <
+      QUALITY_GATES.frontend_coverage
+    ) {
       recommendations.push({
         category: 'Test Coverage',
         priority: 'medium',
         message: 'Frontend test coverage is below target',
-        action: 'Add more unit and integration tests for React components'
+        action: 'Add more unit and integration tests for React components',
       });
     }
 
-    if ((metrics.backend.test_coverage?.score || 0) < QUALITY_GATES.backend_coverage) {
+    if (
+      (metrics.backend.test_coverage?.score || 0) <
+      QUALITY_GATES.backend_coverage
+    ) {
       recommendations.push({
         category: 'Test Coverage',
         priority: 'medium',
         message: 'Backend test coverage is below target',
-        action: 'Add more unit tests for business logic and API endpoints'
+        action: 'Add more unit tests for business logic and API endpoints',
       });
     }
 
     // Performance recommendations
-    if ((metrics.frontend.performance?.test_execution_time || 0) > QUALITY_GATES.test_execution_time) {
+    if (
+      (metrics.frontend.performance?.test_execution_time || 0) >
+      QUALITY_GATES.test_execution_time
+    ) {
       recommendations.push({
         category: 'Performance',
         priority: 'medium',
         message: 'Frontend test execution time is too slow',
-        action: 'Optimize test setup and consider parallel test execution'
+        action: 'Optimize test setup and consider parallel test execution',
       });
     }
 
-    if ((metrics.frontend.bundle_analysis?.total_size || 0) > QUALITY_GATES.bundle_size) {
+    if (
+      (metrics.frontend.bundle_analysis?.total_size || 0) >
+      QUALITY_GATES.bundle_size
+    ) {
       recommendations.push({
         category: 'Performance',
         priority: 'medium',
         message: 'Bundle size is too large',
-        action: 'Implement code splitting and tree shaking optimizations'
+        action: 'Implement code splitting and tree shaking optimizations',
       });
     }
 
@@ -741,7 +822,7 @@ class QualityMetricsReporter {
         category: 'Security',
         priority: 'critical',
         message: 'Critical security vulnerabilities found',
-        action: 'Update vulnerable dependencies immediately'
+        action: 'Update vulnerable dependencies immediately',
       });
     }
 
@@ -809,11 +890,15 @@ class QualityMetricsReporter {
             </div>
 
             <h2>Quality Gates</h2>
-            ${report.quality_gates.gates.map(gate => `
+            ${report.quality_gates.gates
+              .map(
+                (gate) => `
                 <div class="quality-gate ${gate.passed ? 'gate-passed' : 'gate-failed'}">
                     <strong>${gate.name}</strong>: ${gate.actual} ${gate.passed ? '✅' : '❌'} (Threshold: ${gate.threshold})
                 </div>
-            `).join('')}
+            `
+              )
+              .join('')}
 
             <h2>Frontend Metrics</h2>
             <div class="metric-grid">
@@ -855,17 +940,25 @@ class QualityMetricsReporter {
                 </div>
             </div>
 
-            ${report.recommendations.length > 0 ? `
+            ${
+              report.recommendations.length > 0
+                ? `
             <h2>Recommendations</h2>
             <div class="recommendations">
-                ${report.recommendations.map(rec => `
+                ${report.recommendations
+                  .map(
+                    (rec) => `
                     <div class="recommendation priority-${rec.priority}">
                         <strong>${rec.category}</strong> (${rec.priority}): ${rec.message}
                         <br><em>Action: ${rec.action}</em>
                     </div>
-                `).join('')}
+                `
+                  )
+                  .join('')}
             </div>
-            ` : ''}
+            `
+                : ''
+            }
         </div>
     </div>
 </body>
@@ -879,26 +972,36 @@ class QualityMetricsReporter {
    */
   printReportSummary(report) {
     this.logSection('Quality Metrics Summary');
-    
+
     const overallScore = report.overall.overall_score;
-    const scoreColor = overallScore >= 90 ? COLORS.GREEN : 
-                      overallScore >= 70 ? COLORS.YELLOW : COLORS.RED;
-    
+    const scoreColor =
+      overallScore >= 90
+        ? COLORS.GREEN
+        : overallScore >= 70
+          ? COLORS.YELLOW
+          : COLORS.RED;
+
     this.log(`Overall Quality Score: ${overallScore}/100`, scoreColor);
     this.log(`Frontend Score: ${report.overall.frontend_score}/100`);
     this.log(`Backend Score: ${report.overall.backend_score}/100`);
-    
+
     // Quality gates status
     const gateStatus = report.quality_gates;
     const gateColor = gateStatus.passed ? COLORS.GREEN : COLORS.RED;
-    this.log(`Quality Gates: ${gateStatus.passed_count}/${gateStatus.total_count} passed`, gateColor);
-    
+    this.log(
+      `Quality Gates: ${gateStatus.passed_count}/${gateStatus.total_count} passed`,
+      gateColor
+    );
+
     // Failed gates
-    const failedGates = gateStatus.gates.filter(g => !g.passed);
+    const failedGates = gateStatus.gates.filter((g) => !g.passed);
     if (failedGates.length > 0) {
       this.log('\n❌ Failed Quality Gates:', COLORS.RED);
-      failedGates.forEach(gate => {
-        this.log(`  • ${gate.name}: ${gate.actual} (threshold: ${gate.threshold})`, COLORS.RED);
+      failedGates.forEach((gate) => {
+        this.log(
+          `  • ${gate.name}: ${gate.actual} (threshold: ${gate.threshold})`,
+          COLORS.RED
+        );
       });
     }
 
@@ -906,9 +1009,16 @@ class QualityMetricsReporter {
     if (report.recommendations.length > 0) {
       this.log('\n🔧 Top Recommendations:', COLORS.YELLOW);
       report.recommendations.slice(0, 5).forEach((rec, i) => {
-        const priorityColor = rec.priority === 'critical' ? COLORS.RED :
-                             rec.priority === 'high' ? COLORS.YELLOW : COLORS.BLUE;
-        this.log(`  ${i + 1}. [${rec.priority.toUpperCase()}] ${rec.message}`, priorityColor);
+        const priorityColor =
+          rec.priority === 'critical'
+            ? COLORS.RED
+            : rec.priority === 'high'
+              ? COLORS.YELLOW
+              : COLORS.BLUE;
+        this.log(
+          `  ${i + 1}. [${rec.priority.toUpperCase()}] ${rec.message}`,
+          priorityColor
+        );
       });
     }
 
@@ -923,13 +1033,13 @@ class QualityMetricsReporter {
       const result = execSync(command, {
         encoding: 'utf8',
         cwd: options.cwd || this.projectRoot,
-        stdio: options.silent ? 'pipe' : 'inherit'
+        stdio: options.silent ? 'pipe' : 'inherit',
       });
       return { success: true, output: result.trim() };
     } catch (error) {
-      return { 
-        success: false, 
-        output: error.stdout || error.stderr || error.message 
+      return {
+        success: false,
+        output: error.stdout || error.stderr || error.message,
       };
     }
   }
@@ -945,15 +1055,15 @@ class QualityMetricsReporter {
 
   async getFilesRecursively(dir, extension) {
     const files = [];
-    
+
     try {
       const entries = await fs.readdir(dir, { withFileTypes: true });
-      
+
       for (const entry of entries) {
         const fullPath = path.join(dir, entry.name);
-        
+
         if (entry.isDirectory()) {
-          files.push(...await this.getFilesRecursively(fullPath, extension));
+          files.push(...(await this.getFilesRecursively(fullPath, extension)));
         } else if (entry.name.endsWith(extension)) {
           files.push(fullPath);
         }
@@ -961,7 +1071,7 @@ class QualityMetricsReporter {
     } catch (error) {
       // Directory might not exist or be accessible
     }
-    
+
     return files;
   }
 
@@ -971,52 +1081,54 @@ class QualityMetricsReporter {
       if (await this.pathExists(nextDir)) {
         const jsFiles = await this.getFilesRecursively(nextDir, '.js');
         let totalSize = 0;
-        
+
         for (const file of jsFiles) {
           const stats = await fs.stat(file);
           totalSize += stats.size;
         }
-        
+
         return Math.round(totalSize / 1024); // KB
       }
     } catch (error) {
       // Build might not exist
     }
-    
+
     return 0;
   }
 
   calculateCodeQualityScore(eslintIssues, tscSuccess) {
     let score = 100;
-    
+
     // Deduct points for ESLint issues
-    const errors = eslintIssues.filter(i => i.severity === 'error').length;
-    const warnings = eslintIssues.filter(i => i.severity === 'warning').length;
-    
+    const errors = eslintIssues.filter((i) => i.severity === 'error').length;
+    const warnings = eslintIssues.filter(
+      (i) => i.severity === 'warning'
+    ).length;
+
     score -= errors * 5;
     score -= warnings * 2;
-    
+
     // Deduct points for TypeScript errors
     if (!tscSuccess) {
       score -= 20;
     }
-    
+
     return Math.max(0, score);
   }
 
   calculatePerformanceScore(testTime, bundleSize) {
     let score = 100;
-    
+
     // Test execution time penalty
     if (testTime > QUALITY_GATES.test_execution_time) {
       score -= (testTime - QUALITY_GATES.test_execution_time) * 2;
     }
-    
+
     // Bundle size penalty
     if (bundleSize > QUALITY_GATES.bundle_size) {
       score -= (bundleSize - QUALITY_GATES.bundle_size) * 0.1;
     }
-    
+
     return Math.max(0, score);
   }
 
@@ -1033,28 +1145,42 @@ class QualityMetricsReporter {
    */
   async run() {
     try {
-      this.log(`${COLORS.BOLD}📊 Quality Metrics Reporter - Medical Device Regulatory Assistant${COLORS.RESET}`, COLORS.BLUE);
-      
+      this.log(
+        `${COLORS.BOLD}📊 Quality Metrics Reporter - Medical Device Regulatory Assistant${COLORS.RESET}`,
+        COLORS.BLUE
+      );
+
       const report = await this.generateReport();
       const passed = this.printReportSummary(report);
-      
-      const reportPath = path.join(this.reportsDir, `quality-metrics-${this.timestamp.split('T')[0]}.json`);
+
+      const reportPath = path.join(
+        this.reportsDir,
+        `quality-metrics-${this.timestamp.split('T')[0]}.json`
+      );
       const htmlPath = reportPath.replace('.json', '.html');
-      
+
       this.log(`\n📄 Reports saved:`, COLORS.BLUE);
       this.log(`  JSON: ${reportPath}`);
       this.log(`  HTML: ${htmlPath}`);
-      
+
       if (passed) {
-        this.log('\n🎉 All quality gates passed! System is ready for production.', COLORS.GREEN);
+        this.log(
+          '\n🎉 All quality gates passed! System is ready for production.',
+          COLORS.GREEN
+        );
         process.exit(0);
       } else {
-        this.log('\n❌ Some quality gates failed. Please address the issues above.', COLORS.RED);
+        this.log(
+          '\n❌ Some quality gates failed. Please address the issues above.',
+          COLORS.RED
+        );
         process.exit(1);
       }
-      
     } catch (error) {
-      this.log(`\n💥 Quality metrics reporting failed: ${error.message}`, COLORS.RED);
+      this.log(
+        `\n💥 Quality metrics reporting failed: ${error.message}`,
+        COLORS.RED
+      );
       process.exit(1);
     }
   }

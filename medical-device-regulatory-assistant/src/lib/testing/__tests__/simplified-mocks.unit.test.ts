@@ -3,7 +3,11 @@
  * Verifies that the simplified MSW utils work without complex HTTP server simulation
  */
 
-import { setupMockAPI, teardownMockAPI, MockEndpoint } from '../msw-utils-simple';
+import {
+  setupMockAPI,
+  teardownMockAPI,
+  MockEndpoint,
+} from '../msw-utils-simple';
 
 describe('Simplified Mock Service Integration', () => {
   afterEach(() => {
@@ -47,7 +51,9 @@ describe('Simplified Mock Service Integration', () => {
 
     setupMockAPI(mockEndpoints);
 
-    await expect(fetch('/api/error')).rejects.toThrow('Mock API error for GET:/api/error');
+    await expect(fetch('/api/error')).rejects.toThrow(
+      'Mock API error for GET:/api/error'
+    );
   });
 
   it('should simulate delays in mock endpoints', async () => {

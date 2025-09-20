@@ -180,7 +180,9 @@ export class ProviderStackManager {
     const visit = (providerName: string): void => {
       if (visited.has(providerName)) return;
       if (visiting.has(providerName)) {
-        throw new Error(`Circular dependency detected involving provider: ${providerName}`);
+        throw new Error(
+          `Circular dependency detected involving provider: ${providerName}`
+        );
       }
 
       visiting.add(providerName);
@@ -228,8 +230,10 @@ export class ProviderStackManager {
     } = options;
 
     // Filter enabled providers
-    const availableProviders = enabledProviders.filter(name =>
-      this.providerRegistry.has(name) && this.providerRegistry.get(name)?.enabled
+    const availableProviders = enabledProviders.filter(
+      (name) =>
+        this.providerRegistry.has(name) &&
+        this.providerRegistry.get(name)?.enabled
     );
 
     // Resolve dependencies
@@ -248,7 +252,9 @@ export class ProviderStackManager {
     }
 
     // Create the composed provider stack
-    const ProviderStack: ComponentType<{ children: ReactNode }> = ({ children }) => {
+    const ProviderStack: ComponentType<{ children: ReactNode }> = ({
+      children,
+    }) => {
       let wrappedChildren = children;
 
       // Wrap children with providers in reverse order (outermost first)
@@ -283,7 +289,7 @@ export class ProviderStackManager {
 
     // Register cleanup functions
     const cleanupFunctions = resolvedOrder
-      .map(name => this.providerRegistry.get(name)?.cleanup)
+      .map((name) => this.providerRegistry.get(name)?.cleanup)
       .filter(Boolean) as (() => void)[];
 
     this.cleanupFunctions.set(stackId, cleanupFunctions);
@@ -331,7 +337,7 @@ export class ProviderStackManager {
       if (options.toast?.initialToasts) {
         // Initialize toasts after provider creation
         setTimeout(() => {
-          options.toast?.initialToasts?.forEach(toast => {
+          options.toast?.initialToasts?.forEach((toast) => {
             providerMockUtils.addMockToast(toast);
           });
         }, 0);
@@ -374,7 +380,10 @@ export class ProviderStackManager {
         try {
           cleanupFunctions[i]();
         } catch (error) {
-          console.error(`Error during provider cleanup for stack ${stackId}:`, error);
+          console.error(
+            `Error during provider cleanup for stack ${stackId}:`,
+            error
+          );
         }
       }
     }
@@ -386,10 +395,13 @@ export class ProviderStackManager {
   /**
    * Reset a specific provider stack (cleanup and recreate)
    */
-  public resetStack(stackId: string, options?: {
-    enabledProviders?: string[];
-    providerProps?: Record<string, any>;
-  }): ComponentType<{ children: ReactNode }> | null {
+  public resetStack(
+    stackId: string,
+    options?: {
+      enabledProviders?: string[];
+      providerProps?: Record<string, any>;
+    }
+  ): ComponentType<{ children: ReactNode }> | null {
     this.cleanupStack(stackId);
 
     if (options) {
@@ -456,7 +468,9 @@ export class ProviderStackManager {
     for (const [name, config] of this.providerRegistry) {
       for (const dependency of config.dependencies || []) {
         if (!this.providerRegistry.has(dependency)) {
-          errors.push(`Provider '${name}' depends on missing provider '${dependency}'`);
+          errors.push(
+            `Provider '${name}' depends on missing provider '${dependency}'`
+          );
         }
       }
     }
@@ -619,12 +633,14 @@ export const providerStackUtils = {
   validate: () => providerStackManager.validateConfiguration(),
 
   // Provider registration
-  registerProvider: (config: ProviderConfig) => providerStackManager.registerProvider(config),
-  unregisterProvider: (name: string) => providerStackManager.unregisterProvider(name),
+  registerProvider: (config: ProviderConfig) =>
+    providerStackManager.registerProvider(config),
+  unregisterProvider: (name: string) =>
+    providerStackManager.unregisterProvider(name),
 
   // State management
   getAllStates: () => providerStackManager.getAllProviderStates(),
-  
+
   // Manager instance
   manager: providerStackManager,
 };

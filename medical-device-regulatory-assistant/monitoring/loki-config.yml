@@ -40,7 +40,7 @@ ruler:
 
 # Retention policy
 limits_config:
-  retention_period: 744h  # 31 days
+  retention_period: 744h # 31 days
   ingestion_rate_mb: 16
   ingestion_burst_size_mb: 32
 

@@ -5,6 +5,7 @@ Generated: 2025-09-13 21:52:28
 ## Test Organization Patterns
 
 ### Directory Structure
+
 ```
 tests/
 ├── fixtures/           # Reusable test fixtures
@@ -24,6 +25,7 @@ tests/
 ### Fixture Patterns
 
 #### Database Fixtures
+
 ```python
 @pytest_asyncio.fixture(scope="function")
 async def test_db_session():
@@ -33,12 +35,13 @@ async def test_db_session():
 ```
 
 #### Data Factory Pattern
+
 ```python
 class TestDataFactory:
     def __init__(self, session):
         self.session = session
         self.created_entities = []
-    
+
     async def create_user(self, **kwargs):
         # Create user with defaults and track for cleanup
         pass
@@ -47,6 +50,7 @@ class TestDataFactory:
 ### Service Testing Patterns
 
 #### Dependency Injection Pattern
+
 ```python
 class ServiceUnderTest:
     def __init__(self, dependency: Dependency = None):
@@ -59,6 +63,7 @@ def test_service(mock_dependency):
 ```
 
 #### Mock Service Factory Pattern
+
 ```python
 @pytest.fixture
 def mock_external_service():
@@ -70,6 +75,7 @@ def mock_external_service():
 ## API Testing Patterns
 
 ### TestClient Pattern (Recommended)
+
 ```python
 def test_endpoint(test_client):
     response = test_client.get("/api/endpoint")
@@ -77,6 +83,7 @@ def test_endpoint(test_client):
 ```
 
 ### Authentication Patterns
+
 ```python
 @pytest.fixture
 def authenticated_client():
@@ -89,6 +96,7 @@ def authenticated_client():
 ## Error Testing Patterns
 
 ### Exception Testing
+
 ```python
 def test_service_error_handling():
     with pytest.raises(SpecificException) as exc_info:
@@ -97,6 +105,7 @@ def test_service_error_handling():
 ```
 
 ### API Error Testing
+
 ```python
 def test_api_validation_error(test_client):
     response = test_client.post("/api/endpoint", json={"invalid": "data"})

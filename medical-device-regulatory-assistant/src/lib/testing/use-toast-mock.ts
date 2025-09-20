@@ -11,7 +11,13 @@ export interface MockToastCall {
   id: string;
   title?: string;
   description?: string;
-  variant?: 'default' | 'destructive' | 'success' | 'warning' | 'info' | 'progress';
+  variant?:
+    | 'default'
+    | 'destructive'
+    | 'success'
+    | 'warning'
+    | 'info'
+    | 'progress';
   duration?: number;
   onRetry?: () => void;
   retryLabel?: string;
@@ -52,7 +58,7 @@ let idCounter = 0;
 const mockToast = jest.fn((props: Partial<Toast>) => {
   const id = `mock-toast-${++idCounter}`;
   const timestamp = Date.now();
-  
+
   const toastData: Toast = {
     id,
     title: props.title,
@@ -96,7 +102,7 @@ const mockToast = jest.fn((props: Partial<Toast>) => {
 // Mock dismiss function
 const mockDismiss = jest.fn((toastId?: string) => {
   if (toastId) {
-    mockState.toasts = mockState.toasts.filter(t => t.id !== toastId);
+    mockState.toasts = mockState.toasts.filter((t) => t.id !== toastId);
   } else {
     mockState.toasts = [];
   }
@@ -114,15 +120,18 @@ const mockClearQueue = jest.fn(() => {
 
 // Mock update function
 const mockUpdate = jest.fn((id: string, updateProps: Partial<Toast>) => {
-  const toastIndex = mockState.toasts.findIndex(t => t.id === id);
+  const toastIndex = mockState.toasts.findIndex((t) => t.id === id);
   if (toastIndex !== -1) {
-    mockState.toasts[toastIndex] = { ...mockState.toasts[toastIndex], ...updateProps };
+    mockState.toasts[toastIndex] = {
+      ...mockState.toasts[toastIndex],
+      ...updateProps,
+    };
   }
 });
 
 // Mock retry function
 const mockRetry = jest.fn((id: string) => {
-  const toast = mockState.toasts.find(t => t.id === id);
+  const toast = mockState.toasts.find((t) => t.id === id);
   if (toast && toast.onRetry) {
     toast.onRetry();
   }
@@ -130,7 +139,7 @@ const mockRetry = jest.fn((id: string) => {
 
 // Mock updateProgress function
 const mockUpdateProgress = jest.fn((id: string, progress: number) => {
-  const toastIndex = mockState.toasts.findIndex(t => t.id === id);
+  const toastIndex = mockState.toasts.findIndex((t) => t.id === id);
   if (toastIndex !== -1) {
     mockState.toasts[toastIndex].progress = progress;
   }
@@ -138,13 +147,15 @@ const mockUpdateProgress = jest.fn((id: string, progress: number) => {
 
 // Mock getToastsByCategory function
 const mockGetToastsByCategory = jest.fn((category: string) => {
-  return mockState.toasts.filter(t => t.category === category);
+  return mockState.toasts.filter((t) => t.category === category);
 });
 
 // Mock getToastsByPriority function
-const mockGetToastsByPriority = jest.fn((priority: 'low' | 'normal' | 'high' | 'critical') => {
-  return mockState.toasts.filter(t => t.priority === priority);
-});
+const mockGetToastsByPriority = jest.fn(
+  (priority: 'low' | 'normal' | 'high' | 'critical') => {
+    return mockState.toasts.filter((t) => t.priority === priority);
+  }
+);
 
 // Mock contextual toast methods
 const mockContextualToast = {
@@ -152,7 +163,8 @@ const mockContextualToast = {
     return mockToast({
       variant: 'destructive',
       title: 'FDA API Connection Failed',
-      description: 'Unable to connect to FDA database. This may affect predicate searches and device classifications.',
+      description:
+        'Unable to connect to FDA database. This may affect predicate searches and device classifications.',
       onRetry,
       retryLabel: 'Retry Connection',
       actionUrl: 'https://open.fda.gov/status/',
@@ -166,7 +178,8 @@ const mockContextualToast = {
     return mockToast({
       variant: 'destructive',
       title: 'Predicate Search Failed',
-      description: 'Could not complete predicate device search. Please check your search criteria and try again.',
+      description:
+        'Could not complete predicate device search. Please check your search criteria and try again.',
       onRetry,
       retryLabel: 'Retry Search',
       category: 'regulatory',
@@ -178,10 +191,12 @@ const mockContextualToast = {
     return mockToast({
       variant: 'destructive',
       title: 'Device Classification Error',
-      description: 'Unable to classify your device. Please verify device description and intended use.',
+      description:
+        'Unable to classify your device. Please verify device description and intended use.',
       onRetry,
       retryLabel: 'Try Again',
-      actionUrl: 'https://www.fda.gov/medical-devices/classify-your-medical-device',
+      actionUrl:
+        'https://www.fda.gov/medical-devices/classify-your-medical-device',
       actionLabel: 'Classification Guide',
       category: 'regulatory',
       priority: 'high',
@@ -192,7 +207,8 @@ const mockContextualToast = {
     return mockToast({
       variant: 'destructive',
       title: 'Project Save Failed',
-      description: 'Your project changes could not be saved. Your work may be lost if you navigate away.',
+      description:
+        'Your project changes could not be saved. Your work may be lost if you navigate away.',
       onRetry,
       retryLabel: 'Save Again',
       category: 'user',
@@ -205,7 +221,8 @@ const mockContextualToast = {
     return mockToast({
       variant: 'destructive',
       title: 'Export Failed',
-      description: 'Could not generate the requested export. Please try a different format or contact support.',
+      description:
+        'Could not generate the requested export. Please try a different format or contact support.',
       onRetry,
       retryLabel: 'Retry Export',
       category: 'user',
@@ -217,7 +234,9 @@ const mockContextualToast = {
     return mockToast({
       variant: 'warning',
       title: 'Validation Error',
-      description: message || 'Please check the highlighted fields and ensure all required information is provided.',
+      description:
+        message ||
+        'Please check the highlighted fields and ensure all required information is provided.',
       category: 'validation',
       priority: 'normal',
     });
@@ -227,7 +246,8 @@ const mockContextualToast = {
     return mockToast({
       variant: 'warning',
       title: 'Session Expired',
-      description: 'Your session has expired. Please sign in again to continue.',
+      description:
+        'Your session has expired. Please sign in again to continue.',
       onAction,
       actionLabel: 'Sign In',
       category: 'system',
@@ -287,10 +307,18 @@ const mockContextualToast = {
 // Mock useToast hook
 export const mockUseToast = jest.fn(() => ({
   // State properties (return current state)
-  get toasts() { return mockState.toasts; },
-  get queue() { return mockState.queue; },
-  get rateLimitCount() { return mockState.rateLimitCount; },
-  get lastResetTime() { return mockState.lastResetTime; },
+  get toasts() {
+    return mockState.toasts;
+  },
+  get queue() {
+    return mockState.queue;
+  },
+  get rateLimitCount() {
+    return mockState.rateLimitCount;
+  },
+  get lastResetTime() {
+    return mockState.lastResetTime;
+  },
 
   // Functions
   toast: mockToast,
@@ -311,19 +339,20 @@ export const toastMockUtils = {
   getLastCall: () => mockState.calls[mockState.calls.length - 1],
 
   // Get calls by type
-  getCallsByVariant: (variant: string) => 
-    mockState.calls.filter(call => call.variant === variant),
+  getCallsByVariant: (variant: string) =>
+    mockState.calls.filter((call) => call.variant === variant),
 
   // Get calls by category
-  getCallsByCategory: (category: string) => 
-    mockState.calls.filter(call => call.category === category),
+  getCallsByCategory: (category: string) =>
+    mockState.calls.filter((call) => call.category === category),
 
   // Check if toast was called with specific content
   wasCalledWith: (title?: string, description?: string, variant?: string) => {
-    return mockState.calls.some(call => 
-      (!title || call.title === title) &&
-      (!description || call.description === description) &&
-      (!variant || call.variant === variant)
+    return mockState.calls.some(
+      (call) =>
+        (!title || call.title === title) &&
+        (!description || call.description === description) &&
+        (!variant || call.variant === variant)
     );
   },
 
@@ -354,9 +383,9 @@ export const toastMockUtils = {
     mockGetToastsByCategory.mockClear();
     mockGetToastsByPriority.mockClear();
     mockUseToast.mockClear();
-    
+
     // Reset contextual toast mocks
-    Object.values(mockContextualToast).forEach(mockFn => {
+    Object.values(mockContextualToast).forEach((mockFn) => {
       if (jest.isMockFunction(mockFn)) {
         mockFn.mockClear();
       }

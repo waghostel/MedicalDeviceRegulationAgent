@@ -2,5 +2,13 @@ node_modules
 .next
 out
 build
+dist
+coverage
 *.lock
 *.log
+*.min.js
+*.min.css
+public
+.kiro
+next-env.d.ts
+tsconfig.tsbuildinfo

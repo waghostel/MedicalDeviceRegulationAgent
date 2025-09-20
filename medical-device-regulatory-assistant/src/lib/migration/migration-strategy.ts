@@ -1,6 +1,6 @@
 /**
  * Migration Strategy and Planning Tools
- * Provides comprehensive migration planning from mock data to real backend connections 
+ * Provides comprehensive migration planning from mock data to real backend connections
  */
 
 export interface ComponentMockUsage {
@@ -88,7 +88,12 @@ export interface MigrationPriority {
 }
 
 export interface RiskFactor {
-  type: 'data-integrity' | 'user-experience' | 'performance' | 'security' | 'compatibility';
+  type:
+    | 'data-integrity'
+    | 'user-experience'
+    | 'performance'
+    | 'security'
+    | 'compatibility';
   severity: 'low' | 'medium' | 'high' | 'critical';
   description: string;
   mitigation: string;
@@ -165,7 +170,7 @@ export enum MigrationAction {
   SEED_DATABASE = 'seed_database',
   CREATE_API_ENDPOINT = 'create_api_endpoint',
   UPDATE_TYPE_DEFINITIONS = 'update_type_definitions',
-  MIGRATE_STATE_MANAGEMENT = 'migrate_state_management'
+  MIGRATE_STATE_MANAGEMENT = 'migrate_state_management',
 }
 
 export interface ValidationStep {
@@ -272,7 +277,7 @@ export class MigrationStrategyAnalyzer {
     // This would be implemented with actual AST parsing
     // For now, return a mock analysis based on known components
     const componentName = this.extractComponentName(componentPath);
-    
+
     return {
       componentPath,
       componentName,
@@ -283,7 +288,7 @@ export class MigrationStrategyAnalyzer {
       contextUsage: this.analyzeContextUsage(componentPath),
       testFiles: this.findTestFiles(componentPath),
       coverageMetrics: this.getCoverageMetrics(componentPath),
-      migrationReadiness: this.assessMigrationReadiness(componentPath)
+      migrationReadiness: this.assessMigrationReadiness(componentPath),
     };
   }
 
@@ -302,10 +307,10 @@ export class MigrationStrategyAnalyzer {
       'src/components/citations/citation-panel.tsx',
       'src/components/layout/app-layout.tsx',
       'src/components/layout/header.tsx',
-      'src/components/layout/sidebar.tsx'
+      'src/components/layout/sidebar.tsx',
     ];
 
-    return knownComponents.map(componentPath => {
+    return knownComponents.map((componentPath) => {
       const analysis = this.analyzeComponent(componentPath);
       return this.calculatePriority(analysis);
     });
@@ -317,63 +322,93 @@ export class MigrationStrategyAnalyzer {
   createMigrationPlan(): MigrationPlan {
     const priorities = this.generatePriorityMatrix();
     const phases = this.createMigrationPhases(priorities);
-    
+
     return {
       phases,
-      totalEstimatedDuration: phases.reduce((sum, phase) => sum + phase.estimatedDuration, 0),
-      totalEstimatedEffort: priorities.reduce((sum, priority) => sum + priority.estimatedEffort, 0),
+      totalEstimatedDuration: phases.reduce(
+        (sum, phase) => sum + phase.estimatedDuration,
+        0
+      ),
+      totalEstimatedEffort: priorities.reduce(
+        (sum, priority) => sum + priority.estimatedEffort,
+        0
+      ),
       riskAssessment: this.assessOverallRisk(priorities),
       resourceRequirements: this.calculateResourceRequirements(phases),
       timeline: this.createTimeline(phases),
-      contingencyPlans: this.createContingencyPlans(phases)
+      contingencyPlans: this.createContingencyPlans(phases),
     };
   }
 
   private extractComponentName(componentPath: string): string {
-    return componentPath.split('/').pop()?.replace('.tsx', '').replace('.ts', '') || '';
+    return (
+      componentPath.split('/').pop()?.replace('.tsx', '').replace('.ts', '') ||
+      ''
+    );
   }
 
   private analyzeMockDataImports(componentPath: string): MockDataImport[] {
     // Mock implementation - would use AST parsing in real implementation
     const componentName = this.extractComponentName(componentPath);
-    
+
     if (componentName.includes('classification-widget')) {
-      return [{
-        importPath: 'src/lib/mock-data.ts',
-        importedFunctions: ['generateMockDeviceClassification'],
-        usageCount: 3,
-        lineNumbers: [15, 45, 78]
-      }];
+      return [
+        {
+          importPath: 'src/lib/mock-data.ts',
+          importedFunctions: ['generateMockDeviceClassification'],
+          usageCount: 3,
+          lineNumbers: [15, 45, 78],
+        },
+      ];
     }
-    
+
     if (componentName.includes('predicate-widget')) {
-      return [{
-        importPath: 'src/lib/mock-data.ts',
-        importedFunctions: ['generateMockPredicateDevices'],
-        usageCount: 5,
-        lineNumbers: [20, 35, 67, 89, 112]
-      }];
+      return [
+        {
+          importPath: 'src/lib/mock-data.ts',
+          importedFunctions: ['generateMockPredicateDevices'],
+          usageCount: 5,
+          lineNumbers: [20, 35, 67, 89, 112],
+        },
+      ];
     }
-    
+
     return [];
   }
 
   private analyzeMockDataUsage(componentPath: string): MockDataUsage[] {
     const componentName = this.extractComponentName(componentPath);
-    
+
     if (componentName.includes('classification-widget')) {
-      return [{
-        functionName: 'generateMockDeviceClassification',
-        usageContext: 'hook',
-        frequency: 3,
-        locations: [
-          { file: componentPath, line: 15, column: 10, context: 'useEffect hook' },
-          { file: componentPath, line: 45, column: 20, context: 'event handler' },
-          { file: componentPath, line: 78, column: 15, context: 'render method' }
-        ]
-      }];
+      return [
+        {
+          functionName: 'generateMockDeviceClassification',
+          usageContext: 'hook',
+          frequency: 3,
+          locations: [
+            {
+              file: componentPath,
+              line: 15,
+              column: 10,
+              context: 'useEffect hook',
+            },
+            {
+              file: componentPath,
+              line: 45,
+              column: 20,
+              context: 'event handler',
+            },
+            {
+              file: componentPath,
+              line: 78,
+              column: 15,
+              context: 'render method',
+            },
+          ],
+        },
+      ];
     }
-    
+
     return [];
   }
 
@@ -384,29 +419,31 @@ export class MigrationStrategyAnalyzer {
         type: 'component',
         name: 'Card',
         path: '@/components/ui/card',
-        hasMockData: false
+        hasMockData: false,
       },
       {
         type: 'hook',
         name: 'useClassification',
         path: '@/hooks/use-classification',
-        hasMockData: true
-      }
+        hasMockData: true,
+      },
     ];
   }
 
   private analyzeHooks(componentPath: string): HookUsage[] {
     const componentName = this.extractComponentName(componentPath);
-    
+
     if (componentName.includes('classification-widget')) {
-      return [{
-        hookName: 'useClassification',
-        path: '@/hooks/use-classification',
-        usesMockData: true,
-        apiEndpoints: ['/api/classification']
-      }];
+      return [
+        {
+          hookName: 'useClassification',
+          path: '@/hooks/use-classification',
+          usesMockData: true,
+          apiEndpoints: ['/api/classification'],
+        },
+      ];
     }
-    
+
     return [];
   }
 
@@ -416,8 +453,8 @@ export class MigrationStrategyAnalyzer {
         contextName: 'ProjectContext',
         path: '@/contexts/project-context',
         providesData: false,
-        consumesData: true
-      }
+        consumesData: true,
+      },
     ];
   }
 
@@ -425,7 +462,7 @@ export class MigrationStrategyAnalyzer {
     const componentName = this.extractComponentName(componentPath);
     return [
       `src/__tests__/components/${componentName}.test.tsx`,
-      `src/__tests__/integration/${componentName}.integration.test.tsx`
+      `src/__tests__/integration/${componentName}.integration.test.tsx`,
     ];
   }
 
@@ -436,28 +473,31 @@ export class MigrationStrategyAnalyzer {
       branches: 78,
       functions: 92,
       lines: 88,
-      testCount: 12
+      testCount: 12,
     };
   }
 
   private assessMigrationReadiness(componentPath: string): MigrationReadiness {
     const componentName = this.extractComponentName(componentPath);
-    
+
     if (componentName.includes('classification-widget')) {
       return {
         score: 0.7,
         blockers: ['Missing API endpoint', 'Database schema not finalized'],
-        warnings: ['High complexity component', 'Multiple mock data dependencies'],
+        warnings: [
+          'High complexity component',
+          'Multiple mock data dependencies',
+        ],
         recommendations: [
           'Create API endpoint first',
           'Update database schema',
-          'Add integration tests'
+          'Add integration tests',
         ],
         estimatedEffort: 16,
-        riskLevel: 'medium'
+        riskLevel: 'medium',
       };
     }
-    
+
     if (componentName.includes('project-card')) {
       return {
         score: 0.9,
@@ -465,17 +505,17 @@ export class MigrationStrategyAnalyzer {
         warnings: ['Minor prop interface changes needed'],
         recommendations: ['Update prop types', 'Add error handling'],
         estimatedEffort: 4,
-        riskLevel: 'low'
+        riskLevel: 'low',
       };
     }
-    
+
     return {
       score: 0.5,
       blockers: ['Analysis needed'],
       warnings: ['Component not analyzed'],
       recommendations: ['Perform detailed analysis'],
       estimatedEffort: 8,
-      riskLevel: 'medium'
+      riskLevel: 'medium',
     };
   }
 
@@ -483,45 +523,58 @@ export class MigrationStrategyAnalyzer {
     const userImpact = this.calculateUserImpact(analysis);
     const technicalComplexity = this.calculateTechnicalComplexity(analysis);
     const priority = this.determinePriority(userImpact, technicalComplexity);
-    
+
     return {
       componentPath: analysis.componentPath,
       priority,
       userImpact,
       technicalComplexity,
-      dependencies: analysis.dependencies.map(d => d.path),
+      dependencies: analysis.dependencies.map((d) => d.path),
       blockedBy: this.findBlockingDependencies(analysis),
       blocks: this.findBlockedComponents(analysis),
       estimatedEffort: analysis.migrationReadiness.estimatedEffort,
-      riskFactors: this.identifyRiskFactors(analysis)
+      riskFactors: this.identifyRiskFactors(analysis),
     };
   }
 
-  private calculateUserImpact(analysis: ComponentMockUsage): 'critical' | 'high' | 'medium' | 'low' {
+  private calculateUserImpact(
+    analysis: ComponentMockUsage
+  ): 'critical' | 'high' | 'medium' | 'low' {
     const componentName = analysis.componentName;
-    
-    if (componentName.includes('classification-widget') || componentName.includes('predicate-widget')) {
+
+    if (
+      componentName.includes('classification-widget') ||
+      componentName.includes('predicate-widget')
+    ) {
       return 'critical';
     }
-    
-    if (componentName.includes('project-card') || componentName.includes('dashboard')) {
+
+    if (
+      componentName.includes('project-card') ||
+      componentName.includes('dashboard')
+    ) {
       return 'high';
     }
-    
-    if (componentName.includes('layout') || componentName.includes('navigation')) {
+
+    if (
+      componentName.includes('layout') ||
+      componentName.includes('navigation')
+    ) {
       return 'medium';
     }
-    
+
     return 'low';
   }
 
-  private calculateTechnicalComplexity(analysis: ComponentMockUsage): 'simple' | 'moderate' | 'complex' | 'very-complex' {
+  private calculateTechnicalComplexity(
+    analysis: ComponentMockUsage
+  ): 'simple' | 'moderate' | 'complex' | 'very-complex' {
     const mockDataUsage = analysis.mockDataUsage.length;
     const dependencies = analysis.dependencies.length;
     const hooks = analysis.hooks.length;
-    
+
     const complexityScore = mockDataUsage * 2 + dependencies + hooks * 1.5;
-    
+
     if (complexityScore > 15) return 'very-complex';
     if (complexityScore > 10) return 'complex';
     if (complexityScore > 5) return 'moderate';
@@ -533,15 +586,23 @@ export class MigrationStrategyAnalyzer {
     technicalComplexity: 'simple' | 'moderate' | 'complex' | 'very-complex'
   ): 'high' | 'medium' | 'low' {
     if (userImpact === 'critical') return 'high';
-    if (userImpact === 'high' && (technicalComplexity === 'simple' || technicalComplexity === 'moderate')) return 'high';
-    if (userImpact === 'high' || (userImpact === 'medium' && technicalComplexity === 'simple')) return 'medium';
+    if (
+      userImpact === 'high' &&
+      (technicalComplexity === 'simple' || technicalComplexity === 'moderate')
+    )
+      return 'high';
+    if (
+      userImpact === 'high' ||
+      (userImpact === 'medium' && technicalComplexity === 'simple')
+    )
+      return 'medium';
     return 'low';
   }
 
   private findBlockingDependencies(analysis: ComponentMockUsage): string[] {
     return analysis.dependencies
-      .filter(dep => dep.hasMockData)
-      .map(dep => dep.path);
+      .filter((dep) => dep.hasMockData)
+      .map((dep) => dep.path);
   }
 
   private findBlockedComponents(analysis: ComponentMockUsage): string[] {
@@ -551,73 +612,92 @@ export class MigrationStrategyAnalyzer {
 
   private identifyRiskFactors(analysis: ComponentMockUsage): RiskFactor[] {
     const risks: RiskFactor[] = [];
-    
+
     if (analysis.mockDataUsage.length > 3) {
       risks.push({
         type: 'data-integrity',
         severity: 'medium',
-        description: 'Multiple mock data dependencies increase data consistency risk',
-        mitigation: 'Implement comprehensive data validation and testing'
+        description:
+          'Multiple mock data dependencies increase data consistency risk',
+        mitigation: 'Implement comprehensive data validation and testing',
       });
     }
-    
+
     if (analysis.migrationReadiness.score < 0.6) {
       risks.push({
         type: 'compatibility',
         severity: 'high',
-        description: 'Low migration readiness score indicates potential compatibility issues',
-        mitigation: 'Address blockers and warnings before migration'
+        description:
+          'Low migration readiness score indicates potential compatibility issues',
+        mitigation: 'Address blockers and warnings before migration',
       });
     }
-    
+
     return risks;
   }
 
-  private createMigrationPhases(priorities: MigrationPriority[]): MigrationPhase[] {
-    const highPriority = priorities.filter(p => p.priority === 'high');
-    const mediumPriority = priorities.filter(p => p.priority === 'medium');
-    const lowPriority = priorities.filter(p => p.priority === 'low');
-    
+  private createMigrationPhases(
+    priorities: MigrationPriority[]
+  ): MigrationPhase[] {
+    const highPriority = priorities.filter((p) => p.priority === 'high');
+    const mediumPriority = priorities.filter((p) => p.priority === 'medium');
+    const lowPriority = priorities.filter((p) => p.priority === 'low');
+
     return [
       this.createPhase('Phase 1: Critical Components', highPriority, 1),
       this.createPhase('Phase 2: High Impact Components', mediumPriority, 2),
-      this.createPhase('Phase 3: Remaining Components', lowPriority, 3)
+      this.createPhase('Phase 3: Remaining Components', lowPriority, 3),
     ];
   }
 
-  private createPhase(name: string, priorities: MigrationPriority[], phaseNumber: number): MigrationPhase {
+  private createPhase(
+    name: string,
+    priorities: MigrationPriority[],
+    phaseNumber: number
+  ): MigrationPhase {
     return {
       name,
       description: `Migration phase ${phaseNumber} focusing on ${priorities.length} components`,
-      components: priorities.map(p => p.componentPath),
+      components: priorities.map((p) => p.componentPath),
       dependencies: this.calculatePhaseDependencies(priorities),
-      estimatedDuration: Math.ceil(priorities.reduce((sum, p) => sum + p.estimatedEffort, 0) / 8), // 8 hours per day
+      estimatedDuration: Math.ceil(
+        priorities.reduce((sum, p) => sum + p.estimatedEffort, 0) / 8
+      ), // 8 hours per day
       riskLevel: this.calculatePhaseRisk(priorities),
       rollbackStrategy: this.createRollbackStrategy(priorities),
       preMigrationTests: this.createTestSuites('pre-migration', priorities),
       migrationSteps: this.createMigrationSteps(priorities),
       postMigrationTests: this.createTestSuites('post-migration', priorities),
       validationSteps: this.createValidationSteps(priorities),
-      successCriteria: this.createSuccessCriteria(priorities)
+      successCriteria: this.createSuccessCriteria(priorities),
     };
   }
 
-  private calculatePhaseDependencies(priorities: MigrationPriority[]): string[] {
-    const allDependencies = priorities.flatMap(p => p.dependencies);
+  private calculatePhaseDependencies(
+    priorities: MigrationPriority[]
+  ): string[] {
+    const allDependencies = priorities.flatMap((p) => p.dependencies);
     return [...new Set(allDependencies)];
   }
 
-  private calculatePhaseRisk(priorities: MigrationPriority[]): 'low' | 'medium' | 'high' {
-    const riskScores = priorities.flatMap(p => p.riskFactors.map(rf => rf.severity));
-    const hasHighRisk = riskScores.includes('critical') || riskScores.includes('high');
+  private calculatePhaseRisk(
+    priorities: MigrationPriority[]
+  ): 'low' | 'medium' | 'high' {
+    const riskScores = priorities.flatMap((p) =>
+      p.riskFactors.map((rf) => rf.severity)
+    );
+    const hasHighRisk =
+      riskScores.includes('critical') || riskScores.includes('high');
     const hasMediumRisk = riskScores.includes('medium');
-    
+
     if (hasHighRisk) return 'high';
     if (hasMediumRisk) return 'medium';
     return 'low';
   }
 
-  private createRollbackStrategy(priorities: MigrationPriority[]): RollbackStrategy {
+  private createRollbackStrategy(
+    priorities: MigrationPriority[]
+  ): RollbackStrategy {
     return {
       type: 'hybrid',
       triggers: [
@@ -625,14 +705,16 @@ export class MigrationStrategyAnalyzer {
           type: 'error-rate',
           threshold: 5, // 5% error rate
           timeWindow: 15, // 15 minutes
-          description: 'Automatic rollback if error rate exceeds 5% for 15 minutes'
+          description:
+            'Automatic rollback if error rate exceeds 5% for 15 minutes',
         },
         {
           type: 'performance',
           threshold: 2000, // 2 second response time
           timeWindow: 10, // 10 minutes
-          description: 'Automatic rollback if response time exceeds 2s for 10 minutes'
-        }
+          description:
+            'Automatic rollback if response time exceeds 2s for 10 minutes',
+        },
       ],
       steps: [
         {
@@ -640,15 +722,15 @@ export class MigrationStrategyAnalyzer {
           description: 'Switch feature flags to disable new implementation',
           action: 'toggle_feature_flags',
           validation: 'verify_mock_data_active',
-          estimatedTime: 2
+          estimatedTime: 2,
         },
         {
           order: 2,
           description: 'Restore database to pre-migration state',
           action: 'restore_database_snapshot',
           validation: 'verify_data_integrity',
-          estimatedTime: 10
-        }
+          estimatedTime: 10,
+        },
       ],
       dataRecovery: {
         backupStrategy: 'snapshot',
@@ -657,36 +739,45 @@ export class MigrationStrategyAnalyzer {
         validationSteps: [
           'Verify all components render correctly',
           'Test critical user workflows',
-          'Validate data consistency'
-        ]
+          'Validate data consistency',
+        ],
       },
-      estimatedTime: 15
+      estimatedTime: 15,
     };
   }
 
-  private createTestSuites(phase: 'pre-migration' | 'post-migration', priorities: MigrationPriority[]): TestSuite[] {
+  private createTestSuites(
+    phase: 'pre-migration' | 'post-migration',
+    priorities: MigrationPriority[]
+  ): TestSuite[] {
     return [
       {
         name: `${phase}-unit-tests`,
         type: 'unit',
-        testFiles: priorities.flatMap(p => [`${p.componentPath.replace('.tsx', '.test.tsx')}`]),
+        testFiles: priorities.flatMap((p) => [
+          `${p.componentPath.replace('.tsx', '.test.tsx')}`,
+        ]),
         estimatedRuntime: 5,
-        passingThreshold: 95
+        passingThreshold: 95,
       },
       {
         name: `${phase}-integration-tests`,
         type: 'integration',
-        testFiles: priorities.flatMap(p => [`${p.componentPath.replace('.tsx', '.integration.test.tsx')}`]),
+        testFiles: priorities.flatMap((p) => [
+          `${p.componentPath.replace('.tsx', '.integration.test.tsx')}`,
+        ]),
         estimatedRuntime: 15,
-        passingThreshold: 90
-      }
+        passingThreshold: 90,
+      },
     ];
   }
 
-  private createMigrationSteps(priorities: MigrationPriority[]): MigrationStep[] {
+  private createMigrationSteps(
+    priorities: MigrationPriority[]
+  ): MigrationStep[] {
     const steps: MigrationStep[] = [];
     let order = 1;
-    
+
     for (const priority of priorities) {
       steps.push({
         order: order++,
@@ -703,25 +794,27 @@ export class MigrationStrategyAnalyzer {
               name: 'Component renders without errors',
               type: 'functional',
               expected: true,
-              critical: true
+              critical: true,
             },
             {
               name: 'Data loads correctly',
               type: 'data-integrity',
               expected: true,
-              critical: true
-            }
+              critical: true,
+            },
           ],
-          timeout: 10
+          timeout: 10,
         },
-        estimatedTime: priority.estimatedEffort * 60 // convert hours to minutes
+        estimatedTime: priority.estimatedEffort * 60, // convert hours to minutes
       });
     }
-    
+
     return steps;
   }
 
-  private createValidationSteps(priorities: MigrationPriority[]): ValidationStep[] {
+  private createValidationSteps(
+    priorities: MigrationPriority[]
+  ): ValidationStep[] {
     return [
       {
         name: 'Functional Validation',
@@ -732,17 +825,17 @@ export class MigrationStrategyAnalyzer {
             name: 'All components render',
             type: 'functional',
             expected: true,
-            critical: true
+            critical: true,
           },
           {
             name: 'Data loads within acceptable time',
             type: 'performance',
             expected: 2000, // 2 seconds
             tolerance: 500, // 500ms tolerance
-            critical: false
-          }
+            critical: false,
+          },
         ],
-        timeout: 30
+        timeout: 30,
       },
       {
         name: 'User Experience Validation',
@@ -753,15 +846,17 @@ export class MigrationStrategyAnalyzer {
             name: 'User can complete primary workflows',
             type: 'user-experience',
             expected: true,
-            critical: true
-          }
+            critical: true,
+          },
         ],
-        timeout: 60
-      }
+        timeout: 60,
+      },
     ];
   }
 
-  private createSuccessCriteria(priorities: MigrationPriority[]): SuccessCriteria[] {
+  private createSuccessCriteria(
+    priorities: MigrationPriority[]
+  ): SuccessCriteria[] {
     return [
       {
         name: 'Zero Critical Errors',
@@ -769,7 +864,7 @@ export class MigrationStrategyAnalyzer {
         target: 0,
         tolerance: 0.01, // 1%
         measurement: 'automated',
-        frequency: 'continuous'
+        frequency: 'continuous',
       },
       {
         name: 'Performance Maintained',
@@ -777,7 +872,7 @@ export class MigrationStrategyAnalyzer {
         target: 2000, // 2 seconds
         tolerance: 500, // 500ms
         measurement: 'automated',
-        frequency: 'continuous'
+        frequency: 'continuous',
       },
       {
         name: 'Test Coverage Maintained',
@@ -785,22 +880,23 @@ export class MigrationStrategyAnalyzer {
         target: 85,
         tolerance: 5,
         measurement: 'automated',
-        frequency: 'daily'
-      }
+        frequency: 'daily',
+      },
     ];
   }
 
   private assessOverallRisk(priorities: MigrationPriority[]): RiskAssessment {
-    const allRisks = priorities.flatMap(p => p.riskFactors);
-    const criticalRisks = allRisks.filter(r => r.severity === 'critical');
-    const highRisks = allRisks.filter(r => r.severity === 'high');
-    
+    const allRisks = priorities.flatMap((p) => p.riskFactors);
+    const criticalRisks = allRisks.filter((r) => r.severity === 'critical');
+    const highRisks = allRisks.filter((r) => r.severity === 'high');
+
     let overallRisk: 'low' | 'medium' | 'high' | 'critical' = 'low';
-    
+
     if (criticalRisks.length > 0) overallRisk = 'critical';
     else if (highRisks.length > 2) overallRisk = 'high';
-    else if (highRisks.length > 0 || allRisks.length > 5) overallRisk = 'medium';
-    
+    else if (highRisks.length > 0 || allRisks.length > 5)
+      overallRisk = 'medium';
+
     return {
       overallRisk,
       riskFactors: allRisks,
@@ -809,15 +905,17 @@ export class MigrationStrategyAnalyzer {
         'Error rate exceeds 5%',
         'Performance degrades by more than 50%',
         'Critical functionality breaks',
-        'User complaints increase significantly'
-      ]
+        'User complaints increase significantly',
+      ],
     };
   }
 
-  private createMitigationStrategies(risks: RiskFactor[]): MitigationStrategy[] {
+  private createMitigationStrategies(
+    risks: RiskFactor[]
+  ): MitigationStrategy[] {
     const strategies: MitigationStrategy[] = [];
-    
-    const dataIntegrityRisks = risks.filter(r => r.type === 'data-integrity');
+
+    const dataIntegrityRisks = risks.filter((r) => r.type === 'data-integrity');
     if (dataIntegrityRisks.length > 0) {
       strategies.push({
         riskType: 'data-integrity',
@@ -826,19 +924,24 @@ export class MigrationStrategyAnalyzer {
           'Implement schema validation at API boundaries',
           'Add data integrity tests for all components',
           'Create data migration validation scripts',
-          'Set up monitoring for data consistency'
+          'Set up monitoring for data consistency',
         ],
         effectiveness: 0.8,
-        cost: 'medium'
+        cost: 'medium',
       });
     }
-    
+
     return strategies;
   }
 
-  private calculateResourceRequirements(phases: MigrationPhase[]): ResourceRequirements {
-    const totalEffort = phases.reduce((sum, phase) => sum + phase.estimatedDuration, 0);
-    
+  private calculateResourceRequirements(
+    phases: MigrationPhase[]
+  ): ResourceRequirements {
+    const totalEffort = phases.reduce(
+      (sum, phase) => sum + phase.estimatedDuration,
+      0
+    );
+
     return {
       developers: Math.ceil(totalEffort / 10), // Assume 10 days per developer
       testers: Math.ceil(totalEffort / 15), // Assume 15 days per tester
@@ -848,45 +951,61 @@ export class MigrationStrategyAnalyzer {
         {
           type: 'database',
           description: 'Test database instances for migration testing',
-          setup: ['Create isolated test databases', 'Set up data seeding scripts'],
-          maintenance: ['Regular backup and cleanup', 'Performance monitoring']
+          setup: [
+            'Create isolated test databases',
+            'Set up data seeding scripts',
+          ],
+          maintenance: ['Regular backup and cleanup', 'Performance monitoring'],
         },
         {
           type: 'monitoring',
           description: 'Enhanced monitoring during migration',
           setup: ['Set up error tracking', 'Configure performance monitoring'],
-          maintenance: ['Monitor dashboards', 'Alert management']
-        }
-      ]
+          maintenance: ['Monitor dashboards', 'Alert management'],
+        },
+      ],
     };
   }
 
   private createTimeline(phases: MigrationPhase[]): MigrationTimeline {
     const startDate = new Date();
-    const totalDays = phases.reduce((sum, phase) => sum + phase.estimatedDuration, 0);
-    const endDate = new Date(startDate.getTime() + (totalDays + 5) * 24 * 60 * 60 * 1000); // Add 5 days buffer
-    
+    const totalDays = phases.reduce(
+      (sum, phase) => sum + phase.estimatedDuration,
+      0
+    );
+    const endDate = new Date(
+      startDate.getTime() + (totalDays + 5) * 24 * 60 * 60 * 1000
+    ); // Add 5 days buffer
+
     const milestones: Milestone[] = [];
     let currentDate = new Date(startDate);
-    
+
     for (const phase of phases) {
       milestones.push({
         name: `${phase.name} Complete`,
-        date: new Date(currentDate.getTime() + phase.estimatedDuration * 24 * 60 * 60 * 1000).toISOString(),
-        deliverables: [`All components in ${phase.name} migrated`, 'Tests passing', 'Validation complete'],
+        date: new Date(
+          currentDate.getTime() + phase.estimatedDuration * 24 * 60 * 60 * 1000
+        ).toISOString(),
+        deliverables: [
+          `All components in ${phase.name} migrated`,
+          'Tests passing',
+          'Validation complete',
+        ],
         dependencies: phase.dependencies,
-        riskLevel: phase.riskLevel
+        riskLevel: phase.riskLevel,
       });
-      
-      currentDate = new Date(currentDate.getTime() + phase.estimatedDuration * 24 * 60 * 60 * 1000);
+
+      currentDate = new Date(
+        currentDate.getTime() + phase.estimatedDuration * 24 * 60 * 60 * 1000
+      );
     }
-    
+
     return {
       startDate: startDate.toISOString(),
       endDate: endDate.toISOString(),
       milestones,
-      criticalPath: phases.map(p => p.name),
-      bufferTime: 5
+      criticalPath: phases.map((p) => p.name),
+      bufferTime: 5,
     };
   }
 
@@ -899,10 +1018,10 @@ export class MigrationStrategyAnalyzer {
           'Reassess remaining component priorities',
           'Consider parallel development streams',
           'Add additional developer resources',
-          'Defer low-priority components to future release'
+          'Defer low-priority components to future release',
         ],
         impact: 'schedule',
-        probability: 0.3
+        probability: 0.3,
       },
       {
         trigger: 'Critical component migration fails',
@@ -911,11 +1030,11 @@ export class MigrationStrategyAnalyzer {
           'Implement feature flag to revert to mock data',
           'Analyze root cause of failure',
           'Develop alternative migration approach',
-          'Update timeline and communicate to stakeholders'
+          'Update timeline and communicate to stakeholders',
         ],
         impact: 'scope',
-        probability: 0.2
-      }
+        probability: 0.2,
+      },
     ];
   }
 }

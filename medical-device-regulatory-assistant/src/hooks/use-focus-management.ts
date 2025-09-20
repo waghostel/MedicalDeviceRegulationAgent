@@ -28,7 +28,7 @@ export function useFocusManagement(
     trapFocus = false,
     restoreFocus = true,
     autoFocus = true,
-    initialFocusRef
+    initialFocusRef,
   } = options;
 
   const containerRef = useRef<HTMLDivElement>(null);
@@ -46,12 +46,12 @@ export function useFocusManagement(
       'select:not([disabled])',
       'textarea:not([disabled])',
       '[tabindex]:not([tabindex="-1"]):not([disabled])',
-      '[contenteditable="true"]'
+      '[contenteditable="true"]',
     ].join(', ');
 
     return Array.from(
       containerRef.current.querySelectorAll<HTMLElement>(focusableSelectors)
-    ).filter(element => {
+    ).filter((element) => {
       // Additional check for visibility and interactability
       const style = window.getComputedStyle(element);
       return (
@@ -125,7 +125,8 @@ export function useFocusManagement(
     if (isActive) {
       // Store the currently focused element
       if (restoreFocus) {
-        previousActiveElementRef.current = document.activeElement as HTMLElement;
+        previousActiveElementRef.current =
+          document.activeElement as HTMLElement;
       }
 
       // Auto-focus the first element if requested
@@ -160,8 +161,8 @@ export function useFocusManagement(
     ...(trapFocus && {
       role: 'dialog',
       'aria-modal': 'true',
-      tabIndex: -1
-    })
+      tabIndex: -1,
+    }),
   };
 
   return {
@@ -169,7 +170,7 @@ export function useFocusManagement(
     focusProps,
     restoreFocus: restoreFocusToElement,
     focusFirst,
-    focusLast
+    focusLast,
   };
 }
 
@@ -196,7 +197,9 @@ export function useFormFocusManagement() {
 
   // Focus the first field with an error
   const focusFirstError = useCallback(() => {
-    const errorField = document.querySelector('[aria-invalid="true"]') as HTMLElement;
+    const errorField = document.querySelector(
+      '[aria-invalid="true"]'
+    ) as HTMLElement;
     if (errorField) {
       errorField.focus();
       setFocusedFieldId(errorField.id);
@@ -210,11 +213,11 @@ export function useFormFocusManagement() {
       const form = event.currentTarget as HTMLFormElement;
       const formElements = Array.from(
         form.querySelectorAll<HTMLElement>('input, select, textarea, button')
-      ).filter(el => !el.disabled && el.tabIndex !== -1);
-      
+      ).filter((el) => !el.disabled && el.tabIndex !== -1);
+
       const currentIndex = formElements.indexOf(event.target);
       const nextElement = formElements[currentIndex + 1];
-      
+
       if (nextElement) {
         event.preventDefault();
         nextElement.focus();
@@ -228,7 +231,7 @@ export function useFormFocusManagement() {
     focusFirstInput,
     focusField,
     focusFirstError,
-    handleFormKeyDown
+    handleFormKeyDown,
   };
 }
 
@@ -239,23 +242,29 @@ export function useAccessibilityAnnouncements() {
   const [announcement, setAnnouncement] = useState<string>('');
   const [priority, setPriority] = useState<'polite' | 'assertive'>('polite');
 
-  const announce = useCallback((message: string, announcementPriority: 'polite' | 'assertive' = 'polite') => {
-    setAnnouncement(message);
-    setPriority(announcementPriority);
-    
-    // Clear the announcement after a short delay to allow for re-announcements
-    setTimeout(() => setAnnouncement(''), 100);
-  }, []);
+  const announce = useCallback(
+    (
+      message: string,
+      announcementPriority: 'polite' | 'assertive' = 'polite'
+    ) => {
+      setAnnouncement(message);
+      setPriority(announcementPriority);
+
+      // Clear the announcement after a short delay to allow for re-announcements
+      setTimeout(() => setAnnouncement(''), 100);
+    },
+    []
+  );
 
   const liveRegionProps = {
     'aria-live': priority,
     'aria-atomic': 'true',
-    className: 'sr-only'
+    className: 'sr-only',
   };
 
   return {
     announcement,
     announce,
-    liveRegionProps
+    liveRegionProps,
   };
 }

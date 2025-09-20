@@ -85,7 +85,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
       description: 'Navigate to main dashboard',
       icon: Home,
       category: 'navigation',
-      action: () => window.location.href = '/',
+      action: () => (window.location.href = '/'),
     },
     {
       id: 'go-projects',
@@ -93,7 +93,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
       description: 'Navigate to projects page',
       icon: FolderOpen,
       category: 'navigation',
-      action: () => window.location.href = '/projects',
+      action: () => (window.location.href = '/projects'),
     },
     {
       id: 'go-agent',
@@ -101,7 +101,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
       description: 'Navigate to agent workflow page',
       icon: MessageSquare,
       category: 'navigation',
-      action: () => window.location.href = '/agent',
+      action: () => (window.location.href = '/agent'),
     },
     {
       id: 'go-settings',
@@ -109,7 +109,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
       description: 'Navigate to settings page',
       icon: Settings,
       category: 'navigation',
-      action: () => window.location.href = '/settings',
+      action: () => (window.location.href = '/settings'),
     },
   ];
 

@@ -2,7 +2,7 @@ import { Page, expect, Locator } from '@playwright/test';
 
 /**
  * Test Helper Utilities for End-to-End Tests
- * 
+ *
  * Common utilities and helper functions for project workflow testing,
  * WebSocket management, performance monitoring, and data setup/cleanup.
  */
@@ -60,17 +60,17 @@ export class ProjectTestHelper {
       device_type: 'Test Device',
       intended_use: 'Test intended use',
       priority: 'medium',
-      tags: ['test']
+      tags: ['test'],
     };
 
     const data = { ...defaultData, ...projectData };
 
     const response = await this.page.request.post('/api/projects', {
       headers: {
-        'Authorization': 'Bearer mock-jwt-token',
-        'Content-Type': 'application/json'
+        Authorization: 'Bearer mock-jwt-token',
+        'Content-Type': 'application/json',
       },
-      data
+      data,
     });
 
     expect(response.status()).toBe(201);
@@ -80,7 +80,10 @@ export class ProjectTestHelper {
   /**
    * Create multiple test projects
    */
-  async createMultipleProjects(count: number, baseData?: Partial<TestProject>): Promise<TestProject[]> {
+  async createMultipleProjects(
+    count: number,
+    baseData?: Partial<TestProject>
+  ): Promise<TestProject[]> {
     const projects: TestProject[] = [];
     const batchSize = 10;
 
@@ -97,7 +100,7 @@ export class ProjectTestHelper {
           intended_use: `Test intended use for project ${i + 1}`,
           priority: ['high', 'medium', 'low'][i % 3],
           tags: [`tag${i % 3}`, 'batch-test'],
-          ...baseData
+          ...baseData,
         };
 
         batchPromises.push(this.createProject(projectData));
@@ -113,13 +116,16 @@ export class ProjectTestHelper {
   /**
    * Update a project
    */
-  async updateProject(projectId: number, updateData: Partial<TestProject>): Promise<TestProject> {
+  async updateProject(
+    projectId: number,
+    updateData: Partial<TestProject>
+  ): Promise<TestProject> {
     const response = await this.page.request.put(`/api/projects/${projectId}`, {
       headers: {
-        'Authorization': 'Bearer mock-jwt-token',
-        'Content-Type': 'application/json'
+        Authorization: 'Bearer mock-jwt-token',
+        'Content-Type': 'application/json',
       },
-      data: updateData
+      data: updateData,
     });
 
     expect(response.status()).toBe(200);
@@ -130,11 +136,14 @@ export class ProjectTestHelper {
    * Delete a project
    */
   async deleteProject(projectId: number): Promise<void> {
-    const response = await this.page.request.delete(`/api/projects/${projectId}`, {
-      headers: {
-        'Authorization': 'Bearer mock-jwt-token'
+    const response = await this.page.request.delete(
+      `/api/projects/${projectId}`,
+      {
+        headers: {
+          Authorization: 'Bearer mock-jwt-token',
+        },
       }
-    });
+    );
 
     expect(response.status()).toBe(200);
   }
@@ -143,7 +152,9 @@ export class ProjectTestHelper {
    * Delete multiple projects
    */
   async deleteMultipleProjects(projects: TestProject[]): Promise<void> {
-    const deletePromises = projects.map(project => this.deleteProject(project.id));
+    const deletePromises = projects.map((project) =>
+      this.deleteProject(project.id)
+    );
     await Promise.all(deletePromises);
   }
 
@@ -153,8 +164,8 @@ export class ProjectTestHelper {
   async getProject(projectId: number): Promise<TestProject> {
     const response = await this.page.request.get(`/api/projects/${projectId}`, {
       headers: {
-        'Authorization': 'Bearer mock-jwt-token'
-      }
+        Authorization: 'Bearer mock-jwt-token',
+      },
     });
 
     expect(response.status()).toBe(200);
@@ -174,8 +185,8 @@ export class ProjectTestHelper {
 
     const response = await this.page.request.get(url.toString(), {
       headers: {
-        'Authorization': 'Bearer mock-jwt-token'
-      }
+        Authorization: 'Bearer mock-jwt-token',
+      },
     });
 
     expect(response.status()).toBe(200);
@@ -185,16 +196,22 @@ export class ProjectTestHelper {
   /**
    * Export project data
    */
-  async exportProject(projectId: number, format: 'json' | 'pdf' | 'csv' = 'json'): Promise<any> {
-    const response = await this.page.request.get(`/api/projects/${projectId}/export`, {
-      headers: {
-        'Authorization': 'Bearer mock-jwt-token'
-      },
-      params: { format }
-    });
+  async exportProject(
+    projectId: number,
+    format: 'json' | 'pdf' | 'csv' = 'json'
+  ): Promise<any> {
+    const response = await this.page.request.get(
+      `/api/projects/${projectId}/export`,
+      {
+        headers: {
+          Authorization: 'Bearer mock-jwt-token',
+        },
+        params: { format },
+      }
+    );
 
     expect(response.status()).toBe(200);
-    
+
     if (format === 'json') {
       return await response.json();
     } else {
@@ -218,10 +235,10 @@ export class WebSocketTestHelper {
    * Set up WebSocket message monitoring
    */
   private setupWebSocketMonitoring(): void {
-    this.page.on('websocket', ws => {
+    this.page.on('websocket', (ws) => {
       this.wsConnection = ws;
-      
-      ws.on('framereceived', event => {
+
+      ws.on('framereceived', (event) => {
         try {
           const message = JSON.parse(event.payload as string);
           this.wsMessages.push(message);
@@ -231,7 +248,7 @@ export class WebSocketTestHelper {
         }
       });
 
-      ws.on('framesent', event => {
+      ws.on('framesent', (event) => {
         try {
           const message = JSON.parse(event.payload as string);
           console.log('WebSocket sent:', message);
@@ -245,7 +262,7 @@ export class WebSocketTestHelper {
         this.wsConnection = null;
       });
 
-      ws.on('socketerror', error => {
+      ws.on('socketerror', (error) => {
         console.log('WebSocket error:', error);
       });
     });
@@ -255,10 +272,15 @@ export class WebSocketTestHelper {
    * Wait for WebSocket connection to establish
    */
   async waitForConnection(timeout: number = 5000): Promise<void> {
-    await this.page.waitForFunction(() => {
-      return (window as any).websocketConnection && 
-             (window as any).websocketConnection.readyState === WebSocket.OPEN;
-    }, { timeout });
+    await this.page.waitForFunction(
+      () => {
+        return (
+          (window as any).websocketConnection &&
+          (window as any).websocketConnection.readyState === WebSocket.OPEN
+        );
+      },
+      { timeout }
+    );
   }
 
   /**
@@ -276,25 +298,30 @@ export class WebSocketTestHelper {
   /**
    * Wait for specific WebSocket message type
    */
-  async waitForMessage(messageType: string, timeout: number = 10000): Promise<WebSocketMessage> {
+  async waitForMessage(
+    messageType: string,
+    timeout: number = 10000
+  ): Promise<WebSocketMessage> {
     const startTime = Date.now();
-    
+
     while (Date.now() - startTime < timeout) {
-      const message = this.wsMessages.find(msg => msg.type === messageType);
+      const message = this.wsMessages.find((msg) => msg.type === messageType);
       if (message) {
         return message;
       }
       await this.page.waitForTimeout(100);
     }
-    
-    throw new Error(`WebSocket message of type '${messageType}' not received within ${timeout}ms`);
+
+    throw new Error(
+      `WebSocket message of type '${messageType}' not received within ${timeout}ms`
+    );
   }
 
   /**
    * Get all messages of a specific type
    */
   getMessagesByType(messageType: string): WebSocketMessage[] {
-    return this.wsMessages.filter(msg => msg.type === messageType);
+    return this.wsMessages.filter((msg) => msg.type === messageType);
   }
 
   /**
@@ -317,7 +344,7 @@ export class WebSocketTestHelper {
   async subscribeToProject(projectId: number): Promise<void> {
     await this.sendMessage({
       type: 'subscribe',
-      project_id: projectId
+      project_id: projectId,
     });
   }
 
@@ -327,7 +354,7 @@ export class WebSocketTestHelper {
   async unsubscribeFromProject(projectId: number): Promise<void> {
     await this.sendMessage({
       type: 'unsubscribe',
-      project_id: projectId
+      project_id: projectId,
     });
   }
 
@@ -336,7 +363,7 @@ export class WebSocketTestHelper {
    */
   async testPingPong(): Promise<boolean> {
     await this.sendMessage({ type: 'ping' });
-    
+
     try {
       await this.waitForMessage('pong', 5000);
       return true;
@@ -365,7 +392,7 @@ export class PerformanceTestHelper {
         navigationStart: performance.now(),
         requests: [],
         memoryUsage: [],
-        timings: {}
+        timings: {},
       };
 
       // Monitor network requests
@@ -374,14 +401,14 @@ export class PerformanceTestHelper {
         const start = performance.now();
         const response = await originalFetch(...args);
         const end = performance.now();
-        
+
         (window as any).performanceData.requests.push({
           url: args[0],
           duration: end - start,
           status: response.status,
-          size: response.headers.get('content-length') || 0
+          size: response.headers.get('content-length') || 0,
         });
-        
+
         return response;
       };
 
@@ -391,7 +418,7 @@ export class PerformanceTestHelper {
           (window as any).performanceData.memoryUsage.push({
             timestamp: performance.now(),
             used: (performance as any).memory.usedJSHeapSize,
-            total: (performance as any).memory.totalJSHeapSize
+            total: (performance as any).memory.totalJSHeapSize,
           });
         }, 1000);
       }
@@ -405,9 +432,9 @@ export class PerformanceTestHelper {
     const metric: PerformanceMetrics = {
       startTime: Date.now(),
       endTime: 0,
-      duration: 0
+      duration: 0,
     };
-    
+
     this.metrics.push(metric);
     console.log(`Performance measurement started: ${name}`);
   }
@@ -420,20 +447,25 @@ export class PerformanceTestHelper {
     if (metric) {
       metric.endTime = Date.now();
       metric.duration = metric.endTime - metric.startTime;
-      console.log(`Performance measurement completed: ${name} - ${metric.duration}ms`);
+      console.log(
+        `Performance measurement completed: ${name} - ${metric.duration}ms`
+      );
     }
-    
+
     return metric;
   }
 
   /**
    * Measure operation performance
    */
-  async measureOperation<T>(name: string, operation: () => Promise<T>): Promise<{ result: T; metrics: PerformanceMetrics }> {
+  async measureOperation<T>(
+    name: string,
+    operation: () => Promise<T>
+  ): Promise<{ result: T; metrics: PerformanceMetrics }> {
     this.startMeasurement(name);
     const result = await operation();
     const metrics = this.endMeasurement(name);
-    
+
     return { result, metrics };
   }
 
@@ -446,7 +478,7 @@ export class PerformanceTestHelper {
         return {
           used: (performance as any).memory.usedJSHeapSize,
           total: (performance as any).memory.totalJSHeapSize,
-          limit: (performance as any).memory.jsHeapSizeLimit
+          limit: (performance as any).memory.jsHeapSizeLimit,
         };
       }
       return null;
@@ -467,17 +499,17 @@ export class PerformanceTestHelper {
    */
   async measurePageLoad(url: string): Promise<PerformanceMetrics> {
     const startTime = Date.now();
-    
+
     await this.page.goto(url);
     await this.page.waitForLoadState('networkidle');
-    
+
     const endTime = Date.now();
     const duration = endTime - startTime;
-    
+
     const metrics: PerformanceMetrics = {
       startTime,
       endTime,
-      duration
+      duration,
     };
 
     console.log(`Page load performance: ${url} - ${duration}ms`);
@@ -491,32 +523,37 @@ export class PerformanceTestHelper {
     name: string,
     operations: (() => Promise<T>)[],
     concurrent: boolean = false
-  ): Promise<{ results: T[]; metrics: PerformanceMetrics & { operationsPerSecond: number } }> {
+  ): Promise<{
+    results: T[];
+    metrics: PerformanceMetrics & { operationsPerSecond: number };
+  }> {
     const startTime = Date.now();
-    
+
     let results: T[];
     if (concurrent) {
-      results = await Promise.all(operations.map(op => op()));
+      results = await Promise.all(operations.map((op) => op()));
     } else {
       results = [];
       for (const operation of operations) {
         results.push(await operation());
       }
     }
-    
+
     const endTime = Date.now();
     const duration = endTime - startTime;
     const operationsPerSecond = (operations.length / duration) * 1000;
-    
+
     const metrics = {
       startTime,
       endTime,
       duration,
-      operationsPerSecond
+      operationsPerSecond,
     };
 
-    console.log(`Throughput measurement: ${name} - ${operationsPerSecond.toFixed(2)} ops/sec`);
-    
+    console.log(
+      `Throughput measurement: ${name} - ${operationsPerSecond.toFixed(2)} ops/sec`
+    );
+
     return { results, metrics };
   }
 }
@@ -530,24 +567,27 @@ export class UITestHelper {
   /**
    * Wait for element to be visible and stable
    */
-  async waitForStableElement(selector: string, timeout: number = 10000): Promise<Locator> {
+  async waitForStableElement(
+    selector: string,
+    timeout: number = 10000
+  ): Promise<Locator> {
     const element = this.page.locator(selector);
     await element.waitFor({ state: 'visible', timeout });
-    
+
     // Wait for element to be stable (not moving)
     await this.page.waitForFunction((sel) => {
       const el = document.querySelector(sel);
       if (!el) return false;
-      
+
       const rect1 = el.getBoundingClientRect();
       setTimeout(() => {
         const rect2 = el.getBoundingClientRect();
         return rect1.top === rect2.top && rect1.left === rect2.left;
       }, 100);
-      
+
       return true;
     }, selector);
-    
+
     return element;
   }
 
@@ -570,12 +610,15 @@ export class UITestHelper {
       '[data-testid="loading"]',
       '[data-testid="spinner"]',
       '.loading',
-      '.spinner'
+      '.spinner',
     ];
 
     for (const selector of loadingSelectors) {
       try {
-        await this.page.waitForSelector(selector, { state: 'hidden', timeout: 1000 });
+        await this.page.waitForSelector(selector, {
+          state: 'hidden',
+          timeout: 1000,
+        });
       } catch (error) {
         // Selector might not exist, continue
       }
@@ -588,7 +631,10 @@ export class UITestHelper {
   /**
    * Verify toast notification
    */
-  async verifyToast(expectedText: string, type: 'success' | 'error' | 'info' = 'success'): Promise<void> {
+  async verifyToast(
+    expectedText: string,
+    type: 'success' | 'error' | 'info' = 'success'
+  ): Promise<void> {
     const toastSelector = `[data-testid="${type}-toast"], [data-testid="toast"]`;
     const toast = await this.waitForStableElement(toastSelector);
     await expect(toast).toContainText(expectedText);
@@ -602,7 +648,7 @@ export class UITestHelper {
       '[data-testid="error-message"]',
       '[data-testid="error-toast"]',
       '.error-message',
-      '.error'
+      '.error',
     ];
 
     let errorFound = false;
@@ -629,9 +675,9 @@ export class UITestHelper {
    */
   async takeTimestampedScreenshot(name: string): Promise<void> {
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-    await this.page.screenshot({ 
+    await this.page.screenshot({
       path: `screenshots/${name}-${timestamp}.png`,
-      fullPage: true 
+      fullPage: true,
     });
   }
 
@@ -651,7 +697,7 @@ export class UITestHelper {
           }
         }
       },
-      
+
       // Check for form labels
       async () => {
         const inputs = await this.page.locator('input, select, textarea').all();
@@ -659,7 +705,7 @@ export class UITestHelper {
           const id = await input.getAttribute('id');
           const ariaLabel = await input.getAttribute('aria-label');
           const ariaLabelledBy = await input.getAttribute('aria-labelledby');
-          
+
           if (id) {
             const label = this.page.locator(`label[for="${id}"]`);
             if (!(await label.count()) && !ariaLabel && !ariaLabelledBy) {
@@ -668,17 +714,19 @@ export class UITestHelper {
           }
         }
       },
-      
+
       // Check for keyboard navigation
       async () => {
-        const focusableElements = await this.page.locator(
-          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-        ).all();
-        
+        const focusableElements = await this.page
+          .locator(
+            'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+          )
+          .all();
+
         if (focusableElements.length === 0) {
           console.warn('No focusable elements found on page');
         }
-      }
+      },
     ];
 
     for (const check of accessibilityChecks) {
@@ -701,18 +749,21 @@ export class AuthTestHelper {
       id: 'test-user-123',
       email: 'test@example.com',
       name: 'Test User',
-      token: 'mock-jwt-token'
+      token: 'mock-jwt-token',
     };
 
     const userData = { ...defaultUser, ...user };
 
     await this.page.evaluate((data) => {
       localStorage.setItem('auth-token', data.token);
-      localStorage.setItem('user-data', JSON.stringify({
-        id: data.id,
-        email: data.email,
-        name: data.name
-      }));
+      localStorage.setItem(
+        'user-data',
+        JSON.stringify({
+          id: data.id,
+          email: data.email,
+          name: data.name,
+        })
+      );
     }, userData);
   }
 
@@ -733,7 +784,7 @@ export class AuthTestHelper {
     const authData = await this.page.evaluate(() => {
       return {
         token: localStorage.getItem('auth-token'),
-        userData: localStorage.getItem('user-data')
+        userData: localStorage.getItem('user-data'),
       };
     });
 
@@ -751,16 +802,16 @@ export class AuthTestHelper {
    */
   createTestUsers(count: number): TestUser[] {
     const users: TestUser[] = [];
-    
+
     for (let i = 0; i < count; i++) {
       users.push({
         id: `test-user-${i + 1}`,
         email: `test${i + 1}@example.com`,
         name: `Test User ${i + 1}`,
-        token: `mock-jwt-token-${i + 1}`
+        token: `mock-jwt-token-${i + 1}`,
       });
     }
-    
+
     return users;
   }
 }
@@ -794,16 +845,20 @@ export class CleanupTestHelper {
   async cleanupAll(): Promise<void> {
     // Clean up projects
     if (this.createdProjects.length > 0) {
-      console.log(`Cleaning up ${this.createdProjects.length} test projects...`);
-      
-      const deletePromises = this.createdProjects.map(project => 
-        this.page.request.delete(`/api/projects/${project.id}`, {
-          headers: {
-            'Authorization': 'Bearer mock-jwt-token'
-          }
-        }).catch(error => {
-          console.warn(`Failed to delete project ${project.id}:`, error);
-        })
+      console.log(
+        `Cleaning up ${this.createdProjects.length} test projects...`
+      );
+
+      const deletePromises = this.createdProjects.map((project) =>
+        this.page.request
+          .delete(`/api/projects/${project.id}`, {
+            headers: {
+              Authorization: 'Bearer mock-jwt-token',
+            },
+          })
+          .catch((error) => {
+            console.warn(`Failed to delete project ${project.id}:`, error);
+          })
       );
 
       await Promise.all(deletePromises);
@@ -831,27 +886,31 @@ export class CleanupTestHelper {
     try {
       const response = await this.page.request.get('/api/projects', {
         headers: {
-          'Authorization': 'Bearer mock-jwt-token'
-        }
+          Authorization: 'Bearer mock-jwt-token',
+        },
       });
 
       if (response.status() === 200) {
         const projects = await response.json();
-        const testProjects = projects.filter((p: TestProject) => 
+        const testProjects = projects.filter((p: TestProject) =>
           p.name.includes(namePattern)
         );
 
         if (testProjects.length > 0) {
-          console.log(`Cleaning up ${testProjects.length} projects matching pattern "${namePattern}"`);
-          
-          const deletePromises = testProjects.map((project: TestProject) => 
-            this.page.request.delete(`/api/projects/${project.id}`, {
-              headers: {
-                'Authorization': 'Bearer mock-jwt-token'
-              }
-            }).catch(error => {
-              console.warn(`Failed to delete project ${project.id}:`, error);
-            })
+          console.log(
+            `Cleaning up ${testProjects.length} projects matching pattern "${namePattern}"`
+          );
+
+          const deletePromises = testProjects.map((project: TestProject) =>
+            this.page.request
+              .delete(`/api/projects/${project.id}`, {
+                headers: {
+                  Authorization: 'Bearer mock-jwt-token',
+                },
+              })
+              .catch((error) => {
+                console.warn(`Failed to delete project ${project.id}:`, error);
+              })
           );
 
           await Promise.all(deletePromises);
@@ -870,5 +929,5 @@ export {
   PerformanceTestHelper,
   UITestHelper,
   AuthTestHelper,
-  CleanupTestHelper
+  CleanupTestHelper,
 };

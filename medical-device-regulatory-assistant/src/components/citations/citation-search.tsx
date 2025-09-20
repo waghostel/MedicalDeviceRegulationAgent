@@ -5,17 +5,17 @@ import { Search, Filter, X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from '@/components/ui/select';
-import { 
-  Popover, 
-  PopoverContent, 
-  PopoverTrigger 
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
 } from '@/components/ui/popover';
 import { SourceCitation } from '@/types/copilot';
 import { getDocumentTypeDisplayName } from './citation-utils';
@@ -36,13 +36,13 @@ interface SearchFilters {
 export function CitationSearch({
   citations,
   onFilteredResults,
-  placeholder = "Search citations..."
+  placeholder = 'Search citations...',
 }: CitationSearchProps) {
   const [filters, setFilters] = useState<SearchFilters>({
     query: '',
     documentType: 'all',
     dateRange: 'all',
-    validOnly: false
+    validOnly: false,
   });
 
   const [showFilters, setShowFilters] = useState(false);
@@ -54,16 +54,17 @@ export function CitationSearch({
     // Text search
     if (filters.query.trim()) {
       const query = filters.query.toLowerCase();
-      filtered = filtered.filter(citation =>
-        citation.title.toLowerCase().includes(query) ||
-        citation.url.toLowerCase().includes(query)
+      filtered = filtered.filter(
+        (citation) =>
+          citation.title.toLowerCase().includes(query) ||
+          citation.url.toLowerCase().includes(query)
       );
     }
 
     // Document type filter
     if (filters.documentType !== 'all') {
-      filtered = filtered.filter(citation =>
-        citation.documentType === filters.documentType
+      filtered = filtered.filter(
+        (citation) => citation.documentType === filters.documentType
       );
     }
 
@@ -71,7 +72,7 @@ export function CitationSearch({
     if (filters.dateRange !== 'all') {
       const now = new Date();
       const cutoffDate = new Date();
-      
+
       switch (filters.dateRange) {
         case 'last-year':
           cutoffDate.setFullYear(now.getFullYear() - 1);
@@ -82,7 +83,7 @@ export function CitationSearch({
       }
 
       if (filters.dateRange !== 'custom') {
-        filtered = filtered.filter(citation => {
+        filtered = filtered.filter((citation) => {
           const effectiveDate = new Date(citation.effectiveDate);
           return effectiveDate >= cutoffDate;
         });
@@ -98,20 +99,20 @@ export function CitationSearch({
   }, [filteredCitations, onFilteredResults]);
 
   const handleQueryChange = (value: string) => {
-    setFilters(prev => ({ ...prev, query: value }));
+    setFilters((prev) => ({ ...prev, query: value }));
   };
 
   const handleDocumentTypeChange = (value: string) => {
-    setFilters(prev => ({ 
-      ...prev, 
-      documentType: value as SearchFilters['documentType']
+    setFilters((prev) => ({
+      ...prev,
+      documentType: value as SearchFilters['documentType'],
     }));
   };
 
   const handleDateRangeChange = (value: string) => {
-    setFilters(prev => ({ 
-      ...prev, 
-      dateRange: value as SearchFilters['dateRange']
+    setFilters((prev) => ({
+      ...prev,
+      dateRange: value as SearchFilters['dateRange'],
     }));
   };
 
@@ -120,11 +121,11 @@ export function CitationSearch({
       query: '',
       documentType: 'all',
       dateRange: 'all',
-      validOnly: false
+      validOnly: false,
     });
   };
 
-  const hasActiveFilters = 
+  const hasActiveFilters =
     filters.query.trim() !== '' ||
     filters.documentType !== 'all' ||
     filters.dateRange !== 'all' ||
@@ -132,9 +133,9 @@ export function CitationSearch({
 
   const documentTypes: SourceCitation['documentType'][] = [
     'FDA_510K',
-    'FDA_GUIDANCE', 
+    'FDA_GUIDANCE',
     'CFR_SECTION',
-    'FDA_DATABASE'
+    'FDA_DATABASE',
   ];
 
   return (
@@ -189,7 +190,7 @@ export function CitationSearch({
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">All Types</SelectItem>
-                      {documentTypes.map(type => (
+                      {documentTypes.map((type) => (
                         <SelectItem key={type} value={type}>
                           {getDocumentTypeDisplayName(type)}
                         </SelectItem>
@@ -237,7 +238,7 @@ export function CitationSearch({
               </Button>
             </Badge>
           )}
-          
+
           {filters.documentType !== 'all' && (
             <Badge variant="secondary" className="text-xs">
               Type: {getDocumentTypeDisplayName(filters.documentType)}
@@ -251,7 +252,7 @@ export function CitationSearch({
               </Button>
             </Badge>
           )}
-          
+
           {filters.dateRange !== 'all' && (
             <Badge variant="secondary" className="text-xs">
               Date: {filters.dateRange.replace('-', ' ')}

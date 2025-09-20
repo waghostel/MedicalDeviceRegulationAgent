@@ -1,6 +1,6 @@
 /**
  * Performance Monitoring Component
- * 
+ *
  * Provides real-time performance monitoring and metrics display
  * for tracking application performance and identifying bottlenecks.
  */
@@ -25,10 +25,10 @@ import {
   TrendingUp,
   TrendingDown,
 } from 'lucide-react';
-import { 
-  usePerformanceMonitor, 
+import {
+  usePerformanceMonitor,
   useMemoryMonitoring,
-  performanceMonitor 
+  performanceMonitor,
 } from '@/lib/performance/optimization';
 import { useWebVitals } from '@/lib/web-vitals';
 import { apiCache, memoryCache, getCacheSize } from '@/lib/performance/caching';
@@ -57,76 +57,92 @@ const PERFORMANCE_THRESHOLDS = {
   bundle_size: 1000, // KB
 };
 
-const PerformanceMetricCard = memo(({ 
-  title, 
-  value, 
-  unit, 
-  threshold, 
-  icon: Icon, 
-  trend 
-}: {
-  title: string;
-  value: number;
-  unit: string;
-  threshold: number;
-  icon: React.ComponentType<{ className?: string }>;
-  trend?: 'up' | 'down' | 'stable';
-}) => {
-  const getStatus = () => {
-    if (value <= threshold * 0.7) return 'good';
-    if (value <= threshold) return 'warning';
-    return 'poor';
-  };
+const PerformanceMetricCard = memo(
+  ({
+    title,
+    value,
+    unit,
+    threshold,
+    icon: Icon,
+    trend,
+  }: {
+    title: string;
+    value: number;
+    unit: string;
+    threshold: number;
+    icon: React.ComponentType<{ className?: string }>;
+    trend?: 'up' | 'down' | 'stable';
+  }) => {
+    const getStatus = () => {
+      if (value <= threshold * 0.7) return 'good';
+      if (value <= threshold) return 'warning';
+      return 'poor';
+    };
 
-  const status = getStatus();
-  const percentage = Math.min((value / threshold) * 100, 100);
+    const status = getStatus();
+    const percentage = Math.min((value / threshold) * 100, 100);
 
-  const statusColors = {
-    good: 'text-green-600 border-green-200 bg-green-50',
-    warning: 'text-yellow-600 border-yellow-200 bg-yellow-50',
-    poor: 'text-red-600 border-red-200 bg-red-50',
-  };
+    const statusColors = {
+      good: 'text-green-600 border-green-200 bg-green-50',
+      warning: 'text-yellow-600 border-yellow-200 bg-yellow-50',
+      poor: 'text-red-600 border-red-200 bg-red-50',
+    };
 
-  const trendIcons = {
-    up: <TrendingUp className="h-3 w-3 text-red-500" />,
-    down: <TrendingDown className="h-3 w-3 text-green-500" />,
-    stable: null,
-  };
+    const trendIcons = {
+      up: <TrendingUp className="h-3 w-3 text-red-500" />,
+      down: <TrendingDown className="h-3 w-3 text-green-500" />,
+      stable: null,
+    };
 
-  return (
-    <Card className={cn('border-l-4', statusColors[status])}>
-      <CardContent className="p-4">
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center space-x-2">
-            <Icon className="h-4 w-4" />
-            <span className="font-medium text-sm">{title}</span>
+    return (
+      <Card className={cn('border-l-4', statusColors[status])}>
+        <CardContent className="p-4">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center space-x-2">
+              <Icon className="h-4 w-4" />
+              <span className="font-medium text-sm">{title}</span>
+            </div>
+            {trend && trendIcons[trend]}
           </div>
-          {trend && trendIcons[trend]}
-        </div>
-        
-        <div className="space-y-2">
-          <div className="text-2xl font-bold">
-            {value.toFixed(1)}{unit}
+
+          <div className="space-y-2">
+            <div className="text-2xl font-bold">
+              {value.toFixed(1)}
+              {unit}
+            </div>
+
+            <Progress value={percentage} className="h-2" />
+
+            <div className="flex justify-between text-xs text-muted-foreground">
+              <span>Current</span>
+              <span>
+                Threshold: {threshold}
+                {unit}
+              </span>
+            </div>
+
+            <Badge
+              variant={
+                status === 'good'
+                  ? 'default'
+                  : status === 'warning'
+                    ? 'secondary'
+                    : 'destructive'
+              }
+              className="text-xs"
+            >
+              {status === 'good'
+                ? 'Good'
+                : status === 'warning'
+                  ? 'Needs Improvement'
+                  : 'Poor'}
+            </Badge>
           </div>
-          
-          <Progress value={percentage} className="h-2" />
-          
-          <div className="flex justify-between text-xs text-muted-foreground">
-            <span>Current</span>
-            <span>Threshold: {threshold}{unit}</span>
-          </div>
-          
-          <Badge 
-            variant={status === 'good' ? 'default' : status === 'warning' ? 'secondary' : 'destructive'}
-            className="text-xs"
-          >
-            {status === 'good' ? 'Good' : status === 'warning' ? 'Needs Improvement' : 'Poor'}
-          </Badge>
-        </div>
-      </CardContent>
-    </Card>
-  );
-});
+        </CardContent>
+      </Card>
+    );
+  }
+);
 PerformanceMetricCard.displayName = 'PerformanceMetricCard';
 
 const AlertsList = memo(({ alerts }: { alerts: PerformanceAlert[] }) => {
@@ -136,7 +152,9 @@ const AlertsList = memo(({ alerts }: { alerts: PerformanceAlert[] }) => {
         <CardContent className="flex items-center justify-center py-8">
           <div className="text-center">
             <CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-4" />
-            <p className="text-muted-foreground">No performance issues detected</p>
+            <p className="text-muted-foreground">
+              No performance issues detected
+            </p>
           </div>
         </CardContent>
       </Card>
@@ -146,7 +164,10 @@ const AlertsList = memo(({ alerts }: { alerts: PerformanceAlert[] }) => {
   return (
     <div className="space-y-2">
       {alerts.map((alert) => (
-        <Alert key={alert.id} variant={alert.type === 'error' ? 'destructive' : 'default'}>
+        <Alert
+          key={alert.id}
+          variant={alert.type === 'error' ? 'destructive' : 'default'}
+        >
           <AlertTriangle className="h-4 w-4" />
           <AlertDescription>
             <div className="flex justify-between items-start">
@@ -155,7 +176,7 @@ const AlertsList = memo(({ alerts }: { alerts: PerformanceAlert[] }) => {
                 <p className="text-sm mt-1">{alert.message}</p>
                 {alert.metric && alert.value && (
                   <p className="text-xs text-muted-foreground mt-1">
-                    {alert.metric}: {alert.value.toFixed(1)} 
+                    {alert.metric}: {alert.value.toFixed(1)}
                     {alert.threshold && ` (threshold: ${alert.threshold})`}
                   </p>
                 )}
@@ -186,7 +207,10 @@ export const PerformanceMonitor = memo(function PerformanceMonitor() {
 
     // Check each metric against thresholds
     Object.entries(metrics).forEach(([metricName, metricData]) => {
-      const threshold = PERFORMANCE_THRESHOLDS[metricName as keyof typeof PERFORMANCE_THRESHOLDS];
+      const threshold =
+        PERFORMANCE_THRESHOLDS[
+          metricName as keyof typeof PERFORMANCE_THRESHOLDS
+        ];
       if (threshold && metricData.avg > threshold) {
         newAlerts.push({
           id: `${metricName}-${now}`,
@@ -202,7 +226,10 @@ export const PerformanceMonitor = memo(function PerformanceMonitor() {
     });
 
     // Check Web Vitals
-    if (webVitals.lcp && webVitals.lcp > PERFORMANCE_THRESHOLDS.largest_contentful_paint) {
+    if (
+      webVitals.lcp &&
+      webVitals.lcp > PERFORMANCE_THRESHOLDS.largest_contentful_paint
+    ) {
       newAlerts.push({
         id: `lcp-${now}`,
         type: 'warning',
@@ -215,7 +242,10 @@ export const PerformanceMonitor = memo(function PerformanceMonitor() {
       });
     }
 
-    if (webVitals.fid && webVitals.fid > PERFORMANCE_THRESHOLDS.first_input_delay) {
+    if (
+      webVitals.fid &&
+      webVitals.fid > PERFORMANCE_THRESHOLDS.first_input_delay
+    ) {
       newAlerts.push({
         id: `fid-${now}`,
         type: 'warning',
@@ -244,8 +274,8 @@ export const PerformanceMonitor = memo(function PerformanceMonitor() {
 
     // Keep only recent alerts (last 10 minutes)
     const cutoff = now - 10 * 60 * 1000;
-    const recentAlerts = alerts.filter(alert => alert.timestamp > cutoff);
-    
+    const recentAlerts = alerts.filter((alert) => alert.timestamp > cutoff);
+
     setAlerts([...recentAlerts, ...newAlerts]);
   }, [metrics, webVitals, memoryInfo, alerts]);
 
@@ -274,7 +304,7 @@ export const PerformanceMonitor = memo(function PerformanceMonitor() {
     const blob = new Blob([JSON.stringify(exportData, null, 2)], {
       type: 'application/json',
     });
-    
+
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -290,15 +320,19 @@ export const PerformanceMonitor = memo(function PerformanceMonitor() {
   }, []);
 
   const toggleRecording = useCallback(() => {
-    setIsRecording(prev => !prev);
+    setIsRecording((prev) => !prev);
   }, []);
 
   // Calculate overall performance score
   const calculateOverallScore = useCallback(() => {
-    const webVitalScores = Object.values(scores).filter(score => score !== null);
-    const goodScores = webVitalScores.filter(score => score === 'good').length;
+    const webVitalScores = Object.values(scores).filter(
+      (score) => score !== null
+    );
+    const goodScores = webVitalScores.filter(
+      (score) => score === 'good'
+    ).length;
     const totalScores = webVitalScores.length;
-    
+
     if (totalScores === 0) return 0;
     return Math.round((goodScores / totalScores) * 100);
   }, [scores]);
@@ -310,30 +344,24 @@ export const PerformanceMonitor = memo(function PerformanceMonitor() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">Performance Monitor</h2>
+          <h2 className="text-2xl font-bold tracking-tight">
+            Performance Monitor
+          </h2>
           <p className="text-muted-foreground">
             Real-time performance metrics and optimization insights
           </p>
         </div>
-        
+
         <div className="flex items-center gap-2">
           <Badge variant={isRecording ? 'default' : 'secondary'}>
             {isRecording ? 'Recording' : 'Paused'}
           </Badge>
-          
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={toggleRecording}
-          >
+
+          <Button variant="outline" size="sm" onClick={toggleRecording}>
             {isRecording ? 'Pause' : 'Resume'}
           </Button>
-          
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleExportData}
-          >
+
+          <Button variant="outline" size="sm" onClick={handleExportData}>
             <Download className="h-4 w-4 mr-2" />
             Export
           </Button>
@@ -345,23 +373,29 @@ export const PerformanceMonitor = memo(function PerformanceMonitor() {
         <CardContent className="p-6">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-lg font-semibold">Overall Performance Score</h3>
+              <h3 className="text-lg font-semibold">
+                Overall Performance Score
+              </h3>
               <p className="text-sm text-muted-foreground">
                 Based on Core Web Vitals and custom metrics
               </p>
             </div>
             <div className="text-right">
-              <div className="text-3xl font-bold">
-                {overallScore}/100
-              </div>
-              <Badge 
+              <div className="text-3xl font-bold">{overallScore}/100</div>
+              <Badge
                 variant={
-                  overallScore >= 80 ? 'default' : 
-                  overallScore >= 60 ? 'secondary' : 
-                  'destructive'
+                  overallScore >= 80
+                    ? 'default'
+                    : overallScore >= 60
+                      ? 'secondary'
+                      : 'destructive'
                 }
               >
-                {overallScore >= 80 ? 'Good' : overallScore >= 60 ? 'Needs Improvement' : 'Poor'}
+                {overallScore >= 80
+                  ? 'Good'
+                  : overallScore >= 60
+                    ? 'Needs Improvement'
+                    : 'Poor'}
               </Badge>
             </div>
           </div>
@@ -392,11 +426,16 @@ export const PerformanceMonitor = memo(function PerformanceMonitor() {
         <TabsContent value="metrics" className="space-y-4">
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {Object.entries(metrics).map(([key, value]) => {
-              const threshold = PERFORMANCE_THRESHOLDS[key as keyof typeof PERFORMANCE_THRESHOLDS] || 1000;
+              const threshold =
+                PERFORMANCE_THRESHOLDS[
+                  key as keyof typeof PERFORMANCE_THRESHOLDS
+                ] || 1000;
               return (
                 <PerformanceMetricCard
                   key={key}
-                  title={key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                  title={key
+                    .replace(/_/g, ' ')
+                    .replace(/\b\w/g, (l) => l.toUpperCase())}
                   value={value.avg || 0}
                   unit="ms"
                   threshold={threshold}
@@ -432,7 +471,9 @@ export const PerformanceMonitor = memo(function PerformanceMonitor() {
                 title="Cumulative Layout Shift"
                 value={webVitals.cls * 1000} // Convert to more readable number
                 unit=""
-                threshold={PERFORMANCE_THRESHOLDS.cumulative_layout_shift * 1000}
+                threshold={
+                  PERFORMANCE_THRESHOLDS.cumulative_layout_shift * 1000
+                }
                 icon={Activity}
               />
             )}
@@ -451,23 +492,36 @@ export const PerformanceMonitor = memo(function PerformanceMonitor() {
                     <div>
                       <div className="flex justify-between text-sm">
                         <span>Used JS Heap</span>
-                        <span>{Math.round(memoryInfo.usedJSHeapSize / 1024 / 1024)}MB</span>
+                        <span>
+                          {Math.round(memoryInfo.usedJSHeapSize / 1024 / 1024)}
+                          MB
+                        </span>
                       </div>
-                      <Progress 
-                        value={(memoryInfo.usedJSHeapSize / memoryInfo.totalJSHeapSize) * 100} 
-                        className="mt-1" 
+                      <Progress
+                        value={
+                          (memoryInfo.usedJSHeapSize /
+                            memoryInfo.totalJSHeapSize) *
+                          100
+                        }
+                        className="mt-1"
                       />
                     </div>
                     <div>
                       <div className="flex justify-between text-sm">
                         <span>Total JS Heap</span>
-                        <span>{Math.round(memoryInfo.totalJSHeapSize / 1024 / 1024)}MB</span>
+                        <span>
+                          {Math.round(memoryInfo.totalJSHeapSize / 1024 / 1024)}
+                          MB
+                        </span>
                       </div>
                     </div>
                     <div>
                       <div className="flex justify-between text-sm">
                         <span>Heap Limit</span>
-                        <span>{Math.round(memoryInfo.jsHeapSizeLimit / 1024 / 1024)}MB</span>
+                        <span>
+                          {Math.round(memoryInfo.jsHeapSizeLimit / 1024 / 1024)}
+                          MB
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -490,7 +544,9 @@ export const PerformanceMonitor = memo(function PerformanceMonitor() {
                     </div>
                     <div className="flex justify-between">
                       <span>API Cache Hit Rate</span>
-                      <span>{Math.round(apiCache.getStats().memory.hitRate * 100)}%</span>
+                      <span>
+                        {Math.round(apiCache.getStats().memory.hitRate * 100)}%
+                      </span>
                     </div>
                   </div>
                 </CardContent>

@@ -239,42 +239,47 @@ export interface ProjectUpdateMessage extends WebSocketMessage<Project> {
   project_id: number;
 }
 
-export interface AgentResponseMessage extends WebSocketMessage<{
-  content: string;
-  confidence?: number;
-  sources?: SourceCitation[];
-  reasoning?: string;
-}> {
+export interface AgentResponseMessage
+  extends WebSocketMessage<{
+    content: string;
+    confidence?: number;
+    sources?: SourceCitation[];
+    reasoning?: string;
+  }> {
   type: 'agent_response';
   project_id: number;
 }
 
-export interface AgentStreamMessage extends WebSocketMessage<{
-  chunk: string;
-  streamId: string;
-}> {
+export interface AgentStreamMessage
+  extends WebSocketMessage<{
+    chunk: string;
+    streamId: string;
+  }> {
   type: 'agent_response_stream';
   stream_id: string;
 }
 
-export interface TypingIndicatorMessage extends WebSocketMessage<{
-  userId: string;
-  userName?: string;
-  projectId?: number;
-}> {
+export interface TypingIndicatorMessage
+  extends WebSocketMessage<{
+    userId: string;
+    userName?: string;
+    projectId?: number;
+  }> {
   type: 'user_typing_start' | 'user_typing_stop';
   project_id?: number;
 }
 
-export interface ConnectionMessage extends WebSocketMessage<{
-  timestamp: string;
-}> {
+export interface ConnectionMessage
+  extends WebSocketMessage<{
+    timestamp: string;
+  }> {
   type: 'ping' | 'pong';
 }
 
-export interface SubscriptionMessage extends WebSocketMessage<{
-  project_id: number;
-}> {
+export interface SubscriptionMessage
+  extends WebSocketMessage<{
+    project_id: number;
+  }> {
   type: 'subscribe_project' | 'unsubscribe_project';
 }
 

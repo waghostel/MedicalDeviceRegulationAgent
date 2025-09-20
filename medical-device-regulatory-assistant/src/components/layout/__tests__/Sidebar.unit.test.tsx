@@ -5,7 +5,11 @@
 
 import React from 'react';
 import { screen, fireEvent } from '@testing-library/react';
-import { renderWithProviders, createMockSession, createMockRouter } from '@/lib/testing/test-utils';
+import {
+  renderWithProviders,
+  createMockSession,
+  createMockRouter,
+} from '@/lib/testing/test-utils';
 import { Sidebar } from '../Sidebar';
 
 // Mock Next.js Link component
@@ -44,20 +48,38 @@ describe('Sidebar Component', () => {
       renderWithProviders(<Sidebar />, { session: mockSession });
 
       // Main navigation items
-      expect(screen.getByRole('link', { name: /dashboard/i })).toBeInTheDocument();
-      expect(screen.getByRole('link', { name: /projects/i })).toBeInTheDocument();
-      expect(screen.getByRole('link', { name: /agent workflow/i })).toBeInTheDocument();
-      expect(screen.getByRole('link', { name: /documents/i })).toBeInTheDocument();
-      expect(screen.getByRole('link', { name: /predicate search/i })).toBeInTheDocument();
-      expect(screen.getByRole('link', { name: /analytics/i })).toBeInTheDocument();
+      expect(
+        screen.getByRole('link', { name: /dashboard/i })
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole('link', { name: /projects/i })
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole('link', { name: /agent workflow/i })
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole('link', { name: /documents/i })
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole('link', { name: /predicate search/i })
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole('link', { name: /analytics/i })
+      ).toBeInTheDocument();
     });
 
     it('renders quick action buttons', () => {
       renderWithProviders(<Sidebar />, { session: mockSession });
 
-      expect(screen.getByRole('button', { name: /find predicates/i })).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: /check classification/i })).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: /generate checklist/i })).toBeInTheDocument();
+      expect(
+        screen.getByRole('button', { name: /find predicates/i })
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole('button', { name: /check classification/i })
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole('button', { name: /generate checklist/i })
+      ).toBeInTheDocument();
     });
 
     it('renders settings link', () => {
@@ -73,12 +95,28 @@ describe('Sidebar Component', () => {
     it('has correct href attributes for all navigation links', () => {
       renderWithProviders(<Sidebar />, { session: mockSession });
 
-      expect(screen.getByRole('link', { name: /dashboard/i })).toHaveAttribute('href', '/');
-      expect(screen.getByRole('link', { name: /projects/i })).toHaveAttribute('href', '/projects');
-      expect(screen.getByRole('link', { name: /agent workflow/i })).toHaveAttribute('href', '/agent');
-      expect(screen.getByRole('link', { name: /documents/i })).toHaveAttribute('href', '/documents');
-      expect(screen.getByRole('link', { name: /predicate search/i })).toHaveAttribute('href', '/predicate-search');
-      expect(screen.getByRole('link', { name: /analytics/i })).toHaveAttribute('href', '/analytics');
+      expect(screen.getByRole('link', { name: /dashboard/i })).toHaveAttribute(
+        'href',
+        '/'
+      );
+      expect(screen.getByRole('link', { name: /projects/i })).toHaveAttribute(
+        'href',
+        '/projects'
+      );
+      expect(
+        screen.getByRole('link', { name: /agent workflow/i })
+      ).toHaveAttribute('href', '/agent');
+      expect(screen.getByRole('link', { name: /documents/i })).toHaveAttribute(
+        'href',
+        '/documents'
+      );
+      expect(
+        screen.getByRole('link', { name: /predicate search/i })
+      ).toHaveAttribute('href', '/predicate-search');
+      expect(screen.getByRole('link', { name: /analytics/i })).toHaveAttribute(
+        'href',
+        '/analytics'
+      );
     });
 
     it('displays correct icons for navigation items', () => {
@@ -94,7 +132,7 @@ describe('Sidebar Component', () => {
         screen.getByRole('link', { name: /analytics/i }),
       ];
 
-      navigationLinks.forEach(link => {
+      navigationLinks.forEach((link) => {
         const icon = link.querySelector('svg');
         expect(icon).toBeInTheDocument();
         expect(icon).toHaveClass('mr-2', 'h-4', 'w-4');
@@ -142,7 +180,7 @@ describe('Sidebar Component', () => {
 
       const dashboardLink = screen.getByRole('link', { name: /dashboard/i });
       const agentLink = screen.getByRole('link', { name: /agent workflow/i });
-      
+
       expect(dashboardLink.closest('button')).toHaveClass('variant-ghost');
       expect(agentLink.closest('button')).toHaveClass('variant-ghost');
     });
@@ -152,9 +190,15 @@ describe('Sidebar Component', () => {
     it('renders quick action buttons with correct icons', () => {
       renderWithProviders(<Sidebar />, { session: mockSession });
 
-      const findPredicatesBtn = screen.getByRole('button', { name: /find predicates/i });
-      const checkClassificationBtn = screen.getByRole('button', { name: /check classification/i });
-      const generateChecklistBtn = screen.getByRole('button', { name: /generate checklist/i });
+      const findPredicatesBtn = screen.getByRole('button', {
+        name: /find predicates/i,
+      });
+      const checkClassificationBtn = screen.getByRole('button', {
+        name: /check classification/i,
+      });
+      const generateChecklistBtn = screen.getByRole('button', {
+        name: /generate checklist/i,
+      });
 
       // Check icons are present
       expect(findPredicatesBtn.querySelector('svg')).toBeInTheDocument();
@@ -162,18 +206,26 @@ describe('Sidebar Component', () => {
       expect(generateChecklistBtn.querySelector('svg')).toBeInTheDocument();
 
       // Check icon classes
-      [findPredicatesBtn, checkClassificationBtn, generateChecklistBtn].forEach(btn => {
-        const icon = btn.querySelector('svg');
-        expect(icon).toHaveClass('mr-2', 'h-4', 'w-4');
-      });
+      [findPredicatesBtn, checkClassificationBtn, generateChecklistBtn].forEach(
+        (btn) => {
+          const icon = btn.querySelector('svg');
+          expect(icon).toHaveClass('mr-2', 'h-4', 'w-4');
+        }
+      );
     });
 
     it('quick action buttons are clickable', () => {
       renderWithProviders(<Sidebar />, { session: mockSession });
 
-      const findPredicatesBtn = screen.getByRole('button', { name: /find predicates/i });
-      const checkClassificationBtn = screen.getByRole('button', { name: /check classification/i });
-      const generateChecklistBtn = screen.getByRole('button', { name: /generate checklist/i });
+      const findPredicatesBtn = screen.getByRole('button', {
+        name: /find predicates/i,
+      });
+      const checkClassificationBtn = screen.getByRole('button', {
+        name: /check classification/i,
+      });
+      const generateChecklistBtn = screen.getByRole('button', {
+        name: /generate checklist/i,
+      });
 
       // Buttons should be clickable (not disabled)
       expect(findPredicatesBtn).not.toBeDisabled();
@@ -206,7 +258,9 @@ describe('Sidebar Component', () => {
 
     it('applies custom className when provided', () => {
       const customClass = 'custom-sidebar-class';
-      renderWithProviders(<Sidebar className={customClass} />, { session: mockSession });
+      renderWithProviders(<Sidebar className={customClass} />, {
+        session: mockSession,
+      });
 
       const sidebar = document.querySelector(`.${customClass}`);
       expect(sidebar).toBeInTheDocument();
@@ -218,7 +272,7 @@ describe('Sidebar Component', () => {
 
       const dashboardLink = screen.getByRole('link', { name: /dashboard/i });
       const button = dashboardLink.closest('button');
-      
+
       expect(button).toHaveClass('w-full', 'justify-start');
     });
   });
@@ -230,8 +284,20 @@ describe('Sidebar Component', () => {
       const navigationHeader = screen.getByText('Navigation');
       const quickActionsHeader = screen.getByText('Quick Actions');
 
-      expect(navigationHeader).toHaveClass('mb-2', 'px-4', 'text-lg', 'font-semibold', 'tracking-tight');
-      expect(quickActionsHeader).toHaveClass('mb-2', 'px-4', 'text-lg', 'font-semibold', 'tracking-tight');
+      expect(navigationHeader).toHaveClass(
+        'mb-2',
+        'px-4',
+        'text-lg',
+        'font-semibold',
+        'tracking-tight'
+      );
+      expect(quickActionsHeader).toHaveClass(
+        'mb-2',
+        'px-4',
+        'text-lg',
+        'font-semibold',
+        'tracking-tight'
+      );
     });
 
     it('has proper heading hierarchy', () => {
@@ -249,8 +315,12 @@ describe('Sidebar Component', () => {
       renderWithProviders(<Sidebar />, { session: mockSession });
 
       // Check for proper heading structure
-      const navigationHeading = screen.getByRole('heading', { name: /navigation/i });
-      const quickActionsHeading = screen.getByRole('heading', { name: /quick actions/i });
+      const navigationHeading = screen.getByRole('heading', {
+        name: /navigation/i,
+      });
+      const quickActionsHeading = screen.getByRole('heading', {
+        name: /quick actions/i,
+      });
 
       expect(navigationHeading).toBeInTheDocument();
       expect(quickActionsHeading).toBeInTheDocument();
@@ -263,7 +333,7 @@ describe('Sidebar Component', () => {
       const allButtons = screen.getAllByRole('button');
 
       // All interactive elements should be focusable
-      [...allLinks, ...allButtons].forEach(element => {
+      [...allLinks, ...allButtons].forEach((element) => {
         expect(element).toHaveAttribute('tabIndex', '0');
       });
     });
@@ -322,40 +392,46 @@ describe('Sidebar Component', () => {
       renderWithProviders(<Sidebar />, { session: null });
 
       expect(screen.getByText('Navigation')).toBeInTheDocument();
-      expect(screen.getByRole('link', { name: /dashboard/i })).toBeInTheDocument();
+      expect(
+        screen.getByRole('link', { name: /dashboard/i })
+      ).toBeInTheDocument();
     });
   });
 
   describe('Integration with Router', () => {
     it('works with mock router', () => {
       const mockRouter = createMockRouter('/projects');
-      
-      renderWithProviders(<Sidebar />, { 
+
+      renderWithProviders(<Sidebar />, {
         session: mockSession,
-        router: mockRouter 
+        router: mockRouter,
       });
 
       expect(screen.getByText('Navigation')).toBeInTheDocument();
-      expect(screen.getByRole('link', { name: /projects/i })).toBeInTheDocument();
+      expect(
+        screen.getByRole('link', { name: /projects/i })
+      ).toBeInTheDocument();
     });
 
     it('handles route changes correctly', () => {
       const { usePathname } = require('next/navigation');
-      
+
       // Start with dashboard
       usePathname.mockReturnValue('/');
-      const { rerender } = renderWithProviders(<Sidebar />, { session: mockSession });
-      
+      const { rerender } = renderWithProviders(<Sidebar />, {
+        session: mockSession,
+      });
+
       let dashboardLink = screen.getByRole('link', { name: /dashboard/i });
       expect(dashboardLink.closest('button')).toHaveClass('variant-secondary');
 
       // Change to projects
       usePathname.mockReturnValue('/projects');
       rerender(<Sidebar />);
-      
+
       dashboardLink = screen.getByRole('link', { name: /dashboard/i });
       const projectsLink = screen.getByRole('link', { name: /projects/i });
-      
+
       expect(dashboardLink.closest('button')).toHaveClass('variant-ghost');
       expect(projectsLink.closest('button')).toHaveClass('variant-secondary');
     });

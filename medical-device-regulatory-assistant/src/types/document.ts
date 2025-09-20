@@ -18,7 +18,7 @@ export interface DocumentMetadata {
   author?: string;
 }
 
-export type DocumentType = 
+export type DocumentType =
   | 'predicate-analysis'
   | 'device-classification'
   | 'submission-checklist'

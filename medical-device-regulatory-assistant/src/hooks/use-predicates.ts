@@ -20,10 +20,10 @@ interface PredicatesState {
   lastUpdated?: string;
 }
 
-export function usePredicates({ 
-  projectId, 
-  autoRefresh = false, 
-  refreshInterval = 30000 
+export function usePredicates({
+  projectId,
+  autoRefresh = false,
+  refreshInterval = 30000,
 }: UsePredicatesOptions) {
   const [state, setState] = useState<PredicatesState>({
     predicates: [],
@@ -34,56 +34,60 @@ export function usePredicates({
   const abortControllerRef = useRef<AbortController | null>(null);
   const refreshTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const loadPredicates = useCallback(async (showLoading = true) => {
-    // Cancel previous request
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
-    }
-    
-    abortControllerRef.current = new AbortController();
-    
-    if (showLoading) {
-      setState(prev => ({ ...prev, loading: true, error: undefined }));
-    }
-
-    try {
-      const predicates = await dashboardService.getPredicateDevices(projectId);
-      
-      setState({
-        predicates: predicates || [],
-        loading: false,
-        lastUpdated: new Date().toISOString(),
-      });
-    } catch (error: any) {
-      if (error.name !== 'AbortError') {
-        setState(prev => ({
-          ...prev,
-          loading: false,
-          error: error.message || 'Failed to load predicate devices',
-        }));
+  const loadPredicates = useCallback(
+    async (showLoading = true) => {
+      // Cancel previous request
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
       }
-    }
-  }, [projectId]);
+
+      abortControllerRef.current = new AbortController();
+
+      if (showLoading) {
+        setState((prev) => ({ ...prev, loading: true, error: undefined }));
+      }
+
+      try {
+        const predicates =
+          await dashboardService.getPredicateDevices(projectId);
+
+        setState({
+          predicates: predicates || [],
+          loading: false,
+          lastUpdated: new Date().toISOString(),
+        });
+      } catch (error: any) {
+        if (error.name !== 'AbortError') {
+          setState((prev) => ({
+            ...prev,
+            loading: false,
+            error: error.message || 'Failed to load predicate devices',
+          }));
+        }
+      }
+    },
+    [projectId]
+  );
 
   const searchPredicates = useCallback(async () => {
     try {
-      setState(prev => ({ ...prev, loading: true, error: undefined }));
-      
+      setState((prev) => ({ ...prev, loading: true, error: undefined }));
+
       const result = await dashboardService.startPredicateSearch(projectId);
-      
+
       toast({
         title: 'Predicate Search Started',
-        description: result.message || 'Searching FDA database for predicate devices.',
+        description:
+          result.message || 'Searching FDA database for predicate devices.',
       });
-      
+
       // Poll for updates after starting search
       setTimeout(() => {
         loadPredicates(false);
       }, 3000);
-      
     } catch (error: any) {
-      setState(prev => ({ ...prev, loading: false }));
-      
+      setState((prev) => ({ ...prev, loading: false }));
+
       toast({
         title: 'Predicate Search Failed',
         description: error.message || 'Failed to start predicate search.',
@@ -92,45 +96,47 @@ export function usePredicates({
     }
   }, [projectId, toast, loadPredicates]);
 
-  const selectPredicate = useCallback(async (predicate: PredicateDevice) => {
-    try {
-      const newSelection = !predicate.isSelected;
-      
-      // Optimistic update
-      setState(prev => ({
-        ...prev,
-        predicates: prev.predicates.map(p =>
-          p.id === predicate.id ? { ...p, isSelected: newSelection } : p
-        ),
-      }));
-      
-      await dashboardService.updatePredicateSelection(
-        projectId, 
-        predicate.id, 
-        newSelection
-      );
-      
-      toast({
-        title: newSelection ? 'Predicate Selected' : 'Predicate Deselected',
-        description: `${predicate.deviceName} has been ${newSelection ? 'selected' : 'deselected'}.`,
-      });
-      
-      // Refresh to get updated data
-      setTimeout(() => {
-        loadPredicates(false);
-      }, 1000);
-      
-    } catch (error: any) {
-      // Revert optimistic update
-      await loadPredicates(false);
-      
-      toast({
-        title: 'Selection Failed',
-        description: error.message || 'Failed to update predicate selection.',
-        variant: 'destructive',
-      });
-    }
-  }, [projectId, toast, loadPredicates]);
+  const selectPredicate = useCallback(
+    async (predicate: PredicateDevice) => {
+      try {
+        const newSelection = !predicate.isSelected;
+
+        // Optimistic update
+        setState((prev) => ({
+          ...prev,
+          predicates: prev.predicates.map((p) =>
+            p.id === predicate.id ? { ...p, isSelected: newSelection } : p
+          ),
+        }));
+
+        await dashboardService.updatePredicateSelection(
+          projectId,
+          predicate.id,
+          newSelection
+        );
+
+        toast({
+          title: newSelection ? 'Predicate Selected' : 'Predicate Deselected',
+          description: `${predicate.deviceName} has been ${newSelection ? 'selected' : 'deselected'}.`,
+        });
+
+        // Refresh to get updated data
+        setTimeout(() => {
+          loadPredicates(false);
+        }, 1000);
+      } catch (error: any) {
+        // Revert optimistic update
+        await loadPredicates(false);
+
+        toast({
+          title: 'Selection Failed',
+          description: error.message || 'Failed to update predicate selection.',
+          variant: 'destructive',
+        });
+      }
+    },
+    [projectId, toast, loadPredicates]
+  );
 
   const refreshPredicates = useCallback(async () => {
     try {
@@ -171,7 +177,7 @@ export function usePredicates({
   // Load initial data
   useEffect(() => {
     loadPredicates();
-    
+
     return () => {
       if (abortControllerRef.current) {
         abortControllerRef.current.abort();
@@ -183,13 +189,15 @@ export function usePredicates({
   }, [loadPredicates]);
 
   // Computed values
-  const selectedPredicates = state.predicates.filter(p => p.isSelected);
+  const selectedPredicates = state.predicates.filter((p) => p.isSelected);
   const topMatches = [...state.predicates]
     .sort((a, b) => b.confidenceScore - a.confidenceScore)
     .slice(0, 5);
-  const averageConfidence = state.predicates.length > 0 
-    ? state.predicates.reduce((sum, p) => sum + p.confidenceScore, 0) / state.predicates.length
-    : 0;
+  const averageConfidence =
+    state.predicates.length > 0
+      ? state.predicates.reduce((sum, p) => sum + p.confidenceScore, 0) /
+        state.predicates.length
+      : 0;
 
   return {
     ...state,

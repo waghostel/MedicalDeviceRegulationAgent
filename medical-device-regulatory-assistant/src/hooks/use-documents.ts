@@ -11,7 +11,7 @@ const mockDocuments: Document[] = [
     projectId: 'project-1',
     isFolder: false,
     createdAt: new Date('2024-01-01'),
-    updatedAt: new Date('2024-01-01')
+    updatedAt: new Date('2024-01-01'),
   },
   {
     id: '2',
@@ -21,7 +21,7 @@ const mockDocuments: Document[] = [
     projectId: 'project-1',
     isFolder: true,
     createdAt: new Date('2024-01-01'),
-    updatedAt: new Date('2024-01-01')
+    updatedAt: new Date('2024-01-01'),
   },
   {
     id: '3',
@@ -32,8 +32,8 @@ const mockDocuments: Document[] = [
     parentId: '2',
     isFolder: false,
     createdAt: new Date('2024-01-02'),
-    updatedAt: new Date('2024-01-02')
-  }
+    updatedAt: new Date('2024-01-02'),
+  },
 ];
 
 export function useDocuments(projectId: string) {
@@ -47,10 +47,14 @@ export function useDocuments(projectId: string) {
       try {
         setLoading(true);
         // In production, this would be an API call
-        const projectDocuments = mockDocuments.filter(doc => doc.projectId === projectId);
+        const projectDocuments = mockDocuments.filter(
+          (doc) => doc.projectId === projectId
+        );
         setDocuments(projectDocuments);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load documents');
+        setError(
+          err instanceof Error ? err.message : 'Failed to load documents'
+        );
       } finally {
         setLoading(false);
       }
@@ -59,55 +63,66 @@ export function useDocuments(projectId: string) {
     loadDocuments();
   }, [projectId]);
 
-  const createDocument = useCallback(async (
-    name: string,
-    content: string,
-    type: Document['type'],
-    parentId?: string
-  ): Promise<Document> => {
-    const newDocument: Document = {
-      id: Date.now().toString(),
-      name,
-      content,
-      type,
-      projectId,
-      parentId,
-      isFolder: type === 'folder',
-      createdAt: new Date(),
-      updatedAt: new Date()
-    };
+  const createDocument = useCallback(
+    async (
+      name: string,
+      content: string,
+      type: Document['type'],
+      parentId?: string
+    ): Promise<Document> => {
+      const newDocument: Document = {
+        id: Date.now().toString(),
+        name,
+        content,
+        type,
+        projectId,
+        parentId,
+        isFolder: type === 'folder',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
 
-    setDocuments(prev => [...prev, newDocument]);
-    return newDocument;
-  }, [projectId]);
+      setDocuments((prev) => [...prev, newDocument]);
+      return newDocument;
+    },
+    [projectId]
+  );
 
-  const updateDocument = useCallback(async (id: string, updates: Partial<Document>): Promise<void> => {
-    setDocuments(prev => prev.map(doc => 
-      doc.id === id 
-        ? { ...doc, ...updates, updatedAt: new Date() }
-        : doc
-    ));
-  }, []);
+  const updateDocument = useCallback(
+    async (id: string, updates: Partial<Document>): Promise<void> => {
+      setDocuments((prev) =>
+        prev.map((doc) =>
+          doc.id === id ? { ...doc, ...updates, updatedAt: new Date() } : doc
+        )
+      );
+    },
+    []
+  );
 
   const deleteDocument = useCallback(async (id: string): Promise<void> => {
-    setDocuments(prev => prev.filter(doc => doc.id !== id && doc.parentId !== id));
+    setDocuments((prev) =>
+      prev.filter((doc) => doc.id !== id && doc.parentId !== id)
+    );
   }, []);
 
-  const getDocument = useCallback((id: string): Document | undefined => {
-    return documents.find(doc => doc.id === id);
-  }, [documents]);
+  const getDocument = useCallback(
+    (id: string): Document | undefined => {
+      return documents.find((doc) => doc.id === id);
+    },
+    [documents]
+  );
 
   const getDocumentTree = useCallback((): DocumentTreeNode[] => {
     const buildTree = (parentId?: string): DocumentTreeNode[] => {
       return documents
-        .filter(doc => doc.parentId === parentId)
-        .map(doc => ({
+        .filter((doc) => doc.parentId === parentId)
+        .map((doc) => ({
           id: doc.id,
           name: doc.name,
           type: doc.type,
           isFolder: doc.isFolder,
           parentId: doc.parentId,
-          children: doc.isFolder ? buildTree(doc.id) : undefined
+          children: doc.isFolder ? buildTree(doc.id) : undefined,
         }));
     };
 
@@ -116,26 +131,30 @@ export function useDocuments(projectId: string) {
 
   const getMentionItems = useCallback((): MentionItem[] => {
     return documents
-      .filter(doc => !doc.isFolder)
-      .map(doc => ({
+      .filter((doc) => !doc.isFolder)
+      .map((doc) => ({
         id: doc.id,
         type: 'document',
         label: doc.name,
         value: `@${doc.name.replace(/\s+/g, '-').toLowerCase()}`,
         metadata: {
           type: doc.type,
-          updatedAt: doc.updatedAt
-        }
+          updatedAt: doc.updatedAt,
+        },
       }));
   }, [documents]);
 
-  const searchDocuments = useCallback((query: string): Document[] => {
-    const lowercaseQuery = query.toLowerCase();
-    return documents.filter(doc => 
-      doc.name.toLowerCase().includes(lowercaseQuery) ||
-      doc.content.toLowerCase().includes(lowercaseQuery)
-    );
-  }, [documents]);
+  const searchDocuments = useCallback(
+    (query: string): Document[] => {
+      const lowercaseQuery = query.toLowerCase();
+      return documents.filter(
+        (doc) =>
+          doc.name.toLowerCase().includes(lowercaseQuery) ||
+          doc.content.toLowerCase().includes(lowercaseQuery)
+      );
+    },
+    [documents]
+  );
 
   return {
     documents,
@@ -147,6 +166,6 @@ export function useDocuments(projectId: string) {
     getDocument,
     getDocumentTree,
     getMentionItems,
-    searchDocuments
+    searchDocuments,
   };
 }

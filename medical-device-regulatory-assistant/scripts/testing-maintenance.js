@@ -2,7 +2,7 @@
 
 /**
  * Testing Maintenance Script
- * 
+ *
  * Automates common testing maintenance tasks including:
  * - Mock data validation
  * - Test coverage analysis
@@ -31,10 +31,10 @@ class TestingMaintenance {
 
   async runCommand(command, options = {}) {
     try {
-      const result = execSync(command, { 
-        encoding: 'utf8', 
+      const result = execSync(command, {
+        encoding: 'utf8',
         cwd: this.projectRoot,
-        ...options 
+        ...options,
       });
       return result.trim();
     } catch (error) {
@@ -46,18 +46,20 @@ class TestingMaintenance {
 
   async validateMockData() {
     this.log('Validating mock data generators...');
-    
+
     try {
       // Check if mock data file exists
       const mockDataPath = path.join(this.projectRoot, 'src/lib/mock-data.ts');
       await fs.access(mockDataPath);
-      
+
       // Run TypeScript compilation to check for errors
       await this.runCommand('pnpm type-check');
-      
+
       // Run mock data validation tests
-      const testResult = await this.runCommand('pnpm test src/lib/mock-data.unit.test.ts --passWithNoTests');
-      
+      const testResult = await this.runCommand(
+        'pnpm test src/lib/mock-data.unit.test.ts --passWithNoTests'
+      );
+
       this.log('Mock data validation completed successfully');
       return true;
     } catch (error) {
@@ -68,15 +70,18 @@ class TestingMaintenance {
 
   async analyzeCoverage() {
     this.log('Analyzing test coverage...');
-    
+
     try {
       // Run tests with coverage
       await this.runCommand('pnpm test:coverage --silent');
-      
+
       // Read coverage summary
-      const coveragePath = path.join(this.projectRoot, 'coverage/coverage-summary.json');
+      const coveragePath = path.join(
+        this.projectRoot,
+        'coverage/coverage-summary.json'
+      );
       const coverageData = JSON.parse(await fs.readFile(coveragePath, 'utf8'));
-      
+
       const totalCoverage = coverageData.total;
       const coverageReport = {
         statements: totalCoverage.statements.pct,
@@ -84,25 +89,35 @@ class TestingMaintenance {
         functions: totalCoverage.functions.pct,
         lines: totalCoverage.lines.pct,
       };
-      
+
       this.log(`Coverage Report: ${JSON.stringify(coverageReport, null, 2)}`);
-      
+
       // Check if coverage meets thresholds
-      const thresholds = { statements: 85, branches: 85, functions: 85, lines: 85 };
+      const thresholds = {
+        statements: 85,
+        branches: 85,
+        functions: 85,
+        lines: 85,
+      };
       const failedThresholds = [];
-      
+
       Object.entries(thresholds).forEach(([metric, threshold]) => {
         if (coverageReport[metric] < threshold) {
-          failedThresholds.push(`${metric}: ${coverageReport[metric]}% < ${threshold}%`);
+          failedThresholds.push(
+            `${metric}: ${coverageReport[metric]}% < ${threshold}%`
+          );
         }
       });
-      
+
       if (failedThresholds.length > 0) {
-        this.log(`Coverage thresholds not met: ${failedThresholds.join(', ')}`, 'warn');
+        this.log(
+          `Coverage thresholds not met: ${failedThresholds.join(', ')}`,
+          'warn'
+        );
       } else {
         this.log('All coverage thresholds met');
       }
-      
+
       return coverageReport;
     } catch (error) {
       this.log('Coverage analysis failed', 'error');
@@ -112,11 +127,13 @@ class TestingMaintenance {
 
   async checkPerformance() {
     this.log('Checking performance metrics...');
-    
+
     try {
       // Check bundle size
-      const bundleSizeResult = await this.runCommand('pnpm bundlesize --json', { stdio: 'pipe' });
-      
+      const bundleSizeResult = await this.runCommand('pnpm bundlesize --json', {
+        stdio: 'pipe',
+      });
+
       // Run Lighthouse CI if available
       try {
         await this.runCommand('pnpm lighthouse:collect --quiet');
@@ -124,7 +141,7 @@ class TestingMaintenance {
       } catch (lighthouseError) {
         this.log('Lighthouse audit skipped (server not running)', 'warn');
       }
-      
+
       this.log('Performance check completed');
       return true;
     } catch (error) {
@@ -135,18 +152,21 @@ class TestingMaintenance {
 
   async updateDependencies() {
     this.log('Checking for dependency updates...');
-    
+
     try {
       // Check for outdated packages
-      const outdatedResult = await this.runCommand('pnpm outdated --format json', { stdio: 'pipe' });
-      
+      const outdatedResult = await this.runCommand(
+        'pnpm outdated --format json',
+        { stdio: 'pipe' }
+      );
+
       if (outdatedResult) {
         const outdatedPackages = JSON.parse(outdatedResult);
         const packageCount = Object.keys(outdatedPackages).length;
-        
+
         if (packageCount > 0) {
           this.log(`Found ${packageCount} outdated packages`);
-          
+
           // Update non-breaking changes only
           await this.runCommand('pnpm update --latest');
           this.log('Dependencies updated (non-breaking changes only)');
@@ -154,7 +174,7 @@ class TestingMaintenance {
           this.log('All dependencies are up to date');
         }
       }
-      
+
       return true;
     } catch (error) {
       this.log('Dependency update check failed', 'error');
@@ -164,7 +184,7 @@ class TestingMaintenance {
 
   async cleanupArtifacts() {
     this.log('Cleaning up test artifacts...');
-    
+
     try {
       const artifactPatterns = [
         'coverage/**/*',
@@ -174,17 +194,17 @@ class TestingMaintenance {
         '**/*.test-output.*',
         'test-*.db',
       ];
-      
+
       let cleanedFiles = 0;
-      
+
       for (const pattern of artifactPatterns) {
         const files = glob.sync(pattern, { cwd: this.projectRoot });
-        
+
         for (const file of files) {
           try {
             const filePath = path.join(this.projectRoot, file);
             const stats = await fs.stat(filePath);
-            
+
             if (stats.isFile()) {
               await fs.unlink(filePath);
               cleanedFiles++;
@@ -194,7 +214,7 @@ class TestingMaintenance {
           }
         }
       }
-      
+
       this.log(`Cleaned up ${cleanedFiles} artifact files`);
       return true;
     } catch (error) {
@@ -205,17 +225,17 @@ class TestingMaintenance {
 
   async checkTestHealth() {
     this.log('Checking test suite health...');
-    
+
     try {
       // Run a quick test to check for obvious failures
       await this.runCommand('pnpm test --passWithNoTests --testTimeout=10000');
-      
+
       // Check for flaky tests by running a subset multiple times
       const flakyTestCheck = await this.runCommand(
         'pnpm test --testNamePattern="should render" --testTimeout=5000 --verbose',
         { stdio: 'pipe' }
       );
-      
+
       this.log('Test suite health check completed');
       return true;
     } catch (error) {
@@ -227,14 +247,14 @@ class TestingMaintenance {
   async generateMaintenanceReport() {
     const timestamp = new Date().toISOString();
     const reportPath = path.join(this.projectRoot, 'maintenance-reports');
-    
+
     // Ensure reports directory exists
     try {
       await fs.mkdir(reportPath, { recursive: true });
     } catch (error) {
       // Directory might already exist
     }
-    
+
     const report = {
       timestamp,
       maintenanceLog: this.maintenanceLog,
@@ -244,9 +264,9 @@ class TestingMaintenance {
         failedTasks: 0,
       },
     };
-    
+
     // Count task results from log
-    this.maintenanceLog.forEach(entry => {
+    this.maintenanceLog.forEach((entry) => {
       if (entry.includes('completed') || entry.includes('failed')) {
         report.summary.totalTasks++;
         if (entry.includes('completed')) {
@@ -256,23 +276,26 @@ class TestingMaintenance {
         }
       }
     });
-    
-    const reportFile = path.join(reportPath, `maintenance-${timestamp.split('T')[0]}.json`);
+
+    const reportFile = path.join(
+      reportPath,
+      `maintenance-${timestamp.split('T')[0]}.json`
+    );
     await fs.writeFile(reportFile, JSON.stringify(report, null, 2));
-    
+
     this.log(`Maintenance report saved to ${reportFile}`);
     return report;
   }
 
   async runDailyMaintenance() {
     this.log('Starting daily maintenance tasks...');
-    
+
     const tasks = [
       { name: 'Mock Data Validation', fn: () => this.validateMockData() },
       { name: 'Test Health Check', fn: () => this.checkTestHealth() },
       { name: 'Artifact Cleanup', fn: () => this.cleanupArtifacts() },
     ];
-    
+
     for (const task of tasks) {
       try {
         this.log(`Running ${task.name}...`);
@@ -282,14 +305,14 @@ class TestingMaintenance {
         this.log(`${task.name} failed`, 'error');
       }
     }
-    
+
     await this.generateMaintenanceReport();
     this.log('Daily maintenance completed');
   }
 
   async runWeeklyMaintenance() {
     this.log('Starting weekly maintenance tasks...');
-    
+
     const tasks = [
       { name: 'Mock Data Validation', fn: () => this.validateMockData() },
       { name: 'Coverage Analysis', fn: () => this.analyzeCoverage() },
@@ -298,7 +321,7 @@ class TestingMaintenance {
       { name: 'Test Health Check', fn: () => this.checkTestHealth() },
       { name: 'Artifact Cleanup', fn: () => this.cleanupArtifacts() },
     ];
-    
+
     for (const task of tasks) {
       try {
         this.log(`Running ${task.name}...`);
@@ -308,17 +331,17 @@ class TestingMaintenance {
         this.log(`${task.name} failed`, 'error');
       }
     }
-    
+
     await this.generateMaintenanceReport();
     this.log('Weekly maintenance completed');
   }
 
   async runMonthlyMaintenance() {
     this.log('Starting monthly maintenance tasks...');
-    
+
     // Run all weekly tasks plus additional monthly tasks
     await this.runWeeklyMaintenance();
-    
+
     // Additional monthly tasks
     try {
       this.log('Running comprehensive test audit...');
@@ -327,7 +350,7 @@ class TestingMaintenance {
     } catch (error) {
       this.log('Comprehensive test audit failed', 'error');
     }
-    
+
     this.log('Monthly maintenance completed');
   }
 }
@@ -336,7 +359,7 @@ class TestingMaintenance {
 async function main() {
   const maintenance = new TestingMaintenance();
   const command = process.argv[2] || 'daily';
-  
+
   try {
     switch (command) {
       case 'daily':
@@ -380,7 +403,7 @@ async function main() {
         console.log('  health-check       - Check test suite health');
         process.exit(1);
     }
-    
+
     process.exit(0);
   } catch (error) {
     console.error('Maintenance script failed:', error.message);

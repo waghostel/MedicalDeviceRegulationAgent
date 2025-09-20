@@ -1,6 +1,6 @@
 {
   "enabled": true,
-  "name": "Auto Git Commit & Push",
+  "name": "Git Commit & Push",
   "description": "Automatically stages all files, creates a git commit with a descriptive message based on code modifications and any error messages, then pushes to the current branch",
   "version": "1",
   "when": {

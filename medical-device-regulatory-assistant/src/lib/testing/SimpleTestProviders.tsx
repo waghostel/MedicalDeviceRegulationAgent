@@ -8,15 +8,11 @@ export interface SimpleTestProvidersProps {
   session?: any;
 }
 
-export const SimpleTestProviders: React.FC<SimpleTestProvidersProps> = ({ 
-  children, 
-  session = null 
+export const SimpleTestProviders: React.FC<SimpleTestProvidersProps> = ({
+  children,
+  session = null,
 }) => {
-  return (
-    <div data-testid="simple-test-providers">
-      {children}
-    </div>
-  );
+  return <div data-testid="simple-test-providers">{children}</div>;
 };
 
 export default SimpleTestProviders;

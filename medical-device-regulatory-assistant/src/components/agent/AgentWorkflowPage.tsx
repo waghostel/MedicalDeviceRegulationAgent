@@ -17,7 +17,10 @@ interface AgentWorkflowPageProps {
   initialProject?: ProjectContext;
 }
 
-export function AgentWorkflowPage({ projectId, initialProject }: AgentWorkflowPageProps) {
+export function AgentWorkflowPage({
+  projectId,
+  initialProject,
+}: AgentWorkflowPageProps) {
   const { state, setProject, setLoading, addMessage } = useProjectContext();
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
@@ -34,7 +37,7 @@ export function AgentWorkflowPage({ projectId, initialProject }: AgentWorkflowPa
     isExecuting,
     result: agentResult,
     executeTask,
-    cancelExecution
+    cancelExecution,
   } = useAgentExecution({
     onStatusUpdate: (status) => {
       console.log('Agent status update:', status);
@@ -50,7 +53,7 @@ export function AgentWorkflowPage({ projectId, initialProject }: AgentWorkflowPa
         projectId: state.currentProject?.id,
         confidence: result.confidence,
         sources: result.sources,
-        executionTime: result.executionTime
+        executionTime: result.executionTime,
       };
       addMessage(assistantMessage);
     },
@@ -63,11 +66,11 @@ export function AgentWorkflowPage({ projectId, initialProject }: AgentWorkflowPa
         content: `Error: ${error}`,
         timestamp: new Date(),
         projectId: state.currentProject?.id,
-        isError: true
+        isError: true,
       };
       addMessage(errorMessage);
     },
-    enableRealTimeUpdates: true
+    enableRealTimeUpdates: true,
   });
 
   const handleExecuteCommand = async (command: string) => {
@@ -77,31 +80,30 @@ export function AgentWorkflowPage({ projectId, initialProject }: AgentWorkflowPa
     }
 
     setLoading(true);
-    
+
     // Add user message
     const userMessage = {
       id: `msg-${Date.now()}-user`,
       role: 'user' as const,
       content: command,
       timestamp: new Date(),
-      projectId: state.currentProject.id
+      projectId: state.currentProject.id,
     };
-    
+
     addMessage(userMessage);
 
     try {
       // Parse command to determine task type
       const taskType = parseCommandToTaskType(command);
       const parameters = parseCommandParameters(command);
-      
+
       // Execute through agent
       await executeTask(taskType, parameters, {
         projectId: state.currentProject.id,
         deviceDescription: state.currentProject.description,
         intendedUse: state.currentProject.intendedUse,
-        deviceType: state.currentProject.deviceType
+        deviceType: state.currentProject.deviceType,
       });
-      
     } catch (error) {
       console.error('Command execution failed:', error);
     } finally {
@@ -110,13 +112,25 @@ export function AgentWorkflowPage({ projectId, initialProject }: AgentWorkflowPa
   };
 
   const parseCommandToTaskType = (command: string): string => {
-    if (command.includes('/predicate-search') || command.includes('predicate')) {
+    if (
+      command.includes('/predicate-search') ||
+      command.includes('predicate')
+    ) {
       return 'predicate_search';
-    } else if (command.includes('/classify-device') || command.includes('classify')) {
+    } else if (
+      command.includes('/classify-device') ||
+      command.includes('classify')
+    ) {
       return 'device_classification';
-    } else if (command.includes('/compare-predicate') || command.includes('compare')) {
+    } else if (
+      command.includes('/compare-predicate') ||
+      command.includes('compare')
+    ) {
       return 'predicate_comparison';
-    } else if (command.includes('/find-guidance') || command.includes('guidance')) {
+    } else if (
+      command.includes('/find-guidance') ||
+      command.includes('guidance')
+    ) {
       return 'guidance_search';
     }
     return 'predicate_search'; // Default
@@ -125,19 +139,19 @@ export function AgentWorkflowPage({ projectId, initialProject }: AgentWorkflowPa
   const parseCommandParameters = (command: string): Record<string, any> => {
     // Simple parameter parsing - in production, you'd want more sophisticated parsing
     const params: Record<string, any> = {};
-    
+
     // Extract K-number for comparison
     const kNumberMatch = command.match(/K\d{6}/);
     if (kNumberMatch) {
       params.predicate_k_number = kNumberMatch[0];
     }
-    
+
     // Extract product code
     const productCodeMatch = command.match(/product[_\s]code[:\s]+([A-Z]{3})/i);
     if (productCodeMatch) {
       params.product_code = productCodeMatch[1];
     }
-    
+
     return params;
   };
 
@@ -178,8 +192,12 @@ export function AgentWorkflowPage({ projectId, initialProject }: AgentWorkflowPa
                   <CardHeader>
                     <CardTitle className="flex items-center justify-between">
                       Current Project
-                      <Badge 
-                        variant={state.currentProject.status === 'completed' ? 'default' : 'secondary'}
+                      <Badge
+                        variant={
+                          state.currentProject.status === 'completed'
+                            ? 'default'
+                            : 'secondary'
+                        }
                       >
                         {state.currentProject.status}
                       </Badge>
@@ -187,13 +205,16 @@ export function AgentWorkflowPage({ projectId, initialProject }: AgentWorkflowPa
                   </CardHeader>
                   <CardContent className="space-y-2">
                     <div>
-                      <strong>Device Type:</strong> {state.currentProject.deviceType}
+                      <strong>Device Type:</strong>{' '}
+                      {state.currentProject.deviceType}
                     </div>
                     <div>
-                      <strong>Intended Use:</strong> {state.currentProject.intendedUse}
+                      <strong>Intended Use:</strong>{' '}
+                      {state.currentProject.intendedUse}
                     </div>
                     <div>
-                      <strong>Description:</strong> {state.currentProject.description}
+                      <strong>Description:</strong>{' '}
+                      {state.currentProject.description}
                     </div>
                   </CardContent>
                 </Card>
@@ -202,7 +223,11 @@ export function AgentWorkflowPage({ projectId, initialProject }: AgentWorkflowPa
                 {(isExecuting || agentStatus.status !== 'idle') && (
                   <AgentExecutionStatusComponent
                     status={agentStatus}
-                    onCancel={isExecuting ? () => cancelExecution('User cancelled') : undefined}
+                    onCancel={
+                      isExecuting
+                        ? () => cancelExecution('User cancelled')
+                        : undefined
+                    }
                     showDetails={true}
                   />
                 )}
@@ -226,19 +251,26 @@ export function AgentWorkflowPage({ projectId, initialProject }: AgentWorkflowPa
                     <div>
                       <h4 className="font-medium mb-2">Chat Interface</h4>
                       <p className="text-sm text-muted-foreground">
-                        Use the chat sidebar to interact with the AI assistant. You can type naturally 
-                        or use slash commands for specific actions.
+                        Use the chat sidebar to interact with the AI assistant.
+                        You can type naturally or use slash commands for
+                        specific actions.
                       </p>
                     </div>
                     <div>
                       <h4 className="font-medium mb-2">Slash Commands</h4>
                       <p className="text-sm text-muted-foreground">
-                        Click on the command cards above or type them directly in the chat:
+                        Click on the command cards above or type them directly
+                        in the chat:
                       </p>
                       <ul className="text-sm text-muted-foreground mt-2 space-y-1">
                         {state.availableCommands.map((cmd) => (
-                          <li key={cmd.command} className="flex items-center gap-2">
-                            <code className="bg-muted px-1 rounded text-xs">{cmd.command}</code>
+                          <li
+                            key={cmd.command}
+                            className="flex items-center gap-2"
+                          >
+                            <code className="bg-muted px-1 rounded text-xs">
+                              {cmd.command}
+                            </code>
                             - {cmd.description}
                           </li>
                         ))}
@@ -255,11 +287,10 @@ export function AgentWorkflowPage({ projectId, initialProject }: AgentWorkflowPa
                   </CardHeader>
                   <CardContent>
                     <p className="text-muted-foreground mb-4">
-                      Please select a project to start using the regulatory assistant.
+                      Please select a project to start using the regulatory
+                      assistant.
                     </p>
-                    <Button className="w-full">
-                      Select Project
-                    </Button>
+                    <Button className="w-full">Select Project</Button>
                   </CardContent>
                 </Card>
               </div>
@@ -273,12 +304,16 @@ export function AgentWorkflowPage({ projectId, initialProject }: AgentWorkflowPa
             <CopilotSidebar
               instructions={`You are a specialized FDA regulatory assistant for medical device companies. 
               
-Current project context: ${state.currentProject ? `
+Current project context: ${
+                state.currentProject
+                  ? `
 - Device: ${state.currentProject.name}
 - Type: ${state.currentProject.deviceType}
 - Intended Use: ${state.currentProject.intendedUse}
 - Status: ${state.currentProject.status}
-` : 'No project selected'}
+`
+                  : 'No project selected'
+              }
 
 Your role is to help regulatory affairs professionals navigate the 510(k) submission process efficiently and accurately.
 

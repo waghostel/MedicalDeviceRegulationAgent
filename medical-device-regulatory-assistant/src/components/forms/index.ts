@@ -3,11 +3,11 @@ export {
   ValidatedTextarea,
   useRealTimeValidation,
   projectFormSchema,
-  deviceSearchSchema
+  deviceSearchSchema,
 } from './FormValidation';
 
 export {
   EnhancedInput,
   EnhancedTextarea,
-  AutoSaveIndicator
+  AutoSaveIndicator,
 } from './EnhancedFormField';

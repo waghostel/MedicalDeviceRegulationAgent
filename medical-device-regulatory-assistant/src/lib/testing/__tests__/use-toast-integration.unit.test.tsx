@@ -6,7 +6,10 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { useToastMock, toastMockUtils } from '../use-toast-mock';
-import { setupUseToastMock, cleanupUseToastMock } from '../setup-use-toast-mock';
+import {
+  setupUseToastMock,
+  cleanupUseToastMock,
+} from '../setup-use-toast-mock';
 
 // Simple test component that uses useToast
 const TestComponent: React.FC = () => {
@@ -69,14 +72,25 @@ describe('useToast Mock Integration', () => {
 
     // Should have tracked the toast call
     expect(toastMockUtils.getCallCount()).toBe(1);
-    expect(toastMockUtils.wasCalledWith('Basic Toast', 'This is a basic toast message', 'success')).toBe(true);
+    expect(
+      toastMockUtils.wasCalledWith(
+        'Basic Toast',
+        'This is a basic toast message',
+        'success'
+      )
+    ).toBe(true);
 
     // Click contextual toast button
     fireEvent.click(screen.getByText('Show Validation Error'));
 
     // Should have tracked both calls
     expect(toastMockUtils.getCallCount()).toBe(2);
-    expect(toastMockUtils.wasCalledWith('Validation Error', 'Please fill in all required fields')).toBe(true);
+    expect(
+      toastMockUtils.wasCalledWith(
+        'Validation Error',
+        'Please fill in all required fields'
+      )
+    ).toBe(true);
   });
 
   it('should track contextual toast calls correctly', () => {
@@ -87,7 +101,9 @@ describe('useToast Mock Integration', () => {
     const validationCalls = toastMockUtils.getCallsByCategory('validation');
     expect(validationCalls).toHaveLength(1);
     expect(validationCalls[0].title).toBe('Validation Error');
-    expect(validationCalls[0].description).toBe('Please fill in all required fields');
+    expect(validationCalls[0].description).toBe(
+      'Please fill in all required fields'
+    );
   });
 
   it('should track dismiss calls', () => {
@@ -108,7 +124,7 @@ describe('useToast Mock Integration', () => {
 
     // After clicking, the mock state is updated (but component doesn't re-render)
     fireEvent.click(screen.getByText('Show Basic Toast'));
-    
+
     // Verify the mock state was updated
     const mockReturn = useToastMock.useToast();
     expect(mockReturn.toasts).toHaveLength(1);

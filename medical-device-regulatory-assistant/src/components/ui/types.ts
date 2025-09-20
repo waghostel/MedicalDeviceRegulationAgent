@@ -62,8 +62,7 @@ export interface FormFieldProps {
   render: (props: any) => React.ReactElement;
 }
 
-export interface FormItemProps
-  extends React.HTMLAttributes<HTMLDivElement> {}
+export interface FormItemProps extends React.HTMLAttributes<HTMLDivElement> {}
 
 export interface FormLabelProps
   extends React.LabelHTMLAttributes<HTMLLabelElement> {}
@@ -87,13 +86,20 @@ export interface CardTitleProps extends React.HTMLAttributes<HTMLDivElement> {}
 export interface CardDescriptionProps
   extends React.HTMLAttributes<HTMLDivElement> {}
 
-export interface CardContentProps extends React.HTMLAttributes<HTMLDivElement> {}
+export interface CardContentProps
+  extends React.HTMLAttributes<HTMLDivElement> {}
 
 export interface CardFooterProps extends React.HTMLAttributes<HTMLDivElement> {}
 
 // Toast component types
 export interface ToastProps extends React.HTMLAttributes<HTMLDivElement> {
-  variant?: 'default' | 'destructive' | 'success' | 'warning' | 'info' | 'progress';
+  variant?:
+    | 'default'
+    | 'destructive'
+    | 'success'
+    | 'warning'
+    | 'info'
+    | 'progress';
   onRetry?: () => void;
   retryLabel?: string;
   actionLabel?: string;
@@ -113,8 +119,7 @@ export interface BadgeProps
 }
 
 // Progress component types
-export interface ProgressProps
-  extends React.HTMLAttributes<HTMLDivElement> {
+export interface ProgressProps extends React.HTMLAttributes<HTMLDivElement> {
   value?: number;
 }
 
@@ -141,8 +146,7 @@ export interface SwitchProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement> {}
 
 // Slider component types
-export interface SliderProps
-  extends React.HTMLAttributes<HTMLDivElement> {
+export interface SliderProps extends React.HTMLAttributes<HTMLDivElement> {
   value?: number[];
   onValueChange?: (value: number[]) => void;
   min?: number;
@@ -154,26 +158,25 @@ export interface SliderProps
 export interface CalendarProps {
   mode?: 'single' | 'multiple' | 'range';
   selected?: Date | Date[] | { from: Date; to: Date };
-  onSelect?: (date: Date | Date[] | { from: Date; to: Date } | undefined) => void;
+  onSelect?: (
+    date: Date | Date[] | { from: Date; to: Date } | undefined
+  ) => void;
   disabled?: (date: Date) => boolean;
   className?: string;
 }
 
 // Separator component types
-export interface SeparatorProps
-  extends React.HTMLAttributes<HTMLDivElement> {
+export interface SeparatorProps extends React.HTMLAttributes<HTMLDivElement> {
   orientation?: 'horizontal' | 'vertical';
   decorative?: boolean;
 }
 
 // ScrollArea component types
-export interface ScrollAreaProps
-  extends React.HTMLAttributes<HTMLDivElement> {
+export interface ScrollAreaProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
 }
 
-export interface ScrollBarProps
-  extends React.HTMLAttributes<HTMLDivElement> {
+export interface ScrollBarProps extends React.HTMLAttributes<HTMLDivElement> {
   orientation?: 'vertical' | 'horizontal';
 }
 
@@ -198,8 +201,7 @@ export interface TabsTriggerProps
   value: string;
 }
 
-export interface TabsContentProps
-  extends React.HTMLAttributes<HTMLDivElement> {
+export interface TabsContentProps extends React.HTMLAttributes<HTMLDivElement> {
   value: string;
 }
 
@@ -272,14 +274,18 @@ export interface SlashCommandCardProps {
 }
 
 // Re-export common React types for convenience
-export type ComponentProps<T extends keyof JSX.IntrinsicElements | React.JSXElementConstructor<any>> =
-  React.ComponentProps<T>;
+export type ComponentProps<
+  T extends keyof JSX.IntrinsicElements | React.JSXElementConstructor<any>,
+> = React.ComponentProps<T>;
 
-export type ComponentPropsWithoutRef<T extends keyof JSX.IntrinsicElements | React.JSXElementConstructor<any>> =
-  React.ComponentPropsWithoutRef<T>;
+export type ComponentPropsWithoutRef<
+  T extends keyof JSX.IntrinsicElements | React.JSXElementConstructor<any>,
+> = React.ComponentPropsWithoutRef<T>;
 
-export type ComponentPropsWithRef<T extends keyof JSX.IntrinsicElements | React.JSXElementConstructor<any>> =
-  React.ComponentPropsWithRef<T>;
+export type ComponentPropsWithRef<
+  T extends keyof JSX.IntrinsicElements | React.JSXElementConstructor<any>,
+> = React.ComponentPropsWithRef<T>;
 
-export type ElementRef<T extends keyof JSX.IntrinsicElements | React.JSXElementConstructor<any>> =
-  React.ElementRef<T>;
+export type ElementRef<
+  T extends keyof JSX.IntrinsicElements | React.JSXElementConstructor<any>,
+> = React.ElementRef<T>;

@@ -3,13 +3,17 @@
  * Converts mock data to database seed scripts and manages test data
  */
 
-import { DatabaseSeed, MockDataGenerator, TestScenario } from '../mock-data/generators';
-import { 
-  Project, 
-  DeviceClassification, 
-  PredicateDevice, 
-  AgentInteraction, 
-  ProjectDocument 
+import {
+  DatabaseSeed,
+  MockDataGenerator,
+  TestScenario,
+} from '../mock-data/generators';
+import {
+  Project,
+  DeviceClassification,
+  PredicateDevice,
+  AgentInteraction,
+  ProjectDocument,
 } from '@/types/project';
 
 export interface SeedingOptions {
@@ -83,14 +87,16 @@ export class DatabaseSeeder {
       documents: 0,
       interactions: 0,
       citations: 0,
-      total: 0
+      total: 0,
     };
 
     try {
       // Generate or use provided seed data
-      const seedData = options.customSeed || 
-        (options.scenario ? this.generator.generateTestScenario(options.scenario) : 
-         this.generator.generateDatabaseSeed());
+      const seedData =
+        options.customSeed ||
+        (options.scenario
+          ? this.generator.generateTestScenario(options.scenario)
+          : this.generator.generateDatabaseSeed());
 
       // Clear existing data if requested
       if (options.clearExisting) {
@@ -106,35 +112,60 @@ export class DatabaseSeeder {
 
         // Seed projects (referenced by other tables)
         if (seedData.projects.length > 0) {
-          stats.projects = await this.seedProjects(tx, seedData.projects, errors);
+          stats.projects = await this.seedProjects(
+            tx,
+            seedData.projects,
+            errors
+          );
         }
 
         // Seed classifications
         if (seedData.classifications.length > 0) {
-          stats.classifications = await this.seedClassifications(tx, seedData.classifications, errors);
+          stats.classifications = await this.seedClassifications(
+            tx,
+            seedData.classifications,
+            errors
+          );
         }
 
         // Seed predicate devices
         if (seedData.predicateDevices.length > 0) {
-          stats.predicateDevices = await this.seedPredicateDevices(tx, seedData.predicateDevices, errors);
+          stats.predicateDevices = await this.seedPredicateDevices(
+            tx,
+            seedData.predicateDevices,
+            errors
+          );
         }
 
         // Seed documents
         if (seedData.documents.length > 0) {
-          stats.documents = await this.seedDocuments(tx, seedData.documents, errors);
+          stats.documents = await this.seedDocuments(
+            tx,
+            seedData.documents,
+            errors
+          );
         }
 
         // Seed interactions
         if (seedData.interactions.length > 0) {
-          stats.interactions = await this.seedInteractions(tx, seedData.interactions, errors);
+          stats.interactions = await this.seedInteractions(
+            tx,
+            seedData.interactions,
+            errors
+          );
         }
 
         // Citations are embedded in interactions, so we count them separately
         stats.citations = seedData.citations.length;
       });
 
-      stats.total = stats.users + stats.projects + stats.classifications + 
-                   stats.predicateDevices + stats.documents + stats.interactions;
+      stats.total =
+        stats.users +
+        stats.projects +
+        stats.classifications +
+        stats.predicateDevices +
+        stats.documents +
+        stats.interactions;
 
       const duration = Date.now() - startTime;
 
@@ -143,23 +174,24 @@ export class DatabaseSeeder {
         recordsCreated: stats,
         errors,
         duration,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
-
     } catch (error) {
       const duration = Date.now() - startTime;
-      
+
       return {
         success: false,
         recordsCreated: stats,
-        errors: [{
-          table: 'general',
-          record: null,
-          error: String(error),
-          timestamp: new Date().toISOString()
-        }],
+        errors: [
+          {
+            table: 'general',
+            record: null,
+            error: String(error),
+            timestamp: new Date().toISOString(),
+          },
+        ],
         duration,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
     }
   }
@@ -174,7 +206,7 @@ export class DatabaseSeeder {
       'predicate_devices',
       'device_classifications',
       'projects',
-      'users'
+      'users',
     ];
 
     await this.connection.transaction(async (tx) => {
@@ -194,9 +226,13 @@ export class DatabaseSeeder {
   /**
    * Seed users table
    */
-  private async seedUsers(tx: DatabaseTransaction, users: any[], errors: SeedingError[]): Promise<number> {
+  private async seedUsers(
+    tx: DatabaseTransaction,
+    users: any[],
+    errors: SeedingError[]
+  ): Promise<number> {
     let count = 0;
-    
+
     const sql = `
       INSERT INTO users (id, email, name, role, created_at, last_login)
       VALUES (?, ?, ?, ?, ?, ?)
@@ -210,7 +246,7 @@ export class DatabaseSeeder {
           user.name,
           user.role,
           user.created_at,
-          user.last_login
+          user.last_login,
         ]);
         count++;
       } catch (error) {
@@ -218,7 +254,7 @@ export class DatabaseSeeder {
           table: 'users',
           record: user,
           error: String(error),
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         });
       }
     }
@@ -229,9 +265,13 @@ export class DatabaseSeeder {
   /**
    * Seed projects table
    */
-  private async seedProjects(tx: DatabaseTransaction, projects: Project[], errors: SeedingError[]): Promise<number> {
+  private async seedProjects(
+    tx: DatabaseTransaction,
+    projects: Project[],
+    errors: SeedingError[]
+  ): Promise<number> {
     let count = 0;
-    
+
     const sql = `
       INSERT INTO projects (id, user_id, name, description, device_type, intended_use, status, created_at, updated_at)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -248,7 +288,7 @@ export class DatabaseSeeder {
           project.intended_use,
           project.status,
           project.created_at,
-          project.updated_at
+          project.updated_at,
         ]);
         count++;
       } catch (error) {
@@ -256,7 +296,7 @@ export class DatabaseSeeder {
           table: 'projects',
           record: project,
           error: String(error),
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         });
       }
     }
@@ -268,12 +308,12 @@ export class DatabaseSeeder {
    * Seed device classifications table
    */
   private async seedClassifications(
-    tx: DatabaseTransaction, 
-    classifications: DeviceClassification[], 
+    tx: DatabaseTransaction,
+    classifications: DeviceClassification[],
     errors: SeedingError[]
   ): Promise<number> {
     let count = 0;
-    
+
     const sql = `
       INSERT INTO device_classifications (
         id, project_id, device_class, product_code, regulatory_pathway,
@@ -294,7 +334,7 @@ export class DatabaseSeeder {
           classification.confidence_score,
           classification.reasoning,
           JSON.stringify(classification.sources),
-          classification.created_at
+          classification.created_at,
         ]);
         count++;
       } catch (error) {
@@ -302,7 +342,7 @@ export class DatabaseSeeder {
           table: 'device_classifications',
           record: classification,
           error: String(error),
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         });
       }
     }
@@ -314,12 +354,12 @@ export class DatabaseSeeder {
    * Seed predicate devices table
    */
   private async seedPredicateDevices(
-    tx: DatabaseTransaction, 
-    predicateDevices: PredicateDevice[], 
+    tx: DatabaseTransaction,
+    predicateDevices: PredicateDevice[],
     errors: SeedingError[]
   ): Promise<number> {
     let count = 0;
-    
+
     const sql = `
       INSERT INTO predicate_devices (
         id, project_id, k_number, device_name, intended_use, product_code,
@@ -341,7 +381,7 @@ export class DatabaseSeeder {
           predicate.confidence_score,
           JSON.stringify(predicate.comparison_data),
           predicate.is_selected ? 1 : 0,
-          predicate.created_at
+          predicate.created_at,
         ]);
         count++;
       } catch (error) {
@@ -349,7 +389,7 @@ export class DatabaseSeeder {
           table: 'predicate_devices',
           record: predicate,
           error: String(error),
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         });
       }
     }
@@ -361,12 +401,12 @@ export class DatabaseSeeder {
    * Seed project documents table
    */
   private async seedDocuments(
-    tx: DatabaseTransaction, 
-    documents: ProjectDocument[], 
+    tx: DatabaseTransaction,
+    documents: ProjectDocument[],
     errors: SeedingError[]
   ): Promise<number> {
     let count = 0;
-    
+
     const sql = `
       INSERT INTO project_documents (
         id, project_id, filename, file_path, document_type,
@@ -386,7 +426,7 @@ export class DatabaseSeeder {
           document.content_markdown,
           JSON.stringify(document.metadata),
           document.created_at,
-          document.updated_at
+          document.updated_at,
         ]);
         count++;
       } catch (error) {
@@ -394,7 +434,7 @@ export class DatabaseSeeder {
           table: 'project_documents',
           record: document,
           error: String(error),
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         });
       }
     }
@@ -406,12 +446,12 @@ export class DatabaseSeeder {
    * Seed agent interactions table
    */
   private async seedInteractions(
-    tx: DatabaseTransaction, 
-    interactions: AgentInteraction[], 
+    tx: DatabaseTransaction,
+    interactions: AgentInteraction[],
     errors: SeedingError[]
   ): Promise<number> {
     let count = 0;
-    
+
     const sql = `
       INSERT INTO agent_interactions (
         id, project_id, user_id, agent_action, input_data, output_data,
@@ -433,7 +473,7 @@ export class DatabaseSeeder {
           JSON.stringify(interaction.sources),
           interaction.reasoning,
           interaction.execution_time_ms,
-          interaction.created_at
+          interaction.created_at,
         ]);
         count++;
       } catch (error) {
@@ -441,7 +481,7 @@ export class DatabaseSeeder {
           table: 'agent_interactions',
           record: interaction,
           error: String(error),
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         });
       }
     }
@@ -553,8 +593,8 @@ export class DatabaseSeeder {
     `;
 
     // Execute schema creation
-    const statements = schemaSql.split(';').filter(stmt => stmt.trim());
-    
+    const statements = schemaSql.split(';').filter((stmt) => stmt.trim());
+
     for (const statement of statements) {
       if (statement.trim()) {
         await this.connection.execute(statement.trim());
@@ -567,12 +607,16 @@ export class DatabaseSeeder {
    */
   async validateSchema(): Promise<{ valid: boolean; issues: string[] }> {
     const issues: string[] = [];
-    
+
     try {
       // Check if all required tables exist
       const requiredTables = [
-        'users', 'projects', 'device_classifications', 
-        'predicate_devices', 'project_documents', 'agent_interactions'
+        'users',
+        'projects',
+        'device_classifications',
+        'predicate_devices',
+        'project_documents',
+        'agent_interactions',
       ];
 
       for (const table of requiredTables) {
@@ -591,13 +635,12 @@ export class DatabaseSeeder {
 
       return {
         valid: issues.length === 0,
-        issues
+        issues,
       };
-
     } catch (error) {
       return {
         valid: false,
-        issues: [`Schema validation failed: ${error}`]
+        issues: [`Schema validation failed: ${error}`],
       };
     }
   }
@@ -614,7 +657,7 @@ export class DatabaseSeeder {
       documents: 0,
       interactions: 0,
       citations: 0,
-      total: 0
+      total: 0,
     };
 
     try {
@@ -624,12 +667,14 @@ export class DatabaseSeeder {
         { name: 'device_classifications', key: 'classifications' },
         { name: 'predicate_devices', key: 'predicateDevices' },
         { name: 'project_documents', key: 'documents' },
-        { name: 'agent_interactions', key: 'interactions' }
+        { name: 'agent_interactions', key: 'interactions' },
       ];
 
       for (const table of tables) {
         try {
-          const result = await this.connection.execute(`SELECT COUNT(*) as count FROM ${table.name}`);
+          const result = await this.connection.execute(
+            `SELECT COUNT(*) as count FROM ${table.name}`
+          );
           const count = result[0]?.count || 0;
           (stats as any)[table.key] = count;
           stats.total += count;
@@ -649,7 +694,6 @@ export class DatabaseSeeder {
       } catch (error) {
         console.warn('Failed to count citations:', error);
       }
-
     } catch (error) {
       console.error('Failed to get database stats:', error);
     }
@@ -668,53 +712,66 @@ export class DatabaseSeeder {
       predicateDevices: [],
       documents: [],
       interactions: [],
-      citations: []
+      citations: [],
     };
 
     try {
       // Export users
-      const users = await this.connection.execute('SELECT * FROM users ORDER BY created_at');
+      const users = await this.connection.execute(
+        'SELECT * FROM users ORDER BY created_at'
+      );
       seed.users = users || [];
 
       // Export projects
-      const projects = await this.connection.execute('SELECT * FROM projects ORDER BY created_at');
+      const projects = await this.connection.execute(
+        'SELECT * FROM projects ORDER BY created_at'
+      );
       seed.projects = projects || [];
 
       // Export classifications
-      const classifications = await this.connection.execute('SELECT * FROM device_classifications ORDER BY created_at');
+      const classifications = await this.connection.execute(
+        'SELECT * FROM device_classifications ORDER BY created_at'
+      );
       seed.classifications = (classifications || []).map((c: any) => ({
         ...c,
         cfr_sections: c.cfr_sections ? JSON.parse(c.cfr_sections) : [],
-        sources: c.sources ? JSON.parse(c.sources) : []
+        sources: c.sources ? JSON.parse(c.sources) : [],
       }));
 
       // Export predicate devices
-      const predicates = await this.connection.execute('SELECT * FROM predicate_devices ORDER BY created_at');
+      const predicates = await this.connection.execute(
+        'SELECT * FROM predicate_devices ORDER BY created_at'
+      );
       seed.predicateDevices = (predicates || []).map((p: any) => ({
         ...p,
-        comparison_data: p.comparison_data ? JSON.parse(p.comparison_data) : null,
-        is_selected: Boolean(p.is_selected)
+        comparison_data: p.comparison_data
+          ? JSON.parse(p.comparison_data)
+          : null,
+        is_selected: Boolean(p.is_selected),
       }));
 
       // Export documents
-      const documents = await this.connection.execute('SELECT * FROM project_documents ORDER BY created_at');
+      const documents = await this.connection.execute(
+        'SELECT * FROM project_documents ORDER BY created_at'
+      );
       seed.documents = (documents || []).map((d: any) => ({
         ...d,
-        metadata: d.metadata ? JSON.parse(d.metadata) : {}
+        metadata: d.metadata ? JSON.parse(d.metadata) : {},
       }));
 
       // Export interactions
-      const interactions = await this.connection.execute('SELECT * FROM agent_interactions ORDER BY created_at');
+      const interactions = await this.connection.execute(
+        'SELECT * FROM agent_interactions ORDER BY created_at'
+      );
       seed.interactions = (interactions || []).map((i: any) => ({
         ...i,
         input_data: i.input_data ? JSON.parse(i.input_data) : {},
         output_data: i.output_data ? JSON.parse(i.output_data) : {},
-        sources: i.sources ? JSON.parse(i.sources) : []
+        sources: i.sources ? JSON.parse(i.sources) : [],
       }));
 
       // Extract citations from interactions
-      seed.citations = seed.interactions.flatMap(i => i.sources || []);
-
+      seed.citations = seed.interactions.flatMap((i) => i.sources || []);
     } catch (error) {
       console.error('Failed to export seed data:', error);
       throw error;
@@ -737,26 +794,31 @@ export class SQLiteConnection implements DatabaseConnection {
 
   async execute(sql: string, params?: any[]): Promise<any> {
     // Simulate database execution
-    console.log(`Executing SQL: ${sql}`, params ? `with params: ${JSON.stringify(params)}` : '');
-    
+    console.log(
+      `Executing SQL: ${sql}`,
+      params ? `with params: ${JSON.stringify(params)}` : ''
+    );
+
     // Return mock results for different query types
     if (sql.includes('SELECT COUNT(*)')) {
       return [{ count: Math.floor(Math.random() * 100) }];
     }
-    
+
     if (sql.includes('SELECT') && sql.includes('FROM')) {
       return []; // Return empty array for SELECT queries
     }
-    
+
     return { changes: 1, lastInsertRowid: Math.floor(Math.random() * 1000) };
   }
 
-  async transaction<T>(callback: (tx: DatabaseTransaction) => Promise<T>): Promise<T> {
+  async transaction<T>(
+    callback: (tx: DatabaseTransaction) => Promise<T>
+  ): Promise<T> {
     // Simulate transaction
     const tx: DatabaseTransaction = {
-      execute: this.execute.bind(this)
+      execute: this.execute.bind(this),
     };
-    
+
     try {
       const result = await callback(tx);
       console.log('Transaction committed');
@@ -781,28 +843,32 @@ export async function seedTestDatabase(
   options?: Partial<SeedingOptions>
 ): Promise<SeedingResult> {
   const seeder = new DatabaseSeeder(connection);
-  
+
   return await seeder.seedDatabase({
     environment: 'testing',
     clearExisting: true,
     scenario,
-    ...options
+    ...options,
   });
 }
 
-export async function createTestDatabase(dbPath: string = ':memory:'): Promise<DatabaseConnection> {
+export async function createTestDatabase(
+  dbPath: string = ':memory:'
+): Promise<DatabaseConnection> {
   const connection = new SQLiteConnection(dbPath);
   const seeder = new DatabaseSeeder(connection);
-  
+
   // Create schema
   await seeder.createSchema();
-  
+
   // Validate schema
   const validation = await seeder.validateSchema();
   if (!validation.valid) {
-    throw new Error(`Schema validation failed: ${validation.issues.join(', ')}`);
+    throw new Error(
+      `Schema validation failed: ${validation.issues.join(', ')}`
+    );
   }
-  
+
   return connection;
 }
 
@@ -812,6 +878,6 @@ export async function setupTestDatabaseWithSeed(
 ): Promise<{ connection: DatabaseConnection; seedResult: SeedingResult }> {
   const connection = await createTestDatabase(dbPath);
   const seedResult = await seedTestDatabase(connection, scenario);
-  
+
   return { connection, seedResult };
 }

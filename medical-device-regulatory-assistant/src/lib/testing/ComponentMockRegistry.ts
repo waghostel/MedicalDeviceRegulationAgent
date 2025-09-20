@@ -1,15 +1,20 @@
 /**
  * ComponentMockRegistry - Component Mock Management System
- * 
+ *
  * Implements automatic component mock loading, validation, and testing
  * for enhanced form components and UI components.
- * 
+ *
  * Requirements: 2.4, 4.4
  */
 
 import React from 'react';
 import { z } from 'zod';
-import { MockRegistry, MockMetadata, MockConfiguration, MockLoadResult } from './MockRegistry';
+import {
+  MockRegistry,
+  MockMetadata,
+  MockConfiguration,
+  MockLoadResult,
+} from './MockRegistry';
 
 // ============================================================================
 // Type Definitions
@@ -70,7 +75,12 @@ export interface ComponentValidationResult {
 }
 
 export interface ComponentValidationError {
-  type: 'props' | 'accessibility' | 'testAttributes' | 'interactions' | 'rendering';
+  type:
+    | 'props'
+    | 'accessibility'
+    | 'testAttributes'
+    | 'interactions'
+    | 'rendering';
   message: string;
   severity: 'low' | 'medium' | 'high' | 'critical';
   suggestion?: string;
@@ -114,7 +124,10 @@ export class ComponentMockRegistry {
   private validationCache: Map<string, ComponentValidationResult> = new Map();
   private testResults: Map<string, ComponentTestResult> = new Map();
 
-  constructor(mockRegistry?: MockRegistry, autoLoadConfig?: Partial<AutoLoadConfig>) {
+  constructor(
+    mockRegistry?: MockRegistry,
+    autoLoadConfig?: Partial<AutoLoadConfig>
+  ) {
     this.mockRegistry = mockRegistry || new MockRegistry();
     this.autoLoadConfig = this.mergeAutoLoadConfig(autoLoadConfig);
     this.setupAutoLoading();
@@ -124,7 +137,9 @@ export class ComponentMockRegistry {
   // Configuration Management
   // ============================================================================
 
-  private mergeAutoLoadConfig(userConfig?: Partial<AutoLoadConfig>): AutoLoadConfig {
+  private mergeAutoLoadConfig(
+    userConfig?: Partial<AutoLoadConfig>
+  ): AutoLoadConfig {
     const defaultConfig: AutoLoadConfig = {
       enabled: true,
       patterns: [
@@ -224,12 +239,19 @@ export class ComponentMockRegistry {
       };
 
       // Validate component mock
-      const validationResult = this.validateComponent(name, mockComponent, fullMetadata);
-      
-      if (validationResult.errors.length > 0 && this.autoLoadConfig.validationLevel === 'strict') {
-        errors.push(...validationResult.errors.map(e => e.message));
+      const validationResult = this.validateComponent(
+        name,
+        mockComponent,
+        fullMetadata
+      );
+
+      if (
+        validationResult.errors.length > 0 &&
+        this.autoLoadConfig.validationLevel === 'strict'
+      ) {
+        errors.push(...validationResult.errors.map((e) => e.message));
       } else if (validationResult.errors.length > 0) {
-        warnings.push(...validationResult.errors.map(e => e.message));
+        warnings.push(...validationResult.errors.map((e) => e.message));
       }
 
       // Create registry entry
@@ -266,11 +288,17 @@ export class ComponentMockRegistry {
 
       // Register with global mock registry if available
       if (global.__GLOBAL_MOCK_REGISTRY) {
-        global.__GLOBAL_MOCK_REGISTRY.register('component', name, mockComponent);
+        global.__GLOBAL_MOCK_REGISTRY.register(
+          'component',
+          name,
+          mockComponent
+        );
       }
 
       const loadTime = performance.now() - startTime;
-      this.logDebug(`Component mock '${name}' registered successfully in ${loadTime.toFixed(2)}ms`);
+      this.logDebug(
+        `Component mock '${name}' registered successfully in ${loadTime.toFixed(2)}ms`
+      );
 
       return {
         success: errors.length === 0,
@@ -280,7 +308,6 @@ export class ComponentMockRegistry {
         warnings,
         loadTime,
       };
-
     } catch (error) {
       errors.push(`Failed to register component mock '${name}': ${error}`);
       return {
@@ -312,12 +339,14 @@ export class ComponentMockRegistry {
 
   private async preloadComponents(): Promise<void> {
     const { preloadComponents } = this.autoLoadConfig;
-    
+
     for (const componentName of preloadComponents) {
       try {
         await this.loadComponent(componentName);
       } catch (error) {
-        this.logDebug(`Failed to preload component '${componentName}': ${error}`);
+        this.logDebug(
+          `Failed to preload component '${componentName}': ${error}`
+        );
       }
     }
   }
@@ -326,22 +355,24 @@ export class ComponentMockRegistry {
     // Setup proxy for automatic component loading
     if (typeof Proxy !== 'undefined') {
       const originalGet = this.getComponent.bind(this);
-      
+
       this.getComponent = new Proxy(originalGet, {
         apply: (target, thisArg, argumentsList) => {
           const [componentName] = argumentsList;
-          
+
           // Try to get existing component
           const existing = target.apply(thisArg, argumentsList);
           if (existing) return existing;
-          
+
           // Try to auto-load component
           if (this.shouldAutoLoad(componentName)) {
-            this.loadComponent(componentName).catch(error => {
-              this.logDebug(`Auto-load failed for component '${componentName}': ${error}`);
+            this.loadComponent(componentName).catch((error) => {
+              this.logDebug(
+                `Auto-load failed for component '${componentName}': ${error}`
+              );
             });
           }
-          
+
           return undefined;
         },
       });
@@ -351,20 +382,26 @@ export class ComponentMockRegistry {
   private shouldAutoLoad(componentName: string): boolean {
     // Check if component matches auto-load patterns
     const { patterns, excludePatterns } = this.autoLoadConfig;
-    
+
     // Simple pattern matching (in real implementation, use glob or regex)
-    const matchesPattern = patterns.some(pattern => 
-      componentName.toLowerCase().includes(pattern.replace('*', '').toLowerCase())
+    const matchesPattern = patterns.some((pattern) =>
+      componentName
+        .toLowerCase()
+        .includes(pattern.replace('*', '').toLowerCase())
     );
-    
-    const matchesExclude = excludePatterns.some(pattern => 
-      componentName.toLowerCase().includes(pattern.replace('*', '').toLowerCase())
+
+    const matchesExclude = excludePatterns.some((pattern) =>
+      componentName
+        .toLowerCase()
+        .includes(pattern.replace('*', '').toLowerCase())
     );
-    
+
     return matchesPattern && !matchesExclude;
   }
 
-  public async loadComponent(componentName: string): Promise<ComponentMockEntry | null> {
+  public async loadComponent(
+    componentName: string
+  ): Promise<ComponentMockEntry | null> {
     try {
       // Check if already loaded
       const existing = this.registry.get(componentName);
@@ -388,11 +425,12 @@ export class ComponentMockRegistry {
       );
 
       if (!result.success) {
-        throw new Error(`Failed to register component: ${result.errors.join(', ')}`);
+        throw new Error(
+          `Failed to register component: ${result.errors.join(', ')}`
+        );
       }
 
       return this.registry.get(componentName) || null;
-
     } catch (error) {
       this.logDebug(`Failed to load component '${componentName}': ${error}`);
       return null;
@@ -406,37 +444,46 @@ export class ComponentMockRegistry {
   } | null> {
     // Try to resolve from enhanced form component mocks
     try {
-      const { componentMocks } = await import('./enhanced-form-component-mocks');
-      
+      const { componentMocks } = await import(
+        './enhanced-form-component-mocks'
+      );
+
       if (componentMocks[componentName as keyof typeof componentMocks]) {
         return {
-          mockImplementation: componentMocks[componentName as keyof typeof componentMocks],
+          mockImplementation:
+            componentMocks[componentName as keyof typeof componentMocks],
           metadata: {
             componentType: 'form',
             requiredProps: this.inferRequiredProps(componentName),
             testAttributes: ['data-testid'],
-            accessibilityFeatures: ['aria-label', 'aria-describedby', 'aria-invalid'],
+            accessibilityFeatures: [
+              'aria-label',
+              'aria-describedby',
+              'aria-invalid',
+            ],
           },
         };
       }
     } catch (error) {
-      this.logDebug(`Could not load from enhanced-form-component-mocks: ${error}`);
+      this.logDebug(
+        `Could not load from enhanced-form-component-mocks: ${error}`
+      );
     }
 
     // Try to resolve from other mock sources
     // This could be extended to load from file system, remote sources, etc.
-    
+
     return null;
   }
 
   private inferRequiredProps(componentName: string): string[] {
     // Infer required props based on component name and type
     const commonRequiredProps: Record<string, string[]> = {
-      'EnhancedInput': ['name', 'label'],
-      'EnhancedTextarea': ['name', 'label'],
-      'AutoSaveIndicator': ['isSaving'],
-      'FormSubmissionProgress': ['progress', 'currentStep'],
-      'EnhancedButton': ['children'],
+      EnhancedInput: ['name', 'label'],
+      EnhancedTextarea: ['name', 'label'],
+      AutoSaveIndicator: ['isSaving'],
+      FormSubmissionProgress: ['progress', 'currentStep'],
+      EnhancedButton: ['children'],
     };
 
     return commonRequiredProps[componentName] || [];
@@ -473,10 +520,26 @@ export class ComponentMockRegistry {
 
     // Validate required props
     const testCoverage = {
-      propsValidation: this.validatePropsHandling(name, mockComponent, metadata),
-      accessibilityAttributes: this.validateAccessibilityFeatures(name, mockComponent, metadata),
-      testAttributes: this.validateTestAttributes(name, mockComponent, metadata),
-      interactionHandlers: this.validateInteractionHandlers(name, mockComponent, metadata),
+      propsValidation: this.validatePropsHandling(
+        name,
+        mockComponent,
+        metadata
+      ),
+      accessibilityAttributes: this.validateAccessibilityFeatures(
+        name,
+        mockComponent,
+        metadata
+      ),
+      testAttributes: this.validateTestAttributes(
+        name,
+        mockComponent,
+        metadata
+      ),
+      interactionHandlers: this.validateInteractionHandlers(
+        name,
+        mockComponent,
+        metadata
+      ),
       errorStates: this.validateErrorStates(name, mockComponent, metadata),
     };
 
@@ -498,7 +561,8 @@ export class ComponentMockRegistry {
       warnings.push({
         type: 'accessibility',
         message: `Component '${name}' has no defined accessibility features`,
-        suggestion: 'Add ARIA attributes and accessibility features to the component mock',
+        suggestion:
+          'Add ARIA attributes and accessibility features to the component mock',
       });
     }
 
@@ -508,7 +572,8 @@ export class ComponentMockRegistry {
         type: 'testAttributes',
         message: `Component '${name}' has no test attributes defined`,
         severity: 'high',
-        suggestion: 'Add data-testid and other test attributes to enable testing',
+        suggestion:
+          'Add data-testid and other test attributes to enable testing',
         code: 'MISSING_TEST_ATTRIBUTES',
       });
     }
@@ -521,7 +586,9 @@ export class ComponentMockRegistry {
     }
 
     return {
-      isValid: errors.filter(e => e.severity === 'critical' || e.severity === 'high').length === 0,
+      isValid:
+        errors.filter((e) => e.severity === 'critical' || e.severity === 'high')
+          .length === 0,
       componentName: name,
       errors,
       warnings,
@@ -586,7 +653,10 @@ export class ComponentMockRegistry {
     // Check if error states are handled
     if (metadata.componentType === 'form') {
       // Form components should handle error states
-      return metadata.optionalProps.includes('error') || metadata.requiredProps.includes('error');
+      return (
+        metadata.optionalProps.includes('error') ||
+        metadata.requiredProps.includes('error')
+      );
     }
     return true;
   }
@@ -595,10 +665,12 @@ export class ComponentMockRegistry {
   // Component Testing
   // ============================================================================
 
-  public async testComponent(componentName: string): Promise<ComponentTestResult> {
+  public async testComponent(
+    componentName: string
+  ): Promise<ComponentTestResult> {
     const startTime = performance.now();
     const entry = this.registry.get(componentName);
-    
+
     if (!entry) {
       return {
         componentName,
@@ -675,7 +747,6 @@ export class ComponentMockRegistry {
         testsFailed++;
         errors.push(`Test attributes error: ${error}`);
       }
-
     } catch (error) {
       testsFailed++;
       errors.push(`Component testing error: ${error}`);
@@ -704,9 +775,9 @@ export class ComponentMockRegistry {
 
   private generateBasicProps(metadata: ComponentMockMetadata): any {
     const props: any = {};
-    
+
     // Generate required props
-    metadata.requiredProps.forEach(propName => {
+    metadata.requiredProps.forEach((propName) => {
       switch (propName) {
         case 'children':
           props[propName] = 'Test Content';
@@ -734,13 +805,16 @@ export class ComponentMockRegistry {
     return props;
   }
 
-  private testPropsValidation(entry: ComponentMockEntry): { success: boolean; errors: string[] } {
+  private testPropsValidation(entry: ComponentMockEntry): {
+    success: boolean;
+    errors: string[];
+  } {
     const errors: string[] = [];
-    
+
     try {
       // Test with missing required props
       const result = entry.mockComponent({});
-      
+
       // If component renders without required props, it might be an issue
       if (entry.metadata.requiredProps.length > 0 && result) {
         errors.push('Component renders without required props');
@@ -755,9 +829,12 @@ export class ComponentMockRegistry {
     };
   }
 
-  private testAccessibilityFeatures(entry: ComponentMockEntry): { success: boolean; warnings: string[] } {
+  private testAccessibilityFeatures(entry: ComponentMockEntry): {
+    success: boolean;
+    warnings: string[];
+  } {
     const warnings: string[] = [];
-    
+
     if (entry.metadata.accessibilityFeatures.length === 0) {
       warnings.push('No accessibility features defined');
     }
@@ -768,9 +845,12 @@ export class ComponentMockRegistry {
     };
   }
 
-  private testTestAttributes(entry: ComponentMockEntry): { success: boolean; errors: string[] } {
+  private testTestAttributes(entry: ComponentMockEntry): {
+    success: boolean;
+    errors: string[];
+  } {
     const errors: string[] = [];
-    
+
     if (!entry.metadata.testAttributes.includes('data-testid')) {
       errors.push('Missing data-testid attribute');
     }
@@ -793,7 +873,9 @@ export class ComponentMockRegistry {
     return entry;
   }
 
-  public getComponentMock(name: string): jest.MockedFunction<React.FC<any>> | undefined {
+  public getComponentMock(
+    name: string
+  ): jest.MockedFunction<React.FC<any>> | undefined {
     const entry = this.getComponent(name);
     return entry?.mockComponent;
   }
@@ -807,13 +889,19 @@ export class ComponentMockRegistry {
 
     if (filter) {
       if (filter.componentType) {
-        entries = entries.filter(entry => entry.metadata.componentType === filter.componentType);
+        entries = entries.filter(
+          (entry) => entry.metadata.componentType === filter.componentType
+        );
       }
       if (filter.isRegistered !== undefined) {
-        entries = entries.filter(entry => entry.isRegistered === filter.isRegistered);
+        entries = entries.filter(
+          (entry) => entry.isRegistered === filter.isRegistered
+        );
       }
       if (filter.hasValidation !== undefined) {
-        entries = entries.filter(entry => !!entry.validationResult === filter.hasValidation);
+        entries = entries.filter(
+          (entry) => !!entry.validationResult === filter.hasValidation
+        );
       }
     }
 
@@ -845,7 +933,6 @@ export class ComponentMockRegistry {
 
       this.logDebug(`Component mock '${name}' unregistered successfully`);
       return true;
-
     } catch (error) {
       this.logDebug(`Failed to unregister component mock '${name}': ${error}`);
       return false;
@@ -858,7 +945,7 @@ export class ComponentMockRegistry {
 
   public async testAllComponents(): Promise<ComponentTestResult[]> {
     const results: ComponentTestResult[] = [];
-    
+
     for (const [componentName] of this.registry) {
       try {
         const result = await this.testComponent(componentName);
@@ -882,26 +969,31 @@ export class ComponentMockRegistry {
 
   public validateAllComponents(): ComponentValidationResult[] {
     const results: ComponentValidationResult[] = [];
-    
+
     for (const [componentName, entry] of this.registry) {
       try {
-        const result = this.validateComponent(componentName, entry.mockComponent, entry.metadata);
+        const result = this.validateComponent(
+          componentName,
+          entry.mockComponent,
+          entry.metadata
+        );
         results.push(result);
-        
+
         // Update cache
         this.validationCache.set(componentName, result);
         entry.validationResult = result;
         entry.lastValidated = new Date();
-        
       } catch (error) {
         results.push({
           isValid: false,
           componentName,
-          errors: [{
-            type: 'rendering',
-            message: `Validation failed: ${error}`,
-            severity: 'critical',
-          }],
+          errors: [
+            {
+              type: 'rendering',
+              message: `Validation failed: ${error}`,
+              severity: 'critical',
+            },
+          ],
           warnings: [],
           suggestions: [],
           testCoverage: {
@@ -962,22 +1054,27 @@ export class ComponentMockRegistry {
     componentsByType: Record<string, number>;
   } {
     const entries = Array.from(this.registry.values());
-    const validatedEntries = entries.filter(e => e.validationResult);
+    const validatedEntries = entries.filter((e) => e.validationResult);
     const testedEntries = Array.from(this.testResults.values());
-    
-    const componentsByType = entries.reduce((acc, entry) => {
-      const type = entry.metadata.componentType;
-      acc[type] = (acc[type] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
 
-    const averageCoverage = testedEntries.length > 0
-      ? testedEntries.reduce((sum, result) => sum + result.coverage, 0) / testedEntries.length
-      : 0;
+    const componentsByType = entries.reduce(
+      (acc, entry) => {
+        const type = entry.metadata.componentType;
+        acc[type] = (acc[type] || 0) + 1;
+        return acc;
+      },
+      {} as Record<string, number>
+    );
+
+    const averageCoverage =
+      testedEntries.length > 0
+        ? testedEntries.reduce((sum, result) => sum + result.coverage, 0) /
+          testedEntries.length
+        : 0;
 
     return {
       totalComponents: entries.length,
-      registeredComponents: entries.filter(e => e.isRegistered).length,
+      registeredComponents: entries.filter((e) => e.isRegistered).length,
       validatedComponents: validatedEntries.length,
       testedComponents: testedEntries.length,
       averageCoverage,
@@ -1009,7 +1106,9 @@ export function getDefaultComponentRegistry(): ComponentMockRegistry {
   return defaultComponentRegistry;
 }
 
-export function setDefaultComponentRegistry(registry: ComponentMockRegistry): void {
+export function setDefaultComponentRegistry(
+  registry: ComponentMockRegistry
+): void {
   defaultComponentRegistry = registry;
 }
 
@@ -1023,14 +1122,23 @@ export function registerComponent(
   metadata: Partial<ComponentMockMetadata>,
   configuration?: Partial<ComponentMockConfiguration>
 ): MockLoadResult {
-  return getDefaultComponentRegistry().registerComponent(name, mockComponent, metadata, configuration);
+  return getDefaultComponentRegistry().registerComponent(
+    name,
+    mockComponent,
+    metadata,
+    configuration
+  );
 }
 
-export function loadComponent(componentName: string): Promise<ComponentMockEntry | null> {
+export function loadComponent(
+  componentName: string
+): Promise<ComponentMockEntry | null> {
   return getDefaultComponentRegistry().loadComponent(componentName);
 }
 
-export function getComponentMock(name: string): jest.MockedFunction<React.FC<any>> | undefined {
+export function getComponentMock(
+  name: string
+): jest.MockedFunction<React.FC<any>> | undefined {
   return getDefaultComponentRegistry().getComponentMock(name);
 }
 
@@ -1039,14 +1147,22 @@ export function validateComponent(
   mockComponent: jest.MockedFunction<React.FC<any>>,
   metadata: ComponentMockMetadata
 ): ComponentValidationResult {
-  return getDefaultComponentRegistry().validateComponent(name, mockComponent, metadata);
+  return getDefaultComponentRegistry().validateComponent(
+    name,
+    mockComponent,
+    metadata
+  );
 }
 
-export function testComponent(componentName: string): Promise<ComponentTestResult> {
+export function testComponent(
+  componentName: string
+): Promise<ComponentTestResult> {
   return getDefaultComponentRegistry().testComponent(componentName);
 }
 
-export function listComponents(filter?: Parameters<ComponentMockRegistry['listComponents']>[0]): ComponentMockEntry[] {
+export function listComponents(
+  filter?: Parameters<ComponentMockRegistry['listComponents']>[0]
+): ComponentMockEntry[] {
   return getDefaultComponentRegistry().listComponents(filter);
 }
 
@@ -1062,7 +1178,9 @@ export function resetComponents(): void {
   return getDefaultComponentRegistry().reset();
 }
 
-export function getComponentStats(): ReturnType<ComponentMockRegistry['getStats']> {
+export function getComponentStats(): ReturnType<
+  ComponentMockRegistry['getStats']
+> {
   return getDefaultComponentRegistry().getStats();
 }
 

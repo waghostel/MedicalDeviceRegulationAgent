@@ -37,14 +37,16 @@ describe('ProjectCard', () => {
     );
 
     expect(screen.getByText('Test Cardiac Monitor')).toBeInTheDocument();
-    expect(screen.getByText('A continuous cardiac monitoring device')).toBeInTheDocument();
+    expect(
+      screen.getByText('A continuous cardiac monitoring device')
+    ).toBeInTheDocument();
     expect(screen.getByText('Class II Medical Device')).toBeInTheDocument();
     expect(screen.getByText('in-progress')).toBeInTheDocument();
   });
 
   it('calls onSelect when card is clicked', async () => {
     const user = userEvent.setup();
-    
+
     render(
       <ProjectCard
         project={mockProject}
@@ -62,7 +64,7 @@ describe('ProjectCard', () => {
 
   it('calls onEdit when edit button is clicked', async () => {
     const user = userEvent.setup();
-    
+
     render(
       <ProjectCard
         project={mockProject}
@@ -81,7 +83,7 @@ describe('ProjectCard', () => {
 
   it('calls onDelete when delete button is clicked', async () => {
     const user = userEvent.setup();
-    
+
     render(
       <ProjectCard
         project={mockProject}
@@ -99,7 +101,7 @@ describe('ProjectCard', () => {
 
   it('displays correct status badge variant', () => {
     const completedProject = { ...mockProject, status: 'completed' as const };
-    
+
     render(
       <ProjectCard
         project={completedProject}
@@ -129,7 +131,7 @@ describe('ProjectCard', () => {
 
   it('handles keyboard navigation', async () => {
     const user = userEvent.setup();
-    
+
     render(
       <ProjectCard
         project={mockProject}
@@ -140,7 +142,7 @@ describe('ProjectCard', () => {
     );
 
     const card = screen.getByTestId('project-card');
-    
+
     // Focus the card
     card.focus();
     expect(card).toHaveFocus();
@@ -162,7 +164,10 @@ describe('ProjectCard', () => {
 
     const card = screen.getByTestId('project-card');
     expect(card).toHaveAttribute('role', 'button');
-    expect(card).toHaveAttribute('aria-label', expect.stringContaining('Test Cardiac Monitor'));
+    expect(card).toHaveAttribute(
+      'aria-label',
+      expect.stringContaining('Test Cardiac Monitor')
+    );
 
     const editButton = screen.getByTestId('edit-project-button');
     expect(editButton).toHaveAttribute('aria-label', 'Edit project');
@@ -175,7 +180,8 @@ describe('ProjectCard', () => {
     const longTextProject = {
       ...mockProject,
       name: 'Very Long Project Name That Should Be Truncated Properly',
-      description: 'This is a very long description that should be handled gracefully by the component and not break the layout or cause overflow issues',
+      description:
+        'This is a very long description that should be handled gracefully by the component and not break the layout or cause overflow issues',
     };
 
     render(
@@ -189,7 +195,7 @@ describe('ProjectCard', () => {
 
     const card = screen.getByTestId('project-card');
     expect(card).toBeInTheDocument();
-    
+
     // Verify text is present (truncation would be handled by CSS)
     expect(screen.getByText(longTextProject.name)).toBeInTheDocument();
     expect(screen.getByText(longTextProject.description)).toBeInTheDocument();
@@ -197,7 +203,7 @@ describe('ProjectCard', () => {
 
   it('prevents event bubbling on button clicks', async () => {
     const user = userEvent.setup();
-    
+
     render(
       <ProjectCard
         project={mockProject}

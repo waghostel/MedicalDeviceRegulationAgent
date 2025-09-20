@@ -1,10 +1,14 @@
 /**
  * Performance Integration Tests
- * 
+ *
  * Simple integration tests to validate performance optimization features
  */
 
-import { MemoryCache, APICache, createCacheKey } from '@/lib/performance/caching';
+import {
+  MemoryCache,
+  APICache,
+  createCacheKey,
+} from '@/lib/performance/caching';
 import { analyzeBundleSize } from '@/lib/performance/optimization';
 
 // Mock performance API
@@ -41,7 +45,7 @@ describe('Performance Optimization Integration', () => {
   describe('Caching System Integration', () => {
     it('should provide efficient caching for large datasets', () => {
       const cache = new MemoryCache({ maxSize: 100, ttl: 60000 });
-      
+
       // Simulate caching large project data
       const largeProjectData = Array.from({ length: 1000 }, (_, i) => ({
         id: i,
@@ -65,17 +69,20 @@ describe('Performance Optimization Integration', () => {
     it('should handle API caching with performance monitoring', async () => {
       const apiCache = new APICache();
       const mockFetch = jest.fn().mockResolvedValue({
-        projects: Array.from({ length: 500 }, (_, i) => ({ id: i, name: `Project ${i}` }))
+        projects: Array.from({ length: 500 }, (_, i) => ({
+          id: i,
+          name: `Project ${i}`,
+        })),
       });
 
       const startTime = performance.now();
-      
+
       // First call - should fetch and cache
       const result1 = await apiCache.get('large-projects', mockFetch);
-      
+
       // Second call - should use cache
       const result2 = await apiCache.get('large-projects', mockFetch);
-      
+
       const endTime = performance.now();
 
       expect(mockFetch).toHaveBeenCalledTimes(1);
@@ -94,11 +101,11 @@ describe('Performance Optimization Integration', () => {
       expect(analysis.totalCSSSize).toBeGreaterThan(0);
       expect(analysis.jsResourceCount).toBe(1);
       expect(analysis.cssResourceCount).toBe(1);
-      
+
       // Should have resource details
       expect(analysis.resources.js).toHaveLength(1);
       expect(analysis.resources.css).toHaveLength(1);
-      
+
       // Check resource details
       const jsResource = analysis.resources.js[0];
       expect(jsResource.size).toBeCloseTo(500, 0); // 500KB
@@ -116,7 +123,7 @@ describe('Performance Optimization Integration', () => {
       });
 
       const startTime = performance.now();
-      
+
       // Simulate some operations
       const operations = Array.from({ length: 100 }, (_, i) => ({
         id: i,
@@ -130,7 +137,7 @@ describe('Performance Optimization Integration', () => {
       expect(mockPerformance.now).toHaveBeenCalled();
       expect(operations).toHaveLength(100);
       expect(operationTime).toBeGreaterThan(0);
-      
+
       // Performance should be reasonable for 100 operations
       expect(operationTime).toBeLessThan(1000); // Should complete in under 1000ms
     });
@@ -148,17 +155,20 @@ describe('Performance Optimization Integration', () => {
       const itemHeight = 50;
       const visibleCount = Math.ceil(containerHeight / itemHeight);
       const overscan = 5;
-      
+
       // Simulate virtual scrolling calculation
       const startIndex = 0;
-      const endIndex = Math.min(largeDataset.length, visibleCount + overscan * 2);
+      const endIndex = Math.min(
+        largeDataset.length,
+        visibleCount + overscan * 2
+      );
       const visibleItems = largeDataset.slice(startIndex, endIndex);
 
       // Should only render visible items, not all 10,000
       expect(visibleItems.length).toBeLessThan(100);
       expect(visibleItems.length).toBeGreaterThan(0);
       expect(visibleItems[0].id).toBe(0);
-      
+
       // Total height calculation
       const totalHeight = largeDataset.length * itemHeight;
       expect(totalHeight).toBe(500000); // 10,000 * 50px
@@ -187,7 +197,7 @@ describe('Performance Optimization Integration', () => {
       }));
 
       // Initially, no components should be loaded
-      const loadedComponents = lazyComponents.filter(c => c.loaded);
+      const loadedComponents = lazyComponents.filter((c) => c.loaded);
       expect(loadedComponents).toHaveLength(0);
 
       // Simulate intersection observer setup
@@ -203,23 +213,26 @@ describe('Performance Optimization Integration', () => {
   describe('Overall Performance Optimization', () => {
     it('should demonstrate performance improvements with all optimizations', async () => {
       const startTime = performance.now();
-      
+
       // Simulate a complex operation with caching
       const cache = new MemoryCache({ maxSize: 50 });
       const apiCache = new APICache();
-      
+
       // Cache some data
-      const testData = Array.from({ length: 1000 }, (_, i) => ({ id: i, value: i * 2 }));
+      const testData = Array.from({ length: 1000 }, (_, i) => ({
+        id: i,
+        value: i * 2,
+      }));
       cache.set('test-data', testData);
-      
+
       // Simulate API call with caching
       const mockApiCall = jest.fn().mockResolvedValue({ result: 'success' });
       await apiCache.get('test-api', mockApiCall);
       await apiCache.get('test-api', mockApiCall); // Should use cache
-      
+
       // Simulate virtual scrolling calculation
       const visibleItems = testData.slice(0, 20); // Only render 20 items
-      
+
       const endTime = performance.now();
       const totalTime = endTime - startTime;
 
@@ -228,7 +241,7 @@ describe('Performance Optimization Integration', () => {
       expect(mockApiCall).toHaveBeenCalledTimes(1); // Cached on second call
       expect(visibleItems).toHaveLength(20); // Virtual scrolling limits rendered items
       expect(totalTime).toBeLessThan(100); // Should be fast with optimizations
-      
+
       // Verify cache stats
       const cacheStats = cache.getStats();
       expect(cacheStats.size).toBe(1);

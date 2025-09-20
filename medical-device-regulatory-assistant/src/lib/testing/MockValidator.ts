@@ -1,6 +1,6 @@
 /**
  * MockValidator - Comprehensive Mock Validation System
- * 
+ *
  * Implements mock validation system from design requirements 2.4 and 5.4
  * Provides automated mock structure comparison and validation
  * Ensures mock accuracy against actual implementations
@@ -22,7 +22,12 @@ export interface ValidationResult {
 }
 
 export interface ValidationError {
-  type: 'MISSING_METHOD' | 'MISSING_PROPERTY' | 'TYPE_MISMATCH' | 'STRUCTURE_MISMATCH' | 'MOCK_FUNCTION_MISSING';
+  type:
+    | 'MISSING_METHOD'
+    | 'MISSING_PROPERTY'
+    | 'TYPE_MISMATCH'
+    | 'STRUCTURE_MISMATCH'
+    | 'MOCK_FUNCTION_MISSING';
   severity: 'critical' | 'high' | 'medium' | 'low';
   path: string;
   expected: any;
@@ -32,7 +37,11 @@ export interface ValidationError {
 }
 
 export interface ValidationWarning {
-  type: 'DEPRECATED_METHOD' | 'OPTIONAL_PROPERTY' | 'PERFORMANCE_CONCERN' | 'COMPATIBILITY_ISSUE';
+  type:
+    | 'DEPRECATED_METHOD'
+    | 'OPTIONAL_PROPERTY'
+    | 'PERFORMANCE_CONCERN'
+    | 'COMPATIBILITY_ISSUE';
   path: string;
   message: string;
   suggestion?: string;
@@ -79,17 +88,23 @@ interface HookValidationSchema {
   name: string;
   expectedStructure: {
     returnType: 'object' | 'function' | 'array' | 'primitive';
-    properties?: Record<string, {
-      type: string;
-      required: boolean;
-      mockType?: 'jest.fn' | 'value' | 'object';
-    }>;
-    methods?: Record<string, {
-      type: 'function';
-      required: boolean;
-      parameters?: any[];
-      returnType?: string;
-    }>;
+    properties?: Record<
+      string,
+      {
+        type: string;
+        required: boolean;
+        mockType?: 'jest.fn' | 'value' | 'object';
+      }
+    >;
+    methods?: Record<
+      string,
+      {
+        type: 'function';
+        required: boolean;
+        parameters?: any[];
+        returnType?: string;
+      }
+    >;
   };
 }
 
@@ -110,8 +125,16 @@ const HOOK_SCHEMAS: Record<string, HookValidationSchema> = {
         dismiss: { type: 'function', required: true, returnType: 'void' },
         dismissAll: { type: 'function', required: true, returnType: 'void' },
         clearQueue: { type: 'function', required: true, returnType: 'void' },
-        getToastsByCategory: { type: 'function', required: true, returnType: 'array' },
-        getToastsByPriority: { type: 'function', required: false, returnType: 'array' },
+        getToastsByCategory: {
+          type: 'function',
+          required: true,
+          returnType: 'array',
+        },
+        getToastsByPriority: {
+          type: 'function',
+          required: false,
+          returnType: 'array',
+        },
       },
     },
   },
@@ -127,16 +150,40 @@ const HOOK_SCHEMAS: Record<string, HookValidationSchema> = {
       },
       methods: {
         register: { type: 'function', required: true, returnType: 'object' },
-        handleSubmit: { type: 'function', required: true, returnType: 'function' },
+        handleSubmit: {
+          type: 'function',
+          required: true,
+          returnType: 'function',
+        },
         watch: { type: 'function', required: true, returnType: 'any' },
         getValues: { type: 'function', required: true, returnType: 'any' },
         setValue: { type: 'function', required: true, returnType: 'void' },
-        validateField: { type: 'function', required: true, returnType: 'Promise' },
-        getFieldValidation: { type: 'function', required: true, returnType: 'object' },
+        validateField: {
+          type: 'function',
+          required: true,
+          returnType: 'Promise',
+        },
+        getFieldValidation: {
+          type: 'function',
+          required: true,
+          returnType: 'object',
+        },
         saveNow: { type: 'function', required: true, returnType: 'Promise' },
-        submitWithFeedback: { type: 'function', required: true, returnType: 'Promise' },
-        focusFirstError: { type: 'function', required: true, returnType: 'void' },
-        announceFormState: { type: 'function', required: true, returnType: 'void' },
+        submitWithFeedback: {
+          type: 'function',
+          required: true,
+          returnType: 'Promise',
+        },
+        focusFirstError: {
+          type: 'function',
+          required: true,
+          returnType: 'void',
+        },
+        announceFormState: {
+          type: 'function',
+          required: true,
+          returnType: 'void',
+        },
       },
     },
   },
@@ -160,10 +207,26 @@ const HOOK_SCHEMAS: Record<string, HookValidationSchema> = {
         validationState: { type: 'object', required: true, mockType: 'value' },
       },
       methods: {
-        validateField: { type: 'function', required: true, returnType: 'Promise' },
-        getFieldValidation: { type: 'function', required: true, returnType: 'object' },
-        validateAllFields: { type: 'function', required: true, returnType: 'Promise' },
-        clearValidation: { type: 'function', required: true, returnType: 'void' },
+        validateField: {
+          type: 'function',
+          required: true,
+          returnType: 'Promise',
+        },
+        getFieldValidation: {
+          type: 'function',
+          required: true,
+          returnType: 'object',
+        },
+        validateAllFields: {
+          type: 'function',
+          required: true,
+          returnType: 'Promise',
+        },
+        clearValidation: {
+          type: 'function',
+          required: true,
+          returnType: 'void',
+        },
       },
     },
   },
@@ -172,14 +235,42 @@ const HOOK_SCHEMAS: Record<string, HookValidationSchema> = {
     expectedStructure: {
       returnType: 'object',
       methods: {
-        showValidationError: { type: 'function', required: true, returnType: 'void' },
-        showSubmissionSuccess: { type: 'function', required: true, returnType: 'void' },
-        showSubmissionError: { type: 'function', required: true, returnType: 'void' },
-        showSaveProgress: { type: 'function', required: true, returnType: 'object' },
-        showAutoSaveSuccess: { type: 'function', required: true, returnType: 'void' },
-        showNetworkError: { type: 'function', required: true, returnType: 'void' },
+        showValidationError: {
+          type: 'function',
+          required: true,
+          returnType: 'void',
+        },
+        showSubmissionSuccess: {
+          type: 'function',
+          required: true,
+          returnType: 'void',
+        },
+        showSubmissionError: {
+          type: 'function',
+          required: true,
+          returnType: 'void',
+        },
+        showSaveProgress: {
+          type: 'function',
+          required: true,
+          returnType: 'object',
+        },
+        showAutoSaveSuccess: {
+          type: 'function',
+          required: true,
+          returnType: 'void',
+        },
+        showNetworkError: {
+          type: 'function',
+          required: true,
+          returnType: 'void',
+        },
         showAuthError: { type: 'function', required: true, returnType: 'void' },
-        clearFormToasts: { type: 'function', required: true, returnType: 'void' },
+        clearFormToasts: {
+          type: 'function',
+          required: true,
+          returnType: 'void',
+        },
       },
     },
   },
@@ -191,11 +282,14 @@ const HOOK_SCHEMAS: Record<string, HookValidationSchema> = {
 
 interface ComponentValidationSchema {
   name: string;
-  expectedProps: Record<string, {
-    type: string;
-    required: boolean;
-    defaultValue?: any;
-  }>;
+  expectedProps: Record<
+    string,
+    {
+      type: string;
+      required: boolean;
+      defaultValue?: any;
+    }
+  >;
   expectedBehavior: {
     rendersWithoutError: boolean;
     acceptsChildren: boolean;
@@ -308,17 +402,17 @@ export class MockValidator {
     // Register known mocks from global registry if available
     if (typeof global !== 'undefined' && global.__GLOBAL_MOCK_REGISTRY) {
       const registry = global.__GLOBAL_MOCK_REGISTRY;
-      
+
       // Register hooks
       registry.hooks.forEach((mock, name) => {
         this.mockRegistry.set(`hook:${name}`, mock);
       });
-      
+
       // Register components
       registry.components.forEach((mock, name) => {
         this.mockRegistry.set(`component:${name}`, mock);
       });
-      
+
       // Register providers
       registry.providers.forEach((mock, name) => {
         this.mockRegistry.set(`provider:${name}`, mock);
@@ -347,8 +441,15 @@ export class MockValidator {
         message: `No validation schema found for hook '${hookName}'`,
         suggestion: 'Add validation schema or check hook name spelling',
       });
-      
-      return this.createValidationResult(false, errors, warnings, suggestions, 0, startTime);
+
+      return this.createValidationResult(
+        false,
+        errors,
+        warnings,
+        suggestions,
+        0,
+        startTime
+      );
     }
 
     // Validate that mock is a function (hooks should be functions)
@@ -367,7 +468,7 @@ export class MockValidator {
     // If mock is a function, validate its return value
     if (typeof mock === 'function') {
       let mockReturnValue: any;
-      
+
       try {
         // Call the mock to get its return value
         mockReturnValue = mock();
@@ -381,8 +482,15 @@ export class MockValidator {
           message: `Hook mock '${hookName}' throws error when called: ${error}`,
           suggestion: 'Ensure mock function returns a valid object',
         });
-        
-        return this.createValidationResult(false, errors, warnings, suggestions, 0, startTime);
+
+        return this.createValidationResult(
+          false,
+          errors,
+          warnings,
+          suggestions,
+          0,
+          startTime
+        );
       }
 
       // Validate return value structure
@@ -398,20 +506,32 @@ export class MockValidator {
 
     // Calculate validation score
     const score = this.calculateValidationScore(errors, warnings);
-    const isValid = errors.filter(e => e.severity === 'critical' || e.severity === 'high').length === 0;
+    const isValid =
+      errors.filter((e) => e.severity === 'critical' || e.severity === 'high')
+        .length === 0;
 
-    const result = this.createValidationResult(isValid, errors, warnings, suggestions, score, startTime);
-    
+    const result = this.createValidationResult(
+      isValid,
+      errors,
+      warnings,
+      suggestions,
+      score,
+      startTime
+    );
+
     // Store in history
     this.addToHistory(hookName, result);
-    
+
     return result;
   }
 
   /**
    * Validate a component mock against its expected structure
    */
-  public validateComponentMock(componentName: string, mock: any): ValidationResult {
+  public validateComponentMock(
+    componentName: string,
+    mock: any
+  ): ValidationResult {
     const startTime = Date.now();
     const errors: ValidationError[] = [];
     const warnings: ValidationWarning[] = [];
@@ -429,8 +549,15 @@ export class MockValidator {
         message: `No validation schema found for component '${componentName}'`,
         suggestion: 'Add validation schema or check component name spelling',
       });
-      
-      return this.createValidationResult(false, errors, warnings, suggestions, 0, startTime);
+
+      return this.createValidationResult(
+        false,
+        errors,
+        warnings,
+        suggestions,
+        0,
+        startTime
+      );
     }
 
     // Validate that mock is a function (React components should be functions)
@@ -452,19 +579,22 @@ export class MockValidator {
         // Test basic rendering with minimal props
         const testProps = this.generateTestProps(schema);
         const result = mock(testProps);
-        
+
         // Also test without test ID to check if mock adds it
         const propsWithoutTestId = { ...testProps };
         delete propsWithoutTestId['data-testid'];
         const resultWithoutTestId = mock(propsWithoutTestId);
-        
+
         // Validate that component returns valid JSX-like structure
         if (result && typeof result === 'object' && result.type) {
           // Check for test ID
           if (schema.expectedBehavior.hasTestId) {
-            const hasTestIdWithProps = result.props && result.props['data-testid'];
-            const hasTestIdWithoutProps = resultWithoutTestId.props && resultWithoutTestId.props['data-testid'];
-            
+            const hasTestIdWithProps =
+              result.props && result.props['data-testid'];
+            const hasTestIdWithoutProps =
+              resultWithoutTestId.props &&
+              resultWithoutTestId.props['data-testid'];
+
             // Warn if mock doesn't add test ID when not provided in props
             if (!hasTestIdWithoutProps) {
               warnings.push({
@@ -501,13 +631,22 @@ export class MockValidator {
 
     // Calculate validation score
     const score = this.calculateValidationScore(errors, warnings);
-    const isValid = errors.filter(e => e.severity === 'critical' || e.severity === 'high').length === 0;
+    const isValid =
+      errors.filter((e) => e.severity === 'critical' || e.severity === 'high')
+        .length === 0;
 
-    const result = this.createValidationResult(isValid, errors, warnings, suggestions, score, startTime);
-    
+    const result = this.createValidationResult(
+      isValid,
+      errors,
+      warnings,
+      suggestions,
+      score,
+      startTime
+    );
+
     // Store in history
     this.addToHistory(componentName, result);
-    
+
     return result;
   }
 
@@ -521,7 +660,7 @@ export class MockValidator {
     this.mockRegistry.forEach((mock, key) => {
       const [type, name] = key.split(':');
       let validationResult: ValidationResult;
-      
+
       if (type === 'hook') {
         validationResult = this.validateHookMock(name, mock);
       } else if (type === 'component') {
@@ -531,8 +670,15 @@ export class MockValidator {
         validationResult = this.validateGenericMock(name, mock);
       }
 
-      const coverage = this.calculateMockCoverage(name, mock, type as 'hook' | 'component');
-      const recommendations = this.generateRecommendations(validationResult, coverage);
+      const coverage = this.calculateMockCoverage(
+        name,
+        mock,
+        type as 'hook' | 'component'
+      );
+      const recommendations = this.generateRecommendations(
+        validationResult,
+        coverage
+      );
       const healthScore = this.calculateHealthScore(validationResult, coverage);
 
       reports.push({
@@ -555,47 +701,85 @@ export class MockValidator {
   public suggestFixes(failures: ValidationFailure[]): FixSuggestion[] {
     const suggestions: FixSuggestion[] = [];
 
-    failures.forEach(failure => {
-      failure.errors.forEach(error => {
+    failures.forEach((failure) => {
+      failure.errors.forEach((error) => {
         let suggestion: FixSuggestion;
 
         switch (error.type) {
           case 'MISSING_METHOD':
             suggestion = {
               type: 'ADD_METHOD',
-              priority: error.severity as 'critical' | 'high' | 'medium' | 'low',
+              priority: error.severity as
+                | 'critical'
+                | 'high'
+                | 'medium'
+                | 'low',
               description: `Add missing method '${error.path}' to mock '${failure.mockName}'`,
-              codeExample: this.generateMethodMockCode(error.path, error.expected),
-              affectedTests: this.findAffectedTests(failure.mockName, error.path),
+              codeExample: this.generateMethodMockCode(
+                error.path,
+                error.expected
+              ),
+              affectedTests: this.findAffectedTests(
+                failure.mockName,
+                error.path
+              ),
             };
             break;
 
           case 'MISSING_PROPERTY':
             suggestion = {
               type: 'ADD_PROPERTY',
-              priority: error.severity as 'critical' | 'high' | 'medium' | 'low',
+              priority: error.severity as
+                | 'critical'
+                | 'high'
+                | 'medium'
+                | 'low',
               description: `Add missing property '${error.path}' to mock '${failure.mockName}'`,
-              codeExample: this.generatePropertyMockCode(error.path, error.expected),
-              affectedTests: this.findAffectedTests(failure.mockName, error.path),
+              codeExample: this.generatePropertyMockCode(
+                error.path,
+                error.expected
+              ),
+              affectedTests: this.findAffectedTests(
+                failure.mockName,
+                error.path
+              ),
             };
             break;
 
           case 'TYPE_MISMATCH':
             suggestion = {
               type: 'FIX_TYPE',
-              priority: error.severity as 'critical' | 'high' | 'medium' | 'low',
+              priority: error.severity as
+                | 'critical'
+                | 'high'
+                | 'medium'
+                | 'low',
               description: `Fix type mismatch for '${error.path}' in mock '${failure.mockName}'`,
-              codeExample: this.generateTypeFix(error.path, error.expected, error.actual),
-              affectedTests: this.findAffectedTests(failure.mockName, error.path),
+              codeExample: this.generateTypeFix(
+                error.path,
+                error.expected,
+                error.actual
+              ),
+              affectedTests: this.findAffectedTests(
+                failure.mockName,
+                error.path
+              ),
             };
             break;
 
           case 'STRUCTURE_MISMATCH':
             suggestion = {
               type: 'UPDATE_STRUCTURE',
-              priority: error.severity as 'critical' | 'high' | 'medium' | 'low',
+              priority: error.severity as
+                | 'critical'
+                | 'high'
+                | 'medium'
+                | 'low',
               description: `Update structure of mock '${failure.mockName}' to match expected format`,
-              codeExample: this.generateStructureFix(failure.mockName, error.expected),
+              codeExample: this.generateStructureFix(
+                failure.mockName,
+                error.expected
+              ),
               affectedTests: this.findAffectedTests(failure.mockName),
             };
             break;
@@ -646,79 +830,85 @@ export class MockValidator {
 
     // Validate properties
     if (expectedStructure.properties) {
-      Object.entries(expectedStructure.properties).forEach(([propName, propSchema]: [string, any]) => {
-        const propPath = `${basePath}.${propName}`;
-        const actualValue = obj[propName];
+      Object.entries(expectedStructure.properties).forEach(
+        ([propName, propSchema]: [string, any]) => {
+          const propPath = `${basePath}.${propName}`;
+          const actualValue = obj[propName];
 
-        if (propSchema.required && actualValue === undefined) {
-          errors.push({
-            type: 'MISSING_PROPERTY',
-            severity: 'high',
-            path: propPath,
-            expected: propSchema.type,
-            actual: 'undefined',
-            message: `Required property '${propName}' is missing from '${basePath}'`,
-            suggestion: `Add ${propName}: ${this.generateDefaultValue(propSchema.type)} to the mock`,
-          });
-        } else if (actualValue !== undefined) {
-          // Validate type
-          const expectedType = propSchema.type;
-          const actualType = Array.isArray(actualValue) ? 'array' : typeof actualValue;
-          
-          if (actualType !== expectedType) {
-            const severity = propSchema.required ? 'high' : 'medium';
+          if (propSchema.required && actualValue === undefined) {
             errors.push({
-              type: 'TYPE_MISMATCH',
-              severity,
+              type: 'MISSING_PROPERTY',
+              severity: 'high',
               path: propPath,
-              expected: expectedType,
-              actual: actualType,
-              message: `Property '${propName}' has wrong type. Expected ${expectedType}, got ${actualType}`,
-              suggestion: `Change ${propName} to type ${expectedType}`,
+              expected: propSchema.type,
+              actual: 'undefined',
+              message: `Required property '${propName}' is missing from '${basePath}'`,
+              suggestion: `Add ${propName}: ${this.generateDefaultValue(propSchema.type)} to the mock`,
             });
+          } else if (actualValue !== undefined) {
+            // Validate type
+            const expectedType = propSchema.type;
+            const actualType = Array.isArray(actualValue)
+              ? 'array'
+              : typeof actualValue;
+
+            if (actualType !== expectedType) {
+              const severity = propSchema.required ? 'high' : 'medium';
+              errors.push({
+                type: 'TYPE_MISMATCH',
+                severity,
+                path: propPath,
+                expected: expectedType,
+                actual: actualType,
+                message: `Property '${propName}' has wrong type. Expected ${expectedType}, got ${actualType}`,
+                suggestion: `Change ${propName} to type ${expectedType}`,
+              });
+            }
           }
         }
-      });
+      );
     }
 
     // Validate methods
     if (expectedStructure.methods) {
-      Object.entries(expectedStructure.methods).forEach(([methodName, methodSchema]: [string, any]) => {
-        const methodPath = `${basePath}.${methodName}`;
-        const actualMethod = obj[methodName];
+      Object.entries(expectedStructure.methods).forEach(
+        ([methodName, methodSchema]: [string, any]) => {
+          const methodPath = `${basePath}.${methodName}`;
+          const actualMethod = obj[methodName];
 
-        if (methodSchema.required && !actualMethod) {
-          errors.push({
-            type: 'MISSING_METHOD',
-            severity: 'critical',
-            path: methodPath,
-            expected: 'function',
-            actual: 'undefined',
-            message: `Required method '${methodName}' is missing from '${basePath}'`,
-            suggestion: `Add ${methodName}: jest.fn() to the mock`,
-          });
-        } else if (actualMethod) {
-          // Validate that it's a function
-          if (typeof actualMethod !== 'function') {
+          if (methodSchema.required && !actualMethod) {
             errors.push({
-              type: 'TYPE_MISMATCH',
-              severity: 'high',
+              type: 'MISSING_METHOD',
+              severity: 'critical',
               path: methodPath,
               expected: 'function',
-              actual: typeof actualMethod,
-              message: `Method '${methodName}' should be a function, got ${typeof actualMethod}`,
-              suggestion: `Change ${methodName} to jest.fn()`,
+              actual: 'undefined',
+              message: `Required method '${methodName}' is missing from '${basePath}'`,
+              suggestion: `Add ${methodName}: jest.fn() to the mock`,
             });
-          } else if (!jest.isMockFunction(actualMethod)) {
-            warnings.push({
-              type: 'PERFORMANCE_CONCERN',
-              path: methodPath,
-              message: `Method '${methodName}' is not a jest mock function`,
-              suggestion: `Use jest.fn() for better test control and assertions`,
-            });
+          } else if (actualMethod) {
+            // Validate that it's a function
+            if (typeof actualMethod !== 'function') {
+              errors.push({
+                type: 'TYPE_MISMATCH',
+                severity: 'high',
+                path: methodPath,
+                expected: 'function',
+                actual: typeof actualMethod,
+                message: `Method '${methodName}' should be a function, got ${typeof actualMethod}`,
+                suggestion: `Change ${methodName} to jest.fn()`,
+              });
+            } else if (!jest.isMockFunction(actualMethod)) {
+              warnings.push({
+                type: 'PERFORMANCE_CONCERN',
+                path: methodPath,
+                message: `Method '${methodName}' is not a jest mock function`,
+                suggestion: `Use jest.fn() for better test control and assertions`,
+              });
+            }
           }
         }
-      });
+      );
     }
   }
 
@@ -743,59 +933,88 @@ export class MockValidator {
     const score = this.calculateValidationScore(errors, warnings);
     const isValid = errors.length === 0;
 
-    return this.createValidationResult(isValid, errors, warnings, suggestions, score, startTime);
+    return this.createValidationResult(
+      isValid,
+      errors,
+      warnings,
+      suggestions,
+      score,
+      startTime
+    );
   }
 
-  private calculateMockCoverage(name: string, mock: any, type: 'hook' | 'component'): MockCoverage {
+  private calculateMockCoverage(
+    name: string,
+    mock: any,
+    type: 'hook' | 'component'
+  ): MockCoverage {
     let totalMethods = 0;
     let mockedMethods = 0;
     let totalProperties = 0;
     let mockedProperties = 0;
     const missingItems: string[] = [];
 
-    const schema = type === 'hook' ? HOOK_SCHEMAS[name] : COMPONENT_SCHEMAS[name];
-    
+    const schema =
+      type === 'hook' ? HOOK_SCHEMAS[name] : COMPONENT_SCHEMAS[name];
+
     if (schema && type === 'hook') {
       const hookSchema = schema as HookValidationSchema;
-      
+
       // Count methods
       if (hookSchema.expectedStructure.methods) {
         totalMethods = Object.keys(hookSchema.expectedStructure.methods).length;
-        
+
         if (typeof mock === 'function') {
           try {
             const mockReturn = mock();
-            Object.keys(hookSchema.expectedStructure.methods).forEach(methodName => {
-              if (mockReturn && typeof mockReturn[methodName] === 'function') {
-                mockedMethods++;
-              } else {
-                missingItems.push(`method:${methodName}`);
+            Object.keys(hookSchema.expectedStructure.methods).forEach(
+              (methodName) => {
+                if (
+                  mockReturn &&
+                  typeof mockReturn[methodName] === 'function'
+                ) {
+                  mockedMethods++;
+                } else {
+                  missingItems.push(`method:${methodName}`);
+                }
               }
-            });
+            );
           } catch (error) {
             // Mock function failed, all methods are missing
-            missingItems.push(...Object.keys(hookSchema.expectedStructure.methods).map(m => `method:${m}`));
+            missingItems.push(
+              ...Object.keys(hookSchema.expectedStructure.methods).map(
+                (m) => `method:${m}`
+              )
+            );
           }
         }
       }
 
       // Count properties
       if (hookSchema.expectedStructure.properties) {
-        totalProperties = Object.keys(hookSchema.expectedStructure.properties).length;
-        
+        totalProperties = Object.keys(
+          hookSchema.expectedStructure.properties
+        ).length;
+
         if (typeof mock === 'function') {
           try {
             const mockReturn = mock();
-            Object.keys(hookSchema.expectedStructure.properties).forEach(propName => {
-              if (mockReturn && mockReturn[propName] !== undefined) {
-                mockedProperties++;
-              } else {
-                missingItems.push(`property:${propName}`);
+            Object.keys(hookSchema.expectedStructure.properties).forEach(
+              (propName) => {
+                if (mockReturn && mockReturn[propName] !== undefined) {
+                  mockedProperties++;
+                } else {
+                  missingItems.push(`property:${propName}`);
+                }
               }
-            });
+            );
           } catch (error) {
             // Mock function failed, all properties are missing
-            missingItems.push(...Object.keys(hookSchema.expectedStructure.properties).map(p => `property:${p}`));
+            missingItems.push(
+              ...Object.keys(hookSchema.expectedStructure.properties).map(
+                (p) => `property:${p}`
+              )
+            );
           }
         }
       }
@@ -803,7 +1022,8 @@ export class MockValidator {
 
     const totalItems = totalMethods + totalProperties;
     const mockedItems = mockedMethods + mockedProperties;
-    const coveragePercentage = totalItems > 0 ? Math.round((mockedItems / totalItems) * 100) : 0;
+    const coveragePercentage =
+      totalItems > 0 ? Math.round((mockedItems / totalItems) * 100) : 0;
 
     return {
       totalMethods,
@@ -815,63 +1035,90 @@ export class MockValidator {
     };
   }
 
-  private generateRecommendations(validation: ValidationResult, coverage: MockCoverage): string[] {
+  private generateRecommendations(
+    validation: ValidationResult,
+    coverage: MockCoverage
+  ): string[] {
     const recommendations: string[] = [];
 
     // Coverage-based recommendations
     if (coverage.coveragePercentage < 80) {
-      recommendations.push(`Improve mock coverage (currently ${coverage.coveragePercentage}%). Missing: ${coverage.missingItems.join(', ')}`);
+      recommendations.push(
+        `Improve mock coverage (currently ${coverage.coveragePercentage}%). Missing: ${coverage.missingItems.join(', ')}`
+      );
     }
 
     if (coverage.mockedMethods < coverage.totalMethods) {
-      recommendations.push(`Add ${coverage.totalMethods - coverage.mockedMethods} missing method mocks`);
+      recommendations.push(
+        `Add ${coverage.totalMethods - coverage.mockedMethods} missing method mocks`
+      );
     }
 
     if (coverage.mockedProperties < coverage.totalProperties) {
-      recommendations.push(`Add ${coverage.totalProperties - coverage.mockedProperties} missing property mocks`);
+      recommendations.push(
+        `Add ${coverage.totalProperties - coverage.mockedProperties} missing property mocks`
+      );
     }
 
     // Validation-based recommendations
-    const criticalErrors = validation.errors.filter(e => e.severity === 'critical');
+    const criticalErrors = validation.errors.filter(
+      (e) => e.severity === 'critical'
+    );
     if (criticalErrors.length > 0) {
-      recommendations.push(`Fix ${criticalErrors.length} critical validation errors immediately`);
+      recommendations.push(
+        `Fix ${criticalErrors.length} critical validation errors immediately`
+      );
     }
 
-    const highErrors = validation.errors.filter(e => e.severity === 'high');
+    const highErrors = validation.errors.filter((e) => e.severity === 'high');
     if (highErrors.length > 0) {
-      recommendations.push(`Address ${highErrors.length} high-priority validation issues`);
+      recommendations.push(
+        `Address ${highErrors.length} high-priority validation issues`
+      );
     }
 
     if (validation.warnings.length > 0) {
-      recommendations.push(`Consider addressing ${validation.warnings.length} warnings for better test reliability`);
+      recommendations.push(
+        `Consider addressing ${validation.warnings.length} warnings for better test reliability`
+      );
     }
 
     // Score-based recommendations
     if (validation.score < 70) {
-      recommendations.push('Mock quality is below acceptable threshold. Consider refactoring.');
+      recommendations.push(
+        'Mock quality is below acceptable threshold. Consider refactoring.'
+      );
     } else if (validation.score < 90) {
-      recommendations.push('Mock quality is good but has room for improvement.');
+      recommendations.push(
+        'Mock quality is good but has room for improvement.'
+      );
     }
 
     return recommendations;
   }
 
-  private calculateHealthScore(validation: ValidationResult, coverage: MockCoverage): number {
+  private calculateHealthScore(
+    validation: ValidationResult,
+    coverage: MockCoverage
+  ): number {
     // Health score is weighted combination of validation score and coverage
     const validationWeight = 0.7;
     const coverageWeight = 0.3;
-    
+
     return Math.round(
-      (validation.score * validationWeight) + 
-      (coverage.coveragePercentage * coverageWeight)
+      validation.score * validationWeight +
+        coverage.coveragePercentage * coverageWeight
     );
   }
 
-  private calculateValidationScore(errors: ValidationError[], warnings: ValidationWarning[]): number {
+  private calculateValidationScore(
+    errors: ValidationError[],
+    warnings: ValidationWarning[]
+  ): number {
     let score = 100;
 
     // Deduct points for errors based on severity
-    errors.forEach(error => {
+    errors.forEach((error) => {
       switch (error.severity) {
         case 'critical':
           score -= 25;
@@ -918,19 +1165,21 @@ export class MockValidator {
     if (!this.validationHistory.has(mockName)) {
       this.validationHistory.set(mockName, []);
     }
-    
+
     const history = this.validationHistory.get(mockName)!;
     history.push(result);
-    
+
     // Keep only last 10 validation results
     if (history.length > 10) {
       history.shift();
     }
   }
 
-  private generateTestProps(schema: ComponentValidationSchema): Record<string, any> {
+  private generateTestProps(
+    schema: ComponentValidationSchema
+  ): Record<string, any> {
     const props: Record<string, any> = {};
-    
+
     Object.entries(schema.expectedProps).forEach(([propName, propConfig]) => {
       if (propConfig.required) {
         props[propName] = this.generateDefaultValue(propConfig.type);
@@ -939,7 +1188,7 @@ export class MockValidator {
 
     // Always add test ID for validation
     props['data-testid'] = `test-${schema.name.toLowerCase()}`;
-    
+
     return props;
   }
 
@@ -969,13 +1218,20 @@ export class MockValidator {
     return `${methodName}: jest.fn()`;
   }
 
-  private generatePropertyMockCode(propertyPath: string, expected: any): string {
+  private generatePropertyMockCode(
+    propertyPath: string,
+    expected: any
+  ): string {
     const propertyName = propertyPath.split('.').pop();
     const defaultValue = this.generateDefaultValue(expected);
     return `${propertyName}: ${JSON.stringify(defaultValue)}`;
   }
 
-  private generateTypeFix(path: string, expected: string, actual: string): string {
+  private generateTypeFix(
+    path: string,
+    expected: string,
+    actual: string
+  ): string {
     const propertyName = path.split('.').pop();
     const defaultValue = this.generateDefaultValue(expected);
     return `// Change from ${actual} to ${expected}\n${propertyName}: ${JSON.stringify(defaultValue)}`;
@@ -1008,7 +1264,11 @@ export class MockValidator {
   /**
    * Register a mock for validation
    */
-  public registerMock(type: 'hook' | 'component' | 'provider' | 'utility', name: string, mock: any): void {
+  public registerMock(
+    type: 'hook' | 'component' | 'provider' | 'utility',
+    name: string,
+    mock: any
+  ): void {
     this.mockRegistry.set(`${type}:${name}`, mock);
   }
 

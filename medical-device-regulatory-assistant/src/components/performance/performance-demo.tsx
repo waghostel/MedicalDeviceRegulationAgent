@@ -1,6 +1,6 @@
 /**
  * Performance Optimization Demo Component
- * 
+ *
  * Demonstrates all implemented performance optimization features:
  * - Virtual scrolling for large datasets
  * - Lazy loading of images and components
@@ -14,14 +14,14 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
-import { 
-  Activity, 
-  Database, 
-  Image as ImageIcon, 
-  Zap, 
+import {
+  Activity,
+  Database,
+  Image as ImageIcon,
+  Zap,
   RefreshCw,
   TrendingUp,
-  CheckCircle 
+  CheckCircle,
 } from 'lucide-react';
 
 // Import performance optimization components
@@ -30,22 +30,28 @@ import { LazyImage, LazyComponent, LazyChart } from './lazy-loading';
 import { PerformanceMonitor } from './performance-monitor';
 
 // Import performance utilities
-import { 
-  usePerformanceMonitor, 
+import {
+  usePerformanceMonitor,
   useMemoryMonitoring,
-  useRenderPerformance 
+  useRenderPerformance,
 } from '@/lib/performance/optimization';
-import { useCachedData, apiCache, memoryCache } from '@/lib/performance/caching';
+import {
+  useCachedData,
+  apiCache,
+  memoryCache,
+} from '@/lib/performance/caching';
 
 // Mock data generators
-const generateLargeDataset = (size: number) => 
+const generateLargeDataset = (size: number) =>
   Array.from({ length: size }, (_, i) => ({
     id: i,
     name: `Project ${i}`,
     description: `This is a detailed description for project ${i} with comprehensive information about the medical device regulatory requirements.`,
     device_type: ['Class I', 'Class II', 'Class III'][i % 3],
     status: ['draft', 'in_progress', 'completed'][i % 3],
-    created_at: new Date(Date.now() - Math.random() * 365 * 24 * 60 * 60 * 1000).toISOString(),
+    created_at: new Date(
+      Date.now() - Math.random() * 365 * 24 * 60 * 60 * 1000
+    ).toISOString(),
     image_url: `https://picsum.photos/300/200?random=${i}`,
   }));
 
@@ -60,10 +66,12 @@ const generateChartData = (points: number) =>
 const ProjectStats = memo(({ projects }: { projects: any[] }) => {
   const stats = useMemo(() => {
     const total = projects.length;
-    const completed = projects.filter(p => p.status === 'completed').length;
-    const inProgress = projects.filter(p => p.status === 'in_progress').length;
-    const draft = projects.filter(p => p.status === 'draft').length;
-    
+    const completed = projects.filter((p) => p.status === 'completed').length;
+    const inProgress = projects.filter(
+      (p) => p.status === 'in_progress'
+    ).length;
+    const draft = projects.filter((p) => p.status === 'draft').length;
+
     return { total, completed, inProgress, draft };
   }, [projects]);
 
@@ -77,13 +85,17 @@ const ProjectStats = memo(({ projects }: { projects: any[] }) => {
       </Card>
       <Card>
         <CardContent className="p-4 text-center">
-          <div className="text-2xl font-bold text-green-600">{stats.completed}</div>
+          <div className="text-2xl font-bold text-green-600">
+            {stats.completed}
+          </div>
           <div className="text-sm text-muted-foreground">Completed</div>
         </CardContent>
       </Card>
       <Card>
         <CardContent className="p-4 text-center">
-          <div className="text-2xl font-bold text-blue-600">{stats.inProgress}</div>
+          <div className="text-2xl font-bold text-blue-600">
+            {stats.inProgress}
+          </div>
           <div className="text-sm text-muted-foreground">In Progress</div>
         </CardContent>
       </Card>
@@ -201,37 +213,46 @@ CacheStats.displayName = 'CacheStats';
 
 export const PerformanceDemo = memo(function PerformanceDemo() {
   useRenderPerformance('PerformanceDemo');
-  
+
   const [datasetSize, setDatasetSize] = useState(1000);
   const [refreshKey, setRefreshKey] = useState(0);
-  
+
   const { metrics } = usePerformanceMonitor();
   const memoryInfo = useMemoryMonitoring();
 
   // Generate large dataset with caching
-  const { data: projects, loading, refresh } = useCachedData(
+  const {
+    data: projects,
+    loading,
+    refresh,
+  } = useCachedData(
     `projects-${datasetSize}-${refreshKey}`,
     async () => {
       // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise((resolve) => setTimeout(resolve, 100));
       return generateLargeDataset(datasetSize);
     },
     { ttl: 60000 } // Cache for 1 minute
   );
 
   const chartData = useMemo(() => generateChartData(50), []);
-  const imageUrls = useMemo(() => 
-    Array.from({ length: 20 }, (_, i) => `https://picsum.photos/300/200?random=${i + 100}`)
-  , []);
+  const imageUrls = useMemo(
+    () =>
+      Array.from(
+        { length: 20 },
+        (_, i) => `https://picsum.photos/300/200?random=${i + 100}`
+      ),
+    []
+  );
 
   const handleDatasetSizeChange = (size: number) => {
     setDatasetSize(size);
-    setRefreshKey(prev => prev + 1);
+    setRefreshKey((prev) => prev + 1);
   };
 
   const handleRefresh = () => {
     refresh();
-    setRefreshKey(prev => prev + 1);
+    setRefreshKey((prev) => prev + 1);
   };
 
   return (
@@ -239,18 +260,21 @@ export const PerformanceDemo = memo(function PerformanceDemo() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Performance Optimization Demo</h1>
+          <h1 className="text-3xl font-bold tracking-tight">
+            Performance Optimization Demo
+          </h1>
           <p className="text-muted-foreground">
-            Demonstrating virtual scrolling, lazy loading, caching, and performance monitoring
+            Demonstrating virtual scrolling, lazy loading, caching, and
+            performance monitoring
           </p>
         </div>
-        
+
         <div className="flex items-center gap-2">
-          <Badge variant="outline">
-            {datasetSize.toLocaleString()} items
-          </Badge>
+          <Badge variant="outline">{datasetSize.toLocaleString()} items</Badge>
           <Button variant="outline" onClick={handleRefresh} disabled={loading}>
-            <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+            <RefreshCw
+              className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`}
+            />
             Refresh
           </Button>
         </div>
@@ -270,7 +294,9 @@ export const PerformanceDemo = memo(function PerformanceDemo() {
               <div className="text-2xl font-bold">
                 {Object.keys(metrics).length}
               </div>
-              <div className="text-sm text-muted-foreground">Active Metrics</div>
+              <div className="text-sm text-muted-foreground">
+                Active Metrics
+              </div>
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold">
@@ -279,10 +305,10 @@ export const PerformanceDemo = memo(function PerformanceDemo() {
               <div className="text-sm text-muted-foreground">Memory Usage</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-green-600">
-                Optimized
+              <div className="text-2xl font-bold text-green-600">Optimized</div>
+              <div className="text-sm text-muted-foreground">
+                Performance Status
               </div>
-              <div className="text-sm text-muted-foreground">Performance Status</div>
             </div>
           </div>
         </CardContent>
@@ -317,22 +343,22 @@ export const PerformanceDemo = memo(function PerformanceDemo() {
             <CardHeader>
               <CardTitle>Virtual Scrolling Demo</CardTitle>
               <div className="flex gap-2">
-                <Button 
-                  variant={datasetSize === 100 ? "default" : "outline"}
+                <Button
+                  variant={datasetSize === 100 ? 'default' : 'outline'}
                   size="sm"
                   onClick={() => handleDatasetSizeChange(100)}
                 >
                   100 items
                 </Button>
-                <Button 
-                  variant={datasetSize === 1000 ? "default" : "outline"}
+                <Button
+                  variant={datasetSize === 1000 ? 'default' : 'outline'}
                   size="sm"
                   onClick={() => handleDatasetSizeChange(1000)}
                 >
                   1,000 items
                 </Button>
-                <Button 
-                  variant={datasetSize === 10000 ? "default" : "outline"}
+                <Button
+                  variant={datasetSize === 10000 ? 'default' : 'outline'}
                   size="sm"
                   onClick={() => handleDatasetSizeChange(10000)}
                 >
@@ -342,18 +368,22 @@ export const PerformanceDemo = memo(function PerformanceDemo() {
             </CardHeader>
             <CardContent>
               {projects && <ProjectStats projects={projects} />}
-              
+
               <div className="mt-6">
                 {loading ? (
                   <div className="flex items-center justify-center py-8">
                     <RefreshCw className="h-6 w-6 animate-spin mr-2" />
-                    <span>Loading {datasetSize.toLocaleString()} projects...</span>
+                    <span>
+                      Loading {datasetSize.toLocaleString()} projects...
+                    </span>
                   </div>
                 ) : projects ? (
                   <VirtualizedProjectList
                     projects={projects}
                     containerHeight={400}
-                    onSelectProject={(project) => console.log('Selected:', project)}
+                    onSelectProject={(project) =>
+                      console.log('Selected:', project)
+                    }
                   />
                 ) : null}
               </div>
@@ -371,20 +401,26 @@ export const PerformanceDemo = memo(function PerformanceDemo() {
             </CardHeader>
             <CardContent className="space-y-6">
               <div>
-                <h3 className="text-lg font-semibold mb-4">Lazy Loaded Images</h3>
+                <h3 className="text-lg font-semibold mb-4">
+                  Lazy Loaded Images
+                </h3>
                 <LazyImageGallery images={imageUrls} />
               </div>
-              
+
               <div>
-                <h3 className="text-lg font-semibold mb-4">Lazy Loaded Chart</h3>
-                <LazyComponent fallback={
-                  <div className="w-full h-64 bg-gray-100 rounded-lg flex items-center justify-center">
-                    <div className="text-center">
-                      <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-2" />
-                      <p>Loading chart...</p>
+                <h3 className="text-lg font-semibold mb-4">
+                  Lazy Loaded Chart
+                </h3>
+                <LazyComponent
+                  fallback={
+                    <div className="w-full h-64 bg-gray-100 rounded-lg flex items-center justify-center">
+                      <div className="text-center">
+                        <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-2" />
+                        <p>Loading chart...</p>
+                      </div>
                     </div>
-                  </div>
-                }>
+                  }
+                >
                   <LazyChart data={chartData} type="line" />
                 </LazyComponent>
               </div>
@@ -402,9 +438,11 @@ export const PerformanceDemo = memo(function PerformanceDemo() {
             </CardHeader>
             <CardContent>
               <CacheStats />
-              
+
               <div className="mt-6 p-4 bg-green-50 rounded-lg">
-                <h4 className="font-semibold text-green-800 mb-2">Cache Benefits:</h4>
+                <h4 className="font-semibold text-green-800 mb-2">
+                  Cache Benefits:
+                </h4>
                 <ul className="text-sm text-green-700 space-y-1">
                   <li>• Reduced API calls and server load</li>
                   <li>• Faster data retrieval for repeated requests</li>
@@ -430,11 +468,15 @@ export const PerformanceDemo = memo(function PerformanceDemo() {
                 <div className="space-y-3">
                   <div className="flex items-center">
                     <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
-                    <span className="text-sm">Virtual Scrolling for Large Lists</span>
+                    <span className="text-sm">
+                      Virtual Scrolling for Large Lists
+                    </span>
                   </div>
                   <div className="flex items-center">
                     <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
-                    <span className="text-sm">Lazy Loading of Images & Components</span>
+                    <span className="text-sm">
+                      Lazy Loading of Images & Components
+                    </span>
                   </div>
                   <div className="flex items-center">
                     <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
@@ -442,7 +484,9 @@ export const PerformanceDemo = memo(function PerformanceDemo() {
                   </div>
                   <div className="flex items-center">
                     <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
-                    <span className="text-sm">Real-time Performance Monitoring</span>
+                    <span className="text-sm">
+                      Real-time Performance Monitoring
+                    </span>
                   </div>
                   <div className="flex items-center">
                     <CheckCircle className="h-4 w-4 text-green-500 mr-2" />

@@ -95,7 +95,12 @@ export interface DashboardData {
 
 export interface ActivityItem {
   id: string;
-  type: 'classification' | 'predicate_search' | 'comparison' | 'document_upload' | 'agent_interaction';
+  type:
+    | 'classification'
+    | 'predicate_search'
+    | 'comparison'
+    | 'document_upload'
+    | 'agent_interaction';
   title: string;
   description: string;
   timestamp: string;
@@ -142,15 +147,28 @@ export interface DashboardExportOptions {
 }
 
 export interface DashboardUpdate {
-  type: 'classification_updated' | 'predicate_added' | 'progress_updated' | 'activity_added';
+  type:
+    | 'classification_updated'
+    | 'predicate_added'
+    | 'progress_updated'
+    | 'activity_added';
   projectId: string;
   data: any;
   timestamp: string;
 }
 
 // Status enums for better type safety
-export type ClassificationStatus = 'pending' | 'in-progress' | 'completed' | 'error';
-export type PredicateStatus = 'pending' | 'searching' | 'found' | 'analyzed' | 'selected';
+export type ClassificationStatus =
+  | 'pending'
+  | 'in-progress'
+  | 'completed'
+  | 'error';
+export type PredicateStatus =
+  | 'pending'
+  | 'searching'
+  | 'found'
+  | 'analyzed'
+  | 'selected';
 export type ProgressStatus = 'pending' | 'in-progress' | 'completed' | 'error';
 
 // Widget component props interfaces
@@ -175,7 +193,12 @@ export interface ProgressWidgetProps {
   progress: ProjectProgress;
   loading?: boolean;
   error?: string;
-  onStepClick?: (step: keyof Omit<ProjectProgress, 'projectId' | 'overallProgress' | 'nextActions' | 'lastUpdated'>) => void;
+  onStepClick?: (
+    step: keyof Omit<
+      ProjectProgress,
+      'projectId' | 'overallProgress' | 'nextActions' | 'lastUpdated'
+    >
+  ) => void;
   onRefresh?: () => void;
 }
 

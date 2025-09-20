@@ -6,15 +6,15 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
-import { 
-  Eye, 
-  EyeOff, 
-  Type, 
-  Contrast, 
-  MousePointer, 
+import {
+  Eye,
+  EyeOff,
+  Type,
+  Contrast,
+  MousePointer,
   Keyboard,
   Volume2,
-  Settings
+  Settings,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -35,11 +35,14 @@ const defaultSettings: AccessibilitySettings = {
   focusIndicators: true,
   screenReaderOptimized: false,
   fontSize: 16,
-  announceChanges: true
+  announceChanges: true,
 };
 
-export const AccessibilityProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [settings, setSettings] = useState<AccessibilitySettings>(defaultSettings);
+export const AccessibilityProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
+  const [settings, setSettings] =
+    useState<AccessibilitySettings>(defaultSettings);
 
   // Load settings from localStorage
   useEffect(() => {
@@ -61,42 +64,42 @@ export const AccessibilityProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const applyAccessibilitySettings = (settings: AccessibilitySettings) => {
     const root = document.documentElement;
-    
+
     // High contrast
     if (settings.highContrast) {
       root.classList.add('high-contrast');
     } else {
       root.classList.remove('high-contrast');
     }
-    
+
     // Reduced motion
     if (settings.reducedMotion) {
       root.classList.add('reduce-motion');
     } else {
       root.classList.remove('reduce-motion');
     }
-    
+
     // Large text
     if (settings.largeText) {
       root.classList.add('large-text');
     } else {
       root.classList.remove('large-text');
     }
-    
+
     // Enhanced focus indicators
     if (settings.focusIndicators) {
       root.classList.add('enhanced-focus');
     } else {
       root.classList.remove('enhanced-focus');
     }
-    
+
     // Screen reader optimizations
     if (settings.screenReaderOptimized) {
       root.classList.add('screen-reader-optimized');
     } else {
       root.classList.remove('screen-reader-optimized');
     }
-    
+
     // Font size
     root.style.setProperty('--base-font-size', `${settings.fontSize}px`);
   };
@@ -116,20 +119,24 @@ const AccessibilityContext = React.createContext<{
 export const useAccessibility = () => {
   const context = React.useContext(AccessibilityContext);
   if (!context) {
-    throw new Error('useAccessibility must be used within AccessibilityProvider');
+    throw new Error(
+      'useAccessibility must be used within AccessibilityProvider'
+    );
   }
   return context;
 };
 
 // Accessibility settings panel
-export const AccessibilityPanel: React.FC<{ className?: string }> = ({ className }) => {
+export const AccessibilityPanel: React.FC<{ className?: string }> = ({
+  className,
+}) => {
   const { settings, setSettings } = useAccessibility();
 
   const updateSetting = <K extends keyof AccessibilitySettings>(
     key: K,
     value: AccessibilitySettings[K]
   ) => {
-    setSettings(prev => ({ ...prev, [key]: value }));
+    setSettings((prev) => ({ ...prev, [key]: value }));
   };
 
   return (
@@ -144,7 +151,7 @@ export const AccessibilityPanel: React.FC<{ className?: string }> = ({ className
         {/* Visual Settings */}
         <div className="space-y-4">
           <h3 className="font-medium text-sm">Visual</h3>
-          
+
           <div className="flex items-center justify-between">
             <div className="space-y-1">
               <Label htmlFor="high-contrast">High Contrast Mode</Label>
@@ -155,10 +162,12 @@ export const AccessibilityPanel: React.FC<{ className?: string }> = ({ className
             <Switch
               id="high-contrast"
               checked={settings.highContrast}
-              onCheckedChange={(checked) => updateSetting('highContrast', checked)}
+              onCheckedChange={(checked) =>
+                updateSetting('highContrast', checked)
+              }
             />
           </div>
-          
+
           <div className="flex items-center justify-between">
             <div className="space-y-1">
               <Label htmlFor="large-text">Large Text</Label>
@@ -172,7 +181,7 @@ export const AccessibilityPanel: React.FC<{ className?: string }> = ({ className
               onCheckedChange={(checked) => updateSetting('largeText', checked)}
             />
           </div>
-          
+
           <div className="space-y-2">
             <Label>Font Size: {settings.fontSize}px</Label>
             <Slider
@@ -185,11 +194,11 @@ export const AccessibilityPanel: React.FC<{ className?: string }> = ({ className
             />
           </div>
         </div>
-        
+
         {/* Motion Settings */}
         <div className="space-y-4">
           <h3 className="font-medium text-sm">Motion</h3>
-          
+
           <div className="flex items-center justify-between">
             <div className="space-y-1">
               <Label htmlFor="reduced-motion">Reduce Motion</Label>
@@ -200,18 +209,22 @@ export const AccessibilityPanel: React.FC<{ className?: string }> = ({ className
             <Switch
               id="reduced-motion"
               checked={settings.reducedMotion}
-              onCheckedChange={(checked) => updateSetting('reducedMotion', checked)}
+              onCheckedChange={(checked) =>
+                updateSetting('reducedMotion', checked)
+              }
             />
           </div>
         </div>
-        
+
         {/* Navigation Settings */}
         <div className="space-y-4">
           <h3 className="font-medium text-sm">Navigation</h3>
-          
+
           <div className="flex items-center justify-between">
             <div className="space-y-1">
-              <Label htmlFor="focus-indicators">Enhanced Focus Indicators</Label>
+              <Label htmlFor="focus-indicators">
+                Enhanced Focus Indicators
+              </Label>
               <p className="text-xs text-muted-foreground">
                 Makes keyboard focus more visible
               </p>
@@ -219,18 +232,22 @@ export const AccessibilityPanel: React.FC<{ className?: string }> = ({ className
             <Switch
               id="focus-indicators"
               checked={settings.focusIndicators}
-              onCheckedChange={(checked) => updateSetting('focusIndicators', checked)}
+              onCheckedChange={(checked) =>
+                updateSetting('focusIndicators', checked)
+              }
             />
           </div>
         </div>
-        
+
         {/* Screen Reader Settings */}
         <div className="space-y-4">
           <h3 className="font-medium text-sm">Screen Reader</h3>
-          
+
           <div className="flex items-center justify-between">
             <div className="space-y-1">
-              <Label htmlFor="screen-reader-optimized">Screen Reader Optimized</Label>
+              <Label htmlFor="screen-reader-optimized">
+                Screen Reader Optimized
+              </Label>
               <p className="text-xs text-muted-foreground">
                 Optimizes interface for screen readers
               </p>
@@ -238,10 +255,12 @@ export const AccessibilityPanel: React.FC<{ className?: string }> = ({ className
             <Switch
               id="screen-reader-optimized"
               checked={settings.screenReaderOptimized}
-              onCheckedChange={(checked) => updateSetting('screenReaderOptimized', checked)}
+              onCheckedChange={(checked) =>
+                updateSetting('screenReaderOptimized', checked)
+              }
             />
           </div>
-          
+
           <div className="flex items-center justify-between">
             <div className="space-y-1">
               <Label htmlFor="announce-changes">Announce Changes</Label>
@@ -252,13 +271,15 @@ export const AccessibilityPanel: React.FC<{ className?: string }> = ({ className
             <Switch
               id="announce-changes"
               checked={settings.announceChanges}
-              onCheckedChange={(checked) => updateSetting('announceChanges', checked)}
+              onCheckedChange={(checked) =>
+                updateSetting('announceChanges', checked)
+              }
             />
           </div>
         </div>
-        
-        <Button 
-          variant="outline" 
+
+        <Button
+          variant="outline"
           onClick={() => setSettings(defaultSettings)}
           className="w-full"
         >
@@ -270,8 +291,8 @@ export const AccessibilityPanel: React.FC<{ className?: string }> = ({ className
 };
 
 // Live region for screen reader announcements
-export const LiveRegion: React.FC<{ 
-  message?: string; 
+export const LiveRegion: React.FC<{
+  message?: string;
   priority?: 'polite' | 'assertive';
   className?: string;
 }> = ({ message, priority = 'polite', className }) => (
@@ -285,7 +306,7 @@ export const LiveRegion: React.FC<{
 );
 
 // Focus trap component
-export const FocusTrap: React.FC<{ 
+export const FocusTrap: React.FC<{
   children: React.ReactNode;
   active?: boolean;
   className?: string;
@@ -299,9 +320,11 @@ export const FocusTrap: React.FC<{
     const focusableElements = container.querySelectorAll(
       'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
     );
-    
+
     const firstElement = focusableElements[0] as HTMLElement;
-    const lastElement = focusableElements[focusableElements.length - 1] as HTMLElement;
+    const lastElement = focusableElements[
+      focusableElements.length - 1
+    ] as HTMLElement;
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key !== 'Tab') return;
@@ -340,21 +363,27 @@ export const AccessibleButton: React.FC<{
   onClick?: () => void;
   disabled?: boolean;
   loading?: boolean;
-  variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link';
+  variant?:
+    | 'default'
+    | 'destructive'
+    | 'outline'
+    | 'secondary'
+    | 'ghost'
+    | 'link';
   size?: 'default' | 'sm' | 'lg' | 'icon';
   className?: string;
   ariaLabel?: string;
   ariaDescribedBy?: string;
-}> = ({ 
-  children, 
-  onClick, 
-  disabled, 
-  loading, 
+}> = ({
+  children,
+  onClick,
+  disabled,
+  loading,
   variant = 'default',
   size = 'default',
   className,
   ariaLabel,
-  ariaDescribedBy
+  ariaDescribedBy,
 }) => {
   const { settings } = useAccessibility();
 
@@ -365,7 +394,8 @@ export const AccessibleButton: React.FC<{
       variant={variant}
       size={size}
       className={cn(
-        settings.focusIndicators && 'focus-visible:ring-4 focus-visible:ring-offset-2',
+        settings.focusIndicators &&
+          'focus-visible:ring-4 focus-visible:ring-offset-2',
         className
       )}
       aria-label={ariaLabel}

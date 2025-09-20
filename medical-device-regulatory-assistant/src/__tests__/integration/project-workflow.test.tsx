@@ -3,7 +3,13 @@
  * Tests complete user workflows from UI through API to backend
  */
 
-import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
+import {
+  render,
+  screen,
+  fireEvent,
+  waitFor,
+  within,
+} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { rest } from 'msw';
 import { setupServer } from 'msw/node';
@@ -54,12 +60,16 @@ const mockDashboardData = {
   },
   document_summary: {
     total_documents: 3,
-    document_types: { 'FDA_GUIDANCE': 2, 'USER_DOCUMENT': 1 },
+    document_types: { FDA_GUIDANCE: 2, USER_DOCUMENT: 1 },
     last_upload_date: '2024-01-15T16:00:00Z',
   },
   interaction_summary: {
     total_interactions: 8,
-    recent_actions: ['predicate_search', 'device_classification', 'document_upload'],
+    recent_actions: [
+      'predicate_search',
+      'device_classification',
+      'document_upload',
+    ],
     last_interaction_date: '2024-01-16T14:30:00Z',
   },
   completion_percentage: 75,
@@ -71,20 +81,21 @@ const server = setupServer(
   rest.get('/api/projects', (req, res, ctx) => {
     const search = req.url.searchParams.get('search');
     const status = req.url.searchParams.get('status');
-    
+
     let filteredProjects = [...mockProjects];
-    
+
     if (search) {
-      filteredProjects = filteredProjects.filter(p => 
-        p.name.toLowerCase().includes(search.toLowerCase()) ||
-        p.description?.toLowerCase().includes(search.toLowerCase())
+      filteredProjects = filteredProjects.filter(
+        (p) =>
+          p.name.toLowerCase().includes(search.toLowerCase()) ||
+          p.description?.toLowerCase().includes(search.toLowerCase())
       );
     }
-    
+
     if (status && status !== 'all') {
-      filteredProjects = filteredProjects.filter(p => p.status === status);
+      filteredProjects = filteredProjects.filter((p) => p.status === status);
     }
-    
+
     return res(ctx.json(filteredProjects));
   }),
 
@@ -99,7 +110,7 @@ const server = setupServer(
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     };
-    
+
     mockProjects.push(newProject);
     return res(ctx.status(201), ctx.json(newProject));
   }),
@@ -108,30 +119,30 @@ const server = setupServer(
   rest.put('/api/projects/:id', async (req, res, ctx) => {
     const projectId = parseInt(req.params.id as string);
     const updateData = await req.json();
-    
-    const projectIndex = mockProjects.findIndex(p => p.id === projectId);
+
+    const projectIndex = mockProjects.findIndex((p) => p.id === projectId);
     if (projectIndex === -1) {
       return res(ctx.status(404), ctx.json({ error: 'Project not found' }));
     }
-    
+
     mockProjects[projectIndex] = {
       ...mockProjects[projectIndex],
       ...updateData,
       updated_at: new Date().toISOString(),
     };
-    
+
     return res(ctx.json(mockProjects[projectIndex]));
   }),
 
   // Delete project
   rest.delete('/api/projects/:id', (req, res, ctx) => {
     const projectId = parseInt(req.params.id as string);
-    const projectIndex = mockProjects.findIndex(p => p.id === projectId);
-    
+    const projectIndex = mockProjects.findIndex((p) => p.id === projectId);
+
     if (projectIndex === -1) {
       return res(ctx.status(404), ctx.json({ error: 'Project not found' }));
     }
-    
+
     mockProjects.splice(projectIndex, 1);
     return res(ctx.json({ message: 'Project deleted successfully' }));
   }),
@@ -139,12 +150,12 @@ const server = setupServer(
   // Get project dashboard
   rest.get('/api/projects/:id/dashboard', (req, res, ctx) => {
     const projectId = parseInt(req.params.id as string);
-    const project = mockProjects.find(p => p.id === projectId);
-    
+    const project = mockProjects.find((p) => p.id === projectId);
+
     if (!project) {
       return res(ctx.status(404), ctx.json({ error: 'Project not found' }));
     }
-    
+
     return res(ctx.json({ ...mockDashboardData, project }));
   }),
 
@@ -152,12 +163,12 @@ const server = setupServer(
   rest.get('/api/projects/:id/export', (req, res, ctx) => {
     const format = req.url.searchParams.get('format') || 'json';
     const projectId = parseInt(req.params.id as string);
-    const project = mockProjects.find(p => p.id === projectId);
-    
+    const project = mockProjects.find((p) => p.id === projectId);
+
     if (!project) {
       return res(ctx.status(404), ctx.json({ error: 'Project not found' }));
     }
-    
+
     if (format === 'json') {
       return res(
         ctx.json({
@@ -171,11 +182,14 @@ const server = setupServer(
         })
       );
     }
-    
+
     // Mock PDF response
     return res(
       ctx.set('Content-Type', 'application/pdf'),
-      ctx.set('Content-Disposition', `attachment; filename=project_${projectId}_report.pdf`),
+      ctx.set(
+        'Content-Disposition',
+        `attachment; filename=project_${projectId}_report.pdf`
+      ),
       ctx.body('Mock PDF content')
     );
   }),
@@ -186,12 +200,15 @@ const server = setupServer(
   }),
 
   rest.post('/api/projects/error', (req, res, ctx) => {
-    return res(ctx.status(400), ctx.json({ 
-      error: 'Validation error',
-      message: 'Project name is required',
-      suggestions: ['Please provide a valid project name']
-    }));
-  }),
+    return res(
+      ctx.status(400),
+      ctx.json({
+        error: 'Validation error',
+        message: 'Project name is required',
+        suggestions: ['Please provide a valid project name'],
+      })
+    );
+  })
 );
 
 // Test setup
@@ -253,9 +270,13 @@ describe('Project Management Integration Tests', () => {
       });
 
       // Verify project details are displayed
-      expect(screen.getByText('A portable cardiac monitoring device for home use')).toBeInTheDocument();
-      expect(screen.getByText('Digital blood glucose monitoring system')).toBeInTheDocument();
-      
+      expect(
+        screen.getByText('A portable cardiac monitoring device for home use')
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText('Digital blood glucose monitoring system')
+      ).toBeInTheDocument();
+
       // Verify status badges
       expect(screen.getByText('In Progress')).toBeInTheDocument();
       expect(screen.getByText('Draft')).toBeInTheDocument();
@@ -276,7 +297,9 @@ describe('Project Management Integration Tests', () => {
       // Wait for search results
       await waitFor(() => {
         expect(screen.getByText('Cardiac Monitor Device')).toBeInTheDocument();
-        expect(screen.queryByText('Blood Glucose Meter')).not.toBeInTheDocument();
+        expect(
+          screen.queryByText('Blood Glucose Meter')
+        ).not.toBeInTheDocument();
       });
     });
 
@@ -289,16 +312,20 @@ describe('Project Management Integration Tests', () => {
       });
 
       // Filter by draft status
-      const statusFilter = screen.getByRole('combobox', { name: /all status/i });
+      const statusFilter = screen.getByRole('combobox', {
+        name: /all status/i,
+      });
       await user.click(statusFilter);
-      
+
       const draftOption = screen.getByRole('option', { name: /draft/i });
       await user.click(draftOption);
 
       // Wait for filtered results
       await waitFor(() => {
         expect(screen.getByText('Blood Glucose Meter')).toBeInTheDocument();
-        expect(screen.queryByText('Cardiac Monitor Device')).not.toBeInTheDocument();
+        expect(
+          screen.queryByText('Cardiac Monitor Device')
+        ).not.toBeInTheDocument();
       });
     });
   });
@@ -323,12 +350,17 @@ describe('Project Management Integration Tests', () => {
       const intendedUseInput = screen.getByLabelText(/intended use/i);
 
       await user.type(nameInput, 'New Test Device');
-      await user.type(descriptionInput, 'A test device for integration testing');
+      await user.type(
+        descriptionInput,
+        'A test device for integration testing'
+      );
       await user.type(deviceTypeInput, 'Class I Medical Device');
       await user.type(intendedUseInput, 'Testing purposes only');
 
       // Submit the form
-      const submitButton = screen.getByRole('button', { name: /create project/i });
+      const submitButton = screen.getByRole('button', {
+        name: /create project/i,
+      });
       await user.click(submitButton);
 
       // Wait for project to be created and form to close
@@ -339,7 +371,9 @@ describe('Project Management Integration Tests', () => {
       // Verify new project appears in the list
       await waitFor(() => {
         expect(screen.getByText('New Test Device')).toBeInTheDocument();
-        expect(screen.getByText('A test device for integration testing')).toBeInTheDocument();
+        expect(
+          screen.getByText('A test device for integration testing')
+        ).toBeInTheDocument();
       });
     });
 
@@ -352,7 +386,7 @@ describe('Project Management Integration Tests', () => {
             ctx.json({
               error: 'Validation error',
               message: 'Project name is required',
-              suggestions: ['Please provide a valid project name']
+              suggestions: ['Please provide a valid project name'],
             })
           );
         })
@@ -369,7 +403,9 @@ describe('Project Management Integration Tests', () => {
         expect(screen.getByRole('dialog')).toBeInTheDocument();
       });
 
-      const submitButton = screen.getByRole('button', { name: /create project/i });
+      const submitButton = screen.getByRole('button', {
+        name: /create project/i,
+      });
       await user.click(submitButton);
 
       // Wait for error handling
@@ -390,10 +426,14 @@ describe('Project Management Integration Tests', () => {
       });
 
       // Find and click edit button for first project
-      const projectCard = screen.getByText('Cardiac Monitor Device').closest('[data-testid="project-card"]');
+      const projectCard = screen
+        .getByText('Cardiac Monitor Device')
+        .closest('[data-testid="project-card"]');
       expect(projectCard).toBeInTheDocument();
 
-      const editButton = within(projectCard!).getByRole('button', { name: /edit/i });
+      const editButton = within(projectCard!).getByRole('button', {
+        name: /edit/i,
+      });
       await user.click(editButton);
 
       // Wait for edit form
@@ -407,13 +447,17 @@ describe('Project Management Integration Tests', () => {
       await user.type(nameInput, 'Updated Cardiac Monitor');
 
       // Submit update
-      const updateButton = screen.getByRole('button', { name: /update project/i });
+      const updateButton = screen.getByRole('button', {
+        name: /update project/i,
+      });
       await user.click(updateButton);
 
       // Verify optimistic update (should see updated name immediately)
       await waitFor(() => {
         expect(screen.getByText('Updated Cardiac Monitor')).toBeInTheDocument();
-        expect(screen.queryByText('Cardiac Monitor Device')).not.toBeInTheDocument();
+        expect(
+          screen.queryByText('Cardiac Monitor Device')
+        ).not.toBeInTheDocument();
       });
     });
   });
@@ -428,8 +472,12 @@ describe('Project Management Integration Tests', () => {
       });
 
       // Find and click delete button
-      const projectCard = screen.getByText('Blood Glucose Meter').closest('[data-testid="project-card"]');
-      const deleteButton = within(projectCard!).getByRole('button', { name: /delete/i });
+      const projectCard = screen
+        .getByText('Blood Glucose Meter')
+        .closest('[data-testid="project-card"]');
+      const deleteButton = within(projectCard!).getByRole('button', {
+        name: /delete/i,
+      });
       await user.click(deleteButton);
 
       // Confirm deletion (assuming there's a confirmation dialog)
@@ -438,7 +486,9 @@ describe('Project Management Integration Tests', () => {
 
       // Verify project is removed from list
       await waitFor(() => {
-        expect(screen.queryByText('Blood Glucose Meter')).not.toBeInTheDocument();
+        expect(
+          screen.queryByText('Blood Glucose Meter')
+        ).not.toBeInTheDocument();
       });
     });
   });
@@ -448,7 +498,10 @@ describe('Project Management Integration Tests', () => {
       // Mock server error
       server.use(
         rest.get('/api/projects', (req, res, ctx) => {
-          return res(ctx.status(500), ctx.json({ error: 'Internal server error' }));
+          return res(
+            ctx.status(500),
+            ctx.json({ error: 'Internal server error' })
+          );
         })
       );
 
@@ -460,7 +513,9 @@ describe('Project Management Integration Tests', () => {
       });
 
       // Verify retry button is available
-      expect(screen.getByRole('button', { name: /try again/i })).toBeInTheDocument();
+      expect(
+        screen.getByRole('button', { name: /try again/i })
+      ).toBeInTheDocument();
     });
 
     test('should handle network errors', async () => {
@@ -495,12 +550,19 @@ describe('Project Management Integration Tests', () => {
       expect(screen.getAllByTestId('project-card-skeleton')).toHaveLength(6);
 
       // Wait for projects to load
-      await waitFor(() => {
-        expect(screen.getByText('Cardiac Monitor Device')).toBeInTheDocument();
-      }, { timeout: 2000 });
+      await waitFor(
+        () => {
+          expect(
+            screen.getByText('Cardiac Monitor Device')
+          ).toBeInTheDocument();
+        },
+        { timeout: 2000 }
+      );
 
       // Verify skeletons are gone
-      expect(screen.queryByTestId('project-card-skeleton')).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId('project-card-skeleton')
+      ).not.toBeInTheDocument();
     });
   });
 
@@ -509,7 +571,7 @@ describe('Project Management Integration Tests', () => {
       // Mock URL.createObjectURL and document methods
       global.URL.createObjectURL = jest.fn(() => 'mock-url');
       global.URL.revokeObjectURL = jest.fn();
-      
+
       const mockLink = {
         href: '',
         download: '',
@@ -527,8 +589,12 @@ describe('Project Management Integration Tests', () => {
       });
 
       // Find and click export button
-      const projectCard = screen.getByText('Cardiac Monitor Device').closest('[data-testid="project-card"]');
-      const exportButton = within(projectCard!).getByRole('button', { name: /export/i });
+      const projectCard = screen
+        .getByText('Cardiac Monitor Device')
+        .closest('[data-testid="project-card"]');
+      const exportButton = within(projectCard!).getByRole('button', {
+        name: /export/i,
+      });
       await user.click(exportButton);
 
       // Wait for export to complete
@@ -545,7 +611,7 @@ describe('Project Management Integration Tests', () => {
 describe('API Client Integration', () => {
   test('should handle retry logic for failed requests', async () => {
     let attemptCount = 0;
-    
+
     server.use(
       rest.get('/api/projects', (req, res, ctx) => {
         attemptCount++;
@@ -557,7 +623,7 @@ describe('API Client Integration', () => {
     );
 
     const response = await apiClient.get('/api/projects');
-    
+
     expect(attemptCount).toBe(3);
     expect(response.data).toEqual(mockProjects);
   });
@@ -569,14 +635,18 @@ describe('API Client Integration', () => {
       })
     );
 
-    await expect(apiClient.get('/api/projects')).rejects.toThrow('Request timeout');
+    await expect(apiClient.get('/api/projects')).rejects.toThrow(
+      'Request timeout'
+    );
   });
 
   test('should set authentication token correctly', () => {
     const token = 'test-jwt-token';
     apiClient.setAuthToken(token);
-    
+
     // Verify token is set in default headers
-    expect((apiClient as any).defaultHeaders['Authorization']).toBe(`Bearer ${token}`);
+    expect((apiClient as any).defaultHeaders['Authorization']).toBe(
+      `Bearer ${token}`
+    );
   });
 });

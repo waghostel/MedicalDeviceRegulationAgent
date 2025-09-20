@@ -5,12 +5,12 @@
 
 import { DatabaseConnection } from './seeder';
 import { DatabaseSeed } from '../mock-data/generators';
-import { 
-  Project, 
-  DeviceClassification, 
-  PredicateDevice, 
+import {
+  Project,
+  DeviceClassification,
+  PredicateDevice,
   AgentInteraction,
-  ProjectDocument 
+  ProjectDocument,
 } from '@/types/project';
 
 export interface IntegrityValidationResult {
@@ -54,7 +54,7 @@ export enum ViolationType {
   FORMAT_VIOLATION = 'format_violation',
   BUSINESS_RULE_VIOLATION = 'business_rule_violation',
   ORPHANED_RECORD = 'orphaned_record',
-  MISSING_REQUIRED_DATA = 'missing_required_data'
+  MISSING_REQUIRED_DATA = 'missing_required_data',
 }
 
 export interface IntegrityRecommendation {
@@ -125,7 +125,12 @@ export interface ForeignKeyDefinition {
 }
 
 export interface SchemaIssue {
-  type: 'missing_table' | 'missing_column' | 'type_mismatch' | 'missing_constraint' | 'missing_index';
+  type:
+    | 'missing_table'
+    | 'missing_column'
+    | 'type_mismatch'
+    | 'missing_constraint'
+    | 'missing_index';
   severity: 'low' | 'medium' | 'high' | 'critical';
   description: string;
   expected?: string;
@@ -166,7 +171,7 @@ export class DataIntegrityValidator {
         WHERE u.id IS NULL
       `,
       fixSql: `DELETE FROM projects WHERE user_id NOT IN (SELECT id FROM users)`,
-      enabled: true
+      enabled: true,
     });
 
     this.addRule({
@@ -185,7 +190,7 @@ export class DataIntegrityValidator {
         WHERE p.id IS NULL
       `,
       fixSql: `DELETE FROM device_classifications WHERE project_id NOT IN (SELECT id FROM projects)`,
-      enabled: true
+      enabled: true,
     });
 
     // Data type and range validation rules
@@ -211,13 +216,14 @@ export class DataIntegrityValidator {
           ELSE confidence_score 
         END
       `,
-      enabled: true
+      enabled: true,
     });
 
     this.addRule({
       id: 'predicate_confidence_range',
       name: 'Predicate Confidence Score Range',
-      description: 'Validate that predicate confidence scores are between 0 and 1',
+      description:
+        'Validate that predicate confidence scores are between 0 and 1',
       type: ViolationType.RANGE_VIOLATION,
       severity: 'high',
       table: 'predicate_devices',
@@ -228,7 +234,7 @@ export class DataIntegrityValidator {
         FROM predicate_devices 
         WHERE confidence_score < 0 OR confidence_score > 1
       `,
-      enabled: true
+      enabled: true,
     });
 
     // Business rule validation
@@ -246,7 +252,7 @@ export class DataIntegrityValidator {
         FROM device_classifications 
         WHERE device_class NOT IN ('I', 'II', 'III')
       `,
-      enabled: true
+      enabled: true,
     });
 
     this.addRule({
@@ -263,7 +269,7 @@ export class DataIntegrityValidator {
         FROM projects 
         WHERE status NOT IN ('draft', 'in_progress', 'completed')
       `,
-      enabled: true
+      enabled: true,
     });
 
     // Required data validation
@@ -279,7 +285,7 @@ export class DataIntegrityValidator {
       validationSql: `
         SELECT id FROM projects WHERE name IS NULL OR name = ''
       `,
-      enabled: true
+      enabled: true,
     });
 
     this.addRule({
@@ -294,7 +300,7 @@ export class DataIntegrityValidator {
       validationSql: `
         SELECT id FROM users WHERE email IS NULL OR email = ''
       `,
-      enabled: true
+      enabled: true,
     });
 
     // Format validation
@@ -312,7 +318,7 @@ export class DataIntegrityValidator {
         FROM users 
         WHERE email NOT LIKE '%@%.%'
       `,
-      enabled: true
+      enabled: true,
     });
 
     this.addRule({
@@ -329,7 +335,7 @@ export class DataIntegrityValidator {
         FROM predicate_devices 
         WHERE k_number NOT GLOB 'K[0-9][0-9][0-9][0-9][0-9][0-9]'
       `,
-      enabled: true
+      enabled: true,
     });
 
     // Orphaned records
@@ -347,7 +353,7 @@ export class DataIntegrityValidator {
         LEFT JOIN projects p ON dc.project_id = p.id 
         WHERE p.id IS NULL
       `,
-      enabled: true
+      enabled: true,
     });
   }
 
@@ -369,7 +375,7 @@ export class DataIntegrityValidator {
    * Get all validation rules
    */
   getRules(): ValidationRule[] {
-    return Array.from(this.rules.values()).filter(rule => rule.enabled);
+    return Array.from(this.rules.values()).filter((rule) => rule.enabled);
   }
 
   /**
@@ -395,14 +401,14 @@ export class DataIntegrityValidator {
           column: rule.column,
           description: `Validation rule failed: ${error}`,
           constraint: rule.constraint,
-          impact: 'Unable to validate data integrity for this rule'
+          impact: 'Unable to validate data integrity for this rule',
         });
       }
     }
 
     // Generate summary
     const summary = this.generateSummary(violations, rules.length);
-    
+
     // Generate recommendations
     const recommendations = this.generateRecommendations(violations);
 
@@ -411,19 +417,21 @@ export class DataIntegrityValidator {
       summary,
       violations,
       recommendations,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
   }
 
   /**
    * Validate specific rule
    */
-  private async validateRule(rule: ValidationRule): Promise<IntegrityViolation[]> {
+  private async validateRule(
+    rule: ValidationRule
+  ): Promise<IntegrityViolation[]> {
     const violations: IntegrityViolation[] = [];
-    
+
     try {
       const results = await this.connection.execute(rule.validationSql);
-      
+
       for (const result of results || []) {
         violations.push({
           id: `${rule.id}_${result.id || Date.now()}`,
@@ -435,7 +443,7 @@ export class DataIntegrityValidator {
           description: `${rule.description}: ${this.formatViolationDetails(rule, result)}`,
           constraint: rule.constraint,
           impact: this.getViolationImpact(rule.type, rule.severity),
-          actualValue: rule.column ? result[rule.column] : undefined
+          actualValue: rule.column ? result[rule.column] : undefined,
         });
       }
     } catch (error) {
@@ -474,37 +482,48 @@ export class DataIntegrityValidator {
         critical: 'Data corruption, application crashes, broken relationships',
         high: 'Data inconsistency, potential application errors',
         medium: 'Minor data inconsistency',
-        low: 'Minimal impact on functionality'
+        low: 'Minimal impact on functionality',
       },
       [ViolationType.RANGE_VIOLATION]: {
         critical: 'Invalid calculations, system failures',
         high: 'Incorrect business logic, data corruption',
         medium: 'Display issues, minor calculation errors',
-        low: 'Cosmetic issues only'
+        low: 'Cosmetic issues only',
       },
       [ViolationType.FORMAT_VIOLATION]: {
         critical: 'System integration failures',
         high: 'Data processing errors',
         medium: 'Display formatting issues',
-        low: 'Minor presentation problems'
-      }
+        low: 'Minor presentation problems',
+      },
     };
 
-    return impacts[type]?.[severity as keyof typeof impacts[ViolationType.FOREIGN_KEY_VIOLATION]] || 
-           'Unknown impact';
+    return (
+      impacts[type]?.[
+        severity as keyof (typeof impacts)[ViolationType.FOREIGN_KEY_VIOLATION]
+      ] || 'Unknown impact'
+    );
   }
 
   /**
    * Generate validation summary
    */
-  private generateSummary(violations: IntegrityViolation[], totalChecks: number): ValidationSummary {
+  private generateSummary(
+    violations: IntegrityViolation[],
+    totalChecks: number
+  ): ValidationSummary {
     const failed = violations.length;
     const passed = totalChecks - failed;
-    const criticalIssues = violations.filter(v => v.severity === 'critical').length;
-    const warnings = violations.filter(v => v.severity === 'low' || v.severity === 'medium').length;
-    
+    const criticalIssues = violations.filter(
+      (v) => v.severity === 'critical'
+    ).length;
+    const warnings = violations.filter(
+      (v) => v.severity === 'low' || v.severity === 'medium'
+    ).length;
+
     // Calculate score (0-100)
-    const score = totalChecks > 0 ? Math.round((passed / totalChecks) * 100) : 100;
+    const score =
+      totalChecks > 0 ? Math.round((passed / totalChecks) * 100) : 100;
 
     return {
       totalChecks,
@@ -512,16 +531,18 @@ export class DataIntegrityValidator {
       failed,
       warnings,
       criticalIssues,
-      score
+      score,
     };
   }
 
   /**
    * Generate recommendations
    */
-  private generateRecommendations(violations: IntegrityViolation[]): IntegrityRecommendation[] {
+  private generateRecommendations(
+    violations: IntegrityViolation[]
+  ): IntegrityRecommendation[] {
     const recommendations: IntegrityRecommendation[] = [];
-    
+
     // Group violations by type
     const violationsByType = new Map<ViolationType, IntegrityViolation[]>();
     for (const violation of violations) {
@@ -533,7 +554,10 @@ export class DataIntegrityValidator {
 
     // Generate recommendations for each type
     for (const [type, typeViolations] of violationsByType) {
-      const recommendation = this.generateTypeRecommendation(type, typeViolations);
+      const recommendation = this.generateTypeRecommendation(
+        type,
+        typeViolations
+      );
       if (recommendation) {
         recommendations.push(recommendation);
       }
@@ -545,14 +569,15 @@ export class DataIntegrityValidator {
         type: 'warning',
         priority: 'medium',
         title: 'Regular Integrity Monitoring',
-        description: 'Set up regular data integrity validation to catch issues early',
+        description:
+          'Set up regular data integrity validation to catch issues early',
         actions: [
           'Schedule automated integrity checks',
           'Set up alerts for critical violations',
           'Create data quality dashboard',
-          'Implement data validation in application code'
+          'Implement data validation in application code',
         ],
-        impact: 'Prevents data corruption and maintains system reliability'
+        impact: 'Prevents data corruption and maintains system reliability',
       });
     }
 
@@ -566,13 +591,19 @@ export class DataIntegrityValidator {
    * Generate recommendation for specific violation type
    */
   private generateTypeRecommendation(
-    type: ViolationType, 
+    type: ViolationType,
     violations: IntegrityViolation[]
   ): IntegrityRecommendation | null {
     const count = violations.length;
-    const maxSeverity = violations.reduce((max, v) => 
-      v.severity === 'critical' ? 'critical' : 
-      v.severity === 'high' && max !== 'critical' ? 'high' : max, 'low');
+    const maxSeverity = violations.reduce(
+      (max, v) =>
+        v.severity === 'critical'
+          ? 'critical'
+          : v.severity === 'high' && max !== 'critical'
+            ? 'high'
+            : max,
+      'low'
+    );
 
     switch (type) {
       case ViolationType.FOREIGN_KEY_VIOLATION:
@@ -580,15 +611,18 @@ export class DataIntegrityValidator {
           type: 'fix',
           priority: maxSeverity as any,
           title: `Fix Foreign Key Violations (${count} found)`,
-          description: 'Foreign key violations can cause data corruption and application errors',
+          description:
+            'Foreign key violations can cause data corruption and application errors',
           actions: [
             'Review and fix orphaned records',
             'Ensure proper cascade delete rules',
             'Add foreign key constraints if missing',
-            'Validate data before insertion'
+            'Validate data before insertion',
           ],
-          sqlFix: violations[0] ? this.getRule(violations[0].id.split('_')[0])?.fixSql : undefined,
-          impact: 'Critical for data integrity and application stability'
+          sqlFix: violations[0]
+            ? this.getRule(violations[0].id.split('_')[0])?.fixSql
+            : undefined,
+          impact: 'Critical for data integrity and application stability',
         };
 
       case ViolationType.RANGE_VIOLATION:
@@ -596,14 +630,15 @@ export class DataIntegrityValidator {
           type: 'fix',
           priority: maxSeverity as any,
           title: `Fix Range Violations (${count} found)`,
-          description: 'Values outside expected ranges can cause calculation errors',
+          description:
+            'Values outside expected ranges can cause calculation errors',
           actions: [
             'Update out-of-range values',
             'Add check constraints to prevent future violations',
             'Implement input validation in application',
-            'Review business rules for valid ranges'
+            'Review business rules for valid ranges',
           ],
-          impact: 'Ensures accurate calculations and business logic'
+          impact: 'Ensures accurate calculations and business logic',
         };
 
       case ViolationType.FORMAT_VIOLATION:
@@ -611,14 +646,15 @@ export class DataIntegrityValidator {
           type: 'fix',
           priority: maxSeverity as any,
           title: `Fix Format Violations (${count} found)`,
-          description: 'Invalid formats can cause integration and display issues',
+          description:
+            'Invalid formats can cause integration and display issues',
           actions: [
             'Standardize data formats',
             'Implement format validation',
             'Clean up existing invalid data',
-            'Add format constraints to database'
+            'Add format constraints to database',
           ],
-          impact: 'Improves data quality and system integration'
+          impact: 'Improves data quality and system integration',
         };
 
       default:
@@ -629,7 +665,9 @@ export class DataIntegrityValidator {
   /**
    * Validate mock data against database schema
    */
-  async validateMockDataCompatibility(mockData: DatabaseSeed): Promise<IntegrityValidationResult> {
+  async validateMockDataCompatibility(
+    mockData: DatabaseSeed
+  ): Promise<IntegrityValidationResult> {
     const violations: IntegrityViolation[] = [];
 
     // Validate projects
@@ -640,7 +678,8 @@ export class DataIntegrityValidator {
 
     // Validate classifications
     for (const classification of mockData.classifications) {
-      const classificationViolations = await this.validateClassificationData(classification);
+      const classificationViolations =
+        await this.validateClassificationData(classification);
       violations.push(...classificationViolations);
     }
 
@@ -650,8 +689,12 @@ export class DataIntegrityValidator {
       violations.push(...predicateViolations);
     }
 
-    const summary = this.generateSummary(violations, mockData.projects.length + 
-      mockData.classifications.length + mockData.predicateDevices.length);
+    const summary = this.generateSummary(
+      violations,
+      mockData.projects.length +
+        mockData.classifications.length +
+        mockData.predicateDevices.length
+    );
     const recommendations = this.generateRecommendations(violations);
 
     return {
@@ -659,14 +702,16 @@ export class DataIntegrityValidator {
       summary,
       violations,
       recommendations,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
   }
 
   /**
    * Validate project data
    */
-  private async validateProjectData(project: Project): Promise<IntegrityViolation[]> {
+  private async validateProjectData(
+    project: Project
+  ): Promise<IntegrityViolation[]> {
     const violations: IntegrityViolation[] = [];
 
     // Required fields
@@ -680,7 +725,7 @@ export class DataIntegrityValidator {
         recordId: project.id,
         description: 'Project name is required',
         constraint: 'NOT NULL',
-        impact: 'Project cannot be displayed or managed properly'
+        impact: 'Project cannot be displayed or managed properly',
       });
     }
 
@@ -697,7 +742,7 @@ export class DataIntegrityValidator {
         description: `Invalid project status: ${project.status}`,
         actualValue: project.status,
         constraint: 'CHECK (status IN ("draft", "in_progress", "completed"))',
-        impact: 'Project status filtering and workflow will not work correctly'
+        impact: 'Project status filtering and workflow will not work correctly',
       });
     }
 
@@ -707,12 +752,17 @@ export class DataIntegrityValidator {
   /**
    * Validate classification data
    */
-  private async validateClassificationData(classification: DeviceClassification): Promise<IntegrityViolation[]> {
+  private async validateClassificationData(
+    classification: DeviceClassification
+  ): Promise<IntegrityViolation[]> {
     const violations: IntegrityViolation[] = [];
 
     // Device class validation
     const validClasses = ['I', 'II', 'III'];
-    if (classification.device_class && !validClasses.includes(classification.device_class)) {
+    if (
+      classification.device_class &&
+      !validClasses.includes(classification.device_class)
+    ) {
       violations.push({
         id: `classification_${classification.id}_device_class`,
         type: ViolationType.CHECK_CONSTRAINT_VIOLATION,
@@ -723,13 +773,17 @@ export class DataIntegrityValidator {
         description: `Invalid device class: ${classification.device_class}`,
         actualValue: classification.device_class,
         constraint: 'CHECK (device_class IN ("I", "II", "III"))',
-        impact: 'Classification logic and regulatory pathway determination will fail'
+        impact:
+          'Classification logic and regulatory pathway determination will fail',
       });
     }
 
     // Confidence score validation
-    if (classification.confidence_score !== undefined && 
-        (classification.confidence_score < 0 || classification.confidence_score > 1)) {
+    if (
+      classification.confidence_score !== undefined &&
+      (classification.confidence_score < 0 ||
+        classification.confidence_score > 1)
+    ) {
       violations.push({
         id: `classification_${classification.id}_confidence`,
         type: ViolationType.RANGE_VIOLATION,
@@ -740,7 +794,7 @@ export class DataIntegrityValidator {
         description: `Confidence score out of range: ${classification.confidence_score}`,
         actualValue: classification.confidence_score,
         constraint: 'CHECK (confidence_score >= 0 AND confidence_score <= 1)',
-        impact: 'Confidence calculations and UI display will be incorrect'
+        impact: 'Confidence calculations and UI display will be incorrect',
       });
     }
 
@@ -750,7 +804,9 @@ export class DataIntegrityValidator {
   /**
    * Validate predicate device data
    */
-  private async validatePredicateData(predicate: PredicateDevice): Promise<IntegrityViolation[]> {
+  private async validatePredicateData(
+    predicate: PredicateDevice
+  ): Promise<IntegrityViolation[]> {
     const violations: IntegrityViolation[] = [];
 
     // K-number format validation
@@ -766,13 +822,15 @@ export class DataIntegrityValidator {
         description: `Invalid K-number format: ${predicate.k_number}`,
         actualValue: predicate.k_number,
         constraint: 'K-number format: K######',
-        impact: 'FDA database lookups and regulatory references will fail'
+        impact: 'FDA database lookups and regulatory references will fail',
       });
     }
 
     // Confidence score validation
-    if (predicate.confidence_score !== undefined && 
-        (predicate.confidence_score < 0 || predicate.confidence_score > 1)) {
+    if (
+      predicate.confidence_score !== undefined &&
+      (predicate.confidence_score < 0 || predicate.confidence_score > 1)
+    ) {
       violations.push({
         id: `predicate_${predicate.id}_confidence`,
         type: ViolationType.RANGE_VIOLATION,
@@ -783,7 +841,7 @@ export class DataIntegrityValidator {
         description: `Confidence score out of range: ${predicate.confidence_score}`,
         actualValue: predicate.confidence_score,
         constraint: 'CHECK (confidence_score >= 0 AND confidence_score <= 1)',
-        impact: 'Predicate ranking and selection logic will be incorrect'
+        impact: 'Predicate ranking and selection logic will be incorrect',
       });
     }
 
@@ -793,7 +851,9 @@ export class DataIntegrityValidator {
   /**
    * Fix violations automatically where possible
    */
-  async fixViolations(violationIds: string[]): Promise<{ fixed: string[]; failed: string[] }> {
+  async fixViolations(
+    violationIds: string[]
+  ): Promise<{ fixed: string[]; failed: string[] }> {
     const fixed: string[] = [];
     const failed: string[] = [];
 
@@ -802,7 +862,7 @@ export class DataIntegrityValidator {
         // Extract rule ID from violation ID
         const ruleId = violationId.split('_')[0];
         const rule = this.getRule(ruleId);
-        
+
         if (rule?.fixSql) {
           await this.connection.execute(rule.fixSql);
           fixed.push(violationId);
@@ -822,13 +882,15 @@ export class DataIntegrityValidator {
 /**
  * Export utility functions for data integrity validation
  */
-export async function validateDatabaseIntegrity(connection: DatabaseConnection): Promise<IntegrityValidationResult> {
+export async function validateDatabaseIntegrity(
+  connection: DatabaseConnection
+): Promise<IntegrityValidationResult> {
   const validator = new DataIntegrityValidator(connection);
   return await validator.validateIntegrity();
 }
 
 export async function validateMockDataIntegrity(
-  connection: DatabaseConnection, 
+  connection: DatabaseConnection,
   mockData: DatabaseSeed
 ): Promise<IntegrityValidationResult> {
   const validator = new DataIntegrityValidator(connection);
@@ -853,6 +915,6 @@ export function createCustomValidationRule(
     constraint: 'Custom validation rule',
     validationSql,
     enabled: true,
-    ...options
+    ...options,
   };
 }

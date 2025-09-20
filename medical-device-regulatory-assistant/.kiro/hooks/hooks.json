@@ -1,0 +1,140 @@
+{
+  "hooks": [
+    {
+      "id": "format-and-lint-autofix",
+      "name": "Format and Lint Auto-Fix",
+      "description": "Automatically format code with Prettier and fix ESLint issues",
+      "type": "auto-fix",
+      "trigger": "on-save",
+      "script": "./format-and-lint-autofix.js",
+      "filePatterns": [
+        "**/*.js",
+        "**/*.jsx",
+        "**/*.ts",
+        "**/*.tsx",
+        "**/*.mjs"
+      ],
+      "excludePatterns": [
+        "**/node_modules/**",
+        "**/.next/**",
+        "**/build/**",
+        "**/dist/**",
+        "**/coverage/**",
+        "**/*.min.js",
+        "**/*.min.css"
+      ],
+      "settings": {
+        "timeout": 30000,
+        "maxRetries": 3,
+        "runOnSave": true,
+        "runOnCommit": true,
+        "showProgress": true,
+        "reportLevel": "detailed"
+      },
+      "commands": {
+        "primary": "node .kiro/hooks/format-and-lint-autofix.js",
+        "check": "pnpm lint:check",
+        "format": "pnpm format",
+        "fix": "pnpm lint:fix"
+      },
+      "shortcuts": [
+        {
+          "key": "Ctrl+Shift+F",
+          "action": "format",
+          "description": "Format current file"
+        },
+        {
+          "key": "Ctrl+Shift+L",
+          "action": "fix",
+          "description": "Format and lint fix current file"
+        }
+      ],
+      "notifications": {
+        "onSuccess": {
+          "show": true,
+          "message": "Code formatted and linted successfully",
+          "duration": 3000
+        },
+        "onError": {
+          "show": true,
+          "message": "Format/lint issues found - check output panel",
+          "duration": 5000
+        },
+        "onWarning": {
+          "show": true,
+          "message": "Code formatted with warnings - review suggested fixes",
+          "duration": 4000
+        }
+      },
+      "integration": {
+        "statusBar": {
+          "show": true,
+          "position": "right",
+          "text": "Format & Lint",
+          "tooltip": "Click to run format and lint check"
+        },
+        "contextMenu": {
+          "show": true,
+          "label": "Format and Lint Fix",
+          "group": "code-quality"
+        },
+        "commandPalette": {
+          "commands": [
+            {
+              "id": "format-and-lint.run",
+              "title": "Format and Lint: Run Auto-Fix",
+              "category": "Code Quality"
+            },
+            {
+              "id": "format-and-lint.check",
+              "title": "Format and Lint: Check Only",
+              "category": "Code Quality"
+            },
+            {
+              "id": "format-and-lint.format",
+              "title": "Format and Lint: Format Only",
+              "category": "Code Quality"
+            }
+          ]
+        }
+      },
+      "errorHandling": {
+        "retryOnFailure": true,
+        "maxRetries": 3,
+        "retryDelay": 1000,
+        "fallbackActions": [
+          {
+            "condition": "prettier-error",
+            "action": "skip-formatting",
+            "message": "Skipping formatting due to syntax errors"
+          },
+          {
+            "condition": "eslint-error",
+            "action": "report-only",
+            "message": "Reporting ESLint issues without auto-fix"
+          }
+        ]
+      },
+      "performance": {
+        "enableCaching": true,
+        "cacheLocation": ".kiro/cache/format-lint",
+        "parallelProcessing": true,
+        "maxConcurrentFiles": 10,
+        "timeoutPerFile": 5000
+      },
+      "reporting": {
+        "outputFormat": "detailed",
+        "includeMetrics": true,
+        "saveReports": true,
+        "reportLocation": ".kiro/reports/format-lint",
+        "retentionDays": 30
+      }
+    }
+  ],
+  "globalSettings": {
+    "enableHooks": true,
+    "logLevel": "info",
+    "maxConcurrentHooks": 5,
+    "defaultTimeout": 30000
+  }
+}

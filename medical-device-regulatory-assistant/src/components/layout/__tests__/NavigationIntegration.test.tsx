@@ -4,7 +4,13 @@ import { AppLayout } from '../AppLayout';
 
 // Mock Next.js components
 jest.mock('next/link', () => {
-  return function MockLink({ children, href }: { children: React.ReactNode; href: string }) {
+  return function MockLink({
+    children,
+    href,
+  }: {
+    children: React.ReactNode;
+    href: string;
+  }) {
     return <a href={href}>{children}</a>;
   };
 });
@@ -37,7 +43,9 @@ describe('Navigation Integration', () => {
     );
 
     // Check that all major components are rendered
-    expect(screen.getByText('Medical Device Regulatory Assistant')).toBeInTheDocument();
+    expect(
+      screen.getByText('Medical Device Regulatory Assistant')
+    ).toBeInTheDocument();
     expect(screen.getAllByText('Quick Actions')).toHaveLength(3); // Toolbar, sidebar, and quick actions panel
     expect(screen.getByText('Navigation')).toBeInTheDocument();
     expect(screen.getAllByText('Projects')).toHaveLength(2); // Sidebar and breadcrumb
@@ -134,9 +142,9 @@ describe('Navigation Integration', () => {
 
     // Check breadcrumb navigation - get all links and find the breadcrumb ones
     const projectsLinks = screen.getAllByRole('link', { name: 'Projects' });
-    const breadcrumbProjectsLink = projectsLinks.find(link => 
-      link.getAttribute('href') === '/projects' && 
-      !link.querySelector('svg') // Breadcrumb link doesn't have icon
+    const breadcrumbProjectsLink = projectsLinks.find(
+      (link) =>
+        link.getAttribute('href') === '/projects' && !link.querySelector('svg') // Breadcrumb link doesn't have icon
     );
     expect(breadcrumbProjectsLink).toHaveAttribute('href', '/projects');
 
@@ -163,7 +171,9 @@ describe('Navigation Integration', () => {
     });
 
     // Search for a command
-    const searchInput = screen.getByPlaceholderText('Type a command or search...');
+    const searchInput = screen.getByPlaceholderText(
+      'Type a command or search...'
+    );
     fireEvent.change(searchInput, { target: { value: 'predicate' } });
 
     await waitFor(() => {
@@ -172,7 +182,7 @@ describe('Navigation Integration', () => {
 
     // Select the command from the command palette (not the toolbar)
     const commandPaletteItems = screen.getAllByText('Find Similar Predicates');
-    const commandPaletteItem = commandPaletteItems.find(item => 
+    const commandPaletteItem = commandPaletteItems.find((item) =>
       item.className.includes('text-sm font-medium')
     );
     if (commandPaletteItem) {

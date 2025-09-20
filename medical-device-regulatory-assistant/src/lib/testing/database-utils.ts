@@ -4,11 +4,11 @@
  */
 
 import { Database } from 'sqlite3';
-import { 
-  DatabaseSeed, 
-  generateDatabaseSeed, 
-  TestScenario, 
-  generateTestScenario 
+import {
+  DatabaseSeed,
+  generateDatabaseSeed,
+  TestScenario,
+  generateTestScenario,
 } from '@/lib/mock-data';
 
 // Test database interface
@@ -35,18 +35,20 @@ let testDatabase: TestDatabase | null = null;
 export const setupTestDatabase = async (
   config: TestDatabaseConfig = { inMemory: true, verbose: false }
 ): Promise<TestDatabase> => {
-  const connectionString = config.inMemory ? ':memory:' : (config.filename || 'test.db');
-  
+  const connectionString = config.inMemory
+    ? ':memory:'
+    : config.filename || 'test.db';
+
   return new Promise((resolve, reject) => {
     const db = new Database(connectionString, (err) => {
       if (err) {
         reject(new Error(`Failed to create test database: ${err.message}`));
         return;
       }
-      
+
       // Enable foreign keys
       db.run('PRAGMA foreign_keys = ON');
-      
+
       // Create schema
       createTestSchema(db)
         .then(() => {
@@ -59,7 +61,7 @@ export const setupTestDatabase = async (
         })
         .catch(reject);
     });
-    
+
     if (config.verbose) {
       db.on('trace', (sql) => {
         console.log('SQL:', sql);
@@ -199,13 +201,15 @@ const createTestSchema = async (db: Database): Promise<void> => {
       }
     });
   });
-};/*
-*
+}; /*
+ *
  * Seed test database with mock data
  */
 export const seedTestDatabase = async (data?: DatabaseSeed): Promise<void> => {
   if (!testDatabase) {
-    throw new Error('Test database not initialized. Call setupTestDatabase first.');
+    throw new Error(
+      'Test database not initialized. Call setupTestDatabase first.'
+    );
   }
 
   const seedData = data || generateDatabaseSeed();
@@ -222,8 +226,8 @@ export const seedTestDatabase = async (data?: DatabaseSeed): Promise<void> => {
           INSERT INTO users (id, email, name, image, role, created_at, updated_at)
           VALUES (?, ?, ?, ?, ?, ?, ?)
         `);
-        
-        seedData.users.forEach(user => {
+
+        seedData.users.forEach((user) => {
           userStmt.run([
             user.id,
             user.email,
@@ -241,8 +245,8 @@ export const seedTestDatabase = async (data?: DatabaseSeed): Promise<void> => {
           INSERT INTO projects (id, user_id, name, description, device_type, intended_use, status, created_at, updated_at)
           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         `);
-        
-        seedData.projects.forEach(project => {
+
+        seedData.projects.forEach((project) => {
           projectStmt.run([
             project.id,
             project.user_id,
@@ -262,8 +266,8 @@ export const seedTestDatabase = async (data?: DatabaseSeed): Promise<void> => {
           INSERT INTO device_classifications (id, project_id, device_class, product_code, regulatory_pathway, cfr_sections, confidence_score, reasoning, sources, created_at, updated_at)
           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `);
-        
-        seedData.classifications.forEach(classification => {
+
+        seedData.classifications.forEach((classification) => {
           classificationStmt.run([
             classification.id,
             classification.projectId,
@@ -285,8 +289,8 @@ export const seedTestDatabase = async (data?: DatabaseSeed): Promise<void> => {
           INSERT INTO predicate_devices (id, project_id, k_number, device_name, intended_use, product_code, clearance_date, confidence_score, comparison_data, is_selected, created_at, updated_at)
           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `);
-        
-        seedData.predicateDevices.forEach(predicate => {
+
+        seedData.predicateDevices.forEach((predicate) => {
           predicateStmt.run([
             predicate.id,
             predicate.projectId,
@@ -309,8 +313,8 @@ export const seedTestDatabase = async (data?: DatabaseSeed): Promise<void> => {
           INSERT INTO sessions (id, user_id, expires, session_token, access_token, created_at, updated_at)
           VALUES (?, ?, ?, ?, ?, ?, ?)
         `);
-        
-        seedData.sessions.forEach(session => {
+
+        seedData.sessions.forEach((session) => {
           sessionStmt.run([
             session.id,
             session.userId,
@@ -328,8 +332,8 @@ export const seedTestDatabase = async (data?: DatabaseSeed): Promise<void> => {
           INSERT INTO audit_logs (id, user_id, project_id, action, entity_type, entity_id, changes, metadata, ip_address, user_agent, created_at)
           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `);
-        
-        seedData.auditLogs.forEach(log => {
+
+        seedData.auditLogs.forEach((log) => {
           auditStmt.run([
             log.id,
             log.userId,
@@ -351,8 +355,8 @@ export const seedTestDatabase = async (data?: DatabaseSeed): Promise<void> => {
           INSERT INTO agent_interactions (id, project_id, user_id, agent_action, input_data, output_data, confidence_score, sources, reasoning, execution_time_ms, created_at)
           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `);
-        
-        seedData.agentInteractions.forEach(interaction => {
+
+        seedData.agentInteractions.forEach((interaction) => {
           interactionStmt.run([
             interaction.id,
             interaction.project_id,
@@ -377,7 +381,6 @@ export const seedTestDatabase = async (data?: DatabaseSeed): Promise<void> => {
             resolve();
           }
         });
-
       } catch (error) {
         // Rollback on error
         db.run('ROLLBACK');
@@ -390,7 +393,9 @@ export const seedTestDatabase = async (data?: DatabaseSeed): Promise<void> => {
 /**
  * Seed database with scenario-specific data
  */
-export const seedScenarioDatabase = async (scenario: TestScenario): Promise<void> => {
+export const seedScenarioDatabase = async (
+  scenario: TestScenario
+): Promise<void> => {
   const scenarioData = generateTestScenario(scenario);
   await seedTestDatabase(scenarioData);
 };
@@ -421,7 +426,7 @@ export const cleanupTestDatabase = async (): Promise<void> => {
       db.run('BEGIN TRANSACTION');
 
       try {
-        tables.forEach(table => {
+        tables.forEach((table) => {
           db.run(`DELETE FROM ${table}`);
         });
 
@@ -470,7 +475,10 @@ export const getTestDatabase = (): TestDatabase | null => {
 /**
  * Execute raw SQL query on test database
  */
-export const executeQuery = async (sql: string, params: any[] = []): Promise<any[]> => {
+export const executeQuery = async (
+  sql: string,
+  params: any[] = []
+): Promise<any[]> => {
   if (!testDatabase) {
     throw new Error('Test database not initialized');
   }
@@ -489,7 +497,10 @@ export const executeQuery = async (sql: string, params: any[] = []): Promise<any
 /**
  * Validate data integrity in test database
  */
-export const validateDataIntegrity = async (): Promise<{ valid: boolean; errors: string[] }> => {
+export const validateDataIntegrity = async (): Promise<{
+  valid: boolean;
+  errors: string[];
+}> => {
   if (!testDatabase) {
     return { valid: false, errors: ['Database not initialized'] };
   }
@@ -520,7 +531,6 @@ export const validateDataIntegrity = async (): Promise<{ valid: boolean; errors:
     if (invalidJson[0]?.count > 0) {
       errors.push(`Invalid JSON in classifications: ${invalidJson[0].count}`);
     }
-
   } catch (error) {
     errors.push(`Integrity check failed: ${error}`);
   }

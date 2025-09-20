@@ -31,7 +31,10 @@ export default async function handler(
   checks.push(backendCheck);
   if (backendCheck.status === 'unhealthy') {
     overallStatus = 'unhealthy';
-  } else if (backendCheck.status === 'degraded' && overallStatus === 'healthy') {
+  } else if (
+    backendCheck.status === 'degraded' &&
+    overallStatus === 'healthy'
+  ) {
     overallStatus = 'degraded';
   }
 
@@ -66,17 +69,22 @@ export default async function handler(
   };
 
   // Set appropriate HTTP status code
-  const statusCode = overallStatus === 'healthy' ? 200 : 
-                    overallStatus === 'degraded' ? 200 : 503;
+  const statusCode =
+    overallStatus === 'healthy'
+      ? 200
+      : overallStatus === 'degraded'
+        ? 200
+        : 503;
 
   res.status(statusCode).json(response);
 }
 
 async function checkBackendAPI(): Promise<HealthCheck> {
   const startTime = Date.now();
-  
+
   try {
-    const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+    const backendUrl =
+      process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
     const response = await fetch(`${backendUrl}/health`, {
       method: 'GET',
       headers: {
@@ -132,8 +140,10 @@ function checkEnvironmentVariables(): HealthCheck {
     'NEXT_PUBLIC_API_URL',
   ];
 
-  const missingVars = requiredEnvVars.filter(varName => !process.env[varName]);
-  
+  const missingVars = requiredEnvVars.filter(
+    (varName) => !process.env[varName]
+  );
+
   if (missingVars.length === 0) {
     return {
       name: 'environment_variables',
@@ -180,7 +190,8 @@ function checkNextJSConfig(): HealthCheck {
     return {
       name: 'nextjs_config',
       status: 'unhealthy',
-      error: error instanceof Error ? error.message : 'Configuration check failed',
+      error:
+        error instanceof Error ? error.message : 'Configuration check failed',
     };
   }
 }
@@ -234,7 +245,10 @@ function checkAuthConfig(): HealthCheck {
     return {
       name: 'auth_config',
       status: 'unhealthy',
-      error: error instanceof Error ? error.message : 'Auth configuration check failed',
+      error:
+        error instanceof Error
+          ? error.message
+          : 'Auth configuration check failed',
     };
   }
 }

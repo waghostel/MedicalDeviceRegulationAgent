@@ -3,7 +3,7 @@ export {
   useKeyboardShortcuts,
   KeyCombo,
   SkipLink,
-  type KeyboardShortcut
+  type KeyboardShortcut,
 } from './KeyboardShortcuts';
 
 export {
@@ -12,5 +12,5 @@ export {
   useAccessibility,
   LiveRegion,
   FocusTrap,
-  AccessibleButton
+  AccessibleButton,
 } from './AccessibilityFeatures';

@@ -12,7 +12,7 @@ const customJestConfig = {
   testEnvironment: 'jsdom',
   testMatch: [
     '<rootDir>/src/**/__tests__/accessibility/**/*.test.{js,jsx,ts,tsx}',
-    '<rootDir>/src/**/*.accessibility.test.{js,jsx,ts,tsx}'
+    '<rootDir>/src/**/*.accessibility.test.{js,jsx,ts,tsx}',
   ],
   collectCoverageFrom: [
     'src/components/**/*.{js,jsx,ts,tsx}',

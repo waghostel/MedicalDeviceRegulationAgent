@@ -21,11 +21,12 @@ This guide provides detailed documentation for all FDA API configuration options
 ### Core FDA API Configuration
 
 #### `FDA_API_KEY`
+
 - **Type**: String
 - **Required**: Optional (recommended for production)
 - **Default**: None
 - **Description**: FDA API key for authenticated requests
-- **Rate Limits**: 
+- **Rate Limits**:
   - With key: 240 requests/minute
   - Without key: 40 requests/minute
 - **Example**: `FDA_API_KEY=your-fda-api-key-here`
@@ -40,6 +41,7 @@ export FDA_API_KEY_FILE="/run/secrets/fda_api_key"
 ```
 
 #### `USE_REAL_FDA_API`
+
 - **Type**: Boolean
 - **Required**: No
 - **Default**: `false`
@@ -58,27 +60,30 @@ export USE_REAL_FDA_API=false
 ### Cache Configuration
 
 #### `REDIS_URL`
+
 - **Type**: String (URL)
 - **Required**: Optional (recommended for production)
 - **Default**: None (no caching)
 - **Description**: Redis connection URL for caching
 - **Format**: `redis://[username:password@]host:port[/db]`
 - **Examples**:
+
   ```bash
   # Local Redis
   export REDIS_URL="redis://localhost:6379"
-  
+
   # Redis with authentication
   export REDIS_URL="redis://user:password@redis.example.com:6379/0"
-  
+
   # Redis Cluster
   export REDIS_URL="redis://redis-cluster.example.com:6379"
-  
+
   # Redis with SSL
   export REDIS_URL="rediss://redis.example.com:6380"
   ```
 
 #### `CACHE_TTL`
+
 - **Type**: Integer (seconds)
 - **Required**: No
 - **Default**: `3600` (1 hour)
@@ -97,11 +102,12 @@ export CACHE_TTL=14400
 ### Rate Limiting Configuration
 
 #### `RATE_LIMIT_REQUESTS`
+
 - **Type**: Integer
 - **Required**: No
 - **Default**: `240` (with API key) or `40` (without)
 - **Description**: Maximum requests per minute
-- **FDA Limits**: 
+- **FDA Limits**:
   - With API key: 240/minute
   - Without API key: 40/minute
 - **Example**: `RATE_LIMIT_REQUESTS=240`
@@ -117,6 +123,7 @@ export RATE_LIMIT_REQUESTS=240
 ### Network Configuration
 
 #### `FDA_API_TIMEOUT`
+
 - **Type**: Integer (seconds)
 - **Required**: No
 - **Default**: `30`
@@ -125,6 +132,7 @@ export RATE_LIMIT_REQUESTS=240
 - **Example**: `FDA_API_TIMEOUT=60`
 
 #### `FDA_API_MAX_RETRIES`
+
 - **Type**: Integer
 - **Required**: No
 - **Default**: `3`
@@ -133,6 +141,7 @@ export RATE_LIMIT_REQUESTS=240
 - **Example**: `FDA_API_MAX_RETRIES=5`
 
 #### `FDA_API_BASE_URL`
+
 - **Type**: String (URL)
 - **Required**: No
 - **Default**: `https://api.fda.gov`
@@ -142,6 +151,7 @@ export RATE_LIMIT_REQUESTS=240
 ### Circuit Breaker Configuration
 
 #### `CIRCUIT_BREAKER_FAILURE_THRESHOLD`
+
 - **Type**: Integer
 - **Required**: No
 - **Default**: `5`
@@ -150,6 +160,7 @@ export RATE_LIMIT_REQUESTS=240
 - **Example**: `CIRCUIT_BREAKER_FAILURE_THRESHOLD=10`
 
 #### `CIRCUIT_BREAKER_RECOVERY_TIMEOUT`
+
 - **Type**: Integer (seconds)
 - **Required**: No
 - **Default**: `60`
@@ -160,6 +171,7 @@ export RATE_LIMIT_REQUESTS=240
 ### Logging Configuration
 
 #### `FDA_API_LOG_LEVEL`
+
 - **Type**: String
 - **Required**: No
 - **Default**: `INFO`
@@ -316,7 +328,7 @@ async def batch_process_searches(search_terms_list, batch_size=10):
     for i in range(0, len(search_terms_list), batch_size):
         batch = search_terms_list[i:i + batch_size]
         batch_tasks = [
-            service.search_predicates(terms) 
+            service.search_predicates(terms)
             for terms in batch
         ]
         batch_results = await asyncio.gather(*batch_tasks)
@@ -348,7 +360,7 @@ def load_api_key():
     if key_file and os.path.exists(key_file):
         with open(key_file, 'r') as f:
             return f.read().strip()
-    
+
     # Fallback to environment variable
     return os.getenv("FDA_API_KEY")
 
@@ -441,19 +453,19 @@ cache_ttl = cache_configs[env]["ttl"]
 class CustomCacheKeyGenerator:
     def __init__(self, prefix="fda_api"):
         self.prefix = prefix
-    
+
     def generate_key(self, endpoint, params, user_id=None):
         # Include user context in cache key if needed
         key_parts = [self.prefix, endpoint]
-        
+
         if user_id:
             key_parts.append(f"user:{user_id}")
-        
+
         # Sort params for consistent keys
         sorted_params = sorted(params.items())
         param_string = urlencode(sorted_params)
         key_parts.append(hashlib.md5(param_string.encode()).hexdigest())
-        
+
         return ":".join(key_parts)
 ```
 
@@ -585,14 +597,14 @@ async def create_production_service():
     if key_file:
         with open(key_file, 'r') as f:
             api_key = f.read().strip()
-    
+
     # Redis with connection pooling
     redis_client = redis.from_url(
         os.getenv("REDIS_URL"),
         max_connections=50,
         retry_on_timeout=True
     )
-    
+
     # High-performance HTTP client
     http_client = httpx.AsyncClient(
         timeout=httpx.Timeout(60.0),
@@ -601,7 +613,7 @@ async def create_production_service():
             max_connections=100
         )
     )
-    
+
     return OpenFDAService(
         api_key=api_key,
         redis_client=redis_client,
@@ -657,7 +669,7 @@ services:
   app:
     build: .
     ports:
-      - "8000:8000"
+      - '8000:8000'
     environment:
       - USE_REAL_FDA_API=true
       - REDIS_URL=redis://redis:6379
@@ -668,7 +680,7 @@ services:
     depends_on:
       - redis
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health/fda-api"]
+      test: ['CMD', 'curl', '-f', 'http://localhost:8000/health/fda-api']
       interval: 30s
       timeout: 10s
       retries: 3
@@ -676,12 +688,12 @@ services:
   redis:
     image: redis:7-alpine
     ports:
-      - "6379:6379"
+      - '6379:6379'
     command: redis-server --maxmemory 1gb --maxmemory-policy allkeys-lru
     volumes:
       - redis_data:/data
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ['CMD', 'redis-cli', 'ping']
       interval: 10s
       timeout: 5s
       retries: 3
@@ -705,15 +717,15 @@ kind: ConfigMap
 metadata:
   name: fda-api-config
 data:
-  USE_REAL_FDA_API: "true"
-  REDIS_URL: "redis://redis-service:6379"
-  CACHE_TTL: "7200"
-  FDA_API_LOG_LEVEL: "INFO"
-  RATE_LIMIT_REQUESTS: "240"
-  FDA_API_TIMEOUT: "60"
-  FDA_API_MAX_RETRIES: "5"
-  CIRCUIT_BREAKER_FAILURE_THRESHOLD: "10"
-  CIRCUIT_BREAKER_RECOVERY_TIMEOUT: "120"
+  USE_REAL_FDA_API: 'true'
+  REDIS_URL: 'redis://redis-service:6379'
+  CACHE_TTL: '7200'
+  FDA_API_LOG_LEVEL: 'INFO'
+  RATE_LIMIT_REQUESTS: '240'
+  FDA_API_TIMEOUT: '60'
+  FDA_API_MAX_RETRIES: '5'
+  CIRCUIT_BREAKER_FAILURE_THRESHOLD: '10'
+  CIRCUIT_BREAKER_RECOVERY_TIMEOUT: '120'
 ```
 
 ### Secret
@@ -748,38 +760,38 @@ spec:
         app: medical-device-assistant
     spec:
       containers:
-      - name: app
-        image: medical-device-assistant:latest
-        ports:
-        - containerPort: 8000
-        envFrom:
-        - configMapRef:
-            name: fda-api-config
-        env:
-        - name: FDA_API_KEY
-          valueFrom:
-            secretKeyRef:
-              name: fda-api-secret
-              key: fda-api-key
-        livenessProbe:
-          httpGet:
-            path: /health/fda-api
-            port: 8000
-          initialDelaySeconds: 30
-          periodSeconds: 30
-        readinessProbe:
-          httpGet:
-            path: /health/fda-api
-            port: 8000
-          initialDelaySeconds: 5
-          periodSeconds: 10
-        resources:
-          requests:
-            memory: "256Mi"
-            cpu: "250m"
-          limits:
-            memory: "512Mi"
-            cpu: "500m"
+        - name: app
+          image: medical-device-assistant:latest
+          ports:
+            - containerPort: 8000
+          envFrom:
+            - configMapRef:
+                name: fda-api-config
+          env:
+            - name: FDA_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: fda-api-secret
+                  key: fda-api-key
+          livenessProbe:
+            httpGet:
+              path: /health/fda-api
+              port: 8000
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /health/fda-api
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            requests:
+              memory: '256Mi'
+              cpu: '250m'
+            limits:
+              memory: '512Mi'
+              cpu: '500m'
 ```
 
 ## Configuration Validation
@@ -795,49 +807,49 @@ from services.openfda import create_production_openfda_service
 async def validate_configuration():
     """Validate FDA API configuration"""
     print("Validating FDA API configuration...")
-    
+
     # Check required environment variables
     required_vars = ["USE_REAL_FDA_API"]
     optional_vars = ["FDA_API_KEY", "REDIS_URL", "CACHE_TTL"]
-    
+
     print("\nEnvironment Variables:")
     for var in required_vars + optional_vars:
         value = os.getenv(var)
         status = "✓" if value else "✗"
         required = "Required" if var in required_vars else "Optional"
         print(f"  {status} {var}: {value or 'Not set'} ({required})")
-    
+
     # Test service creation
     try:
         service = await create_production_openfda_service()
         print("\n✓ Service creation successful")
-        
+
         # Test configuration validation
         validation = await service.validate_api_configuration()
         print(f"\n✓ API Key Configured: {validation['api_key_configured']}")
         print(f"✓ Base URL Accessible: {validation['base_url_accessible']}")
         print(f"✓ Cache Configured: {validation['cache_configured']}")
-        
+
         if validation['errors']:
             print("\nErrors:")
             for error in validation['errors']:
                 print(f"  ✗ {error}")
-        
+
         if validation['warnings']:
             print("\nWarnings:")
             for warning in validation['warnings']:
                 print(f"  ⚠ {warning}")
-        
+
         # Test health check
         health = await service.health_check()
         print(f"\n✓ Health Status: {health['status']}")
-        
+
         await service.close()
-        
+
     except Exception as e:
         print(f"\n✗ Configuration validation failed: {e}")
         return False
-    
+
     print("\n✓ Configuration validation completed successfully")
     return True
 

@@ -1,18 +1,18 @@
 /**
  * Virtual Scrolling Components
- * 
+ *
  * Provides high-performance virtual scrolling components for large datasets
  * to maintain smooth performance with thousands of items.
  */
 
-import React, { 
-  useState, 
-  useEffect, 
-  useRef, 
-  useCallback, 
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
   useMemo,
   memo,
-  CSSProperties 
+  CSSProperties,
 } from 'react';
 import { useVirtualScrolling } from '@/lib/performance/optimization';
 import { cn } from '@/lib/utils';
@@ -39,17 +39,16 @@ export function VirtualScrollContainer<T>({
   onScroll,
   getItemKey = (_, index) => index,
 }: VirtualScrollContainerProps<T>) {
-  const { visibleItems, totalHeight, offsetY, handleScroll } = useVirtualScrolling(
-    items,
-    itemHeight,
-    containerHeight,
-    overscan
-  );
+  const { visibleItems, totalHeight, offsetY, handleScroll } =
+    useVirtualScrolling(items, itemHeight, containerHeight, overscan);
 
-  const handleScrollWithCallback = useCallback((event: React.UIEvent<HTMLDivElement>) => {
-    handleScroll(event);
-    onScroll?.(event.currentTarget.scrollTop);
-  }, [handleScroll, onScroll]);
+  const handleScrollWithCallback = useCallback(
+    (event: React.UIEvent<HTMLDivElement>) => {
+      handleScroll(event);
+      onScroll?.(event.currentTarget.scrollTop);
+    },
+    [handleScroll, onScroll]
+  );
 
   return (
     <div
@@ -122,8 +121,9 @@ export function VirtualGrid<T>({
   }, [scrollTop, rowHeight, containerHeight, rowsCount, overscan]);
 
   const visibleItems = useMemo(() => {
-    const result: Array<{ item: T; index: number; row: number; col: number }> = [];
-    
+    const result: Array<{ item: T; index: number; row: number; col: number }> =
+      [];
+
     for (let row = visibleRange.start; row < visibleRange.end; row++) {
       for (let col = 0; col < columnsCount; col++) {
         const index = row * columnsCount + col;
@@ -137,7 +137,7 @@ export function VirtualGrid<T>({
         }
       }
     }
-    
+
     return result;
   }, [items, visibleRange, columnsCount]);
 
@@ -207,7 +207,9 @@ export function VariableVirtualScroll<T>({
   getItemKey = (_, index) => index,
 }: VariableVirtualScrollProps<T>) {
   const [scrollTop, setScrollTop] = useState(0);
-  const [itemHeights, setItemHeights] = useState<Map<number, number>>(new Map());
+  const [itemHeights, setItemHeights] = useState<Map<number, number>>(
+    new Map()
+  );
   const itemRefs = useRef<Map<number, HTMLDivElement>>(new Map());
 
   // Calculate item positions based on measured heights
@@ -217,8 +219,9 @@ export function VariableVirtualScroll<T>({
 
     for (let i = 0; i < items.length; i++) {
       positions[i] = totalHeight;
-      const height = itemHeights.get(i) || 
-                   (getItemHeight ? getItemHeight(items[i], i) : estimatedItemHeight);
+      const height =
+        itemHeights.get(i) ||
+        (getItemHeight ? getItemHeight(items[i], i) : estimatedItemHeight);
       totalHeight += height;
     }
 
@@ -228,7 +231,7 @@ export function VariableVirtualScroll<T>({
   // Find visible range based on scroll position
   const visibleRange = useMemo(() => {
     const { positions } = itemPositions;
-    
+
     let start = 0;
     let end = items.length;
 
@@ -287,7 +290,7 @@ export function VariableVirtualScroll<T>({
 
   const visibleItems = useMemo(() => {
     const result: Array<{ item: T; index: number; top: number }> = [];
-    
+
     for (let i = visibleRange.start; i < visibleRange.end; i++) {
       result.push({
         item: items[i],
@@ -295,7 +298,7 @@ export function VariableVirtualScroll<T>({
         top: itemPositions.positions[i],
       });
     }
-    
+
     return result;
   }, [items, visibleRange, itemPositions]);
 
@@ -355,56 +358,61 @@ export const VirtualizedProjectList = memo(function VirtualizedProjectList({
   itemHeight = 120,
   className,
 }: VirtualizedProjectListProps) {
-  const renderProject = useCallback((project: any, index: number) => (
-    <div 
-      className="flex items-center justify-between p-4 border-b hover:bg-muted/50 cursor-pointer"
-      onClick={() => onSelectProject?.(project)}
-    >
-      <div className="flex-1 min-w-0">
-        <h3 className="font-semibold truncate">{project.name}</h3>
-        {project.description && (
-          <p className="text-sm text-muted-foreground truncate">
-            {project.description}
-          </p>
-        )}
-        <div className="flex items-center gap-2 mt-1">
-          {project.device_type && (
-            <span className="text-xs bg-secondary px-2 py-1 rounded">
-              {project.device_type}
-            </span>
+  const renderProject = useCallback(
+    (project: any, index: number) => (
+      <div
+        className="flex items-center justify-between p-4 border-b hover:bg-muted/50 cursor-pointer"
+        onClick={() => onSelectProject?.(project)}
+      >
+        <div className="flex-1 min-w-0">
+          <h3 className="font-semibold truncate">{project.name}</h3>
+          {project.description && (
+            <p className="text-sm text-muted-foreground truncate">
+              {project.description}
+            </p>
           )}
-          <span className={cn(
-            "text-xs px-2 py-1 rounded",
-            project.status === 'completed' ? 'bg-green-100 text-green-800' :
-            project.status === 'in_progress' ? 'bg-blue-100 text-blue-800' :
-            'bg-gray-100 text-gray-800'
-          )}>
-            {project.status}
-          </span>
+          <div className="flex items-center gap-2 mt-1">
+            {project.device_type && (
+              <span className="text-xs bg-secondary px-2 py-1 rounded">
+                {project.device_type}
+              </span>
+            )}
+            <span
+              className={cn(
+                'text-xs px-2 py-1 rounded',
+                project.status === 'completed'
+                  ? 'bg-green-100 text-green-800'
+                  : project.status === 'in_progress'
+                    ? 'bg-blue-100 text-blue-800'
+                    : 'bg-gray-100 text-gray-800'
+              )}
+            >
+              {project.status}
+            </span>
+          </div>
         </div>
+        {onEditProject && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onEditProject(project);
+            }}
+            className="ml-4 px-3 py-1 text-sm border rounded hover:bg-muted"
+          >
+            Edit
+          </button>
+        )}
       </div>
-      {onEditProject && (
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onEditProject(project);
-          }}
-          className="ml-4 px-3 py-1 text-sm border rounded hover:bg-muted"
-        >
-          Edit
-        </button>
-      )}
-    </div>
-  ), [onSelectProject, onEditProject]);
+    ),
+    [onSelectProject, onEditProject]
+  );
 
   // Use regular rendering for small lists to avoid complexity
   if (projects.length <= 50) {
     return (
       <div className={cn('border rounded-lg', className)}>
         {projects.map((project, index) => (
-          <div key={project.id}>
-            {renderProject(project, index)}
-          </div>
+          <div key={project.id}>{renderProject(project, index)}</div>
         ))}
       </div>
     );
@@ -429,7 +437,7 @@ export function useVirtualScrollConfig(itemCount: number) {
     // Adjust configuration based on item count and device capabilities
     const isLargeDataset = itemCount > 1000;
     const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
-    
+
     return {
       shouldUseVirtualScrolling: itemCount > (isMobile ? 20 : 50),
       itemHeight: isMobile ? 100 : 120,

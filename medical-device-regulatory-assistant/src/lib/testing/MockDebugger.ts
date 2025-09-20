@@ -1,6 +1,6 @@
 /**
  * MockDebugger - Advanced Mock Debugging and Analysis System
- * 
+ *
  * Implements mock debugging system from design requirements 2.4 and 5.4
  * Provides detailed mock failure diagnosis and diff generation
  * Helps developers quickly identify and fix mock-related issues
@@ -107,7 +107,12 @@ export interface StructureMetadata {
 }
 
 export interface MockDifference {
-  type: 'MISSING' | 'EXTRA' | 'TYPE_MISMATCH' | 'VALUE_MISMATCH' | 'STRUCTURE_MISMATCH';
+  type:
+    | 'MISSING'
+    | 'EXTRA'
+    | 'TYPE_MISMATCH'
+    | 'VALUE_MISMATCH'
+    | 'STRUCTURE_MISMATCH';
   path: string;
   expected?: any;
   actual?: any;
@@ -146,8 +151,10 @@ const ERROR_PATTERNS: ErrorPattern[] = [
     category: 'STRUCTURE',
     severity: 'critical',
     rootCause: 'useToast hook is not properly mocked as a function',
-    description: 'The useToast hook mock is missing or not configured correctly. Components expect useToast to be a function that returns an object with toast methods.',
-    quickFix: 'Ensure useToast is mocked as: jest.fn(() => ({ toast: jest.fn(), ... }))',
+    description:
+      'The useToast hook mock is missing or not configured correctly. Components expect useToast to be a function that returns an object with toast methods.',
+    quickFix:
+      'Ensure useToast is mocked as: jest.fn(() => ({ toast: jest.fn(), ... }))',
     codeExample: `
 // Correct useToast mock
 const mockUseToast = jest.fn(() => ({
@@ -163,7 +170,8 @@ const mockUseToast = jest.fn(() => ({
     category: 'STRUCTURE',
     severity: 'high',
     rootCause: 'Mock object is missing expected properties',
-    description: 'A component is trying to access a property that doesn\'t exist on the mock object. This usually indicates incomplete mock structure.',
+    description:
+      "A component is trying to access a property that doesn't exist on the mock object. This usually indicates incomplete mock structure.",
     quickFix: 'Add the missing property to the mock object',
   },
   {
@@ -171,7 +179,8 @@ const mockUseToast = jest.fn(() => ({
     category: 'TYPE',
     severity: 'high',
     rootCause: 'Expected function is not mocked as a function',
-    description: 'A method that should be a function is either missing or has the wrong type in the mock.',
+    description:
+      'A method that should be a function is either missing or has the wrong type in the mock.',
     quickFix: 'Replace the property with jest.fn()',
   },
   {
@@ -179,7 +188,8 @@ const mockUseToast = jest.fn(() => ({
     category: 'CONFIGURATION',
     severity: 'critical',
     rootCause: 'React 19 compatibility issue with error handling',
-    description: 'React 19 introduces AggregateError for batched errors. The test infrastructure may not be handling these correctly.',
+    description:
+      'React 19 introduces AggregateError for batched errors. The test infrastructure may not be handling these correctly.',
     quickFix: 'Update error boundary and test setup for React 19 compatibility',
   },
   {
@@ -187,23 +197,28 @@ const mockUseToast = jest.fn(() => ({
     category: 'STRUCTURE',
     severity: 'medium',
     rootCause: 'Component mock is not returning valid React element',
-    description: 'The mocked component is not returning a valid React element structure.',
-    quickFix: 'Ensure component mock returns valid JSX or React.createElement result',
+    description:
+      'The mocked component is not returning a valid React element structure.',
+    quickFix:
+      'Ensure component mock returns valid JSX or React.createElement result',
   },
   {
     pattern: /Cannot find module.*__mocks__/i,
     category: 'CONFIGURATION',
     severity: 'medium',
     rootCause: 'Mock file location or naming issue',
-    description: 'Jest cannot find the mock file. Check file location and naming conventions.',
-    quickFix: 'Verify mock file is in correct __mocks__ directory with proper naming',
+    description:
+      'Jest cannot find the mock file. Check file location and naming conventions.',
+    quickFix:
+      'Verify mock file is in correct __mocks__ directory with proper naming',
   },
   {
     pattern: /ReferenceError: (\w+) is not defined/i,
     category: 'DEPENDENCY',
     severity: 'high',
     rootCause: 'Missing mock dependency or import',
-    description: 'A dependency required by the mock is not available in the test environment.',
+    description:
+      'A dependency required by the mock is not available in the test environment.',
     quickFix: 'Import or mock the missing dependency',
   },
 ];
@@ -253,11 +268,14 @@ export class MockDebugger {
   /**
    * Diagnose hook failure and provide detailed analysis
    */
-  public static diagnoseHookFailure(hookName: string, error: Error): DiagnosisReport {
+  public static diagnoseHookFailure(
+    hookName: string,
+    error: Error
+  ): DiagnosisReport {
     const startTime = Date.now();
-    
+
     // Analyze error message against known patterns
-    const matchedPattern = ERROR_PATTERNS.find(pattern => 
+    const matchedPattern = ERROR_PATTERNS.find((pattern) =>
       pattern.pattern.test(error.message)
     );
 
@@ -286,8 +304,16 @@ export class MockDebugger {
       confidence = 30; // Low confidence for unknown patterns
     }
 
-    const recommendations = MockDebugger.generateRecommendations(hookName, error, diagnosis);
-    const codeExamples = MockDebugger.generateCodeExamples(hookName, error, diagnosis);
+    const recommendations = MockDebugger.generateRecommendations(
+      hookName,
+      error,
+      diagnosis
+    );
+    const codeExamples = MockDebugger.generateCodeExamples(
+      hookName,
+      error,
+      diagnosis
+    );
     const relatedIssues = MockDebugger.findRelatedIssues(hookName, error);
 
     return {
@@ -305,14 +331,28 @@ export class MockDebugger {
   /**
    * Generate detailed diff between expected and actual mock structures
    */
-  public static generateMockDiff(expected: any, actual: any, mockName: string = 'unknown'): MockDiff {
-    const expectedStructure = MockDebugger.analyzeStructure(expected, 'expected');
+  public static generateMockDiff(
+    expected: any,
+    actual: any,
+    mockName: string = 'unknown'
+  ): MockDiff {
+    const expectedStructure = MockDebugger.analyzeStructure(
+      expected,
+      'expected'
+    );
     const actualStructure = MockDebugger.analyzeStructure(actual, 'actual');
-    
-    const differences = MockDebugger.compareStructures(expectedStructure, actualStructure);
+
+    const differences = MockDebugger.compareStructures(
+      expectedStructure,
+      actualStructure
+    );
     const summary = MockDebugger.generateDiffSummary(differences);
     const fixSuggestions = MockDebugger.generateFixSuggestions(differences);
-    const generatedCode = MockDebugger.generateFixCode(mockName, differences, expectedStructure);
+    const generatedCode = MockDebugger.generateFixCode(
+      mockName,
+      differences,
+      expectedStructure
+    );
 
     return {
       mockName,
@@ -328,7 +368,10 @@ export class MockDebugger {
   /**
    * Analyze and compare mock structures
    */
-  private static analyzeStructure(obj: any, source: 'expected' | 'actual' | 'inferred'): MockStructure {
+  private static analyzeStructure(
+    obj: any,
+    source: 'expected' | 'actual' | 'inferred'
+  ): MockStructure {
     const properties: Record<string, PropertyInfo> = {};
     const methods: Record<string, MethodInfo> = {};
 
@@ -388,13 +431,16 @@ export class MockDebugger {
   /**
    * Compare two mock structures and identify differences
    */
-  private static compareStructures(expected: MockStructure, actual: MockStructure): MockDifference[] {
+  private static compareStructures(
+    expected: MockStructure,
+    actual: MockStructure
+  ): MockDifference[] {
     const differences: MockDifference[] = [];
 
     // Compare properties
     Object.entries(expected.properties).forEach(([key, expectedProp]) => {
       const actualProp = actual.properties[key];
-      
+
       if (!actualProp) {
         differences.push({
           type: 'MISSING',
@@ -436,7 +482,7 @@ export class MockDebugger {
     // Compare methods
     Object.entries(expected.methods).forEach(([key, expectedMethod]) => {
       const actualMethod = actual.methods[key];
-      
+
       if (!actualMethod) {
         differences.push({
           type: 'MISSING',
@@ -481,28 +527,34 @@ export class MockDebugger {
   /**
    * Generate summary of differences
    */
-  private static generateDiffSummary(differences: MockDifference[]): DiffSummary {
+  private static generateDiffSummary(
+    differences: MockDifference[]
+  ): DiffSummary {
     const totalDifferences = differences.length;
-    const criticalIssues = differences.filter(d => d.severity === 'critical').length;
-    const missingItems = differences.filter(d => d.type === 'MISSING').length;
-    const extraItems = differences.filter(d => d.type === 'EXTRA').length;
-    const typeMismatches = differences.filter(d => d.type === 'TYPE_MISMATCH').length;
+    const criticalIssues = differences.filter(
+      (d) => d.severity === 'critical'
+    ).length;
+    const missingItems = differences.filter((d) => d.type === 'MISSING').length;
+    const extraItems = differences.filter((d) => d.type === 'EXTRA').length;
+    const typeMismatches = differences.filter(
+      (d) => d.type === 'TYPE_MISMATCH'
+    ).length;
 
     let overallHealth: DiffSummary['overallHealth'];
     let compatibilityScore: number;
 
     if (criticalIssues > 0) {
       overallHealth = 'critical';
-      compatibilityScore = Math.max(0, 30 - (criticalIssues * 10));
+      compatibilityScore = Math.max(0, 30 - criticalIssues * 10);
     } else if (totalDifferences > 10) {
       overallHealth = 'poor';
-      compatibilityScore = Math.max(20, 60 - (totalDifferences * 2));
+      compatibilityScore = Math.max(20, 60 - totalDifferences * 2);
     } else if (totalDifferences > 5) {
       overallHealth = 'fair';
-      compatibilityScore = Math.max(40, 80 - (totalDifferences * 3));
+      compatibilityScore = Math.max(40, 80 - totalDifferences * 3);
     } else if (totalDifferences > 0) {
       overallHealth = 'good';
-      compatibilityScore = Math.max(70, 95 - (totalDifferences * 5));
+      compatibilityScore = Math.max(70, 95 - totalDifferences * 5);
     } else {
       overallHealth = 'excellent';
       compatibilityScore = 100;
@@ -522,33 +574,49 @@ export class MockDebugger {
   /**
    * Generate fix suggestions based on differences
    */
-  private static generateFixSuggestions(differences: MockDifference[]): string[] {
+  private static generateFixSuggestions(
+    differences: MockDifference[]
+  ): string[] {
     const suggestions: string[] = [];
-    
+
     // Group suggestions by type
-    const criticalIssues = differences.filter(d => d.severity === 'critical');
-    const missingMethods = differences.filter(d => d.type === 'MISSING' && d.path.startsWith('methods.'));
-    const missingProperties = differences.filter(d => d.type === 'MISSING' && d.path.startsWith('properties.'));
-    const typeMismatches = differences.filter(d => d.type === 'TYPE_MISMATCH');
+    const criticalIssues = differences.filter((d) => d.severity === 'critical');
+    const missingMethods = differences.filter(
+      (d) => d.type === 'MISSING' && d.path.startsWith('methods.')
+    );
+    const missingProperties = differences.filter(
+      (d) => d.type === 'MISSING' && d.path.startsWith('properties.')
+    );
+    const typeMismatches = differences.filter(
+      (d) => d.type === 'TYPE_MISMATCH'
+    );
 
     if (criticalIssues.length > 0) {
-      suggestions.push(`🚨 Fix ${criticalIssues.length} critical issue(s) immediately to prevent test failures`);
+      suggestions.push(
+        `🚨 Fix ${criticalIssues.length} critical issue(s) immediately to prevent test failures`
+      );
     }
 
     if (missingMethods.length > 0) {
-      suggestions.push(`➕ Add ${missingMethods.length} missing method(s): ${missingMethods.map(d => d.path.split('.')[1]).join(', ')}`);
+      suggestions.push(
+        `➕ Add ${missingMethods.length} missing method(s): ${missingMethods.map((d) => d.path.split('.')[1]).join(', ')}`
+      );
     }
 
     if (missingProperties.length > 0) {
-      suggestions.push(`📝 Add ${missingProperties.length} missing propert(y/ies): ${missingProperties.map(d => d.path.split('.')[1]).join(', ')}`);
+      suggestions.push(
+        `📝 Add ${missingProperties.length} missing propert(y/ies): ${missingProperties.map((d) => d.path.split('.')[1]).join(', ')}`
+      );
     }
 
     if (typeMismatches.length > 0) {
-      suggestions.push(`🔧 Fix ${typeMismatches.length} type mismatch(es) for better compatibility`);
+      suggestions.push(
+        `🔧 Fix ${typeMismatches.length} type mismatch(es) for better compatibility`
+      );
     }
 
     // Add specific suggestions
-    differences.forEach(diff => {
+    differences.forEach((diff) => {
       if (diff.severity === 'critical' || diff.severity === 'high') {
         suggestions.push(`• ${diff.suggestion}`);
       }
@@ -560,11 +628,17 @@ export class MockDebugger {
   /**
    * Generate code to fix identified issues
    */
-  private static generateFixCode(mockName: string, differences: MockDifference[], expectedStructure: MockStructure): string {
+  private static generateFixCode(
+    mockName: string,
+    differences: MockDifference[],
+    expectedStructure: MockStructure
+  ): string {
     const lines: string[] = [];
-    
+
     lines.push(`// Generated fix for ${mockName} mock`);
-    lines.push(`// Apply these changes to resolve ${differences.length} identified issue(s)`);
+    lines.push(
+      `// Apply these changes to resolve ${differences.length} identified issue(s)`
+    );
     lines.push('');
 
     // Generate mock structure
@@ -579,7 +653,9 @@ export class MockDebugger {
     // Add methods
     Object.entries(expectedStructure.methods).forEach(([key, method]) => {
       if (method.returnType === 'Promise') {
-        lines.push(`  ${key}: jest.fn().mockResolvedValue({}), // async ${method.returnType}`);
+        lines.push(
+          `  ${key}: jest.fn().mockResolvedValue({}), // async ${method.returnType}`
+        );
       } else {
         lines.push(`  ${key}: jest.fn(), // ${method.returnType}`);
       }
@@ -589,10 +665,10 @@ export class MockDebugger {
     lines.push('');
 
     // Add specific fixes for critical issues
-    const criticalIssues = differences.filter(d => d.severity === 'critical');
+    const criticalIssues = differences.filter((d) => d.severity === 'critical');
     if (criticalIssues.length > 0) {
       lines.push('// Critical fixes:');
-      criticalIssues.forEach(issue => {
+      criticalIssues.forEach((issue) => {
         lines.push(`// ${issue.suggestion}`);
       });
     }
@@ -604,19 +680,22 @@ export class MockDebugger {
   // Helper Methods
   // ============================================================================
 
-  private static extractAffectedFeatures(error: Error, hookName: string): string[] {
+  private static extractAffectedFeatures(
+    error: Error,
+    hookName: string
+  ): string[] {
     const features = [hookName];
-    
+
     // Extract additional features from error stack trace
     if (error.stack) {
       const stackLines = error.stack.split('\n');
-      stackLines.forEach(line => {
+      stackLines.forEach((line) => {
         // Look for component names in stack trace
         const componentMatch = line.match(/at (\w+Component|\w+Form|\w+Page)/);
         if (componentMatch) {
           features.push(componentMatch[1]);
         }
-        
+
         // Also look for file names that might indicate components
         const fileMatch = line.match(/at.*\/(\w+)\.(tsx?|jsx?):/);
         if (fileMatch && fileMatch[1] !== 'index') {
@@ -628,7 +707,11 @@ export class MockDebugger {
     return [...new Set(features)]; // Remove duplicates
   }
 
-  private static generateRecommendations(hookName: string, error: Error, diagnosis: MockDiagnosis): DiagnosisRecommendation[] {
+  private static generateRecommendations(
+    hookName: string,
+    error: Error,
+    diagnosis: MockDiagnosis
+  ): DiagnosisRecommendation[] {
     const recommendations: DiagnosisRecommendation[] = [];
 
     // Add immediate fix if available
@@ -657,7 +740,8 @@ export class MockDebugger {
         recommendations.push({
           priority: 'high',
           action: 'Fix Type Mismatch',
-          description: 'Ensure all mock methods are jest.fn() and properties have correct types',
+          description:
+            'Ensure all mock methods are jest.fn() and properties have correct types',
           estimatedEffort: 'minutes',
         });
         break;
@@ -666,7 +750,8 @@ export class MockDebugger {
         recommendations.push({
           priority: 'medium',
           action: 'Check Dependencies',
-          description: 'Verify all required dependencies are mocked or available',
+          description:
+            'Verify all required dependencies are mocked or available',
           estimatedEffort: 'hours',
           dependencies: ['Check imports', 'Verify mock setup order'],
         });
@@ -695,14 +780,19 @@ export class MockDebugger {
     return recommendations;
   }
 
-  private static generateCodeExamples(hookName: string, error: Error, diagnosis: MockDiagnosis): CodeExample[] {
+  private static generateCodeExamples(
+    hookName: string,
+    error: Error,
+    diagnosis: MockDiagnosis
+  ): CodeExample[] {
     const examples: CodeExample[] = [];
 
     // Generate hook-specific examples
     if (hookName === 'useToast') {
       examples.push({
         title: 'Complete useToast Mock',
-        description: 'Comprehensive mock that matches the actual useToast implementation',
+        description:
+          'Comprehensive mock that matches the actual useToast implementation',
         after: `
 const mockUseToast = jest.fn(() => ({
   toast: jest.fn(),
@@ -728,7 +818,8 @@ const mockUseToast = jest.fn(() => ({
     if (hookName === 'useEnhancedForm') {
       examples.push({
         title: 'Enhanced Form Mock Setup',
-        description: 'Mock that includes all react-hook-form methods plus enhanced features',
+        description:
+          'Mock that includes all react-hook-form methods plus enhanced features',
         after: `
 const mockUseEnhancedForm = jest.fn(() => ({
   // Standard react-hook-form methods
@@ -758,7 +849,8 @@ const mockUseEnhancedForm = jest.fn(() => ({
     if (examples.length === 0) {
       examples.push({
         title: `Generic ${hookName} Mock`,
-        description: 'Basic mock structure - customize based on actual hook interface',
+        description:
+          'Basic mock structure - customize based on actual hook interface',
         after: `
 const mock${hookName} = jest.fn(() => ({
   // Add properties and methods based on actual ${hookName} interface
@@ -773,14 +865,18 @@ const mock${hookName} = jest.fn(() => ({
     return examples;
   }
 
-  private static findRelatedIssues(hookName: string, error: Error): RelatedIssue[] {
+  private static findRelatedIssues(
+    hookName: string,
+    error: Error
+  ): RelatedIssue[] {
     const issues: RelatedIssue[] = [];
 
     // Check for common related issues
     if (error.message.includes('is not a function')) {
       issues.push({
         type: 'similar_error',
-        description: 'Similar "not a function" errors often indicate incomplete mocks',
+        description:
+          'Similar "not a function" errors often indicate incomplete mocks',
         suggestion: 'Check all methods in the mock are jest.fn()',
       });
     }
@@ -818,7 +914,7 @@ const mock = jest.fn(() => ({
     // Basic parameter extraction - could be enhanced with AST parsing
     const funcStr = func.toString();
     const paramMatch = funcStr.match(/\(([^)]*)\)/);
-    
+
     if (!paramMatch || !paramMatch[1].trim()) {
       return [];
     }
@@ -838,7 +934,7 @@ const mock = jest.fn(() => ({
         return 'any'; // Could be enhanced to analyze implementation
       }
     }
-    
+
     return 'unknown';
   }
 
@@ -875,10 +971,10 @@ const mock = jest.fn(() => ({
     if (!this.diagnosisHistory.has(report.mockName)) {
       this.diagnosisHistory.set(report.mockName, []);
     }
-    
+
     const history = this.diagnosisHistory.get(report.mockName)!;
     history.push(report);
-    
+
     // Keep only last 20 diagnoses
     if (history.length > 20) {
       history.shift();
@@ -906,10 +1002,10 @@ const mock = jest.fn(() => ({
     if (!this.performanceMetrics.has(mockName)) {
       this.performanceMetrics.set(mockName, []);
     }
-    
+
     const metrics = this.performanceMetrics.get(mockName)!;
     metrics.push(duration);
-    
+
     // Keep only last 100 measurements
     if (metrics.length > 100) {
       metrics.shift();
@@ -921,7 +1017,7 @@ const mock = jest.fn(() => ({
    */
   public generateDebugReport(mockName: string, error?: Error): string {
     const lines: string[] = [];
-    
+
     lines.push(`# Mock Debug Report: ${mockName}`);
     lines.push(`Generated: ${new Date().toISOString()}`);
     lines.push('');
@@ -946,7 +1042,9 @@ const mock = jest.fn(() => ({
 
       lines.push('## Recommendations');
       diagnosis.recommendations.forEach((rec, index) => {
-        lines.push(`${index + 1}. **${rec.action}** (${rec.priority} priority)`);
+        lines.push(
+          `${index + 1}. **${rec.action}** (${rec.priority} priority)`
+        );
         lines.push(`   ${rec.description}`);
         if (rec.codeExample) {
           lines.push('   ```typescript');
@@ -962,7 +1060,9 @@ const mock = jest.fn(() => ({
     if (history.length > 0) {
       lines.push('## Recent Issues');
       history.slice(-5).forEach((report, index) => {
-        lines.push(`${index + 1}. ${report.diagnosis.rootCause} (${report.diagnosis.severity})`);
+        lines.push(
+          `${index + 1}. ${report.diagnosis.rootCause} (${report.diagnosis.severity})`
+        );
       });
       lines.push('');
     }

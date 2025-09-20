@@ -1,6 +1,6 @@
 /**
  * Efficient Caching Strategies
- * 
+ *
  * Provides various caching mechanisms for improving application performance
  * including memory cache, localStorage cache, and API response caching.
  */
@@ -57,7 +57,7 @@ export class MemoryCache<T = any> {
 
   get(key: string): T | null {
     const entry = this.cache.get(key);
-    
+
     if (!entry) {
       performanceMonitor?.recordMetric('cache_miss', 1, {
         cache_type: 'memory',
@@ -91,13 +91,13 @@ export class MemoryCache<T = any> {
   has(key: string): boolean {
     const entry = this.cache.get(key);
     if (!entry) return false;
-    
+
     // Check if expired
     if (Date.now() - entry.timestamp > entry.ttl) {
       this.cache.delete(key);
       return false;
     }
-    
+
     return true;
   }
 
@@ -126,7 +126,8 @@ export class MemoryCache<T = any> {
     }));
 
     const totalHits = entries.reduce((sum, entry) => sum + entry.hits, 0);
-    const hitRate = totalHits > 0 ? totalHits / (totalHits + entries.length) : 0;
+    const hitRate =
+      totalHits > 0 ? totalHits / (totalHits + entries.length) : 0;
 
     return {
       size: this.cache.size,
@@ -247,10 +248,10 @@ export class PersistentCache<T = any> {
     if (!this.isStorageAvailable()) return;
 
     try {
-      const keys = Object.keys(localStorage).filter(key => 
+      const keys = Object.keys(localStorage).filter((key) =>
         key.startsWith(this.prefix)
       );
-      keys.forEach(key => localStorage.removeItem(key));
+      keys.forEach((key) => localStorage.removeItem(key));
     } catch (error) {
       console.warn('Failed to clear persistent cache:', error);
     }
@@ -260,24 +261,26 @@ export class PersistentCache<T = any> {
     if (!this.isStorageAvailable()) return;
 
     try {
-      const keys = Object.keys(localStorage).filter(key => 
+      const keys = Object.keys(localStorage).filter((key) =>
         key.startsWith(this.prefix)
       );
 
       if (keys.length <= this.maxSize) return;
 
       // Get all entries with timestamps
-      const entries = keys.map(key => {
-        try {
-          const stored = localStorage.getItem(key);
-          if (!stored) return null;
-          
-          const entry = JSON.parse(stored);
-          return { key, timestamp: entry.timestamp, hits: entry.hits };
-        } catch {
-          return null;
-        }
-      }).filter(Boolean);
+      const entries = keys
+        .map((key) => {
+          try {
+            const stored = localStorage.getItem(key);
+            if (!stored) return null;
+
+            const entry = JSON.parse(stored);
+            return { key, timestamp: entry.timestamp, hits: entry.hits };
+          } catch {
+            return null;
+          }
+        })
+        .filter(Boolean);
 
       // Sort by least recently used (oldest timestamp, fewest hits)
       entries.sort((a, b) => {
@@ -287,7 +290,7 @@ export class PersistentCache<T = any> {
 
       // Remove oldest entries
       const toRemove = entries.slice(0, entries.length - this.maxSize);
-      toRemove.forEach(entry => {
+      toRemove.forEach((entry) => {
         if (entry) localStorage.removeItem(entry.key);
       });
     } catch (error) {
@@ -304,9 +307,9 @@ export class APICache {
 
   constructor() {
     this.memoryCache = new MemoryCache({ maxSize: 50, ttl: 5 * 60 * 1000 });
-    this.persistentCache = new PersistentCache('api_cache', { 
-      maxSize: 100, 
-      ttl: 30 * 60 * 1000 
+    this.persistentCache = new PersistentCache('api_cache', {
+      maxSize: 100,
+      ttl: 30 * 60 * 1000,
     });
   }
 
@@ -356,34 +359,37 @@ export class APICache {
 
     // Fetch data
     const startTime = performance.now();
-    const promise = fetchFn().then(data => {
-      const duration = performance.now() - startTime;
-      
-      // Store in caches
-      if (useMemoryCache) {
-        this.memoryCache.set(key, data, ttl);
-      }
-      if (usePersistentCache) {
-        this.persistentCache.set(key, data, ttl);
-      }
+    const promise = fetchFn()
+      .then((data) => {
+        const duration = performance.now() - startTime;
 
-      // Record performance
-      performanceMonitor?.recordMetric('api_cache_fetch', duration, {
-        key,
-        cache_miss: true,
-      });
+        // Store in caches
+        if (useMemoryCache) {
+          this.memoryCache.set(key, data, ttl);
+        }
+        if (usePersistentCache) {
+          this.persistentCache.set(key, data, ttl);
+        }
 
-      return data;
-    }).catch(error => {
-      // Record error
-      performanceMonitor?.recordMetric('api_cache_error', 1, {
-        key,
-        error: error.message,
+        // Record performance
+        performanceMonitor?.recordMetric('api_cache_fetch', duration, {
+          key,
+          cache_miss: true,
+        });
+
+        return data;
+      })
+      .catch((error) => {
+        // Record error
+        performanceMonitor?.recordMetric('api_cache_error', 1, {
+          key,
+          error: error.message,
+        });
+        throw error;
+      })
+      .finally(() => {
+        this.pendingRequests.delete(key);
       });
-      throw error;
-    }).finally(() => {
-      this.pendingRequests.delete(key);
-    });
 
     this.pendingRequests.set(key, promise);
     return promise;
@@ -399,7 +405,7 @@ export class APICache {
     // This is a simplified implementation
     // In a real app, you'd want to track keys more efficiently
     const memoryStats = this.memoryCache.getStats();
-    memoryStats.entries.forEach(entry => {
+    memoryStats.entries.forEach((entry) => {
       if (pattern.test(entry.key)) {
         this.invalidate(entry.key);
       }
@@ -478,7 +484,8 @@ export function useCachedData<T>(
   }, [key]);
 
   const refresh = useCallback(() => {
-    apiCache.get(key, fetchFn, { ttl, forceRefresh: true })
+    apiCache
+      .get(key, fetchFn, { ttl, forceRefresh: true })
       .then(setData)
       .catch(setError);
   }, [key, fetchFn, ttl]);
@@ -504,15 +511,15 @@ export class CacheWarmer {
 
   async warmup(): Promise<void> {
     const startTime = performance.now();
-    
+
     try {
-      await Promise.allSettled(this.warmupTasks.map(task => task()));
-      
+      await Promise.allSettled(this.warmupTasks.map((task) => task()));
+
       const duration = performance.now() - startTime;
       performanceMonitor?.recordMetric('cache_warmup', duration, {
         tasks_count: this.warmupTasks.length,
       });
-      
+
       console.log(`Cache warmup completed in ${duration.toFixed(2)}ms`);
     } catch (error) {
       console.error('Cache warmup failed:', error);
@@ -528,17 +535,19 @@ export class CacheWarmer {
 export const cacheWarmer = CacheWarmer.getInstance();
 
 // Utility functions
-export function createCacheKey(...parts: (string | number | boolean)[]): string {
-  return parts.map(part => String(part)).join(':');
+export function createCacheKey(
+  ...parts: (string | number | boolean)[]
+): string {
+  return parts.map((part) => String(part)).join(':');
 }
 
 export function getCacheSize(): { memory: number; persistent: number } {
   const memoryStats = memoryCache.getStats();
-  
+
   let persistentSize = 0;
   if (typeof localStorage !== 'undefined') {
     try {
-      const keys = Object.keys(localStorage).filter(key => 
+      const keys = Object.keys(localStorage).filter((key) =>
         key.startsWith('app_cache_')
       );
       persistentSize = keys.length;

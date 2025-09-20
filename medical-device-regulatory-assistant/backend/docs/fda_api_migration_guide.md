@@ -1,11 +1,13 @@
 # FDA API Migration Guide
 
 ## Overview
+
 Guide for migrating from mock FDA API to real FDA API integration.
 
 ## Migration Steps
 
 ### 1. Environment Configuration
+
 ```bash
 # Before (Mock API)
 export USE_REAL_FDA_API=false
@@ -17,6 +19,7 @@ export REDIS_URL=redis://localhost:6379
 ```
 
 ### 2. Service Configuration Update
+
 ```python
 # Before: Mock service
 service = create_mock_openfda_service()
@@ -26,6 +29,7 @@ service = await create_production_openfda_service()
 ```
 
 ### 3. Testing Migration
+
 ```bash
 # Test real API connectivity
 poetry run python -c "
@@ -43,11 +47,13 @@ asyncio.run(test_migration())
 ```
 
 ### 4. Gradual Rollout
+
 1. **Development**: Test with real API
 2. **Staging**: Validate performance and reliability
 3. **Production**: Deploy with monitoring
 
 ### 5. Rollback Plan
+
 ```bash
 # Emergency rollback to mock
 export USE_REAL_FDA_API=false
@@ -55,6 +61,7 @@ export USE_REAL_FDA_API=false
 ```
 
 ## Validation Checklist
+
 - [ ] API key configured and valid
 - [ ] Redis cache operational
 - [ ] Rate limiting working correctly

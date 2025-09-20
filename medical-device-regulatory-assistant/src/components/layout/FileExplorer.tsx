@@ -194,7 +194,9 @@ export const FileExplorer: React.FC<FileExplorerProps> = ({
   onFileUpload,
   className,
 }) => {
-  const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set());
+  const [expandedFolders, setExpandedFolders] = useState<Set<string>>(
+    new Set()
+  );
   const [dragOver, setDragOver] = useState(false);
 
   const handleToggle = (fileId: string) => {
@@ -223,7 +225,7 @@ export const FileExplorer: React.FC<FileExplorerProps> = ({
     (e: React.DragEvent) => {
       e.preventDefault();
       setDragOver(false);
-      
+
       if (e.dataTransfer.files && onFileUpload) {
         onFileUpload(e.dataTransfer.files, null);
       }

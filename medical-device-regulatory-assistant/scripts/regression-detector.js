@@ -2,7 +2,7 @@
 
 /**
  * Regression Detection System
- * 
+ *
  * Compares current quality metrics with previous builds to detect
  * quality regressions and performance degradations.
  */
@@ -16,19 +16,19 @@ const COLORS = {
   YELLOW: '\x1b[33m',
   BLUE: '\x1b[34m',
   RESET: '\x1b[0m',
-  BOLD: '\x1b[1m'
+  BOLD: '\x1b[1m',
 };
 
 /**
  * Regression thresholds
  */
 const REGRESSION_THRESHOLDS = {
-  overall_score: -5,        // -5 points or more is a regression
-  test_coverage: -3,        // -3% coverage or more is a regression
-  performance_time: 5,      // +5 seconds or more is a regression
-  bundle_size: 50,          // +50KB or more is a regression
-  critical_issues: 1,       // Any increase in critical issues is a regression
-  security_vulnerabilities: 1  // Any increase in vulnerabilities is a regression
+  overall_score: -5, // -5 points or more is a regression
+  test_coverage: -3, // -3% coverage or more is a regression
+  performance_time: 5, // +5 seconds or more is a regression
+  bundle_size: 50, // +50KB or more is a regression
+  critical_issues: 1, // Any increase in critical issues is a regression
+  security_vulnerabilities: 1, // Any increase in vulnerabilities is a regression
 };
 
 /**
@@ -59,7 +59,7 @@ class RegressionDetector {
     try {
       const files = await fs.readdir(this.reportsDir);
       const reportFiles = files
-        .filter(f => f.startsWith('quality-metrics-') && f.endsWith('.json'))
+        .filter((f) => f.startsWith('quality-metrics-') && f.endsWith('.json'))
         .sort()
         .reverse(); // Most recent first
 
@@ -84,7 +84,9 @@ class RegressionDetector {
       if (await this.pathExists(this.previousReportsDir)) {
         const files = await fs.readdir(this.previousReportsDir);
         const reportFiles = files
-          .filter(f => f.startsWith('quality-metrics-') && f.endsWith('.json'))
+          .filter(
+            (f) => f.startsWith('quality-metrics-') && f.endsWith('.json')
+          )
           .sort()
           .reverse();
 
@@ -98,7 +100,7 @@ class RegressionDetector {
       // Fallback: try to find previous report in current reports directory
       const files = await fs.readdir(this.reportsDir);
       const reportFiles = files
-        .filter(f => f.startsWith('quality-metrics-') && f.endsWith('.json'))
+        .filter((f) => f.startsWith('quality-metrics-') && f.endsWith('.json'))
         .sort()
         .reverse();
 
@@ -110,7 +112,10 @@ class RegressionDetector {
       const reportContent = await fs.readFile(reportPath, 'utf8');
       return JSON.parse(reportContent);
     } catch (error) {
-      this.log(`Warning: Could not load previous report: ${error.message}`, COLORS.YELLOW);
+      this.log(
+        `Warning: Could not load previous report: ${error.message}`,
+        COLORS.YELLOW
+      );
       return null;
     }
   }
@@ -131,7 +136,7 @@ class RegressionDetector {
         current: currentScore,
         previous: previousScore,
         difference: difference,
-        threshold: REGRESSION_THRESHOLDS.overall_score
+        threshold: REGRESSION_THRESHOLDS.overall_score,
       });
     }
 
@@ -139,7 +144,7 @@ class RegressionDetector {
       current: currentScore,
       previous: previousScore,
       difference: difference,
-      regression: difference <= REGRESSION_THRESHOLDS.overall_score
+      regression: difference <= REGRESSION_THRESHOLDS.overall_score,
     };
   }
 
@@ -151,8 +156,10 @@ class RegressionDetector {
 
     // Frontend coverage
     const currentFrontendCoverage = current.frontend?.test_coverage?.score || 0;
-    const previousFrontendCoverage = previous.frontend?.test_coverage?.score || 0;
-    const frontendDifference = currentFrontendCoverage - previousFrontendCoverage;
+    const previousFrontendCoverage =
+      previous.frontend?.test_coverage?.score || 0;
+    const frontendDifference =
+      currentFrontendCoverage - previousFrontendCoverage;
 
     if (frontendDifference <= REGRESSION_THRESHOLDS.test_coverage) {
       this.regressions.push({
@@ -162,7 +169,7 @@ class RegressionDetector {
         current: currentFrontendCoverage,
         previous: previousFrontendCoverage,
         difference: frontendDifference,
-        threshold: REGRESSION_THRESHOLDS.test_coverage
+        threshold: REGRESSION_THRESHOLDS.test_coverage,
       });
     }
 
@@ -171,7 +178,7 @@ class RegressionDetector {
       current: currentFrontendCoverage,
       previous: previousFrontendCoverage,
       difference: frontendDifference,
-      regression: frontendDifference <= REGRESSION_THRESHOLDS.test_coverage
+      regression: frontendDifference <= REGRESSION_THRESHOLDS.test_coverage,
     });
 
     // Backend coverage
@@ -187,7 +194,7 @@ class RegressionDetector {
         current: currentBackendCoverage,
         previous: previousBackendCoverage,
         difference: backendDifference,
-        threshold: REGRESSION_THRESHOLDS.test_coverage
+        threshold: REGRESSION_THRESHOLDS.test_coverage,
       });
     }
 
@@ -196,7 +203,7 @@ class RegressionDetector {
       current: currentBackendCoverage,
       previous: previousBackendCoverage,
       difference: backendDifference,
-      regression: backendDifference <= REGRESSION_THRESHOLDS.test_coverage
+      regression: backendDifference <= REGRESSION_THRESHOLDS.test_coverage,
     });
 
     return comparisons;
@@ -209,8 +216,10 @@ class RegressionDetector {
     const comparisons = [];
 
     // Frontend test execution time
-    const currentFrontendTime = current.frontend?.performance?.test_execution_time || 0;
-    const previousFrontendTime = previous.frontend?.performance?.test_execution_time || 0;
+    const currentFrontendTime =
+      current.frontend?.performance?.test_execution_time || 0;
+    const previousFrontendTime =
+      previous.frontend?.performance?.test_execution_time || 0;
     const frontendTimeDifference = currentFrontendTime - previousFrontendTime;
 
     if (frontendTimeDifference >= REGRESSION_THRESHOLDS.performance_time) {
@@ -221,7 +230,7 @@ class RegressionDetector {
         current: currentFrontendTime,
         previous: previousFrontendTime,
         difference: frontendTimeDifference,
-        threshold: REGRESSION_THRESHOLDS.performance_time
+        threshold: REGRESSION_THRESHOLDS.performance_time,
       });
     }
 
@@ -231,12 +240,15 @@ class RegressionDetector {
       previous: previousFrontendTime,
       difference: frontendTimeDifference,
       unit: 's',
-      regression: frontendTimeDifference >= REGRESSION_THRESHOLDS.performance_time
+      regression:
+        frontendTimeDifference >= REGRESSION_THRESHOLDS.performance_time,
     });
 
     // Backend test execution time
-    const currentBackendTime = current.backend?.performance?.test_execution_time || 0;
-    const previousBackendTime = previous.backend?.performance?.test_execution_time || 0;
+    const currentBackendTime =
+      current.backend?.performance?.test_execution_time || 0;
+    const previousBackendTime =
+      previous.backend?.performance?.test_execution_time || 0;
     const backendTimeDifference = currentBackendTime - previousBackendTime;
 
     if (backendTimeDifference >= REGRESSION_THRESHOLDS.performance_time) {
@@ -247,7 +259,7 @@ class RegressionDetector {
         current: currentBackendTime,
         previous: previousBackendTime,
         difference: backendTimeDifference,
-        threshold: REGRESSION_THRESHOLDS.performance_time
+        threshold: REGRESSION_THRESHOLDS.performance_time,
       });
     }
 
@@ -257,12 +269,15 @@ class RegressionDetector {
       previous: previousBackendTime,
       difference: backendTimeDifference,
       unit: 's',
-      regression: backendTimeDifference >= REGRESSION_THRESHOLDS.performance_time
+      regression:
+        backendTimeDifference >= REGRESSION_THRESHOLDS.performance_time,
     });
 
     // Bundle size
-    const currentBundleSize = current.frontend?.bundle_analysis?.total_size || 0;
-    const previousBundleSize = previous.frontend?.bundle_analysis?.total_size || 0;
+    const currentBundleSize =
+      current.frontend?.bundle_analysis?.total_size || 0;
+    const previousBundleSize =
+      previous.frontend?.bundle_analysis?.total_size || 0;
     const bundleSizeDifference = currentBundleSize - previousBundleSize;
 
     if (bundleSizeDifference >= REGRESSION_THRESHOLDS.bundle_size) {
@@ -273,7 +288,7 @@ class RegressionDetector {
         current: currentBundleSize,
         previous: previousBundleSize,
         difference: bundleSizeDifference,
-        threshold: REGRESSION_THRESHOLDS.bundle_size
+        threshold: REGRESSION_THRESHOLDS.bundle_size,
       });
     }
 
@@ -283,7 +298,7 @@ class RegressionDetector {
       previous: previousBundleSize,
       difference: bundleSizeDifference,
       unit: 'KB',
-      regression: bundleSizeDifference >= REGRESSION_THRESHOLDS.bundle_size
+      regression: bundleSizeDifference >= REGRESSION_THRESHOLDS.bundle_size,
     });
 
     return comparisons;
@@ -293,8 +308,10 @@ class RegressionDetector {
    * Compare security metrics
    */
   compareSecurityMetrics(current, previous) {
-    const currentVulns = current.backend?.security?.critical_vulnerabilities || 0;
-    const previousVulns = previous.backend?.security?.critical_vulnerabilities || 0;
+    const currentVulns =
+      current.backend?.security?.critical_vulnerabilities || 0;
+    const previousVulns =
+      previous.backend?.security?.critical_vulnerabilities || 0;
     const difference = currentVulns - previousVulns;
 
     if (difference >= REGRESSION_THRESHOLDS.security_vulnerabilities) {
@@ -305,7 +322,7 @@ class RegressionDetector {
         current: currentVulns,
         previous: previousVulns,
         difference: difference,
-        threshold: REGRESSION_THRESHOLDS.security_vulnerabilities
+        threshold: REGRESSION_THRESHOLDS.security_vulnerabilities,
       });
     }
 
@@ -314,7 +331,7 @@ class RegressionDetector {
       current: currentVulns,
       previous: previousVulns,
       difference: difference,
-      regression: difference >= REGRESSION_THRESHOLDS.security_vulnerabilities
+      regression: difference >= REGRESSION_THRESHOLDS.security_vulnerabilities,
     };
   }
 
@@ -327,7 +344,8 @@ class RegressionDetector {
     // Frontend code quality
     const currentFrontendQuality = current.frontend?.code_quality?.score || 0;
     const previousFrontendQuality = previous.frontend?.code_quality?.score || 0;
-    const frontendQualityDifference = currentFrontendQuality - previousFrontendQuality;
+    const frontendQualityDifference =
+      currentFrontendQuality - previousFrontendQuality;
 
     if (frontendQualityDifference <= REGRESSION_THRESHOLDS.overall_score) {
       this.regressions.push({
@@ -337,7 +355,7 @@ class RegressionDetector {
         current: currentFrontendQuality,
         previous: previousFrontendQuality,
         difference: frontendQualityDifference,
-        threshold: REGRESSION_THRESHOLDS.overall_score
+        threshold: REGRESSION_THRESHOLDS.overall_score,
       });
     }
 
@@ -346,13 +364,15 @@ class RegressionDetector {
       current: currentFrontendQuality,
       previous: previousFrontendQuality,
       difference: frontendQualityDifference,
-      regression: frontendQualityDifference <= REGRESSION_THRESHOLDS.overall_score
+      regression:
+        frontendQualityDifference <= REGRESSION_THRESHOLDS.overall_score,
     });
 
     // Backend code quality
     const currentBackendQuality = current.backend?.code_quality?.score || 0;
     const previousBackendQuality = previous.backend?.code_quality?.score || 0;
-    const backendQualityDifference = currentBackendQuality - previousBackendQuality;
+    const backendQualityDifference =
+      currentBackendQuality - previousBackendQuality;
 
     if (backendQualityDifference <= REGRESSION_THRESHOLDS.overall_score) {
       this.regressions.push({
@@ -362,7 +382,7 @@ class RegressionDetector {
         current: currentBackendQuality,
         previous: previousBackendQuality,
         difference: backendQualityDifference,
-        threshold: REGRESSION_THRESHOLDS.overall_score
+        threshold: REGRESSION_THRESHOLDS.overall_score,
       });
     }
 
@@ -371,7 +391,8 @@ class RegressionDetector {
       current: currentBackendQuality,
       previous: previousBackendQuality,
       difference: backendQualityDifference,
-      regression: backendQualityDifference <= REGRESSION_THRESHOLDS.overall_score
+      regression:
+        backendQualityDifference <= REGRESSION_THRESHOLDS.overall_score,
     });
 
     return comparisons;
@@ -385,22 +406,27 @@ class RegressionDetector {
       timestamp: new Date().toISOString(),
       current_build: {
         timestamp: current.timestamp,
-        overall_score: current.overall?.overall_score || 0
+        overall_score: current.overall?.overall_score || 0,
       },
       previous_build: {
         timestamp: previous.timestamp,
-        overall_score: previous.overall?.overall_score || 0
+        overall_score: previous.overall?.overall_score || 0,
       },
       regressions: this.regressions,
       comparisons: comparisons,
       summary: {
         total_regressions: this.regressions.length,
-        critical_regressions: this.regressions.filter(r => r.severity === 'critical').length,
-        high_regressions: this.regressions.filter(r => r.severity === 'high').length,
-        medium_regressions: this.regressions.filter(r => r.severity === 'medium').length,
-        has_regressions: this.regressions.length > 0
+        critical_regressions: this.regressions.filter(
+          (r) => r.severity === 'critical'
+        ).length,
+        high_regressions: this.regressions.filter((r) => r.severity === 'high')
+          .length,
+        medium_regressions: this.regressions.filter(
+          (r) => r.severity === 'medium'
+        ).length,
+        has_regressions: this.regressions.length > 0,
       },
-      recommendations: this.generateRegressionRecommendations()
+      recommendations: this.generateRegressionRecommendations(),
     };
 
     return report;
@@ -414,7 +440,7 @@ class RegressionDetector {
 
     // Group regressions by type
     const regressionsByType = {};
-    this.regressions.forEach(regression => {
+    this.regressions.forEach((regression) => {
       if (!regressionsByType[regression.type]) {
         regressionsByType[regression.type] = [];
       }
@@ -432,8 +458,8 @@ class RegressionDetector {
             actions: [
               'Review recent code changes for quality issues',
               'Run comprehensive quality checks',
-              'Address failing tests and linting errors'
-            ]
+              'Address failing tests and linting errors',
+            ],
           });
           break;
 
@@ -447,14 +473,16 @@ class RegressionDetector {
             actions: [
               `Add more unit tests for ${component} components`,
               'Review recent changes that may have reduced coverage',
-              'Ensure new code includes appropriate tests'
-            ]
+              'Ensure new code includes appropriate tests',
+            ],
           });
           break;
 
         case 'frontend_performance':
         case 'backend_performance':
-          const perfComponent = type.includes('frontend') ? 'frontend' : 'backend';
+          const perfComponent = type.includes('frontend')
+            ? 'frontend'
+            : 'backend';
           recommendations.push({
             category: 'Performance',
             priority: 'medium',
@@ -462,8 +490,8 @@ class RegressionDetector {
             actions: [
               'Profile test execution to identify slow tests',
               'Optimize test setup and teardown processes',
-              'Consider parallel test execution'
-            ]
+              'Consider parallel test execution',
+            ],
           });
           break;
 
@@ -475,8 +503,8 @@ class RegressionDetector {
             actions: [
               'Analyze bundle composition for large dependencies',
               'Implement code splitting and lazy loading',
-              'Remove unused dependencies and code'
-            ]
+              'Remove unused dependencies and code',
+            ],
           });
           break;
 
@@ -488,14 +516,16 @@ class RegressionDetector {
             actions: [
               'Update vulnerable dependencies immediately',
               'Review security audit results',
-              'Implement additional security measures if needed'
-            ]
+              'Implement additional security measures if needed',
+            ],
           });
           break;
 
         case 'frontend_code_quality':
         case 'backend_code_quality':
-          const qualityComponent = type.includes('frontend') ? 'frontend' : 'backend';
+          const qualityComponent = type.includes('frontend')
+            ? 'frontend'
+            : 'backend';
           recommendations.push({
             category: 'Code Quality',
             priority: 'medium',
@@ -503,8 +533,8 @@ class RegressionDetector {
             actions: [
               'Fix linting and formatting issues',
               'Address code complexity warnings',
-              'Review recent code changes for quality issues'
-            ]
+              'Review recent code changes for quality issues',
+            ],
           });
           break;
       }
@@ -521,41 +551,73 @@ class RegressionDetector {
 
     if (!report.summary.has_regressions) {
       this.log('✅ No quality regressions detected!', COLORS.GREEN);
-      this.log(`Current overall score: ${report.current_build.overall_score}`, COLORS.GREEN);
-      this.log(`Previous overall score: ${report.previous_build.overall_score}`, COLORS.GREEN);
+      this.log(
+        `Current overall score: ${report.current_build.overall_score}`,
+        COLORS.GREEN
+      );
+      this.log(
+        `Previous overall score: ${report.previous_build.overall_score}`,
+        COLORS.GREEN
+      );
       return true;
     }
 
     this.log('❌ Quality regressions detected!', COLORS.RED);
-    this.log(`Total regressions: ${report.summary.total_regressions}`, COLORS.RED);
-    this.log(`Critical: ${report.summary.critical_regressions}, High: ${report.summary.high_regressions}, Medium: ${report.summary.medium_regressions}`);
+    this.log(
+      `Total regressions: ${report.summary.total_regressions}`,
+      COLORS.RED
+    );
+    this.log(
+      `Critical: ${report.summary.critical_regressions}, High: ${report.summary.high_regressions}, Medium: ${report.summary.medium_regressions}`
+    );
 
     // Print detailed regressions
     console.log('\n📊 Regression Details:');
-    console.log('┌─────────────────────────┬──────────┬──────────┬────────────┬──────────┐');
-    console.log('│ Metric                  │ Current  │ Previous │ Difference │ Severity │');
-    console.log('├─────────────────────────┼──────────┼──────────┼────────────┼──────────┤');
+    console.log(
+      '┌─────────────────────────┬──────────┬──────────┬────────────┬──────────┐'
+    );
+    console.log(
+      '│ Metric                  │ Current  │ Previous │ Difference │ Severity │'
+    );
+    console.log(
+      '├─────────────────────────┼──────────┼──────────┼────────────┼──────────┤'
+    );
 
-    this.regressions.forEach(regression => {
-      const metric = regression.type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+    this.regressions.forEach((regression) => {
+      const metric = regression.type
+        .replace(/_/g, ' ')
+        .replace(/\b\w/g, (l) => l.toUpperCase());
       const current = regression.current.toString().padEnd(8);
       const previous = regression.previous.toString().padEnd(8);
-      const difference = (regression.difference > 0 ? '+' : '') + regression.difference.toString().padEnd(10);
+      const difference =
+        (regression.difference > 0 ? '+' : '') +
+        regression.difference.toString().padEnd(10);
       const severity = regression.severity.padEnd(8);
 
-      console.log(`│ ${metric.padEnd(23)} │ ${current} │ ${previous} │ ${difference} │ ${severity} │`);
+      console.log(
+        `│ ${metric.padEnd(23)} │ ${current} │ ${previous} │ ${difference} │ ${severity} │`
+      );
     });
 
-    console.log('└─────────────────────────┴──────────┴──────────┴────────────┴──────────┘');
+    console.log(
+      '└─────────────────────────┴──────────┴──────────┴────────────┴──────────┘'
+    );
 
     // Print recommendations
     if (report.recommendations.length > 0) {
       console.log('\n🔧 Regression Fix Recommendations:');
       report.recommendations.forEach((rec, i) => {
-        const priorityColor = rec.priority === 'critical' ? COLORS.RED :
-                             rec.priority === 'high' ? COLORS.YELLOW : COLORS.BLUE;
-        this.log(`\n${i + 1}. [${rec.priority.toUpperCase()}] ${rec.category}: ${rec.message}`, priorityColor);
-        rec.actions.forEach(action => {
+        const priorityColor =
+          rec.priority === 'critical'
+            ? COLORS.RED
+            : rec.priority === 'high'
+              ? COLORS.YELLOW
+              : COLORS.BLUE;
+        this.log(
+          `\n${i + 1}. [${rec.priority.toUpperCase()}] ${rec.category}: ${rec.message}`,
+          priorityColor
+        );
+        rec.actions.forEach((action) => {
           this.log(`   • ${action}`, COLORS.RESET);
         });
       });
@@ -572,11 +634,14 @@ class RegressionDetector {
       await this.ensureReportsDirectory();
       const reportFileName = `regression-analysis-${new Date().toISOString().split('T')[0]}.json`;
       const reportPath = path.join(this.reportsDir, reportFileName);
-      
+
       await fs.writeFile(reportPath, JSON.stringify(report, null, 2));
       this.log(`\n📄 Regression report saved to: ${reportPath}`, COLORS.BLUE);
     } catch (error) {
-      this.log(`Warning: Could not save regression report: ${error.message}`, COLORS.YELLOW);
+      this.log(
+        `Warning: Could not save regression report: ${error.message}`,
+        COLORS.YELLOW
+      );
     }
   }
 
@@ -605,7 +670,10 @@ class RegressionDetector {
    */
   async run() {
     try {
-      this.log(`${COLORS.BOLD}🔍 Regression Detection System - Medical Device Regulatory Assistant${COLORS.RESET}`, COLORS.BLUE);
+      this.log(
+        `${COLORS.BOLD}🔍 Regression Detection System - Medical Device Regulatory Assistant${COLORS.RESET}`,
+        COLORS.BLUE
+      );
 
       // Load reports
       this.log('Loading current quality report...', COLORS.YELLOW);
@@ -615,45 +683,78 @@ class RegressionDetector {
       const previousReport = await this.loadPreviousReport();
 
       if (!previousReport) {
-        this.log('⚠️  No previous report available for comparison', COLORS.YELLOW);
-        this.log('Regression detection will be available after the next build', COLORS.YELLOW);
+        this.log(
+          '⚠️  No previous report available for comparison',
+          COLORS.YELLOW
+        );
+        this.log(
+          'Regression detection will be available after the next build',
+          COLORS.YELLOW
+        );
         return true;
       }
 
       // Perform comparisons
       this.log('Analyzing quality metrics for regressions...', COLORS.YELLOW);
 
-      const overallComparison = this.compareOverallScores(currentReport, previousReport);
-      const coverageComparisons = this.compareTestCoverage(currentReport, previousReport);
-      const performanceComparisons = this.comparePerformanceMetrics(currentReport, previousReport);
-      const securityComparison = this.compareSecurityMetrics(currentReport, previousReport);
-      const codeQualityComparisons = this.compareCodeQualityMetrics(currentReport, previousReport);
+      const overallComparison = this.compareOverallScores(
+        currentReport,
+        previousReport
+      );
+      const coverageComparisons = this.compareTestCoverage(
+        currentReport,
+        previousReport
+      );
+      const performanceComparisons = this.comparePerformanceMetrics(
+        currentReport,
+        previousReport
+      );
+      const securityComparison = this.compareSecurityMetrics(
+        currentReport,
+        previousReport
+      );
+      const codeQualityComparisons = this.compareCodeQualityMetrics(
+        currentReport,
+        previousReport
+      );
 
       const allComparisons = {
         overall: overallComparison,
         coverage: coverageComparisons,
         performance: performanceComparisons,
         security: securityComparison,
-        code_quality: codeQualityComparisons
+        code_quality: codeQualityComparisons,
       };
 
       // Generate and save report
-      const regressionReport = this.generateRegressionReport(currentReport, previousReport, allComparisons);
+      const regressionReport = this.generateRegressionReport(
+        currentReport,
+        previousReport,
+        allComparisons
+      );
       await this.saveRegressionReport(regressionReport);
 
       // Print results
       const noRegressions = this.printRegressionAnalysis(regressionReport);
 
       if (noRegressions) {
-        this.log('\n🎉 No quality regressions detected! System quality is stable or improving.', COLORS.GREEN);
+        this.log(
+          '\n🎉 No quality regressions detected! System quality is stable or improving.',
+          COLORS.GREEN
+        );
         process.exit(0);
       } else {
-        this.log('\n❌ Quality regressions detected. Please address the issues above.', COLORS.RED);
+        this.log(
+          '\n❌ Quality regressions detected. Please address the issues above.',
+          COLORS.RED
+        );
         process.exit(1);
       }
-
     } catch (error) {
-      this.log(`\n💥 Regression detection failed: ${error.message}`, COLORS.RED);
+      this.log(
+        `\n💥 Regression detection failed: ${error.message}`,
+        COLORS.RED
+      );
       process.exit(1);
     }
   }

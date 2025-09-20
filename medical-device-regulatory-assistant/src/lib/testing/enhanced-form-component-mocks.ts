@@ -1,9 +1,9 @@
 /**
  * Enhanced Form Component Mocks
- * 
+ *
  * Implements component mocks for enhanced form components with proper test attributes
  * and functionality preservation for testing scenarios.
- * 
+ *
  * Requirements: 2.4, 3.1
  */
 
@@ -92,7 +92,13 @@ export interface ProgressProps {
 export interface EnhancedButtonProps {
   children: React.ReactNode;
   type?: 'button' | 'submit' | 'reset';
-  variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link';
+  variant?:
+    | 'default'
+    | 'destructive'
+    | 'outline'
+    | 'secondary'
+    | 'ghost'
+    | 'link';
   size?: 'default' | 'sm' | 'lg' | 'icon';
   disabled?: boolean;
   loading?: boolean;
@@ -122,102 +128,135 @@ export interface ComponentMockRegistry {
  * Enhanced Input Mock
  * Preserves essential functionality for testing while providing proper test attributes
  */
-export const EnhancedInputMock = jest.fn<React.ReactElement, [EnhancedInputProps]>(
-  ({ 
-    label, 
-    name, 
-    type = 'text', 
-    placeholder, 
-    value = '', 
-    onChange, 
-    onBlur, 
-    onFocus, 
-    disabled, 
-    required, 
-    error, 
+export const EnhancedInputMock = jest.fn<
+  React.ReactElement,
+  [EnhancedInputProps]
+>(
+  ({
+    label,
+    name,
+    type = 'text',
+    placeholder,
+    value = '',
+    onChange,
+    onBlur,
+    onFocus,
+    disabled,
+    required,
+    error,
     validation,
     className,
     maxLength,
     showCharacterCount,
     autoComplete,
     autoFocus,
-    ...props 
+    ...props
   }) => {
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       onChange?.(e.target.value);
     };
 
-    return React.createElement('div', {
-      'data-testid': 'enhanced-input-wrapper',
-      className: `enhanced-input-wrapper ${className || ''}`,
-    }, [
-      // Label
-      React.createElement('label', {
-        key: 'label',
-        htmlFor: name,
-        'data-testid': 'enhanced-input-label',
-        className: 'enhanced-input-label',
-      }, [
-        label,
-        required && React.createElement('span', {
-          key: 'required',
-          'data-testid': 'required-indicator',
-          'aria-label': 'required',
-          className: 'required-indicator',
-        }, '*')
-      ]),
-      
-      // Input field
-      React.createElement('input', {
-        key: 'input',
-        id: name,
-        name,
-        type,
-        placeholder,
-        value,
-        onChange: handleChange,
-        onBlur,
-        onFocus,
-        disabled,
-        maxLength,
-        autoComplete,
-        autoFocus,
-        'data-testid': 'enhanced-input',
-        'data-error': !!error,
-        'data-valid': validation?.isValid,
-        'data-validating': validation?.isValidating,
-        'data-touched': validation?.hasBeenTouched,
-        'aria-invalid': !!error,
-        'aria-required': required,
-        'aria-describedby': error ? `${name}-error` : undefined,
-        className: 'enhanced-input',
-        ...props,
-      }),
-      
-      // Character count
-      showCharacterCount && maxLength && React.createElement('div', {
-        key: 'char-count',
-        'data-testid': 'character-count',
-        className: 'character-count',
-      }, `${value.length}/${maxLength}`),
-      
-      // Error message
-      error && React.createElement('div', {
-        key: 'error',
-        id: `${name}-error`,
-        'data-testid': 'input-error',
-        role: 'alert',
-        className: 'input-error',
-      }, error.message || error),
-      
-      // Validation message
-      validation?.message && !error && React.createElement('div', {
-        key: 'validation',
-        'data-testid': 'validation-message',
-        role: 'status',
-        className: 'validation-message',
-      }, validation.message),
-    ]);
+    return React.createElement(
+      'div',
+      {
+        'data-testid': 'enhanced-input-wrapper',
+        className: `enhanced-input-wrapper ${className || ''}`,
+      },
+      [
+        // Label
+        React.createElement(
+          'label',
+          {
+            key: 'label',
+            htmlFor: name,
+            'data-testid': 'enhanced-input-label',
+            className: 'enhanced-input-label',
+          },
+          [
+            label,
+            required &&
+              React.createElement(
+                'span',
+                {
+                  key: 'required',
+                  'data-testid': 'required-indicator',
+                  'aria-label': 'required',
+                  className: 'required-indicator',
+                },
+                '*'
+              ),
+          ]
+        ),
+
+        // Input field
+        React.createElement('input', {
+          key: 'input',
+          id: name,
+          name,
+          type,
+          placeholder,
+          value,
+          onChange: handleChange,
+          onBlur,
+          onFocus,
+          disabled,
+          maxLength,
+          autoComplete,
+          autoFocus,
+          'data-testid': 'enhanced-input',
+          'data-error': !!error,
+          'data-valid': validation?.isValid,
+          'data-validating': validation?.isValidating,
+          'data-touched': validation?.hasBeenTouched,
+          'aria-invalid': !!error,
+          'aria-required': required,
+          'aria-describedby': error ? `${name}-error` : undefined,
+          className: 'enhanced-input',
+          ...props,
+        }),
+
+        // Character count
+        showCharacterCount &&
+          maxLength &&
+          React.createElement(
+            'div',
+            {
+              key: 'char-count',
+              'data-testid': 'character-count',
+              className: 'character-count',
+            },
+            `${value.length}/${maxLength}`
+          ),
+
+        // Error message
+        error &&
+          React.createElement(
+            'div',
+            {
+              key: 'error',
+              id: `${name}-error`,
+              'data-testid': 'input-error',
+              role: 'alert',
+              className: 'input-error',
+            },
+            error.message || error
+          ),
+
+        // Validation message
+        validation?.message &&
+          !error &&
+          React.createElement(
+            'div',
+            {
+              key: 'validation',
+              'data-testid': 'validation-message',
+              role: 'status',
+              className: 'validation-message',
+            },
+            validation.message
+          ),
+      ]
+    );
   }
 );
 
@@ -225,18 +264,21 @@ export const EnhancedInputMock = jest.fn<React.ReactElement, [EnhancedInputProps
  * Enhanced Textarea Mock
  * Preserves essential functionality for testing while providing proper test attributes
  */
-export const EnhancedTextareaMock = jest.fn<React.ReactElement, [EnhancedTextareaProps]>(
-  ({ 
-    label, 
-    name, 
-    placeholder, 
-    value = '', 
-    onChange, 
-    onBlur, 
-    onFocus, 
-    disabled, 
-    required, 
-    error, 
+export const EnhancedTextareaMock = jest.fn<
+  React.ReactElement,
+  [EnhancedTextareaProps]
+>(
+  ({
+    label,
+    name,
+    placeholder,
+    value = '',
+    onChange,
+    onBlur,
+    onFocus,
+    disabled,
+    required,
+    error,
     validation,
     className,
     rows = 4,
@@ -244,84 +286,114 @@ export const EnhancedTextareaMock = jest.fn<React.ReactElement, [EnhancedTextare
     showCharacterCount,
     resize = true,
     autoFocus,
-    ...props 
+    ...props
   }) => {
     const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
       onChange?.(e.target.value);
     };
 
-    return React.createElement('div', {
-      'data-testid': 'enhanced-textarea-wrapper',
-      className: `enhanced-textarea-wrapper ${className || ''}`,
-    }, [
-      // Label
-      React.createElement('label', {
-        key: 'label',
-        htmlFor: name,
-        'data-testid': 'enhanced-textarea-label',
-        className: 'enhanced-textarea-label',
-      }, [
-        label,
-        required && React.createElement('span', {
-          key: 'required',
-          'data-testid': 'required-indicator',
-          'aria-label': 'required',
-          className: 'required-indicator',
-        }, '*')
-      ]),
-      
-      // Textarea field
-      React.createElement('textarea', {
-        key: 'textarea',
-        id: name,
-        name,
-        placeholder,
-        value,
-        onChange: handleChange,
-        onBlur,
-        onFocus,
-        disabled,
-        rows,
-        maxLength,
-        autoFocus,
-        'data-testid': 'enhanced-textarea',
-        'data-error': !!error,
-        'data-valid': validation?.isValid,
-        'data-validating': validation?.isValidating,
-        'data-touched': validation?.hasBeenTouched,
-        'data-resize': resize,
-        'aria-invalid': !!error,
-        'aria-required': required,
-        'aria-describedby': error ? `${name}-error` : undefined,
-        className: 'enhanced-textarea',
-        style: resize ? {} : { resize: 'none' },
-        ...props,
-      }),
-      
-      // Character count
-      showCharacterCount && maxLength && React.createElement('div', {
-        key: 'char-count',
-        'data-testid': 'character-count',
-        className: 'character-count',
-      }, `${value.length}/${maxLength}`),
-      
-      // Error message
-      error && React.createElement('div', {
-        key: 'error',
-        id: `${name}-error`,
-        'data-testid': 'textarea-error',
-        role: 'alert',
-        className: 'textarea-error',
-      }, error.message || error),
-      
-      // Validation message
-      validation?.message && !error && React.createElement('div', {
-        key: 'validation',
-        'data-testid': 'validation-message',
-        role: 'status',
-        className: 'validation-message',
-      }, validation.message),
-    ]);
+    return React.createElement(
+      'div',
+      {
+        'data-testid': 'enhanced-textarea-wrapper',
+        className: `enhanced-textarea-wrapper ${className || ''}`,
+      },
+      [
+        // Label
+        React.createElement(
+          'label',
+          {
+            key: 'label',
+            htmlFor: name,
+            'data-testid': 'enhanced-textarea-label',
+            className: 'enhanced-textarea-label',
+          },
+          [
+            label,
+            required &&
+              React.createElement(
+                'span',
+                {
+                  key: 'required',
+                  'data-testid': 'required-indicator',
+                  'aria-label': 'required',
+                  className: 'required-indicator',
+                },
+                '*'
+              ),
+          ]
+        ),
+
+        // Textarea field
+        React.createElement('textarea', {
+          key: 'textarea',
+          id: name,
+          name,
+          placeholder,
+          value,
+          onChange: handleChange,
+          onBlur,
+          onFocus,
+          disabled,
+          rows,
+          maxLength,
+          autoFocus,
+          'data-testid': 'enhanced-textarea',
+          'data-error': !!error,
+          'data-valid': validation?.isValid,
+          'data-validating': validation?.isValidating,
+          'data-touched': validation?.hasBeenTouched,
+          'data-resize': resize,
+          'aria-invalid': !!error,
+          'aria-required': required,
+          'aria-describedby': error ? `${name}-error` : undefined,
+          className: 'enhanced-textarea',
+          style: resize ? {} : { resize: 'none' },
+          ...props,
+        }),
+
+        // Character count
+        showCharacterCount &&
+          maxLength &&
+          React.createElement(
+            'div',
+            {
+              key: 'char-count',
+              'data-testid': 'character-count',
+              className: 'character-count',
+            },
+            `${value.length}/${maxLength}`
+          ),
+
+        // Error message
+        error &&
+          React.createElement(
+            'div',
+            {
+              key: 'error',
+              id: `${name}-error`,
+              'data-testid': 'textarea-error',
+              role: 'alert',
+              className: 'textarea-error',
+            },
+            error.message || error
+          ),
+
+        // Validation message
+        validation?.message &&
+          !error &&
+          React.createElement(
+            'div',
+            {
+              key: 'validation',
+              'data-testid': 'validation-message',
+              role: 'status',
+              className: 'validation-message',
+            },
+            validation.message
+          ),
+      ]
+    );
   }
 );
 
@@ -329,8 +401,16 @@ export const EnhancedTextareaMock = jest.fn<React.ReactElement, [EnhancedTextare
  * Auto Save Indicator Mock
  * Displays saving state and last saved time with proper test attributes
  */
-export const AutoSaveIndicatorMock = jest.fn<React.ReactElement, [AutoSaveIndicatorProps]>(
-  ({ isSaving, lastSaved, className, 'data-testid': testId = 'auto-save-indicator' }) => {
+export const AutoSaveIndicatorMock = jest.fn<
+  React.ReactElement,
+  [AutoSaveIndicatorProps]
+>(
+  ({
+    isSaving,
+    lastSaved,
+    className,
+    'data-testid': testId = 'auto-save-indicator',
+  }) => {
     const formatLastSaved = (date: Date) => {
       const now = new Date();
       const diff = now.getTime() - date.getTime();
@@ -346,57 +426,85 @@ export const AutoSaveIndicatorMock = jest.fn<React.ReactElement, [AutoSaveIndica
     };
 
     if (isSaving) {
-      return React.createElement('div', {
-        'data-testid': testId,
-        'data-saving': true,
-        'data-status': 'saving',
-        className: `auto-save-indicator saving ${className || ''}`,
-        role: 'status',
-        'aria-live': 'polite',
-      }, [
-        React.createElement('span', {
-          key: 'icon',
-          'data-testid': 'saving-icon',
-          className: 'saving-icon',
-          'aria-hidden': 'true',
-        }, '⏳'),
-        React.createElement('span', {
-          key: 'text',
-          'data-testid': 'saving-text',
-        }, 'Saving...')
-      ]);
+      return React.createElement(
+        'div',
+        {
+          'data-testid': testId,
+          'data-saving': true,
+          'data-status': 'saving',
+          className: `auto-save-indicator saving ${className || ''}`,
+          role: 'status',
+          'aria-live': 'polite',
+        },
+        [
+          React.createElement(
+            'span',
+            {
+              key: 'icon',
+              'data-testid': 'saving-icon',
+              className: 'saving-icon',
+              'aria-hidden': 'true',
+            },
+            '⏳'
+          ),
+          React.createElement(
+            'span',
+            {
+              key: 'text',
+              'data-testid': 'saving-text',
+            },
+            'Saving...'
+          ),
+        ]
+      );
     }
 
     if (lastSaved) {
-      return React.createElement('div', {
-        'data-testid': testId,
-        'data-saving': false,
-        'data-status': 'saved',
-        'data-last-saved': lastSaved.toISOString(),
-        className: `auto-save-indicator saved ${className || ''}`,
-        role: 'status',
-        'aria-live': 'polite',
-      }, [
-        React.createElement('span', {
-          key: 'icon',
-          'data-testid': 'saved-icon',
-          className: 'saved-icon',
-          'aria-hidden': 'true',
-        }, '✓'),
-        React.createElement('span', {
-          key: 'text',
-          'data-testid': 'saved-text',
-        }, `Saved ${formatLastSaved(lastSaved)}`)
-      ]);
+      return React.createElement(
+        'div',
+        {
+          'data-testid': testId,
+          'data-saving': false,
+          'data-status': 'saved',
+          'data-last-saved': lastSaved.toISOString(),
+          className: `auto-save-indicator saved ${className || ''}`,
+          role: 'status',
+          'aria-live': 'polite',
+        },
+        [
+          React.createElement(
+            'span',
+            {
+              key: 'icon',
+              'data-testid': 'saved-icon',
+              className: 'saved-icon',
+              'aria-hidden': 'true',
+            },
+            '✓'
+          ),
+          React.createElement(
+            'span',
+            {
+              key: 'text',
+              'data-testid': 'saved-text',
+            },
+            `Saved ${formatLastSaved(lastSaved)}`
+          ),
+        ]
+      );
     }
 
-    return React.createElement('div', {
-      'data-testid': testId,
-      'data-saving': false,
-      'data-status': 'idle',
-      className: `auto-save-indicator idle ${className || ''}`,
-      style: { display: 'none' },
-    }, null);
+    return React.createElement(
+      'div',
+      {
+        'data-testid': testId,
+        'data-saving': false,
+        'data-status': 'idle',
+        className: `auto-save-indicator idle ${className || ''}`,
+        style: { display: 'none' },
+      },
+      null
+    );
   }
 );
 
@@ -404,74 +512,93 @@ export const AutoSaveIndicatorMock = jest.fn<React.ReactElement, [AutoSaveIndica
  * Form Submission Progress Mock
  * Displays form submission progress with proper test attributes
  */
-export const FormSubmissionProgressMock = jest.fn<React.ReactElement, [ProgressProps]>(
-  ({ 
-    progress, 
-    currentStep, 
-    totalSteps = 100, 
-    className, 
-    'data-testid': testId = 'form-submission-progress' 
+export const FormSubmissionProgressMock = jest.fn<
+  React.ReactElement,
+  [ProgressProps]
+>(
+  ({
+    progress,
+    currentStep,
+    totalSteps = 100,
+    className,
+    'data-testid': testId = 'form-submission-progress',
   }) => {
     const progressPercentage = Math.min(Math.max(progress, 0), 100);
-    
-    return React.createElement('div', {
-      'data-testid': testId,
-      'data-progress': progressPercentage,
-      'data-current-step': currentStep,
-      'data-total-steps': totalSteps,
-      className: `form-submission-progress ${className || ''}`,
-      role: 'progressbar',
-      'aria-valuenow': progressPercentage,
-      'aria-valuemin': 0,
-      'aria-valuemax': 100,
-      'aria-label': `Form submission progress: ${progressPercentage}%`,
-    }, [
-      // Progress bar
-      React.createElement('div', {
-        key: 'progress-bar',
-        'data-testid': 'progress-bar',
-        className: 'progress-bar',
-        style: {
-          width: '100%',
-          height: '8px',
-          backgroundColor: '#e5e7eb',
-          borderRadius: '4px',
-          overflow: 'hidden',
-        },
-      }, React.createElement('div', {
-        'data-testid': 'progress-fill',
-        className: 'progress-fill',
-        style: {
-          width: `${progressPercentage}%`,
-          height: '100%',
-          backgroundColor: '#3b82f6',
-          transition: 'width 0.3s ease',
-        },
-      })),
-      
-      // Current step text
-      React.createElement('div', {
-        key: 'step-text',
-        'data-testid': 'current-step-text',
-        className: 'current-step-text',
-        style: {
-          marginTop: '8px',
-          fontSize: '14px',
-          color: '#6b7280',
-        },
-      }, currentStep),
-      
-      // Progress percentage
-      React.createElement('div', {
-        key: 'progress-text',
-        'data-testid': 'progress-percentage',
-        className: 'progress-percentage',
-        style: {
-          fontSize: '12px',
-          color: '#9ca3af',
-        },
-      }, `${progressPercentage}%`),
-    ]);
+
+    return React.createElement(
+      'div',
+      {
+        'data-testid': testId,
+        'data-progress': progressPercentage,
+        'data-current-step': currentStep,
+        'data-total-steps': totalSteps,
+        className: `form-submission-progress ${className || ''}`,
+        role: 'progressbar',
+        'aria-valuenow': progressPercentage,
+        'aria-valuemin': 0,
+        'aria-valuemax': 100,
+        'aria-label': `Form submission progress: ${progressPercentage}%`,
+      },
+      [
+        // Progress bar
+        React.createElement(
+          'div',
+          {
+            key: 'progress-bar',
+            'data-testid': 'progress-bar',
+            className: 'progress-bar',
+            style: {
+              width: '100%',
+              height: '8px',
+              backgroundColor: '#e5e7eb',
+              borderRadius: '4px',
+              overflow: 'hidden',
+            },
+          },
+          React.createElement('div', {
+            'data-testid': 'progress-fill',
+            className: 'progress-fill',
+            style: {
+              width: `${progressPercentage}%`,
+              height: '100%',
+              backgroundColor: '#3b82f6',
+              transition: 'width 0.3s ease',
+            },
+          })
+        ),
+
+        // Current step text
+        React.createElement(
+          'div',
+          {
+            key: 'step-text',
+            'data-testid': 'current-step-text',
+            className: 'current-step-text',
+            style: {
+              marginTop: '8px',
+              fontSize: '14px',
+              color: '#6b7280',
+            },
+          },
+          currentStep
+        ),
+
+        // Progress percentage
+        React.createElement(
+          'div',
+          {
+            key: 'progress-text',
+            'data-testid': 'progress-percentage',
+            className: 'progress-percentage',
+            style: {
+              fontSize: '12px',
+              color: '#9ca3af',
+            },
+          },
+          `${progressPercentage}%`
+        ),
+      ]
+    );
   }
 );
 
@@ -479,18 +606,21 @@ export const FormSubmissionProgressMock = jest.fn<React.ReactElement, [ProgressP
  * Enhanced Button Mock
  * Preserves button functionality with proper test attributes and accessibility
  */
-export const EnhancedButtonMock = jest.fn<React.ReactElement, [EnhancedButtonProps]>(
-  ({ 
-    children, 
-    type = 'button', 
-    variant = 'default', 
-    size = 'default', 
-    disabled, 
-    loading, 
-    onClick, 
-    className, 
+export const EnhancedButtonMock = jest.fn<
+  React.ReactElement,
+  [EnhancedButtonProps]
+>(
+  ({
+    children,
+    type = 'button',
+    variant = 'default',
+    size = 'default',
+    disabled,
+    loading,
+    onClick,
+    className,
     'data-testid': testId = 'enhanced-button',
-    ...props 
+    ...props
   }) => {
     const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
       if (!disabled && !loading) {
@@ -520,32 +650,45 @@ export const EnhancedButtonMock = jest.fn<React.ReactElement, [EnhancedButtonPro
       return sizes[size as keyof typeof sizes] || 'btn-default-size';
     };
 
-    return React.createElement('button', {
-      type,
-      onClick: handleClick,
-      disabled: disabled || loading,
-      'data-testid': testId,
-      'data-variant': variant,
-      'data-size': size,
-      'data-loading': loading,
-      'data-disabled': disabled,
-      className: `enhanced-button ${getVariantClass(variant)} ${getSizeClass(size)} ${className || ''}`,
-      'aria-disabled': disabled || loading,
-      'aria-busy': loading,
-      ...props,
-    }, [
-      loading && React.createElement('span', {
-        key: 'loading-icon',
-        'data-testid': 'loading-icon',
-        className: 'loading-icon',
-        'aria-hidden': 'true',
-      }, '⏳'),
-      React.createElement('span', {
-        key: 'button-content',
-        'data-testid': 'button-content',
-        className: 'button-content',
-      }, children),
-    ]);
+    return React.createElement(
+      'button',
+      {
+        type,
+        onClick: handleClick,
+        disabled: disabled || loading,
+        'data-testid': testId,
+        'data-variant': variant,
+        'data-size': size,
+        'data-loading': loading,
+        'data-disabled': disabled,
+        className: `enhanced-button ${getVariantClass(variant)} ${getSizeClass(size)} ${className || ''}`,
+        'aria-disabled': disabled || loading,
+        'aria-busy': loading,
+        ...props,
+      },
+      [
+        loading &&
+          React.createElement(
+            'span',
+            {
+              key: 'loading-icon',
+              'data-testid': 'loading-icon',
+              className: 'loading-icon',
+              'aria-hidden': 'true',
+            },
+            '⏳'
+          ),
+        React.createElement(
+          'span',
+          {
+            key: 'button-content',
+            'data-testid': 'button-content',
+            className: 'button-content',
+          },
+          children
+        ),
+      ]
+    );
   }
 );
 
@@ -579,7 +722,8 @@ export function registerEnhancedFormComponentMocks(): void {
       type: 'component',
       dependencies: [],
       compatibleVersions: ['19.1.0'],
-      description: 'Mock for EnhancedInput component with validation and accessibility features',
+      description:
+        'Mock for EnhancedInput component with validation and accessibility features',
       tags: ['form', 'input', 'enhanced', 'validation'],
     },
     {
@@ -602,7 +746,8 @@ export function registerEnhancedFormComponentMocks(): void {
       type: 'component',
       dependencies: [],
       compatibleVersions: ['19.1.0'],
-      description: 'Mock for EnhancedTextarea component with validation and accessibility features',
+      description:
+        'Mock for EnhancedTextarea component with validation and accessibility features',
       tags: ['form', 'textarea', 'enhanced', 'validation'],
     },
     {
@@ -625,7 +770,8 @@ export function registerEnhancedFormComponentMocks(): void {
       type: 'component',
       dependencies: [],
       compatibleVersions: ['19.1.0'],
-      description: 'Mock for AutoSaveIndicator component with saving state display',
+      description:
+        'Mock for AutoSaveIndicator component with saving state display',
       tags: ['form', 'autosave', 'indicator', 'status'],
     },
     {
@@ -648,7 +794,8 @@ export function registerEnhancedFormComponentMocks(): void {
       type: 'component',
       dependencies: [],
       compatibleVersions: ['19.1.0'],
-      description: 'Mock for FormSubmissionProgress component with progress tracking',
+      description:
+        'Mock for FormSubmissionProgress component with progress tracking',
       tags: ['form', 'progress', 'submission', 'status'],
     },
     {
@@ -671,7 +818,8 @@ export function registerEnhancedFormComponentMocks(): void {
       type: 'component',
       dependencies: [],
       compatibleVersions: ['19.1.0'],
-      description: 'Mock for EnhancedButton component with variants and loading states',
+      description:
+        'Mock for EnhancedButton component with variants and loading states',
       tags: ['button', 'enhanced', 'loading', 'variants'],
     },
     {
@@ -684,7 +832,9 @@ export function registerEnhancedFormComponentMocks(): void {
     }
   );
 
-  console.log('[Enhanced Form Component Mocks] All component mocks registered successfully');
+  console.log(
+    '[Enhanced Form Component Mocks] All component mocks registered successfully'
+  );
 }
 
 /**
@@ -711,9 +861,14 @@ export function setupEnhancedFormComponentMocks(): void {
         EnhancedTextarea: EnhancedTextareaMock,
         AutoSaveIndicator: AutoSaveIndicatorMock,
       }));
-      console.log('[Enhanced Form Component Mocks] EnhancedFormField module mocked');
+      console.log(
+        '[Enhanced Form Component Mocks] EnhancedFormField module mocked'
+      );
     } catch (error) {
-      console.warn('[Enhanced Form Component Mocks] Could not mock modules:', error);
+      console.warn(
+        '[Enhanced Form Component Mocks] Could not mock modules:',
+        error
+      );
     }
   }
 }
@@ -723,13 +878,13 @@ export function setupEnhancedFormComponentMocks(): void {
  */
 export function cleanupEnhancedFormComponentMocks(): void {
   // Clear all mock call history
-  Object.values(componentMocks).forEach(mock => {
+  Object.values(componentMocks).forEach((mock) => {
     mock.mockClear();
   });
 
   // Clear from global registry if available
   if (global.__GLOBAL_MOCK_REGISTRY) {
-    Object.keys(componentMocks).forEach(name => {
+    Object.keys(componentMocks).forEach((name) => {
       const componentMap = global.__GLOBAL_MOCK_REGISTRY.components;
       if (componentMap && componentMap.delete) {
         componentMap.delete(name);

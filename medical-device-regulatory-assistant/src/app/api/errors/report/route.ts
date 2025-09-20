@@ -20,21 +20,26 @@ export async function POST(request: NextRequest) {
         sessionId: session?.user?.id ? `session-${session.user.id}` : undefined,
       },
       reportType: 'user_reported',
-      priority: 'high' // User-reported errors get higher priority
+      priority: 'high', // User-reported errors get higher priority
     };
 
     // Forward to backend error reporting service
-    const backendResponse = await fetch(`${process.env.BACKEND_URL}/api/errors/report`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.BACKEND_API_KEY}`,
-      },
-      body: JSON.stringify(enhancedReport),
-    });
+    const backendResponse = await fetch(
+      `${process.env.BACKEND_URL}/api/errors/report`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.BACKEND_API_KEY}`,
+        },
+        body: JSON.stringify(enhancedReport),
+      }
+    );
 
     if (!backendResponse.ok) {
-      throw new Error(`Backend error reporting failed: ${backendResponse.status}`);
+      throw new Error(
+        `Backend error reporting failed: ${backendResponse.status}`
+      );
     }
 
     const result = await backendResponse.json();
@@ -52,28 +57,30 @@ export async function POST(request: NextRequest) {
       success: true,
       reportId: result.reportId,
       message: 'Error report submitted successfully',
-      ticketNumber: result.ticketNumber || `ERR-${Date.now()}`
+      ticketNumber: result.ticketNumber || `ERR-${Date.now()}`,
     });
-
   } catch (error) {
     console.error('Error reporting API failed:', error);
-    
+
     // Fallback: create local error report
     const fallbackReportId = `report-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-    
+
     console.error('Frontend Error Report (Detailed):', {
       reportId: fallbackReportId,
       timestamp: new Date().toISOString(),
       error: error instanceof Error ? error.message : 'Unknown error',
-      originalReport: await request.json().catch(() => ({}))
+      originalReport: await request.json().catch(() => ({})),
     });
 
-    return NextResponse.json({
-      success: true,
-      reportId: fallbackReportId,
-      message: 'Error report logged locally (backend unavailable)',
-      ticketNumber: `LOCAL-${fallbackReportId}`
-    }, { status: 200 });
+    return NextResponse.json(
+      {
+        success: true,
+        reportId: fallbackReportId,
+        message: 'Error report logged locally (backend unavailable)',
+        ticketNumber: `LOCAL-${fallbackReportId}`,
+      },
+      { status: 200 }
+    );
   }
 }
 
@@ -86,7 +93,7 @@ async function sendErrorNotification(errorReport: any) {
     userEmail: errorReport.context.userEmail,
     url: errorReport.context.url,
     error: errorReport.error.message,
-    timestamp: errorReport.context.timestamp
+    timestamp: errorReport.context.timestamp,
   });
 
   // TODO: Integrate with actual notification service

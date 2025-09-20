@@ -14,36 +14,48 @@ const customJestConfig = {
     '^@/(.*)$': '<rootDir>/src/$1',
   },
   transform: {
-    '^.+\\.(js|jsx|ts|tsx)$': ['babel-jest', {
-      presets: [
-        ['@babel/preset-env', { 
-          targets: { node: 'current' },
-          modules: 'commonjs'
-        }],
-        ['@babel/preset-react', { 
-          runtime: 'automatic',
-          development: process.env.NODE_ENV === 'development',
-          // React 19 specific options
-          importSource: 'react',
-          throwIfNamespace: false,
-          // Fix JSX fragment parsing issues
-          pragma: 'React.createElement',
-          pragmaFrag: 'React.Fragment'
-        }],
-        '@babel/preset-typescript'
-      ],
-      plugins: [
-        '@babel/plugin-transform-runtime',
-        // React 19 JSX fragment support
-        ['@babel/plugin-transform-react-jsx', {
-          runtime: 'automatic',
-          importSource: 'react'
-        }]
-      ]
-    }]
+    '^.+\\.(js|jsx|ts|tsx)$': [
+      'babel-jest',
+      {
+        presets: [
+          [
+            '@babel/preset-env',
+            {
+              targets: { node: 'current' },
+              modules: 'commonjs',
+            },
+          ],
+          [
+            '@babel/preset-react',
+            {
+              runtime: 'automatic',
+              development: process.env.NODE_ENV === 'development',
+              // React 19 specific options
+              importSource: 'react',
+              throwIfNamespace: false,
+              // Fix JSX fragment parsing issues
+              pragma: 'React.createElement',
+              pragmaFrag: 'React.Fragment',
+            },
+          ],
+          '@babel/preset-typescript',
+        ],
+        plugins: [
+          '@babel/plugin-transform-runtime',
+          // React 19 JSX fragment support
+          [
+            '@babel/plugin-transform-react-jsx',
+            {
+              runtime: 'automatic',
+              importSource: 'react',
+            },
+          ],
+        ],
+      },
+    ],
   },
   transformIgnorePatterns: [
-    'node_modules/(?!(.*\\.mjs$|@radix-ui|@testing-library|react-19-compat|@copilotkit|react|react-dom|@babel))'
+    'node_modules/(?!(.*\\.mjs$|@radix-ui|@testing-library|react-19-compat|@copilotkit|react|react-dom|@babel))',
   ],
   collectCoverageFrom: [
     'src/**/*.{js,jsx,ts,tsx}',
@@ -85,9 +97,9 @@ const customJestConfig = {
       '<rootDir>/src/lib/testing/jest-health-reporter.js',
       {
         outputDir: 'test-reports',
-        failOnHealthIssues: process.env.CI === 'true' // Fail CI on health issues
-      }
-    ]
+        failOnHealthIssues: process.env.CI === 'true', // Fail CI on health issues
+      },
+    ],
   ],
   testMatch: [
     '<rootDir>/src/**/__tests__/**/*.{js,jsx,ts,tsx}',
@@ -123,7 +135,7 @@ const customJestConfig = {
       displayName: 'unit',
       testMatch: [
         '<rootDir>/src/**/*.unit.{test,spec}.{js,jsx,ts,tsx}',
-        '<rootDir>/src/**/__tests__/**/*.unit.{test,spec}.{js,jsx,ts,tsx}'
+        '<rootDir>/src/**/__tests__/**/*.unit.{test,spec}.{js,jsx,ts,tsx}',
       ],
       testEnvironment: 'jsdom',
       setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
@@ -131,32 +143,39 @@ const customJestConfig = {
         '^@/(.*)$': '<rootDir>/src/$1',
       },
       transform: {
-        '^.+\\.(js|jsx|ts|tsx)$': ['babel-jest', {
-          presets: [
-            ['@babel/preset-env', { 
-              targets: { node: 'current' },
-              modules: 'commonjs'
-            }],
-            ['@babel/preset-react', { 
-              runtime: 'automatic',
-              development: process.env.NODE_ENV === 'development'
-            }],
-            '@babel/preset-typescript'
-          ],
-          plugins: [
-            '@babel/plugin-transform-runtime'
-          ]
-        }]
+        '^.+\\.(js|jsx|ts|tsx)$': [
+          'babel-jest',
+          {
+            presets: [
+              [
+                '@babel/preset-env',
+                {
+                  targets: { node: 'current' },
+                  modules: 'commonjs',
+                },
+              ],
+              [
+                '@babel/preset-react',
+                {
+                  runtime: 'automatic',
+                  development: process.env.NODE_ENV === 'development',
+                },
+              ],
+              '@babel/preset-typescript',
+            ],
+            plugins: ['@babel/plugin-transform-runtime'],
+          },
+        ],
       },
       transformIgnorePatterns: [
-        'node_modules/(?!(.*\\.mjs$|@radix-ui|@testing-library|react-19-compat|@copilotkit))'
+        'node_modules/(?!(.*\\.mjs$|@radix-ui|@testing-library|react-19-compat|@copilotkit))',
       ],
     },
     {
       displayName: 'integration',
       testMatch: [
         '<rootDir>/src/**/*.integration.{test,spec}.{js,jsx,ts,tsx}',
-        '<rootDir>/src/**/__tests__/**/*.integration.{test,spec}.{js,jsx,ts,tsx}'
+        '<rootDir>/src/**/__tests__/**/*.integration.{test,spec}.{js,jsx,ts,tsx}',
       ],
       testEnvironment: 'jsdom',
       setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
@@ -164,32 +183,39 @@ const customJestConfig = {
         '^@/(.*)$': '<rootDir>/src/$1',
       },
       transform: {
-        '^.+\\.(js|jsx|ts|tsx)$': ['babel-jest', {
-          presets: [
-            ['@babel/preset-env', { 
-              targets: { node: 'current' },
-              modules: 'commonjs'
-            }],
-            ['@babel/preset-react', { 
-              runtime: 'automatic',
-              development: process.env.NODE_ENV === 'development'
-            }],
-            '@babel/preset-typescript'
-          ],
-          plugins: [
-            '@babel/plugin-transform-runtime'
-          ]
-        }]
+        '^.+\\.(js|jsx|ts|tsx)$': [
+          'babel-jest',
+          {
+            presets: [
+              [
+                '@babel/preset-env',
+                {
+                  targets: { node: 'current' },
+                  modules: 'commonjs',
+                },
+              ],
+              [
+                '@babel/preset-react',
+                {
+                  runtime: 'automatic',
+                  development: process.env.NODE_ENV === 'development',
+                },
+              ],
+              '@babel/preset-typescript',
+            ],
+            plugins: ['@babel/plugin-transform-runtime'],
+          },
+        ],
       },
       transformIgnorePatterns: [
-        'node_modules/(?!(.*\\.mjs$|@radix-ui|@testing-library|react-19-compat|@copilotkit))'
+        'node_modules/(?!(.*\\.mjs$|@radix-ui|@testing-library|react-19-compat|@copilotkit))',
       ],
     },
     {
       displayName: 'accessibility',
       testMatch: [
         '<rootDir>/src/**/*.accessibility.{test,spec}.{js,jsx,ts,tsx}',
-        '<rootDir>/src/**/__tests__/**/*.accessibility.{test,spec}.{js,jsx,ts,tsx}'
+        '<rootDir>/src/**/__tests__/**/*.accessibility.{test,spec}.{js,jsx,ts,tsx}',
       ],
       testEnvironment: 'jsdom',
       setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
@@ -197,25 +223,32 @@ const customJestConfig = {
         '^@/(.*)$': '<rootDir>/src/$1',
       },
       transform: {
-        '^.+\\.(js|jsx|ts|tsx)$': ['babel-jest', {
-          presets: [
-            ['@babel/preset-env', { 
-              targets: { node: 'current' },
-              modules: 'commonjs'
-            }],
-            ['@babel/preset-react', { 
-              runtime: 'automatic',
-              development: process.env.NODE_ENV === 'development'
-            }],
-            '@babel/preset-typescript'
-          ],
-          plugins: [
-            '@babel/plugin-transform-runtime'
-          ]
-        }]
+        '^.+\\.(js|jsx|ts|tsx)$': [
+          'babel-jest',
+          {
+            presets: [
+              [
+                '@babel/preset-env',
+                {
+                  targets: { node: 'current' },
+                  modules: 'commonjs',
+                },
+              ],
+              [
+                '@babel/preset-react',
+                {
+                  runtime: 'automatic',
+                  development: process.env.NODE_ENV === 'development',
+                },
+              ],
+              '@babel/preset-typescript',
+            ],
+            plugins: ['@babel/plugin-transform-runtime'],
+          },
+        ],
       },
       transformIgnorePatterns: [
-        'node_modules/(?!(.*\\.mjs$|@radix-ui|@testing-library|react-19-compat|@copilotkit))'
+        'node_modules/(?!(.*\\.mjs$|@radix-ui|@testing-library|react-19-compat|@copilotkit))',
       ],
     },
   ],

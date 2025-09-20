@@ -5,14 +5,22 @@
 
 import React from 'react';
 import { screen, fireEvent } from '@testing-library/react';
-import { renderWithProviders, createMockSession } from '@/lib/testing/test-utils';
-import { AgentExecutionStatusComponent, AgentExecutionStatusInline } from '../AgentExecutionStatus';
+import {
+  renderWithProviders,
+  createMockSession,
+} from '@/lib/testing/test-utils';
+import {
+  AgentExecutionStatusComponent,
+  AgentExecutionStatusInline,
+} from '../AgentExecutionStatus';
 import { AgentExecutionStatus } from '@/hooks/useAgentExecution';
 
 describe('AgentExecutionStatusComponent', () => {
   const mockSession = createMockSession();
 
-  const createMockStatus = (overrides: Partial<AgentExecutionStatus> = {}): AgentExecutionStatus => ({
+  const createMockStatus = (
+    overrides: Partial<AgentExecutionStatus> = {}
+  ): AgentExecutionStatus => ({
     status: 'idle',
     sessionId: 'session-123',
     currentTask: null,
@@ -36,27 +44,29 @@ describe('AgentExecutionStatusComponent', () => {
 
   describe('Idle State', () => {
     it('renders idle state correctly', () => {
-      renderWithProviders(
-        <AgentExecutionStatusComponent {...defaultProps} />,
-        { session: mockSession }
-      );
+      renderWithProviders(<AgentExecutionStatusComponent {...defaultProps} />, {
+        session: mockSession,
+      });
 
       expect(screen.getByText('Agent Status')).toBeInTheDocument();
       expect(screen.getByText('Ready')).toBeInTheDocument();
-      
+
       // Should show clock icon for idle state
       const clockIcon = document.querySelector('[data-lucide="clock"]');
       expect(clockIcon).toBeInTheDocument();
     });
 
     it('does not show cancel or retry buttons in idle state', () => {
-      renderWithProviders(
-        <AgentExecutionStatusComponent {...defaultProps} />,
-        { session: mockSession }
-      );
+      renderWithProviders(<AgentExecutionStatusComponent {...defaultProps} />, {
+        session: mockSession,
+      });
 
-      expect(screen.queryByRole('button', { name: /cancel/i })).not.toBeInTheDocument();
-      expect(screen.queryByRole('button', { name: /retry/i })).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole('button', { name: /cancel/i })
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole('button', { name: /retry/i })
+      ).not.toBeInTheDocument();
     });
   });
 
@@ -70,14 +80,19 @@ describe('AgentExecutionStatusComponent', () => {
       });
 
       renderWithProviders(
-        <AgentExecutionStatusComponent status={processingStatus} onCancel={jest.fn()} />,
+        <AgentExecutionStatusComponent
+          status={processingStatus}
+          onCancel={jest.fn()}
+        />,
         { session: mockSession }
       );
 
       expect(screen.getByText('Processing')).toBeInTheDocument();
       expect(screen.getByText('Current Task:')).toBeInTheDocument();
       expect(screen.getByText('Predicate Search')).toBeInTheDocument();
-      expect(screen.getByText('Searching FDA database for similar devices...')).toBeInTheDocument();
+      expect(
+        screen.getByText('Searching FDA database for similar devices...')
+      ).toBeInTheDocument();
       expect(screen.getByText('45%')).toBeInTheDocument();
     });
 
@@ -88,7 +103,10 @@ describe('AgentExecutionStatusComponent', () => {
       });
 
       renderWithProviders(
-        <AgentExecutionStatusComponent status={processingStatus} onCancel={jest.fn()} />,
+        <AgentExecutionStatusComponent
+          status={processingStatus}
+          onCancel={jest.fn()}
+        />,
         { session: mockSession }
       );
 
@@ -104,7 +122,10 @@ describe('AgentExecutionStatusComponent', () => {
 
       const mockOnCancel = jest.fn();
       renderWithProviders(
-        <AgentExecutionStatusComponent status={processingStatus} onCancel={mockOnCancel} />,
+        <AgentExecutionStatusComponent
+          status={processingStatus}
+          onCancel={mockOnCancel}
+        />,
         { session: mockSession }
       );
 
@@ -145,7 +166,7 @@ describe('AgentExecutionStatusComponent', () => {
 
       expect(screen.getByText('Completed')).toBeInTheDocument();
       expect(screen.getByText('Execution time: 5.5s')).toBeInTheDocument();
-      
+
       // Should show check icon for completed state
       const checkIcon = document.querySelector('.text-green-600');
       expect(checkIcon).toBeInTheDocument();
@@ -158,7 +179,10 @@ describe('AgentExecutionStatusComponent', () => {
       });
 
       renderWithProviders(
-        <AgentExecutionStatusComponent status={completedStatus} showDetails={true} />,
+        <AgentExecutionStatusComponent
+          status={completedStatus}
+          showDetails={true}
+        />,
         { session: mockSession }
       );
 
@@ -174,7 +198,10 @@ describe('AgentExecutionStatusComponent', () => {
       });
 
       renderWithProviders(
-        <AgentExecutionStatusComponent status={completedStatus} showDetails={false} />,
+        <AgentExecutionStatusComponent
+          status={completedStatus}
+          showDetails={false}
+        />,
         { session: mockSession }
       );
 
@@ -190,13 +217,18 @@ describe('AgentExecutionStatusComponent', () => {
       });
 
       renderWithProviders(
-        <AgentExecutionStatusComponent status={errorStatus} onRetry={jest.fn()} />,
+        <AgentExecutionStatusComponent
+          status={errorStatus}
+          onRetry={jest.fn()}
+        />,
         { session: mockSession }
       );
 
       expect(screen.getByText('Error')).toBeInTheDocument();
-      expect(screen.getByText('Failed to connect to FDA database')).toBeInTheDocument();
-      
+      expect(
+        screen.getByText('Failed to connect to FDA database')
+      ).toBeInTheDocument();
+
       // Should show error icon
       const errorIcon = document.querySelector('.text-red-600');
       expect(errorIcon).toBeInTheDocument();
@@ -210,7 +242,10 @@ describe('AgentExecutionStatusComponent', () => {
 
       const mockOnRetry = jest.fn();
       renderWithProviders(
-        <AgentExecutionStatusComponent status={errorStatus} onRetry={mockOnRetry} />,
+        <AgentExecutionStatusComponent
+          status={errorStatus}
+          onRetry={mockOnRetry}
+        />,
         { session: mockSession }
       );
 
@@ -229,12 +264,15 @@ describe('AgentExecutionStatusComponent', () => {
       });
 
       renderWithProviders(
-        <AgentExecutionStatusComponent status={cancelledStatus} onRetry={jest.fn()} />,
+        <AgentExecutionStatusComponent
+          status={cancelledStatus}
+          onRetry={jest.fn()}
+        />,
         { session: mockSession }
       );
 
       expect(screen.getByText('Cancelled')).toBeInTheDocument();
-      
+
       // Should show stop icon for cancelled state
       const stopIcon = document.querySelector('.text-orange-600');
       expect(stopIcon).toBeInTheDocument();
@@ -247,7 +285,10 @@ describe('AgentExecutionStatusComponent', () => {
 
       const mockOnRetry = jest.fn();
       renderWithProviders(
-        <AgentExecutionStatusComponent status={cancelledStatus} onRetry={mockOnRetry} />,
+        <AgentExecutionStatusComponent
+          status={cancelledStatus}
+          onRetry={mockOnRetry}
+        />,
         { session: mockSession }
       );
 
@@ -266,10 +307,9 @@ describe('AgentExecutionStatusComponent', () => {
         executionTime: 500,
       });
 
-      renderWithProviders(
-        <AgentExecutionStatusComponent status={status} />,
-        { session: mockSession }
-      );
+      renderWithProviders(<AgentExecutionStatusComponent status={status} />, {
+        session: mockSession,
+      });
 
       expect(screen.getByText('Execution time: 500ms')).toBeInTheDocument();
     });
@@ -280,10 +320,9 @@ describe('AgentExecutionStatusComponent', () => {
         executionTime: 2500,
       });
 
-      renderWithProviders(
-        <AgentExecutionStatusComponent status={status} />,
-        { session: mockSession }
-      );
+      renderWithProviders(<AgentExecutionStatusComponent status={status} />, {
+        session: mockSession,
+      });
 
       expect(screen.getByText('Execution time: 2.5s')).toBeInTheDocument();
     });
@@ -294,10 +333,9 @@ describe('AgentExecutionStatusComponent', () => {
         executionTime: 125000, // 2 minutes 5 seconds
       });
 
-      renderWithProviders(
-        <AgentExecutionStatusComponent status={status} />,
-        { session: mockSession }
-      );
+      renderWithProviders(<AgentExecutionStatusComponent status={status} />, {
+        session: mockSession,
+      });
 
       expect(screen.getByText('Execution time: 2m 5s')).toBeInTheDocument();
     });
@@ -338,10 +376,9 @@ describe('AgentExecutionStatusComponent', () => {
         currentTask: 'predicate_search_analysis',
       });
 
-      renderWithProviders(
-        <AgentExecutionStatusComponent status={status} />,
-        { session: mockSession }
-      );
+      renderWithProviders(<AgentExecutionStatusComponent status={status} />, {
+        session: mockSession,
+      });
 
       expect(screen.getByText('Predicate Search Analysis')).toBeInTheDocument();
     });
@@ -366,7 +403,9 @@ describe('AgentExecutionStatusComponent', () => {
 describe('AgentExecutionStatusInline', () => {
   const mockSession = createMockSession();
 
-  const createMockStatus = (overrides: Partial<AgentExecutionStatus> = {}): AgentExecutionStatus => ({
+  const createMockStatus = (
+    overrides: Partial<AgentExecutionStatus> = {}
+  ): AgentExecutionStatus => ({
     status: 'idle',
     sessionId: 'session-123',
     currentTask: null,
@@ -385,13 +424,14 @@ describe('AgentExecutionStatusInline', () => {
         message: 'Analyzing device characteristics...',
       });
 
-      renderWithProviders(
-        <AgentExecutionStatusInline status={status} />,
-        { session: mockSession }
-      );
+      renderWithProviders(<AgentExecutionStatusInline status={status} />, {
+        session: mockSession,
+      });
 
-      expect(screen.getByText('Analyzing device characteristics...')).toBeInTheDocument();
-      
+      expect(
+        screen.getByText('Analyzing device characteristics...')
+      ).toBeInTheDocument();
+
       // Should show spinner for processing
       const spinner = document.querySelector('.animate-spin');
       expect(spinner).toBeInTheDocument();
@@ -425,7 +465,9 @@ describe('AgentExecutionStatusInline', () => {
         { session: mockSession }
       );
 
-      expect(screen.queryByRole('button', { name: /cancel/i })).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole('button', { name: /cancel/i })
+      ).not.toBeInTheDocument();
     });
 
     it('displays status when no message is provided', () => {
@@ -434,10 +476,9 @@ describe('AgentExecutionStatusInline', () => {
         message: null,
       });
 
-      renderWithProviders(
-        <AgentExecutionStatusInline status={status} />,
-        { session: mockSession }
-      );
+      renderWithProviders(<AgentExecutionStatusInline status={status} />, {
+        session: mockSession,
+      });
 
       expect(screen.getByText('idle')).toBeInTheDocument();
     });
@@ -446,7 +487,9 @@ describe('AgentExecutionStatusInline', () => {
   describe('Icon Display', () => {
     it('shows correct icons for different states', () => {
       const { rerender } = renderWithProviders(
-        <AgentExecutionStatusInline status={createMockStatus({ status: 'processing' })} />,
+        <AgentExecutionStatusInline
+          status={createMockStatus({ status: 'processing' })}
+        />,
         { session: mockSession }
       );
 
@@ -454,15 +497,27 @@ describe('AgentExecutionStatusInline', () => {
       expect(document.querySelector('.animate-spin')).toBeInTheDocument();
 
       // Completed - check
-      rerender(<AgentExecutionStatusInline status={createMockStatus({ status: 'completed' })} />);
+      rerender(
+        <AgentExecutionStatusInline
+          status={createMockStatus({ status: 'completed' })}
+        />
+      );
       expect(document.querySelector('.text-green-600')).toBeInTheDocument();
 
       // Error - X
-      rerender(<AgentExecutionStatusInline status={createMockStatus({ status: 'error' })} />);
+      rerender(
+        <AgentExecutionStatusInline
+          status={createMockStatus({ status: 'error' })}
+        />
+      );
       expect(document.querySelector('.text-red-600')).toBeInTheDocument();
 
       // Cancelled - stop
-      rerender(<AgentExecutionStatusInline status={createMockStatus({ status: 'cancelled' })} />);
+      rerender(
+        <AgentExecutionStatusInline
+          status={createMockStatus({ status: 'cancelled' })}
+        />
+      );
       expect(document.querySelector('.text-orange-600')).toBeInTheDocument();
     });
   });
@@ -483,10 +538,9 @@ describe('Error Handling', () => {
       executionTime: null,
     };
 
-    renderWithProviders(
-      <AgentExecutionStatusComponent status={status} />,
-      { session: mockSession }
-    );
+    renderWithProviders(<AgentExecutionStatusComponent status={status} />, {
+      session: mockSession,
+    });
 
     // Should render without crashing
     expect(screen.getByText('Agent Status')).toBeInTheDocument();
@@ -504,10 +558,9 @@ describe('Error Handling', () => {
       executionTime: null,
     };
 
-    renderWithProviders(
-      <AgentExecutionStatusComponent status={status} />,
-      { session: mockSession }
-    );
+    renderWithProviders(<AgentExecutionStatusComponent status={status} />, {
+      session: mockSession,
+    });
 
     expect(screen.getByText('Unknown')).toBeInTheDocument();
   });

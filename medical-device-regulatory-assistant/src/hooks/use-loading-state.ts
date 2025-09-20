@@ -40,7 +40,7 @@ export function useLoadingState(initialState: Partial<LoadingState> = {}) {
   // Start loading with optional configuration
   const startLoading = useCallback((options: LoadingOptions = {}) => {
     optionsRef.current = options;
-    
+
     setState({
       isLoading: true,
       progress: options.showProgress ? 0 : undefined,
@@ -57,13 +57,17 @@ export function useLoadingState(initialState: Partial<LoadingState> = {}) {
 
       progressInterval.current = setInterval(() => {
         const elapsed = Date.now() - startTime;
-        const progress = Math.min((elapsed / options.estimatedDuration!) * 100, 95); // Cap at 95% until manually completed
+        const progress = Math.min(
+          (elapsed / options.estimatedDuration!) * 100,
+          95
+        ); // Cap at 95% until manually completed
         const remaining = Math.max(0, options.estimatedDuration! - elapsed);
-        
-        setState(prev => ({
+
+        setState((prev) => ({
           ...prev,
           progress,
-          estimatedTimeRemaining: remaining > 0 ? formatTimeRemaining(remaining) : undefined,
+          estimatedTimeRemaining:
+            remaining > 0 ? formatTimeRemaining(remaining) : undefined,
         }));
 
         options.onProgress?.(progress);
@@ -71,9 +75,10 @@ export function useLoadingState(initialState: Partial<LoadingState> = {}) {
         // Auto-advance steps based on progress
         if (options.steps && options.steps.length > 0) {
           const stepIndex = Math.floor((progress / 100) * options.steps.length);
-          const currentStep = options.steps[Math.min(stepIndex, options.steps.length - 1)];
-          
-          setState(prev => ({
+          const currentStep =
+            options.steps[Math.min(stepIndex, options.steps.length - 1)];
+
+          setState((prev) => ({
             ...prev,
             currentStep,
           }));
@@ -84,7 +89,7 @@ export function useLoadingState(initialState: Partial<LoadingState> = {}) {
 
   // Update progress manually
   const updateProgress = useCallback((progress: number, step?: string) => {
-    setState(prev => ({
+    setState((prev) => ({
       ...prev,
       progress,
       currentStep: step || prev.currentStep,
@@ -95,7 +100,7 @@ export function useLoadingState(initialState: Partial<LoadingState> = {}) {
 
   // Update current step
   const updateStep = useCallback((step: string) => {
-    setState(prev => ({
+    setState((prev) => ({
       ...prev,
       currentStep: step,
     }));
@@ -107,7 +112,7 @@ export function useLoadingState(initialState: Partial<LoadingState> = {}) {
       clearInterval(progressInterval.current);
     }
 
-    setState(prev => ({
+    setState((prev) => ({
       ...prev,
       isLoading: false,
       progress: optionsRef.current?.showProgress ? 100 : undefined,
@@ -123,7 +128,7 @@ export function useLoadingState(initialState: Partial<LoadingState> = {}) {
       clearInterval(progressInterval.current);
     }
 
-    setState(prev => ({
+    setState((prev) => ({
       ...prev,
       isLoading: false,
       error,
@@ -173,50 +178,58 @@ export function useLoadingState(initialState: Partial<LoadingState> = {}) {
 export function useFormSubmissionState() {
   const loadingState = useLoadingState();
 
-  const submitForm = useCallback(async <T>(
-    submitFn: () => Promise<T>,
-    options: {
-      steps?: string[];
-      onSuccess?: (result: T) => void;
-      onError?: (error: string) => void;
-    } = {}
-  ) => {
-    const defaultSteps = ['Validating data', 'Saving changes', 'Updating interface'];
-    const steps = options.steps || defaultSteps;
+  const submitForm = useCallback(
+    async <T>(
+      submitFn: () => Promise<T>,
+      options: {
+        steps?: string[];
+        onSuccess?: (result: T) => void;
+        onError?: (error: string) => void;
+      } = {}
+    ) => {
+      const defaultSteps = [
+        'Validating data',
+        'Saving changes',
+        'Updating interface',
+      ];
+      const steps = options.steps || defaultSteps;
 
-    loadingState.startLoading({
-      showProgress: true,
-      estimatedDuration: 3000, // 3 seconds estimated
-      steps,
-    });
+      loadingState.startLoading({
+        showProgress: true,
+        estimatedDuration: 3000, // 3 seconds estimated
+        steps,
+      });
 
-    try {
-      // Simulate validation step
-      loadingState.updateStep(steps[0]);
-      await new Promise(resolve => setTimeout(resolve, 500));
-      loadingState.updateProgress(33);
+      try {
+        // Simulate validation step
+        loadingState.updateStep(steps[0]);
+        await new Promise((resolve) => setTimeout(resolve, 500));
+        loadingState.updateProgress(33);
 
-      // Execute the actual submission
-      loadingState.updateStep(steps[1]);
-      const result = await submitFn();
-      loadingState.updateProgress(66);
+        // Execute the actual submission
+        loadingState.updateStep(steps[1]);
+        const result = await submitFn();
+        loadingState.updateProgress(66);
 
-      // Finalize
-      loadingState.updateStep(steps[2]);
-      await new Promise(resolve => setTimeout(resolve, 300));
-      loadingState.updateProgress(100);
+        // Finalize
+        loadingState.updateStep(steps[2]);
+        await new Promise((resolve) => setTimeout(resolve, 300));
+        loadingState.updateProgress(100);
 
-      loadingState.completeLoading();
-      options.onSuccess?.(result);
+        loadingState.completeLoading();
+        options.onSuccess?.(result);
 
-      return result;
-    } catch (error: any) {
-      const errorMessage = error.message || 'An error occurred during submission';
-      loadingState.setError(errorMessage);
-      options.onError?.(errorMessage);
-      throw error;
-    }
-  }, [loadingState]);
+        return result;
+      } catch (error: any) {
+        const errorMessage =
+          error.message || 'An error occurred during submission';
+        loadingState.setError(errorMessage);
+        options.onError?.(errorMessage);
+        throw error;
+      }
+    },
+    [loadingState]
+  );
 
   return {
     ...loadingState,
@@ -235,89 +248,93 @@ export function useBulkOperationState() {
     results: [] as any[],
   });
 
-  const startBulkOperation = useCallback(<T>(
-    items: T[],
-    operation: (item: T, index: number) => Promise<any>,
-    options: {
-      onProgress?: (processed: number, total: number, current: T) => void;
-      onComplete?: (results: any[]) => void;
-      onError?: (error: string, item: T) => void;
-      batchSize?: number;
-    } = {}
-  ) => {
-    setState({
-      isRunning: true,
-      totalItems: items.length,
-      processedItems: 0,
-      currentItem: '',
-      errors: 0,
-      results: [],
-    });
-
-    const { batchSize = 1 } = options;
-    const results: any[] = [];
-    let processed = 0;
-    let errors = 0;
-
-    const processBatch = async (batch: T[], startIndex: number) => {
-      const batchPromises = batch.map(async (item, batchIndex) => {
-        const itemIndex = startIndex + batchIndex;
-        
-        setState(prev => ({
-          ...prev,
-          currentItem: typeof item === 'string' ? item : `Item ${itemIndex + 1}`,
-        }));
-
-        try {
-          const result = await operation(item, itemIndex);
-          results[itemIndex] = result;
-          processed++;
-          
-          setState(prev => ({
-            ...prev,
-            processedItems: processed,
-            results: [...results],
-          }));
-
-          options.onProgress?.(processed, items.length, item);
-          return result;
-        } catch (error: any) {
-          errors++;
-          setState(prev => ({
-            ...prev,
-            processedItems: processed,
-            errors,
-          }));
-
-          options.onError?.(error.message, item);
-          return null;
-        }
+  const startBulkOperation = useCallback(
+    <T>(
+      items: T[],
+      operation: (item: T, index: number) => Promise<any>,
+      options: {
+        onProgress?: (processed: number, total: number, current: T) => void;
+        onComplete?: (results: any[]) => void;
+        onError?: (error: string, item: T) => void;
+        batchSize?: number;
+      } = {}
+    ) => {
+      setState({
+        isRunning: true,
+        totalItems: items.length,
+        processedItems: 0,
+        currentItem: '',
+        errors: 0,
+        results: [],
       });
 
-      await Promise.all(batchPromises);
-    };
+      const { batchSize = 1 } = options;
+      const results: any[] = [];
+      let processed = 0;
+      let errors = 0;
 
-    // Process items in batches
-    const processBatches = async () => {
-      for (let i = 0; i < items.length; i += batchSize) {
-        const batch = items.slice(i, i + batchSize);
-        await processBatch(batch, i);
-      }
+      const processBatch = async (batch: T[], startIndex: number) => {
+        const batchPromises = batch.map(async (item, batchIndex) => {
+          const itemIndex = startIndex + batchIndex;
 
-      setState(prev => ({
-        ...prev,
-        isRunning: false,
-        currentItem: '',
-      }));
+          setState((prev) => ({
+            ...prev,
+            currentItem:
+              typeof item === 'string' ? item : `Item ${itemIndex + 1}`,
+          }));
 
-      options.onComplete?.(results);
-    };
+          try {
+            const result = await operation(item, itemIndex);
+            results[itemIndex] = result;
+            processed++;
 
-    processBatches();
-  }, []);
+            setState((prev) => ({
+              ...prev,
+              processedItems: processed,
+              results: [...results],
+            }));
+
+            options.onProgress?.(processed, items.length, item);
+            return result;
+          } catch (error: any) {
+            errors++;
+            setState((prev) => ({
+              ...prev,
+              processedItems: processed,
+              errors,
+            }));
+
+            options.onError?.(error.message, item);
+            return null;
+          }
+        });
+
+        await Promise.all(batchPromises);
+      };
+
+      // Process items in batches
+      const processBatches = async () => {
+        for (let i = 0; i < items.length; i += batchSize) {
+          const batch = items.slice(i, i + batchSize);
+          await processBatch(batch, i);
+        }
+
+        setState((prev) => ({
+          ...prev,
+          isRunning: false,
+          currentItem: '',
+        }));
+
+        options.onComplete?.(results);
+      };
+
+      processBatches();
+    },
+    []
+  );
 
   const cancelOperation = useCallback(() => {
-    setState(prev => ({
+    setState((prev) => ({
       ...prev,
       isRunning: false,
       currentItem: '',
@@ -334,7 +351,7 @@ export function useBulkOperationState() {
 // Utility function to format time remaining
 function formatTimeRemaining(milliseconds: number): string {
   const seconds = Math.ceil(milliseconds / 1000);
-  
+
   if (seconds < 60) {
     return `${seconds}s`;
   } else if (seconds < 3600) {

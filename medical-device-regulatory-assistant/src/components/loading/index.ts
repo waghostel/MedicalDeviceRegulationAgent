@@ -10,7 +10,7 @@ export {
   ProjectListSkeleton,
   BulkOperationsSkeleton,
   ExportProgressSkeleton,
-  PageLoadingSkeleton
+  PageLoadingSkeleton,
 } from './LoadingSkeleton';
 
 export {
@@ -24,5 +24,5 @@ export {
   BulkOperationsProgress,
   ExportProgress,
   DataLoadingProgress,
-  type ProgressStep
+  type ProgressStep,
 } from './ProgressIndicator';

@@ -42,7 +42,7 @@ export enum PhaseStatus {
   COMPLETED = 'completed',
   DELAYED = 'delayed',
   BLOCKED = 'blocked',
-  CANCELLED = 'cancelled'
+  CANCELLED = 'cancelled',
 }
 
 export interface TimelineTask {
@@ -67,14 +67,14 @@ export enum TaskPriority {
   CRITICAL = 'critical',
   HIGH = 'high',
   MEDIUM = 'medium',
-  LOW = 'low'
+  LOW = 'low',
 }
 
 export enum TaskComplexity {
   SIMPLE = 'simple',
   MODERATE = 'moderate',
   COMPLEX = 'complex',
-  VERY_COMPLEX = 'very_complex'
+  VERY_COMPLEX = 'very_complex',
 }
 
 export enum TaskStatus {
@@ -82,7 +82,7 @@ export enum TaskStatus {
   IN_PROGRESS = 'in_progress',
   COMPLETED = 'completed',
   BLOCKED = 'blocked',
-  DELAYED = 'delayed'
+  DELAYED = 'delayed',
 }
 
 export interface SkillRequirement {
@@ -111,7 +111,7 @@ export enum MilestoneType {
   DELIVERABLE = 'deliverable',
   DECISION_POINT = 'decision_point',
   EXTERNAL_DEPENDENCY = 'external_dependency',
-  RISK_CHECKPOINT = 'risk_checkpoint'
+  RISK_CHECKPOINT = 'risk_checkpoint',
 }
 
 export interface Dependency {
@@ -131,14 +131,14 @@ export enum DependencyType {
   PHASE_TO_PHASE = 'phase_to_phase',
   EXTERNAL = 'external',
   RESOURCE = 'resource',
-  TECHNICAL = 'technical'
+  TECHNICAL = 'technical',
 }
 
 export enum DependencyRelationship {
   FINISH_TO_START = 'finish_to_start',
   START_TO_START = 'start_to_start',
   FINISH_TO_FINISH = 'finish_to_finish',
-  START_TO_FINISH = 'start_to_finish'
+  START_TO_FINISH = 'start_to_finish',
 }
 
 export interface ResourceAllocation {
@@ -248,7 +248,7 @@ export enum DeliverableType {
   TEST_SUITE = 'test_suite',
   DEPLOYMENT = 'deployment',
   TRAINING = 'training',
-  REPORT = 'report'
+  REPORT = 'report',
 }
 
 export enum DeliverableStatus {
@@ -256,7 +256,7 @@ export enum DeliverableStatus {
   IN_PROGRESS = 'in_progress',
   REVIEW = 'review',
   APPROVED = 'approved',
-  REJECTED = 'rejected'
+  REJECTED = 'rejected',
 }
 
 export interface PhaseResourceRequirement {
@@ -286,7 +286,7 @@ export enum RiskCategory {
   RESOURCE = 'resource',
   TECHNICAL = 'technical',
   EXTERNAL = 'external',
-  QUALITY = 'quality'
+  QUALITY = 'quality',
 }
 
 export interface RiskImpact {
@@ -325,7 +325,7 @@ export enum BufferType {
   SCHEDULE = 'schedule',
   RESOURCE = 'resource',
   QUALITY = 'quality',
-  INTEGRATION = 'integration'
+  INTEGRATION = 'integration',
 }
 
 export interface CriticalPathAnalysis {
@@ -390,13 +390,20 @@ export class TimelinePlanner {
     const criticalPath = this.analyzeCriticalPath(tasks, dependencies);
 
     const startDate = this.baseDate.toISOString();
-    const totalDuration = phases.reduce((sum, phase) => sum + phase.duration, 0);
-    const endDate = this.addWorkingDays(this.baseDate, totalDuration).toISOString();
+    const totalDuration = phases.reduce(
+      (sum, phase) => sum + phase.duration,
+      0
+    );
+    const endDate = this.addWorkingDays(
+      this.baseDate,
+      totalDuration
+    ).toISOString();
 
     return {
       id: `timeline_${Date.now()}`,
       name: 'Frontend Migration Timeline',
-      description: 'Comprehensive timeline for migrating frontend components from mock data to real backend',
+      description:
+        'Comprehensive timeline for migrating frontend components from mock data to real backend',
       startDate,
       endDate,
       totalDuration,
@@ -406,7 +413,7 @@ export class TimelinePlanner {
       resources,
       risks,
       buffers,
-      criticalPath
+      criticalPath,
     };
   }
 
@@ -417,9 +424,15 @@ export class TimelinePlanner {
     components: string[],
     priorities: { [component: string]: 'high' | 'medium' | 'low' }
   ): TimelinePhase[] {
-    const highPriorityComponents = components.filter(c => priorities[c] === 'high');
-    const mediumPriorityComponents = components.filter(c => priorities[c] === 'medium');
-    const lowPriorityComponents = components.filter(c => priorities[c] === 'low');
+    const highPriorityComponents = components.filter(
+      (c) => priorities[c] === 'high'
+    );
+    const mediumPriorityComponents = components.filter(
+      (c) => priorities[c] === 'medium'
+    );
+    const lowPriorityComponents = components.filter(
+      (c) => priorities[c] === 'low'
+    );
 
     const phases: TimelinePhase[] = [];
     let currentDate = new Date(this.baseDate);
@@ -501,17 +514,19 @@ export class TimelinePlanner {
         'All components in phase migrated successfully',
         'Tests passing for all migrated components',
         'Performance benchmarks met',
-        'No critical issues identified'
+        'No critical issues identified',
       ],
       riskLevel,
-      status: PhaseStatus.NOT_STARTED
+      status: PhaseStatus.NOT_STARTED,
     };
   }
 
   /**
    * Create phase resource requirements
    */
-  private createPhaseResourceRequirements(componentCount: number): PhaseResourceRequirement[] {
+  private createPhaseResourceRequirements(
+    componentCount: number
+  ): PhaseResourceRequirement[] {
     const baseRequirements: PhaseResourceRequirement[] = [
       {
         role: 'Frontend Developer',
@@ -519,7 +534,7 @@ export class TimelinePlanner {
         level: 'senior',
         duration: Math.max(5, componentCount * 1.5),
         utilization: 80,
-        critical: true
+        critical: true,
       },
       {
         role: 'Backend Developer',
@@ -527,7 +542,7 @@ export class TimelinePlanner {
         level: 'mid',
         duration: Math.max(3, componentCount * 1),
         utilization: 60,
-        critical: true
+        critical: true,
       },
       {
         role: 'QA Engineer',
@@ -535,8 +550,8 @@ export class TimelinePlanner {
         level: 'mid',
         duration: Math.max(3, componentCount * 0.8),
         utilization: 70,
-        critical: false
-      }
+        critical: false,
+      },
     ];
 
     return baseRequirements;
@@ -545,7 +560,10 @@ export class TimelinePlanner {
   /**
    * Create phase deliverables
    */
-  private createPhaseDeliverables(phaseId: string, components: string[]): Deliverable[] {
+  private createPhaseDeliverables(
+    phaseId: string,
+    components: string[]
+  ): Deliverable[] {
     return [
       {
         id: `${phaseId}-code`,
@@ -559,9 +577,9 @@ export class TimelinePlanner {
           'Components render without errors',
           'Data loads from real API',
           'Error handling implemented',
-          'Loading states functional'
+          'Loading states functional',
         ],
-        dependencies: []
+        dependencies: [],
       },
       {
         id: `${phaseId}-tests`,
@@ -575,9 +593,9 @@ export class TimelinePlanner {
           'Unit tests for all components',
           'Integration tests for API calls',
           'E2E tests for critical workflows',
-          'Test coverage > 85%'
+          'Test coverage > 85%',
         ],
-        dependencies: [`${phaseId}-code`]
+        dependencies: [`${phaseId}-code`],
       },
       {
         id: `${phaseId}-docs`,
@@ -591,23 +609,26 @@ export class TimelinePlanner {
           'Component documentation updated',
           'API integration documented',
           'Migration notes recorded',
-          'Troubleshooting guide created'
+          'Troubleshooting guide created',
         ],
-        dependencies: [`${phaseId}-code`]
-      }
+        dependencies: [`${phaseId}-code`],
+      },
     ];
   }
 
   /**
    * Create detailed tasks for phases
    */
-  private createTasks(phases: TimelinePhase[], components: string[]): TimelineTask[] {
+  private createTasks(
+    phases: TimelinePhase[],
+    components: string[]
+  ): TimelineTask[] {
     const tasks: TimelineTask[] = [];
     let taskCounter = 1;
 
     for (const phase of phases) {
       const phaseComponents = this.getPhaseComponents(phase.id, components);
-      
+
       // Infrastructure tasks for first phase
       if (phase.id === 'phase-1') {
         tasks.push(...this.createInfrastructureTasks(phase, taskCounter));
@@ -631,24 +652,33 @@ export class TimelinePlanner {
   /**
    * Get components for specific phase
    */
-  private getPhaseComponents(phaseId: string, allComponents: string[]): string[] {
+  private getPhaseComponents(
+    phaseId: string,
+    allComponents: string[]
+  ): string[] {
     // This would be based on the actual component allocation logic
     // For now, distribute evenly
     const componentsPerPhase = Math.ceil(allComponents.length / 3);
-    const startIndex = phaseId === 'phase-1' ? 0 : 
-                     phaseId === 'phase-2' ? componentsPerPhase : 
-                     componentsPerPhase * 2;
+    const startIndex =
+      phaseId === 'phase-1'
+        ? 0
+        : phaseId === 'phase-2'
+          ? componentsPerPhase
+          : componentsPerPhase * 2;
     const endIndex = startIndex + componentsPerPhase;
-    
+
     return allComponents.slice(startIndex, endIndex);
   }
 
   /**
    * Create infrastructure setup tasks
    */
-  private createInfrastructureTasks(phase: TimelinePhase, startCounter: number): TimelineTask[] {
+  private createInfrastructureTasks(
+    phase: TimelinePhase,
+    startCounter: number
+  ): TimelineTask[] {
     const phaseStart = new Date(phase.startDate);
-    
+
     return [
       {
         id: `task-${startCounter}`,
@@ -659,15 +689,20 @@ export class TimelinePlanner {
         duration: 2,
         effort: 3,
         skills: [
-          { skill: 'Database Design', level: 'mid', required: true, duration: 2 },
-          { skill: 'SQLite', level: 'mid', required: true, duration: 2 }
+          {
+            skill: 'Database Design',
+            level: 'mid',
+            required: true,
+            duration: 2,
+          },
+          { skill: 'SQLite', level: 'mid', required: true, duration: 2 },
         ],
         dependencies: [],
         components: [],
         priority: TaskPriority.CRITICAL,
         complexity: TaskComplexity.MODERATE,
         status: TaskStatus.NOT_STARTED,
-        progress: 0
+        progress: 0,
       },
       {
         id: `task-${startCounter + 1}`,
@@ -679,14 +714,14 @@ export class TimelinePlanner {
         effort: 5,
         skills: [
           { skill: 'FastAPI', level: 'senior', required: true, duration: 3 },
-          { skill: 'Python', level: 'senior', required: true, duration: 3 }
+          { skill: 'Python', level: 'senior', required: true, duration: 3 },
         ],
         dependencies: [`task-${startCounter}`],
         components: [],
         priority: TaskPriority.CRITICAL,
         complexity: TaskComplexity.COMPLEX,
         status: TaskStatus.NOT_STARTED,
-        progress: 0
+        progress: 0,
       },
       {
         id: `task-${startCounter + 2}`,
@@ -697,27 +732,45 @@ export class TimelinePlanner {
         duration: 2,
         effort: 3,
         skills: [
-          { skill: 'Frontend Development', level: 'mid', required: true, duration: 2 },
-          { skill: 'Configuration Management', level: 'mid', required: true, duration: 1 }
+          {
+            skill: 'Frontend Development',
+            level: 'mid',
+            required: true,
+            duration: 2,
+          },
+          {
+            skill: 'Configuration Management',
+            level: 'mid',
+            required: true,
+            duration: 1,
+          },
         ],
         dependencies: [],
         components: [],
         priority: TaskPriority.HIGH,
         complexity: TaskComplexity.MODERATE,
         status: TaskStatus.NOT_STARTED,
-        progress: 0
-      }
+        progress: 0,
+      },
     ];
   }
 
   /**
    * Create component-specific migration tasks
    */
-  private createComponentTasks(phase: TimelinePhase, component: string, startCounter: number): TimelineTask[] {
-    const componentName = component.split('/').pop()?.replace('.tsx', '') || 'component';
+  private createComponentTasks(
+    phase: TimelinePhase,
+    component: string,
+    startCounter: number
+  ): TimelineTask[] {
+    const componentName =
+      component.split('/').pop()?.replace('.tsx', '') || 'component';
     const phaseStart = new Date(phase.startDate);
-    const taskStartDate = this.addWorkingDays(phaseStart, Math.floor(Math.random() * 3));
-    
+    const taskStartDate = this.addWorkingDays(
+      phaseStart,
+      Math.floor(Math.random() * 3)
+    );
+
     return [
       {
         id: `task-${startCounter}`,
@@ -728,14 +781,14 @@ export class TimelinePlanner {
         duration: 1,
         effort: 1,
         skills: [
-          { skill: 'Code Analysis', level: 'mid', required: true, duration: 1 }
+          { skill: 'Code Analysis', level: 'mid', required: true, duration: 1 },
         ],
         dependencies: [],
         components: [component],
         priority: TaskPriority.HIGH,
         complexity: TaskComplexity.SIMPLE,
         status: TaskStatus.NOT_STARTED,
-        progress: 0
+        progress: 0,
       },
       {
         id: `task-${startCounter + 1}`,
@@ -748,14 +801,19 @@ export class TimelinePlanner {
         skills: [
           { skill: 'React', level: 'senior', required: true, duration: 2 },
           { skill: 'TypeScript', level: 'mid', required: true, duration: 2 },
-          { skill: 'API Integration', level: 'mid', required: true, duration: 1 }
+          {
+            skill: 'API Integration',
+            level: 'mid',
+            required: true,
+            duration: 1,
+          },
         ],
         dependencies: [`task-${startCounter}`],
         components: [component],
         priority: TaskPriority.HIGH,
         complexity: this.getComponentComplexity(component),
         status: TaskStatus.NOT_STARTED,
-        progress: 0
+        progress: 0,
       },
       {
         id: `task-${startCounter + 2}`,
@@ -766,16 +824,21 @@ export class TimelinePlanner {
         duration: 2,
         effort: 2,
         skills: [
-          { skill: 'Test Automation', level: 'mid', required: true, duration: 2 },
+          {
+            skill: 'Test Automation',
+            level: 'mid',
+            required: true,
+            duration: 2,
+          },
           { skill: 'Jest', level: 'mid', required: true, duration: 1 },
-          { skill: 'Playwright', level: 'mid', required: false, duration: 1 }
+          { skill: 'Playwright', level: 'mid', required: false, duration: 1 },
         ],
         dependencies: [`task-${startCounter + 1}`],
         components: [component],
         priority: TaskPriority.MEDIUM,
         complexity: TaskComplexity.MODERATE,
         status: TaskStatus.NOT_STARTED,
-        progress: 0
+        progress: 0,
       },
       {
         id: `task-${startCounter + 3}`,
@@ -786,15 +849,20 @@ export class TimelinePlanner {
         duration: 1,
         effort: 1,
         skills: [
-          { skill: 'Quality Assurance', level: 'mid', required: true, duration: 1 }
+          {
+            skill: 'Quality Assurance',
+            level: 'mid',
+            required: true,
+            duration: 1,
+          },
         ],
         dependencies: [`task-${startCounter + 2}`],
         components: [component],
         priority: TaskPriority.MEDIUM,
         complexity: TaskComplexity.SIMPLE,
         status: TaskStatus.NOT_STARTED,
-        progress: 0
-      }
+        progress: 0,
+      },
     ];
   }
 
@@ -803,29 +871,41 @@ export class TimelinePlanner {
    */
   private getComponentComplexity(component: string): TaskComplexity {
     const componentName = component.toLowerCase();
-    
-    if (componentName.includes('classification') || componentName.includes('predicate')) {
+
+    if (
+      componentName.includes('classification') ||
+      componentName.includes('predicate')
+    ) {
       return TaskComplexity.VERY_COMPLEX;
     }
-    
-    if (componentName.includes('dashboard') || componentName.includes('agent')) {
+
+    if (
+      componentName.includes('dashboard') ||
+      componentName.includes('agent')
+    ) {
       return TaskComplexity.COMPLEX;
     }
-    
-    if (componentName.includes('project') || componentName.includes('citation')) {
+
+    if (
+      componentName.includes('project') ||
+      componentName.includes('citation')
+    ) {
       return TaskComplexity.MODERATE;
     }
-    
+
     return TaskComplexity.SIMPLE;
   }
 
   /**
    * Create phase completion tasks
    */
-  private createPhaseCompletionTasks(phase: TimelinePhase, startCounter: number): TimelineTask[] {
+  private createPhaseCompletionTasks(
+    phase: TimelinePhase,
+    startCounter: number
+  ): TimelineTask[] {
     const phaseEnd = new Date(phase.endDate);
     const validationStart = this.addWorkingDays(phaseEnd, -2);
-    
+
     return [
       {
         id: `task-${startCounter}`,
@@ -836,14 +916,19 @@ export class TimelinePlanner {
         duration: 1,
         effort: 2,
         skills: [
-          { skill: 'Integration Testing', level: 'mid', required: true, duration: 1 }
+          {
+            skill: 'Integration Testing',
+            level: 'mid',
+            required: true,
+            duration: 1,
+          },
         ],
         dependencies: [], // Will be set to all component tasks in phase
         components: [],
         priority: TaskPriority.HIGH,
         complexity: TaskComplexity.MODERATE,
         status: TaskStatus.NOT_STARTED,
-        progress: 0
+        progress: 0,
       },
       {
         id: `task-${startCounter + 1}`,
@@ -854,15 +939,20 @@ export class TimelinePlanner {
         duration: 1,
         effort: 1,
         skills: [
-          { skill: 'Project Management', level: 'mid', required: true, duration: 1 }
+          {
+            skill: 'Project Management',
+            level: 'mid',
+            required: true,
+            duration: 1,
+          },
         ],
         dependencies: [`task-${startCounter}`],
         components: [],
         priority: TaskPriority.CRITICAL,
         complexity: TaskComplexity.SIMPLE,
         status: TaskStatus.NOT_STARTED,
-        progress: 0
-      }
+        progress: 0,
+      },
     ];
   }
 
@@ -884,7 +974,7 @@ export class TimelinePlanner {
           relationship: DependencyRelationship.FINISH_TO_START,
           lag: 0,
           critical: task.priority === TaskPriority.CRITICAL,
-          description: `${task.name} depends on completion of ${depTaskId}`
+          description: `${task.name} depends on completion of ${depTaskId}`,
         });
       }
     }
@@ -895,7 +985,10 @@ export class TimelinePlanner {
   /**
    * Allocate resources across phases
    */
-  private allocateResources(phases: TimelinePhase[], teamSize: number): ResourceAllocation {
+  private allocateResources(
+    phases: TimelinePhase[],
+    teamSize: number
+  ): ResourceAllocation {
     const team = this.createTeam(teamSize);
     const roles = this.analyzeRoleRequirements(phases);
     const skills = this.analyzeSkillRequirements(phases);
@@ -907,7 +1000,7 @@ export class TimelinePlanner {
       roles,
       skills,
       capacity,
-      costs
+      costs,
     };
   }
 
@@ -921,11 +1014,31 @@ export class TimelinePlanner {
 
     // Create team based on typical roles
     const roles = [
-      { role: 'Senior Frontend Developer', skills: ['React', 'TypeScript', 'Testing'], rate: 120 },
-      { role: 'Frontend Developer', skills: ['React', 'JavaScript', 'CSS'], rate: 90 },
-      { role: 'Backend Developer', skills: ['Python', 'FastAPI', 'Database'], rate: 100 },
-      { role: 'QA Engineer', skills: ['Testing', 'Automation', 'Playwright'], rate: 80 },
-      { role: 'DevOps Engineer', skills: ['CI/CD', 'Infrastructure', 'Monitoring'], rate: 110 }
+      {
+        role: 'Senior Frontend Developer',
+        skills: ['React', 'TypeScript', 'Testing'],
+        rate: 120,
+      },
+      {
+        role: 'Frontend Developer',
+        skills: ['React', 'JavaScript', 'CSS'],
+        rate: 90,
+      },
+      {
+        role: 'Backend Developer',
+        skills: ['Python', 'FastAPI', 'Database'],
+        rate: 100,
+      },
+      {
+        role: 'QA Engineer',
+        skills: ['Testing', 'Automation', 'Playwright'],
+        rate: 80,
+      },
+      {
+        role: 'DevOps Engineer',
+        skills: ['CI/CD', 'Infrastructure', 'Monitoring'],
+        rate: 110,
+      },
     ];
 
     for (let i = 0; i < Math.min(teamSize, roles.length); i++) {
@@ -938,7 +1051,7 @@ export class TimelinePlanner {
         availability: 100,
         hourlyRate: role.rate,
         startDate,
-        endDate
+        endDate,
       });
     }
 
@@ -959,7 +1072,7 @@ export class TimelinePlanner {
           allocated: 0,
           skills: [],
           phases: [],
-          utilization: 0
+          utilization: 0,
         };
 
         existing.required += requirement.duration;
@@ -988,7 +1101,7 @@ export class TimelinePlanner {
           required: 0,
           available: 0,
           gap: 0,
-          phases: []
+          phases: [],
         };
 
         existing.required += requirement.duration;
@@ -1010,21 +1123,28 @@ export class TimelinePlanner {
   /**
    * Calculate capacity plan
    */
-  private calculateCapacityPlan(phases: TimelinePhase[], team: TeamMember[]): CapacityPlan[] {
+  private calculateCapacityPlan(
+    phases: TimelinePhase[],
+    team: TeamMember[]
+  ): CapacityPlan[] {
     const plan: CapacityPlan[] = [];
-    const totalDuration = phases.reduce((sum, phase) => sum + phase.duration, 0);
+    const totalDuration = phases.reduce(
+      (sum, phase) => sum + phase.duration,
+      0
+    );
     const dailyCapacity = team.length * this.hoursPerDay;
 
     for (let day = 0; day < totalDuration; day++) {
       const date = this.addWorkingDays(this.baseDate, day);
       const allocatedCapacity = dailyCapacity * 0.85; // Assume 85% utilization
-      
+
       plan.push({
         date: date.toISOString(),
         totalCapacity: dailyCapacity,
         allocatedCapacity,
         utilization: (allocatedCapacity / dailyCapacity) * 100,
-        bottlenecks: allocatedCapacity > dailyCapacity * 0.9 ? ['High utilization'] : []
+        bottlenecks:
+          allocatedCapacity > dailyCapacity * 0.9 ? ['High utilization'] : [],
       });
     }
 
@@ -1034,48 +1154,60 @@ export class TimelinePlanner {
   /**
    * Estimate project costs
    */
-  private estimateCosts(phases: TimelinePhase[], team: TeamMember[]): CostEstimate {
+  private estimateCosts(
+    phases: TimelinePhase[],
+    team: TeamMember[]
+  ): CostEstimate {
     const totalEffort = phases.reduce((sum, phase) => sum + phase.effort, 0);
-    const avgHourlyRate = team.reduce((sum, member) => sum + member.hourlyRate, 0) / team.length;
-    
+    const avgHourlyRate =
+      team.reduce((sum, member) => sum + member.hourlyRate, 0) / team.length;
+
     const labor: LaborCost = {
       developers: totalEffort * 0.6 * avgHourlyRate * this.hoursPerDay,
       testers: totalEffort * 0.2 * avgHourlyRate * this.hoursPerDay,
       devops: totalEffort * 0.1 * avgHourlyRate * this.hoursPerDay,
       projectManagement: totalEffort * 0.1 * avgHourlyRate * this.hoursPerDay,
-      total: 0
+      total: 0,
     };
-    labor.total = labor.developers + labor.testers + labor.devops + labor.projectManagement;
+    labor.total =
+      labor.developers + labor.testers + labor.devops + labor.projectManagement;
 
     const infrastructure: InfrastructureCost = {
       development: 500,
       testing: 300,
       staging: 200,
       monitoring: 150,
-      total: 1150
+      total: 1150,
     };
 
     const tools: ToolCost = {
       licenses: 1000,
       subscriptions: 500,
       oneTime: 200,
-      total: 1700
+      total: 1700,
     };
 
     const training: TrainingCost = {
       internal: 2000,
       external: 1000,
       materials: 300,
-      total: 3300
+      total: 3300,
     };
 
     const contingency: ContingencyCost = {
       percentage: 20,
-      amount: (labor.total + infrastructure.total + tools.total + training.total) * 0.2,
-      justification: 'Buffer for unexpected issues and scope changes'
+      amount:
+        (labor.total + infrastructure.total + tools.total + training.total) *
+        0.2,
+      justification: 'Buffer for unexpected issues and scope changes',
     };
 
-    const total = labor.total + infrastructure.total + tools.total + training.total + contingency.amount;
+    const total =
+      labor.total +
+      infrastructure.total +
+      tools.total +
+      training.total +
+      contingency.amount;
 
     return {
       labor,
@@ -1083,7 +1215,7 @@ export class TimelinePlanner {
       tools,
       training,
       contingency,
-      total
+      total,
     };
   }
 
@@ -1101,11 +1233,18 @@ export class TimelinePlanner {
       description: 'Migration project officially starts',
       date: this.baseDate.toISOString(),
       type: MilestoneType.PHASE_START,
-      deliverables: ['Project plan approved', 'Team assembled', 'Infrastructure ready'],
-      successCriteria: ['All team members onboarded', 'Development environment set up'],
+      deliverables: [
+        'Project plan approved',
+        'Team assembled',
+        'Infrastructure ready',
+      ],
+      successCriteria: [
+        'All team members onboarded',
+        'Development environment set up',
+      ],
       dependencies: [],
       stakeholders: ['Development Team', 'Project Manager', 'Product Owner'],
-      riskLevel: 'low'
+      riskLevel: 'low',
     });
 
     // Phase milestones
@@ -1116,11 +1255,11 @@ export class TimelinePlanner {
         description: `All deliverables for ${phase.name} completed and validated`,
         date: phase.endDate,
         type: MilestoneType.PHASE_END,
-        deliverables: phase.deliverables.map(d => d.name),
+        deliverables: phase.deliverables.map((d) => d.name),
         successCriteria: phase.successCriteria,
         dependencies: [phase.id],
         stakeholders: ['Development Team', 'QA Team', 'Product Owner'],
-        riskLevel: phase.riskLevel
+        riskLevel: phase.riskLevel,
       });
     }
 
@@ -1136,17 +1275,17 @@ export class TimelinePlanner {
         'All components migrated',
         'Mock data removed',
         'Documentation updated',
-        'Performance validated'
+        'Performance validated',
       ],
       successCriteria: [
         'Zero critical issues',
         'Performance targets met',
         'User acceptance achieved',
-        'Rollback procedures tested'
+        'Rollback procedures tested',
       ],
-      dependencies: phases.map(p => p.id),
+      dependencies: phases.map((p) => p.id),
       stakeholders: ['All Teams', 'Executive Sponsor'],
-      riskLevel: 'medium'
+      riskLevel: 'medium',
     });
 
     return milestones;
@@ -1167,7 +1306,7 @@ export class TimelinePlanner {
           schedule: 5, // 5 days delay
           cost: 10000,
           quality: 'Potential for bugs and performance issues',
-          scope: 'May need to reduce scope or extend timeline'
+          scope: 'May need to reduce scope or extend timeline',
         },
         severity: 'medium',
         phases: ['phase-1', 'phase-2'],
@@ -1176,12 +1315,12 @@ export class TimelinePlanner {
           actions: [
             'Conduct detailed technical analysis',
             'Create proof of concept for complex components',
-            'Add buffer time for complex tasks'
+            'Add buffer time for complex tasks',
           ],
           owner: 'Technical Lead',
           timeline: 'Before phase start',
           cost: 5000,
-          effectiveness: 0.7
+          effectiveness: 0.7,
         },
         contingency: {
           trigger: 'Tasks taking 50% longer than estimated',
@@ -1189,11 +1328,11 @@ export class TimelinePlanner {
           actions: [
             'Bring in additional senior developer',
             'Reduce scope of non-critical features',
-            'Extend timeline with stakeholder approval'
+            'Extend timeline with stakeholder approval',
           ],
           resources: ['Senior Developer', 'Project Manager'],
-          timeline: 'Within 2 days of trigger'
-        }
+          timeline: 'Within 2 days of trigger',
+        },
       },
       {
         id: 'risk-2',
@@ -1205,7 +1344,7 @@ export class TimelinePlanner {
           schedule: 10, // 10 days delay
           cost: 15000,
           quality: 'Knowledge transfer issues',
-          scope: 'May need to adjust deliverables'
+          scope: 'May need to adjust deliverables',
         },
         severity: 'high',
         phases: ['phase-1', 'phase-2', 'phase-3'],
@@ -1214,12 +1353,12 @@ export class TimelinePlanner {
           actions: [
             'Cross-train team members on critical skills',
             'Document all processes and decisions',
-            'Identify backup resources'
+            'Identify backup resources',
           ],
           owner: 'Project Manager',
           timeline: 'Ongoing',
           cost: 3000,
-          effectiveness: 0.8
+          effectiveness: 0.8,
         },
         contingency: {
           trigger: 'Key team member unavailable for >3 days',
@@ -1227,26 +1366,29 @@ export class TimelinePlanner {
           actions: [
             'Bring in backup developer',
             'Redistribute workload',
-            'Adjust timeline if necessary'
+            'Adjust timeline if necessary',
           ],
           resources: ['Backup Developer', 'Team Lead'],
-          timeline: 'Within 1 day of trigger'
-        }
-      }
+          timeline: 'Within 1 day of trigger',
+        },
+      },
     ];
   }
 
   /**
    * Calculate buffer allocations
    */
-  private calculateBuffers(phases: TimelinePhase[], risks: TimelineRisk[]): BufferAllocation[] {
+  private calculateBuffers(
+    phases: TimelinePhase[],
+    risks: TimelineRisk[]
+  ): BufferAllocation[] {
     const buffers: BufferAllocation[] = [];
 
     for (const phase of phases) {
       // Schedule buffer based on phase risk level
-      const scheduleBufferDays = phase.riskLevel === 'high' ? 3 : 
-                                phase.riskLevel === 'medium' ? 2 : 1;
-      
+      const scheduleBufferDays =
+        phase.riskLevel === 'high' ? 3 : phase.riskLevel === 'medium' ? 2 : 1;
+
       buffers.push({
         type: BufferType.SCHEDULE,
         phase: phase.id,
@@ -1255,8 +1397,8 @@ export class TimelinePlanner {
         conditions: [
           'Tasks taking longer than estimated',
           'Unexpected technical challenges',
-          'Resource availability issues'
-        ]
+          'Resource availability issues',
+        ],
       });
 
       // Quality buffer for testing and validation
@@ -1265,12 +1407,13 @@ export class TimelinePlanner {
           type: BufferType.QUALITY,
           phase: phase.id,
           duration: 2,
-          justification: 'Additional time for thorough testing of critical components',
+          justification:
+            'Additional time for thorough testing of critical components',
           conditions: [
             'Quality issues discovered',
             'Performance problems identified',
-            'Integration issues found'
-          ]
+            'Integration issues found',
+          ],
         });
       }
     }
@@ -1281,13 +1424,16 @@ export class TimelinePlanner {
   /**
    * Analyze critical path
    */
-  private analyzeCriticalPath(tasks: TimelineTask[], dependencies: Dependency[]): CriticalPathAnalysis {
+  private analyzeCriticalPath(
+    tasks: TimelineTask[],
+    dependencies: Dependency[]
+  ): CriticalPathAnalysis {
     // Simplified critical path analysis
     // In a real implementation, this would use proper CPM algorithms
-    
+
     const criticalTasks = tasks
-      .filter(task => task.priority === TaskPriority.CRITICAL)
-      .map(task => task.id);
+      .filter((task) => task.priority === TaskPriority.CRITICAL)
+      .map((task) => task.id);
 
     const totalDuration = tasks.reduce((max, task) => {
       const taskEnd = new Date(task.endDate).getTime();
@@ -1295,16 +1441,18 @@ export class TimelinePlanner {
     }, 0);
 
     const projectStart = new Date(this.baseDate).getTime();
-    const durationDays = Math.ceil((totalDuration - projectStart) / (24 * 60 * 60 * 1000));
+    const durationDays = Math.ceil(
+      (totalDuration - projectStart) / (24 * 60 * 60 * 1000)
+    );
 
     return {
       path: criticalTasks,
       duration: durationDays,
-      slack: tasks.map(task => ({
+      slack: tasks.map((task) => ({
         taskId: task.id,
         totalSlack: task.priority === TaskPriority.CRITICAL ? 0 : 2,
         freeSlack: task.priority === TaskPriority.CRITICAL ? 0 : 1,
-        critical: task.priority === TaskPriority.CRITICAL
+        critical: task.priority === TaskPriority.CRITICAL,
       })),
       bottlenecks: [
         {
@@ -1315,9 +1463,9 @@ export class TimelinePlanner {
           solutions: [
             'Add additional senior developer',
             'Redistribute some tasks to mid-level developers',
-            'Extend timeline for non-critical tasks'
-          ]
-        }
+            'Extend timeline for non-critical tasks',
+          ],
+        },
       ],
       optimizations: [
         {
@@ -1325,16 +1473,17 @@ export class TimelinePlanner {
           description: 'Run some component migrations in parallel',
           impact: 3, // 3 days saved
           cost: 5000,
-          risk: 'Increased coordination complexity'
+          risk: 'Increased coordination complexity',
         },
         {
           type: 'fast-track',
-          description: 'Fast-track critical components with additional resources',
+          description:
+            'Fast-track critical components with additional resources',
           impact: 5, // 5 days saved
           cost: 10000,
-          risk: 'Higher cost and resource pressure'
-        }
-      ]
+          risk: 'Higher cost and resource pressure',
+        },
+      ],
     };
   }
 
@@ -1344,16 +1493,16 @@ export class TimelinePlanner {
   private addWorkingDays(date: Date, days: number): Date {
     const result = new Date(date);
     let addedDays = 0;
-    
+
     while (addedDays < days) {
       result.setDate(result.getDate() + 1);
-      
+
       // Skip weekends (Saturday = 6, Sunday = 0)
       if (result.getDay() !== 0 && result.getDay() !== 6) {
         addedDays++;
       }
     }
-    
+
     return result;
   }
 }

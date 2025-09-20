@@ -1,16 +1,16 @@
 import { test as base, expect, Page, BrowserContext } from '@playwright/test';
-import { 
-  ProjectTestHelper, 
-  WebSocketTestHelper, 
-  PerformanceTestHelper, 
-  UITestHelper, 
-  AuthTestHelper, 
-  CleanupTestHelper 
+import {
+  ProjectTestHelper,
+  WebSocketTestHelper,
+  PerformanceTestHelper,
+  UITestHelper,
+  AuthTestHelper,
+  CleanupTestHelper,
 } from './test-helpers';
 
 /**
  * Test Setup and Configuration for End-to-End Tests
- * 
+ *
  * Provides extended test fixtures with helper classes,
  * common setup/teardown, and test utilities.
  */
@@ -64,10 +64,10 @@ export const test = base.extend<TestFixtures, WorkerFixtures>({
   cleanupHelper: async ({ page }, use) => {
     const helper = new CleanupTestHelper(page);
     await use(helper);
-    
+
     // Automatic cleanup after each test
     await helper.cleanupAll();
-  }
+  },
 });
 
 /**
@@ -82,11 +82,11 @@ export class TestSetup {
     await page.evaluate(() => {
       localStorage.clear();
       sessionStorage.clear();
-      
+
       // Clear any cached data
       if ('caches' in window) {
-        caches.keys().then(names => {
-          names.forEach(name => {
+        caches.keys().then((names) => {
+          names.forEach((name) => {
             caches.delete(name);
           });
         });
@@ -94,7 +94,7 @@ export class TestSetup {
     });
 
     // Set up console logging
-    page.on('console', msg => {
+    page.on('console', (msg) => {
       if (msg.type() === 'error') {
         console.error('Browser console error:', msg.text());
       } else if (msg.type() === 'warning') {
@@ -103,17 +103,17 @@ export class TestSetup {
     });
 
     // Set up error handling
-    page.on('pageerror', error => {
+    page.on('pageerror', (error) => {
       console.error('Page error:', error.message);
     });
 
     // Set up request/response logging for debugging
     if (process.env.DEBUG_NETWORK) {
-      page.on('request', request => {
+      page.on('request', (request) => {
         console.log('Request:', request.method(), request.url());
       });
 
-      page.on('response', response => {
+      page.on('response', (response) => {
         if (response.status() >= 400) {
           console.error('Response error:', response.status(), response.url());
         }
@@ -129,18 +129,21 @@ export class TestSetup {
       id: 'test-user-123',
       email: 'test@example.com',
       name: 'Test User',
-      token: 'mock-jwt-token'
+      token: 'mock-jwt-token',
     };
 
     const user = { ...defaultUser, ...customUser };
 
     await page.evaluate((userData) => {
       localStorage.setItem('auth-token', userData.token);
-      localStorage.setItem('user-data', JSON.stringify({
-        id: userData.id,
-        email: userData.email,
-        name: userData.name
-      }));
+      localStorage.setItem(
+        'user-data',
+        JSON.stringify({
+          id: userData.id,
+          email: userData.email,
+          name: userData.name,
+        })
+      );
     }, user);
   }
 
@@ -155,7 +158,7 @@ export class TestSetup {
         marks: {},
         measures: {},
         networkRequests: [],
-        memoryUsage: []
+        memoryUsage: [],
       };
 
       // Mark performance milestones
@@ -166,14 +169,20 @@ export class TestSetup {
       };
 
       // Measure performance between marks
-      (window as any).measurePerformance = (name: string, startMark: string, endMark?: string) => {
+      (window as any).measurePerformance = (
+        name: string,
+        startMark: string,
+        endMark?: string
+      ) => {
         const start = (window as any).testPerformance.marks[startMark];
-        const end = endMark ? (window as any).testPerformance.marks[endMark] : performance.now();
+        const end = endMark
+          ? (window as any).testPerformance.marks[endMark]
+          : performance.now();
         const duration = end - start;
-        
+
         (window as any).testPerformance.measures[name] = duration;
         console.log(`Performance measure: ${name} = ${duration.toFixed(2)}ms`);
-        
+
         return duration;
       };
 
@@ -183,15 +192,15 @@ export class TestSetup {
         const startTime = performance.now();
         const response = await originalFetch(...args);
         const endTime = performance.now();
-        
+
         (window as any).testPerformance.networkRequests.push({
           url: args[0],
           method: args[1]?.method || 'GET',
           status: response.status,
           duration: endTime - startTime,
-          timestamp: startTime
+          timestamp: startTime,
         });
-        
+
         return response;
       };
 
@@ -202,7 +211,7 @@ export class TestSetup {
             timestamp: performance.now(),
             used: (performance as any).memory.usedJSHeapSize,
             total: (performance as any).memory.totalJSHeapSize,
-            limit: (performance as any).memory.jsHeapSizeLimit
+            limit: (performance as any).memory.jsHeapSizeLimit,
           });
         }, 1000);
       }
@@ -222,14 +231,14 @@ export class TestSetup {
       window.WebSocket = class extends originalWebSocket {
         constructor(url: string | URL, protocols?: string | string[]) {
           super(url, protocols);
-          
+
           this.addEventListener('open', (event) => {
             console.log('WebSocket connected:', url);
             (window as any).webSocketMessages.push({
               type: 'connection',
               event: 'open',
               timestamp: Date.now(),
-              url: url.toString()
+              url: url.toString(),
             });
           });
 
@@ -240,14 +249,14 @@ export class TestSetup {
                 type: 'message',
                 event: 'message',
                 data: data,
-                timestamp: Date.now()
+                timestamp: Date.now(),
               });
             } catch (e) {
               (window as any).webSocketMessages.push({
                 type: 'message',
                 event: 'message',
                 data: event.data,
-                timestamp: Date.now()
+                timestamp: Date.now(),
               });
             }
           });
@@ -257,7 +266,7 @@ export class TestSetup {
             (window as any).webSocketErrors.push({
               event: 'error',
               error: event,
-              timestamp: Date.now()
+              timestamp: Date.now(),
             });
           });
 
@@ -268,7 +277,7 @@ export class TestSetup {
               event: 'close',
               code: event.code,
               reason: event.reason,
-              timestamp: Date.now()
+              timestamp: Date.now(),
             });
           });
         }
@@ -279,28 +288,39 @@ export class TestSetup {
   /**
    * Wait for application to be ready
    */
-  static async waitForAppReady(page: Page, timeout: number = 30000): Promise<void> {
+  static async waitForAppReady(
+    page: Page,
+    timeout: number = 30000
+  ): Promise<void> {
     // Wait for initial page load
     await page.waitForLoadState('networkidle', { timeout });
 
     // Wait for React to be ready
-    await page.waitForFunction(() => {
-      return typeof window.React !== 'undefined' || 
-             document.querySelector('[data-reactroot]') !== null ||
-             document.querySelector('#__next') !== null;
-    }, { timeout });
+    await page.waitForFunction(
+      () => {
+        return (
+          typeof window.React !== 'undefined' ||
+          document.querySelector('[data-reactroot]') !== null ||
+          document.querySelector('#__next') !== null
+        );
+      },
+      { timeout }
+    );
 
     // Wait for any loading indicators to disappear
     const loadingSelectors = [
       '[data-testid="loading"]',
       '[data-testid="spinner"]',
       '.loading',
-      '.spinner'
+      '.spinner',
     ];
 
     for (const selector of loadingSelectors) {
       try {
-        await page.waitForSelector(selector, { state: 'hidden', timeout: 5000 });
+        await page.waitForSelector(selector, {
+          state: 'hidden',
+          timeout: 5000,
+        });
       } catch (error) {
         // Selector might not exist, continue
       }
@@ -331,7 +351,7 @@ export class TestSetup {
           lineno: event.lineno,
           colno: event.colno,
           error: event.error?.stack,
-          timestamp: Date.now()
+          timestamp: Date.now(),
         });
       });
 
@@ -340,7 +360,7 @@ export class TestSetup {
         (window as any).testErrors.push({
           type: 'unhandled-promise',
           reason: event.reason,
-          timestamp: Date.now()
+          timestamp: Date.now(),
         });
       });
 
@@ -349,7 +369,7 @@ export class TestSetup {
       console.warn = (...args) => {
         (window as any).testWarnings.push({
           message: args.join(' '),
-          timestamp: Date.now()
+          timestamp: Date.now(),
         });
         originalWarn.apply(console, args);
       };
@@ -366,7 +386,7 @@ export class TestSetup {
     return await page.evaluate(() => {
       return {
         errors: (window as any).testErrors || [],
-        warnings: (window as any).testWarnings || []
+        warnings: (window as any).testWarnings || [],
       };
     });
   }
@@ -398,27 +418,32 @@ export class TestSetup {
         // Clean up projects
         const projectsResponse = await page.request.get('/api/projects', {
           headers: {
-            'Authorization': 'Bearer mock-jwt-token'
-          }
+            Authorization: 'Bearer mock-jwt-token',
+          },
         });
 
         if (projectsResponse.status() === 200) {
           const projects = await projectsResponse.json();
-          const testProjects = projects.filter((p: any) => 
-            patterns.some(pattern => p.name.includes(pattern))
+          const testProjects = projects.filter((p: any) =>
+            patterns.some((pattern) => p.name.includes(pattern))
           );
 
           if (testProjects.length > 0) {
             console.log(`Cleaning up ${testProjects.length} test projects`);
-            
-            const deletePromises = testProjects.map((project: any) => 
-              page.request.delete(`/api/projects/${project.id}`, {
-                headers: {
-                  'Authorization': 'Bearer mock-jwt-token'
-                }
-              }).catch(error => {
-                console.warn(`Failed to delete project ${project.id}:`, error);
-              })
+
+            const deletePromises = testProjects.map((project: any) =>
+              page.request
+                .delete(`/api/projects/${project.id}`, {
+                  headers: {
+                    Authorization: 'Bearer mock-jwt-token',
+                  },
+                })
+                .catch((error) => {
+                  console.warn(
+                    `Failed to delete project ${project.id}:`,
+                    error
+                  );
+                })
             );
 
             await Promise.all(deletePromises);
@@ -436,12 +461,12 @@ export class TestSetup {
   static async setupTestDatabase(page: Page): Promise<void> {
     // This would typically involve seeding the database with test data
     // For now, we'll just ensure the database is accessible
-    
+
     try {
       const healthResponse = await page.request.get('/api/health', {
         headers: {
-          'Authorization': 'Bearer mock-jwt-token'
-        }
+          Authorization: 'Bearer mock-jwt-token',
+        },
       });
 
       if (healthResponse.status() !== 200) {
@@ -458,32 +483,35 @@ export class TestSetup {
   /**
    * Set up mock data for testing
    */
-  static async setupMockData(page: Page, dataType: 'minimal' | 'comprehensive' | 'performance'): Promise<void> {
+  static async setupMockData(
+    page: Page,
+    dataType: 'minimal' | 'comprehensive' | 'performance'
+  ): Promise<void> {
     const mockDataConfigs = {
       minimal: {
         projects: 5,
-        users: 2
+        users: 2,
       },
       comprehensive: {
         projects: 20,
-        users: 5
+        users: 5,
       },
       performance: {
         projects: 100,
-        users: 10
-      }
+        users: 10,
+      },
     };
 
     const config = mockDataConfigs[dataType];
-    
+
     try {
       // This would typically call a seeding endpoint or service
       const seedResponse = await page.request.post('/api/test/seed', {
         headers: {
-          'Authorization': 'Bearer mock-jwt-token',
-          'Content-Type': 'application/json'
+          Authorization: 'Bearer mock-jwt-token',
+          'Content-Type': 'application/json',
         },
-        data: config
+        data: config,
       });
 
       if (seedResponse.status() === 200) {
@@ -492,7 +520,9 @@ export class TestSetup {
         console.warn(`Mock data setup failed: ${seedResponse.status()}`);
       }
     } catch (error) {
-      console.warn('Mock data setup not available, continuing with empty database');
+      console.warn(
+        'Mock data setup not available, continuing with empty database'
+      );
     }
   }
 }
@@ -522,7 +552,7 @@ export const TEST_CONFIG = {
     'WebSocket Test',
     'Memory Test',
     'Batch Test',
-    'Load Test'
+    'Load Test',
   ],
 
   // API endpoints
@@ -530,10 +560,11 @@ export const TEST_CONFIG = {
   FRONTEND_BASE_URL: process.env.FRONTEND_BASE_URL || 'http://localhost:3000',
 
   // Feature flags
-  ENABLE_PERFORMANCE_MONITORING: process.env.ENABLE_PERFORMANCE_MONITORING === 'true',
+  ENABLE_PERFORMANCE_MONITORING:
+    process.env.ENABLE_PERFORMANCE_MONITORING === 'true',
   ENABLE_WEBSOCKET_TESTING: process.env.ENABLE_WEBSOCKET_TESTING !== 'false',
   ENABLE_VISUAL_TESTING: process.env.ENABLE_VISUAL_TESTING === 'true',
-  DEBUG_MODE: process.env.DEBUG_MODE === 'true'
+  DEBUG_MODE: process.env.DEBUG_MODE === 'true',
 };
 
 // Export the extended test and expect

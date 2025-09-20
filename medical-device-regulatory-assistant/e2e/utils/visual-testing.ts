@@ -106,7 +106,7 @@ export class VisualTester {
       }
 
       await this.waitForPageStability();
-      
+
       const element = this.page.locator(selector);
       await expect(element).toBeVisible();
 
@@ -133,8 +133,10 @@ export class VisualTester {
     await this.compareScreenshot(`${pageName}-initial`, options);
 
     // Test hover states for interactive elements
-    const interactiveElements = await this.page.locator('button, a, [role="button"]').all();
-    
+    const interactiveElements = await this.page
+      .locator('button, a, [role="button"]')
+      .all();
+
     for (let i = 0; i < Math.min(interactiveElements.length, 3); i++) {
       const element = interactiveElements[i];
       await element.hover();
@@ -142,8 +144,10 @@ export class VisualTester {
     }
 
     // Test focus states
-    const focusableElements = await this.page.locator('button, input, select, textarea, a').all();
-    
+    const focusableElements = await this.page
+      .locator('button, input, select, textarea, a')
+      .all();
+
     for (let i = 0; i < Math.min(focusableElements.length, 3); i++) {
       const element = focusableElements[i];
       await element.focus();
@@ -157,17 +161,17 @@ export class VisualTester {
   private async waitForPageStability(): Promise<void> {
     // Wait for network to be idle
     await this.page.waitForLoadState('networkidle');
-    
+
     // Wait for any animations to complete
     await this.page.waitForTimeout(500);
-    
+
     // Wait for fonts to load
     await this.page.waitForFunction(() => document.fonts.ready);
-    
+
     // Wait for images to load
     await this.page.waitForFunction(() => {
       const images = Array.from(document.images);
-      return images.every(img => img.complete);
+      return images.every((img) => img.complete);
     });
   }
 
@@ -193,7 +197,7 @@ export class VisualTester {
    */
   private async maskElements(locators: Locator[]): Promise<void> {
     for (const locator of locators) {
-      await locator.evaluate(element => {
+      await locator.evaluate((element) => {
         element.style.backgroundColor = '#cccccc';
         element.style.color = 'transparent';
       });
@@ -210,14 +214,14 @@ export class VisualTester {
     // Test light mode
     await this.page.emulateMedia({ colorScheme: 'light' });
     await this.waitForPageStability();
-    
+
     const element = this.page.locator(selector);
     await this.compareElementScreenshot(element, `${componentName}-light`);
 
     // Test dark mode
     await this.page.emulateMedia({ colorScheme: 'dark' });
     await this.waitForPageStability();
-    
+
     await this.compareElementScreenshot(element, `${componentName}-dark`);
   }
 
@@ -234,7 +238,7 @@ export class VisualTester {
     for (const [stateName, setupState] of Object.entries(states)) {
       await setupState();
       await this.waitForPageStability();
-      
+
       await this.compareElementScreenshot(
         element,
         `${componentName}-${stateName}`,
@@ -255,15 +259,15 @@ export class CrossBrowserTester {
    */
   async testFormInteractions(formSelector: string): Promise<void> {
     const form = this.page.locator(formSelector);
-    
+
     // Test input focus styles
     const inputs = form.locator('input, select, textarea');
     const inputCount = await inputs.count();
-    
+
     for (let i = 0; i < inputCount; i++) {
       const input = inputs.nth(i);
       await input.focus();
-      
+
       // Check focus styles are applied
       const focusedElement = this.page.locator(':focus');
       await expect(focusedElement).toBeVisible();
@@ -271,11 +275,13 @@ export class CrossBrowserTester {
 
     // Test form validation
     const submitButton = form.locator('button[type="submit"]');
-    if (await submitButton.count() > 0) {
+    if ((await submitButton.count()) > 0) {
       await submitButton.click();
-      
+
       // Check for validation messages
-      const validationMessages = this.page.locator('[aria-invalid="true"], .error, .invalid');
+      const validationMessages = this.page.locator(
+        '[aria-invalid="true"], .error, .invalid'
+      );
       // Validation behavior may differ across browsers
     }
   }
@@ -285,9 +291,9 @@ export class CrossBrowserTester {
    */
   async testLayoutConsistency(containerSelector: string): Promise<void> {
     const container = this.page.locator(containerSelector);
-    
+
     // Get computed styles
-    const styles = await container.evaluate(element => {
+    const styles = await container.evaluate((element) => {
       const computed = window.getComputedStyle(element);
       return {
         display: computed.display,
@@ -300,7 +306,7 @@ export class CrossBrowserTester {
 
     // Verify layout properties are supported
     expect(styles.display).toBeDefined();
-    
+
     // Check for layout shifts
     const boundingBox = await container.boundingBox();
     expect(boundingBox).toBeTruthy();
@@ -318,7 +324,8 @@ export class CrossBrowserTester {
         intersectionObserver: typeof IntersectionObserver !== 'undefined',
         resizeObserver: typeof ResizeObserver !== 'undefined',
         customElements: typeof customElements !== 'undefined',
-        webComponents: typeof HTMLElement.prototype.attachShadow !== 'undefined',
+        webComponents:
+          typeof HTMLElement.prototype.attachShadow !== 'undefined',
         es6Modules: typeof Symbol !== 'undefined',
         asyncAwait: (async () => true)() instanceof Promise,
       };
@@ -336,13 +343,13 @@ export class CrossBrowserTester {
    */
   async testTouchInteractions(elementSelector: string): Promise<void> {
     const element = this.page.locator(elementSelector);
-    
+
     // Test tap
     await element.tap();
-    
+
     // Test long press (if supported)
     await element.tap({ timeout: 1000 });
-    
+
     // Test swipe gestures (for carousels, etc.)
     const boundingBox = await element.boundingBox();
     if (boundingBox) {
@@ -350,7 +357,7 @@ export class CrossBrowserTester {
         boundingBox.x + boundingBox.width / 2,
         boundingBox.y + boundingBox.height / 2
       );
-      
+
       await this.page.mouse.down();
       await this.page.mouse.move(
         boundingBox.x + boundingBox.width / 4,
@@ -377,12 +384,19 @@ export class VisualPerformanceTester {
   }> {
     const paintTiming = await this.page.evaluate(() => {
       const perfEntries = performance.getEntriesByType('paint');
-      const navigation = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
-      
+      const navigation = performance.getEntriesByType(
+        'navigation'
+      )[0] as PerformanceNavigationTiming;
+
       return {
-        firstPaint: perfEntries.find(entry => entry.name === 'first-paint')?.startTime || 0,
-        firstContentfulPaint: perfEntries.find(entry => entry.name === 'first-contentful-paint')?.startTime || 0,
-        largestContentfulPaint: navigation.loadEventEnd - navigation.loadEventStart,
+        firstPaint:
+          perfEntries.find((entry) => entry.name === 'first-paint')
+            ?.startTime || 0,
+        firstContentfulPaint:
+          perfEntries.find((entry) => entry.name === 'first-contentful-paint')
+            ?.startTime || 0,
+        largestContentfulPaint:
+          navigation.loadEventEnd - navigation.loadEventStart,
       };
     });
 
@@ -396,17 +410,20 @@ export class VisualPerformanceTester {
     return await this.page.evaluate(() => {
       return new Promise<number>((resolve) => {
         let clsValue = 0;
-        
+
         const observer = new PerformanceObserver((list) => {
           for (const entry of list.getEntries()) {
-            if (entry.entryType === 'layout-shift' && !(entry as any).hadRecentInput) {
+            if (
+              entry.entryType === 'layout-shift' &&
+              !(entry as any).hadRecentInput
+            ) {
               clsValue += (entry as any).value;
             }
           }
         });
-        
+
         observer.observe({ type: 'layout-shift', buffered: true });
-        
+
         setTimeout(() => {
           observer.disconnect();
           resolve(clsValue);

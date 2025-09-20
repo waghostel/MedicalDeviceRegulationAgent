@@ -56,7 +56,8 @@ describe('Error Handling Integration Tests', () => {
 
       expect(toast).toHaveBeenCalledWith({
         title: 'Connection Error',
-        description: 'Unable to connect to the server. Please check your internet connection.',
+        description:
+          'Unable to connect to the server. Please check your internet connection.',
         variant: 'destructive',
       });
     });
@@ -70,9 +71,14 @@ describe('Error Handling Integration Tests', () => {
 
       render(<ProjectList />);
 
-      await waitFor(() => {
-        expect(screen.getByText(/error loading projects/i)).toBeInTheDocument();
-      }, { timeout: 35000 });
+      await waitFor(
+        () => {
+          expect(
+            screen.getByText(/error loading projects/i)
+          ).toBeInTheDocument();
+        },
+        { timeout: 35000 }
+      );
 
       expect(toast).toHaveBeenCalledWith({
         title: 'Request Timeout',
@@ -83,50 +89,63 @@ describe('Error Handling Integration Tests', () => {
 
     test('should retry failed requests automatically', async () => {
       let attemptCount = 0;
-      
+
       server.use(
         rest.get('/api/projects', (req, res, ctx) => {
           attemptCount++;
           if (attemptCount < 3) {
             return res(ctx.status(500), ctx.json({ error: 'Server error' }));
           }
-          return res(ctx.json([
-            {
-              id: 1,
-              name: 'Test Project',
-              status: 'draft',
-              created_at: '2024-01-01T00:00:00Z',
-              updated_at: '2024-01-01T00:00:00Z',
-            }
-          ]));
+          return res(
+            ctx.json([
+              {
+                id: 1,
+                name: 'Test Project',
+                status: 'draft',
+                created_at: '2024-01-01T00:00:00Z',
+                updated_at: '2024-01-01T00:00:00Z',
+              },
+            ])
+          );
         })
       );
 
       render(<ProjectList />);
 
       // Should eventually succeed after retries
-      await waitFor(() => {
-        expect(screen.getByText('Test Project')).toBeInTheDocument();
-      }, { timeout: 10000 });
+      await waitFor(
+        () => {
+          expect(screen.getByText('Test Project')).toBeInTheDocument();
+        },
+        { timeout: 10000 }
+      );
 
       expect(attemptCount).toBe(3);
     });
 
     test('should stop retrying after max attempts', async () => {
       let attemptCount = 0;
-      
+
       server.use(
         rest.get('/api/projects', (req, res, ctx) => {
           attemptCount++;
-          return res(ctx.status(500), ctx.json({ error: 'Persistent server error' }));
+          return res(
+            ctx.status(500),
+            ctx.json({ error: 'Persistent server error' })
+          );
         })
       );
 
       render(<ProjectList />);
 
-      await waitFor(() => {
-        expect(screen.getByText(/error loading projects/i)).toBeInTheDocument();
-      }, { timeout: 15000 });
+      await waitFor(
+        () => {
+          expect(
+            screen.getByText(/error loading projects/i)
+          ).toBeInTheDocument();
+        },
+        { timeout: 15000 }
+      );
 
       // Should have attempted 4 times (initial + 3 retries)
       expect(attemptCount).toBe(4);
@@ -306,9 +325,14 @@ describe('Error Handling Integration Tests', () => {
       expect(screen.getAllByTestId('project-card-skeleton')).toHaveLength(6);
 
       // Wait for loading to complete
-      await waitFor(() => {
-        expect(screen.queryByTestId('project-card-skeleton')).not.toBeInTheDocument();
-      }, { timeout: 2000 });
+      await waitFor(
+        () => {
+          expect(
+            screen.queryByTestId('project-card-skeleton')
+          ).not.toBeInTheDocument();
+        },
+        { timeout: 2000 }
+      );
     });
 
     test('should show loading indicator during refresh', async () => {
@@ -316,7 +340,9 @@ describe('Error Handling Integration Tests', () => {
       render(<ProjectList />);
 
       await waitFor(() => {
-        expect(screen.queryByTestId('project-card-skeleton')).not.toBeInTheDocument();
+        expect(
+          screen.queryByTestId('project-card-skeleton')
+        ).not.toBeInTheDocument();
       });
 
       // Add delay for refresh
@@ -336,9 +362,12 @@ describe('Error Handling Integration Tests', () => {
       });
 
       // Wait for refresh to complete
-      await waitFor(() => {
-        expect(refreshButton).not.toHaveClass('animate-spin');
-      }, { timeout: 1000 });
+      await waitFor(
+        () => {
+          expect(refreshButton).not.toHaveClass('animate-spin');
+        },
+        { timeout: 1000 }
+      );
     });
 
     test('should show loading state during search', async () => {
@@ -346,7 +375,9 @@ describe('Error Handling Integration Tests', () => {
 
       // Wait for initial load
       await waitFor(() => {
-        expect(screen.queryByTestId('project-card-skeleton')).not.toBeInTheDocument();
+        expect(
+          screen.queryByTestId('project-card-skeleton')
+        ).not.toBeInTheDocument();
       });
 
       // Add delay for search
@@ -378,7 +409,7 @@ describe('Error Handling Integration Tests', () => {
           status: 'draft',
           created_at: '2024-01-01T00:00:00Z',
           updated_at: '2024-01-01T00:00:00Z',
-        }
+        },
       ];
 
       server.use(
@@ -397,12 +428,16 @@ describe('Error Handling Integration Tests', () => {
       });
 
       // Find and click delete button
-      const projectCard = screen.getByText('Test Project').closest('[data-testid="project-card"]');
-      const moreButton = projectCard?.querySelector('button[aria-label="Open menu"]');
-      
+      const projectCard = screen
+        .getByText('Test Project')
+        .closest('[data-testid="project-card"]');
+      const moreButton = projectCard?.querySelector(
+        'button[aria-label="Open menu"]'
+      );
+
       if (moreButton) {
         fireEvent.click(moreButton);
-        
+
         const deleteButton = screen.getByText(/delete project/i);
         fireEvent.click(deleteButton);
 
@@ -417,21 +452,23 @@ describe('Error Handling Integration Tests', () => {
   describe('Error Recovery', () => {
     test('should allow retry after error', async () => {
       let shouldFail = true;
-      
+
       server.use(
         rest.get('/api/projects', (req, res, ctx) => {
           if (shouldFail) {
             return res(ctx.status(500), ctx.json({ error: 'Server error' }));
           }
-          return res(ctx.json([
-            {
-              id: 1,
-              name: 'Recovered Project',
-              status: 'draft',
-              created_at: '2024-01-01T00:00:00Z',
-              updated_at: '2024-01-01T00:00:00Z',
-            }
-          ]));
+          return res(
+            ctx.json([
+              {
+                id: 1,
+                name: 'Recovered Project',
+                status: 'draft',
+                created_at: '2024-01-01T00:00:00Z',
+                updated_at: '2024-01-01T00:00:00Z',
+              },
+            ])
+          );
         })
       );
 
@@ -450,7 +487,9 @@ describe('Error Handling Integration Tests', () => {
       // Should recover and show projects
       await waitFor(() => {
         expect(screen.getByText('Recovered Project')).toBeInTheDocument();
-        expect(screen.queryByText(/error loading projects/i)).not.toBeInTheDocument();
+        expect(
+          screen.queryByText(/error loading projects/i)
+        ).not.toBeInTheDocument();
       });
     });
 
@@ -462,7 +501,7 @@ describe('Error Handling Integration Tests', () => {
           status: 'draft',
           created_at: '2024-01-01T00:00:00Z',
           updated_at: '2024-01-01T00:00:00Z',
-        }
+        },
       ];
 
       server.use(
@@ -482,7 +521,9 @@ describe('Error Handling Integration Tests', () => {
       });
 
       // Error should be handled gracefully without breaking the UI
-      expect(screen.queryByText(/error loading projects/i)).not.toBeInTheDocument();
+      expect(
+        screen.queryByText(/error loading projects/i)
+      ).not.toBeInTheDocument();
     });
   });
 
@@ -495,7 +536,7 @@ describe('Error Handling Integration Tests', () => {
           status: 'draft',
           created_at: '2024-01-01T00:00:00Z',
           updated_at: '2024-01-01T00:00:00Z',
-        }
+        },
       ];
 
       server.use(
@@ -552,7 +593,9 @@ describe('Error Handling Integration Tests', () => {
         await apiClient.post('/api/projects', {});
       } catch (error: any) {
         expect(error.suggestions).toHaveLength(3);
-        expect(error.suggestions[0]).toBe('Please provide a descriptive project name');
+        expect(error.suggestions[0]).toBe(
+          'Please provide a descriptive project name'
+        );
       }
 
       expect(toast).toHaveBeenCalledWith({
@@ -595,7 +638,9 @@ describe('Error Handling Integration Tests', () => {
       try {
         await apiClient.get('/api/projects/network-error');
       } catch (error: any) {
-        expect(error.message).toBe('Network error - please check your internet connection');
+        expect(error.message).toBe(
+          'Network error - please check your internet connection'
+        );
         expect(error.code).toBe('NETWORK_ERROR');
       }
 
@@ -622,7 +667,9 @@ describe('Error Handling Integration Tests', () => {
       );
 
       try {
-        await apiClient.get('/api/projects/silent-error', { skipErrorToast: true });
+        await apiClient.get('/api/projects/silent-error', {
+          skipErrorToast: true,
+        });
       } catch (error) {
         // Error should be thrown but no toast should be shown
       }

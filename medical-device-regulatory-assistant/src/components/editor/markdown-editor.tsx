@@ -33,18 +33,18 @@ export function MarkdownEditor({
   document,
   onSave,
   mentionItems,
-  className = ''
+  className = '',
 }: MarkdownEditorProps) {
   const [content, setContent] = useState(document.content);
   const [mentionState, setMentionState] = useState<MentionState>({
     isOpen: false,
     query: '',
     position: { top: 0, left: 0 },
-    cursorPosition: 0
+    cursorPosition: 0,
   });
   const [lastSaved, setLastSaved] = useState<Date>(document.updatedAt);
   const [saveError, setSaveError] = useState<string | null>(null);
-  
+
   const editorRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -60,55 +60,60 @@ export function MarkdownEditor({
         throw error;
       }
     },
-    enabled: content !== document.content
+    enabled: content !== document.content,
   });
 
   // Handle @ mention detection
   const handleEditorChange = useCallback((value?: string) => {
     if (value === undefined) return;
-    
+
     setContent(value);
-    
+
     // Check for @ mentions
     const textarea = textareaRef.current;
     if (!textarea) return;
-    
+
     const cursorPosition = textarea.selectionStart;
     const textBeforeCursor = value.substring(0, cursorPosition);
     const mentionMatch = textBeforeCursor.match(/@(\w*)$/);
-    
+
     if (mentionMatch) {
       const query = mentionMatch[1];
       const mentionStart = cursorPosition - mentionMatch[0].length;
-      
+
       // Calculate position for dropdown
       const rect = textarea.getBoundingClientRect();
       const lineHeight = 20; // Approximate line height
       const lines = textBeforeCursor.split('\n').length - 1;
-      
+
       setMentionState({
         isOpen: true,
         query,
         position: {
-          top: rect.top + (lines * lineHeight) + 25,
-          left: rect.left + 10
+          top: rect.top + lines * lineHeight + 25,
+          left: rect.left + 10,
         },
-        cursorPosition: mentionStart
+        cursorPosition: mentionStart,
       });
     } else {
-      setMentionState(prev => ({ ...prev, isOpen: false }));
+      setMentionState((prev) => ({ ...prev, isOpen: false }));
     }
   }, []);
 
   // Handle mention selection
-  const handleMentionSelect = useCallback((item: MentionItem) => {
-    const beforeMention = content.substring(0, mentionState.cursorPosition);
-    const afterMention = content.substring(mentionState.cursorPosition + mentionState.query.length + 1);
-    const newContent = `${beforeMention}[${item.label}](${item.value})${afterMention}`;
-    
-    setContent(newContent);
-    setMentionState(prev => ({ ...prev, isOpen: false }));
-  }, [content, mentionState]);
+  const handleMentionSelect = useCallback(
+    (item: MentionItem) => {
+      const beforeMention = content.substring(0, mentionState.cursorPosition);
+      const afterMention = content.substring(
+        mentionState.cursorPosition + mentionState.query.length + 1
+      );
+      const newContent = `${beforeMention}[${item.label}](${item.value})${afterMention}`;
+
+      setContent(newContent);
+      setMentionState((prev) => ({ ...prev, isOpen: false }));
+    },
+    [content, mentionState]
+  );
 
   // Handle manual save
   const handleManualSave = useCallback(async () => {
@@ -126,7 +131,9 @@ export function MarkdownEditor({
   }, [document]);
 
   const hasUnsavedChanges = content !== document.content;
-  const timeSinceLastSave = Math.floor((Date.now() - lastSaved.getTime()) / 1000);
+  const timeSinceLastSave = Math.floor(
+    (Date.now() - lastSaved.getTime()) / 1000
+  );
 
   return (
     <div className={`flex flex-col h-full ${className}`}>
@@ -143,12 +150,17 @@ export function MarkdownEditor({
               ) : hasUnsavedChanges ? (
                 <span>Unsaved changes</span>
               ) : (
-                <span>Saved {timeSinceLastSave < 60 ? 'just now' : `${Math.floor(timeSinceLastSave / 60)}m ago`}</span>
+                <span>
+                  Saved{' '}
+                  {timeSinceLastSave < 60
+                    ? 'just now'
+                    : `${Math.floor(timeSinceLastSave / 60)}m ago`}
+                </span>
               )}
             </div>
           </div>
         </div>
-        
+
         <div className="flex items-center gap-2">
           {saveError && (
             <div className="flex items-center gap-1 text-red-600">
@@ -156,11 +168,11 @@ export function MarkdownEditor({
               <span className="text-xs">Save failed</span>
             </div>
           )}
-          
+
           <Badge variant={document.type === 'folder' ? 'secondary' : 'default'}>
             {document.type.replace('-', ' ')}
           </Badge>
-          
+
           <Button
             variant="outline"
             size="sm"
@@ -183,17 +195,19 @@ export function MarkdownEditor({
           visibleDragBar={false}
           textareaProps={{
             ref: textareaRef,
-            placeholder: 'Start typing... Use @ to mention documents, projects, or other resources.',
+            placeholder:
+              'Start typing... Use @ to mention documents, projects, or other resources.',
             style: {
               fontSize: 14,
               lineHeight: 1.6,
-              fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace'
-            }
+              fontFamily:
+                'ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace',
+            },
           }}
           height={400}
           data-color-mode="light"
         />
-        
+
         {/* Mention Dropdown */}
         {mentionState.isOpen && (
           <MentionDropdown
@@ -201,7 +215,9 @@ export function MarkdownEditor({
             query={mentionState.query}
             position={mentionState.position}
             onSelect={handleMentionSelect}
-            onClose={() => setMentionState(prev => ({ ...prev, isOpen: false }))}
+            onClose={() =>
+              setMentionState((prev) => ({ ...prev, isOpen: false }))
+            }
           />
         )}
       </div>
@@ -211,13 +227,19 @@ export function MarkdownEditor({
         <div className="flex items-center gap-4">
           <span>{content.length} characters</span>
           <span>{content.split('\n').length} lines</span>
-          <span>{content.split(/\s+/).filter(word => word.length > 0).length} words</span>
+          <span>
+            {content.split(/\s+/).filter((word) => word.length > 0).length}{' '}
+            words
+          </span>
         </div>
-        
+
         <div className="flex items-center gap-2">
           <span>Markdown</span>
           {hasUnsavedChanges && (
-            <div className="w-2 h-2 bg-orange-400 rounded-full" title="Unsaved changes" />
+            <div
+              className="w-2 h-2 bg-orange-400 rounded-full"
+              title="Unsaved changes"
+            />
           )}
         </div>
       </div>

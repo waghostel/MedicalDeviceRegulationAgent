@@ -3,9 +3,21 @@
  */
 
 import React from 'react';
-import { screen, fireEvent, waitFor, render, cleanup } from '@testing-library/react';
+import {
+  screen,
+  fireEvent,
+  waitFor,
+  render,
+  cleanup,
+} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { Toast, ToastProvider, ToastViewport, ToastTitle, ToastDescription } from '../toast';
+import {
+  Toast,
+  ToastProvider,
+  ToastViewport,
+  ToastTitle,
+  ToastDescription,
+} from '../toast';
 
 // Mock lucide-react icons
 jest.mock('lucide-react', () => ({
@@ -83,15 +95,15 @@ const originalEnhancedCleanup = global.__ENHANCED_CLEANUP;
 
 beforeAll(() => {
   // Replace the global cleanup with a safer version
-  global.__ENHANCED_CLEANUP = function() {
+  global.__ENHANCED_CLEANUP = function () {
     // Only clear mocks, not DOM
     jest.clearAllMocks();
     jest.restoreAllMocks();
-    
+
     if (global.__GLOBAL_MOCK_REGISTRY) {
       global.__GLOBAL_MOCK_REGISTRY.clearAll();
     }
-    
+
     if (global.__REACT_19_ERROR_TRACKER) {
       global.__REACT_19_ERROR_TRACKER.clear();
     }
@@ -109,7 +121,6 @@ afterEach(() => {
 });
 
 describe('Toast Component', () => {
-
   describe('Basic Rendering', () => {
     it('should render toast with title and description', () => {
       renderToast({
@@ -118,7 +129,9 @@ describe('Toast Component', () => {
       });
 
       expect(screen.getByTestId('toast-title')).toHaveTextContent('Test Title');
-      expect(screen.getByTestId('toast-description')).toHaveTextContent('Test Description');
+      expect(screen.getByTestId('toast-description')).toHaveTextContent(
+        'Test Description'
+      );
     });
 
     it('should render close button', () => {
@@ -136,7 +149,7 @@ describe('Toast Component', () => {
       const statusElements = screen.getAllByRole('status');
       expect(statusElements.length).toBeGreaterThan(0);
       // The main toast should be the first one with proper attributes
-      const mainToast = statusElements.find(el => el.tagName === 'LI');
+      const mainToast = statusElements.find((el) => el.tagName === 'LI');
       expect(mainToast).toBeInTheDocument();
     });
   });
@@ -326,7 +339,7 @@ describe('Toast Component', () => {
 
       // Get the main toast element (LI element, not the screen reader span)
       const statusElements = screen.getAllByRole('status');
-      const mainToast = statusElements.find(el => el.tagName === 'LI');
+      const mainToast = statusElements.find((el) => el.tagName === 'LI');
       expect(mainToast).toBeInTheDocument();
       expect(mainToast).toHaveAttribute('aria-atomic', 'true');
       expect(mainToast).toHaveAttribute('aria-live', 'polite');
@@ -344,7 +357,7 @@ describe('Toast Component', () => {
 
       // Click to focus the button (more reliable than .focus() in tests)
       await user.click(retryButton);
-      
+
       // Press Enter
       await user.keyboard('{Enter}');
 
@@ -358,8 +371,12 @@ describe('Toast Component', () => {
         variant: 'destructive',
       });
 
-      expect(screen.getByTestId('toast-title')).toHaveTextContent('Error Occurred');
-      expect(screen.getByTestId('toast-description')).toHaveTextContent('Please try again later');
+      expect(screen.getByTestId('toast-title')).toHaveTextContent(
+        'Error Occurred'
+      );
+      expect(screen.getByTestId('toast-description')).toHaveTextContent(
+        'Please try again later'
+      );
     });
   });
 
@@ -369,7 +386,7 @@ describe('Toast Component', () => {
 
       // Get the main toast element (LI element)
       let statusElements = screen.getAllByRole('alert'); // destructive variant uses 'alert' role
-      let mainToast = statusElements.find(el => el.tagName === 'LI');
+      let mainToast = statusElements.find((el) => el.tagName === 'LI');
       expect(mainToast).toHaveClass('destructive');
 
       rerender(
@@ -382,7 +399,7 @@ describe('Toast Component', () => {
       );
 
       statusElements = screen.getAllByRole('status'); // success variant uses 'status' role
-      mainToast = statusElements.find(el => el.tagName === 'LI');
+      mainToast = statusElements.find((el) => el.tagName === 'LI');
       expect(mainToast).toHaveClass('border-green-200');
     });
 
@@ -393,7 +410,7 @@ describe('Toast Component', () => {
 
       // Get the main toast element (LI element)
       const statusElements = screen.getAllByRole('status');
-      const mainToast = statusElements.find(el => el.tagName === 'LI');
+      const mainToast = statusElements.find((el) => el.tagName === 'LI');
       expect(mainToast).toHaveClass('custom-toast-class');
     });
   });
@@ -407,7 +424,9 @@ describe('Toast Component', () => {
         onOpenChange: mockOnOpenChange,
       });
 
-      const closeButton = screen.getByRole('button', { name: 'Close notification' });
+      const closeButton = screen.getByRole('button', {
+        name: 'Close notification',
+      });
       await user.click(closeButton);
 
       expect(mockOnOpenChange).toHaveBeenCalledWith(false);
@@ -462,7 +481,9 @@ describe('Toast Component', () => {
       });
 
       expect(screen.getByTestId('toast-title')).toHaveTextContent(longTitle);
-      expect(screen.getByTestId('toast-description')).toHaveTextContent(longDescription);
+      expect(screen.getByTestId('toast-description')).toHaveTextContent(
+        longDescription
+      );
     });
   });
 });

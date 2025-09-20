@@ -38,20 +38,21 @@ async function testAgentIntegration() {
       task_type: 'predicate_search',
       project_id: 'integration-test-project',
       device_description: 'Cardiac monitoring device for integration testing',
-      intended_use: 'For continuous monitoring of cardiac rhythm in ambulatory patients',
+      intended_use:
+        'For continuous monitoring of cardiac rhythm in ambulatory patients',
       device_type: 'Class II Medical Device',
       parameters: {
-        product_code: 'DQK'
-      }
+        product_code: 'DQK',
+      },
     };
 
     const response = await fetch(`${BACKEND_URL}/api/agent/execute`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer test-token'
+        Authorization: 'Bearer test-token',
       },
-      body: JSON.stringify(taskRequest)
+      body: JSON.stringify(taskRequest),
     });
 
     if (response.ok) {
@@ -61,25 +62,31 @@ async function testAgentIntegration() {
       console.log(`   Task Type: ${data.task_type}`);
       console.log(`   Status: ${data.status}`);
       console.log(`   Confidence: ${data.confidence || 'N/A'}`);
-      
+
       // Test 3: Session Status Check
       console.log('\n3. Testing session status check...');
-      const statusResponse = await fetch(`${BACKEND_URL}/api/agent/session/${data.session_id}/status`, {
-        headers: {
-          'Authorization': 'Bearer test-token'
+      const statusResponse = await fetch(
+        `${BACKEND_URL}/api/agent/session/${data.session_id}/status`,
+        {
+          headers: {
+            Authorization: 'Bearer test-token',
+          },
         }
-      });
+      );
 
       if (statusResponse.ok) {
         const statusData = await statusResponse.json();
         console.log('✅ Session status check passed');
         console.log(`   Session Status: ${statusData.status}`);
-        console.log(`   Completed Tasks: ${statusData.completed_tasks?.length || 0}`);
+        console.log(
+          `   Completed Tasks: ${statusData.completed_tasks?.length || 0}`
+        );
       } else {
         console.log('❌ Session status check failed');
-        console.log(`   Status: ${statusResponse.status} ${statusResponse.statusText}`);
+        console.log(
+          `   Status: ${statusResponse.status} ${statusResponse.statusText}`
+        );
       }
-
     } else {
       console.log('❌ Agent task execution failed');
       console.log(`   Status: ${response.status} ${response.statusText}`);
@@ -99,19 +106,20 @@ async function testAgentIntegration() {
     const response = await fetch(`${FRONTEND_URL}/api/copilotkit`, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify({
         // This would be the actual CopilotKit request format
         // For now, just test that the endpoint exists
-        test: true
-      })
+        test: true,
+      }),
     });
 
     // CopilotKit endpoints typically return different status codes
     // We're just checking if the endpoint is accessible
-    console.log(`✅ CopilotKit endpoint accessible (Status: ${response.status})`);
-    
+    console.log(
+      `✅ CopilotKit endpoint accessible (Status: ${response.status})`
+    );
   } catch (error) {
     if (error.code === 'ECONNREFUSED') {
       console.log('⚠️  Frontend server not running (this is expected in CI)');

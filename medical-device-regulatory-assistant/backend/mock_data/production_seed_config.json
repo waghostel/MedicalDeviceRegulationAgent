@@ -35,7 +35,7 @@
       "product_code": "DPS",
       "regulatory_pathway": "510k",
       "cfr_sections": ["21 CFR 870.2300"],
-      "confidence_score": 0.90,
+      "confidence_score": 0.9,
       "reasoning": "Demonstration classification for cardiac monitoring device"
     },
     {
@@ -62,7 +62,10 @@
         "similarities": ["Similar monitoring capability", "Same product code"],
         "differences": ["Enhanced features", "Improved accuracy"],
         "risk_assessment": "low",
-        "testing_recommendations": ["Clinical validation", "Software verification"]
+        "testing_recommendations": [
+          "Clinical validation",
+          "Software verification"
+        ]
       }
     },
     {
@@ -72,7 +75,7 @@
       "intended_use": "Demonstration predicate for glucose monitoring",
       "product_code": "NBW",
       "clearance_date": "2020-02-10",
-      "confidence_score": 0.90,
+      "confidence_score": 0.9,
       "is_selected": true,
       "comparison_data": {
         "similarities": ["Blood glucose measurement", "Similar accuracy"],

@@ -14,11 +14,11 @@ graph TB
     A --> C[useAutoSave]
     A --> D[useFormToast]
     A --> E[React Hook Form]
-    
+
     B --> F[Zod Schema Validation]
     C --> G[localStorage]
     D --> H[Toast Notifications]
-    
+
     I[EnhancedFormField] --> A
     J[ProjectForm] --> I
     K[Other Forms] --> I
@@ -65,18 +65,18 @@ const form = useEnhancedForm({
 
 #### Options
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `schema` | `ZodSchema` | Required | Zod validation schema |
-| `autoSave.enabled` | `boolean` | `false` | Enable auto-save functionality |
-| `autoSave.interval` | `number` | `2000` | Auto-save interval in milliseconds |
-| `autoSave.onSave` | `function` | Required if enabled | Callback for saving data |
-| `autoSave.storageKey` | `string` | Optional | localStorage key for persistence |
-| `realTimeValidation.enabled` | `boolean` | `true` | Enable real-time validation |
-| `realTimeValidation.debounceMs` | `number` | `300` | Validation debounce delay |
-| `accessibility.announceErrors` | `boolean` | `true` | Announce errors to screen readers |
-| `accessibility.focusFirstError` | `boolean` | `true` | Focus first error field on validation |
-| `formName` | `string` | Optional | Form name for error messages |
+| Option                          | Type        | Default             | Description                           |
+| ------------------------------- | ----------- | ------------------- | ------------------------------------- |
+| `schema`                        | `ZodSchema` | Required            | Zod validation schema                 |
+| `autoSave.enabled`              | `boolean`   | `false`             | Enable auto-save functionality        |
+| `autoSave.interval`             | `number`    | `2000`              | Auto-save interval in milliseconds    |
+| `autoSave.onSave`               | `function`  | Required if enabled | Callback for saving data              |
+| `autoSave.storageKey`           | `string`    | Optional            | localStorage key for persistence      |
+| `realTimeValidation.enabled`    | `boolean`   | `true`              | Enable real-time validation           |
+| `realTimeValidation.debounceMs` | `number`    | `300`               | Validation debounce delay             |
+| `accessibility.announceErrors`  | `boolean`   | `true`              | Announce errors to screen readers     |
+| `accessibility.focusFirstError` | `boolean`   | `true`              | Focus first error field on validation |
+| `formName`                      | `string`    | Optional            | Form name for error messages          |
 
 #### Return Value
 
@@ -85,21 +85,25 @@ The hook returns all standard React Hook Form methods plus enhanced features:
 ```typescript
 interface EnhancedFormReturn<T> extends UseFormReturn<T> {
   // Real-time validation
-  validateField: (fieldName: keyof T, value: any, immediate?: boolean) => Promise<void>;
+  validateField: (
+    fieldName: keyof T,
+    value: any,
+    immediate?: boolean
+  ) => Promise<void>;
   getFieldValidation: (fieldName: keyof T) => ValidationState;
-  
+
   // Auto-save functionality
   saveNow: () => Promise<void>;
   isSaving: boolean;
   lastSaved?: Date;
-  
+
   // Enhanced submission
   submitWithFeedback: (onSubmit: (data: T) => Promise<void>) => Promise<void>;
-  
+
   // Form state helpers
   isDirtyField: (fieldName: keyof T) => boolean;
   getTouchedFields: () => (keyof T)[];
-  
+
   // Accessibility helpers
   focusFirstError: () => void;
   announceFormState: (message: string) => void;
@@ -258,45 +262,61 @@ export function ProjectForm({ onSubmit, initialData }: ProjectFormProps) {
 ```typescript
 import { z } from 'zod';
 
-export const projectSchema = z.object({
-  name: z
-    .string()
-    .min(1, 'Project name is required')
-    .max(255, 'Project name must be less than 255 characters')
-    .regex(/^[a-zA-Z0-9\s\-_]+$/, 'Project name can only contain letters, numbers, spaces, hyphens, and underscores')
-    .refine((val) => val.trim() === val, 'Project name cannot start or end with whitespace')
-    .refine((val) => val.trim().length > 0, 'Project name cannot be only whitespace'),
-  
-  description: z
-    .string()
-    .optional()
-    .refine(
-      (val) => !val || val.length >= 10,
-      'Description must be at least 10 characters when provided'
-    )
-    .refine(
-      (val) => !val || val.length <= 1000,
-      'Description must be less than 1000 characters'
-    ),
-  
-  device_type: z.string().optional(),
-  
-  intended_use: z.string().optional(),
-  
-  status: z.enum(['DRAFT', 'IN_PROGRESS', 'COMPLETED', 'ARCHIVED']).optional(),
-}).refine(
-  (data) => {
-    // Cross-field validation: Software devices should have descriptions
-    if (data.device_type?.toLowerCase().includes('software') && !data.description) {
-      return false;
+export const projectSchema = z
+  .object({
+    name: z
+      .string()
+      .min(1, 'Project name is required')
+      .max(255, 'Project name must be less than 255 characters')
+      .regex(
+        /^[a-zA-Z0-9\s\-_]+$/,
+        'Project name can only contain letters, numbers, spaces, hyphens, and underscores'
+      )
+      .refine(
+        (val) => val.trim() === val,
+        'Project name cannot start or end with whitespace'
+      )
+      .refine(
+        (val) => val.trim().length > 0,
+        'Project name cannot be only whitespace'
+      ),
+
+    description: z
+      .string()
+      .optional()
+      .refine(
+        (val) => !val || val.length >= 10,
+        'Description must be at least 10 characters when provided'
+      )
+      .refine(
+        (val) => !val || val.length <= 1000,
+        'Description must be less than 1000 characters'
+      ),
+
+    device_type: z.string().optional(),
+
+    intended_use: z.string().optional(),
+
+    status: z
+      .enum(['DRAFT', 'IN_PROGRESS', 'COMPLETED', 'ARCHIVED'])
+      .optional(),
+  })
+  .refine(
+    (data) => {
+      // Cross-field validation: Software devices should have descriptions
+      if (
+        data.device_type?.toLowerCase().includes('software') &&
+        !data.description
+      ) {
+        return false;
+      }
+      return true;
+    },
+    {
+      message: 'Software devices require a description',
+      path: ['description'],
     }
-    return true;
-  },
-  {
-    message: 'Software devices require a description',
-    path: ['description'],
-  }
-);
+  );
 ```
 
 ### Custom Validation Hook
@@ -309,8 +329,12 @@ export function useRealTimeValidation<T>(
   schema: z.ZodSchema<T>,
   debounceMs: number = 300
 ) {
-  const [validationState, setValidationState] = useState<Record<string, ValidationState>>({});
-  const [debounceTimers, setDebounceTimers] = useState<Record<string, NodeJS.Timeout>>({});
+  const [validationState, setValidationState] = useState<
+    Record<string, ValidationState>
+  >({});
+  const [debounceTimers, setDebounceTimers] = useState<
+    Record<string, NodeJS.Timeout>
+  >({});
 
   const validateField = useCallback(
     async (fieldName: string, value: any, immediate = false) => {
@@ -320,18 +344,19 @@ export function useRealTimeValidation<T>(
       }
 
       const validate = async () => {
-        setValidationState(prev => ({
+        setValidationState((prev) => ({
           ...prev,
           [fieldName]: { ...prev[fieldName], isValidating: true },
         }));
 
         try {
           // Validate single field
-          const fieldSchema = schema.shape[fieldName as keyof typeof schema.shape];
+          const fieldSchema =
+            schema.shape[fieldName as keyof typeof schema.shape];
           if (fieldSchema) {
             await fieldSchema.parseAsync(value);
-            
-            setValidationState(prev => ({
+
+            setValidationState((prev) => ({
               ...prev,
               [fieldName]: {
                 isValid: true,
@@ -342,7 +367,7 @@ export function useRealTimeValidation<T>(
           }
         } catch (error) {
           if (error instanceof z.ZodError) {
-            setValidationState(prev => ({
+            setValidationState((prev) => ({
               ...prev,
               [fieldName]: {
                 isValid: false,
@@ -359,7 +384,7 @@ export function useRealTimeValidation<T>(
         await validate();
       } else {
         const timer = setTimeout(validate, debounceMs);
-        setDebounceTimers(prev => ({ ...prev, [fieldName]: timer }));
+        setDebounceTimers((prev) => ({ ...prev, [fieldName]: timer }));
       }
     },
     [schema, debounceMs, debounceTimers]
@@ -367,11 +392,13 @@ export function useRealTimeValidation<T>(
 
   const getFieldValidation = useCallback(
     (fieldName: string) => {
-      return validationState[fieldName] || {
-        isValid: true,
-        isValidating: false,
-        hasBeenTouched: false,
-      };
+      return (
+        validationState[fieldName] || {
+          isValid: true,
+          isValidating: false,
+          hasBeenTouched: false,
+        }
+      );
     },
     [validationState]
   );
@@ -562,7 +589,7 @@ describe('ProjectForm Integration', () => {
 
     // Fill form
     await user.type(screen.getByLabelText(/name/i), 'Test Project');
-    
+
     // Verify auto-save
     await waitFor(() => {
       expect(localStorage.setItem).toHaveBeenCalled();

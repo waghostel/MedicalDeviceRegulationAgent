@@ -4,7 +4,7 @@ import {
   validateSourceUrl,
   getDocumentTypeDisplayName,
   getDocumentTypeIcon,
-  CitationFormat
+  CitationFormat,
 } from '../citation-utils';
 import { SourceCitation } from '@/types/copilot';
 
@@ -17,7 +17,7 @@ describe('Citation Utils', () => {
     title: 'Test Medical Device 510(k) Summary',
     effectiveDate: '2023-01-15',
     documentType: 'FDA_510K',
-    accessedDate: '2024-01-15'
+    accessedDate: '2024-01-15',
   };
 
   beforeEach(() => {
@@ -45,7 +45,7 @@ describe('Citation Utils', () => {
       const guidanceCitation: SourceCitation = {
         ...mockCitation,
         documentType: 'FDA_GUIDANCE',
-        title: 'Guidance for Industry: 510(k) Device Modifications'
+        title: 'Guidance for Industry: 510(k) Device Modifications',
       };
 
       const apaResult = formatCitation(guidanceCitation, 'APA');
@@ -59,7 +59,7 @@ describe('Citation Utils', () => {
       const cfrCitation: SourceCitation = {
         ...mockCitation,
         documentType: 'CFR_SECTION',
-        title: '21 CFR 820.30 - Design Controls'
+        title: '21 CFR 820.30 - Design Controls',
       };
 
       const apaResult = formatCitation(cfrCitation, 'APA');
@@ -73,7 +73,7 @@ describe('Citation Utils', () => {
       const dbCitation: SourceCitation = {
         ...mockCitation,
         documentType: 'FDA_DATABASE',
-        title: 'FDA 510(k) Premarket Notification Database'
+        title: 'FDA 510(k) Premarket Notification Database',
       };
 
       const apaResult = formatCitation(dbCitation, 'APA');
@@ -133,7 +133,10 @@ describe('Citation Utils', () => {
     });
 
     it('should identify missing document type', () => {
-      const invalidCitation = { ...mockCitation, documentType: undefined as any };
+      const invalidCitation = {
+        ...mockCitation,
+        documentType: undefined as any,
+      };
       const result = validateCitation(invalidCitation);
       expect(result.isValid).toBe(false);
       expect(result.errors).toContain('Document type is required');
@@ -143,7 +146,7 @@ describe('Citation Utils', () => {
   describe('validateSourceUrl', () => {
     it('should return true for accessible URL', async () => {
       (fetch as jest.Mock).mockResolvedValueOnce({
-        ok: true
+        ok: true,
       });
 
       const result = await validateSourceUrl('https://www.fda.gov');

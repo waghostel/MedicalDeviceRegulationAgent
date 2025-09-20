@@ -34,7 +34,7 @@ describe('FileExplorer', () => {
   };
 
   beforeEach(() => {
-    Object.values(mockHandlers).forEach(mock => mock.mockClear());
+    Object.values(mockHandlers).forEach((mock) => mock.mockClear());
   });
 
   it('renders file tree correctly', () => {
@@ -49,7 +49,9 @@ describe('FileExplorer', () => {
     render(<FileExplorer files={[]} {...mockHandlers} />);
 
     expect(screen.getByText('No files yet')).toBeInTheDocument();
-    expect(screen.getByText('Drag and drop files here or use the buttons above')).toBeInTheDocument();
+    expect(
+      screen.getByText('Drag and drop files here or use the buttons above')
+    ).toBeInTheDocument();
   });
 
   it('calls onFileSelect when file is clicked', () => {
@@ -73,10 +75,10 @@ describe('FileExplorer', () => {
 
     // Click to expand folder - find the specific expand button for the Documents folder
     const expandButtons = screen.getAllByRole('button');
-    const expandButton = expandButtons.find(button => 
+    const expandButton = expandButtons.find((button) =>
       button.querySelector('svg.lucide-chevron-right')
     );
-    
+
     if (expandButton) {
       fireEvent.click(expandButton);
       // Now children should be visible
@@ -88,7 +90,7 @@ describe('FileExplorer', () => {
     render(<FileExplorer files={mockFiles} {...mockHandlers} />);
 
     expect(screen.getByText('Project Files')).toBeInTheDocument();
-    
+
     // Should have folder create, file create, and upload buttons
     const buttons = screen.getAllByRole('button');
     expect(buttons.length).toBeGreaterThan(0);
@@ -98,7 +100,7 @@ describe('FileExplorer', () => {
     render(<FileExplorer files={mockFiles} {...mockHandlers} />);
 
     const fileInput = document.querySelector('input[type="file"]');
-    
+
     if (fileInput) {
       const file = new File(['content'], 'test.txt', { type: 'text/plain' });
       const fileList = {
@@ -122,7 +124,7 @@ describe('FileExplorer', () => {
 
     // Find the drop zone (the file tree area)
     const dropZone = document.querySelector('.min-h-\\[200px\\]');
-    
+
     if (dropZone) {
       const file = new File(['content'], 'dropped.txt', { type: 'text/plain' });
       const dataTransfer = {
@@ -136,7 +138,10 @@ describe('FileExplorer', () => {
       fireEvent.dragOver(dropZone);
       fireEvent.drop(dropZone, { dataTransfer });
 
-      expect(mockHandlers.onFileUpload).toHaveBeenCalledWith(dataTransfer.files, null);
+      expect(mockHandlers.onFileUpload).toHaveBeenCalledWith(
+        dataTransfer.files,
+        null
+      );
     }
   });
 
@@ -144,15 +149,19 @@ describe('FileExplorer', () => {
     render(<FileExplorer files={mockFiles} {...mockHandlers} />);
 
     const fileItem = screen.getByText('readme.txt').closest('div');
-    
+
     if (fileItem) {
       fireEvent.mouseEnter(fileItem);
-      
+
       // Actions should become visible (edit and delete buttons)
       // Note: These might be hidden by CSS initially, so we check for their presence
-      const editButtons = document.querySelectorAll('[data-testid="edit-button"]');
-      const deleteButtons = document.querySelectorAll('[data-testid="delete-button"]');
-      
+      const editButtons = document.querySelectorAll(
+        '[data-testid="edit-button"]'
+      );
+      const deleteButtons = document.querySelectorAll(
+        '[data-testid="delete-button"]'
+      );
+
       // At minimum, the buttons should exist in the DOM
       expect(fileItem).toBeInTheDocument();
     }

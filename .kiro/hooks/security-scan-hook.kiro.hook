@@ -1,0 +1,26 @@
+{
+  "enabled": true,
+  "name": "Security Scan Hook",
+  "description": "Scan source code for plaintext API keys, passwords, tokens, and other sensitive information. Remind developers to move such data into environment variables.",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": [
+      "**/*.js",
+      "**/*.ts",
+      "**/*.jsx",
+      "**/*.tsx",
+      "**/*.py",
+      "**/*.env",
+      "**/*.json",
+      "**/*.yaml",
+      "**/*.yml",
+      "**/*.sh",
+      "**/*.ps1"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "Please scan the modified files for any hardcoded sensitive information such as:\n- API keys (patterns like \"api_key\", \"apikey\", \"key\", etc.)\n- Passwords (patterns like \"password\", \"pwd\", \"pass\", etc.)\n- Tokens (patterns like \"token\", \"auth\", \"bearer\", etc.)\n- Database connection strings with credentials\n- Secret keys or private keys\n- OAuth client secrets\n- Any other sensitive configuration data\n\nFor each finding, provide:\n1. File path and line number\n2. Issue description (what sensitive data was found)\n3. Recommended fix (how to move it to environment variables)\n4. Corrected code example showing proper environment variable usage\n\nFocus on common patterns in JavaScript/TypeScript, Python, shell scripts, and configuration files. Ignore files that are clearly examples, tests, or documentation unless they contain real credentials."
+  }
+}

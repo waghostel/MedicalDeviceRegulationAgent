@@ -15,17 +15,17 @@ class TestMonitor {
     this.thresholds = {
       coverage: {
         frontend: 90,
-        backend: 90
+        backend: 90,
       },
       performance: {
         classification: 2000, // 2 seconds
         predicate_search: 10000, // 10 seconds
         project_creation: 1000, // 1 second
-        dashboard_load: 500 // 500ms
+        dashboard_load: 500, // 500ms
       },
       reliability: {
-        success_rate: 95 // 95%
-      }
+        success_rate: 95, // 95%
+      },
     };
   }
 
@@ -48,11 +48,11 @@ class TestMonitor {
       commit: this.getGitCommit(),
       branch: this.getGitBranch(),
       results: results,
-      metrics: this.calculateMetrics(results)
+      metrics: this.calculateMetrics(results),
     };
 
     this.metricsHistory.runs.push(testRun);
-    
+
     // Keep only last 50 runs
     if (this.metricsHistory.runs.length > 50) {
       this.metricsHistory.runs = this.metricsHistory.runs.slice(-50);
@@ -72,7 +72,9 @@ class TestMonitor {
 
   getGitBranch() {
     try {
-      return execSync('git rev-parse --abbrev-ref HEAD', { encoding: 'utf8' }).trim();
+      return execSync('git rev-parse --abbrev-ref HEAD', {
+        encoding: 'utf8',
+      }).trim();
     } catch (error) {
       return 'unknown';
     }
@@ -84,17 +86,23 @@ class TestMonitor {
       performance_score: 0,
       reliability_score: 0,
       overall_score: 0,
-      trends: {}
+      trends: {},
     };
 
     // Calculate quality score based on coverage
     if (results.frontend && results.frontend.coverage) {
-      const frontendQuality = Math.min(100, (results.frontend.coverage / this.thresholds.coverage.frontend) * 100);
+      const frontendQuality = Math.min(
+        100,
+        (results.frontend.coverage / this.thresholds.coverage.frontend) * 100
+      );
       metrics.quality_score += frontendQuality * 0.5;
     }
 
     if (results.backend && results.backend.coverage) {
-      const backendQuality = Math.min(100, (results.backend.coverage / this.thresholds.coverage.backend) * 100);
+      const backendQuality = Math.min(
+        100,
+        (results.backend.coverage / this.thresholds.coverage.backend) * 100
+      );
       metrics.quality_score += backendQuality * 0.5;
     }
 
@@ -105,7 +113,10 @@ class TestMonitor {
     Object.entries(this.thresholds.performance).forEach(([test, threshold]) => {
       if (results.performance && results.performance[test]) {
         const actualTime = results.performance[test];
-        const score = Math.max(0, Math.min(100, ((threshold - actualTime) / threshold) * 100));
+        const score = Math.max(
+          0,
+          Math.min(100, ((threshold - actualTime) / threshold) * 100)
+        );
         performanceScore += score;
         performanceTests++;
       }
@@ -116,25 +127,33 @@ class TestMonitor {
     }
 
     // Calculate reliability score
-    const passedTests = Object.values(results).filter(r => r && r.passed).length;
+    const passedTests = Object.values(results).filter(
+      (r) => r && r.passed
+    ).length;
     const totalTests = Object.keys(results).length;
     metrics.reliability_score = (passedTests / totalTests) * 100;
 
     // Calculate overall score
-    metrics.overall_score = (
+    metrics.overall_score =
       metrics.quality_score * 0.4 +
       metrics.performance_score * 0.3 +
-      metrics.reliability_score * 0.3
-    );
+      metrics.reliability_score * 0.3;
 
     // Calculate trends
     if (this.metricsHistory.runs.length > 1) {
-      const previousRun = this.metricsHistory.runs[this.metricsHistory.runs.length - 1];
+      const previousRun =
+        this.metricsHistory.runs[this.metricsHistory.runs.length - 1];
       metrics.trends = {
-        quality: metrics.quality_score - (previousRun.metrics?.quality_score || 0),
-        performance: metrics.performance_score - (previousRun.metrics?.performance_score || 0),
-        reliability: metrics.reliability_score - (previousRun.metrics?.reliability_score || 0),
-        overall: metrics.overall_score - (previousRun.metrics?.overall_score || 0)
+        quality:
+          metrics.quality_score - (previousRun.metrics?.quality_score || 0),
+        performance:
+          metrics.performance_score -
+          (previousRun.metrics?.performance_score || 0),
+        reliability:
+          metrics.reliability_score -
+          (previousRun.metrics?.reliability_score || 0),
+        overall:
+          metrics.overall_score - (previousRun.metrics?.overall_score || 0),
       };
     }
 
@@ -146,7 +165,7 @@ class TestMonitor {
       summary: this.generateSummary(testRun),
       details: this.generateDetails(testRun),
       recommendations: this.generateRecommendations(testRun),
-      trends: this.generateTrends()
+      trends: this.generateTrends(),
     };
 
     // Save HTML report
@@ -161,7 +180,9 @@ class TestMonitor {
 
   generateSummary(testRun) {
     const { results, metrics } = testRun;
-    const passedTests = Object.values(results).filter(r => r && r.passed).length;
+    const passedTests = Object.values(results).filter(
+      (r) => r && r.passed
+    ).length;
     const totalTests = Object.keys(results).length;
 
     return {
@@ -173,7 +194,7 @@ class TestMonitor {
       overall_score: Math.round(metrics.overall_score),
       quality_score: Math.round(metrics.quality_score),
       performance_score: Math.round(metrics.performance_score),
-      reliability_score: Math.round(metrics.reliability_score)
+      reliability_score: Math.round(metrics.reliability_score),
     };
   }
 
@@ -185,9 +206,11 @@ class TestMonitor {
       if (result) {
         details[suite] = {
           status: result.passed ? 'PASS' : 'FAIL',
-          duration: result.duration ? `${(result.duration / 1000).toFixed(1)}s` : 'N/A',
+          duration: result.duration
+            ? `${(result.duration / 1000).toFixed(1)}s`
+            : 'N/A',
           coverage: result.coverage ? `${result.coverage}%` : 'N/A',
-          issues: this.identifyIssues(suite, result)
+          issues: this.identifyIssues(suite, result),
         };
       }
     });
@@ -202,15 +225,26 @@ class TestMonitor {
       issues.push('Test suite failed');
     }
 
-    if (suite === 'frontend' && result.coverage < this.thresholds.coverage.frontend) {
-      issues.push(`Coverage below threshold (${result.coverage}% < ${this.thresholds.coverage.frontend}%)`);
+    if (
+      suite === 'frontend' &&
+      result.coverage < this.thresholds.coverage.frontend
+    ) {
+      issues.push(
+        `Coverage below threshold (${result.coverage}% < ${this.thresholds.coverage.frontend}%)`
+      );
     }
 
-    if (suite === 'backend' && result.coverage < this.thresholds.coverage.backend) {
-      issues.push(`Coverage below threshold (${result.coverage}% < ${this.thresholds.coverage.backend}%)`);
+    if (
+      suite === 'backend' &&
+      result.coverage < this.thresholds.coverage.backend
+    ) {
+      issues.push(
+        `Coverage below threshold (${result.coverage}% < ${this.thresholds.coverage.backend}%)`
+      );
     }
 
-    if (result.duration > 60000) { // 1 minute
+    if (result.duration > 60000) {
+      // 1 minute
       issues.push('Test suite taking too long');
     }
 
@@ -230,8 +264,8 @@ class TestMonitor {
         actions: [
           'Add unit tests for uncovered functions',
           'Implement integration tests for critical paths',
-          'Review and test error handling scenarios'
-        ]
+          'Review and test error handling scenarios',
+        ],
       });
     }
 
@@ -245,8 +279,8 @@ class TestMonitor {
           'Profile slow API endpoints',
           'Implement caching for frequently accessed data',
           'Optimize database queries',
-          'Consider async processing for long-running tasks'
-        ]
+          'Consider async processing for long-running tasks',
+        ],
       });
     }
 
@@ -260,8 +294,8 @@ class TestMonitor {
           'Fix failing tests',
           'Improve error handling',
           'Add retry mechanisms for flaky tests',
-          'Review test environment setup'
-        ]
+          'Review test environment setup',
+        ],
       });
     }
 
@@ -274,8 +308,8 @@ class TestMonitor {
         actions: [
           'Review recent changes',
           'Run additional regression tests',
-          'Consider reverting problematic commits'
-        ]
+          'Consider reverting problematic commits',
+        ],
       });
     }
 
@@ -292,14 +326,14 @@ class TestMonitor {
       quality: this.calculateTrend(recentRuns, 'quality_score'),
       performance: this.calculateTrend(recentRuns, 'performance_score'),
       reliability: this.calculateTrend(recentRuns, 'reliability_score'),
-      overall: this.calculateTrend(recentRuns, 'overall_score')
+      overall: this.calculateTrend(recentRuns, 'overall_score'),
     };
 
     return trends;
   }
 
   calculateTrend(runs, metric) {
-    const values = runs.map(run => run.metrics?.[metric] || 0);
+    const values = runs.map((run) => run.metrics?.[metric] || 0);
     if (values.length < 2) return { trend: 'stable', change: 0 };
 
     const first = values[0];
@@ -388,53 +422,77 @@ class TestMonitor {
             <div class="section">
                 <h2>Test Suite Details</h2>
                 <div class="test-grid">
-                    ${Object.entries(report.details).map(([suite, details]) => `
+                    ${Object.entries(report.details)
+                      .map(
+                        ([suite, details]) => `
                         <div class="test-card">
                             <h3>${suite.charAt(0).toUpperCase() + suite.slice(1)}</h3>
                             <p><strong>Status:</strong> <span class="${details.status === 'PASS' ? 'pass' : 'fail'}">${details.status}</span></p>
                             <p><strong>Duration:</strong> ${details.duration}</p>
                             <p><strong>Coverage:</strong> ${details.coverage}</p>
-                            ${details.issues.length > 0 ? `
+                            ${
+                              details.issues.length > 0
+                                ? `
                                 <div class="issues">
                                     <strong>Issues:</strong>
                                     <ul>
-                                        ${details.issues.map(issue => `<li>${issue}</li>`).join('')}
+                                        ${details.issues.map((issue) => `<li>${issue}</li>`).join('')}
                                     </ul>
                                 </div>
-                            ` : ''}
+                            `
+                                : ''
+                            }
                         </div>
-                    `).join('')}
+                    `
+                      )
+                      .join('')}
                 </div>
             </div>
 
-            ${report.recommendations.length > 0 ? `
+            ${
+              report.recommendations.length > 0
+                ? `
                 <div class="section">
                     <h2>Recommendations</h2>
-                    ${report.recommendations.map(rec => `
+                    ${report.recommendations
+                      .map(
+                        (rec) => `
                         <div class="recommendations recommendation priority-${rec.priority}">
                             <h4>${rec.message}</h4>
                             <p><strong>Priority:</strong> ${rec.priority.toUpperCase()}</p>
                             <p><strong>Actions:</strong></p>
                             <ul>
-                                ${rec.actions.map(action => `<li>${action}</li>`).join('')}
+                                ${rec.actions.map((action) => `<li>${action}</li>`).join('')}
                             </ul>
                         </div>
-                    `).join('')}
+                    `
+                      )
+                      .join('')}
                 </div>
-            ` : ''}
+            `
+                : ''
+            }
 
             <div class="section">
                 <h2>Trends</h2>
                 <div class="test-grid">
-                    ${Object.entries(report.trends).map(([metric, trend]) => `
+                    ${Object.entries(report.trends)
+                      .map(
+                        ([metric, trend]) => `
                         <div class="test-card">
                             <h4>${metric.charAt(0).toUpperCase() + metric.slice(1)}</h4>
-                            ${trend.trend ? `
+                            ${
+                              trend.trend
+                                ? `
                                 <p><strong>Trend:</strong> ${trend.trend}</p>
                                 <p><strong>Change:</strong> ${trend.change > 0 ? '+' : ''}${trend.change}%</p>
-                            ` : `<p>${trend.message || 'No trend data available'}</p>`}
+                            `
+                                : `<p>${trend.message || 'No trend data available'}</p>`
+                            }
                         </div>
-                    `).join('')}
+                    `
+                      )
+                      .join('')}
                 </div>
             </div>
         </div>
@@ -445,11 +503,11 @@ class TestMonitor {
 
   async monitorTestExecution(testResultsFile) {
     console.log('📊 Monitoring test execution...');
-    
+
     // Wait for test results file
     let attempts = 0;
     while (!fs.existsSync(testResultsFile) && attempts < 60) {
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
       attempts++;
     }
 
@@ -463,13 +521,23 @@ class TestMonitor {
     const report = this.generateReport(testRun);
 
     console.log('\n📈 Test Monitoring Summary:');
-    console.log(`   Overall Score: ${Math.round(testRun.metrics.overall_score)}%`);
-    console.log(`   Quality Score: ${Math.round(testRun.metrics.quality_score)}%`);
-    console.log(`   Performance Score: ${Math.round(testRun.metrics.performance_score)}%`);
-    console.log(`   Reliability Score: ${Math.round(testRun.metrics.reliability_score)}%`);
+    console.log(
+      `   Overall Score: ${Math.round(testRun.metrics.overall_score)}%`
+    );
+    console.log(
+      `   Quality Score: ${Math.round(testRun.metrics.quality_score)}%`
+    );
+    console.log(
+      `   Performance Score: ${Math.round(testRun.metrics.performance_score)}%`
+    );
+    console.log(
+      `   Reliability Score: ${Math.round(testRun.metrics.reliability_score)}%`
+    );
 
     if (report.recommendations.length > 0) {
-      console.log(`\n⚠️  ${report.recommendations.length} recommendations generated`);
+      console.log(
+        `\n⚠️  ${report.recommendations.length} recommendations generated`
+      );
     }
 
     console.log('\n📄 Reports generated:');
@@ -483,17 +551,18 @@ class TestMonitor {
 // CLI interface
 if (require.main === module) {
   const monitor = new TestMonitor();
-  
+
   const command = process.argv[2];
-  
+
   if (command === 'monitor') {
     const testResultsFile = process.argv[3] || 'test-results.json';
-    monitor.monitorTestExecution(testResultsFile)
+    monitor
+      .monitorTestExecution(testResultsFile)
       .then(() => {
         console.log('✅ Test monitoring completed');
         process.exit(0);
       })
-      .catch(error => {
+      .catch((error) => {
         console.error('❌ Test monitoring failed:', error.message);
         process.exit(1);
       });

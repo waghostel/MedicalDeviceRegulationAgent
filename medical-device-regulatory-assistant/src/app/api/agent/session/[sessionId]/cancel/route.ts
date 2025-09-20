@@ -11,13 +11,13 @@ const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:8000';
 
 async function getAuthHeaders(request: NextRequest) {
   const session = await getServerSession(authOptions);
-  
+
   if (!session?.user?.email) {
     throw new Error('Unauthorized');
   }
 
   return {
-    'Authorization': `Bearer ${session.accessToken || 'mock-token'}`,
+    Authorization: `Bearer ${session.accessToken || 'mock-token'}`,
     'Content-Type': 'application/json',
   };
 }
@@ -30,19 +30,22 @@ export async function POST(
     const headers = await getAuthHeaders(request);
     const sessionId = params.sessionId;
     const body = await request.json();
-    
-    const response = await fetch(`${BACKEND_URL}/api/agent/session/${sessionId}/cancel`, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify(body),
-    });
+
+    const response = await fetch(
+      `${BACKEND_URL}/api/agent/session/${sessionId}/cancel`,
+      {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(body),
+      }
+    );
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       return NextResponse.json(
-        { 
+        {
           message: errorData.message || `Backend error: ${response.status}`,
-          details: errorData 
+          details: errorData,
         },
         { status: response.status }
       );
@@ -50,10 +53,9 @@ export async function POST(
 
     const data = await response.json();
     return NextResponse.json(data);
-
   } catch (error) {
     console.error('Agent session cancel API error:', error);
-    
+
     if (error.message === 'Unauthorized') {
       return NextResponse.json(
         { message: 'Authentication required' },

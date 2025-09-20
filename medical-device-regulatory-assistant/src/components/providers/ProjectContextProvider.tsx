@@ -1,7 +1,12 @@
 'use client';
 
 import React, { createContext, useContext, useReducer, ReactNode } from 'react';
-import { ProjectContext, AgentWorkflowState, ChatMessage, SlashCommand } from '@/types/copilot';
+import {
+  ProjectContext,
+  AgentWorkflowState,
+  ChatMessage,
+  SlashCommand,
+} from '@/types/copilot';
 
 // Available slash commands for the regulatory assistant
 const DEFAULT_SLASH_COMMANDS: SlashCommand[] = [
@@ -9,26 +14,26 @@ const DEFAULT_SLASH_COMMANDS: SlashCommand[] = [
     command: '/predicate-search',
     description: 'Find similar predicate devices for 510(k) submissions',
     icon: '🔍',
-    category: 'search'
+    category: 'search',
   },
   {
     command: '/classify-device',
     description: 'Determine device classification and product code',
     icon: '📋',
-    category: 'classification'
+    category: 'classification',
   },
   {
     command: '/compare-predicate',
     description: 'Compare your device with a specific predicate',
     icon: '⚖️',
-    category: 'analysis'
+    category: 'analysis',
   },
   {
     command: '/find-guidance',
     description: 'Search FDA guidance documents',
     icon: '📚',
-    category: 'guidance'
-  }
+    category: 'guidance',
+  },
 ];
 
 type ProjectAction =
@@ -43,41 +48,44 @@ const initialState: AgentWorkflowState = {
   currentProject: null,
   isLoading: false,
   messages: [],
-  availableCommands: DEFAULT_SLASH_COMMANDS
+  availableCommands: DEFAULT_SLASH_COMMANDS,
 };
 
-function projectReducer(state: AgentWorkflowState, action: ProjectAction): AgentWorkflowState {
+function projectReducer(
+  state: AgentWorkflowState,
+  action: ProjectAction
+): AgentWorkflowState {
   switch (action.type) {
     case 'SET_PROJECT':
       return {
         ...state,
-        currentProject: action.payload
+        currentProject: action.payload,
       };
     case 'CLEAR_PROJECT':
       return {
         ...state,
         currentProject: null,
-        messages: []
+        messages: [],
       };
     case 'SET_LOADING':
       return {
         ...state,
-        isLoading: action.payload
+        isLoading: action.payload,
       };
     case 'ADD_MESSAGE':
       return {
         ...state,
-        messages: [...state.messages, action.payload]
+        messages: [...state.messages, action.payload],
       };
     case 'CLEAR_MESSAGES':
       return {
         ...state,
-        messages: []
+        messages: [],
       };
     case 'SET_MESSAGES':
       return {
         ...state,
-        messages: action.payload
+        messages: action.payload,
       };
     default:
       return state;
@@ -94,7 +102,9 @@ interface ProjectContextType {
   setMessages: (messages: ChatMessage[]) => void;
 }
 
-const ProjectContextContext = createContext<ProjectContextType | undefined>(undefined);
+const ProjectContextContext = createContext<ProjectContextType | undefined>(
+  undefined
+);
 
 export function ProjectContextProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(projectReducer, initialState);
@@ -130,7 +140,7 @@ export function ProjectContextProvider({ children }: { children: ReactNode }) {
     setLoading,
     addMessage,
     clearMessages,
-    setMessages
+    setMessages,
   };
 
   return (
@@ -143,7 +153,9 @@ export function ProjectContextProvider({ children }: { children: ReactNode }) {
 export function useProjectContext() {
   const context = useContext(ProjectContextContext);
   if (context === undefined) {
-    throw new Error('useProjectContext must be used within a ProjectContextProvider');
+    throw new Error(
+      'useProjectContext must be used within a ProjectContextProvider'
+    );
   }
   return context;
 }

@@ -31,7 +31,7 @@ export enum ValidationCategory {
   USER_EXPERIENCE = 'user_experience',
   SECURITY = 'security',
   COMPLIANCE = 'compliance',
-  RELIABILITY = 'reliability'
+  RELIABILITY = 'reliability',
 }
 
 export enum ValidationType {
@@ -40,14 +40,14 @@ export enum ValidationType {
   METRIC_THRESHOLD = 'metric_threshold',
   USER_FEEDBACK = 'user_feedback',
   COMPLIANCE_CHECK = 'compliance_check',
-  PERFORMANCE_BENCHMARK = 'performance_benchmark'
+  PERFORMANCE_BENCHMARK = 'performance_benchmark',
 }
 
 export enum ValidationPhase {
   PRE_MIGRATION = 'pre_migration',
   DURING_MIGRATION = 'during_migration',
   POST_MIGRATION = 'post_migration',
-  CONTINUOUS = 'continuous'
+  CONTINUOUS = 'continuous',
 }
 
 export interface AcceptanceCriteria {
@@ -74,7 +74,7 @@ export enum MeasurementMethod {
   REAL_USER_MONITORING = 'real_user_monitoring',
   LOAD_TESTING = 'load_testing',
   MANUAL_TESTING = 'manual_testing',
-  CODE_ANALYSIS = 'code_analysis'
+  CODE_ANALYSIS = 'code_analysis',
 }
 
 export enum MeasurementFrequency {
@@ -84,7 +84,7 @@ export enum MeasurementFrequency {
   EVERY_15_MINUTES = 'every_15_minutes',
   HOURLY = 'hourly',
   DAILY = 'daily',
-  ON_DEMAND = 'on_demand'
+  ON_DEMAND = 'on_demand',
 }
 
 export interface SuccessMetrics {
@@ -268,7 +268,7 @@ export enum ValidationStatus {
   FAILED = 'failed',
   WARNING = 'warning',
   PENDING = 'pending',
-  SKIPPED = 'skipped'
+  SKIPPED = 'skipped',
 }
 
 export interface ValidationDetails {
@@ -325,13 +325,15 @@ export class MigrationValidationManager {
   /**
    * Create default validation framework
    */
-  private createDefaultFramework(overrides?: Partial<ValidationFramework>): ValidationFramework {
+  private createDefaultFramework(
+    overrides?: Partial<ValidationFramework>
+  ): ValidationFramework {
     const defaultFramework: ValidationFramework = {
       criteria: this.createDefaultCriteria(),
       metrics: this.createDefaultMetrics(),
       benchmarks: this.createDefaultBenchmarks(),
       compliance: this.createDefaultCompliance(),
-      monitoring: this.createDefaultMonitoring()
+      monitoring: this.createDefaultMonitoring(),
     };
 
     return { ...defaultFramework, ...overrides };
@@ -352,18 +354,18 @@ export class MigrationValidationManager {
         acceptance: {
           threshold: 100,
           operator: 'eq',
-          unit: 'percentage'
+          unit: 'percentage',
         },
         measurement: {
           method: MeasurementMethod.AUTOMATED_MONITORING,
           frequency: MeasurementFrequency.CONTINUOUS,
           duration: 60,
           aggregation: 'avg',
-          tools: ['Jest', 'React Testing Library']
+          tools: ['Jest', 'React Testing Library'],
         },
         priority: 'critical',
         phase: [ValidationPhase.POST_MIGRATION, ValidationPhase.CONTINUOUS],
-        dependencies: []
+        dependencies: [],
       },
       {
         id: 'api-integration',
@@ -375,18 +377,18 @@ export class MigrationValidationManager {
           threshold: 99,
           operator: 'gte',
           unit: 'percentage',
-          tolerance: 1
+          tolerance: 1,
         },
         measurement: {
           method: MeasurementMethod.SYNTHETIC_TESTING,
           frequency: MeasurementFrequency.EVERY_5_MINUTES,
           duration: 30,
           aggregation: 'avg',
-          tools: ['Playwright', 'API Tests']
+          tools: ['Playwright', 'API Tests'],
         },
         priority: 'critical',
         phase: [ValidationPhase.POST_MIGRATION, ValidationPhase.CONTINUOUS],
-        dependencies: ['component-rendering']
+        dependencies: ['component-rendering'],
       },
 
       // Performance Criteria
@@ -401,18 +403,18 @@ export class MigrationValidationManager {
           operator: 'lte',
           unit: 'milliseconds',
           tolerance: 500,
-          baseline: 1500
+          baseline: 1500,
         },
         measurement: {
           method: MeasurementMethod.REAL_USER_MONITORING,
           frequency: MeasurementFrequency.CONTINUOUS,
           duration: 60,
           aggregation: 'p95',
-          tools: ['Application Performance Monitoring']
+          tools: ['Application Performance Monitoring'],
         },
         priority: 'high',
         phase: [ValidationPhase.POST_MIGRATION, ValidationPhase.CONTINUOUS],
-        dependencies: ['api-integration']
+        dependencies: ['api-integration'],
       },
       {
         id: 'page-load-time',
@@ -425,18 +427,18 @@ export class MigrationValidationManager {
           operator: 'lte',
           unit: 'milliseconds',
           tolerance: 1000,
-          baseline: 2500
+          baseline: 2500,
         },
         measurement: {
           method: MeasurementMethod.SYNTHETIC_TESTING,
           frequency: MeasurementFrequency.EVERY_15_MINUTES,
           duration: 15,
           aggregation: 'p95',
-          tools: ['Lighthouse', 'WebPageTest']
+          tools: ['Lighthouse', 'WebPageTest'],
         },
         priority: 'high',
         phase: [ValidationPhase.POST_MIGRATION, ValidationPhase.CONTINUOUS],
-        dependencies: []
+        dependencies: [],
       },
 
       // Data Integrity Criteria
@@ -445,22 +447,23 @@ export class MigrationValidationManager {
         name: 'Data Consistency',
         category: ValidationCategory.DATA_INTEGRITY,
         type: ValidationType.AUTOMATED_TEST,
-        description: 'Data remains consistent between mock and real implementations',
+        description:
+          'Data remains consistent between mock and real implementations',
         acceptance: {
           threshold: 100,
           operator: 'eq',
-          unit: 'percentage'
+          unit: 'percentage',
         },
         measurement: {
           method: MeasurementMethod.AUTOMATED_MONITORING,
           frequency: MeasurementFrequency.HOURLY,
           duration: 30,
           aggregation: 'avg',
-          tools: ['Database Validation Scripts']
+          tools: ['Database Validation Scripts'],
         },
         priority: 'critical',
         phase: [ValidationPhase.POST_MIGRATION, ValidationPhase.CONTINUOUS],
-        dependencies: ['api-integration']
+        dependencies: ['api-integration'],
       },
       {
         id: 'data-completeness',
@@ -472,18 +475,18 @@ export class MigrationValidationManager {
           threshold: 95,
           operator: 'gte',
           unit: 'percentage',
-          tolerance: 2
+          tolerance: 2,
         },
         measurement: {
           method: MeasurementMethod.AUTOMATED_MONITORING,
           frequency: MeasurementFrequency.HOURLY,
           duration: 30,
           aggregation: 'avg',
-          tools: ['Data Quality Checks']
+          tools: ['Data Quality Checks'],
         },
         priority: 'high',
         phase: [ValidationPhase.POST_MIGRATION, ValidationPhase.CONTINUOUS],
-        dependencies: ['data-consistency']
+        dependencies: ['data-consistency'],
       },
 
       // User Experience Criteria
@@ -497,18 +500,18 @@ export class MigrationValidationManager {
           threshold: 95,
           operator: 'gte',
           unit: 'percentage',
-          tolerance: 3
+          tolerance: 3,
         },
         measurement: {
           method: MeasurementMethod.SYNTHETIC_TESTING,
           frequency: MeasurementFrequency.EVERY_15_MINUTES,
           duration: 45,
           aggregation: 'avg',
-          tools: ['Playwright E2E Tests']
+          tools: ['Playwright E2E Tests'],
         },
         priority: 'critical',
         phase: [ValidationPhase.POST_MIGRATION, ValidationPhase.CONTINUOUS],
-        dependencies: ['component-rendering', 'api-integration']
+        dependencies: ['component-rendering', 'api-integration'],
       },
       {
         id: 'error-rate',
@@ -521,18 +524,18 @@ export class MigrationValidationManager {
           operator: 'lte',
           unit: 'percentage',
           tolerance: 0.5,
-          baseline: 0.5
+          baseline: 0.5,
         },
         measurement: {
           method: MeasurementMethod.REAL_USER_MONITORING,
           frequency: MeasurementFrequency.CONTINUOUS,
           duration: 60,
           aggregation: 'avg',
-          tools: ['Error Tracking', 'User Analytics']
+          tools: ['Error Tracking', 'User Analytics'],
         },
         priority: 'critical',
         phase: [ValidationPhase.POST_MIGRATION, ValidationPhase.CONTINUOUS],
-        dependencies: []
+        dependencies: [],
       },
 
       // Security Criteria
@@ -545,18 +548,18 @@ export class MigrationValidationManager {
         acceptance: {
           threshold: 100,
           operator: 'eq',
-          unit: 'percentage'
+          unit: 'percentage',
         },
         measurement: {
           method: MeasurementMethod.CODE_ANALYSIS,
           frequency: MeasurementFrequency.DAILY,
           duration: 60,
           aggregation: 'avg',
-          tools: ['Security Scanning', 'Penetration Testing']
+          tools: ['Security Scanning', 'Penetration Testing'],
         },
         priority: 'critical',
         phase: [ValidationPhase.POST_MIGRATION, ValidationPhase.CONTINUOUS],
-        dependencies: []
+        dependencies: [],
       },
 
       // Reliability Criteria
@@ -565,25 +568,30 @@ export class MigrationValidationManager {
         name: 'System Availability',
         category: ValidationCategory.RELIABILITY,
         type: ValidationType.METRIC_THRESHOLD,
-        description: 'System maintains high availability during and after migration',
+        description:
+          'System maintains high availability during and after migration',
         acceptance: {
           threshold: 99.9,
           operator: 'gte',
           unit: 'percentage',
           tolerance: 0.1,
-          baseline: 99.5
+          baseline: 99.5,
         },
         measurement: {
           method: MeasurementMethod.AUTOMATED_MONITORING,
           frequency: MeasurementFrequency.CONTINUOUS,
           duration: 1440, // 24 hours
           aggregation: 'avg',
-          tools: ['Uptime Monitoring', 'Health Checks']
+          tools: ['Uptime Monitoring', 'Health Checks'],
         },
         priority: 'critical',
-        phase: [ValidationPhase.DURING_MIGRATION, ValidationPhase.POST_MIGRATION, ValidationPhase.CONTINUOUS],
-        dependencies: []
-      }
+        phase: [
+          ValidationPhase.DURING_MIGRATION,
+          ValidationPhase.POST_MIGRATION,
+          ValidationPhase.CONTINUOUS,
+        ],
+        dependencies: [],
+      },
     ];
   }
 
@@ -600,7 +608,7 @@ export class MigrationValidationManager {
           target: 100,
           unit: 'percentage',
           trend: 'higher_better',
-          weight: 0.3
+          weight: 0.3,
         },
         {
           id: 'zero-critical-errors',
@@ -609,16 +617,17 @@ export class MigrationValidationManager {
           target: 0,
           unit: 'count',
           trend: 'lower_better',
-          weight: 0.25
+          weight: 0.25,
         },
         {
           id: 'performance-maintained',
           name: 'Performance Maintenance',
-          description: 'Performance maintained or improved compared to baseline',
+          description:
+            'Performance maintained or improved compared to baseline',
           target: 100,
           unit: 'percentage',
           trend: 'higher_better',
-          weight: 0.2
+          weight: 0.2,
         },
         {
           id: 'user-satisfaction',
@@ -627,8 +636,8 @@ export class MigrationValidationManager {
           target: 4.5,
           unit: 'score (1-5)',
           trend: 'higher_better',
-          weight: 0.25
-        }
+          weight: 0.25,
+        },
       ],
       secondary: [
         {
@@ -637,7 +646,7 @@ export class MigrationValidationManager {
           description: 'Code coverage of migrated components',
           target: 85,
           unit: 'percentage',
-          category: 'Quality'
+          category: 'Quality',
         },
         {
           id: 'documentation-completeness',
@@ -645,8 +654,8 @@ export class MigrationValidationManager {
           description: 'Completeness of migration documentation',
           target: 100,
           unit: 'percentage',
-          category: 'Documentation'
-        }
+          category: 'Documentation',
+        },
       ],
       kpis: [
         {
@@ -656,7 +665,7 @@ export class MigrationValidationManager {
           formula: 'components_migrated / days_elapsed',
           target: 2,
           unit: 'components/day',
-          reportingFrequency: 'daily'
+          reportingFrequency: 'daily',
         },
         {
           id: 'defect-density',
@@ -665,8 +674,8 @@ export class MigrationValidationManager {
           formula: 'total_defects / migrated_components',
           target: 0.1,
           unit: 'defects/component',
-          reportingFrequency: 'weekly'
-        }
+          reportingFrequency: 'weekly',
+        },
       ],
       slas: [
         {
@@ -676,7 +685,10 @@ export class MigrationValidationManager {
           metric: 'response_time_p95',
           threshold: 2000,
           timeWindow: 60,
-          consequences: ['Performance optimization required', 'Rollback consideration']
+          consequences: [
+            'Performance optimization required',
+            'Rollback consideration',
+          ],
         },
         {
           id: 'availability-sla',
@@ -685,9 +697,12 @@ export class MigrationValidationManager {
           metric: 'availability',
           threshold: 99.9,
           timeWindow: 1440, // 24 hours
-          consequences: ['Incident response activation', 'Root cause analysis required']
-        }
-      ]
+          consequences: [
+            'Incident response activation',
+            'Root cause analysis required',
+          ],
+        },
+      ],
     };
   }
 
@@ -699,35 +714,55 @@ export class MigrationValidationManager {
       baseline: {
         responseTime: { p50: 800, p95: 1500, p99: 3000 },
         throughput: { requestsPerSecond: 100, transactionsPerMinute: 1000 },
-        resources: { cpuUtilization: 60, memoryUtilization: 70, diskUtilization: 50 },
-        availability: { uptime: 99.5, errorRate: 0.5 }
+        resources: {
+          cpuUtilization: 60,
+          memoryUtilization: 70,
+          diskUtilization: 50,
+        },
+        availability: { uptime: 99.5, errorRate: 0.5 },
       },
       targets: {
         responseTime: { p50: 600, p95: 1200, p99: 2500 },
         throughput: { requestsPerSecond: 120, transactionsPerMinute: 1200 },
-        resources: { cpuUtilization: 50, memoryUtilization: 60, diskUtilization: 40 },
-        availability: { uptime: 99.9, errorRate: 0.1 }
+        resources: {
+          cpuUtilization: 50,
+          memoryUtilization: 60,
+          diskUtilization: 40,
+        },
+        availability: { uptime: 99.9, errorRate: 0.1 },
       },
       thresholds: {
         critical: {
           responseTime: { p50: 2000, p95: 5000, p99: 10000 },
           throughput: { requestsPerSecond: 50, transactionsPerMinute: 500 },
-          resources: { cpuUtilization: 90, memoryUtilization: 90, diskUtilization: 85 },
-          availability: { uptime: 95, errorRate: 5 }
+          resources: {
+            cpuUtilization: 90,
+            memoryUtilization: 90,
+            diskUtilization: 85,
+          },
+          availability: { uptime: 95, errorRate: 5 },
         },
         warning: {
           responseTime: { p50: 1200, p95: 2500, p99: 5000 },
           throughput: { requestsPerSecond: 80, transactionsPerMinute: 800 },
-          resources: { cpuUtilization: 75, memoryUtilization: 80, diskUtilization: 70 },
-          availability: { uptime: 99, errorRate: 2 }
+          resources: {
+            cpuUtilization: 75,
+            memoryUtilization: 80,
+            diskUtilization: 70,
+          },
+          availability: { uptime: 99, errorRate: 2 },
         },
         acceptable: {
           responseTime: { p50: 800, p95: 1500, p99: 3000 },
           throughput: { requestsPerSecond: 100, transactionsPerMinute: 1000 },
-          resources: { cpuUtilization: 60, memoryUtilization: 70, diskUtilization: 50 },
-          availability: { uptime: 99.5, errorRate: 0.5 }
-        }
-      }
+          resources: {
+            cpuUtilization: 60,
+            memoryUtilization: 70,
+            diskUtilization: 50,
+          },
+          availability: { uptime: 99.5, errorRate: 0.5 },
+        },
+      },
     };
   }
 
@@ -743,46 +778,66 @@ export class MigrationValidationManager {
             'Maintain design controls',
             'Document all changes',
             'Validate software changes',
-            'Maintain traceability'
+            'Maintain traceability',
           ],
           validationMethods: [
             'Design review documentation',
             'Change control records',
             'Validation test results',
-            'Traceability matrix'
+            'Traceability matrix',
           ],
           documentation: [
             'Design history file',
             'Change control procedures',
             'Validation protocols',
-            'Risk management file'
+            'Risk management file',
           ],
           penalties: [
             'Warning letters',
             'Consent decrees',
             'Product recalls',
-            'Criminal prosecution'
-          ]
-        }
+            'Criminal prosecution',
+          ],
+        },
       ],
       auditTrail: {
         retention: 365, // 1 year
         completeness: 100,
         integrity: ['Digital signatures', 'Checksums', 'Timestamps'],
-        accessibility: ['Searchable', 'Exportable', 'Human readable']
+        accessibility: ['Searchable', 'Exportable', 'Human readable'],
       },
       dataProtection: {
         encryption: ['Data at rest', 'Data in transit', 'Database encryption'],
         anonymization: ['PII removal', 'Data masking', 'Pseudonymization'],
-        retention: ['Data lifecycle management', 'Automated deletion', 'Retention policies'],
-        deletion: ['Secure deletion', 'Verification of deletion', 'Deletion logs']
+        retention: [
+          'Data lifecycle management',
+          'Automated deletion',
+          'Retention policies',
+        ],
+        deletion: [
+          'Secure deletion',
+          'Verification of deletion',
+          'Deletion logs',
+        ],
       },
       accessControl: {
-        authentication: ['Multi-factor authentication', 'Strong passwords', 'Session management'],
-        authorization: ['Role-based access', 'Principle of least privilege', 'Access reviews'],
+        authentication: [
+          'Multi-factor authentication',
+          'Strong passwords',
+          'Session management',
+        ],
+        authorization: [
+          'Role-based access',
+          'Principle of least privilege',
+          'Access reviews',
+        ],
         monitoring: ['Access logging', 'Anomaly detection', 'Real-time alerts'],
-        reporting: ['Access reports', 'Compliance dashboards', 'Audit summaries']
-      }
+        reporting: [
+          'Access reports',
+          'Compliance dashboards',
+          'Audit summaries',
+        ],
+      },
     };
   }
 
@@ -794,18 +849,22 @@ export class MigrationValidationManager {
       dashboards: [
         {
           name: 'Migration Progress Dashboard',
-          metrics: ['migration-success-rate', 'component-rendering', 'api-integration'],
+          metrics: [
+            'migration-success-rate',
+            'component-rendering',
+            'api-integration',
+          ],
           refreshRate: 30,
           audience: ['Development Team', 'Project Managers'],
-          layout: 'grid'
+          layout: 'grid',
         },
         {
           name: 'Performance Monitoring Dashboard',
           metrics: ['response-time', 'page-load-time', 'system-availability'],
           refreshRate: 60,
           audience: ['Operations Team', 'Performance Engineers'],
-          layout: 'timeline'
-        }
+          layout: 'timeline',
+        },
       ],
       alerts: [
         {
@@ -815,13 +874,21 @@ export class MigrationValidationManager {
           channels: ['email', 'slack', 'sms'],
           escalation: {
             levels: [
-              { level: 1, contacts: ['on-call-engineer'], actions: ['investigate'] },
+              {
+                level: 1,
+                contacts: ['on-call-engineer'],
+                actions: ['investigate'],
+              },
               { level: 2, contacts: ['tech-lead'], actions: ['escalate'] },
-              { level: 3, contacts: ['engineering-manager'], actions: ['emergency-response'] }
+              {
+                level: 3,
+                contacts: ['engineering-manager'],
+                actions: ['emergency-response'],
+              },
             ],
-            timeouts: [15, 30, 60] // minutes
-          }
-        }
+            timeouts: [15, 30, 60], // minutes
+          },
+        },
       ],
       reports: [
         {
@@ -829,23 +896,23 @@ export class MigrationValidationManager {
           frequency: 'daily',
           recipients: ['project-team'],
           format: 'html',
-          sections: ['progress', 'issues', 'metrics', 'next-steps']
-        }
+          sections: ['progress', 'issues', 'metrics', 'next-steps'],
+        },
       ],
       integrations: [
         {
           type: 'monitoring',
           service: 'Prometheus',
           config: { endpoint: 'http://prometheus:9090' },
-          enabled: true
+          enabled: true,
         },
         {
           type: 'alerting',
           service: 'Slack',
           config: { webhook: 'https://hooks.slack.com/...' },
-          enabled: true
-        }
-      ]
+          enabled: true,
+        },
+      ],
     };
   }
 
@@ -853,7 +920,9 @@ export class MigrationValidationManager {
    * Validate criteria against current state
    */
   async validateCriteria(phase: ValidationPhase): Promise<ValidationReport> {
-    const phaseCriteria = this.framework.criteria.filter(c => c.phase.includes(phase));
+    const phaseCriteria = this.framework.criteria.filter((c) =>
+      c.phase.includes(phase)
+    );
     const results: ValidationResult[] = [];
 
     for (const criteria of phaseCriteria) {
@@ -871,14 +940,16 @@ export class MigrationValidationManager {
       summary,
       results,
       recommendations,
-      nextSteps: this.generateNextSteps(summary, recommendations)
+      nextSteps: this.generateNextSteps(summary, recommendations),
     };
   }
 
   /**
    * Validate single criteria
    */
-  private async validateSingleCriteria(criteria: ValidationCriteria): Promise<ValidationResult> {
+  private async validateSingleCriteria(
+    criteria: ValidationCriteria
+  ): Promise<ValidationResult> {
     try {
       // Simulate measurement based on criteria type
       const measurement = await this.performMeasurement(criteria);
@@ -893,12 +964,13 @@ export class MigrationValidationManager {
         details: {
           measurement,
           baseline: criteria.acceptance.baseline,
-          deviation: criteria.acceptance.baseline ? 
-            Math.abs(measurement - criteria.acceptance.baseline) : undefined,
+          deviation: criteria.acceptance.baseline
+            ? Math.abs(measurement - criteria.acceptance.baseline)
+            : undefined,
           trend: this.calculateTrend(criteria.id, measurement),
           confidence: 0.95,
-          notes: `Measured using ${criteria.measurement.method}`
-        }
+          notes: `Measured using ${criteria.measurement.method}`,
+        },
       };
     } catch (error) {
       return {
@@ -909,8 +981,8 @@ export class MigrationValidationManager {
         timestamp: new Date().toISOString(),
         details: {
           measurement: 0,
-          notes: `Measurement failed: ${error}`
-        }
+          notes: `Measurement failed: ${error}`,
+        },
       };
     }
   }
@@ -918,7 +990,9 @@ export class MigrationValidationManager {
   /**
    * Perform measurement for criteria
    */
-  private async performMeasurement(criteria: ValidationCriteria): Promise<number> {
+  private async performMeasurement(
+    criteria: ValidationCriteria
+  ): Promise<number> {
     // Simulate different measurement methods
     switch (criteria.measurement.method) {
       case MeasurementMethod.AUTOMATED_MONITORING:
@@ -979,7 +1053,10 @@ export class MigrationValidationManager {
   /**
    * Evaluate measurement result against acceptance criteria
    */
-  private evaluateResult(measurement: number, acceptance: AcceptanceCriteria): ValidationStatus {
+  private evaluateResult(
+    measurement: number,
+    acceptance: AcceptanceCriteria
+  ): ValidationStatus {
     const { threshold, operator, tolerance = 0 } = acceptance;
 
     let passed = false;
@@ -1001,13 +1078,17 @@ export class MigrationValidationManager {
         break;
       case 'between':
         // Assuming threshold is lower bound and tolerance is range
-        passed = measurement >= threshold && measurement <= (threshold + tolerance);
+        passed =
+          measurement >= threshold && measurement <= threshold + tolerance;
         break;
     }
 
     if (passed) {
       return ValidationStatus.PASSED;
-    } else if (tolerance > 0 && Math.abs(measurement - threshold) <= tolerance * 2) {
+    } else if (
+      tolerance > 0 &&
+      Math.abs(measurement - threshold) <= tolerance * 2
+    ) {
       return ValidationStatus.WARNING;
     } else {
       return ValidationStatus.FAILED;
@@ -1017,7 +1098,10 @@ export class MigrationValidationManager {
   /**
    * Calculate trend for criteria
    */
-  private calculateTrend(criteriaId: string, currentValue: number): 'improving' | 'degrading' | 'stable' {
+  private calculateTrend(
+    criteriaId: string,
+    currentValue: number
+  ): 'improving' | 'degrading' | 'stable' {
     const history = this.results.get(criteriaId) || [];
     if (history.length < 2) return 'stable';
 
@@ -1032,14 +1116,24 @@ export class MigrationValidationManager {
   /**
    * Calculate validation summary
    */
-  private calculateValidationSummary(results: ValidationResult[]): ValidationSummary {
-    const passed = results.filter(r => r.status === ValidationStatus.PASSED).length;
-    const failed = results.filter(r => r.status === ValidationStatus.FAILED).length;
-    const warnings = results.filter(r => r.status === ValidationStatus.WARNING).length;
-    const pending = results.filter(r => r.status === ValidationStatus.PENDING).length;
+  private calculateValidationSummary(
+    results: ValidationResult[]
+  ): ValidationSummary {
+    const passed = results.filter(
+      (r) => r.status === ValidationStatus.PASSED
+    ).length;
+    const failed = results.filter(
+      (r) => r.status === ValidationStatus.FAILED
+    ).length;
+    const warnings = results.filter(
+      (r) => r.status === ValidationStatus.WARNING
+    ).length;
+    const pending = results.filter(
+      (r) => r.status === ValidationStatus.PENDING
+    ).length;
 
     const overallScore = (passed / results.length) * 100;
-    
+
     let riskLevel: 'low' | 'medium' | 'high' | 'critical' = 'low';
     if (failed > 0) riskLevel = 'critical';
     else if (warnings > results.length * 0.2) riskLevel = 'high';
@@ -1052,21 +1146,29 @@ export class MigrationValidationManager {
       warnings,
       pending,
       overallScore,
-      riskLevel
+      riskLevel,
     };
   }
 
   /**
    * Generate recommendations based on results
    */
-  private generateRecommendations(results: ValidationResult[]): ValidationRecommendation[] {
+  private generateRecommendations(
+    results: ValidationResult[]
+  ): ValidationRecommendation[] {
     const recommendations: ValidationRecommendation[] = [];
-    const failedResults = results.filter(r => r.status === ValidationStatus.FAILED);
-    const warningResults = results.filter(r => r.status === ValidationStatus.WARNING);
+    const failedResults = results.filter(
+      (r) => r.status === ValidationStatus.FAILED
+    );
+    const warningResults = results.filter(
+      (r) => r.status === ValidationStatus.WARNING
+    );
 
     // Critical fixes for failed criteria
     for (const result of failedResults) {
-      const criteria = this.framework.criteria.find(c => c.id === result.criteriaId);
+      const criteria = this.framework.criteria.find(
+        (c) => c.id === result.criteriaId
+      );
       if (criteria) {
         recommendations.push({
           type: 'fix',
@@ -1077,17 +1179,19 @@ export class MigrationValidationManager {
             'Investigate root cause of failure',
             'Implement corrective measures',
             'Re-run validation tests',
-            'Monitor for stability'
+            'Monitor for stability',
           ],
           impact: 'Critical for migration success',
-          effort: 'high'
+          effort: 'high',
         });
       }
     }
 
     // Optimization recommendations for warnings
     for (const result of warningResults) {
-      const criteria = this.framework.criteria.find(c => c.id === result.criteriaId);
+      const criteria = this.framework.criteria.find(
+        (c) => c.id === result.criteriaId
+      );
       if (criteria) {
         recommendations.push({
           type: 'optimize',
@@ -1097,10 +1201,10 @@ export class MigrationValidationManager {
           actions: [
             'Analyze performance bottlenecks',
             'Implement optimizations',
-            'Monitor improvements'
+            'Monitor improvements',
           ],
           impact: 'Improved performance and reliability',
-          effort: 'medium'
+          effort: 'medium',
         });
       }
     }
@@ -1111,7 +1215,10 @@ export class MigrationValidationManager {
   /**
    * Generate next steps based on validation results
    */
-  private generateNextSteps(summary: ValidationSummary, recommendations: ValidationRecommendation[]): string[] {
+  private generateNextSteps(
+    summary: ValidationSummary,
+    recommendations: ValidationRecommendation[]
+  ): string[] {
     const nextSteps: string[] = [];
 
     if (summary.failed > 0) {
@@ -1145,12 +1252,12 @@ export class MigrationValidationManager {
   storeResult(result: ValidationResult): void {
     const history = this.results.get(result.criteriaId) || [];
     history.push(result);
-    
+
     // Keep only last 100 results per criteria
     if (history.length > 100) {
       history.splice(0, history.length - 100);
     }
-    
+
     this.results.set(result.criteriaId, history);
   }
 
@@ -1179,6 +1286,8 @@ export class MigrationValidationManager {
 /**
  * Export utility function for creating validation manager
  */
-export function createMigrationValidationManager(config?: Partial<ValidationFramework>): MigrationValidationManager {
+export function createMigrationValidationManager(
+  config?: Partial<ValidationFramework>
+): MigrationValidationManager {
   return new MigrationValidationManager(config);
 }

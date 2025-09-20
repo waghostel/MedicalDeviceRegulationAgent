@@ -6,28 +6,28 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from '@/components/ui/select';
-import { 
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { 
-  Search, 
-  Filter, 
-  Download, 
-  ChevronDown, 
+import {
+  Search,
+  Filter,
+  Download,
+  ChevronDown,
   ChevronRight,
   Clock,
   User,
-  Activity
+  Activity,
 } from 'lucide-react';
 import { AgentInteraction, AuditLogFilter } from '@/types/audit';
 import { AuditLogFilters } from './AuditLogFilters';
@@ -42,8 +42,12 @@ interface AuditLogPageProps {
 
 export function AuditLogPage({ projectId }: AuditLogPageProps) {
   const [interactions, setInteractions] = useState<AgentInteraction[]>([]);
-  const [filteredInteractions, setFilteredInteractions] = useState<AgentInteraction[]>([]);
-  const [auditSummary, setAuditSummary] = useState<AuditTrailResponse['summary'] | null>(null);
+  const [filteredInteractions, setFilteredInteractions] = useState<
+    AgentInteraction[]
+  >([]);
+  const [auditSummary, setAuditSummary] = useState<
+    AuditTrailResponse['summary'] | null
+  >(null);
   const [filters, setFilters] = useState<AuditLogFilter>({});
   const [searchTerm, setSearchTerm] = useState('');
   const [isLoading, setIsLoading] = useState(true);
@@ -58,27 +62,30 @@ export function AuditLogPage({ projectId }: AuditLogPageProps) {
 
       try {
         setIsLoading(true);
-        const response = await auditAPI.getAuditTrail(parseInt(projectId), filters);
-        
+        const response = await auditAPI.getAuditTrail(
+          parseInt(projectId),
+          filters
+        );
+
         setInteractions(response.audit_entries);
         setAuditSummary(response.summary);
-        
+
         // Set up real-time updates
         const unsubscribe = auditAPI.subscribeToAuditUpdates(
           parseInt(projectId),
           (newInteraction) => {
-            setInteractions(prev => [newInteraction, ...prev]);
+            setInteractions((prev) => [newInteraction, ...prev]);
             toast({
-              title: "New Audit Entry",
+              title: 'New Audit Entry',
               description: `${newInteraction.agentAction} completed`,
             });
           },
           (error) => {
             console.error('Audit stream error:', error);
             toast({
-              title: "Connection Error",
-              description: "Lost connection to audit stream",
-              variant: "destructive",
+              title: 'Connection Error',
+              description: 'Lost connection to audit stream',
+              variant: 'destructive',
             });
           }
         );
@@ -87,11 +94,11 @@ export function AuditLogPage({ projectId }: AuditLogPageProps) {
       } catch (error) {
         console.error('Failed to load audit trail:', error);
         toast({
-          title: "Error",
-          description: "Failed to load audit trail",
-          variant: "destructive",
+          title: 'Error',
+          description: 'Failed to load audit trail',
+          variant: 'destructive',
         });
-        
+
         // Fallback to mock data for development
         const mockInteractions: AgentInteraction[] = [
           {
@@ -101,12 +108,16 @@ export function AuditLogPage({ projectId }: AuditLogPageProps) {
             agentAction: 'predicate-search',
             inputData: {
               deviceDescription: 'Cardiac monitoring device',
-              intendedUse: 'Continuous ECG monitoring for arrhythmia detection'
+              intendedUse: 'Continuous ECG monitoring for arrhythmia detection',
             },
             outputData: {
               predicates: [
-                { kNumber: 'K123456', deviceName: 'CardioWatch Pro', confidenceScore: 0.89 }
-              ]
+                {
+                  kNumber: 'K123456',
+                  deviceName: 'CardioWatch Pro',
+                  confidenceScore: 0.89,
+                },
+              ],
             },
             confidenceScore: 0.89,
             sources: [
@@ -115,16 +126,17 @@ export function AuditLogPage({ projectId }: AuditLogPageProps) {
                 title: 'CardioWatch Pro 510(k) Summary',
                 effectiveDate: '2023-01-15',
                 documentType: 'FDA_510K',
-                accessedDate: '2024-01-20'
-              }
+                accessedDate: '2024-01-20',
+              },
             ],
-            reasoning: 'Device shows high similarity in intended use and technological characteristics. Both devices use similar ECG sensor technology and arrhythmia detection algorithms.',
+            reasoning:
+              'Device shows high similarity in intended use and technological characteristics. Both devices use similar ECG sensor technology and arrhythmia detection algorithms.',
             executionTimeMs: 2340,
             createdAt: new Date('2024-01-20T10:30:00Z'),
-            status: 'completed'
-          }
+            status: 'completed',
+          },
         ];
-        
+
         setInteractions(mockInteractions);
         setAuditSummary({
           total_interactions: 1,
@@ -133,7 +145,7 @@ export function AuditLogPage({ projectId }: AuditLogPageProps) {
           total_execution_time: 2340,
           average_execution_time: 2340,
           error_count: 0,
-          error_rate: 0
+          error_rate: 0,
         });
       } finally {
         setIsLoading(false);
@@ -149,33 +161,46 @@ export function AuditLogPage({ projectId }: AuditLogPageProps) {
 
     // Apply search term
     if (searchTerm) {
-      filtered = filtered.filter(interaction =>
-        interaction.agentAction.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        interaction.reasoning.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        JSON.stringify(interaction.inputData).toLowerCase().includes(searchTerm.toLowerCase())
+      filtered = filtered.filter(
+        (interaction) =>
+          interaction.agentAction
+            .toLowerCase()
+            .includes(searchTerm.toLowerCase()) ||
+          interaction.reasoning
+            .toLowerCase()
+            .includes(searchTerm.toLowerCase()) ||
+          JSON.stringify(interaction.inputData)
+            .toLowerCase()
+            .includes(searchTerm.toLowerCase())
       );
     }
 
     // Apply filters
     if (filters.agentAction) {
-      filtered = filtered.filter(interaction => interaction.agentAction === filters.agentAction);
+      filtered = filtered.filter(
+        (interaction) => interaction.agentAction === filters.agentAction
+      );
     }
 
     if (filters.status) {
-      filtered = filtered.filter(interaction => interaction.status === filters.status);
+      filtered = filtered.filter(
+        (interaction) => interaction.status === filters.status
+      );
     }
 
     if (filters.confidenceRange) {
-      filtered = filtered.filter(interaction => 
-        interaction.confidenceScore >= filters.confidenceRange!.min &&
-        interaction.confidenceScore <= filters.confidenceRange!.max
+      filtered = filtered.filter(
+        (interaction) =>
+          interaction.confidenceScore >= filters.confidenceRange!.min &&
+          interaction.confidenceScore <= filters.confidenceRange!.max
       );
     }
 
     if (filters.dateRange) {
-      filtered = filtered.filter(interaction => 
-        interaction.createdAt >= filters.dateRange!.start &&
-        interaction.createdAt <= filters.dateRange!.end
+      filtered = filtered.filter(
+        (interaction) =>
+          interaction.createdAt >= filters.dateRange!.start &&
+          interaction.createdAt <= filters.dateRange!.end
       );
     }
 
@@ -188,18 +213,23 @@ export function AuditLogPage({ projectId }: AuditLogPageProps) {
 
   const getStatusBadgeVariant = (status: AgentInteraction['status']) => {
     switch (status) {
-      case 'completed': return 'default';
-      case 'pending': return 'secondary';
-      case 'failed': return 'destructive';
-      case 'cancelled': return 'outline';
-      default: return 'secondary';
+      case 'completed':
+        return 'default';
+      case 'pending':
+        return 'secondary';
+      case 'failed':
+        return 'destructive';
+      case 'cancelled':
+        return 'outline';
+      default:
+        return 'secondary';
     }
   };
 
   const formatActionName = (action: string) => {
     return action
       .split('-')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
       .join(' ');
   };
 
@@ -256,7 +286,11 @@ export function AuditLogPage({ projectId }: AuditLogPageProps) {
             >
               <Filter className="h-4 w-4" />
               Filters
-              {showFilters ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+              {showFilters ? (
+                <ChevronDown className="h-4 w-4" />
+              ) : (
+                <ChevronRight className="h-4 w-4" />
+              )}
             </Button>
           </div>
 
@@ -286,7 +320,7 @@ export function AuditLogPage({ projectId }: AuditLogPageProps) {
             </div>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-2">
@@ -294,10 +328,17 @@ export function AuditLogPage({ projectId }: AuditLogPageProps) {
               <div>
                 <p className="text-sm font-medium">Avg Response Time</p>
                 <p className="text-2xl font-bold">
-                  {auditSummary?.average_execution_time 
-                    ? Math.round(auditSummary.average_execution_time / 1000) 
-                    : Math.round(interactions.reduce((acc, i) => acc + i.executionTimeMs, 0) / interactions.length / 1000) || 0
-                  }s
+                  {auditSummary?.average_execution_time
+                    ? Math.round(auditSummary.average_execution_time / 1000)
+                    : Math.round(
+                        interactions.reduce(
+                          (acc, i) => acc + i.executionTimeMs,
+                          0
+                        ) /
+                          interactions.length /
+                          1000
+                      ) || 0}
+                  s
                 </p>
               </div>
             </div>
@@ -311,10 +352,17 @@ export function AuditLogPage({ projectId }: AuditLogPageProps) {
               <div>
                 <p className="text-sm font-medium">Avg Confidence</p>
                 <p className="text-2xl font-bold">
-                  {auditSummary?.average_confidence 
+                  {auditSummary?.average_confidence
                     ? Math.round(auditSummary.average_confidence * 100)
-                    : Math.round(interactions.reduce((acc, i) => acc + i.confidenceScore, 0) / interactions.length * 100) || 0
-                  }%
+                    : Math.round(
+                        (interactions.reduce(
+                          (acc, i) => acc + i.confidenceScore,
+                          0
+                        ) /
+                          interactions.length) *
+                          100
+                      ) || 0}
+                  %
                 </p>
               </div>
             </div>
@@ -328,10 +376,15 @@ export function AuditLogPage({ projectId }: AuditLogPageProps) {
               <div>
                 <p className="text-sm font-medium">Success Rate</p>
                 <p className="text-2xl font-bold">
-                  {auditSummary 
+                  {auditSummary
                     ? Math.round((1 - auditSummary.error_rate / 100) * 100)
-                    : Math.round(interactions.filter(i => i.status === 'completed').length / interactions.length * 100) || 0
-                  }%
+                    : Math.round(
+                        (interactions.filter((i) => i.status === 'completed')
+                          .length /
+                          interactions.length) *
+                          100
+                      ) || 0}
+                  %
                 </p>
               </div>
             </div>
@@ -344,7 +397,9 @@ export function AuditLogPage({ projectId }: AuditLogPageProps) {
         {filteredInteractions.length === 0 ? (
           <Card>
             <CardContent className="p-8 text-center">
-              <p className="text-muted-foreground">No interactions found matching your criteria.</p>
+              <p className="text-muted-foreground">
+                No interactions found matching your criteria.
+              </p>
             </CardContent>
           </Card>
         ) : (

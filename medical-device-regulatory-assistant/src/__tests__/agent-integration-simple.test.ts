@@ -21,7 +21,7 @@ describe('Agent Integration - Core Logic', () => {
         project_id: 'test-project',
         device_description: 'Cardiac monitoring device',
         intended_use: 'Heart rhythm monitoring',
-        parameters: { product_code: 'DQK' }
+        parameters: { product_code: 'DQK' },
       };
 
       expect(taskRequest.task_type).toBe('predicate_search');
@@ -40,17 +40,17 @@ describe('Agent Integration - Core Logic', () => {
             {
               k_number: 'K123456',
               device_name: 'Test Device',
-              confidence_score: 0.85
-            }
-          ]
+              confidence_score: 0.85,
+            },
+          ],
         },
         confidence: 0.85,
-        execution_time_ms: 2500
+        execution_time_ms: 2500,
       };
 
       (global.fetch as jest.Mock).mockResolvedValueOnce({
         ok: true,
-        json: async () => mockResponse
+        json: async () => mockResponse,
       });
 
       const response = await fetch('/api/agent/execute', {
@@ -60,8 +60,8 @@ describe('Agent Integration - Core Logic', () => {
           task_type: 'predicate_search',
           project_id: 'test-project',
           device_description: 'Test device',
-          intended_use: 'Test use'
-        })
+          intended_use: 'Test use',
+        }),
       });
 
       expect(response.ok).toBe(true);
@@ -75,7 +75,7 @@ describe('Agent Integration - Core Logic', () => {
       (global.fetch as jest.Mock).mockResolvedValueOnce({
         ok: false,
         status: 500,
-        statusText: 'Internal Server Error'
+        statusText: 'Internal Server Error',
       });
 
       const response = await fetch('/api/agent/execute', {
@@ -85,8 +85,8 @@ describe('Agent Integration - Core Logic', () => {
           task_type: 'invalid_task',
           project_id: 'test-project',
           device_description: 'Test device',
-          intended_use: 'Test use'
-        })
+          intended_use: 'Test use',
+        }),
       });
 
       expect(response.ok).toBe(false);
@@ -97,13 +97,19 @@ describe('Agent Integration - Core Logic', () => {
   describe('Command Parsing', () => {
     test('should parse predicate search command', () => {
       const command = '/predicate-search for cardiac monitoring device';
-      
+
       const parseCommandToTaskType = (cmd: string): string => {
         if (cmd.includes('/predicate-search') || cmd.includes('predicate')) {
           return 'predicate_search';
-        } else if (cmd.includes('/classify-device') || cmd.includes('classify')) {
+        } else if (
+          cmd.includes('/classify-device') ||
+          cmd.includes('classify')
+        ) {
           return 'device_classification';
-        } else if (cmd.includes('/compare-predicate') || cmd.includes('compare')) {
+        } else if (
+          cmd.includes('/compare-predicate') ||
+          cmd.includes('compare')
+        ) {
           return 'predicate_comparison';
         } else if (cmd.includes('/find-guidance') || cmd.includes('guidance')) {
           return 'guidance_search';
@@ -117,13 +123,19 @@ describe('Agent Integration - Core Logic', () => {
 
     test('should parse device classification command', () => {
       const command = '/classify-device Class II medical device';
-      
+
       const parseCommandToTaskType = (cmd: string): string => {
         if (cmd.includes('/predicate-search') || cmd.includes('predicate')) {
           return 'predicate_search';
-        } else if (cmd.includes('/classify-device') || cmd.includes('classify')) {
+        } else if (
+          cmd.includes('/classify-device') ||
+          cmd.includes('classify')
+        ) {
           return 'device_classification';
-        } else if (cmd.includes('/compare-predicate') || cmd.includes('compare')) {
+        } else if (
+          cmd.includes('/compare-predicate') ||
+          cmd.includes('compare')
+        ) {
           return 'predicate_comparison';
         } else if (cmd.includes('/find-guidance') || cmd.includes('guidance')) {
           return 'guidance_search';
@@ -137,16 +149,16 @@ describe('Agent Integration - Core Logic', () => {
 
     test('should extract K-number from command', () => {
       const command = 'Compare with predicate K123456';
-      
+
       const parseCommandParameters = (cmd: string): Record<string, any> => {
         const params: Record<string, any> = {};
-        
+
         // Extract K-number for comparison
         const kNumberMatch = cmd.match(/K\d{6}/);
         if (kNumberMatch) {
           params.predicate_k_number = kNumberMatch[0];
         }
-        
+
         return params;
       };
 
@@ -162,7 +174,7 @@ describe('Agent Integration - Core Logic', () => {
         currentTask: 'predicate_search',
         completedTasks: [],
         message: 'Searching for predicate devices...',
-        sessionId: 'test-session-123'
+        sessionId: 'test-session-123',
       };
 
       expect(status.status).toBe('processing');
@@ -175,14 +187,14 @@ describe('Agent Integration - Core Logic', () => {
     test('should handle status transitions', () => {
       const initialStatus = {
         status: 'idle' as const,
-        completedTasks: []
+        completedTasks: [],
       };
 
       const processingStatus = {
         ...initialStatus,
         status: 'processing' as const,
         currentTask: 'predicate_search',
-        message: 'Starting predicate search...'
+        message: 'Starting predicate search...',
       };
 
       const completedStatus = {
@@ -190,7 +202,7 @@ describe('Agent Integration - Core Logic', () => {
         status: 'completed' as const,
         currentTask: undefined,
         completedTasks: ['predicate_search'],
-        message: 'Task completed successfully'
+        message: 'Task completed successfully',
       };
 
       expect(initialStatus.status).toBe('idle');
@@ -202,7 +214,9 @@ describe('Agent Integration - Core Logic', () => {
 
   describe('Error Handling', () => {
     test('should handle network errors', async () => {
-      (global.fetch as jest.Mock).mockRejectedValueOnce(new Error('Network error'));
+      (global.fetch as jest.Mock).mockRejectedValueOnce(
+        new Error('Network error')
+      );
 
       try {
         await fetch('/api/agent/execute', {
@@ -212,8 +226,8 @@ describe('Agent Integration - Core Logic', () => {
             task_type: 'predicate_search',
             project_id: 'test-project',
             device_description: 'Test device',
-            intended_use: 'Test use'
-          })
+            intended_use: 'Test use',
+          }),
         });
       } catch (error) {
         expect(error).toBeInstanceOf(Error);
@@ -226,7 +240,7 @@ describe('Agent Integration - Core Logic', () => {
         status: 'error' as const,
         completedTasks: [],
         error: 'Backend API unavailable',
-        message: 'Error: Backend API unavailable'
+        message: 'Error: Backend API unavailable',
       };
 
       expect(errorStatus.status).toBe('error');
@@ -239,7 +253,7 @@ describe('Agent Integration - Core Logic', () => {
     test('should format session request correctly', () => {
       const sessionRequest = {
         session_id: 'test-session-123',
-        reason: 'User cancelled'
+        reason: 'User cancelled',
       };
 
       expect(sessionRequest.session_id).toBe('test-session-123');
@@ -254,8 +268,8 @@ describe('Agent Integration - Core Logic', () => {
         completed_tasks: ['predicate_search', 'device_classification'],
         context: {
           project_id: 'test-project',
-          device_description: 'Test device'
-        }
+          device_description: 'Test device',
+        },
       };
 
       expect(sessionStatus.session_id).toBe('test-session-123');
@@ -274,8 +288,8 @@ describe('Agent Integration - Core Logic', () => {
           session_id: 'test-session-123',
           status: 'processing',
           current_task: 'predicate_search',
-          timestamp: '2024-01-01T10:00:00Z'
-        }
+          timestamp: '2024-01-01T10:00:00Z',
+        },
       };
 
       expect(eventData.event).toBe('status');
@@ -290,8 +304,8 @@ describe('Agent Integration - Core Logic', () => {
         data: {
           session_id: 'test-session-123',
           final_status: 'completed',
-          timestamp: '2024-01-01T10:01:00Z'
-        }
+          timestamp: '2024-01-01T10:01:00Z',
+        },
       };
 
       expect(completionEvent.event).toBe('complete');

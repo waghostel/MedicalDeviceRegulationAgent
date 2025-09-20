@@ -18,7 +18,10 @@ interface BreadcrumbProps {
 
 export const Breadcrumb: React.FC<BreadcrumbProps> = ({ items, className }) => {
   return (
-    <nav className={cn('flex items-center space-x-1 text-sm', className)} aria-label="Breadcrumb">
+    <nav
+      className={cn('flex items-center space-x-1 text-sm', className)}
+      aria-label="Breadcrumb"
+    >
       <ol className="flex items-center space-x-1">
         {/* Home icon as first item */}
         <li>
@@ -30,7 +33,7 @@ export const Breadcrumb: React.FC<BreadcrumbProps> = ({ items, className }) => {
             <span className="sr-only">Home</span>
           </Link>
         </li>
-        
+
         {items.map((item, index) => (
           <li key={index} className="flex items-center">
             <ChevronRight className="h-4 w-4 text-muted-foreground mx-1" />

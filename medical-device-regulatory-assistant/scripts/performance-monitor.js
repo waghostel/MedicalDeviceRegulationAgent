@@ -2,7 +2,7 @@
 
 /**
  * Performance Monitor Script
- * 
+ *
  * Standalone script to monitor test performance and validate thresholds
  * Implements Requirements 5.1 and 5.2 validation
  */
@@ -21,8 +21,18 @@ const CONFIG = {
     memoryLeakThreshold: 10, // 10MB
   },
   reportDir: join(process.cwd(), 'test-reports', 'performance'),
-  historyFile: join(process.cwd(), 'test-reports', 'performance', 'performance-history.json'),
-  outputFile: join(process.cwd(), 'test-reports', 'performance', 'latest-report.json'),
+  historyFile: join(
+    process.cwd(),
+    'test-reports',
+    'performance',
+    'performance-history.json'
+  ),
+  outputFile: join(
+    process.cwd(),
+    'test-reports',
+    'performance',
+    'latest-report.json'
+  ),
 };
 
 /**
@@ -30,42 +40,45 @@ const CONFIG = {
  */
 async function runPerformanceMonitoring() {
   console.log('📊 Starting Test Performance Monitoring');
-  console.log('=' .repeat(50));
-  
+  console.log('='.repeat(50));
+
   try {
     // Run tests with performance tracking
     console.log('🧪 Running test suite with performance tracking...');
-    
+
     const testCommand = 'pnpm test --coverage --verbose --passWithNoTests';
     const startTime = Date.now();
-    
+
     try {
-      execSync(testCommand, { 
+      execSync(testCommand, {
         stdio: 'inherit',
         cwd: process.cwd(),
         env: {
           ...process.env,
           NODE_ENV: 'test',
-          PERFORMANCE_MONITORING: 'true'
-        }
+          PERFORMANCE_MONITORING: 'true',
+        },
       });
     } catch (error) {
-      console.warn('⚠️  Some tests failed, but continuing with performance analysis...');
+      console.warn(
+        '⚠️  Some tests failed, but continuing with performance analysis...'
+      );
     }
-    
+
     const endTime = Date.now();
     const totalExecutionTime = endTime - startTime;
-    
-    console.log(`\n⏱️  Total test execution time: ${(totalExecutionTime / 1000).toFixed(2)}s`);
-    
+
+    console.log(
+      `\n⏱️  Total test execution time: ${(totalExecutionTime / 1000).toFixed(2)}s`
+    );
+
     // Analyze performance results
     await analyzePerformanceResults(totalExecutionTime);
-    
+
     // Generate recommendations
     generateRecommendations();
-    
+
     console.log('\n✅ Performance monitoring completed');
-    
   } catch (error) {
     console.error('❌ Performance monitoring failed:', error.message);
     process.exit(1);
@@ -78,25 +91,29 @@ async function runPerformanceMonitoring() {
 async function analyzePerformanceResults(totalExecutionTime) {
   console.log('\n📊 Analyzing Performance Results');
   console.log('-'.repeat(40));
-  
+
   // Check if performance report exists
   if (!existsSync(CONFIG.outputFile)) {
-    console.warn('⚠️  No performance report found. Tests may not have performance tracking enabled.');
+    console.warn(
+      '⚠️  No performance report found. Tests may not have performance tracking enabled.'
+    );
     return;
   }
-  
+
   try {
     const reportData = JSON.parse(readFileSync(CONFIG.outputFile, 'utf8'));
-    
+
     // Validate against thresholds
-    const validation = validatePerformanceThresholds(reportData, totalExecutionTime);
-    
+    const validation = validatePerformanceThresholds(
+      reportData,
+      totalExecutionTime
+    );
+
     // Display results
     displayValidationResults(validation);
-    
+
     // Check requirements compliance
     checkRequirementsCompliance(validation);
-    
   } catch (error) {
     console.error('Failed to analyze performance results:', error.message);
   }
@@ -111,24 +128,26 @@ function validatePerformanceThresholds(reportData, totalExecutionTime) {
       actual: totalExecutionTime,
       threshold: CONFIG.thresholds.maxSuiteExecutionTime,
       passed: totalExecutionTime <= CONFIG.thresholds.maxSuiteExecutionTime,
-      requirement: '5.1'
+      requirement: '5.1',
     },
     consistency: {
       actual: reportData.consistency || 0,
       threshold: 1 - CONFIG.thresholds.consistencyThreshold,
-      passed: (reportData.consistency || 0) >= (1 - CONFIG.thresholds.consistencyThreshold),
-      requirement: '5.2'
+      passed:
+        (reportData.consistency || 0) >=
+        1 - CONFIG.thresholds.consistencyThreshold,
+      requirement: '5.2',
     },
     memory: {
       actual: reportData.peakMemory || 0,
       threshold: CONFIG.thresholds.maxMemoryUsage,
       passed: (reportData.peakMemory || 0) <= CONFIG.thresholds.maxMemoryUsage,
-      requirement: 'General'
+      requirement: 'General',
     },
     violations: reportData.violations || [],
-    recommendations: reportData.recommendations || []
+    recommendations: reportData.recommendations || [],
   };
-  
+
   return validation;
 }
 
@@ -138,23 +157,35 @@ function validatePerformanceThresholds(reportData, totalExecutionTime) {
 function displayValidationResults(validation) {
   console.log('Threshold Validation Results:');
   console.log('');
-  
+
   // Overall execution time (Requirement 5.1)
   const timeStatus = validation.overallTime.passed ? '✅' : '❌';
   console.log(`${timeStatus} Suite Execution Time (Req 5.1):`);
-  console.log(`    Actual: ${(validation.overallTime.actual / 1000).toFixed(2)}s`);
-  console.log(`    Threshold: ${(validation.overallTime.threshold / 1000).toFixed(2)}s`);
-  console.log(`    Status: ${validation.overallTime.passed ? 'PASSED' : 'FAILED'}`);
+  console.log(
+    `    Actual: ${(validation.overallTime.actual / 1000).toFixed(2)}s`
+  );
+  console.log(
+    `    Threshold: ${(validation.overallTime.threshold / 1000).toFixed(2)}s`
+  );
+  console.log(
+    `    Status: ${validation.overallTime.passed ? 'PASSED' : 'FAILED'}`
+  );
   console.log('');
-  
+
   // Consistency (Requirement 5.2)
   const consistencyStatus = validation.consistency.passed ? '✅' : '❌';
   console.log(`${consistencyStatus} Test Consistency (Req 5.2):`);
-  console.log(`    Actual: ${(validation.consistency.actual * 100).toFixed(1)}%`);
-  console.log(`    Threshold: ${(validation.consistency.threshold * 100).toFixed(1)}%`);
-  console.log(`    Status: ${validation.consistency.passed ? 'PASSED' : 'FAILED'}`);
+  console.log(
+    `    Actual: ${(validation.consistency.actual * 100).toFixed(1)}%`
+  );
+  console.log(
+    `    Threshold: ${(validation.consistency.threshold * 100).toFixed(1)}%`
+  );
+  console.log(
+    `    Status: ${validation.consistency.passed ? 'PASSED' : 'FAILED'}`
+  );
   console.log('');
-  
+
   // Memory usage
   const memoryStatus = validation.memory.passed ? '✅' : '❌';
   console.log(`${memoryStatus} Memory Usage:`);
@@ -162,7 +193,7 @@ function displayValidationResults(validation) {
   console.log(`    Threshold: ${validation.memory.threshold}MB`);
   console.log(`    Status: ${validation.memory.passed ? 'PASSED' : 'FAILED'}`);
   console.log('');
-  
+
   // Violations
   if (validation.violations.length > 0) {
     console.log('⚠️  Performance Violations:');
@@ -179,28 +210,38 @@ function displayValidationResults(validation) {
 function checkRequirementsCompliance(validation) {
   console.log('Requirements Compliance Check:');
   console.log('-'.repeat(30));
-  
+
   const req51Passed = validation.overallTime.passed;
   const req52Passed = validation.consistency.passed;
-  
-  console.log(`Requirement 5.1 (30s limit): ${req51Passed ? '✅ COMPLIANT' : '❌ NON-COMPLIANT'}`);
-  console.log(`Requirement 5.2 (consistency): ${req52Passed ? '✅ COMPLIANT' : '❌ NON-COMPLIANT'}`);
-  
+
+  console.log(
+    `Requirement 5.1 (30s limit): ${req51Passed ? '✅ COMPLIANT' : '❌ NON-COMPLIANT'}`
+  );
+  console.log(
+    `Requirement 5.2 (consistency): ${req52Passed ? '✅ COMPLIANT' : '❌ NON-COMPLIANT'}`
+  );
+
   const overallCompliant = req51Passed && req52Passed;
-  console.log(`Overall Compliance: ${overallCompliant ? '✅ COMPLIANT' : '❌ NON-COMPLIANT'}`);
-  
+  console.log(
+    `Overall Compliance: ${overallCompliant ? '✅ COMPLIANT' : '❌ NON-COMPLIANT'}`
+  );
+
   if (!overallCompliant) {
     console.log('');
     console.log('🚨 CRITICAL: Requirements compliance failure detected!');
-    
+
     if (!req51Passed) {
-      console.log('   • Test suite execution exceeds 30-second limit (Requirement 5.1)');
+      console.log(
+        '   • Test suite execution exceeds 30-second limit (Requirement 5.1)'
+      );
     }
-    
+
     if (!req52Passed) {
-      console.log('   • Test execution consistency below threshold (Requirement 5.2)');
+      console.log(
+        '   • Test execution consistency below threshold (Requirement 5.2)'
+      );
     }
-    
+
     console.log('   • This may block deployment and CI/CD pipeline');
     process.exitCode = 1;
   }
@@ -212,7 +253,7 @@ function checkRequirementsCompliance(validation) {
 function generateRecommendations() {
   console.log('\n💡 Performance Recommendations:');
   console.log('-'.repeat(35));
-  
+
   const recommendations = [
     'Run tests in parallel to reduce overall execution time',
     'Optimize slow test cases identified in the performance report',
@@ -220,9 +261,9 @@ function generateRecommendations() {
     'Use test.concurrent() for independent test cases',
     'Consider splitting large test suites into smaller, focused suites',
     'Monitor memory usage and implement proper cleanup in tests',
-    'Use performance budgets in CI/CD to catch regressions early'
+    'Use performance budgets in CI/CD to catch regressions early',
   ];
-  
+
   recommendations.forEach((rec, index) => {
     console.log(`${index + 1}. ${rec}`);
   });
@@ -234,24 +275,27 @@ function generateRecommendations() {
 function watchMode() {
   console.log('👀 Starting performance monitoring in watch mode...');
   console.log('Press Ctrl+C to stop');
-  
+
   const chokidar = require('chokidar');
-  
+
   // Watch test files
-  const watcher = chokidar.watch([
-    'src/**/*.test.{js,jsx,ts,tsx}',
-    'src/**/*.spec.{js,jsx,ts,tsx}',
-    '__tests__/**/*.{js,jsx,ts,tsx}'
-  ], {
-    ignored: /node_modules/,
-    persistent: true
-  });
-  
+  const watcher = chokidar.watch(
+    [
+      'src/**/*.test.{js,jsx,ts,tsx}',
+      'src/**/*.spec.{js,jsx,ts,tsx}',
+      '__tests__/**/*.{js,jsx,ts,tsx}',
+    ],
+    {
+      ignored: /node_modules/,
+      persistent: true,
+    }
+  );
+
   let timeout;
-  
+
   watcher.on('change', (path) => {
     console.log(`\n📝 Test file changed: ${path}`);
-    
+
     // Debounce test runs
     clearTimeout(timeout);
     timeout = setTimeout(() => {
@@ -259,7 +303,7 @@ function watchMode() {
       runPerformanceMonitoring();
     }, 2000);
   });
-  
+
   // Initial run
   runPerformanceMonitoring();
 }
@@ -269,28 +313,27 @@ function watchMode() {
  */
 function generateDashboard() {
   console.log('📊 Generating Performance Dashboard...');
-  
+
   if (!existsSync(CONFIG.historyFile)) {
     console.warn('No performance history available for dashboard');
     return;
   }
-  
+
   try {
     const historyData = JSON.parse(readFileSync(CONFIG.historyFile, 'utf8'));
     const reports = historyData.reports || [];
-    
+
     if (reports.length === 0) {
       console.warn('No performance reports available for dashboard');
       return;
     }
-    
+
     // Generate HTML dashboard
     const dashboardHtml = generateDashboardHtml(reports);
     const dashboardFile = join(CONFIG.reportDir, 'dashboard.html');
-    
+
     writeFileSync(dashboardFile, dashboardHtml);
     console.log(`📊 Dashboard generated: ${dashboardFile}`);
-    
   } catch (error) {
     console.error('Failed to generate dashboard:', error.message);
   }
@@ -301,7 +344,7 @@ function generateDashboard() {
  */
 function generateDashboardHtml(reports) {
   const latestReport = reports[reports.length - 1];
-  
+
   return `
 <!DOCTYPE html>
 <html lang="en">
@@ -345,7 +388,7 @@ function generateDashboardHtml(reports) {
     
     <h2>Recommendations</h2>
     <ul>
-        ${(latestReport.recommendations || []).map(rec => `<li>${rec}</li>`).join('')}
+        ${(latestReport.recommendations || []).map((rec) => `<li>${rec}</li>`).join('')}
     </ul>
     
     <h2>Historical Trend</h2>

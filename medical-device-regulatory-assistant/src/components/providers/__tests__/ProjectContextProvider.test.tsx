@@ -1,6 +1,9 @@
 import React from 'react';
 import { render, screen, fireEvent, act } from '@testing-library/react';
-import { ProjectContextProvider, useProjectContext } from '../ProjectContextProvider';
+import {
+  ProjectContextProvider,
+  useProjectContext,
+} from '../ProjectContextProvider';
 import { ProjectContext, ChatMessage } from '@/types/copilot';
 
 const mockProject: ProjectContext = {
@@ -9,7 +12,7 @@ const mockProject: ProjectContext = {
   description: 'A test medical device',
   deviceType: 'Class II',
   intendedUse: 'For testing purposes',
-  status: 'in-progress'
+  status: 'in-progress',
 };
 
 const mockMessage: ChatMessage = {
@@ -17,7 +20,7 @@ const mockMessage: ChatMessage = {
   role: 'user',
   content: 'Test message',
   timestamp: new Date(),
-  projectId: 'test-project-1'
+  projectId: 'test-project-1',
 };
 
 // Test component to interact with the context
@@ -29,7 +32,7 @@ function TestComponent() {
     setLoading,
     addMessage,
     clearMessages,
-    setMessages
+    setMessages,
   } = useProjectContext();
 
   return (
@@ -40,13 +43,9 @@ function TestComponent() {
       <div data-testid="loading-state">
         {state.isLoading ? 'Loading' : 'Not loading'}
       </div>
-      <div data-testid="messages-count">
-        {state.messages.length}
-      </div>
-      <div data-testid="commands-count">
-        {state.availableCommands.length}
-      </div>
-      
+      <div data-testid="messages-count">{state.messages.length}</div>
+      <div data-testid="commands-count">{state.availableCommands.length}</div>
+
       <button onClick={() => setProject(mockProject)}>Set Project</button>
       <button onClick={() => clearProject()}>Clear Project</button>
       <button onClick={() => setLoading(true)}>Set Loading</button>
@@ -66,8 +65,12 @@ describe('ProjectContextProvider', () => {
       </ProjectContextProvider>
     );
 
-    expect(screen.getByTestId('current-project')).toHaveTextContent('No project');
-    expect(screen.getByTestId('loading-state')).toHaveTextContent('Not loading');
+    expect(screen.getByTestId('current-project')).toHaveTextContent(
+      'No project'
+    );
+    expect(screen.getByTestId('loading-state')).toHaveTextContent(
+      'Not loading'
+    );
     expect(screen.getByTestId('messages-count')).toHaveTextContent('0');
     expect(screen.getByTestId('commands-count')).toHaveTextContent('4'); // Default slash commands
   });
@@ -83,7 +86,9 @@ describe('ProjectContextProvider', () => {
       fireEvent.click(screen.getByText('Set Project'));
     });
 
-    expect(screen.getByTestId('current-project')).toHaveTextContent('Test Device');
+    expect(screen.getByTestId('current-project')).toHaveTextContent(
+      'Test Device'
+    );
   });
 
   it('should clear project correctly', () => {
@@ -97,13 +102,17 @@ describe('ProjectContextProvider', () => {
     act(() => {
       fireEvent.click(screen.getByText('Set Project'));
     });
-    expect(screen.getByTestId('current-project')).toHaveTextContent('Test Device');
+    expect(screen.getByTestId('current-project')).toHaveTextContent(
+      'Test Device'
+    );
 
     // Then clear it
     act(() => {
       fireEvent.click(screen.getByText('Clear Project'));
     });
-    expect(screen.getByTestId('current-project')).toHaveTextContent('No project');
+    expect(screen.getByTestId('current-project')).toHaveTextContent(
+      'No project'
+    );
     expect(screen.getByTestId('messages-count')).toHaveTextContent('0'); // Messages should be cleared too
   });
 
@@ -122,7 +131,9 @@ describe('ProjectContextProvider', () => {
     act(() => {
       fireEvent.click(screen.getByText('Clear Loading'));
     });
-    expect(screen.getByTestId('loading-state')).toHaveTextContent('Not loading');
+    expect(screen.getByTestId('loading-state')).toHaveTextContent(
+      'Not loading'
+    );
   });
 
   it('should add messages correctly', () => {
@@ -190,11 +201,15 @@ describe('ProjectContextProvider', () => {
 
   it('should throw error when used outside provider', () => {
     // Suppress console.error for this test
-    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const consoleSpy = jest
+      .spyOn(console, 'error')
+      .mockImplementation(() => {});
 
     expect(() => {
       render(<TestComponent />);
-    }).toThrow('useProjectContext must be used within a ProjectContextProvider');
+    }).toThrow(
+      'useProjectContext must be used within a ProjectContextProvider'
+    );
 
     consoleSpy.mockRestore();
   });
@@ -204,12 +219,18 @@ describe('ProjectContextProvider Integration', () => {
   it('should maintain state across multiple components', () => {
     function FirstComponent() {
       const { setProject } = useProjectContext();
-      return <button onClick={() => setProject(mockProject)}>Set Project</button>;
+      return (
+        <button onClick={() => setProject(mockProject)}>Set Project</button>
+      );
     }
 
     function SecondComponent() {
       const { state } = useProjectContext();
-      return <div data-testid="project-name">{state.currentProject?.name || 'No project'}</div>;
+      return (
+        <div data-testid="project-name">
+          {state.currentProject?.name || 'No project'}
+        </div>
+      );
     }
 
     render(
@@ -242,7 +263,9 @@ describe('ProjectContextProvider Integration', () => {
       fireEvent.click(screen.getByText('Set Loading'));
     });
 
-    expect(screen.getByTestId('current-project')).toHaveTextContent('Test Device');
+    expect(screen.getByTestId('current-project')).toHaveTextContent(
+      'Test Device'
+    );
     expect(screen.getByTestId('messages-count')).toHaveTextContent('1');
     expect(screen.getByTestId('loading-state')).toHaveTextContent('Loading');
 
@@ -251,7 +274,9 @@ describe('ProjectContextProvider Integration', () => {
       fireEvent.click(screen.getByText('Clear Project'));
     });
 
-    expect(screen.getByTestId('current-project')).toHaveTextContent('No project');
+    expect(screen.getByTestId('current-project')).toHaveTextContent(
+      'No project'
+    );
     expect(screen.getByTestId('messages-count')).toHaveTextContent('0');
     expect(screen.getByTestId('loading-state')).toHaveTextContent('Loading'); // Should remain unchanged
   });

@@ -5,7 +5,11 @@
 
 import { DatabaseConnection, DatabaseSeeder, SeedingResult } from './seeder';
 import { DatabaseMigrationManager, MigrationResult } from './migrations';
-import { DatabaseSeed, TestScenario, MockDataGenerator } from '../mock-data/generators';
+import {
+  DatabaseSeed,
+  TestScenario,
+  MockDataGenerator,
+} from '../mock-data/generators';
 
 export interface TestDatabaseConfig {
   path?: string;
@@ -110,13 +114,17 @@ export class DatabaseTestManager {
   /**
    * Create a new test database instance
    */
-  async createTestDatabase(instanceId: string = 'default'): Promise<TestDatabaseInstance> {
-    const dbPath = this.config.inMemory !== false ? ':memory:' : 
-                   this.config.path || `./test_${instanceId}_${Date.now()}.db`;
+  async createTestDatabase(
+    instanceId: string = 'default'
+  ): Promise<TestDatabaseInstance> {
+    const dbPath =
+      this.config.inMemory !== false
+        ? ':memory:'
+        : this.config.path || `./test_${instanceId}_${Date.now()}.db`;
 
     // Create connection (mock implementation)
     const connection = new MockDatabaseConnection(dbPath);
-    
+
     // Initialize components
     const seeder = new DatabaseSeeder(connection);
     const migrationManager = new DatabaseMigrationManager(connection);
@@ -130,7 +138,7 @@ export class DatabaseTestManager {
         environment: 'testing' as const,
         clearExisting: false,
         scenario: this.config.seedScenario,
-        customSeed: this.config.customSeed
+        customSeed: this.config.customSeed,
       };
       await seeder.seedDatabase(seedOptions);
     }
@@ -142,7 +150,7 @@ export class DatabaseTestManager {
       cleanup: () => this.cleanupInstance(instanceId),
       reset: () => this.resetInstance(instanceId),
       seed: (scenario) => this.seedInstance(instanceId, scenario),
-      validate: () => this.validateInstance(instanceId)
+      validate: () => this.validateInstance(instanceId),
     };
 
     this.instances.set(instanceId, instance);
@@ -152,7 +160,9 @@ export class DatabaseTestManager {
   /**
    * Get existing test database instance
    */
-  getTestDatabase(instanceId: string = 'default'): TestDatabaseInstance | undefined {
+  getTestDatabase(
+    instanceId: string = 'default'
+  ): TestDatabaseInstance | undefined {
     return this.instances.get(instanceId);
   }
 
@@ -166,16 +176,19 @@ export class DatabaseTestManager {
     try {
       // Clear all data
       await instance.seeder.clearDatabase();
-      
+
       // Close connection
       await instance.connection.close();
-      
+
       // Remove from instances
       this.instances.delete(instanceId);
-      
+
       console.log(`Database instance ${instanceId} cleaned up`);
     } catch (error) {
-      console.error(`Failed to cleanup database instance ${instanceId}:`, error);
+      console.error(
+        `Failed to cleanup database instance ${instanceId}:`,
+        error
+      );
     }
   }
 
@@ -188,17 +201,17 @@ export class DatabaseTestManager {
 
     // Reset to clean state
     await instance.migrationManager.resetDatabase();
-    
+
     // Re-run migrations
     await instance.migrationManager.migrate();
-    
+
     // Re-seed if configured
     if (this.config.seedScenario || this.config.customSeed) {
       const seedOptions = {
         environment: 'testing' as const,
         clearExisting: false,
         scenario: this.config.seedScenario,
-        customSeed: this.config.customSeed
+        customSeed: this.config.customSeed,
       };
       await instance.seeder.seedDatabase(seedOptions);
     }
@@ -207,14 +220,17 @@ export class DatabaseTestManager {
   /**
    * Seed database instance with scenario
    */
-  async seedInstance(instanceId: string, scenario?: TestScenario): Promise<SeedingResult> {
+  async seedInstance(
+    instanceId: string,
+    scenario?: TestScenario
+  ): Promise<SeedingResult> {
     const instance = this.instances.get(instanceId);
     if (!instance) throw new Error(`Database instance ${instanceId} not found`);
 
     const seedOptions = {
       environment: 'testing' as const,
       clearExisting: true,
-      scenario: scenario || this.config.seedScenario
+      scenario: scenario || this.config.seedScenario,
     };
 
     return await instance.seeder.seedDatabase(seedOptions);
@@ -223,7 +239,9 @@ export class DatabaseTestManager {
   /**
    * Validate database instance
    */
-  async validateInstance(instanceId: string): Promise<{ valid: boolean; issues: string[] }> {
+  async validateInstance(
+    instanceId: string
+  ): Promise<{ valid: boolean; issues: string[] }> {
     const instance = this.instances.get(instanceId);
     if (!instance) throw new Error(`Database instance ${instanceId} not found`);
 
@@ -234,7 +252,7 @@ export class DatabaseTestManager {
    * Create database snapshot
    */
   async createSnapshot(
-    instanceId: string, 
+    instanceId: string,
     snapshotId: string,
     metadata?: Partial<SnapshotMetadata>
   ): Promise<DatabaseSnapshot> {
@@ -243,7 +261,7 @@ export class DatabaseTestManager {
 
     // Export current data
     const data = await instance.seeder.exportSeedData();
-    
+
     // Capture schema
     const schema = await this.captureSchema(instance.connection);
 
@@ -256,8 +274,8 @@ export class DatabaseTestManager {
         testSuite: metadata?.testSuite,
         testCase: metadata?.testCase,
         description: metadata?.description,
-        tags: metadata?.tags || []
-      }
+        tags: metadata?.tags || [],
+      },
     };
 
     this.snapshots.set(snapshotId, snapshot);
@@ -270,7 +288,7 @@ export class DatabaseTestManager {
   async restoreSnapshot(instanceId: string, snapshotId: string): Promise<void> {
     const instance = this.instances.get(instanceId);
     const snapshot = this.snapshots.get(snapshotId);
-    
+
     if (!instance) throw new Error(`Database instance ${instanceId} not found`);
     if (!snapshot) throw new Error(`Snapshot ${snapshotId} not found`);
 
@@ -285,7 +303,7 @@ export class DatabaseTestManager {
     const seedOptions = {
       environment: 'testing' as const,
       clearExisting: false,
-      customSeed: snapshot.data
+      customSeed: snapshot.data,
     };
     await instance.seeder.seedDatabase(seedOptions);
   }
@@ -293,35 +311,43 @@ export class DatabaseTestManager {
   /**
    * Capture database schema
    */
-  private async captureSchema(connection: DatabaseConnection): Promise<SchemaSnapshot> {
+  private async captureSchema(
+    connection: DatabaseConnection
+  ): Promise<SchemaSnapshot> {
     // Get tables
     const tablesResult = await connection.execute(`
       SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'
     `);
-    
+
     const tables: TableSchema[] = [];
     for (const table of tablesResult || []) {
-      const tableInfo = await connection.execute(`PRAGMA table_info(${table.name})`);
-      const foreignKeys = await connection.execute(`PRAGMA foreign_key_list(${table.name})`);
-      
+      const tableInfo = await connection.execute(
+        `PRAGMA table_info(${table.name})`
+      );
+      const foreignKeys = await connection.execute(
+        `PRAGMA foreign_key_list(${table.name})`
+      );
+
       const columns: ColumnSchema[] = (tableInfo || []).map((col: any) => ({
         name: col.name,
         type: col.type,
         nullable: !col.notnull,
         defaultValue: col.dflt_value,
-        primaryKey: Boolean(col.pk)
+        primaryKey: Boolean(col.pk),
       }));
 
-      const constraints: ConstraintSchema[] = (foreignKeys || []).map((fk: any) => ({
-        name: `fk_${table.name}_${fk.from}`,
-        type: 'FOREIGN KEY' as const,
-        definition: `FOREIGN KEY (${fk.from}) REFERENCES ${fk.table}(${fk.to})`
-      }));
+      const constraints: ConstraintSchema[] = (foreignKeys || []).map(
+        (fk: any) => ({
+          name: `fk_${table.name}_${fk.from}`,
+          type: 'FOREIGN KEY' as const,
+          definition: `FOREIGN KEY (${fk.from}) REFERENCES ${fk.table}(${fk.to})`,
+        })
+      );
 
       tables.push({
         name: table.name,
         columns,
-        constraints
+        constraints,
       });
     }
 
@@ -329,41 +355,43 @@ export class DatabaseTestManager {
     const indexesResult = await connection.execute(`
       SELECT name, tbl_name, sql FROM sqlite_master WHERE type='index' AND name NOT LIKE 'sqlite_%'
     `);
-    
+
     const indexes: IndexSchema[] = (indexesResult || []).map((idx: any) => ({
       name: idx.name,
       table: idx.tbl_name,
       columns: [], // Would parse from SQL in real implementation
-      unique: idx.sql?.includes('UNIQUE') || false
+      unique: idx.sql?.includes('UNIQUE') || false,
     }));
 
     // Get triggers
     const triggersResult = await connection.execute(`
       SELECT name, tbl_name, sql FROM sqlite_master WHERE type='trigger'
     `);
-    
-    const triggers: TriggerSchema[] = (triggersResult || []).map((trigger: any) => ({
-      name: trigger.name,
-      table: trigger.tbl_name,
-      event: 'UNKNOWN', // Would parse from SQL in real implementation
-      definition: trigger.sql
-    }));
+
+    const triggers: TriggerSchema[] = (triggersResult || []).map(
+      (trigger: any) => ({
+        name: trigger.name,
+        table: trigger.tbl_name,
+        event: 'UNKNOWN', // Would parse from SQL in real implementation
+        definition: trigger.sql,
+      })
+    );
 
     // Get views
     const viewsResult = await connection.execute(`
       SELECT name, sql FROM sqlite_master WHERE type='view'
     `);
-    
+
     const views: ViewSchema[] = (viewsResult || []).map((view: any) => ({
       name: view.name,
-      definition: view.sql
+      definition: view.sql,
     }));
 
     return {
       tables,
       indexes,
       triggers,
-      views
+      views,
     };
   }
 
@@ -372,11 +400,11 @@ export class DatabaseTestManager {
    */
   async cleanupAll(): Promise<void> {
     const instanceIds = Array.from(this.instances.keys());
-    
+
     for (const instanceId of instanceIds) {
       await this.cleanupInstance(instanceId);
     }
-    
+
     // Clear snapshots
     this.snapshots.clear();
   }
@@ -391,28 +419,28 @@ export class DatabaseTestManager {
           await this.resetInstance(instanceId);
         }
       },
-      
+
       afterEach: async () => {
         if (this.config.autoCleanup && this.config.isolationLevel === 'test') {
           // Optionally cleanup after each test
         }
       },
-      
+
       beforeAll: async () => {
         if (!this.instances.has(instanceId)) {
           await this.createTestDatabase(instanceId);
         }
-        
+
         if (this.config.isolationLevel === 'suite') {
           await this.resetInstance(instanceId);
         }
       },
-      
+
       afterAll: async () => {
         if (this.config.autoCleanup) {
           await this.cleanupInstance(instanceId);
         }
-      }
+      },
     };
   }
 }
@@ -434,40 +462,47 @@ class MockDatabaseConnection implements DatabaseConnection {
       throw new Error('Database connection is closed');
     }
 
-    console.log(`Executing SQL: ${sql}`, params ? `with params: ${JSON.stringify(params)}` : '');
-    
+    console.log(
+      `Executing SQL: ${sql}`,
+      params ? `with params: ${JSON.stringify(params)}` : ''
+    );
+
     // Mock different query types
     if (sql.includes('SELECT COUNT(*)')) {
       return [{ count: Math.floor(Math.random() * 100) }];
     }
-    
+
     if (sql.includes('SELECT') && sql.includes('sqlite_master')) {
       // Mock schema queries
       if (sql.includes('type="table"')) {
         return [
           { name: 'users' },
           { name: 'projects' },
-          { name: 'device_classifications' }
+          { name: 'device_classifications' },
         ];
       }
       if (sql.includes('type="index"')) {
         return [
-          { name: 'idx_projects_user_id', tbl_name: 'projects', sql: 'CREATE INDEX idx_projects_user_id ON projects(user_id)' }
+          {
+            name: 'idx_projects_user_id',
+            tbl_name: 'projects',
+            sql: 'CREATE INDEX idx_projects_user_id ON projects(user_id)',
+          },
         ];
       }
     }
-    
+
     if (sql.includes('PRAGMA table_info')) {
       return [
         { name: 'id', type: 'INTEGER', notnull: 1, dflt_value: null, pk: 1 },
-        { name: 'name', type: 'TEXT', notnull: 1, dflt_value: null, pk: 0 }
+        { name: 'name', type: 'TEXT', notnull: 1, dflt_value: null, pk: 0 },
       ];
     }
-    
+
     if (sql.includes('SELECT') && !sql.includes('COUNT')) {
       return []; // Return empty array for SELECT queries
     }
-    
+
     return { changes: 1, lastInsertRowid: Math.floor(Math.random() * 1000) };
   }
 
@@ -477,9 +512,9 @@ class MockDatabaseConnection implements DatabaseConnection {
     }
 
     const tx = {
-      execute: this.execute.bind(this)
+      execute: this.execute.bind(this),
     };
-    
+
     try {
       const result = await callback(tx);
       console.log('Transaction committed');
@@ -506,12 +541,14 @@ export class TestDatabaseFactory {
   /**
    * Create test database for Jest tests
    */
-  static async createForJest(config?: Partial<TestDatabaseConfig>): Promise<TestDatabaseInstance> {
+  static async createForJest(
+    config?: Partial<TestDatabaseConfig>
+  ): Promise<TestDatabaseInstance> {
     const manager = new DatabaseTestManager({
       isolationLevel: 'test',
       inMemory: true,
       autoCleanup: true,
-      ...config
+      ...config,
     });
 
     return await manager.createTestDatabase('jest');
@@ -520,12 +557,14 @@ export class TestDatabaseFactory {
   /**
    * Create test database for Playwright tests
    */
-  static async createForPlaywright(config?: Partial<TestDatabaseConfig>): Promise<TestDatabaseInstance> {
+  static async createForPlaywright(
+    config?: Partial<TestDatabaseConfig>
+  ): Promise<TestDatabaseInstance> {
     const manager = new DatabaseTestManager({
       isolationLevel: 'suite',
       inMemory: false,
       autoCleanup: true,
-      ...config
+      ...config,
     });
 
     return await manager.createTestDatabase('playwright');
@@ -534,12 +573,14 @@ export class TestDatabaseFactory {
   /**
    * Create test database for integration tests
    */
-  static async createForIntegration(config?: Partial<TestDatabaseConfig>): Promise<TestDatabaseInstance> {
+  static async createForIntegration(
+    config?: Partial<TestDatabaseConfig>
+  ): Promise<TestDatabaseInstance> {
     const manager = new DatabaseTestManager({
       isolationLevel: 'file',
       inMemory: false,
       autoCleanup: false,
-      ...config
+      ...config,
     });
 
     return await manager.createTestDatabase('integration');
@@ -548,7 +589,10 @@ export class TestDatabaseFactory {
   /**
    * Get or create manager for test suite
    */
-  static getManager(suiteId: string, config?: TestDatabaseConfig): DatabaseTestManager {
+  static getManager(
+    suiteId: string,
+    config?: TestDatabaseConfig
+  ): DatabaseTestManager {
     if (!this.managers.has(suiteId)) {
       this.managers.set(suiteId, new DatabaseTestManager(config));
     }
@@ -569,25 +613,31 @@ export class TestDatabaseFactory {
 /**
  * Export utility functions for common test scenarios
  */
-export async function setupTestDatabase(scenario: TestScenario = TestScenario.EXISTING_PROJECT_WORKFLOW): Promise<TestDatabaseInstance> {
+export async function setupTestDatabase(
+  scenario: TestScenario = TestScenario.EXISTING_PROJECT_WORKFLOW
+): Promise<TestDatabaseInstance> {
   return await TestDatabaseFactory.createForJest({
-    seedScenario: scenario
+    seedScenario: scenario,
   });
 }
 
 export async function createCleanTestDatabase(): Promise<TestDatabaseInstance> {
   return await TestDatabaseFactory.createForJest({
-    seedScenario: undefined
+    seedScenario: undefined,
   });
 }
 
-export async function createTestDatabaseWithCustomSeed(seed: DatabaseSeed): Promise<TestDatabaseInstance> {
+export async function createTestDatabaseWithCustomSeed(
+  seed: DatabaseSeed
+): Promise<TestDatabaseInstance> {
   return await TestDatabaseFactory.createForJest({
-    customSeed: seed
+    customSeed: seed,
   });
 }
 
-export function createTestIsolationHooks(instanceId?: string): TestIsolationManager {
+export function createTestIsolationHooks(
+  instanceId?: string
+): TestIsolationManager {
   const manager = TestDatabaseFactory.getManager('default');
   return manager.getIsolationManager(instanceId);
 }

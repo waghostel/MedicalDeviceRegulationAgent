@@ -1,6 +1,6 @@
 /**
  * Frontend Test Performance Monitor
- * 
+ *
  * Comprehensive performance monitoring for React component tests including
  * memory leak detection, render time tracking, and performance regression detection.
  */
@@ -42,17 +42,20 @@ export interface MemorySnapshot {
 }
 
 export class FrontendTestPerformanceMonitor {
-  private activeMonitors: Map<string, {
-    testName: string;
-    startTime: number;
-    startMemory: MemorySnapshot;
-    peakMemory: MemorySnapshot;
-    renderStartTime?: number;
-    rerenderCount: number;
-    domUpdates: number;
-    warnings: string[];
-    renderResult?: RenderResult;
-  }> = new Map();
+  private activeMonitors: Map<
+    string,
+    {
+      testName: string;
+      startTime: number;
+      startMemory: MemorySnapshot;
+      peakMemory: MemorySnapshot;
+      renderStartTime?: number;
+      rerenderCount: number;
+      domUpdates: number;
+      warnings: string[];
+      renderResult?: RenderResult;
+    }
+  > = new Map();
 
   private performanceHistory: TestPerformanceMetrics[] = [];
   private memorySnapshots: MemorySnapshot[] = [];
@@ -68,7 +71,7 @@ export class FrontendTestPerformanceMonitor {
       maxComponentCount: 500,
       maxRerenderCount: 5,
       memoryLeakThreshold: 5, // 5MB
-      ...thresholds
+      ...thresholds,
     };
   }
 
@@ -78,7 +81,7 @@ export class FrontendTestPerformanceMonitor {
   startMonitoring(testName: string): string {
     const monitorId = `${testName}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     const startMemory = this.getMemorySnapshot();
-    
+
     this.activeMonitors.set(monitorId, {
       testName,
       startTime: performance.now(),
@@ -86,7 +89,7 @@ export class FrontendTestPerformanceMonitor {
       peakMemory: startMemory,
       rerenderCount: 0,
       domUpdates: 0,
-      warnings: []
+      warnings: [],
     });
 
     // Start memory monitoring
@@ -107,8 +110,12 @@ export class FrontendTestPerformanceMonitor {
     const endTime = performance.now();
     const endMemory = this.getMemorySnapshot();
     const executionTime = endTime - monitor.startTime;
-    const memoryUsage = (endMemory.heapUsed - monitor.startMemory.heapUsed) / 1024 / 1024;
-    const peakMemoryUsage = (monitor.peakMemory.heapUsed - monitor.startMemory.heapUsed) / 1024 / 1024;
+    const memoryUsage =
+      (endMemory.heapUsed - monitor.startMemory.heapUsed) / 1024 / 1024;
+    const peakMemoryUsage =
+      (monitor.peakMemory.heapUsed - monitor.startMemory.heapUsed) /
+      1024 /
+      1024;
 
     // Stop DOM mutation monitoring
     this.stopDOMMonitoring();
@@ -125,12 +132,13 @@ export class FrontendTestPerformanceMonitor {
       startTime: monitor.startTime,
       endTime,
       warnings: [...monitor.warnings],
-      context: {}
+      context: {},
     };
 
     // Calculate component count if render result is available
     if (monitor.renderResult) {
-      metrics.componentCount = monitor.renderResult.container.querySelectorAll('*').length;
+      metrics.componentCount =
+        monitor.renderResult.container.querySelectorAll('*').length;
     }
 
     // Check thresholds and add warnings
@@ -163,10 +171,10 @@ export class FrontendTestPerformanceMonitor {
     if (monitor && monitor.renderStartTime) {
       const renderTime = performance.now() - monitor.renderStartTime;
       monitor.renderResult = renderResult;
-      
+
       // Start DOM mutation monitoring
       this.startDOMMonitoring(monitorId, renderResult.container);
-      
+
       // Update peak memory
       const currentMemory = this.getMemorySnapshot();
       if (currentMemory.heapUsed > monitor.peakMemory.heapUsed) {
@@ -182,7 +190,7 @@ export class FrontendTestPerformanceMonitor {
     const monitor = this.activeMonitors.get(monitorId);
     if (monitor) {
       monitor.rerenderCount++;
-      
+
       // Update peak memory
       const currentMemory = this.getMemorySnapshot();
       if (currentMemory.heapUsed > monitor.peakMemory.heapUsed) {
@@ -194,7 +202,10 @@ export class FrontendTestPerformanceMonitor {
   /**
    * Context manager for monitoring test performance
    */
-  async monitorTest<T>(testName: string, testFn: (monitorId: string) => Promise<T>): Promise<T> {
+  async monitorTest<T>(
+    testName: string,
+    testFn: (monitorId: string) => Promise<T>
+  ): Promise<T> {
     const monitorId = this.startMonitoring(testName);
     try {
       const result = await testFn(monitorId);
@@ -214,16 +225,16 @@ export class FrontendTestPerformanceMonitor {
   ): Promise<{ result: T; renderTime: number }> {
     this.startRenderMonitoring(monitorId);
     const startTime = performance.now();
-    
+
     const result = renderFn();
-    
+
     const endTime = performance.now();
     const renderTime = endTime - startTime;
-    
+
     if (result && typeof result === 'object' && 'container' in result) {
       this.stopRenderMonitoring(monitorId, result as RenderResult);
     }
-    
+
     return { result, renderTime };
   }
 
@@ -235,50 +246,59 @@ export class FrontendTestPerformanceMonitor {
     leakSize: number;
     details: string;
   } {
-    const testMetrics = this.performanceHistory.filter(m => m.testName === testName);
-    
+    const testMetrics = this.performanceHistory.filter(
+      (m) => m.testName === testName
+    );
+
     if (testMetrics.length < 2) {
       return {
         hasLeak: false,
         leakSize: 0,
-        details: 'Insufficient data for leak detection'
+        details: 'Insufficient data for leak detection',
       };
     }
 
     // Compare memory usage trend
     const recent = testMetrics.slice(-5); // Last 5 runs
-    const memoryTrend = recent.map(m => m.memoryUsage);
-    const averageIncrease = memoryTrend.reduce((sum, usage, index) => {
-      if (index === 0) return 0;
-      return sum + (usage - memoryTrend[index - 1]);
-    }, 0) / (memoryTrend.length - 1);
+    const memoryTrend = recent.map((m) => m.memoryUsage);
+    const averageIncrease =
+      memoryTrend.reduce((sum, usage, index) => {
+        if (index === 0) return 0;
+        return sum + (usage - memoryTrend[index - 1]);
+      }, 0) /
+      (memoryTrend.length - 1);
 
     const hasLeak = averageIncrease > this.thresholds.memoryLeakThreshold;
 
     return {
       hasLeak,
       leakSize: averageIncrease,
-      details: hasLeak 
+      details: hasLeak
         ? `Memory usage increasing by ${averageIncrease.toFixed(2)}MB per test run`
-        : 'No significant memory leak detected'
+        : 'No significant memory leak detected',
     };
   }
 
   /**
    * Check for performance regressions
    */
-  checkPerformanceRegression(testName: string, baselineWindow: number = 10): {
+  checkPerformanceRegression(
+    testName: string,
+    baselineWindow: number = 10
+  ): {
     hasRegression: boolean;
     regressionPercentage: number;
     details: string;
   } {
-    const testMetrics = this.performanceHistory.filter(m => m.testName === testName);
-    
+    const testMetrics = this.performanceHistory.filter(
+      (m) => m.testName === testName
+    );
+
     if (testMetrics.length < baselineWindow + 5) {
       return {
         hasRegression: false,
         regressionPercentage: 0,
-        details: 'Insufficient data for regression analysis'
+        details: 'Insufficient data for regression analysis',
       };
     }
 
@@ -286,10 +306,13 @@ export class FrontendTestPerformanceMonitor {
     const baseline = testMetrics.slice(0, baselineWindow);
     const recent = testMetrics.slice(-5);
 
-    const baselineAvg = baseline.reduce((sum, m) => sum + m.executionTime, 0) / baseline.length;
-    const recentAvg = recent.reduce((sum, m) => sum + m.executionTime, 0) / recent.length;
+    const baselineAvg =
+      baseline.reduce((sum, m) => sum + m.executionTime, 0) / baseline.length;
+    const recentAvg =
+      recent.reduce((sum, m) => sum + m.executionTime, 0) / recent.length;
 
-    const regressionPercentage = ((recentAvg - baselineAvg) / baselineAvg) * 100;
+    const regressionPercentage =
+      ((recentAvg - baselineAvg) / baselineAvg) * 100;
     const hasRegression = regressionPercentage > 20; // 20% regression threshold
 
     return {
@@ -297,7 +320,7 @@ export class FrontendTestPerformanceMonitor {
       regressionPercentage,
       details: hasRegression
         ? `Performance degraded by ${regressionPercentage.toFixed(2)}%`
-        : 'Performance within acceptable range'
+        : 'Performance within acceptable range',
     };
   }
 
@@ -323,35 +346,45 @@ export class FrontendTestPerformanceMonitor {
         slowTests: [],
         memoryIntensiveTests: [],
         testsWithWarnings: [],
-        memoryLeaks: []
+        memoryLeaks: [],
       };
     }
 
     const totalTests = this.performanceHistory.length;
-    const averageExecutionTime = this.performanceHistory.reduce((sum, m) => sum + m.executionTime, 0) / totalTests;
-    const averageRenderTime = this.performanceHistory.reduce((sum, m) => sum + m.renderTime, 0) / totalTests;
-    const averageMemoryUsage = this.performanceHistory.reduce((sum, m) => sum + m.memoryUsage, 0) / totalTests;
+    const averageExecutionTime =
+      this.performanceHistory.reduce((sum, m) => sum + m.executionTime, 0) /
+      totalTests;
+    const averageRenderTime =
+      this.performanceHistory.reduce((sum, m) => sum + m.renderTime, 0) /
+      totalTests;
+    const averageMemoryUsage =
+      this.performanceHistory.reduce((sum, m) => sum + m.memoryUsage, 0) /
+      totalTests;
 
     const slowTests = this.performanceHistory
-      .filter(m => m.executionTime > this.thresholds.maxExecutionTime)
-      .map(m => ({ name: m.testName, time: m.executionTime }))
+      .filter((m) => m.executionTime > this.thresholds.maxExecutionTime)
+      .map((m) => ({ name: m.testName, time: m.executionTime }))
       .sort((a, b) => b.time - a.time);
 
     const memoryIntensiveTests = this.performanceHistory
-      .filter(m => m.memoryUsage > this.thresholds.maxMemoryUsage)
-      .map(m => ({ name: m.testName, memory: m.memoryUsage }))
+      .filter((m) => m.memoryUsage > this.thresholds.maxMemoryUsage)
+      .map((m) => ({ name: m.testName, memory: m.memoryUsage }))
       .sort((a, b) => b.memory - a.memory);
 
     const testsWithWarnings = this.performanceHistory
-      .filter(m => m.warnings.length > 0)
-      .map(m => ({ name: m.testName, warnings: m.warnings }));
+      .filter((m) => m.warnings.length > 0)
+      .map((m) => ({ name: m.testName, warnings: m.warnings }));
 
     // Check for memory leaks in unique test names
-    const uniqueTestNames = [...new Set(this.performanceHistory.map(m => m.testName))];
+    const uniqueTestNames = [
+      ...new Set(this.performanceHistory.map((m) => m.testName)),
+    ];
     const memoryLeaks = uniqueTestNames
-      .map(testName => {
+      .map((testName) => {
         const leakInfo = this.detectMemoryLeaks(testName);
-        return leakInfo.hasLeak ? { name: testName, leakSize: leakInfo.leakSize } : null;
+        return leakInfo.hasLeak
+          ? { name: testName, leakSize: leakInfo.leakSize }
+          : null;
       })
       .filter(Boolean) as Array<{ name: string; leakSize: number }>;
 
@@ -363,7 +396,7 @@ export class FrontendTestPerformanceMonitor {
       slowTests,
       memoryIntensiveTests,
       testsWithWarnings,
-      memoryLeaks
+      memoryLeaks,
     };
   }
 
@@ -371,12 +404,16 @@ export class FrontendTestPerformanceMonitor {
    * Export performance metrics to JSON
    */
   exportMetrics(): string {
-    return JSON.stringify({
-      timestamp: new Date().toISOString(),
-      thresholds: this.thresholds,
-      summary: this.getPerformanceSummary(),
-      detailedMetrics: this.performanceHistory
-    }, null, 2);
+    return JSON.stringify(
+      {
+        timestamp: new Date().toISOString(),
+        thresholds: this.thresholds,
+        summary: this.getPerformanceSummary(),
+        detailedMetrics: this.performanceHistory,
+      },
+      null,
+      2
+    );
   }
 
   /**
@@ -393,7 +430,7 @@ export class FrontendTestPerformanceMonitor {
       heapUsed: memUsage.heapUsed,
       heapTotal: memUsage.heapTotal,
       external: memUsage.external,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     };
   }
 
@@ -432,7 +469,7 @@ export class FrontendTestPerformanceMonitor {
       attributes: true,
       attributeOldValue: true,
       characterData: true,
-      characterDataOldValue: true
+      characterDataOldValue: true,
     });
   }
 
@@ -447,35 +484,35 @@ export class FrontendTestPerformanceMonitor {
     if (metrics.executionTime > this.thresholds.maxExecutionTime) {
       metrics.warnings.push(
         `Slow test: ${metrics.testName} took ${metrics.executionTime.toFixed(2)}ms ` +
-        `(threshold: ${this.thresholds.maxExecutionTime}ms)`
+          `(threshold: ${this.thresholds.maxExecutionTime}ms)`
       );
     }
 
     if (metrics.renderTime > this.thresholds.maxRenderTime) {
       metrics.warnings.push(
         `Slow render: ${metrics.testName} render took ${metrics.renderTime.toFixed(2)}ms ` +
-        `(threshold: ${this.thresholds.maxRenderTime}ms)`
+          `(threshold: ${this.thresholds.maxRenderTime}ms)`
       );
     }
 
     if (metrics.memoryUsage > this.thresholds.maxMemoryUsage) {
       metrics.warnings.push(
         `High memory usage: ${metrics.testName} used ${metrics.memoryUsage.toFixed(2)}MB ` +
-        `(threshold: ${this.thresholds.maxMemoryUsage}MB)`
+          `(threshold: ${this.thresholds.maxMemoryUsage}MB)`
       );
     }
 
     if (metrics.componentCount > this.thresholds.maxComponentCount) {
       metrics.warnings.push(
         `Too many components: ${metrics.testName} rendered ${metrics.componentCount} components ` +
-        `(threshold: ${this.thresholds.maxComponentCount})`
+          `(threshold: ${this.thresholds.maxComponentCount})`
       );
     }
 
     if (metrics.rerenderCount > this.thresholds.maxRerenderCount) {
       metrics.warnings.push(
         `Too many re-renders: ${metrics.testName} had ${metrics.rerenderCount} re-renders ` +
-        `(threshold: ${this.thresholds.maxRerenderCount})`
+          `(threshold: ${this.thresholds.maxRerenderCount})`
       );
     }
   }
@@ -484,13 +521,13 @@ export class FrontendTestPerformanceMonitor {
     const status = metrics.warnings.length === 0 ? '✅' : '⚠️';
     console.log(
       `${status} ${metrics.testName}: ` +
-      `${metrics.executionTime.toFixed(2)}ms, ` +
-      `${metrics.memoryUsage.toFixed(2)}MB, ` +
-      `${metrics.componentCount} components, ` +
-      `${metrics.rerenderCount} re-renders`
+        `${metrics.executionTime.toFixed(2)}ms, ` +
+        `${metrics.memoryUsage.toFixed(2)}MB, ` +
+        `${metrics.componentCount} components, ` +
+        `${metrics.rerenderCount} re-renders`
     );
 
-    metrics.warnings.forEach(warning => {
+    metrics.warnings.forEach((warning) => {
       console.warn(`  ⚠️  ${warning}`);
     });
   }
@@ -528,7 +565,7 @@ export function createPerformanceTest(
   return async () => {
     const monitor = new FrontendTestPerformanceMonitor(thresholds);
     await monitor.monitorTest(testName, testFn);
-    
+
     const summary = monitor.getPerformanceSummary();
     expect(summary.testsWithWarnings.length).toBe(0);
   };

@@ -10,13 +10,17 @@ import { AppLayout } from '@/components/layout';
 import { ProjectList } from '@/components/projects/project-list';
 import { ProjectForm } from '@/components/projects/project-form';
 import { useProjects } from '@/hooks/use-projects';
-import { Project, ProjectCreateRequest, ProjectUpdateRequest } from '@/types/project';
+import {
+  Project,
+  ProjectCreateRequest,
+  ProjectUpdateRequest,
+} from '@/types/project';
 
 export default function ProjectsPage() {
   const router = useRouter();
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
-  
+
   const { createProject, updateProject } = useProjects();
 
   const handleCreateProject = () => {
@@ -31,7 +35,9 @@ export default function ProjectsPage() {
     setEditingProject(project);
   };
 
-  const handleSubmitCreate = async (data: ProjectCreateRequest): Promise<Project | null> => {
+  const handleSubmitCreate = async (
+    data: ProjectCreateRequest
+  ): Promise<Project | null> => {
     const result = await createProject(data);
     if (result) {
       setShowCreateForm(false);
@@ -39,9 +45,11 @@ export default function ProjectsPage() {
     return result;
   };
 
-  const handleSubmitEdit = async (data: ProjectUpdateRequest): Promise<Project | null> => {
+  const handleSubmitEdit = async (
+    data: ProjectUpdateRequest
+  ): Promise<Project | null> => {
     if (!editingProject) return null;
-    
+
     const result = await updateProject(editingProject.id, data);
     if (result) {
       setEditingProject(null);

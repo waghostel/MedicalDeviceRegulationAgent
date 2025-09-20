@@ -19,7 +19,7 @@ const colors = {
   red: '\x1b[31m',
   yellow: '\x1b[33m',
   blue: '\x1b[34m',
-  reset: '\x1b[0m'
+  reset: '\x1b[0m',
 };
 
 function log(message, color = colors.reset) {
@@ -54,7 +54,7 @@ function makeRequest(options) {
         resolve({
           statusCode: res.statusCode,
           headers: res.headers,
-          data: data
+          data: data,
         });
       });
     });
@@ -74,7 +74,7 @@ function makeRequest(options) {
 
 async function testBackendHealth() {
   logInfo('Testing backend health endpoint...');
-  
+
   try {
     const response = await makeRequest({
       hostname: BACKEND_HOST,
@@ -82,8 +82,8 @@ async function testBackendHealth() {
       path: '/api/health',
       method: 'GET',
       headers: {
-        'Accept': 'application/json'
-      }
+        Accept: 'application/json',
+      },
     });
 
     if (response.statusCode === 200) {
@@ -101,7 +101,7 @@ async function testBackendHealth() {
 
 async function testBackendRoot() {
   logInfo('Testing backend root endpoint...');
-  
+
   try {
     const response = await makeRequest({
       hostname: BACKEND_HOST,
@@ -109,8 +109,8 @@ async function testBackendRoot() {
       path: '/',
       method: 'GET',
       headers: {
-        'Accept': 'application/json'
-      }
+        Accept: 'application/json',
+      },
     });
 
     if (response.statusCode === 200) {
@@ -135,7 +135,7 @@ async function testBackendRoot() {
 
 async function testFrontendHealth() {
   logInfo('Testing frontend health...');
-  
+
   try {
     const response = await makeRequest({
       hostname: FRONTEND_HOST,
@@ -143,8 +143,8 @@ async function testFrontendHealth() {
       path: '/',
       method: 'GET',
       headers: {
-        'Accept': 'text/html'
-      }
+        Accept: 'text/html',
+      },
     });
 
     if (response.statusCode === 200) {
@@ -162,7 +162,7 @@ async function testFrontendHealth() {
 
 async function testCORS() {
   logInfo('Testing CORS configuration...');
-  
+
   try {
     const response = await makeRequest({
       hostname: BACKEND_HOST,
@@ -170,10 +170,10 @@ async function testCORS() {
       path: '/api/health',
       method: 'OPTIONS',
       headers: {
-        'Origin': `http://${FRONTEND_HOST}:${FRONTEND_PORT}`,
+        Origin: `http://${FRONTEND_HOST}:${FRONTEND_PORT}`,
         'Access-Control-Request-Method': 'GET',
-        'Access-Control-Request-Headers': 'Content-Type'
-      }
+        'Access-Control-Request-Headers': 'Content-Type',
+      },
     });
 
     const corsHeaders = response.headers['access-control-allow-origin'];
@@ -192,7 +192,7 @@ async function testCORS() {
 
 async function testAPIStructure() {
   logInfo('Testing API structure...');
-  
+
   try {
     // Test projects endpoint (should return 401/403 without auth)
     const response = await makeRequest({
@@ -201,12 +201,14 @@ async function testAPIStructure() {
       path: '/api/projects',
       method: 'GET',
       headers: {
-        'Accept': 'application/json'
-      }
+        Accept: 'application/json',
+      },
     });
 
     if (response.statusCode === 401 || response.statusCode === 403) {
-      logSuccess('Projects endpoint properly protected (requires authentication)');
+      logSuccess(
+        'Projects endpoint properly protected (requires authentication)'
+      );
       return true;
     } else if (response.statusCode === 200) {
       logWarning('Projects endpoint accessible without authentication');
@@ -224,36 +226,36 @@ async function testAPIStructure() {
 // Main verification function
 async function runVerification() {
   log('\n🚀 Starting Frontend-Backend Integration Verification\n', colors.blue);
-  
+
   const results = {
     backendHealth: false,
     backendRoot: false,
     frontendHealth: false,
     cors: false,
-    apiStructure: false
+    apiStructure: false,
   };
-  
+
   // Run tests
   results.backendHealth = await testBackendHealth();
   results.backendRoot = await testBackendRoot();
   results.frontendHealth = await testFrontendHealth();
   results.cors = await testCORS();
   results.apiStructure = await testAPIStructure();
-  
+
   // Summary
   log('\n📊 Verification Results Summary\n', colors.blue);
-  
+
   const testNames = {
     backendHealth: 'Backend Health Endpoint',
     backendRoot: 'Backend Root Endpoint',
     frontendHealth: 'Frontend Health',
     cors: 'CORS Configuration',
-    apiStructure: 'API Structure'
+    apiStructure: 'API Structure',
   };
-  
+
   let passedTests = 0;
   let totalTests = Object.keys(results).length;
-  
+
   for (const [key, passed] of Object.entries(results)) {
     if (passed) {
       logSuccess(`${testNames[key]}: PASSED`);
@@ -262,31 +264,43 @@ async function runVerification() {
       logError(`${testNames[key]}: FAILED`);
     }
   }
-  
-  log(`\n📈 Overall Results: ${passedTests}/${totalTests} tests passed\n`, colors.blue);
-  
-  if (passedTests >= 3) { // At least backend health, root, and API structure
-    logSuccess('🎉 Basic integration verification passed! Core connectivity is working.');
-    
+
+  log(
+    `\n📈 Overall Results: ${passedTests}/${totalTests} tests passed\n`,
+    colors.blue
+  );
+
+  if (passedTests >= 3) {
+    // At least backend health, root, and API structure
+    logSuccess(
+      '🎉 Basic integration verification passed! Core connectivity is working.'
+    );
+
     if (passedTests < totalTests) {
-      logWarning('Some optional tests failed. Check the results above for details.');
+      logWarning(
+        'Some optional tests failed. Check the results above for details.'
+      );
     }
-    
+
     log('\n📝 Next Steps:', colors.blue);
-    log('1. Start the backend server: cd backend && poetry run uvicorn main:app --reload');
+    log(
+      '1. Start the backend server: cd backend && poetry run uvicorn main:app --reload'
+    );
     log('2. Start the frontend server: pnpm dev');
     log('3. Run the full integration tests: pnpm test');
-    
+
     process.exit(0);
   } else {
-    logError('❌ Integration verification failed. Please check your server configuration.');
-    
+    logError(
+      '❌ Integration verification failed. Please check your server configuration.'
+    );
+
     log('\n🔧 Troubleshooting:', colors.blue);
     log('1. Make sure the backend server is running on port 8000');
     log('2. Make sure the frontend server is running on port 3000');
     log('3. Check for any firewall or network issues');
     log('4. Verify the server configurations match the expected ports');
-    
+
     process.exit(1);
   }
 }

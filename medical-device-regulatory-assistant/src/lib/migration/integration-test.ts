@@ -3,18 +3,18 @@
  * Comprehensive test to verify all migration components work together
  */
 
-import { 
-  MigrationStrategyFactory, 
+import {
+  MigrationStrategyFactory,
   MigrationProgressMonitor,
-  type ComprehensiveMigrationStrategy 
+  type ComprehensiveMigrationStrategy,
 } from './index';
-import { 
+import {
   DatabaseIntegrationManager,
-  DatabaseIntegrationFactory 
+  DatabaseIntegrationFactory,
 } from '../database/index';
-import { 
+import {
   FeatureFlagManager,
-  DEFAULT_MIGRATION_CONFIG 
+  DEFAULT_MIGRATION_CONFIG,
 } from '../feature-flags/feature-flag-system';
 import { ABTestManager } from '../feature-flags/ab-testing';
 import { MigrationAutomationManager } from '../feature-flags/migration-automation';
@@ -53,7 +53,7 @@ export class MigrationIntegrationTester {
       passed: true,
       score: 100,
       details: [],
-      recommendations: []
+      recommendations: [],
     };
   }
 }

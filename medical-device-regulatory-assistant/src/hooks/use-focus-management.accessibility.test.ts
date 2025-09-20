@@ -3,13 +3,17 @@
  */
 
 import { renderHook, act } from '@testing-library/react';
-import { useFocusManagement, useFormFocusManagement, useAccessibilityAnnouncements } from './use-focus-management';
+import {
+  useFocusManagement,
+  useFormFocusManagement,
+  useAccessibilityAnnouncements,
+} from './use-focus-management';
 
 describe('Focus Management Hooks - Accessibility', () => {
   beforeEach(() => {
     // Clear the DOM
     document.body.innerHTML = '';
-    
+
     // Mock focus methods
     HTMLElement.prototype.focus = jest.fn();
     HTMLElement.prototype.blur = jest.fn();
@@ -27,7 +31,9 @@ describe('Focus Management Hooks - Accessibility', () => {
     });
 
     it('should provide proper focus props for accessibility', () => {
-      const { result } = renderHook(() => useFocusManagement({ trapFocus: true }));
+      const { result } = renderHook(() =>
+        useFocusManagement({ trapFocus: true })
+      );
 
       expect(result.current.focusProps).toHaveProperty('role', 'dialog');
       expect(result.current.focusProps).toHaveProperty('aria-modal', 'true');
@@ -35,16 +41,18 @@ describe('Focus Management Hooks - Accessibility', () => {
     });
 
     it('should handle focus trapping when enabled', () => {
-      const { result } = renderHook(() => useFocusManagement({ trapFocus: true }));
+      const { result } = renderHook(() =>
+        useFocusManagement({ trapFocus: true })
+      );
 
       // Create a container with focusable elements
       const container = document.createElement('div');
       const button1 = document.createElement('button');
       const button2 = document.createElement('button');
-      
+
       button1.textContent = 'Button 1';
       button2.textContent = 'Button 2';
-      
+
       container.appendChild(button1);
       container.appendChild(button2);
       document.body.appendChild(container);
@@ -80,7 +88,7 @@ describe('Focus Management Hooks - Accessibility', () => {
       // Create a mock input
       const input = document.createElement('input');
       input.focus = jest.fn();
-      
+
       // Set the ref
       if (result.current.firstInputRef.current) {
         result.current.firstInputRef.current = input;
@@ -150,7 +158,7 @@ describe('Focus Management Hooks - Accessibility', () => {
 
     it('should clear announcement after timeout', async () => {
       jest.useFakeTimers();
-      
+
       const { result } = renderHook(() => useAccessibilityAnnouncements());
 
       act(() => {

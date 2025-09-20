@@ -2,7 +2,13 @@
  * Enhanced form hook with real-time validation, auto-save, and accessibility features
  */
 
-import { useForm, UseFormProps, UseFormReturn, FieldValues, Path } from 'react-hook-form';
+import {
+  useForm,
+  UseFormProps,
+  UseFormReturn,
+  FieldValues,
+  Path,
+} from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -10,7 +16,8 @@ import { useAutoSave } from './use-auto-save';
 import { useFormToast } from './use-form-toast';
 import { useRealTimeValidation } from '@/components/forms/FormValidation';
 
-export interface EnhancedFormOptions<T extends FieldValues> extends UseFormProps<T> {
+export interface EnhancedFormOptions<T extends FieldValues>
+  extends UseFormProps<T> {
   schema: z.ZodSchema<T>;
   autoSave?: {
     enabled: boolean;
@@ -29,28 +36,33 @@ export interface EnhancedFormOptions<T extends FieldValues> extends UseFormProps
   formName?: string;
 }
 
-export interface EnhancedFormReturn<T extends FieldValues> extends UseFormReturn<T> {
+export interface EnhancedFormReturn<T extends FieldValues>
+  extends UseFormReturn<T> {
   // Real-time validation
-  validateField: (fieldName: keyof T, value: any, immediate?: boolean) => Promise<void>;
+  validateField: (
+    fieldName: keyof T,
+    value: any,
+    immediate?: boolean
+  ) => Promise<void>;
   getFieldValidation: (fieldName: keyof T) => {
     isValid: boolean;
     isValidating: boolean;
     hasBeenTouched: boolean;
     message?: string;
   };
-  
+
   // Auto-save functionality
   saveNow: () => Promise<void>;
   isSaving: boolean;
   lastSaved?: Date;
-  
+
   // Enhanced submission
   submitWithFeedback: (onSubmit: (data: T) => Promise<void>) => Promise<void>;
-  
+
   // Form state helpers
   isDirtyField: (fieldName: keyof T) => boolean;
   getTouchedFields: () => (keyof T)[];
-  
+
   // Accessibility helpers
   focusFirstError: () => void;
   announceFormState: (message: string) => void;
@@ -76,10 +88,8 @@ export function useEnhancedForm<T extends FieldValues>(
   });
 
   // Real-time validation
-  const { validateField, getFieldValidation, validateAllFields } = useRealTimeValidation(
-    schema,
-    realTimeValidation.debounceMs
-  );
+  const { validateField, getFieldValidation, validateAllFields } =
+    useRealTimeValidation(schema, realTimeValidation.debounceMs);
 
   // Form toast notifications
   const formToast = useFormToast();
@@ -90,21 +100,18 @@ export function useEnhancedForm<T extends FieldValues>(
   const previousDataRef = useRef<T>();
 
   // Auto-save functionality
-  const { saveNow, isSaving } = useAutoSave(
-    JSON.stringify(watchedData),
-    {
-      delay: autoSave?.interval || 2000,
-      enabled: autoSave?.enabled || false,
-      onSave: async (content: string) => {
-        if (autoSave?.onSave) {
-          const data = JSON.parse(content) as T;
-          await autoSave.onSave(data);
-          setLastSaved(new Date());
-          formToast.showAutoSaveSuccess({ formName });
-        }
-      },
-    }
-  );
+  const { saveNow, isSaving } = useAutoSave(JSON.stringify(watchedData), {
+    delay: autoSave?.interval || 2000,
+    enabled: autoSave?.enabled || false,
+    onSave: async (content: string) => {
+      if (autoSave?.onSave) {
+        const data = JSON.parse(content) as T;
+        await autoSave.onSave(data);
+        setLastSaved(new Date());
+        formToast.showAutoSaveSuccess({ formName });
+      }
+    },
+  });
 
   // Real-time validation on field changes
   useEffect(() => {
@@ -133,12 +140,12 @@ export function useEnhancedForm<T extends FieldValues>(
       try {
         // Validate all fields first
         const isValid = await form.trigger();
-        
+
         if (!isValid) {
           if (accessibility.focusFirstError) {
             focusFirstError();
           }
-          
+
           if (accessibility.announceErrors) {
             const errors = Object.keys(form.formState.errors);
             formToast.showValidationError(
@@ -151,16 +158,15 @@ export function useEnhancedForm<T extends FieldValues>(
 
         // Get form data
         const data = form.getValues();
-        
+
         // Submit the form
         await onSubmit(data);
-        
+
         // Show success message
         formToast.showSubmissionSuccess(
           `${formName || 'Form'} submitted successfully`,
           { formName }
         );
-
       } catch (error) {
         console.error('Form submission error:', error);
         formToast.showSubmissionError(error as Error, { formName });
@@ -173,7 +179,9 @@ export function useEnhancedForm<T extends FieldValues>(
   const focusFirstError = useCallback(() => {
     const firstErrorField = Object.keys(form.formState.errors)[0];
     if (firstErrorField) {
-      const element = document.querySelector(`[name="${firstErrorField}"]`) as HTMLElement;
+      const element = document.querySelector(
+        `[name="${firstErrorField}"]`
+      ) as HTMLElement;
       if (element) {
         element.focus();
         element.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -189,9 +197,9 @@ export function useEnhancedForm<T extends FieldValues>(
     announcement.setAttribute('aria-atomic', 'true');
     announcement.className = 'sr-only';
     announcement.textContent = message;
-    
+
     document.body.appendChild(announcement);
-    
+
     // Remove after announcement
     setTimeout(() => {
       document.body.removeChild(announcement);
@@ -219,7 +227,11 @@ export function useEnhancedForm<T extends FieldValues>(
         if (saved) {
           const data = JSON.parse(saved);
           form.reset(data);
-          setLastSaved(new Date(localStorage.getItem(`${autoSave.storageKey}_timestamp`) || ''));
+          setLastSaved(
+            new Date(
+              localStorage.getItem(`${autoSave.storageKey}_timestamp`) || ''
+            )
+          );
         }
       } catch (error) {
         console.warn('Failed to load saved form data:', error);
@@ -232,7 +244,10 @@ export function useEnhancedForm<T extends FieldValues>(
     if (autoSave?.storageKey && form.formState.isDirty) {
       try {
         localStorage.setItem(autoSave.storageKey, JSON.stringify(watchedData));
-        localStorage.setItem(`${autoSave.storageKey}_timestamp`, new Date().toISOString());
+        localStorage.setItem(
+          `${autoSave.storageKey}_timestamp`,
+          new Date().toISOString()
+        );
       } catch (error) {
         console.warn('Failed to save form data to localStorage:', error);
       }

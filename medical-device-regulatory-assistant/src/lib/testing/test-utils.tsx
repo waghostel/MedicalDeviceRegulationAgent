@@ -188,10 +188,10 @@ export const renderWithProviders = (
   // Setup MockRegistry system if enabled
   if (useMockRegistry) {
     const integration = getDefaultIntegration();
-    
+
     // Load preset if specified
     if (mockPreset) {
-      loadMockPreset(mockPreset).catch(error => {
+      loadMockPreset(mockPreset).catch((error) => {
         console.warn(`Failed to load mock preset '${mockPreset}':`, error);
       });
     }

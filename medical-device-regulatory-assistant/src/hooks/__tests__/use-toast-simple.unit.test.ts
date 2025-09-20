@@ -89,7 +89,7 @@ describe('Toast System Basic Functionality', () => {
 
   it('should handle retry functionality', () => {
     const mockRetry = jest.fn();
-    
+
     const retryToast = toast({
       title: 'Retryable Toast',
       onRetry: mockRetry,

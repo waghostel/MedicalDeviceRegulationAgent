@@ -3,12 +3,12 @@
  * Converts mock data generators to database-compatible seed scripts
  */
 
-import { 
-  generateDatabaseSeed, 
-  generateTestScenario, 
+import {
+  generateDatabaseSeed,
+  generateTestScenario,
   TestScenario,
   type DatabaseSeed,
-  type MockDataSet 
+  type MockDataSet,
 } from '../mock-data';
 
 export interface DatabaseSeedScript {
@@ -47,7 +47,7 @@ export class DatabaseSeedGenerator {
     scripts.push(this.generateDefaultSeedScript());
 
     // Scenario-specific seed scripts
-    Object.values(TestScenario).forEach(scenario => {
+    Object.values(TestScenario).forEach((scenario) => {
       scripts.push(this.generateScenarioSeedScript(scenario));
     });
 
@@ -59,7 +59,7 @@ export class DatabaseSeedGenerator {
    */
   private static generateDefaultSeedScript(): DatabaseSeedScript {
     const seedData = generateDatabaseSeed();
-    
+
     return {
       id: 'default-seed',
       name: 'Default Test Data Seed',
@@ -69,41 +69,49 @@ export class DatabaseSeedGenerator {
       pythonScript: this.generatePythonScript(seedData, 'default'),
       validationQueries: this.generateValidationQueries(seedData),
       cleanupStatements: this.generateCleanupStatements(),
-      dependencies: []
+      dependencies: [],
     };
   }
 
   /**
    * Generate scenario-specific seed script
    */
-  private static generateScenarioSeedScript(scenario: TestScenario): DatabaseSeedScript {
+  private static generateScenarioSeedScript(
+    scenario: TestScenario
+  ): DatabaseSeedScript {
     const mockDataSet = generateTestScenario(scenario);
-    
+
     return {
       id: `${scenario}-seed`,
-      name: `${scenario.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())} Seed`,
+      name: `${scenario.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase())} Seed`,
       description: `Test data for ${scenario} testing scenario`,
       scenario,
       sqlStatements: this.generateSQLStatements(mockDataSet),
       pythonScript: this.generatePythonScript(mockDataSet, scenario),
       validationQueries: this.generateValidationQueries(mockDataSet),
       cleanupStatements: this.generateCleanupStatements(),
-      dependencies: scenario === TestScenario.NEW_USER_ONBOARDING ? [] : ['default-seed']
+      dependencies:
+        scenario === TestScenario.NEW_USER_ONBOARDING ? [] : ['default-seed'],
     };
   }
 
   /**
    * Generate SQL INSERT statements from mock data
    */
-  private static generateSQLStatements(data: DatabaseSeed | MockDataSet): string[] {
+  private static generateSQLStatements(
+    data: DatabaseSeed | MockDataSet
+  ): string[] {
     const statements: string[] = [];
 
     // Users table
     if (data.users.length > 0) {
-      const userValues = data.users.map(user => 
-        `('${user.email}', '${user.name}', '${user.id}', '${user.createdAt}', '${user.updatedAt}')`
-      ).join(',\n    ');
-      
+      const userValues = data.users
+        .map(
+          (user) =>
+            `('${user.email}', '${user.name}', '${user.id}', '${user.createdAt}', '${user.updatedAt}')`
+        )
+        .join(',\n    ');
+
       statements.push(`
 INSERT INTO users (email, name, google_id, created_at, updated_at) VALUES
     ${userValues}
@@ -114,10 +122,13 @@ ON CONFLICT (email) DO UPDATE SET
 
     // Projects table
     if (data.projects.length > 0) {
-      const projectValues = data.projects.map(project => 
-        `(${project.id}, '${project.user_id}', '${project.name}', ${project.description ? `'${project.description.replace(/'/g, "''")}'` : 'NULL'}, ${project.device_type ? `'${project.device_type}'` : 'NULL'}, ${project.intended_use ? `'${project.intended_use.replace(/'/g, "''")}'` : 'NULL'}, '${project.status}', '${project.created_at}', '${project.updated_at}')`
-      ).join(',\n    ');
-      
+      const projectValues = data.projects
+        .map(
+          (project) =>
+            `(${project.id}, '${project.user_id}', '${project.name}', ${project.description ? `'${project.description.replace(/'/g, "''")}'` : 'NULL'}, ${project.device_type ? `'${project.device_type}'` : 'NULL'}, ${project.intended_use ? `'${project.intended_use.replace(/'/g, "''")}'` : 'NULL'}, '${project.status}', '${project.created_at}', '${project.updated_at}')`
+        )
+        .join(',\n    ');
+
       statements.push(`
 INSERT INTO projects (id, user_id, name, description, device_type, intended_use, status, created_at, updated_at) VALUES
     ${projectValues}
@@ -132,10 +143,13 @@ ON CONFLICT (id) DO UPDATE SET
 
     // Device Classifications table
     if (data.classifications.length > 0) {
-      const classificationValues = data.classifications.map(classification => 
-        `('${classification.projectId}', ${classification.deviceClass ? `'${classification.deviceClass}'` : 'NULL'}, ${classification.productCode ? `'${classification.productCode}'` : 'NULL'}, ${classification.regulatoryPathway ? `'${classification.regulatoryPathway}'` : 'NULL'}, ${classification.cfrSections ? `'${JSON.stringify(classification.cfrSections)}'` : 'NULL'}, ${classification.confidenceScore || 'NULL'}, ${classification.reasoning ? `'${classification.reasoning.replace(/'/g, "''")}'` : 'NULL'}, ${classification.sources ? `'${JSON.stringify(classification.sources)}'` : 'NULL'}, '${classification.createdAt}', '${classification.updatedAt}')`
-      ).join(',\n    ');
-      
+      const classificationValues = data.classifications
+        .map(
+          (classification) =>
+            `('${classification.projectId}', ${classification.deviceClass ? `'${classification.deviceClass}'` : 'NULL'}, ${classification.productCode ? `'${classification.productCode}'` : 'NULL'}, ${classification.regulatoryPathway ? `'${classification.regulatoryPathway}'` : 'NULL'}, ${classification.cfrSections ? `'${JSON.stringify(classification.cfrSections)}'` : 'NULL'}, ${classification.confidenceScore || 'NULL'}, ${classification.reasoning ? `'${classification.reasoning.replace(/'/g, "''")}'` : 'NULL'}, ${classification.sources ? `'${JSON.stringify(classification.sources)}'` : 'NULL'}, '${classification.createdAt}', '${classification.updatedAt}')`
+        )
+        .join(',\n    ');
+
       statements.push(`
 INSERT INTO device_classifications (project_id, device_class, product_code, regulatory_pathway, cfr_sections, confidence_score, reasoning, sources, created_at, updated_at) VALUES
     ${classificationValues};`);
@@ -143,10 +157,13 @@ INSERT INTO device_classifications (project_id, device_class, product_code, regu
 
     // Predicate Devices table
     if (data.predicateDevices.length > 0) {
-      const predicateValues = data.predicateDevices.map(predicate => 
-        `('${predicate.projectId}', '${predicate.kNumber}', ${predicate.deviceName ? `'${predicate.deviceName.replace(/'/g, "''")}'` : 'NULL'}, ${predicate.intendedUse ? `'${predicate.intendedUse.replace(/'/g, "''")}'` : 'NULL'}, ${predicate.productCode ? `'${predicate.productCode}'` : 'NULL'}, ${predicate.clearanceDate ? `'${predicate.clearanceDate}'` : 'NULL'}, ${predicate.confidenceScore || 'NULL'}, ${predicate.comparisonData ? `'${JSON.stringify(predicate.comparisonData)}'` : 'NULL'}, ${predicate.isSelected}, '${predicate.createdAt}', '${predicate.updatedAt}')`
-      ).join(',\n    ');
-      
+      const predicateValues = data.predicateDevices
+        .map(
+          (predicate) =>
+            `('${predicate.projectId}', '${predicate.kNumber}', ${predicate.deviceName ? `'${predicate.deviceName.replace(/'/g, "''")}'` : 'NULL'}, ${predicate.intendedUse ? `'${predicate.intendedUse.replace(/'/g, "''")}'` : 'NULL'}, ${predicate.productCode ? `'${predicate.productCode}'` : 'NULL'}, ${predicate.clearanceDate ? `'${predicate.clearanceDate}'` : 'NULL'}, ${predicate.confidenceScore || 'NULL'}, ${predicate.comparisonData ? `'${JSON.stringify(predicate.comparisonData)}'` : 'NULL'}, ${predicate.isSelected}, '${predicate.createdAt}', '${predicate.updatedAt}')`
+        )
+        .join(',\n    ');
+
       statements.push(`
 INSERT INTO predicate_devices (project_id, k_number, device_name, intended_use, product_code, clearance_date, confidence_score, comparison_data, is_selected, created_at, updated_at) VALUES
     ${predicateValues};`);
@@ -154,10 +171,13 @@ INSERT INTO predicate_devices (project_id, k_number, device_name, intended_use, 
 
     // Agent Interactions table
     if (data.agentInteractions.length > 0) {
-      const interactionValues = data.agentInteractions.map(interaction => 
-        `(${interaction.project_id}, '${interaction.user_id}', '${interaction.agent_action}', ${interaction.input_data ? `'${JSON.stringify(interaction.input_data)}'` : 'NULL'}, ${interaction.output_data ? `'${JSON.stringify(interaction.output_data)}'` : 'NULL'}, ${interaction.confidence_score || 'NULL'}, ${interaction.sources ? `'${JSON.stringify(interaction.sources)}'` : 'NULL'}, ${interaction.reasoning ? `'${interaction.reasoning.replace(/'/g, "''")}'` : 'NULL'}, ${interaction.execution_time_ms || 'NULL'}, '${interaction.created_at}', '${new Date().toISOString()}')`
-      ).join(',\n    ');
-      
+      const interactionValues = data.agentInteractions
+        .map(
+          (interaction) =>
+            `(${interaction.project_id}, '${interaction.user_id}', '${interaction.agent_action}', ${interaction.input_data ? `'${JSON.stringify(interaction.input_data)}'` : 'NULL'}, ${interaction.output_data ? `'${JSON.stringify(interaction.output_data)}'` : 'NULL'}, ${interaction.confidence_score || 'NULL'}, ${interaction.sources ? `'${JSON.stringify(interaction.sources)}'` : 'NULL'}, ${interaction.reasoning ? `'${interaction.reasoning.replace(/'/g, "''")}'` : 'NULL'}, ${interaction.execution_time_ms || 'NULL'}, '${interaction.created_at}', '${new Date().toISOString()}')`
+        )
+        .join(',\n    ');
+
       statements.push(`
 INSERT INTO agent_interactions (project_id, user_id, agent_action, input_data, output_data, confidence_score, sources, reasoning, execution_time_ms, created_at, updated_at) VALUES
     ${interactionValues};`);
@@ -169,7 +189,10 @@ INSERT INTO agent_interactions (project_id, user_id, agent_action, input_data, o
   /**
    * Generate Python script for database seeding
    */
-  private static generatePythonScript(data: DatabaseSeed | MockDataSet, scenario: string): string {
+  private static generatePythonScript(
+    data: DatabaseSeed | MockDataSet,
+    scenario: string
+  ): string {
     return `#!/usr/bin/env python3
 """
 Database Seed Script - ${scenario}
@@ -468,7 +491,9 @@ if __name__ == "__main__":
   /**
    * Generate validation queries to verify seeded data
    */
-  private static generateValidationQueries(data: DatabaseSeed | MockDataSet): string[] {
+  private static generateValidationQueries(
+    data: DatabaseSeed | MockDataSet
+  ): string[] {
     return [
       // Count queries
       'SELECT COUNT(*) as user_count FROM users;',
@@ -476,24 +501,24 @@ if __name__ == "__main__":
       'SELECT COUNT(*) as classification_count FROM device_classifications;',
       'SELECT COUNT(*) as predicate_count FROM predicate_devices;',
       'SELECT COUNT(*) as interaction_count FROM agent_interactions;',
-      
+
       // Relationship validation
       'SELECT COUNT(*) as orphaned_projects FROM projects p LEFT JOIN users u ON p.user_id = u.id WHERE u.id IS NULL;',
       'SELECT COUNT(*) as orphaned_classifications FROM device_classifications dc LEFT JOIN projects p ON dc.project_id = p.id WHERE p.id IS NULL;',
       'SELECT COUNT(*) as orphaned_predicates FROM predicate_devices pd LEFT JOIN projects p ON pd.project_id = p.id WHERE p.id IS NULL;',
       'SELECT COUNT(*) as orphaned_interactions FROM agent_interactions ai LEFT JOIN projects p ON ai.project_id = p.id WHERE p.id IS NULL;',
-      
+
       // Data quality checks
-      'SELECT COUNT(*) as users_without_email FROM users WHERE email IS NULL OR email = \'\';',
-      'SELECT COUNT(*) as projects_without_name FROM projects WHERE name IS NULL OR name = \'\';',
+      "SELECT COUNT(*) as users_without_email FROM users WHERE email IS NULL OR email = '';",
+      "SELECT COUNT(*) as projects_without_name FROM projects WHERE name IS NULL OR name = '';",
       'SELECT COUNT(*) as classifications_without_confidence FROM device_classifications WHERE confidence_score IS NULL;',
-      'SELECT COUNT(*) as predicates_without_k_number FROM predicate_devices WHERE k_number IS NULL OR k_number = \'\';',
-      
+      "SELECT COUNT(*) as predicates_without_k_number FROM predicate_devices WHERE k_number IS NULL OR k_number = '';",
+
       // Sample data queries
       'SELECT name, email FROM users LIMIT 5;',
       'SELECT name, status, device_type FROM projects LIMIT 5;',
       'SELECT device_class, product_code, confidence_score FROM device_classifications LIMIT 5;',
-      'SELECT k_number, device_name, confidence_score FROM predicate_devices LIMIT 5;'
+      'SELECT k_number, device_name, confidence_score FROM predicate_devices LIMIT 5;',
     ];
   }
 
@@ -503,17 +528,17 @@ if __name__ == "__main__":
   private static generateCleanupStatements(): string[] {
     return [
       // Delete in reverse dependency order
-      'DELETE FROM agent_interactions WHERE project_id IN (SELECT id FROM projects WHERE name LIKE \'%Test%\' OR name LIKE \'%Mock%\');',
-      'DELETE FROM predicate_devices WHERE project_id IN (SELECT id FROM projects WHERE name LIKE \'%Test%\' OR name LIKE \'%Mock%\');',
-      'DELETE FROM device_classifications WHERE project_id IN (SELECT id FROM projects WHERE name LIKE \'%Test%\' OR name LIKE \'%Mock%\');',
-      'DELETE FROM projects WHERE name LIKE \'%Test%\' OR name LIKE \'%Mock%\';',
-      'DELETE FROM users WHERE email LIKE \'%example.com\' OR email LIKE \'%test.com\';',
-      
+      "DELETE FROM agent_interactions WHERE project_id IN (SELECT id FROM projects WHERE name LIKE '%Test%' OR name LIKE '%Mock%');",
+      "DELETE FROM predicate_devices WHERE project_id IN (SELECT id FROM projects WHERE name LIKE '%Test%' OR name LIKE '%Mock%');",
+      "DELETE FROM device_classifications WHERE project_id IN (SELECT id FROM projects WHERE name LIKE '%Test%' OR name LIKE '%Mock%');",
+      "DELETE FROM projects WHERE name LIKE '%Test%' OR name LIKE '%Mock%';",
+      "DELETE FROM users WHERE email LIKE '%example.com' OR email LIKE '%test.com';",
+
       // Reset sequences (SQLite)
-      'DELETE FROM sqlite_sequence WHERE name IN (\'users\', \'projects\', \'device_classifications\', \'predicate_devices\', \'agent_interactions\');',
-      
+      "DELETE FROM sqlite_sequence WHERE name IN ('users', 'projects', 'device_classifications', 'predicate_devices', 'agent_interactions');",
+
       // Vacuum to reclaim space
-      'VACUUM;'
+      'VACUUM;',
     ];
   }
 }
@@ -533,7 +558,9 @@ export class DatabaseSeedExecutor {
   /**
    * Execute a seed script
    */
-  async executeSeedScript(script: DatabaseSeedScript): Promise<SeedExecutionResult> {
+  async executeSeedScript(
+    script: DatabaseSeedScript
+  ): Promise<SeedExecutionResult> {
     const startTime = Date.now();
     const result: SeedExecutionResult = {
       scriptId: script.id,
@@ -541,7 +568,7 @@ export class DatabaseSeedExecutor {
       recordsInserted: 0,
       executionTime: 0,
       errors: [],
-      warnings: []
+      warnings: [],
     };
 
     try {
@@ -560,10 +587,11 @@ export class DatabaseSeedExecutor {
 
       result.success = true;
       result.executionTime = Date.now() - startTime;
-
     } catch (error) {
       result.success = false;
-      result.errors.push(error instanceof Error ? error.message : String(error));
+      result.errors.push(
+        error instanceof Error ? error.message : String(error)
+      );
       result.executionTime = Date.now() - startTime;
     }
 
@@ -599,7 +627,7 @@ export class DatabaseSeedExecutor {
    */
   async cleanupDatabase(): Promise<void> {
     const cleanupScript = DatabaseSeedGenerator.generateAllSeedScripts()[0];
-    
+
     try {
       // Execute cleanup statements
       for (const statement of cleanupScript.cleanupStatements) {
@@ -607,7 +635,7 @@ export class DatabaseSeedExecutor {
         // In real implementation, would execute SQL statement
         // await this.executeSQL(statement);
       }
-      
+
       console.log('Database cleanup completed successfully');
     } catch (error) {
       console.error('Database cleanup failed:', error);
@@ -620,7 +648,9 @@ export class DatabaseSeedExecutor {
    */
   private async validateDependencies(dependencies: string[]): Promise<void> {
     for (const dependency of dependencies) {
-      const dependencyResult = this.executionHistory.find(r => r.scriptId === dependency);
+      const dependencyResult = this.executionHistory.find(
+        (r) => r.scriptId === dependency
+      );
       if (!dependencyResult || !dependencyResult.success) {
         throw new Error(`Dependency ${dependency} not satisfied`);
       }
@@ -630,11 +660,14 @@ export class DatabaseSeedExecutor {
   /**
    * Execute Python script (simulated)
    */
-  private async executePythonScript(script: string, result: SeedExecutionResult): Promise<void> {
+  private async executePythonScript(
+    script: string,
+    result: SeedExecutionResult
+  ): Promise<void> {
     console.log('Executing Python seed script...');
     // In real implementation, would execute Python script
     // const output = await exec(`python3 -c "${script}"`);
-    
+
     // Simulate successful execution
     result.recordsInserted = 50; // Mock value
     result.warnings.push('Python script execution simulated');
@@ -643,37 +676,45 @@ export class DatabaseSeedExecutor {
   /**
    * Execute SQL statements (simulated)
    */
-  private async executeSQLStatements(statements: string[], result: SeedExecutionResult): Promise<void> {
+  private async executeSQLStatements(
+    statements: string[],
+    result: SeedExecutionResult
+  ): Promise<void> {
     let recordCount = 0;
-    
+
     for (const statement of statements) {
       console.log(`Executing SQL: ${statement.substring(0, 50)}...`);
       // In real implementation, would execute SQL statement
       // const queryResult = await this.executeSQL(statement);
       // recordCount += queryResult.rowsAffected;
-      
+
       // Simulate record insertion
       recordCount += 10; // Mock value
     }
-    
+
     result.recordsInserted = recordCount;
   }
 
   /**
    * Run validation queries
    */
-  private async runValidationQueries(queries: string[], result: SeedExecutionResult): Promise<void> {
+  private async runValidationQueries(
+    queries: string[],
+    result: SeedExecutionResult
+  ): Promise<void> {
     for (const query of queries) {
       console.log(`Validating: ${query.substring(0, 50)}...`);
       // In real implementation, would execute validation query
       // const queryResult = await this.executeSQL(query);
-      
+
       // Check for data quality issues
       if (query.includes('orphaned') || query.includes('without')) {
         // Simulate validation check
         const mockCount = Math.random() > 0.9 ? 1 : 0; // 10% chance of finding issues
         if (mockCount > 0) {
-          result.warnings.push(`Validation query found ${mockCount} issues: ${query}`);
+          result.warnings.push(
+            `Validation query found ${mockCount} issues: ${query}`
+          );
         }
       }
     }
@@ -682,7 +723,9 @@ export class DatabaseSeedExecutor {
   /**
    * Sort scripts by dependencies
    */
-  private sortScriptsByDependencies(scripts: DatabaseSeedScript[]): DatabaseSeedScript[] {
+  private sortScriptsByDependencies(
+    scripts: DatabaseSeedScript[]
+  ): DatabaseSeedScript[] {
     const sorted: DatabaseSeedScript[] = [];
     const visited = new Set<string>();
     const visiting = new Set<string>();
@@ -698,7 +741,7 @@ export class DatabaseSeedExecutor {
       visiting.add(script.id);
 
       for (const depId of script.dependencies) {
-        const depScript = scripts.find(s => s.id === depId);
+        const depScript = scripts.find((s) => s.id === depId);
         if (depScript) {
           visit(depScript);
         }
@@ -728,9 +771,17 @@ export class DatabaseSeedExecutor {
    */
   generateExecutionReport(): string {
     const totalScripts = this.executionHistory.length;
-    const successfulScripts = this.executionHistory.filter(r => r.success).length;
-    const totalRecords = this.executionHistory.reduce((sum, r) => sum + r.recordsInserted, 0);
-    const totalTime = this.executionHistory.reduce((sum, r) => sum + r.executionTime, 0);
+    const successfulScripts = this.executionHistory.filter(
+      (r) => r.success
+    ).length;
+    const totalRecords = this.executionHistory.reduce(
+      (sum, r) => sum + r.recordsInserted,
+      0
+    );
+    const totalTime = this.executionHistory.reduce(
+      (sum, r) => sum + r.executionTime,
+      0
+    );
 
     return `
 # Database Seed Execution Report
@@ -743,7 +794,9 @@ export class DatabaseSeedExecutor {
 - **Total Execution Time**: ${totalTime}ms
 
 ## Script Results
-${this.executionHistory.map(result => `
+${this.executionHistory
+  .map(
+    (result) => `
 ### ${result.scriptId}
 - **Status**: ${result.success ? '✅ Success' : '❌ Failed'}
 - **Records Inserted**: ${result.recordsInserted}
@@ -751,9 +804,11 @@ ${this.executionHistory.map(result => `
 - **Errors**: ${result.errors.length}
 - **Warnings**: ${result.warnings.length}
 
-${result.errors.length > 0 ? `**Errors:**\n${result.errors.map(e => `- ${e}`).join('\n')}` : ''}
-${result.warnings.length > 0 ? `**Warnings:**\n${result.warnings.map(w => `- ${w}`).join('\n')}` : ''}
-`).join('')}
+${result.errors.length > 0 ? `**Errors:**\n${result.errors.map((e) => `- ${e}`).join('\n')}` : ''}
+${result.warnings.length > 0 ? `**Warnings:**\n${result.warnings.map((w) => `- ${w}`).join('\n')}` : ''}
+`
+  )
+  .join('')}
 
 ---
 *Generated on: ${new Date().toISOString()}*

@@ -3,18 +3,18 @@
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { 
+import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { 
-  CheckCircle, 
-  AlertTriangle, 
+import {
+  CheckCircle,
+  AlertTriangle,
   Info,
   ArrowRight,
-  ExternalLink
+  ExternalLink,
 } from 'lucide-react';
 import { ExpandedReasoning, ReasoningStep } from '@/types/audit';
 
@@ -44,8 +44,10 @@ export function ReasoningTrace({ reasoning }: ReasoningTraceProps) {
     <div className="space-y-4 mt-4">
       {/* Reasoning Steps */}
       <div className="space-y-3">
-        <h5 className="text-sm font-medium text-muted-foreground">Analysis Steps</h5>
-        
+        <h5 className="text-sm font-medium text-muted-foreground">
+          Analysis Steps
+        </h5>
+
         {reasoning.steps.map((step, index) => (
           <div key={step.step} className="flex gap-3">
             {/* Step Number and Icon */}
@@ -68,13 +70,15 @@ export function ReasoningTrace({ reasoning }: ReasoningTraceProps) {
               {/* Step Confidence */}
               {step.confidence !== undefined && (
                 <div className="flex items-center gap-2 mb-2">
-                  <span className="text-xs text-muted-foreground">Confidence:</span>
+                  <span className="text-xs text-muted-foreground">
+                    Confidence:
+                  </span>
                   <TooltipProvider>
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <div className="flex items-center gap-2">
                           <div className="w-16 h-1.5 bg-gray-200 rounded-full overflow-hidden">
-                            <div 
+                            <div
                               className={`h-full ${getConfidenceColor(step.confidence)} transition-all duration-300`}
                               style={{ width: `${step.confidence * 100}%` }}
                             />
@@ -113,8 +117,8 @@ export function ReasoningTrace({ reasoning }: ReasoningTraceProps) {
                     <TooltipProvider key={sourceIndex}>
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <Badge 
-                            variant="outline" 
+                          <Badge
+                            variant="outline"
                             className="text-xs cursor-pointer hover:bg-muted"
                             onClick={() => window.open(source.url, '_blank')}
                           >
@@ -142,7 +146,9 @@ export function ReasoningTrace({ reasoning }: ReasoningTraceProps) {
 
       {/* Conclusion */}
       <div className="border-t pt-4">
-        <h5 className="text-sm font-medium text-muted-foreground mb-2">Conclusion</h5>
+        <h5 className="text-sm font-medium text-muted-foreground mb-2">
+          Conclusion
+        </h5>
         <div className="bg-primary/5 border border-primary/20 rounded-md p-3">
           <p className="text-sm">{reasoning.conclusion}</p>
         </div>
@@ -151,7 +157,9 @@ export function ReasoningTrace({ reasoning }: ReasoningTraceProps) {
       {/* Limitations */}
       {reasoning.limitations.length > 0 && (
         <div className="border-t pt-4">
-          <h5 className="text-sm font-medium text-muted-foreground mb-2">Limitations & Disclaimers</h5>
+          <h5 className="text-sm font-medium text-muted-foreground mb-2">
+            Limitations & Disclaimers
+          </h5>
           <div className="bg-yellow-50 border border-yellow-200 rounded-md p-3">
             <ul className="space-y-1">
               {reasoning.limitations.map((limitation, index) => (

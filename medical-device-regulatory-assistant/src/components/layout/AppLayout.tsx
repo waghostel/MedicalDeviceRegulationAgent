@@ -6,7 +6,10 @@ import { Sidebar } from './Sidebar';
 import { QuickActionsToolbar } from './QuickActionsToolbar';
 import { CommandPalette } from './CommandPalette';
 import { Breadcrumb, BreadcrumbItem } from './Breadcrumb';
-import { useKeyboardShortcuts, createRegulatoryShortcuts } from '@/hooks/useKeyboardShortcuts';
+import {
+  useKeyboardShortcuts,
+  createRegulatoryShortcuts,
+} from '@/hooks/useKeyboardShortcuts';
 import { cn } from '@/lib/utils';
 
 interface AppLayoutProps {
@@ -61,7 +64,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
   return (
     <div className="min-h-screen bg-background">
       <Header onMenuToggle={toggleSidebar} showMenuButton={showSidebar} />
-      
+
       {/* Quick Actions Toolbar */}
       <QuickActionsToolbar onAction={handleQuickAction} />
 

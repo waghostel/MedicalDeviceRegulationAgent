@@ -1,16 +1,16 @@
 /**
  * Mock Data Generators - Legacy Support
- * 
+ *
  * This file contains mock data generators that were used during development
  * and testing phases. As of the migration to real backend integration,
  * these generators are no longer used in production components.
- * 
+ *
  * They are kept for:
  * - Unit testing isolated components
  * - Development environment seeding
  * - E2E testing scenarios
  * - Future testing needs
- * 
+ *
  * @deprecated Most generators are no longer used in production code
  */
 
@@ -23,7 +23,7 @@ import {
   TechnicalCharacteristic,
   ProgressStep,
   ActivityItem,
-  DashboardStatistics
+  DashboardStatistics,
 } from '@/types/dashboard';
 
 import {
@@ -32,7 +32,7 @@ import {
   DeviceClass,
   RegulatoryPathway,
   DocumentType,
-  AgentInteraction as ProjectAgentInteraction
+  AgentInteraction as ProjectAgentInteraction,
 } from '@/types/project';
 
 // Additional types for enhanced mock data
@@ -104,7 +104,9 @@ export interface MockDataSet {
 
 // Utility functions for generating random data
 const getRandomDate = (daysBack: number = 30): string => {
-  const date = new Date(Date.now() - Math.random() * daysBack * 24 * 60 * 60 * 1000);
+  const date = new Date(
+    Date.now() - Math.random() * daysBack * 24 * 60 * 60 * 1000
+  );
   return date.toISOString();
 };
 
@@ -113,7 +115,9 @@ const getRandomId = (prefix: string = 'id'): string => {
 };
 
 // Core mock data generators
-export const generateMockSourceCitation = (overrides?: Partial<SourceCitation>): SourceCitation => ({
+export const generateMockSourceCitation = (
+  overrides?: Partial<SourceCitation>
+): SourceCitation => ({
   url: 'https://www.accessdata.fda.gov/scripts/cdrh/cfdocs/cfpmn/pmn.cfm?ID=K123456',
   title: 'FDA 510(k) Premarket Notification Database',
   effectiveDate: '2023-01-15',
@@ -122,7 +126,9 @@ export const generateMockSourceCitation = (overrides?: Partial<SourceCitation>):
   ...overrides,
 });
 
-export const generateMockDeviceClassification = (overrides?: Partial<DeviceClassification>): DeviceClassification => ({
+export const generateMockDeviceClassification = (
+  overrides?: Partial<DeviceClassification>
+): DeviceClassification => ({
   id: getRandomId('classification'),
   projectId: getRandomId('project'),
   deviceClass: 'II',
@@ -130,7 +136,8 @@ export const generateMockDeviceClassification = (overrides?: Partial<DeviceClass
   regulatoryPathway: '510k',
   cfrSections: ['21 CFR 870.2300', '21 CFR 870.2310'],
   confidenceScore: 0.87,
-  reasoning: 'Device matches Class II cardiovascular monitoring device characteristics based on intended use and technological features.',
+  reasoning:
+    'Device matches Class II cardiovascular monitoring device characteristics based on intended use and technological features.',
   sources: [
     generateMockSourceCitation(),
     generateMockSourceCitation({
@@ -144,7 +151,9 @@ export const generateMockDeviceClassification = (overrides?: Partial<DeviceClass
   ...overrides,
 });
 
-export const generateMockTechnicalCharacteristic = (overrides?: Partial<TechnicalCharacteristic>): TechnicalCharacteristic => ({
+export const generateMockTechnicalCharacteristic = (
+  overrides?: Partial<TechnicalCharacteristic>
+): TechnicalCharacteristic => ({
   category: 'Intended Use',
   userDevice: 'Continuous cardiac monitoring',
   predicateDevice: 'Continuous cardiac monitoring',
@@ -154,7 +163,9 @@ export const generateMockTechnicalCharacteristic = (overrides?: Partial<Technica
   ...overrides,
 });
 
-export const generateMockComparisonMatrix = (overrides?: Partial<ComparisonMatrix>): ComparisonMatrix => ({
+export const generateMockComparisonMatrix = (
+  overrides?: Partial<ComparisonMatrix>
+): ComparisonMatrix => ({
   similarities: [
     generateMockTechnicalCharacteristic(),
     generateMockTechnicalCharacteristic({
@@ -163,7 +174,8 @@ export const generateMockComparisonMatrix = (overrides?: Partial<ComparisonMatri
       predicateDevice: 'ECG electrodes with Bluetooth transmission',
       similarity: 'similar',
       impact: 'low',
-      justification: 'Similar wireless technology with minor protocol differences',
+      justification:
+        'Similar wireless technology with minor protocol differences',
     }),
   ],
   differences: [
@@ -173,7 +185,8 @@ export const generateMockComparisonMatrix = (overrides?: Partial<ComparisonMatri
       predicateDevice: 'Disposable alkaline battery',
       similarity: 'different',
       impact: 'medium',
-      justification: 'Different power source may require additional biocompatibility testing',
+      justification:
+        'Different power source may require additional biocompatibility testing',
     }),
   ],
   riskAssessment: 'low',
@@ -182,16 +195,20 @@ export const generateMockComparisonMatrix = (overrides?: Partial<ComparisonMatri
     'Electrical safety testing for rechargeable components',
     'Wireless performance validation',
   ],
-  substantialEquivalenceAssessment: 'Device demonstrates substantial equivalence with minor differences requiring additional testing',
+  substantialEquivalenceAssessment:
+    'Device demonstrates substantial equivalence with minor differences requiring additional testing',
   ...overrides,
 });
 
-export const generateMockPredicateDevice = (overrides?: Partial<PredicateDevice>): PredicateDevice => ({
+export const generateMockPredicateDevice = (
+  overrides?: Partial<PredicateDevice>
+): PredicateDevice => ({
   id: getRandomId('predicate'),
   projectId: getRandomId('project'),
   kNumber: 'K123456',
   deviceName: 'CardioMonitor Pro',
-  intendedUse: 'For continuous monitoring of cardiac rhythm in hospital and home settings',
+  intendedUse:
+    'For continuous monitoring of cardiac rhythm in hospital and home settings',
   productCode: 'LRH',
   clearanceDate: '2023-01-15',
   confidenceScore: 0.92,
@@ -202,7 +219,9 @@ export const generateMockPredicateDevice = (overrides?: Partial<PredicateDevice>
   ...overrides,
 });
 
-export const generateMockProgressStep = (overrides?: Partial<ProgressStep>): ProgressStep => ({
+export const generateMockProgressStep = (
+  overrides?: Partial<ProgressStep>
+): ProgressStep => ({
   status: 'completed',
   completedAt: getRandomDate(3),
   confidenceScore: 0.87,
@@ -210,7 +229,9 @@ export const generateMockProgressStep = (overrides?: Partial<ProgressStep>): Pro
   ...overrides,
 });
 
-export const generateMockProjectProgress = (overrides?: Partial<ProjectProgress>): ProjectProgress => ({
+export const generateMockProjectProgress = (
+  overrides?: Partial<ProjectProgress>
+): ProjectProgress => ({
   projectId: getRandomId('project'),
   classification: generateMockProgressStep(),
   predicateSearch: generateMockProgressStep({
@@ -239,7 +260,9 @@ export const generateMockProjectProgress = (overrides?: Partial<ProjectProgress>
 });
 
 // Generate multiple mock predicate devices for testing
-export const generateMockPredicateDevices = (count: number = 5): PredicateDevice[] => {
+export const generateMockPredicateDevices = (
+  count: number = 5
+): PredicateDevice[] => {
   const kNumbers = ['K123456', 'K234567', 'K345678', 'K456789', 'K567890'];
   const deviceNames = [
     'CardioMonitor Pro',
@@ -255,7 +278,7 @@ export const generateMockPredicateDevices = (count: number = 5): PredicateDevice
       id: getRandomId('predicate'),
       kNumber: kNumbers[index] || `K${100000 + index}`,
       deviceName: deviceNames[index] || `Mock Device ${index + 1}`,
-      confidenceScore: confidenceScores[index] || 0.75 - (index * 0.05),
+      confidenceScore: confidenceScores[index] || 0.75 - index * 0.05,
       isSelected: index < 2, // First two are selected
     })
   );
@@ -303,7 +326,9 @@ export const generateMockSession = (overrides?: Partial<Session>): Session => ({
   ...overrides,
 });
 
-export const generateMockAuditLog = (overrides?: Partial<AuditLog>): AuditLog => ({
+export const generateMockAuditLog = (
+  overrides?: Partial<AuditLog>
+): AuditLog => ({
   id: getRandomId('audit'),
   userId: getRandomId('user'),
   projectId: getRandomId('project'),
@@ -324,7 +349,9 @@ export const generateMockAuditLog = (overrides?: Partial<AuditLog>): AuditLog =>
   ...overrides,
 });
 
-export const generateMockAgentInteraction = (overrides?: Partial<ProjectAgentInteraction>): ProjectAgentInteraction => ({
+export const generateMockAgentInteraction = (
+  overrides?: Partial<ProjectAgentInteraction>
+): ProjectAgentInteraction => ({
   id: Math.floor(Math.random() * 10000),
   project_id: Math.floor(Math.random() * 100),
   user_id: getRandomId('user'),
@@ -341,7 +368,8 @@ export const generateMockAgentInteraction = (overrides?: Partial<ProjectAgentInt
   },
   confidence_score: 0.87,
   sources: [generateMockSourceCitation()],
-  reasoning: 'Device classified as Class II based on intended use and risk profile',
+  reasoning:
+    'Device classified as Class II based on intended use and risk profile',
   execution_time_ms: 2500,
   created_at: getRandomDate(7),
   ...overrides,
@@ -351,16 +379,20 @@ export const generateMockProject = (overrides?: Partial<Project>): Project => ({
   id: Math.floor(Math.random() * 10000),
   user_id: getRandomId('user'),
   name: 'CardioProbe X',
-  description: 'Next-generation wireless cardiac monitoring device for continuous patient monitoring',
+  description:
+    'Next-generation wireless cardiac monitoring device for continuous patient monitoring',
   device_type: 'Cardiovascular Monitoring Device',
-  intended_use: 'For continuous monitoring of cardiac rhythm in hospital and home care settings',
+  intended_use:
+    'For continuous monitoring of cardiac rhythm in hospital and home care settings',
   status: ProjectStatus.IN_PROGRESS,
   created_at: getRandomDate(30),
   updated_at: getRandomDate(1),
   ...overrides,
 });
 
-export const generateMockActivityItem = (overrides?: Partial<ActivityItem>): ActivityItem => ({
+export const generateMockActivityItem = (
+  overrides?: Partial<ActivityItem>
+): ActivityItem => ({
   id: getRandomId('activity'),
   type: 'classification',
   title: 'Device Classification Completed',
@@ -374,7 +406,9 @@ export const generateMockActivityItem = (overrides?: Partial<ActivityItem>): Act
   ...overrides,
 });
 
-export const generateMockDashboardStatistics = (overrides?: Partial<DashboardStatistics>): DashboardStatistics => ({
+export const generateMockDashboardStatistics = (
+  overrides?: Partial<DashboardStatistics>
+): DashboardStatistics => ({
   totalPredicates: 8,
   selectedPredicates: 2,
   averageConfidence: 0.85,
@@ -391,19 +425,19 @@ export const generateDatabaseSeed = (): DatabaseSeed => {
       id: 'user-1',
       email: 'john.doe@medtech.com',
       name: 'John Doe',
-      role: 'admin'
+      role: 'admin',
     }),
     generateMockUser({
       id: 'user-2',
       email: 'jane.smith@medtech.com',
       name: 'Jane Smith',
-      role: 'user'
+      role: 'user',
     }),
     generateMockUser({
       id: 'user-3',
       email: 'bob.wilson@medtech.com',
       name: 'Bob Wilson',
-      role: 'viewer'
+      role: 'viewer',
     }),
   ];
 
@@ -412,21 +446,21 @@ export const generateDatabaseSeed = (): DatabaseSeed => {
       id: 1,
       user_id: 'user-1',
       name: 'CardioProbe X',
-      status: ProjectStatus.IN_PROGRESS
+      status: ProjectStatus.IN_PROGRESS,
     }),
     generateMockProject({
       id: 2,
       user_id: 'user-1',
       name: 'NeuroStim Device',
       device_type: 'Neurological Stimulation Device',
-      status: ProjectStatus.DRAFT
+      status: ProjectStatus.DRAFT,
     }),
     generateMockProject({
       id: 3,
       user_id: 'user-2',
       name: 'BloodGlucose Monitor',
       device_type: 'Glucose Monitoring Device',
-      status: ProjectStatus.COMPLETED
+      status: ProjectStatus.COMPLETED,
     }),
   ];
 
@@ -434,13 +468,13 @@ export const generateDatabaseSeed = (): DatabaseSeed => {
     generateMockDeviceClassification({
       id: 'classification-1',
       projectId: 'project-1',
-      confidenceScore: 0.87
+      confidenceScore: 0.87,
     }),
     generateMockDeviceClassification({
       id: 'classification-2',
       projectId: 'project-2',
       deviceClass: 'III',
-      confidenceScore: 0.65
+      confidenceScore: 0.65,
     }),
   ];
 
@@ -450,13 +484,13 @@ export const generateDatabaseSeed = (): DatabaseSeed => {
     generateMockAuditLog({
       userId: 'user-1',
       projectId: 'project-1',
-      action: 'project_created'
+      action: 'project_created',
     }),
     generateMockAuditLog({
       userId: 'user-1',
       projectId: 'project-1',
       action: 'classification_completed',
-      entityType: 'classification'
+      entityType: 'classification',
     }),
   ];
 
@@ -468,12 +502,12 @@ export const generateDatabaseSeed = (): DatabaseSeed => {
   const agentInteractions = [
     generateMockAgentInteraction({
       project_id: 1,
-      user_id: 'user-1'
+      user_id: 'user-1',
     }),
     generateMockAgentInteraction({
       project_id: 2,
       user_id: 'user-1',
-      agent_action: 'predicate_search'
+      agent_action: 'predicate_search',
     }),
   ];
 
@@ -496,7 +530,9 @@ export const generateTestScenario = (scenario: TestScenario): MockDataSet => {
     case TestScenario.NEW_USER_ONBOARDING:
       return {
         scenario,
-        users: [generateMockUser({ id: 'new-user', email: 'newuser@example.com' })],
+        users: [
+          generateMockUser({ id: 'new-user', email: 'newuser@example.com' }),
+        ],
         projects: [],
         classifications: [],
         predicateDevices: [],
@@ -521,23 +557,31 @@ export const generateTestScenario = (scenario: TestScenario): MockDataSet => {
       return {
         scenario,
         users: baseData.users.slice(0, 1),
-        projects: [generateMockProject({
-          id: 1,
-          status: ProjectStatus.IN_PROGRESS
-        })],
-        classifications: [generateMockDeviceClassification({
-          projectId: 'project-1',
-          confidenceScore: 0.92
-        })],
+        projects: [
+          generateMockProject({
+            id: 1,
+            status: ProjectStatus.IN_PROGRESS,
+          }),
+        ],
+        classifications: [
+          generateMockDeviceClassification({
+            projectId: 'project-1',
+            confidenceScore: 0.92,
+          }),
+        ],
         predicateDevices: [],
-        auditLogs: [generateMockAuditLog({
-          action: 'classification_completed',
-          entityType: 'classification'
-        })],
+        auditLogs: [
+          generateMockAuditLog({
+            action: 'classification_completed',
+            entityType: 'classification',
+          }),
+        ],
         sessions: baseData.sessions.slice(0, 1),
-        agentInteractions: [generateMockAgentInteraction({
-          agent_action: 'device_classification'
-        })],
+        agentInteractions: [
+          generateMockAgentInteraction({
+            agent_action: 'device_classification',
+          }),
+        ],
       };
 
     case TestScenario.PREDICATE_SEARCH_RESULTS:
@@ -547,14 +591,18 @@ export const generateTestScenario = (scenario: TestScenario): MockDataSet => {
         projects: baseData.projects.slice(0, 1),
         classifications: baseData.classifications.slice(0, 1),
         predicateDevices: generateMockPredicateDevices(10),
-        auditLogs: [generateMockAuditLog({
-          action: 'predicate_search_completed',
-          entityType: 'predicate'
-        })],
+        auditLogs: [
+          generateMockAuditLog({
+            action: 'predicate_search_completed',
+            entityType: 'predicate',
+          }),
+        ],
         sessions: baseData.sessions.slice(0, 1),
-        agentInteractions: [generateMockAgentInteraction({
-          agent_action: 'predicate_search'
-        })],
+        agentInteractions: [
+          generateMockAgentInteraction({
+            agent_action: 'predicate_search',
+          }),
+        ],
       };
 
     case TestScenario.AGENT_CONVERSATION:
@@ -567,7 +615,9 @@ export const generateTestScenario = (scenario: TestScenario): MockDataSet => {
         auditLogs: [],
         sessions: baseData.sessions.slice(0, 1),
         agentInteractions: [
-          generateMockAgentInteraction({ agent_action: 'device_classification' }),
+          generateMockAgentInteraction({
+            agent_action: 'device_classification',
+          }),
           generateMockAgentInteraction({ agent_action: 'predicate_search' }),
           generateMockAgentInteraction({ agent_action: 'guidance_search' }),
         ],
@@ -577,18 +627,24 @@ export const generateTestScenario = (scenario: TestScenario): MockDataSet => {
       return {
         scenario,
         users: baseData.users.slice(0, 1),
-        projects: [generateMockProject({
-          id: 1,
-          status: ProjectStatus.DRAFT
-        })],
-        classifications: [generateMockDeviceClassification({
-          confidenceScore: 0.3 // Low confidence indicating potential error
-        })],
+        projects: [
+          generateMockProject({
+            id: 1,
+            status: ProjectStatus.DRAFT,
+          }),
+        ],
+        classifications: [
+          generateMockDeviceClassification({
+            confidenceScore: 0.3, // Low confidence indicating potential error
+          }),
+        ],
         predicateDevices: [],
-        auditLogs: [generateMockAuditLog({
-          action: 'classification_failed',
-          metadata: { error: 'Insufficient data for classification' }
-        })],
+        auditLogs: [
+          generateMockAuditLog({
+            action: 'classification_failed',
+            metadata: { error: 'Insufficient data for classification' },
+          }),
+        ],
         sessions: baseData.sessions.slice(0, 1),
         agentInteractions: [],
       };
@@ -597,16 +653,21 @@ export const generateTestScenario = (scenario: TestScenario): MockDataSet => {
       return {
         scenario,
         users: baseData.users,
-        projects: [generateMockProject({
-          id: 1,
-          user_id: 'user-1'
-        })],
+        projects: [
+          generateMockProject({
+            id: 1,
+            user_id: 'user-1',
+          }),
+        ],
         classifications: baseData.classifications,
         predicateDevices: baseData.predicateDevices,
         auditLogs: [
           generateMockAuditLog({ userId: 'user-1', action: 'project_created' }),
           generateMockAuditLog({ userId: 'user-2', action: 'project_viewed' }),
-          generateMockAuditLog({ userId: 'user-3', action: 'project_commented' }),
+          generateMockAuditLog({
+            userId: 'user-3',
+            action: 'project_commented',
+          }),
         ],
         sessions: baseData.sessions,
         agentInteractions: baseData.agentInteractions,
@@ -625,12 +686,8 @@ export const generateTestScenario = (scenario: TestScenario): MockDataSet => {
           generateMockDeviceClassification()
         ),
         predicateDevices: generateMockPredicateDevices(500),
-        auditLogs: Array.from({ length: 1000 }, () =>
-          generateMockAuditLog()
-        ),
-        sessions: Array.from({ length: 50 }, () =>
-          generateMockSession()
-        ),
+        auditLogs: Array.from({ length: 1000 }, () => generateMockAuditLog()),
+        sessions: Array.from({ length: 50 }, () => generateMockSession()),
         agentInteractions: Array.from({ length: 200 }, () =>
           generateMockAgentInteraction()
         ),
@@ -667,15 +724,24 @@ export const generateMockProjects = (count: number = 3): Project[] => {
       id: index + 1,
       name: projectNames[index] || `Mock Project ${index + 1}`,
       device_type: deviceTypes[index] || 'Medical Device',
-      status: index === 0 ? ProjectStatus.IN_PROGRESS :
-        index === 1 ? ProjectStatus.DRAFT :
-          ProjectStatus.COMPLETED,
+      status:
+        index === 0
+          ? ProjectStatus.IN_PROGRESS
+          : index === 1
+            ? ProjectStatus.DRAFT
+            : ProjectStatus.COMPLETED,
     })
   );
 };
 
 export const generateMockUsers = (count: number = 3): User[] => {
-  const userNames = ['John Doe', 'Jane Smith', 'Bob Wilson', 'Alice Johnson', 'Charlie Brown'];
+  const userNames = [
+    'John Doe',
+    'Jane Smith',
+    'Bob Wilson',
+    'Alice Johnson',
+    'Charlie Brown',
+  ];
   const roles: Array<'admin' | 'user' | 'viewer'> = ['admin', 'user', 'viewer'];
 
   return Array.from({ length: count }, (_, index) =>
@@ -724,23 +790,23 @@ export default mockDataGenerators;
 
 /**
  * MIGRATION STATUS NOTES:
- * 
+ *
  * ✅ COMPLETED MIGRATIONS:
  * - All production components now use real API calls
  * - Dashboard widgets use real data from backend
  * - Project forms submit to real database
  * - Authentication uses NextAuth.js with real sessions
  * - Agent interactions use real LangGraph backend
- * 
+ *
  * 📋 CURRENT USAGE:
  * - Mock data generators are no longer imported by production components
  * - Kept for potential future testing needs
  * - May be used for development environment seeding
- * 
+ *
  * 🧹 CLEANUP RECOMMENDATIONS:
  * - Consider removing unused generators in future cleanup
  * - Keep core generators for testing infrastructure
  * - Update generators to match current API schemas if needed
- * 
+ *
  * Last Updated: 2024-12-28 (Task 7.3 - Final Migration Validation)
  */

@@ -1,6 +1,6 @@
 /**
  * Frontend Performance Optimization Utilities
- * 
+ *
  * This module provides utilities for optimizing frontend performance
  * including lazy loading, code splitting, and performance monitoring.
  */
@@ -29,7 +29,7 @@ function throttle<T extends (...args: any[]) => any>(
     if (!inThrottle) {
       func(...args);
       inThrottle = true;
-      setTimeout(() => inThrottle = false, wait);
+      setTimeout(() => (inThrottle = false), wait);
     }
   };
 }
@@ -62,9 +62,18 @@ class FrontendPerformanceMonitor {
         for (const entry of list.getEntries()) {
           if (entry.entryType === 'navigation') {
             const navEntry = entry as PerformanceNavigationTiming;
-            this.recordMetric('page_load_time', navEntry.loadEventEnd - navEntry.navigationStart);
-            this.recordMetric('dom_content_loaded', navEntry.domContentLoadedEventEnd - navEntry.navigationStart);
-            this.recordMetric('first_paint', navEntry.responseStart - navEntry.navigationStart);
+            this.recordMetric(
+              'page_load_time',
+              navEntry.loadEventEnd - navEntry.navigationStart
+            );
+            this.recordMetric(
+              'dom_content_loaded',
+              navEntry.domContentLoadedEventEnd - navEntry.navigationStart
+            );
+            this.recordMetric(
+              'first_paint',
+              navEntry.responseStart - navEntry.navigationStart
+            );
           }
         }
       });
@@ -81,10 +90,14 @@ class FrontendPerformanceMonitor {
         for (const entry of list.getEntries()) {
           if (entry.entryType === 'resource') {
             const resourceEntry = entry as PerformanceResourceTiming;
-            this.recordMetric('resource_load_time', resourceEntry.responseEnd - resourceEntry.startTime, {
-              resource_type: resourceEntry.initiatorType,
-              resource_name: resourceEntry.name
-            });
+            this.recordMetric(
+              'resource_load_time',
+              resourceEntry.responseEnd - resourceEntry.startTime,
+              {
+                resource_type: resourceEntry.initiatorType,
+                resource_name: resourceEntry.name,
+              }
+            );
           }
         }
       });
@@ -113,7 +126,10 @@ class FrontendPerformanceMonitor {
       // First Input Delay observer
       const fidObserver = new PerformanceObserver((list) => {
         for (const entry of list.getEntries()) {
-          this.recordMetric('first_input_delay', (entry as any).processingStart - entry.startTime);
+          this.recordMetric(
+            'first_input_delay',
+            (entry as any).processingStart - entry.startTime
+          );
         }
       });
 
@@ -136,7 +152,7 @@ class FrontendPerformanceMonitor {
       name,
       value,
       timestamp: Date.now(),
-      tags
+      tags,
     };
 
     this.metrics.push(metric);
@@ -154,13 +170,13 @@ class FrontendPerformanceMonitor {
 
   private isSlowOperation(name: string, value: number): boolean {
     const thresholds: Record<string, number> = {
-      'page_load_time': 3000,
-      'dom_content_loaded': 2000,
-      'largest_contentful_paint': 2500,
-      'first_input_delay': 100,
-      'api_request': 2000,
-      'component_render': 16, // 60fps = 16ms per frame
-      'resource_load_time': 1000
+      page_load_time: 3000,
+      dom_content_loaded: 2000,
+      largest_contentful_paint: 2500,
+      first_input_delay: 100,
+      api_request: 2000,
+      component_render: 16, // 60fps = 16ms per frame
+      resource_load_time: 1000,
     };
 
     return value > (thresholds[name] || 1000);
@@ -168,26 +184,29 @@ class FrontendPerformanceMonitor {
 
   getMetrics(timeRangeMs: number = 60000): PerformanceMetric[] {
     const cutoff = Date.now() - timeRangeMs;
-    return this.metrics.filter(m => m.timestamp >= cutoff);
+    return this.metrics.filter((m) => m.timestamp >= cutoff);
   }
 
   getAverageMetric(name: string, timeRangeMs: number = 60000): number {
-    const metrics = this.getMetrics(timeRangeMs).filter(m => m.name === name);
+    const metrics = this.getMetrics(timeRangeMs).filter((m) => m.name === name);
     if (metrics.length === 0) return 0;
-    
+
     return metrics.reduce((sum, m) => sum + m.value, 0) / metrics.length;
   }
 
   getPerformanceReport(): Record<string, any> {
     const report: Record<string, any> = {};
     const recentMetrics = this.getMetrics();
-    
+
     // Group metrics by name
-    const groupedMetrics = recentMetrics.reduce((acc, metric) => {
-      if (!acc[metric.name]) acc[metric.name] = [];
-      acc[metric.name].push(metric.value);
-      return acc;
-    }, {} as Record<string, number[]>);
+    const groupedMetrics = recentMetrics.reduce(
+      (acc, metric) => {
+        if (!acc[metric.name]) acc[metric.name] = [];
+        acc[metric.name].push(metric.value);
+        return acc;
+      },
+      {} as Record<string, number[]>
+    );
 
     // Calculate statistics for each metric
     for (const [name, values] of Object.entries(groupedMetrics)) {
@@ -200,7 +219,7 @@ class FrontendPerformanceMonitor {
           max: Math.max(...values),
           p50: sorted[Math.floor(sorted.length * 0.5)],
           p95: sorted[Math.floor(sorted.length * 0.95)],
-          p99: sorted[Math.floor(sorted.length * 0.99)]
+          p99: sorted[Math.floor(sorted.length * 0.99)],
         };
       }
     }
@@ -209,16 +228,15 @@ class FrontendPerformanceMonitor {
   }
 
   cleanup() {
-    this.observers.forEach(observer => observer.disconnect());
+    this.observers.forEach((observer) => observer.disconnect());
     this.observers = [];
     this.metrics = [];
   }
 }
 
 // Global performance monitor instance - only initialize in browser
-export const performanceMonitor = typeof window !== 'undefined' 
-  ? new FrontendPerformanceMonitor() 
-  : null;
+export const performanceMonitor =
+  typeof window !== 'undefined' ? new FrontendPerformanceMonitor() : null;
 
 // React hooks for performance optimization
 export function usePerformanceMonitor() {
@@ -238,52 +256,58 @@ export function usePerformanceMonitor() {
     return () => clearInterval(interval);
   }, []);
 
-  const recordMetric = useCallback((name: string, value: number, tags?: Record<string, string>) => {
-    performanceMonitor?.recordMetric(name, value, tags);
-  }, []);
+  const recordMetric = useCallback(
+    (name: string, value: number, tags?: Record<string, string>) => {
+      performanceMonitor?.recordMetric(name, value, tags);
+    },
+    []
+  );
 
   return { metrics, recordMetric };
 }
 
 // API request performance monitoring
 export function useApiPerformance() {
-  const recordApiRequest = useCallback(async <T>(
-    requestFn: () => Promise<T>,
-    endpoint: string,
-    method: string = 'GET'
-  ): Promise<T> => {
-    // Skip performance monitoring during SSR
-    if (typeof window === 'undefined' || typeof performance === 'undefined') {
-      return await requestFn();
-    }
+  const recordApiRequest = useCallback(
+    async <T>(
+      requestFn: () => Promise<T>,
+      endpoint: string,
+      method: string = 'GET'
+    ): Promise<T> => {
+      // Skip performance monitoring during SSR
+      if (typeof window === 'undefined' || typeof performance === 'undefined') {
+        return await requestFn();
+      }
 
-    const startTime = performance.now();
-    
-    try {
-      const result = await requestFn();
-      const duration = performance.now() - startTime;
-      
-      performanceMonitor?.recordMetric('api_request', duration, {
-        endpoint,
-        method,
-        status: 'success'
-      });
-      
-      return result;
-    } catch (error) {
-      if (typeof performance !== 'undefined') {
+      const startTime = performance.now();
+
+      try {
+        const result = await requestFn();
         const duration = performance.now() - startTime;
-        
+
         performanceMonitor?.recordMetric('api_request', duration, {
           endpoint,
           method,
-          status: 'error'
+          status: 'success',
         });
+
+        return result;
+      } catch (error) {
+        if (typeof performance !== 'undefined') {
+          const duration = performance.now() - startTime;
+
+          performanceMonitor?.recordMetric('api_request', duration, {
+            endpoint,
+            method,
+            status: 'error',
+          });
+        }
+
+        throw error;
       }
-      
-      throw error;
-    }
-  }, []);
+    },
+    []
+  );
 
   return { recordApiRequest };
 }
@@ -297,11 +321,11 @@ export function useRenderPerformance(componentName: string) {
     }
 
     const startTime = performance.now();
-    
+
     return () => {
       const renderTime = performance.now() - startTime;
       performanceMonitor?.recordMetric('component_render', renderTime, {
-        component: componentName
+        component: componentName,
       });
     };
   });
@@ -332,7 +356,10 @@ export function useIntersectionObserver(
 
   useEffect(() => {
     // Skip intersection observer during SSR
-    if (typeof window === 'undefined' || typeof IntersectionObserver === 'undefined') {
+    if (
+      typeof window === 'undefined' ||
+      typeof IntersectionObserver === 'undefined'
+    ) {
       return;
     }
 
@@ -349,7 +376,7 @@ export function useIntersectionObserver(
       {
         threshold: 0.1,
         rootMargin: '50px',
-        ...options
+        ...options,
       }
     );
 
@@ -379,10 +406,12 @@ export function useVirtualScrolling<T>(
   }, [scrollTop, itemHeight, containerHeight, items.length, overscan]);
 
   const visibleItems = useMemo(() => {
-    return items.slice(visibleRange.start, visibleRange.end).map((item, index) => ({
-      item,
-      index: visibleRange.start + index
-    }));
+    return items
+      .slice(visibleRange.start, visibleRange.end)
+      .map((item, index) => ({
+        item,
+        index: visibleRange.start + index,
+      }));
   }, [items, visibleRange]);
 
   const totalHeight = items.length * itemHeight;
@@ -396,7 +425,7 @@ export function useVirtualScrolling<T>(
     visibleItems,
     totalHeight,
     offsetY,
-    handleScroll
+    handleScroll,
   };
 }
 
@@ -417,13 +446,18 @@ export function useMemoryMonitoring() {
           usedJSHeapSize: memory.usedJSHeapSize,
           totalJSHeapSize: memory.totalJSHeapSize,
           jsHeapSizeLimit: memory.jsHeapSizeLimit,
-          usagePercentage: (memory.usedJSHeapSize / memory.jsHeapSizeLimit) * 100
+          usagePercentage:
+            (memory.usedJSHeapSize / memory.jsHeapSizeLimit) * 100,
         });
 
         // Record memory usage metric
-        performanceMonitor?.recordMetric('memory_usage', memory.usedJSHeapSize / 1024 / 1024, {
-          unit: 'MB'
-        });
+        performanceMonitor?.recordMetric(
+          'memory_usage',
+          memory.usedJSHeapSize / 1024 / 1024,
+          {
+            unit: 'MB',
+          }
+        );
       }
     };
 
@@ -444,15 +478,15 @@ export function analyzeBundleSize() {
   }
 
   if ('getEntriesByType' in performance) {
-    const resources = performance.getEntriesByType('resource') as PerformanceResourceTiming[];
-    
-    const jsResources = resources.filter(r => 
-      r.name.includes('.js') && !r.name.includes('node_modules')
+    const resources = performance.getEntriesByType(
+      'resource'
+    ) as PerformanceResourceTiming[];
+
+    const jsResources = resources.filter(
+      (r) => r.name.includes('.js') && !r.name.includes('node_modules')
     );
-    
-    const cssResources = resources.filter(r => 
-      r.name.includes('.css')
-    );
+
+    const cssResources = resources.filter((r) => r.name.includes('.css'));
 
     const totalJSSize = jsResources.reduce((total, resource) => {
       return total + (resource.transferSize || 0);
@@ -468,17 +502,17 @@ export function analyzeBundleSize() {
       jsResourceCount: jsResources.length,
       cssResourceCount: cssResources.length,
       resources: {
-        js: jsResources.map(r => ({
+        js: jsResources.map((r) => ({
           name: r.name,
           size: (r.transferSize || 0) / 1024,
-          loadTime: r.responseEnd - r.startTime
+          loadTime: r.responseEnd - r.startTime,
         })),
-        css: cssResources.map(r => ({
+        css: cssResources.map((r) => ({
           name: r.name,
           size: (r.transferSize || 0) / 1024,
-          loadTime: r.responseEnd - r.startTime
-        }))
-      }
+          loadTime: r.responseEnd - r.startTime,
+        })),
+      },
     };
   }
 
@@ -488,43 +522,56 @@ export function analyzeBundleSize() {
 // Performance optimization recommendations
 export function getPerformanceRecommendations(): string[] {
   const recommendations: string[] = [];
-  
+
   // Return empty recommendations during SSR
   if (!performanceMonitor) {
     return recommendations;
   }
-  
+
   const report = performanceMonitor.getPerformanceReport();
 
   // Check page load time
   if (report.page_load_time?.avg > 3000) {
-    recommendations.push('Page load time is slow. Consider code splitting and lazy loading.');
+    recommendations.push(
+      'Page load time is slow. Consider code splitting and lazy loading.'
+    );
   }
 
   // Check LCP
   if (report.largest_contentful_paint?.avg > 2500) {
-    recommendations.push('Largest Contentful Paint is slow. Optimize images and critical resources.');
+    recommendations.push(
+      'Largest Contentful Paint is slow. Optimize images and critical resources.'
+    );
   }
 
   // Check FID
   if (report.first_input_delay?.avg > 100) {
-    recommendations.push('First Input Delay is high. Reduce JavaScript execution time.');
+    recommendations.push(
+      'First Input Delay is high. Reduce JavaScript execution time.'
+    );
   }
 
   // Check API response times
   if (report.api_request?.avg > 2000) {
-    recommendations.push('API requests are slow. Consider caching and request optimization.');
+    recommendations.push(
+      'API requests are slow. Consider caching and request optimization.'
+    );
   }
 
   // Check component render times
   if (report.component_render?.avg > 16) {
-    recommendations.push('Component renders are slow. Consider React.memo and useMemo optimization.');
+    recommendations.push(
+      'Component renders are slow. Consider React.memo and useMemo optimization.'
+    );
   }
 
   // Check bundle size
   const bundleAnalysis = analyzeBundleSize();
-  if (bundleAnalysis && bundleAnalysis.totalJSSize > 1000) { // 1MB
-    recommendations.push('JavaScript bundle is large. Consider code splitting and tree shaking.');
+  if (bundleAnalysis && bundleAnalysis.totalJSSize > 1000) {
+    // 1MB
+    recommendations.push(
+      'JavaScript bundle is large. Consider code splitting and tree shaking.'
+    );
   }
 
   return recommendations;
@@ -540,7 +587,7 @@ export function exportPerformanceData() {
       bundleAnalysis: null,
       recommendations: [],
       userAgent: 'SSR',
-      connection: null
+      connection: null,
     };
   }
 
@@ -554,10 +601,12 @@ export function exportPerformanceData() {
     bundleAnalysis,
     recommendations,
     userAgent: navigator.userAgent,
-    connection: (navigator as any).connection ? {
-      effectiveType: (navigator as any).connection.effectiveType,
-      downlink: (navigator as any).connection.downlink,
-      rtt: (navigator as any).connection.rtt
-    } : null
+    connection: (navigator as any).connection
+      ? {
+          effectiveType: (navigator as any).connection.effectiveType,
+          downlink: (navigator as any).connection.downlink,
+          rtt: (navigator as any).connection.rtt,
+        }
+      : null,
   };
 }

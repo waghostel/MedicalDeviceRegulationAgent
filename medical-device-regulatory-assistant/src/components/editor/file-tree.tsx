@@ -1,7 +1,15 @@
 'use client';
 
 import React, { useState } from 'react';
-import { ChevronRight, ChevronDown, File, Folder, FolderOpen, Plus, MoreHorizontal } from 'lucide-react';
+import {
+  ChevronRight,
+  ChevronDown,
+  File,
+  Folder,
+  FolderOpen,
+  Plus,
+  MoreHorizontal,
+} from 'lucide-react';
 import { DocumentTreeNode, Document } from '@/types/document';
 import { Button } from '@/components/ui/button';
 import {
@@ -15,7 +23,11 @@ interface FileTreeProps {
   tree: DocumentTreeNode[];
   selectedDocumentId?: string;
   onSelectDocument: (id: string) => void;
-  onCreateDocument: (name: string, type: Document['type'], parentId?: string) => void;
+  onCreateDocument: (
+    name: string,
+    type: Document['type'],
+    parentId?: string
+  ) => void;
   onDeleteDocument: (id: string) => void;
   onRenameDocument: (id: string, newName: string) => void;
 }
@@ -25,7 +37,11 @@ interface TreeNodeProps {
   level: number;
   selectedDocumentId?: string;
   onSelectDocument: (id: string) => void;
-  onCreateDocument: (name: string, type: Document['type'], parentId?: string) => void;
+  onCreateDocument: (
+    name: string,
+    type: Document['type'],
+    parentId?: string
+  ) => void;
   onDeleteDocument: (id: string) => void;
   onRenameDocument: (id: string, newName: string) => void;
 }
@@ -37,7 +53,7 @@ function TreeNode({
   onSelectDocument,
   onCreateDocument,
   onDeleteDocument,
-  onRenameDocument
+  onRenameDocument,
 }: TreeNodeProps) {
   const [isExpanded, setIsExpanded] = useState(true);
   const [isRenaming, setIsRenaming] = useState(false);
@@ -69,7 +85,11 @@ function TreeNode({
 
   const getIcon = () => {
     if (node.isFolder) {
-      return isExpanded ? <FolderOpen className="h-4 w-4" /> : <Folder className="h-4 w-4" />;
+      return isExpanded ? (
+        <FolderOpen className="h-4 w-4" />
+      ) : (
+        <Folder className="h-4 w-4" />
+      );
     }
     return <File className="h-4 w-4" />;
   };
@@ -112,8 +132,11 @@ function TreeNode({
             )}
           </button>
         )}
-        
-        <div className="flex items-center gap-2 flex-1 min-w-0" onClick={handleToggle}>
+
+        <div
+          className="flex items-center gap-2 flex-1 min-w-0"
+          onClick={handleToggle}
+        >
           <span className={getTypeColor()}>{getIcon()}</span>
           {isRenaming ? (
             <input
@@ -144,13 +167,17 @@ function TreeNode({
             {node.isFolder && (
               <>
                 <DropdownMenuItem
-                  onClick={() => onCreateDocument('New Document', 'general-note', node.id)}
+                  onClick={() =>
+                    onCreateDocument('New Document', 'general-note', node.id)
+                  }
                 >
                   <Plus className="h-4 w-4 mr-2" />
                   New Document
                 </DropdownMenuItem>
                 <DropdownMenuItem
-                  onClick={() => onCreateDocument('New Folder', 'folder', node.id)}
+                  onClick={() =>
+                    onCreateDocument('New Folder', 'folder', node.id)
+                  }
                 >
                   <Folder className="h-4 w-4 mr-2" />
                   New Folder
@@ -196,7 +223,7 @@ export function FileTree({
   onSelectDocument,
   onCreateDocument,
   onDeleteDocument,
-  onRenameDocument
+  onRenameDocument,
 }: FileTreeProps) {
   return (
     <div className="w-64 border-r bg-gray-50 overflow-y-auto">
@@ -226,7 +253,7 @@ export function FileTree({
           </DropdownMenu>
         </div>
       </div>
-      
+
       <div className="py-2">
         {tree.map((node) => (
           <TreeNode

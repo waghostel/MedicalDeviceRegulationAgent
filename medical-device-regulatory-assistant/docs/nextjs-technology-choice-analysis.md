@@ -21,6 +21,7 @@ The Medical Device Regulatory Assistant is an agentic AI platform designed to st
 ### 1. Perfect Match for MVP Requirements
 
 #### Full-Stack Capability
+
 Next.js 15 with App Router provides comprehensive full-stack functionality:
 
 - **Server-side rendering** for regulatory dashboards and document workflows
@@ -29,6 +30,7 @@ Next.js 15 with App Router provides comprehensive full-stack functionality:
 - **Hybrid rendering** options (SSR, SSG, ISR) perfect for regulatory content
 
 #### SEO & Performance Benefits
+
 Medical device regulatory content requires excellent discoverability and performance:
 
 - **Server-side rendering** improves search indexing for regulatory guidance
@@ -39,6 +41,7 @@ Medical device regulatory content requires excellent discoverability and perform
 ### 2. Regulatory Compliance Advantages
 
 #### Audit Trail Support
+
 Next.js provides robust logging and monitoring capabilities essential for regulatory compliance:
 
 ```typescript
@@ -55,6 +58,7 @@ export async function middleware(request: NextRequest) {
 - Structured logging for regulatory inspections
 
 #### Security Features
+
 Critical for medical device regulatory data handling:
 
 - **Built-in CSRF protection** for form submissions
@@ -65,12 +69,13 @@ Critical for medical device regulatory data handling:
 ### 3. AI Integration Benefits
 
 #### CopilotKit Integration
+
 Already successfully implemented and working well with Next.js:
 
 ```typescript
 // Seamless AI chat integration
 <CopilotProvider>
-  <CopilotChat 
+  <CopilotChat
     instructions="You are a regulatory assistant for medical devices..."
     makeSystemMessage="Focus on FDA 510(k) predicate searches..."
   />
@@ -83,6 +88,7 @@ Already successfully implemented and working well with Next.js:
 - Context preservation across regulatory workflows
 
 #### API Integration Excellence
+
 Seamless connection to critical regulatory data sources:
 
 - **FastAPI backend** for LangGraph agents and AI workflows
@@ -93,6 +99,7 @@ Seamless connection to critical regulatory data sources:
 ### 4. Developer Experience & Productivity
 
 #### TypeScript Support
+
 Essential for regulatory software reliability:
 
 ```typescript
@@ -113,6 +120,7 @@ interface PredicateDevice {
 - **Self-documenting code** for regulatory compliance
 
 #### Modern Tooling Ecosystem
+
 Already leveraging best-in-class tools:
 
 - **Tailwind CSS** for consistent, professional UI
@@ -123,6 +131,7 @@ Already leveraging best-in-class tools:
 ### 5. Scalability for MVP Growth
 
 #### Incremental Static Regeneration (ISR)
+
 Perfect for regulatory content management:
 
 ```typescript
@@ -131,7 +140,7 @@ export const revalidate = 3600; // Revalidate every hour
 
 export async function generateStaticParams() {
   const guidanceDocs = await fetchFDAGuidanceDocuments();
-  return guidanceDocs.map(doc => ({ id: doc.id }));
+  return guidanceDocs.map((doc) => ({ id: doc.id }));
 }
 ```
 
@@ -141,6 +150,7 @@ export async function generateStaticParams() {
 - **Optimize performance** for document-heavy workflows
 
 #### Edge Functions
+
 Future-ready capabilities for:
 
 - **Global regulatory compliance** across different markets
@@ -175,6 +185,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 ```
 
 **Key Implementation Strengths:**
+
 - Clean separation of concerns with provider pattern
 - Proper state management for regulatory projects
 - Real-time capabilities for agent interactions
@@ -183,12 +194,14 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 ### 7. Alternative Technology Considerations
 
 #### Why Not Pure React SPA?
+
 - **SEO Requirements**: Regulatory content needs search engine visibility
 - **Security Concerns**: Server-side authentication is more secure for sensitive data
 - **Performance Issues**: Better performance for document-heavy regulatory workflows
 - **Compliance**: Server-side logging easier for audit trails
 
 #### Why Not Separate Frontend/Backend?
+
 - **Complexity Overhead**: Increases deployment and maintenance complexity for MVP
 - **Development Velocity**: Slower development cycle for rapid MVP iteration
 - **Audit Trail Challenges**: Harder to maintain consistent logging across services
@@ -197,6 +210,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 ### 8. Regulatory-Specific Benefits
 
 #### Document Management
+
 Next.js excels at handling regulatory document workflows:
 
 - **File upload handling** for device specifications and test reports
@@ -205,6 +219,7 @@ Next.js excels at handling regulatory document workflows:
 - **Document caching** for frequently accessed guidance
 
 #### Workflow Management
+
 Perfect for complex regulatory processes:
 
 - **Multi-step forms** for 510(k) submissions
@@ -213,6 +228,7 @@ Perfect for complex regulatory processes:
 - **Error handling** with user-friendly feedback
 
 #### Compliance Reporting
+
 Built-in capabilities for regulatory reporting:
 
 - **Data export** functionality for regulatory submissions
@@ -235,6 +251,7 @@ Built-in capabilities for regulatory reporting:
 ### Supporting Evidence:
 
 The current implementation already demonstrates these benefits with:
+
 - Sophisticated provider architecture for regulatory context management
 - Comprehensive testing setup ensuring reliability
 - Proper integration with Python backend for AI capabilities

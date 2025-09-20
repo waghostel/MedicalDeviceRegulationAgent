@@ -27,21 +27,25 @@ export interface ToastContextValue {
 }
 
 // Mock toast context
-const MockToastContext = createContext<ToastContextValue | undefined>(undefined);
+const MockToastContext = createContext<ToastContextValue | undefined>(
+  undefined
+);
 
 let mockToastState = {
   toasts: [] as ToastContextValue['toasts'],
   nextId: 1,
 };
 
-export const MockToastProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+export const MockToastProvider: React.FC<{ children: ReactNode }> = ({
+  children,
+}) => {
   const addToast = jest.fn((toast: any) => {
     const newToast = {
       id: `toast-${mockToastState.nextId++}`,
       ...toast,
     };
     mockToastState.toasts.push(newToast);
-    
+
     // Auto-remove after duration
     if (toast.duration !== Infinity) {
       setTimeout(() => {
@@ -51,7 +55,9 @@ export const MockToastProvider: React.FC<{ children: ReactNode }> = ({ children 
   });
 
   const removeToast = jest.fn((id: string) => {
-    mockToastState.toasts = mockToastState.toasts.filter(toast => toast.id !== id);
+    mockToastState.toasts = mockToastState.toasts.filter(
+      (toast) => toast.id !== id
+    );
   });
 
   const clearToasts = jest.fn(() => {
@@ -75,7 +81,9 @@ export const MockToastProvider: React.FC<{ children: ReactNode }> = ({ children 
 export const useMockToastContext = () => {
   const context = useContext(MockToastContext);
   if (!context) {
-    throw new Error('useMockToastContext must be used within MockToastProvider');
+    throw new Error(
+      'useMockToastContext must be used within MockToastProvider'
+    );
   }
   return context;
 };
@@ -107,7 +115,7 @@ let mockFormState = {
   values: {} as Record<string, any>,
 };
 
-export const MockFormProvider: React.FC<{ 
+export const MockFormProvider: React.FC<{
   children: ReactNode;
   formId?: string;
   initialValues?: Record<string, any>;
@@ -126,7 +134,7 @@ export const MockFormProvider: React.FC<{
   const setFieldValue = jest.fn((name: string, value: any) => {
     mockFormState.values[name] = value;
     mockFormState.isDirty = true;
-    
+
     // Clear error when value changes
     if (mockFormState.errors[name]) {
       delete mockFormState.errors[name];
@@ -153,10 +161,10 @@ export const MockFormProvider: React.FC<{
 
   const submitForm = jest.fn(async () => {
     mockFormState.isSubmitting = true;
-    
+
     // Simulate async submission
-    await new Promise(resolve => setTimeout(resolve, 100));
-    
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
     mockFormState.isSubmitting = false;
     mockFormState.isDirty = false;
   });
@@ -200,7 +208,9 @@ export interface ThemeContextValue {
   systemTheme: 'light' | 'dark';
 }
 
-const MockThemeContext = createContext<ThemeContextValue | undefined>(undefined);
+const MockThemeContext = createContext<ThemeContextValue | undefined>(
+  undefined
+);
 
 let mockThemeState = {
   theme: 'light' as 'light' | 'dark' | 'system',
@@ -208,19 +218,21 @@ let mockThemeState = {
   systemTheme: 'light' as 'light' | 'dark',
 };
 
-export const MockThemeProvider: React.FC<{ 
+export const MockThemeProvider: React.FC<{
   children: ReactNode;
   defaultTheme?: 'light' | 'dark' | 'system';
 }> = ({ children, defaultTheme = 'light' }) => {
   React.useEffect(() => {
     mockThemeState.theme = defaultTheme;
-    mockThemeState.resolvedTheme = defaultTheme === 'system' ? 'light' : defaultTheme;
+    mockThemeState.resolvedTheme =
+      defaultTheme === 'system' ? 'light' : defaultTheme;
   }, [defaultTheme]);
 
   const setTheme = jest.fn((theme: 'light' | 'dark' | 'system') => {
     mockThemeState.theme = theme;
-    mockThemeState.resolvedTheme = theme === 'system' ? mockThemeState.systemTheme : theme;
-    
+    mockThemeState.resolvedTheme =
+      theme === 'system' ? mockThemeState.systemTheme : theme;
+
     // Update document class for theme switching
     if (typeof document !== 'undefined') {
       document.documentElement.classList.remove('light', 'dark');
@@ -245,7 +257,9 @@ export const MockThemeProvider: React.FC<{
 export const useMockThemeContext = () => {
   const context = useContext(MockThemeContext);
   if (!context) {
-    throw new Error('useMockThemeContext must be used within MockThemeProvider');
+    throw new Error(
+      'useMockThemeContext must be used within MockThemeProvider'
+    );
   }
   return context;
 };
@@ -260,14 +274,16 @@ export interface SessionContextValue {
   update: (data?: any) => Promise<Session | null>;
 }
 
-const MockSessionContext = createContext<SessionContextValue | undefined>(undefined);
+const MockSessionContext = createContext<SessionContextValue | undefined>(
+  undefined
+);
 
 let mockSessionState = {
   data: null as Session | null,
   status: 'unauthenticated' as 'loading' | 'authenticated' | 'unauthenticated',
 };
 
-export const MockSessionProvider: React.FC<{ 
+export const MockSessionProvider: React.FC<{
   children: ReactNode;
   session?: Session | null;
 }> = ({ children, session = null }) => {
@@ -299,7 +315,9 @@ export const MockSessionProvider: React.FC<{
 export const useMockSessionContext = () => {
   const context = useContext(MockSessionContext);
   if (!context) {
-    throw new Error('useMockSessionContext must be used within MockSessionProvider');
+    throw new Error(
+      'useMockSessionContext must be used within MockSessionProvider'
+    );
   }
   return context;
 };
@@ -363,9 +381,9 @@ export const MockProviderStack: React.FC<{
   if (form.enabled) {
     wrappedChildren = React.createElement(
       MockFormProvider,
-      { 
+      {
         formId: form.formId,
-        initialValues: form.initialValues 
+        initialValues: form.initialValues,
       },
       wrappedChildren
     );
@@ -547,7 +565,7 @@ export const providerMockUtils = {
       },
     };
 
-    const allValid = Object.values(results).every(provider =>
+    const allValid = Object.values(results).every((provider) =>
       Object.values(provider).every(Boolean)
     );
 
@@ -582,18 +600,34 @@ export const setupProviderMocks = () => {
   }));
 
   // Register providers in global mock registry
-  if (global.__GLOBAL_MOCK_REGISTRY) {
-    global.__GLOBAL_MOCK_REGISTRY.register('providers', 'toast', MockToastProvider);
-    global.__GLOBAL_MOCK_REGISTRY.register('providers', 'form', MockFormProvider);
-    global.__GLOBAL_MOCK_REGISTRY.register('providers', 'theme', MockThemeProvider);
-    global.__GLOBAL_MOCK_REGISTRY.register('providers', 'session', MockSessionProvider);
+  if ((global as any).__GLOBAL_MOCK_REGISTRY) {
+    (global as any).__GLOBAL_MOCK_REGISTRY.register(
+      'providers',
+      'toast',
+      MockToastProvider
+    );
+    (global as any).__GLOBAL_MOCK_REGISTRY.register(
+      'providers',
+      'form',
+      MockFormProvider
+    );
+    (global as any).__GLOBAL_MOCK_REGISTRY.register(
+      'providers',
+      'theme',
+      MockThemeProvider
+    );
+    (global as any).__GLOBAL_MOCK_REGISTRY.register(
+      'providers',
+      'session',
+      MockSessionProvider
+    );
   }
 };
 
 export const cleanupProviderMocks = () => {
   // Clear all provider states
   providerMockUtils.clearAllProviderStates();
-  
+
   // Clear jest mocks
   jest.clearAllMocks();
 };

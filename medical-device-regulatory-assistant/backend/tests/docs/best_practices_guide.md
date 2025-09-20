@@ -5,6 +5,7 @@ Generated: 2025-09-13 21:52:28
 ## Database Testing Best Practices
 
 ### Use Isolated Database Sessions
+
 ```python
 @pytest_asyncio.fixture
 async def test_with_database(test_db_session):
@@ -15,6 +16,7 @@ async def test_with_database(test_db_session):
 ```
 
 ### Create Test Data with Factory Pattern
+
 ```python
 async def test_project_creation(test_data_factory):
     user = await test_data_factory.create_user()
@@ -25,6 +27,7 @@ async def test_project_creation(test_data_factory):
 ## API Testing Best Practices
 
 ### Use TestClient for Synchronous Testing
+
 ```python
 def test_api_endpoint(test_client):
     response = test_client.get("/api/projects")
@@ -32,6 +35,7 @@ def test_api_endpoint(test_client):
 ```
 
 ### Authentication Testing
+
 ```python
 def test_protected_endpoint(authenticated_test_client):
     response = authenticated_test_client.post("/api/projects", json={"name": "Test"})
@@ -41,6 +45,7 @@ def test_protected_endpoint(authenticated_test_client):
 ## Service Testing Best Practices
 
 ### Mock External Dependencies
+
 ```python
 def test_service_with_mocks(mock_openfda_service):
     service = ProjectService(openfda_service=mock_openfda_service)
@@ -49,6 +54,7 @@ def test_service_with_mocks(mock_openfda_service):
 ```
 
 ### Use Dependency Injection
+
 ```python
 class ProjectService:
     def __init__(self, db_manager: DatabaseManager = None):
@@ -58,11 +64,13 @@ class ProjectService:
 ## Performance Best Practices
 
 ### Target Execution Times
+
 - Unit tests: < 0.1s each
 - Integration tests: < 2.0s each
 - Full test suite: < 60s total
 
 ### Memory Management
+
 - Use context managers for resource cleanup
 - Avoid global state in tests
 - Clean up async resources properly
@@ -70,6 +78,7 @@ class ProjectService:
 ## Error Handling Best Practices
 
 ### Test Error Scenarios
+
 ```python
 def test_service_handles_api_error(mock_openfda_service_error):
     service = ProjectService(openfda_service=mock_openfda_service_error)
@@ -78,6 +87,7 @@ def test_service_handles_api_error(mock_openfda_service_error):
 ```
 
 ### Validate Error Messages
+
 ```python
 def test_validation_error_message(test_client):
     response = test_client.post("/api/projects", json={})

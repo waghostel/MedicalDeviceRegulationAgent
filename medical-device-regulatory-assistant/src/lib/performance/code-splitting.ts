@@ -1,6 +1,6 @@
 /**
  * Code Splitting and Lazy Loading Utilities
- * 
+ *
  * This module provides utilities for implementing code splitting
  * and lazy loading to improve frontend performance.
  */
@@ -11,11 +11,22 @@ import { performanceMonitor } from './optimization';
 import React, { Suspense, ComponentType, LazyExoticComponent } from 'react';
 
 // Loading component for Suspense fallbacks
-export const LoadingSpinner = ({ message = "Loading..." }: { message?: string }) => {
-  return React.createElement('div', 
-    { className: "flex items-center justify-center p-8" },
-    React.createElement('div', { className: "animate-spin rounded-full h-8 w-8 border-b-2 border-primary" }),
-    React.createElement('span', { className: "ml-3 text-sm text-muted-foreground" }, message)
+export const LoadingSpinner = ({
+  message = 'Loading...',
+}: {
+  message?: string;
+}) => {
+  return React.createElement(
+    'div',
+    { className: 'flex items-center justify-center p-8' },
+    React.createElement('div', {
+      className: 'animate-spin rounded-full h-8 w-8 border-b-2 border-primary',
+    }),
+    React.createElement(
+      'span',
+      { className: 'ml-3 text-sm text-muted-foreground' },
+      message
+    )
   );
 };
 
@@ -26,25 +37,25 @@ export function createLazyComponent<T extends ComponentType<any>>(
 ): LazyExoticComponent<T> {
   return React.lazy(async () => {
     const startTime = performance.now();
-    
+
     try {
       const module = await importFn();
       const loadTime = performance.now() - startTime;
-      
+
       performanceMonitor.recordMetric('component_lazy_load', loadTime, {
         component: componentName,
-        status: 'success'
+        status: 'success',
       });
-      
+
       return module;
     } catch (error) {
       const loadTime = performance.now() - startTime;
-      
+
       performanceMonitor.recordMetric('component_lazy_load', loadTime, {
         component: componentName,
-        status: 'error'
+        status: 'error',
       });
-      
+
       throw error;
     }
   });
@@ -152,27 +163,57 @@ interface LazyWrapperProps {
   componentName?: string;
 }
 
-const DefaultErrorFallback = ({ error, retry }: { error: Error; retry: () => void }) => {
-  return React.createElement('div', 
-    { className: "flex flex-col items-center justify-center p-8 border border-destructive/20 rounded-lg" },
-    React.createElement('div', { className: "text-destructive mb-4" },
-      React.createElement('svg', { className: "w-12 h-12", fill: "none", stroke: "currentColor", viewBox: "0 0 24 24" },
-        React.createElement('path', { 
-          strokeLinecap: "round", 
-          strokeLinejoin: "round", 
-          strokeWidth: 2, 
-          d: "M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 18.5c-.77.833.192 2.5 1.732 2.5z" 
+const DefaultErrorFallback = ({
+  error,
+  retry,
+}: {
+  error: Error;
+  retry: () => void;
+}) => {
+  return React.createElement(
+    'div',
+    {
+      className:
+        'flex flex-col items-center justify-center p-8 border border-destructive/20 rounded-lg',
+    },
+    React.createElement(
+      'div',
+      { className: 'text-destructive mb-4' },
+      React.createElement(
+        'svg',
+        {
+          className: 'w-12 h-12',
+          fill: 'none',
+          stroke: 'currentColor',
+          viewBox: '0 0 24 24',
+        },
+        React.createElement('path', {
+          strokeLinecap: 'round',
+          strokeLinejoin: 'round',
+          strokeWidth: 2,
+          d: 'M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 18.5c-.77.833.192 2.5 1.732 2.5z',
         })
       )
     ),
-    React.createElement('h3', { className: "text-lg font-semibold mb-2" }, "Failed to load component"),
-    React.createElement('p', { className: "text-sm text-muted-foreground mb-4 text-center" },
+    React.createElement(
+      'h3',
+      { className: 'text-lg font-semibold mb-2' },
+      'Failed to load component'
+    ),
+    React.createElement(
+      'p',
+      { className: 'text-sm text-muted-foreground mb-4 text-center' },
       error.message || 'An error occurred while loading this component.'
     ),
-    React.createElement('button', {
-      onClick: retry,
-      className: "px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
-    }, "Try Again")
+    React.createElement(
+      'button',
+      {
+        onClick: retry,
+        className:
+          'px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors',
+      },
+      'Try Again'
+    )
   );
 };
 
@@ -180,32 +221,37 @@ export const LazyWrapper: React.FC<LazyWrapperProps> = ({
   children,
   fallback: Fallback = LoadingSpinner,
   errorFallback: ErrorFallback = DefaultErrorFallback,
-  componentName = 'Unknown'
+  componentName = 'Unknown',
 }) => {
   const [error, setError] = React.useState<Error | null>(null);
   const [retryKey, setRetryKey] = React.useState(0);
 
   const retry = React.useCallback(() => {
     setError(null);
-    setRetryKey(prev => prev + 1);
+    setRetryKey((prev) => prev + 1);
   }, []);
 
   if (error) {
     return React.createElement(ErrorFallback, { error, retry });
   }
 
-  return React.createElement(Suspense, 
+  return React.createElement(
+    Suspense,
     { fallback: React.createElement(Fallback) },
-    React.createElement(React.ErrorBoundary as any, {
-      key: retryKey,
-      onError: (error: Error) => {
-        setError(error);
-        performanceMonitor.recordMetric('component_error', 1, {
-          component: componentName,
-          error: error.message
-        });
-      }
-    }, children)
+    React.createElement(
+      React.ErrorBoundary as any,
+      {
+        key: retryKey,
+        onError: (error: Error) => {
+          setError(error);
+          performanceMonitor.recordMetric('component_error', 1, {
+            component: componentName,
+            error: error.message,
+          });
+        },
+      },
+      children
+    )
   );
 };
 
@@ -221,7 +267,10 @@ export interface RouteConfig {
 export function preloadComponent(importFn: () => Promise<any>): void {
   // Only preload if the user is on a fast connection
   const connection = (navigator as any).connection;
-  if (connection && (connection.effectiveType === '4g' || connection.effectiveType === '3g')) {
+  if (
+    connection &&
+    (connection.effectiveType === '4g' || connection.effectiveType === '3g')
+  ) {
     // Preload after a short delay to not interfere with initial page load
     setTimeout(() => {
       importFn().catch(() => {
@@ -237,46 +286,49 @@ export const routeConfigs: RouteConfig[] = [
     path: '/projects',
     component: LazyProjectHub,
     preload: true,
-    title: 'Projects'
+    title: 'Projects',
   },
   {
     path: '/projects/:id/dashboard',
     component: LazyRegulatoryDashboard,
     preload: true,
-    title: 'Regulatory Dashboard'
+    title: 'Regulatory Dashboard',
   },
   {
     path: '/projects/:id/agent',
     component: LazyAgentWorkflowPage,
     preload: false,
-    title: 'Agent Workflow'
+    title: 'Agent Workflow',
   },
   {
     path: '/projects/:id/editor',
     component: LazyMarkdownEditor,
     preload: false,
-    title: 'Document Editor'
+    title: 'Document Editor',
   },
   {
     path: '/projects/:id/audit',
     component: LazyAuditLogPage,
     preload: false,
-    title: 'Audit Trail'
+    title: 'Audit Trail',
   },
   {
     path: '/compliance',
     component: LazyComplianceDashboard,
     preload: false,
-    title: 'Compliance Dashboard'
-  }
+    title: 'Compliance Dashboard',
+  },
 ];
 
 // Preload critical routes
 export function preloadCriticalRoutes(): void {
   routeConfigs
-    .filter(config => config.preload)
-    .forEach(config => {
-      preloadComponent(() => config.component._payload._result || config.component._payload._value);
+    .filter((config) => config.preload)
+    .forEach((config) => {
+      preloadComponent(
+        () =>
+          config.component._payload._result || config.component._payload._value
+      );
     });
 }
 
@@ -292,36 +344,20 @@ export const bundleSplitRecommendations = {
     'lucide-react',
     'class-variance-authority',
     'clsx',
-    'tailwind-merge'
+    'tailwind-merge',
   ],
-  
+
   // CopilotKit and AI-related libraries
-  ai: [
-    '@copilotkit/react-core',
-    '@copilotkit/react-ui',
-    'openai',
-    'langchain'
-  ],
-  
+  ai: ['@copilotkit/react-core', '@copilotkit/react-ui', 'openai', 'langchain'],
+
   // Chart and visualization libraries
-  charts: [
-    'recharts',
-    'd3',
-    'chart.js'
-  ],
-  
+  charts: ['recharts', 'd3', 'chart.js'],
+
   // PDF and document processing
-  documents: [
-    'react-pdf',
-    'pdf-lib',
-    'mammoth'
-  ],
-  
+  documents: ['react-pdf', 'pdf-lib', 'mammoth'],
+
   // Development and debugging tools
-  dev: [
-    '@storybook/react',
-    'react-devtools'
-  ]
+  dev: ['@storybook/react', 'react-devtools'],
 };
 
 // Dynamic import with retry logic
@@ -337,19 +373,22 @@ export async function dynamicImportWithRetry<T>(
       if (i === retries - 1) {
         throw error;
       }
-      
+
       // Wait before retrying
-      await new Promise(resolve => setTimeout(resolve, delay * (i + 1)));
+      await new Promise((resolve) => setTimeout(resolve, delay * (i + 1)));
     }
   }
-  
+
   throw new Error('All retry attempts failed');
 }
 
 // Component registry for dynamic loading
 const componentRegistry = new Map<string, () => Promise<any>>();
 
-export function registerComponent(name: string, importFn: () => Promise<any>): void {
+export function registerComponent(
+  name: string,
+  importFn: () => Promise<any>
+): void {
   componentRegistry.set(name, importFn);
 }
 
@@ -358,20 +397,38 @@ export async function loadComponent(name: string): Promise<any> {
   if (!importFn) {
     throw new Error(`Component '${name}' not found in registry`);
   }
-  
+
   return dynamicImportWithRetry(importFn);
 }
 
 // Initialize component registry
 export function initializeComponentRegistry(): void {
   // Register all lazy components
-  registerComponent('ProjectHub', () => import('../../components/projects/ProjectHub'));
-  registerComponent('RegulatoryDashboard', () => import('../../components/dashboard/RegulatoryDashboard'));
-  registerComponent('AgentWorkflowPage', () => import('../../components/agent/AgentWorkflowPage'));
-  registerComponent('MarkdownEditor', () => import('../../components/editor/MarkdownEditor'));
-  registerComponent('AuditLogPage', () => import('../../components/audit/AuditLogPage'));
-  registerComponent('ComplianceDashboard', () => import('../../components/audit/ComplianceDashboard'));
-  
+  registerComponent(
+    'ProjectHub',
+    () => import('../../components/projects/ProjectHub')
+  );
+  registerComponent(
+    'RegulatoryDashboard',
+    () => import('../../components/dashboard/RegulatoryDashboard')
+  );
+  registerComponent(
+    'AgentWorkflowPage',
+    () => import('../../components/agent/AgentWorkflowPage')
+  );
+  registerComponent(
+    'MarkdownEditor',
+    () => import('../../components/editor/MarkdownEditor')
+  );
+  registerComponent(
+    'AuditLogPage',
+    () => import('../../components/audit/AuditLogPage')
+  );
+  registerComponent(
+    'ComplianceDashboard',
+    () => import('../../components/audit/ComplianceDashboard')
+  );
+
   // Preload critical components
   preloadCriticalRoutes();
 }
@@ -385,12 +442,12 @@ export function trackCodeSplittingMetrics(): void {
         if (entry.name.includes('chunk') || entry.name.includes('.js')) {
           performanceMonitor.recordMetric('chunk_load_time', entry.duration, {
             chunk_name: entry.name,
-            size: (entry as any).transferSize || 0
+            size: (entry as any).transferSize || 0,
           });
         }
       }
     });
-    
+
     try {
       observer.observe({ entryTypes: ['resource'] });
     } catch (e) {
@@ -407,21 +464,29 @@ export function optimizeBundleSize() {
 
   const recommendations: string[] = [];
 
-  if (analysis.totalJSSize > 1000) { // 1MB
-    recommendations.push('Consider code splitting for large JavaScript bundles');
+  if (analysis.totalJSSize > 1000) {
+    // 1MB
+    recommendations.push(
+      'Consider code splitting for large JavaScript bundles'
+    );
   }
 
   if (analysis.jsResourceCount > 10) {
-    recommendations.push('Too many JavaScript files - consider bundling optimization');
+    recommendations.push(
+      'Too many JavaScript files - consider bundling optimization'
+    );
   }
 
-  if (analysis.totalCSSSize > 200) { // 200KB
-    recommendations.push('CSS bundle is large - consider purging unused styles');
+  if (analysis.totalCSSSize > 200) {
+    // 200KB
+    recommendations.push(
+      'CSS bundle is large - consider purging unused styles'
+    );
   }
 
   return {
     ...analysis,
-    recommendations
+    recommendations,
   };
 }
 
@@ -445,7 +510,7 @@ export function analyzeUnusedCode() {
 // Initialize code splitting monitoring
 if (typeof window !== 'undefined') {
   trackCodeSplittingMetrics();
-  
+
   // Track feature usage for tree shaking insights
   window.addEventListener('click', (e) => {
     const target = e.target as HTMLElement;

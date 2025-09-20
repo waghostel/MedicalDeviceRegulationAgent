@@ -1,14 +1,18 @@
 /**
  * ComponentMockRegistry Tests
- * 
+ *
  * Tests for the ComponentMockRegistry system including automatic loading,
  * validation, and testing capabilities.
- * 
+ *
  * Requirements: 2.4, 4.4
  */
 
 import React from 'react';
-import { ComponentMockRegistry, ComponentMockMetadata, ComponentMockConfiguration } from '../ComponentMockRegistry';
+import {
+  ComponentMockRegistry,
+  ComponentMockMetadata,
+  ComponentMockConfiguration,
+} from '../ComponentMockRegistry';
 import { MockRegistry } from '../MockRegistry';
 
 // ============================================================================
@@ -39,8 +43,11 @@ describe('ComponentMockRegistry', () => {
 
   describe('Component Registration', () => {
     it('should register a component mock successfully', () => {
-      const mockComponent = jest.fn<React.ReactElement, [any]>((props) => 
-        React.createElement('div', { 'data-testid': 'test-component', ...props })
+      const mockComponent = jest.fn<React.ReactElement, [any]>((props) =>
+        React.createElement('div', {
+          'data-testid': 'test-component',
+          ...props,
+        })
       );
 
       const metadata: Partial<ComponentMockMetadata> = {
@@ -62,7 +69,7 @@ describe('ComponentMockRegistry', () => {
     });
 
     it('should validate component metadata during registration', () => {
-      const mockComponent = jest.fn<React.ReactElement, [any]>((props) => 
+      const mockComponent = jest.fn<React.ReactElement, [any]>((props) =>
         React.createElement('div', props)
       );
 
@@ -83,7 +90,7 @@ describe('ComponentMockRegistry', () => {
     });
 
     it('should handle duplicate component registration', () => {
-      const mockComponent = jest.fn<React.ReactElement, [any]>((props) => 
+      const mockComponent = jest.fn<React.ReactElement, [any]>((props) =>
         React.createElement('div', props)
       );
 
@@ -120,7 +127,11 @@ describe('ComponentMockRegistry', () => {
         if (!props.children) {
           throw new Error('Missing required prop: children');
         }
-        return React.createElement('div', { 'data-testid': 'test-component' }, props.children);
+        return React.createElement(
+          'div',
+          { 'data-testid': 'test-component' },
+          props.children
+        );
       });
 
       const metadata: ComponentMockMetadata = {
@@ -152,8 +163,8 @@ describe('ComponentMockRegistry', () => {
     });
 
     it('should detect missing test attributes', () => {
-      const mockComponent = jest.fn<React.ReactElement, [any]>((props) => 
-        React.createElement('div', props) // No data-testid
+      const mockComponent = jest.fn<React.ReactElement, [any]>(
+        (props) => React.createElement('div', props) // No data-testid
       );
 
       const metadata: ComponentMockMetadata = {
@@ -180,16 +191,20 @@ describe('ComponentMockRegistry', () => {
       );
 
       expect(result.isValid).toBe(false);
-      expect(result.errors.some(e => e.type === 'testAttributes')).toBe(true);
+      expect(result.errors.some((e) => e.type === 'testAttributes')).toBe(true);
     });
 
     it('should validate accessibility features', () => {
-      const mockComponent = jest.fn<React.ReactElement, [any]>((props) => 
-        React.createElement('button', { 
-          'data-testid': 'accessible-button',
-          'aria-label': props['aria-label'],
-          'aria-disabled': props.disabled,
-        }, props.children)
+      const mockComponent = jest.fn<React.ReactElement, [any]>((props) =>
+        React.createElement(
+          'button',
+          {
+            'data-testid': 'accessible-button',
+            'aria-label': props['aria-label'],
+            'aria-disabled': props.disabled,
+          },
+          props.children
+        )
       );
 
       const metadata: ComponentMockMetadata = {
@@ -227,11 +242,15 @@ describe('ComponentMockRegistry', () => {
   describe('Component Testing', () => {
     beforeEach(() => {
       // Register a test component
-      const mockComponent = jest.fn<React.ReactElement, [any]>((props) => 
-        React.createElement('div', { 
-          'data-testid': 'test-component',
-          'aria-label': props.label,
-        }, props.children)
+      const mockComponent = jest.fn<React.ReactElement, [any]>((props) =>
+        React.createElement(
+          'div',
+          {
+            'data-testid': 'test-component',
+            'aria-label': props.label,
+          },
+          props.children
+        )
       );
 
       const metadata: Partial<ComponentMockMetadata> = {
@@ -242,7 +261,11 @@ describe('ComponentMockRegistry', () => {
         accessibilityFeatures: ['aria-label'],
       };
 
-      componentRegistry.registerComponent('TestableComponent', mockComponent, metadata);
+      componentRegistry.registerComponent(
+        'TestableComponent',
+        mockComponent,
+        metadata
+      );
     });
 
     it('should test component rendering', async () => {
@@ -255,7 +278,9 @@ describe('ComponentMockRegistry', () => {
     });
 
     it('should handle component testing errors', async () => {
-      const result = await componentRegistry.testComponent('NonExistentComponent');
+      const result = await componentRegistry.testComponent(
+        'NonExistentComponent'
+      );
 
       expect(result.componentName).toBe('NonExistentComponent');
       expect(result.testsFailed).toBe(1);
@@ -265,8 +290,12 @@ describe('ComponentMockRegistry', () => {
 
     it('should test all registered components', async () => {
       // Register another component
-      const anotherMockComponent = jest.fn<React.ReactElement, [any]>((props) => 
-        React.createElement('span', { 'data-testid': 'another-component' }, props.text)
+      const anotherMockComponent = jest.fn<React.ReactElement, [any]>((props) =>
+        React.createElement(
+          'span',
+          { 'data-testid': 'another-component' },
+          props.text
+        )
       );
 
       componentRegistry.registerComponent(
@@ -282,8 +311,8 @@ describe('ComponentMockRegistry', () => {
       const results = await componentRegistry.testAllComponents();
 
       expect(results).toHaveLength(2);
-      expect(results.every(r => r.componentName)).toBe(true);
-      expect(results.every(r => r.duration >= 0)).toBe(true);
+      expect(results.every((r) => r.componentName)).toBe(true);
+      expect(results.every((r) => r.duration >= 0)).toBe(true);
     });
   });
 
@@ -304,14 +333,16 @@ describe('ComponentMockRegistry', () => {
 
     it('should support on-demand component loading', async () => {
       const component = await componentRegistry.loadComponent('EnhancedInput');
-      
+
       // Component might not be found in test environment, but should not throw
       expect(component).toBeDefined();
     });
 
     it('should handle loading failures gracefully', async () => {
-      const component = await componentRegistry.loadComponent('NonExistentComponent');
-      
+      const component = await componentRegistry.loadComponent(
+        'NonExistentComponent'
+      );
+
       expect(component).toBeNull();
     });
   });
@@ -323,12 +354,20 @@ describe('ComponentMockRegistry', () => {
   describe('Component Management', () => {
     beforeEach(() => {
       // Register test components
-      const mockComponent1 = jest.fn<React.ReactElement, [any]>((props) => 
-        React.createElement('div', { 'data-testid': 'component-1' }, props.children)
+      const mockComponent1 = jest.fn<React.ReactElement, [any]>((props) =>
+        React.createElement(
+          'div',
+          { 'data-testid': 'component-1' },
+          props.children
+        )
       );
 
-      const mockComponent2 = jest.fn<React.ReactElement, [any]>((props) => 
-        React.createElement('form', { 'data-testid': 'component-2' }, props.children)
+      const mockComponent2 = jest.fn<React.ReactElement, [any]>((props) =>
+        React.createElement(
+          'form',
+          { 'data-testid': 'component-2' },
+          props.children
+        )
       );
 
       componentRegistry.registerComponent('UIComponent', mockComponent1, {
@@ -346,35 +385,39 @@ describe('ComponentMockRegistry', () => {
 
     it('should retrieve registered components', () => {
       const component = componentRegistry.getComponent('UIComponent');
-      
+
       expect(component).toBeDefined();
       expect(component?.name).toBe('UIComponent');
       expect(component?.metadata.componentType).toBe('ui');
     });
 
     it('should list components with filters', () => {
-      const uiComponents = componentRegistry.listComponents({ componentType: 'ui' });
-      const formComponents = componentRegistry.listComponents({ componentType: 'form' });
-      
+      const uiComponents = componentRegistry.listComponents({
+        componentType: 'ui',
+      });
+      const formComponents = componentRegistry.listComponents({
+        componentType: 'form',
+      });
+
       expect(uiComponents).toHaveLength(1);
       expect(uiComponents[0].name).toBe('UIComponent');
-      
+
       expect(formComponents).toHaveLength(1);
       expect(formComponents[0].name).toBe('FormComponent');
     });
 
     it('should unregister components', () => {
       const success = componentRegistry.unregisterComponent('UIComponent');
-      
+
       expect(success).toBe(true);
-      
+
       const component = componentRegistry.getComponent('UIComponent');
       expect(component).toBeUndefined();
     });
 
     it('should provide registry statistics', () => {
       const stats = componentRegistry.getStats();
-      
+
       expect(stats.totalComponents).toBe(2);
       expect(stats.registeredComponents).toBe(2);
       expect(stats.componentsByType.ui).toBe(1);
@@ -389,39 +432,49 @@ describe('ComponentMockRegistry', () => {
   describe('Cleanup and Reset', () => {
     beforeEach(() => {
       // Register a test component
-      const mockComponent = jest.fn<React.ReactElement, [any]>((props) => 
+      const mockComponent = jest.fn<React.ReactElement, [any]>((props) =>
         React.createElement('div', props)
       );
 
-      componentRegistry.registerComponent('CleanupTestComponent', mockComponent, {
-        componentType: 'ui',
-        requiredProps: [],
-        testAttributes: ['data-testid'],
-      });
+      componentRegistry.registerComponent(
+        'CleanupTestComponent',
+        mockComponent,
+        {
+          componentType: 'ui',
+          requiredProps: [],
+          testAttributes: ['data-testid'],
+        }
+      );
     });
 
     it('should cleanup component mocks', () => {
       const component = componentRegistry.getComponent('CleanupTestComponent');
       expect(component).toBeDefined();
-      
+
       // Make some mock calls
       component!.mockComponent({ test: 'prop' });
       expect(component!.mockComponent).toHaveBeenCalled();
-      
+
       // Cleanup
       componentRegistry.cleanup();
-      
+
       // Mock should be cleared but component should still exist
       expect(component!.mockComponent).not.toHaveBeenCalled();
-      expect(componentRegistry.getComponent('CleanupTestComponent')).toBeDefined();
+      expect(
+        componentRegistry.getComponent('CleanupTestComponent')
+      ).toBeDefined();
     });
 
     it('should reset the entire registry', () => {
-      expect(componentRegistry.getComponent('CleanupTestComponent')).toBeDefined();
-      
+      expect(
+        componentRegistry.getComponent('CleanupTestComponent')
+      ).toBeDefined();
+
       componentRegistry.reset();
-      
-      expect(componentRegistry.getComponent('CleanupTestComponent')).toBeUndefined();
+
+      expect(
+        componentRegistry.getComponent('CleanupTestComponent')
+      ).toBeUndefined();
       expect(componentRegistry.getStats().totalComponents).toBe(0);
     });
   });
@@ -432,7 +485,7 @@ describe('ComponentMockRegistry', () => {
 
   describe('Integration with MockRegistry', () => {
     it('should integrate with MockRegistry', () => {
-      const mockComponent = jest.fn<React.ReactElement, [any]>((props) => 
+      const mockComponent = jest.fn<React.ReactElement, [any]>((props) =>
         React.createElement('div', props)
       );
 
@@ -447,7 +500,7 @@ describe('ComponentMockRegistry', () => {
       );
 
       expect(result.success).toBe(true);
-      
+
       // Should be available in MockRegistry
       const mockFromRegistry = mockRegistry.getMock('IntegrationTestComponent');
       expect(mockFromRegistry).toBe(mockComponent);
@@ -490,8 +543,9 @@ describe('ComponentMockRegistry Integration', () => {
 
   it('should integrate with enhanced form component mocks', async () => {
     // Try to load enhanced form components
-    const enhancedInput = await componentRegistry.loadComponent('EnhancedInput');
-    
+    const enhancedInput =
+      await componentRegistry.loadComponent('EnhancedInput');
+
     if (enhancedInput) {
       expect(enhancedInput.name).toBe('EnhancedInput');
       expect(enhancedInput.metadata.componentType).toBe('form');
@@ -501,8 +555,9 @@ describe('ComponentMockRegistry Integration', () => {
   });
 
   it('should validate enhanced form components', async () => {
-    const enhancedInput = await componentRegistry.loadComponent('EnhancedInput');
-    
+    const enhancedInput =
+      await componentRegistry.loadComponent('EnhancedInput');
+
     if (enhancedInput) {
       const validationResult = componentRegistry.validateComponent(
         'EnhancedInput',

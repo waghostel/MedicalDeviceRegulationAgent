@@ -34,7 +34,7 @@ const mockDocument: Document = {
   projectId: 'project-1',
   isFolder: false,
   createdAt: new Date('2024-01-01'),
-  updatedAt: new Date('2024-01-01')
+  updatedAt: new Date('2024-01-01'),
 };
 
 const mockMentionItems: MentionItem[] = [
@@ -43,15 +43,15 @@ const mockMentionItems: MentionItem[] = [
     type: 'document',
     label: 'Predicate Analysis',
     value: '@predicate-analysis',
-    metadata: { type: 'predicate-analysis' }
+    metadata: { type: 'predicate-analysis' },
   },
   {
     id: '2',
     type: 'project',
     label: 'Device Classification',
     value: '@device-classification',
-    metadata: { type: 'device-classification' }
-  }
+    metadata: { type: 'device-classification' },
+  },
 ];
 
 describe('MarkdownEditor', () => {
@@ -70,7 +70,9 @@ describe('MarkdownEditor', () => {
       />
     );
 
-    expect(screen.getByTestId('md-editor-textarea')).toHaveValue(mockDocument.content);
+    expect(screen.getByTestId('md-editor-textarea')).toHaveValue(
+      mockDocument.content
+    );
     expect(screen.getByText(mockDocument.name)).toBeInTheDocument();
   });
 
@@ -89,7 +91,7 @@ describe('MarkdownEditor', () => {
 
   it('updates content when typing', async () => {
     const user = userEvent.setup();
-    
+
     render(
       <MarkdownEditor
         document={mockDocument}
@@ -107,7 +109,7 @@ describe('MarkdownEditor', () => {
 
   it('shows unsaved changes indicator when content changes', async () => {
     const user = userEvent.setup();
-    
+
     render(
       <MarkdownEditor
         document={mockDocument}
@@ -125,7 +127,7 @@ describe('MarkdownEditor', () => {
   it('calls onSave when save button is clicked', async () => {
     const user = userEvent.setup();
     mockOnSave.mockResolvedValue(undefined);
-    
+
     render(
       <MarkdownEditor
         document={mockDocument}
@@ -141,7 +143,9 @@ describe('MarkdownEditor', () => {
     await user.click(saveButton);
 
     await waitFor(() => {
-      expect(mockOnSave).toHaveBeenCalledWith(mockDocument.content + ' Modified');
+      expect(mockOnSave).toHaveBeenCalledWith(
+        mockDocument.content + ' Modified'
+      );
     });
   });
 
@@ -162,7 +166,7 @@ describe('MarkdownEditor', () => {
   it('shows save error when save fails', async () => {
     const user = userEvent.setup();
     mockOnSave.mockRejectedValue(new Error('Save failed'));
-    
+
     render(
       <MarkdownEditor
         document={mockDocument}
@@ -194,7 +198,7 @@ describe('MarkdownEditor', () => {
     it('auto-saves after delay when content changes', async () => {
       const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
       mockOnSave.mockResolvedValue(undefined);
-      
+
       render(
         <MarkdownEditor
           document={mockDocument}
@@ -210,13 +214,15 @@ describe('MarkdownEditor', () => {
       jest.advanceTimersByTime(2500);
 
       await waitFor(() => {
-        expect(mockOnSave).toHaveBeenCalledWith(mockDocument.content + ' Auto-save test');
+        expect(mockOnSave).toHaveBeenCalledWith(
+          mockDocument.content + ' Auto-save test'
+        );
       });
     });
 
     it('does not auto-save if content has not changed', () => {
       mockOnSave.mockResolvedValue(undefined);
-      
+
       render(
         <MarkdownEditor
           document={mockDocument}

@@ -1,4 +1,4 @@
-import { getCLS, getFCP, getFID, getLCP, getTTFB, Metric } from 'web-vitals';
+import { onCLS, onFCP, onFID, onLCP, onTTFB, type Metric } from 'web-vitals';
 
 export interface WebVitalsMetrics {
   fcp: number | null;
@@ -32,7 +32,7 @@ export function getWebVitalScore(
   value: number
 ): WebVitalScore {
   const thresholds = WEB_VITALS_THRESHOLDS[metricName];
-  
+
   if (value <= thresholds.good) {
     return 'good';
   } else if (value <= thresholds.needsImprovement) {
@@ -58,18 +58,18 @@ export class WebVitalsCollector {
   }
 
   private initializeCollection(): void {
-    getCLS(this.handleMetric('cls'));
-    getFCP(this.handleMetric('fcp'));
-    getFID(this.handleMetric('fid'));
-    getLCP(this.handleMetric('lcp'));
-    getTTFB(this.handleMetric('ttfb'));
+    onCLS(this.handleMetric('cls'));
+    onFCP(this.handleMetric('fcp'));
+    onFID(this.handleMetric('fid'));
+    onLCP(this.handleMetric('lcp'));
+    onTTFB(this.handleMetric('ttfb'));
   }
 
   private handleMetric(name: keyof WebVitalsMetrics) {
     return (metric: Metric) => {
       this.metrics[name] = metric.value;
       this.notifyCallbacks();
-      
+
       // Log to console in development
       if (process.env.NODE_ENV === 'development') {
         console.log(`Web Vital - ${name.toUpperCase()}:`, {
@@ -79,7 +79,7 @@ export class WebVitalsCollector {
           delta: metric.delta,
         });
       }
-      
+
       // Send to analytics in production
       if (process.env.NODE_ENV === 'production') {
         this.sendToAnalytics(name, metric);
@@ -88,7 +88,7 @@ export class WebVitalsCollector {
   }
 
   private notifyCallbacks(): void {
-    this.callbacks.forEach(callback => callback({ ...this.metrics }));
+    this.callbacks.forEach((callback) => callback({ ...this.metrics }));
   }
 
   private sendToAnalytics(name: string, metric: Metric): void {
@@ -98,7 +98,9 @@ export class WebVitalsCollector {
       window.gtag('event', name, {
         event_category: 'Web Vitals',
         event_label: metric.id,
-        value: Math.round(metric.name === 'CLS' ? metric.value * 1000 : metric.value),
+        value: Math.round(
+          metric.name === 'CLS' ? metric.value * 1000 : metric.value
+        ),
         non_interaction: true,
       });
     }
@@ -118,7 +120,9 @@ export class WebVitalsCollector {
       lcp: this.metrics.lcp ? getWebVitalScore('lcp', this.metrics.lcp) : null,
       cls: this.metrics.cls ? getWebVitalScore('cls', this.metrics.cls) : null,
       fid: this.metrics.fid ? getWebVitalScore('fid', this.metrics.fid) : null,
-      ttfb: this.metrics.ttfb ? getWebVitalScore('ttfb', this.metrics.ttfb) : null,
+      ttfb: this.metrics.ttfb
+        ? getWebVitalScore('ttfb', this.metrics.ttfb)
+        : null,
     };
   }
 
@@ -134,30 +138,40 @@ export class WebVitalsCollector {
 
     // Generate recommendations based on scores
     if (scores.lcp === 'poor' || scores.lcp === 'needs-improvement') {
-      recommendations.push('Optimize Largest Contentful Paint by reducing server response times and optimizing images');
+      recommendations.push(
+        'Optimize Largest Contentful Paint by reducing server response times and optimizing images'
+      );
     }
-    
+
     if (scores.fcp === 'poor' || scores.fcp === 'needs-improvement') {
-      recommendations.push('Improve First Contentful Paint by eliminating render-blocking resources');
+      recommendations.push(
+        'Improve First Contentful Paint by eliminating render-blocking resources'
+      );
     }
-    
+
     if (scores.cls === 'poor' || scores.cls === 'needs-improvement') {
-      recommendations.push('Reduce Cumulative Layout Shift by setting dimensions for images and ads');
+      recommendations.push(
+        'Reduce Cumulative Layout Shift by setting dimensions for images and ads'
+      );
     }
-    
+
     if (scores.fid === 'poor' || scores.fid === 'needs-improvement') {
-      recommendations.push('Improve First Input Delay by reducing JavaScript execution time');
+      recommendations.push(
+        'Improve First Input Delay by reducing JavaScript execution time'
+      );
     }
-    
+
     if (scores.ttfb === 'poor' || scores.ttfb === 'needs-improvement') {
-      recommendations.push('Optimize Time to First Byte by improving server performance');
+      recommendations.push(
+        'Optimize Time to First Byte by improving server performance'
+      );
     }
 
     // Calculate overall score
-    const scoreValues = Object.values(scores).filter(score => score !== null);
-    const goodScores = scoreValues.filter(score => score === 'good').length;
+    const scoreValues = Object.values(scores).filter((score) => score !== null);
+    const goodScores = scoreValues.filter((score) => score === 'good').length;
     const totalScores = scoreValues.length;
-    
+
     let overallScore: WebVitalScore;
     if (goodScores / totalScores >= 0.8) {
       overallScore = 'good';
@@ -199,14 +213,14 @@ export function useWebVitals(): {
     fid: null,
     ttfb: null,
   });
-  
+
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
     const collector = getWebVitalsCollector();
-    
+
     collector.onMetricsUpdate((newMetrics) => {
       setMetrics(newMetrics);
       setIsLoading(false);
@@ -215,9 +229,11 @@ export function useWebVitals(): {
     // Set initial metrics if already available
     const initialMetrics = collector.getMetrics();
     setMetrics(initialMetrics);
-    
+
     // Check if any metrics are already collected
-    const hasMetrics = Object.values(initialMetrics).some(value => value !== null);
+    const hasMetrics = Object.values(initialMetrics).some(
+      (value) => value !== null
+    );
     if (hasMetrics) {
       setIsLoading(false);
     }
@@ -242,6 +258,6 @@ import { useState, useEffect, useMemo } from 'react';
 // Extend Window interface for gtag
 declare global {
   interface Window {
-    gtag?: (...args: any[]) => void;
+    gtag?: (...args: unknown[]) => void;
   }
 }

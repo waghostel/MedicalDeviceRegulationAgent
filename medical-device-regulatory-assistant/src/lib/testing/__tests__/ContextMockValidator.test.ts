@@ -45,7 +45,11 @@ describe('ContextMockValidator', () => {
         value: 'test-value',
       };
 
-      const result = validator.validateContext('TestContext', TestContext, mockValue);
+      const result = validator.validateContext(
+        'TestContext',
+        TestContext,
+        mockValue
+      );
 
       expect(result.isValid).toBe(true);
       expect(result.contextName).toBe('TestContext');
@@ -54,7 +58,11 @@ describe('ContextMockValidator', () => {
     });
 
     it('should detect missing context value', () => {
-      const result = validator.validateContext('TestContext', TestContext, null);
+      const result = validator.validateContext(
+        'TestContext',
+        TestContext,
+        null
+      );
 
       expect(result.isValid).toBe(false);
       expect(result.errors).toHaveLength(1);
@@ -63,7 +71,11 @@ describe('ContextMockValidator', () => {
     });
 
     it('should detect invalid context value type', () => {
-      const result = validator.validateContext('TestContext', TestContext, 'invalid-string');
+      const result = validator.validateContext(
+        'TestContext',
+        TestContext,
+        'invalid-string'
+      );
 
       expect(result.isValid).toBe(false);
       expect(result.errors).toHaveLength(1);
@@ -108,8 +120,10 @@ describe('ContextMockValidator', () => {
       const result = validator.validateToastContext(incompleteToastContext);
 
       expect(result.isValid).toBe(false);
-      expect(result.errors.some(e => e.type === 'missing_method')).toBe(true);
-      expect(result.suggestions).toContain('Add missing methods to ToastContext mock implementation');
+      expect(result.errors.some((e) => e.type === 'missing_method')).toBe(true);
+      expect(result.suggestions).toContain(
+        'Add missing methods to ToastContext mock implementation'
+      );
     });
 
     it('should detect non-function toast methods', () => {
@@ -122,7 +136,11 @@ describe('ContextMockValidator', () => {
       const result = validator.validateToastContext(invalidToastContext);
 
       expect(result.isValid).toBe(false);
-      expect(result.errors.some(e => e.type === 'type_mismatch' && e.path === 'toast')).toBe(true);
+      expect(
+        result.errors.some(
+          (e) => e.type === 'type_mismatch' && e.path === 'toast'
+        )
+      ).toBe(true);
     });
   });
 
@@ -135,7 +153,11 @@ describe('ContextMockValidator', () => {
           isDirty: false,
           errors: {},
         },
-        register: jest.fn(() => ({ name: 'test', onChange: jest.fn(), onBlur: jest.fn() })),
+        register: jest.fn(() => ({
+          name: 'test',
+          onChange: jest.fn(),
+          onBlur: jest.fn(),
+        })),
         handleSubmit: jest.fn((fn) => fn),
         setValue: jest.fn(),
         getValues: jest.fn(() => ({})),
@@ -152,7 +174,12 @@ describe('ContextMockValidator', () => {
 
     it('should detect missing required form methods', () => {
       const incompleteFormContext = {
-        formState: { isSubmitting: false, isValid: true, isDirty: false, errors: {} },
+        formState: {
+          isSubmitting: false,
+          isValid: true,
+          isDirty: false,
+          errors: {},
+        },
         register: jest.fn(),
         // Missing handleSubmit, setValue, getValues
       } as any;
@@ -160,9 +187,21 @@ describe('ContextMockValidator', () => {
       const result = validator.validateFormContext(incompleteFormContext);
 
       expect(result.isValid).toBe(false);
-      expect(result.errors.some(e => e.type === 'missing_method' && e.path === 'handleSubmit')).toBe(true);
-      expect(result.errors.some(e => e.type === 'missing_method' && e.path === 'setValue')).toBe(true);
-      expect(result.errors.some(e => e.type === 'missing_method' && e.path === 'getValues')).toBe(true);
+      expect(
+        result.errors.some(
+          (e) => e.type === 'missing_method' && e.path === 'handleSubmit'
+        )
+      ).toBe(true);
+      expect(
+        result.errors.some(
+          (e) => e.type === 'missing_method' && e.path === 'setValue'
+        )
+      ).toBe(true);
+      expect(
+        result.errors.some(
+          (e) => e.type === 'missing_method' && e.path === 'getValues'
+        )
+      ).toBe(true);
     });
   });
 
@@ -193,7 +232,11 @@ describe('ContextMockValidator', () => {
       const result = validator.validateThemeContext(incompleteThemeContext);
 
       expect(result.isValid).toBe(false);
-      expect(result.errors.some(e => e.type === 'missing_method' && e.path === 'setTheme')).toBe(true);
+      expect(
+        result.errors.some(
+          (e) => e.type === 'missing_method' && e.path === 'setTheme'
+        )
+      ).toBe(true);
     });
   });
 
@@ -229,7 +272,11 @@ describe('ContextMockValidator', () => {
       const result = validator.validateSessionContext(incompleteSessionContext);
 
       expect(result.isValid).toBe(false);
-      expect(result.errors.some(e => e.type === 'missing_method' && e.path === 'update')).toBe(true);
+      expect(
+        result.errors.some(
+          (e) => e.type === 'missing_method' && e.path === 'update'
+        )
+      ).toBe(true);
     });
   });
 
@@ -242,10 +289,17 @@ describe('ContextMockValidator', () => {
         property2: null,
       };
 
-      const TestProvider: React.FC<{ children: React.ReactNode; value?: any }> = ({ children, value }) =>
+      const TestProvider: React.FC<{
+        children: React.ReactNode;
+        value?: any;
+      }> = ({ children, value }) =>
         React.createElement(TestContext.Provider, { value }, children);
 
-      const debugInfo = validator.generateDebugInfo('TestContext', mockValue, TestProvider);
+      const debugInfo = validator.generateDebugInfo(
+        'TestContext',
+        mockValue,
+        TestProvider
+      );
 
       expect(debugInfo.contextName).toBe('TestContext');
       expect(debugInfo.providerFound).toBe(true);
@@ -258,13 +312,20 @@ describe('ContextMockValidator', () => {
 
     it('should handle render test failures', () => {
       const mockValue = { test: 'value' };
-      
+
       // Provider that throws an error
-      const FailingProvider: React.FC<{ children: React.ReactNode; value?: any }> = () => {
+      const FailingProvider: React.FC<{
+        children: React.ReactNode;
+        value?: any;
+      }> = () => {
         throw new Error('Provider render failed');
       };
 
-      const debugInfo = validator.generateDebugInfo('TestContext', mockValue, FailingProvider);
+      const debugInfo = validator.generateDebugInfo(
+        'TestContext',
+        mockValue,
+        FailingProvider
+      );
 
       expect(debugInfo.renderTest.success).toBe(false);
       expect(debugInfo.renderTest.error).toContain('Provider render failed');
@@ -281,7 +342,7 @@ describe('ContextMockValidator', () => {
       expect(results).toHaveProperty('SessionContext');
 
       // All should be valid with default mock implementations
-      Object.values(results).forEach(result => {
+      Object.values(results).forEach((result) => {
         expect(result.isValid).toBe(true);
       });
     });
@@ -292,13 +353,21 @@ describe('ContextMockValidator', () => {
       const mockValue = { test: jest.fn() };
 
       // First validation
-      const result1 = validator.validateContext('TestContext', TestContext, mockValue);
-      
+      const result1 = validator.validateContext(
+        'TestContext',
+        TestContext,
+        mockValue
+      );
+
       // Second validation should use cache
-      const result2 = validator.validateContext('TestContext', TestContext, mockValue);
+      const result2 = validator.validateContext(
+        'TestContext',
+        TestContext,
+        mockValue
+      );
 
       expect(result1).toEqual(result2);
-      
+
       const stats = validator.getValidationStats();
       expect(stats.totalValidations).toBeGreaterThan(0);
       expect(stats.cacheHits).toBeGreaterThan(0);
@@ -306,10 +375,12 @@ describe('ContextMockValidator', () => {
 
     it('should clear cache when requested', () => {
       const mockValue = { test: jest.fn() };
-      
+
       validator.validateContext('TestContext', TestContext, mockValue);
-      expect(validator.getValidationStats().totalValidations).toBeGreaterThan(0);
-      
+      expect(validator.getValidationStats().totalValidations).toBeGreaterThan(
+        0
+      );
+
       validator.clearCache();
       expect(validator.getValidationStats().totalValidations).toBe(0);
     });
@@ -324,7 +395,7 @@ describe('ContextMockValidator', () => {
     it('should validate context mock with utility function', () => {
       const mockValue = { test: jest.fn() };
       const result = validateContextMock('TestContext', mockValue);
-      
+
       expect(result.isValid).toBe(true);
       expect(result.contextName).toBe('TestContext');
     });
@@ -332,7 +403,7 @@ describe('ContextMockValidator', () => {
     it('should debug context mock with utility function', () => {
       const mockValue = { test: jest.fn() };
       const debugInfo = debugContextMock('TestContext', mockValue);
-      
+
       expect(debugInfo.contextName).toBe('TestContext');
       expect(debugInfo.valueStructure).toHaveProperty('test');
     });
@@ -341,10 +412,14 @@ describe('ContextMockValidator', () => {
   describe('Default Export', () => {
     it('should provide default context mock validator instance', () => {
       expect(contextMockValidator).toBeInstanceOf(ContextMockValidator);
-      
+
       const mockValue = { test: jest.fn() };
-      const result = contextMockValidator.validateContext('TestContext', TestContext, mockValue);
-      
+      const result = contextMockValidator.validateContext(
+        'TestContext',
+        TestContext,
+        mockValue
+      );
+
       expect(result.isValid).toBe(true);
     });
   });
@@ -355,8 +430,12 @@ describe('ContextMockValidator', () => {
       const circularValue: any = { test: jest.fn() };
       circularValue.circular = circularValue;
 
-      const result = validator.validateContext('TestContext', TestContext, circularValue);
-      
+      const result = validator.validateContext(
+        'TestContext',
+        TestContext,
+        circularValue
+      );
+
       // Should still validate successfully despite circular reference
       expect(result.isValid).toBe(true);
       expect(result.contextName).toBe('TestContext');
@@ -364,13 +443,20 @@ describe('ContextMockValidator', () => {
 
     it('should handle provider validation errors', () => {
       const mockValue = { test: jest.fn() };
-      
+
       // Invalid provider (not a function)
       const invalidProvider = 'not-a-provider' as any;
-      
-      const result = validator.validateContext('TestContext', TestContext, mockValue, invalidProvider);
-      
-      expect(result.errors.some(e => e.type === 'provider_not_found')).toBe(true);
+
+      const result = validator.validateContext(
+        'TestContext',
+        TestContext,
+        mockValue,
+        invalidProvider
+      );
+
+      expect(result.errors.some((e) => e.type === 'provider_not_found')).toBe(
+        true
+      );
     });
   });
 });

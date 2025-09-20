@@ -32,31 +32,31 @@ module.exports = {
         'categories:best-practices': ['error', { minScore: 0.8 }],
         'categories:seo': ['error', { minScore: 0.8 }],
         'categories:pwa': 'off', // PWA not required for MVP
-        
+
         // Core Web Vitals
         'first-contentful-paint': ['error', { maxNumericValue: 2000 }],
         'largest-contentful-paint': ['error', { maxNumericValue: 2500 }],
         'cumulative-layout-shift': ['error', { maxNumericValue: 0.1 }],
         'total-blocking-time': ['error', { maxNumericValue: 300 }],
-        
+
         // Performance budgets
         'speed-index': ['error', { maxNumericValue: 3000 }],
-        'interactive': ['error', { maxNumericValue: 3500 }],
-        
+        interactive: ['error', { maxNumericValue: 3500 }],
+
         // Accessibility requirements
         'color-contrast': 'error',
         'heading-order': 'error',
         'html-has-lang': 'error',
         'image-alt': 'error',
-        'label': 'error',
+        label: 'error',
         'link-name': 'error',
-        'list': 'error',
+        list: 'error',
         'meta-description': 'error',
-        
+
         // Best practices
         'uses-https': 'error',
         'no-vulnerable-libraries': 'error',
-        'charset': 'error',
+        charset: 'error',
       },
     },
     upload: {

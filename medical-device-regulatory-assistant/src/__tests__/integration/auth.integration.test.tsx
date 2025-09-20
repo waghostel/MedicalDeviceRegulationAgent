@@ -8,8 +8,15 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { SessionProvider, useSession, signIn, signOut } from 'next-auth/react';
 import { useRouter } from 'next/router';
-import { setupMockAPI, teardownMockAPI, addMockHandlers } from '@/lib/testing/msw-utils';
-import { createMockSession, renderWithProviders } from '@/lib/testing/test-utils';
+import {
+  setupMockAPI,
+  teardownMockAPI,
+  addMockHandlers,
+} from '@/lib/testing/msw-utils';
+import {
+  createMockSession,
+  renderWithProviders,
+} from '@/lib/testing/test-utils';
 import { generateMockUser } from '@/lib/mock-data';
 
 // Mock Next.js router
@@ -33,15 +40,15 @@ jest.mock('next-auth/react', () => ({
 // Test components for authentication testing
 const TestProtectedComponent: React.FC = () => {
   const { data: session, status } = useSession();
-  
+
   if (status === 'loading') {
     return <div data-testid="loading">Loading...</div>;
   }
-  
+
   if (!session) {
     return <div data-testid="unauthenticated">Please sign in</div>;
   }
-  
+
   return (
     <div data-testid="authenticated">
       <h1>Welcome, {session.user?.name}</h1>
@@ -56,7 +63,7 @@ const TestLoginComponent: React.FC = () => {
   const handleGoogleLogin = () => {
     signIn('google', { callbackUrl: '/dashboard' });
   };
-  
+
   return (
     <div data-testid="login-component">
       <h1>Sign In</h1>
@@ -70,15 +77,17 @@ const TestLoginComponent: React.FC = () => {
 const TestSessionPersistenceComponent: React.FC = () => {
   const { data: session, status } = useSession();
   const router = useRouter();
-  
+
   const handleNavigation = () => {
     router.push('/dashboard');
   };
-  
+
   return (
     <div data-testid="session-persistence">
       <div data-testid="session-status">{status}</div>
-      <div data-testid="session-data">{session ? session.user?.email : 'No session'}</div>
+      <div data-testid="session-data">
+        {session ? session.user?.email : 'No session'}
+      </div>
       <button onClick={handleNavigation} data-testid="navigate-btn">
         Navigate to Dashboard
       </button>
@@ -129,7 +138,9 @@ describe('Authentication Integration Tests', () => {
       const googleLoginBtn = screen.getByTestId('google-login-btn');
       await user.click(googleLoginBtn);
 
-      expect(signIn).toHaveBeenCalledWith('google', { callbackUrl: '/dashboard' });
+      expect(signIn).toHaveBeenCalledWith('google', {
+        callbackUrl: '/dashboard',
+      });
     });
 
     it('should handle successful Google OAuth callback', async () => {
@@ -191,7 +202,9 @@ describe('Authentication Integration Tests', () => {
       const googleLoginBtn = screen.getByTestId('google-login-btn');
       await userEvent.click(googleLoginBtn);
 
-      expect(signIn).toHaveBeenCalledWith('google', { callbackUrl: '/dashboard' });
+      expect(signIn).toHaveBeenCalledWith('google', {
+        callbackUrl: '/dashboard',
+      });
     });
 
     it('should redirect to callback URL after successful authentication', async () => {
@@ -248,8 +261,12 @@ describe('Authentication Integration Tests', () => {
       rerender(<TestSessionPersistenceComponent />);
 
       await waitFor(() => {
-        expect(screen.getByTestId('session-status')).toHaveTextContent('authenticated');
-        expect(screen.getByTestId('session-data')).toHaveTextContent('persistent@example.com');
+        expect(screen.getByTestId('session-status')).toHaveTextContent(
+          'authenticated'
+        );
+        expect(screen.getByTestId('session-data')).toHaveTextContent(
+          'persistent@example.com'
+        );
       });
     });
 
@@ -268,7 +285,9 @@ describe('Authentication Integration Tests', () => {
       await userEvent.click(navigateBtn);
 
       expect(mockRouter.push).toHaveBeenCalledWith('/dashboard');
-      expect(screen.getByTestId('session-status')).toHaveTextContent('authenticated');
+      expect(screen.getByTestId('session-status')).toHaveTextContent(
+        'authenticated'
+      );
     });
 
     it('should handle session restoration failures gracefully', async () => {
@@ -291,8 +310,12 @@ describe('Authentication Integration Tests', () => {
       render(<TestSessionPersistenceComponent />);
 
       await waitFor(() => {
-        expect(screen.getByTestId('session-status')).toHaveTextContent('unauthenticated');
-        expect(screen.getByTestId('session-data')).toHaveTextContent('No session');
+        expect(screen.getByTestId('session-status')).toHaveTextContent(
+          'unauthenticated'
+        );
+        expect(screen.getByTestId('session-data')).toHaveTextContent(
+          'No session'
+        );
       });
     });
   });
@@ -311,7 +334,9 @@ describe('Authentication Integration Tests', () => {
 
       await waitFor(() => {
         expect(screen.getByTestId('authenticated')).toBeInTheDocument();
-        expect(screen.getByText(`Welcome, ${mockUser.name}`)).toBeInTheDocument();
+        expect(
+          screen.getByText(`Welcome, ${mockUser.name}`)
+        ).toBeInTheDocument();
       });
     });
 
@@ -430,7 +455,7 @@ describe('Authentication Integration Tests', () => {
       // Mock session expiration scenario
       const SessionExpirationComponent: React.FC = () => {
         const { data: session, status } = useSession();
-        
+
         React.useEffect(() => {
           // Simulate session expiration check
           const checkSession = async () => {
@@ -481,7 +506,7 @@ describe('Authentication Integration Tests', () => {
   describe('CSRF Protection and Security Headers', () => {
     it('should include CSRF token in authentication requests', async () => {
       const mockCsrfToken = 'csrf-token-123';
-      
+
       // Mock CSRF token endpoint
       addMockHandlers([
         {
@@ -496,8 +521,8 @@ describe('Authentication Integration Tests', () => {
 
         React.useEffect(() => {
           fetch('/api/auth/csrf')
-            .then(res => res.json())
-            .then(data => setCsrfToken(data.csrfToken));
+            .then((res) => res.json())
+            .then((data) => setCsrfToken(data.csrfToken));
         }, []);
 
         return (
@@ -510,7 +535,9 @@ describe('Authentication Integration Tests', () => {
       render(<CSRFTestComponent />);
 
       await waitFor(() => {
-        expect(screen.getByTestId('csrf-token')).toHaveTextContent(mockCsrfToken);
+        expect(screen.getByTestId('csrf-token')).toHaveTextContent(
+          mockCsrfToken
+        );
       });
     });
 
@@ -529,7 +556,9 @@ describe('Authentication Integration Tests', () => {
 
       // Test that security headers are properly handled
       const SecurityHeadersComponent: React.FC = () => {
-        const [securityHeaders, setSecurityHeaders] = React.useState<Record<string, string>>({});
+        const [securityHeaders, setSecurityHeaders] = React.useState<
+          Record<string, string>
+        >({});
 
         React.useEffect(() => {
           fetch('/api/auth/callback/google', {
@@ -538,19 +567,20 @@ describe('Authentication Integration Tests', () => {
               'Content-Type': 'application/json',
               'X-Requested-With': 'XMLHttpRequest',
             },
-          })
-            .then(response => {
-              const headers: Record<string, string> = {};
-              response.headers.forEach((value, key) => {
-                headers[key] = value;
-              });
-              setSecurityHeaders(headers);
+          }).then((response) => {
+            const headers: Record<string, string> = {};
+            response.headers.forEach((value, key) => {
+              headers[key] = value;
             });
+            setSecurityHeaders(headers);
+          });
         }, []);
 
         return (
           <div data-testid="security-headers">
-            {Object.keys(securityHeaders).length > 0 ? 'Headers received' : 'No headers'}
+            {Object.keys(securityHeaders).length > 0
+              ? 'Headers received'
+              : 'No headers'}
           </div>
         );
       };
@@ -572,8 +602,15 @@ describe('Authentication Integration Tests', () => {
             setCspViolation(true);
           };
 
-          document.addEventListener('securitypolicyviolation', handleCSPViolation);
-          return () => document.removeEventListener('securitypolicyviolation', handleCSPViolation);
+          document.addEventListener(
+            'securitypolicyviolation',
+            handleCSPViolation
+          );
+          return () =>
+            document.removeEventListener(
+              'securitypolicyviolation',
+              handleCSPViolation
+            );
         }, []);
 
         return (
@@ -605,13 +642,19 @@ describe('Authentication Integration Tests', () => {
       const { rerender } = render(<TestSessionPersistenceComponent />);
 
       // First tab
-      expect(screen.getByTestId('session-status')).toHaveTextContent('authenticated');
+      expect(screen.getByTestId('session-status')).toHaveTextContent(
+        'authenticated'
+      );
 
       // Simulate second tab with same session
       rerender(<TestSessionPersistenceComponent />);
 
-      expect(screen.getByTestId('session-status')).toHaveTextContent('authenticated');
-      expect(screen.getByTestId('session-data')).toHaveTextContent(mockUser.email);
+      expect(screen.getByTestId('session-status')).toHaveTextContent(
+        'authenticated'
+      );
+      expect(screen.getByTestId('session-data')).toHaveTextContent(
+        mockUser.email
+      );
     });
 
     it('should synchronize logout across multiple tabs', async () => {

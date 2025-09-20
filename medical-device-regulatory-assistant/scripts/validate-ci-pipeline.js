@@ -2,7 +2,7 @@
 
 /**
  * CI/CD Pipeline Validation Script
- * 
+ *
  * Validates the continuous integration pipeline configuration and
  * ensures all quality assurance measures are properly configured.
  */
@@ -17,7 +17,7 @@ const COLORS = {
   YELLOW: '\x1b[33m',
   BLUE: '\x1b[34m',
   RESET: '\x1b[0m',
-  BOLD: '\x1b[1m'
+  BOLD: '\x1b[1m',
 };
 
 /**
@@ -31,7 +31,7 @@ class CIPipelineValidator {
       pre_commit: { valid: false, issues: [] },
       quality_gates: { valid: false, issues: [] },
       scripts: { valid: false, issues: [] },
-      dependencies: { valid: false, issues: [] }
+      dependencies: { valid: false, issues: [] },
     };
   }
 
@@ -53,8 +53,13 @@ class CIPipelineValidator {
     const issues = [];
 
     try {
-      const workflowPath = path.join(this.projectRoot, '.github', 'workflows', 'quality-assurance.yml');
-      
+      const workflowPath = path.join(
+        this.projectRoot,
+        '.github',
+        'workflows',
+        'quality-assurance.yml'
+      );
+
       if (!(await this.pathExists(workflowPath))) {
         issues.push('GitHub Actions workflow file not found');
         this.validationResults.github_actions = { valid: false, issues };
@@ -74,23 +79,33 @@ class CIPipelineValidator {
         'performance-tests',
         'quality-gates',
         'security-scan',
-        'deployment-readiness'
+        'deployment-readiness',
       ];
 
       const actualJobs = Object.keys(workflow.jobs || {});
-      const missingJobs = requiredJobs.filter(job => !actualJobs.includes(job));
+      const missingJobs = requiredJobs.filter(
+        (job) => !actualJobs.includes(job)
+      );
 
       if (missingJobs.length > 0) {
         issues.push(`Missing required jobs: ${missingJobs.join(', ')}`);
       }
 
       // Check environment variables
-      const requiredEnvVars = ['NODE_VERSION', 'PYTHON_VERSION', 'PNPM_VERSION'];
+      const requiredEnvVars = [
+        'NODE_VERSION',
+        'PYTHON_VERSION',
+        'PNPM_VERSION',
+      ];
       const actualEnvVars = Object.keys(workflow.env || {});
-      const missingEnvVars = requiredEnvVars.filter(env => !actualEnvVars.includes(env));
+      const missingEnvVars = requiredEnvVars.filter(
+        (env) => !actualEnvVars.includes(env)
+      );
 
       if (missingEnvVars.length > 0) {
-        issues.push(`Missing environment variables: ${missingEnvVars.join(', ')}`);
+        issues.push(
+          `Missing environment variables: ${missingEnvVars.join(', ')}`
+        );
       }
 
       // Check triggers
@@ -102,12 +117,21 @@ class CIPipelineValidator {
       // Check if quality gates job exists and has proper dependencies
       const qualityGatesJob = workflow.jobs['quality-gates'];
       if (qualityGatesJob) {
-        const expectedDependencies = ['frontend-quality', 'backend-quality', 'integration-tests', 'performance-tests'];
+        const expectedDependencies = [
+          'frontend-quality',
+          'backend-quality',
+          'integration-tests',
+          'performance-tests',
+        ];
         const actualDependencies = qualityGatesJob.needs || [];
-        const missingDependencies = expectedDependencies.filter(dep => !actualDependencies.includes(dep));
+        const missingDependencies = expectedDependencies.filter(
+          (dep) => !actualDependencies.includes(dep)
+        );
 
         if (missingDependencies.length > 0) {
-          issues.push(`Quality gates job missing dependencies: ${missingDependencies.join(', ')}`);
+          issues.push(
+            `Quality gates job missing dependencies: ${missingDependencies.join(', ')}`
+          );
         }
       }
 
@@ -115,13 +139,16 @@ class CIPipelineValidator {
         valid: issues.length === 0,
         issues,
         jobs_count: actualJobs.length,
-        workflow_file: workflowPath
+        workflow_file: workflowPath,
       };
 
       if (issues.length === 0) {
         this.log('✅ GitHub Actions workflow validation passed', COLORS.GREEN);
       } else {
-        this.log(`❌ GitHub Actions workflow validation failed (${issues.length} issues)`, COLORS.RED);
+        this.log(
+          `❌ GitHub Actions workflow validation failed (${issues.length} issues)`,
+          COLORS.RED
+        );
       }
 
       return issues.length === 0;
@@ -140,8 +167,11 @@ class CIPipelineValidator {
     const issues = [];
 
     try {
-      const preCommitPath = path.join(this.projectRoot, '.pre-commit-config.yaml');
-      
+      const preCommitPath = path.join(
+        this.projectRoot,
+        '.pre-commit-config.yaml'
+      );
+
       if (!(await this.pathExists(preCommitPath))) {
         issues.push('Pre-commit configuration file not found');
         this.validationResults.pre_commit = { valid: false, issues };
@@ -159,17 +189,21 @@ class CIPipelineValidator {
         'backend-black',
         'backend-isort',
         'backend-flake8',
-        'backend-mypy'
+        'backend-mypy',
       ];
 
       const repos = preCommitConfig.repos || [];
-      const localRepo = repos.find(repo => repo.repo === 'local');
-      
+      const localRepo = repos.find((repo) => repo.repo === 'local');
+
       if (!localRepo) {
-        issues.push('Local repository configuration not found in pre-commit config');
+        issues.push(
+          'Local repository configuration not found in pre-commit config'
+        );
       } else {
-        const hookIds = localRepo.hooks.map(hook => hook.id);
-        const missingHooks = requiredHookTypes.filter(hookType => !hookIds.includes(hookType));
+        const hookIds = localRepo.hooks.map((hook) => hook.id);
+        const missingHooks = requiredHookTypes.filter(
+          (hookType) => !hookIds.includes(hookType)
+        );
 
         if (missingHooks.length > 0) {
           issues.push(`Missing pre-commit hooks: ${missingHooks.join(', ')}`);
@@ -177,10 +211,15 @@ class CIPipelineValidator {
       }
 
       // Check for security hooks
-      const hasSecurityHooks = repos.some(repo => 
-        repo.hooks && repo.hooks.some(hook => 
-          hook.id.includes('audit') || hook.id.includes('safety') || hook.id.includes('security')
-        )
+      const hasSecurityHooks = repos.some(
+        (repo) =>
+          repo.hooks &&
+          repo.hooks.some(
+            (hook) =>
+              hook.id.includes('audit') ||
+              hook.id.includes('safety') ||
+              hook.id.includes('security')
+          )
       );
 
       if (!hasSecurityHooks) {
@@ -191,13 +230,16 @@ class CIPipelineValidator {
         valid: issues.length === 0,
         issues,
         hooks_count: localRepo ? localRepo.hooks.length : 0,
-        config_file: preCommitPath
+        config_file: preCommitPath,
       };
 
       if (issues.length === 0) {
         this.log('✅ Pre-commit configuration validation passed', COLORS.GREEN);
       } else {
-        this.log(`❌ Pre-commit configuration validation failed (${issues.length} issues)`, COLORS.RED);
+        this.log(
+          `❌ Pre-commit configuration validation failed (${issues.length} issues)`,
+          COLORS.RED
+        );
       }
 
       return issues.length === 0;
@@ -216,8 +258,11 @@ class CIPipelineValidator {
     const issues = [];
 
     try {
-      const qualityGatesPath = path.join(this.projectRoot, 'quality-gates.json');
-      
+      const qualityGatesPath = path.join(
+        this.projectRoot,
+        'quality-gates.json'
+      );
+
       if (!(await this.pathExists(qualityGatesPath))) {
         issues.push('Quality gates configuration file not found');
         this.validationResults.quality_gates = { valid: false, issues };
@@ -233,11 +278,13 @@ class CIPipelineValidator {
         'frontend_coverage',
         'backend_coverage',
         'critical_issues',
-        'security_vulnerabilities'
+        'security_vulnerabilities',
       ];
 
       const actualGates = Object.keys(qualityGates.gates || {});
-      const missingGates = requiredGates.filter(gate => !actualGates.includes(gate));
+      const missingGates = requiredGates.filter(
+        (gate) => !actualGates.includes(gate)
+      );
 
       if (missingGates.length > 0) {
         issues.push(`Missing quality gates: ${missingGates.join(', ')}`);
@@ -259,10 +306,14 @@ class CIPipelineValidator {
       // Check environments
       const requiredEnvironments = ['development', 'staging', 'production'];
       const actualEnvironments = Object.keys(qualityGates.environments || {});
-      const missingEnvironments = requiredEnvironments.filter(env => !actualEnvironments.includes(env));
+      const missingEnvironments = requiredEnvironments.filter(
+        (env) => !actualEnvironments.includes(env)
+      );
 
       if (missingEnvironments.length > 0) {
-        issues.push(`Missing environment configurations: ${missingEnvironments.join(', ')}`);
+        issues.push(
+          `Missing environment configurations: ${missingEnvironments.join(', ')}`
+        );
       }
 
       this.validationResults.quality_gates = {
@@ -270,13 +321,19 @@ class CIPipelineValidator {
         issues,
         gates_count: actualGates.length,
         environments_count: actualEnvironments.length,
-        config_file: qualityGatesPath
+        config_file: qualityGatesPath,
       };
 
       if (issues.length === 0) {
-        this.log('✅ Quality gates configuration validation passed', COLORS.GREEN);
+        this.log(
+          '✅ Quality gates configuration validation passed',
+          COLORS.GREEN
+        );
       } else {
-        this.log(`❌ Quality gates configuration validation failed (${issues.length} issues)`, COLORS.RED);
+        this.log(
+          `❌ Quality gates configuration validation failed (${issues.length} issues)`,
+          COLORS.RED
+        );
       }
 
       return issues.length === 0;
@@ -296,7 +353,7 @@ class CIPipelineValidator {
 
     try {
       const scriptsDir = path.join(this.projectRoot, 'scripts');
-      
+
       if (!(await this.pathExists(scriptsDir))) {
         issues.push('Scripts directory not found');
         this.validationResults.scripts = { valid: false, issues };
@@ -309,11 +366,13 @@ class CIPipelineValidator {
         'quality-metrics-reporter.js',
         'regression-detector.js',
         'validate-frontend-environment.js',
-        'testing-maintenance.js'
+        'testing-maintenance.js',
       ];
 
       const scriptFiles = await fs.readdir(scriptsDir);
-      const missingScripts = requiredScripts.filter(script => !scriptFiles.includes(script));
+      const missingScripts = requiredScripts.filter(
+        (script) => !scriptFiles.includes(script)
+      );
 
       if (missingScripts.length > 0) {
         issues.push(`Missing required scripts: ${missingScripts.join(', ')}`);
@@ -331,7 +390,12 @@ class CIPipelineValidator {
       }
 
       // Check backend quality checker
-      const backendQualityChecker = path.join(this.projectRoot, 'backend', 'testing', 'quality_checker.py');
+      const backendQualityChecker = path.join(
+        this.projectRoot,
+        'backend',
+        'testing',
+        'quality_checker.py'
+      );
       if (!(await this.pathExists(backendQualityChecker))) {
         issues.push('Backend quality checker script not found');
       }
@@ -340,13 +404,16 @@ class CIPipelineValidator {
         valid: issues.length === 0,
         issues,
         scripts_count: scriptFiles.length,
-        scripts_dir: scriptsDir
+        scripts_dir: scriptsDir,
       };
 
       if (issues.length === 0) {
         this.log('✅ Quality scripts validation passed', COLORS.GREEN);
       } else {
-        this.log(`❌ Quality scripts validation failed (${issues.length} issues)`, COLORS.RED);
+        this.log(
+          `❌ Quality scripts validation failed (${issues.length} issues)`,
+          COLORS.RED
+        );
       }
 
       return issues.length === 0;
@@ -366,14 +433,16 @@ class CIPipelineValidator {
 
     try {
       const packageJsonPath = path.join(this.projectRoot, 'package.json');
-      
+
       if (!(await this.pathExists(packageJsonPath))) {
         issues.push('package.json not found');
         this.validationResults.dependencies = { valid: false, issues };
         return false;
       }
 
-      const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf8'));
+      const packageJson = JSON.parse(
+        await fs.readFile(packageJsonPath, 'utf8')
+      );
       const scripts = packageJson.scripts || {};
 
       // Check required npm scripts
@@ -384,22 +453,36 @@ class CIPipelineValidator {
         'test:coverage',
         'lint',
         'format',
-        'type-check'
+        'type-check',
       ];
 
-      const missingScripts = requiredScripts.filter(script => !scripts[script]);
+      const missingScripts = requiredScripts.filter(
+        (script) => !scripts[script]
+      );
 
       if (missingScripts.length > 0) {
-        issues.push(`Missing package.json scripts: ${missingScripts.join(', ')}`);
+        issues.push(
+          `Missing package.json scripts: ${missingScripts.join(', ')}`
+        );
       }
 
       // Check if quality scripts reference the correct files
-      if (scripts['quality:check'] && !scripts['quality:check'].includes('quality-check-system.js')) {
-        issues.push('quality:check script does not reference quality-check-system.js');
+      if (
+        scripts['quality:check'] &&
+        !scripts['quality:check'].includes('quality-check-system.js')
+      ) {
+        issues.push(
+          'quality:check script does not reference quality-check-system.js'
+        );
       }
 
-      if (scripts['quality:report'] && !scripts['quality:report'].includes('quality-metrics-reporter.js')) {
-        issues.push('quality:report script does not reference quality-metrics-reporter.js');
+      if (
+        scripts['quality:report'] &&
+        !scripts['quality:report'].includes('quality-metrics-reporter.js')
+      ) {
+        issues.push(
+          'quality:report script does not reference quality-metrics-reporter.js'
+        );
       }
 
       // Check development dependencies
@@ -410,26 +493,33 @@ class CIPipelineValidator {
         'jest',
         'eslint',
         'prettier',
-        'typescript'
+        'typescript',
       ];
 
-      const missingDevDeps = requiredDevDeps.filter(dep => !devDependencies[dep]);
+      const missingDevDeps = requiredDevDeps.filter(
+        (dep) => !devDependencies[dep]
+      );
 
       if (missingDevDeps.length > 0) {
-        issues.push(`Missing development dependencies: ${missingDevDeps.join(', ')}`);
+        issues.push(
+          `Missing development dependencies: ${missingDevDeps.join(', ')}`
+        );
       }
 
       this.validationResults.dependencies = {
         valid: issues.length === 0,
         issues,
         scripts_count: Object.keys(scripts).length,
-        dev_deps_count: Object.keys(devDependencies).length
+        dev_deps_count: Object.keys(devDependencies).length,
       };
 
       if (issues.length === 0) {
         this.log('✅ Package scripts validation passed', COLORS.GREEN);
       } else {
-        this.log(`❌ Package scripts validation failed (${issues.length} issues)`, COLORS.RED);
+        this.log(
+          `❌ Package scripts validation failed (${issues.length} issues)`,
+          COLORS.RED
+        );
       }
 
       return issues.length === 0;
@@ -445,8 +535,12 @@ class CIPipelineValidator {
    */
   generateValidationReport() {
     const totalChecks = Object.keys(this.validationResults).length;
-    const passedChecks = Object.values(this.validationResults).filter(result => result.valid).length;
-    const allIssues = Object.values(this.validationResults).flatMap(result => result.issues);
+    const passedChecks = Object.values(this.validationResults).filter(
+      (result) => result.valid
+    ).length;
+    const allIssues = Object.values(this.validationResults).flatMap(
+      (result) => result.issues
+    );
 
     return {
       timestamp: new Date().toISOString(),
@@ -455,10 +549,10 @@ class CIPipelineValidator {
         passed_checks: passedChecks,
         failed_checks: totalChecks - passedChecks,
         total_issues: allIssues.length,
-        overall_valid: passedChecks === totalChecks
+        overall_valid: passedChecks === totalChecks,
       },
       results: this.validationResults,
-      recommendations: this.generateRecommendations()
+      recommendations: this.generateRecommendations(),
     };
   }
 
@@ -479,8 +573,8 @@ class CIPipelineValidator {
               actions: [
                 'Review .github/workflows/quality-assurance.yml',
                 'Add missing jobs and environment variables',
-                'Ensure proper job dependencies'
-              ]
+                'Ensure proper job dependencies',
+              ],
             });
             break;
 
@@ -492,8 +586,8 @@ class CIPipelineValidator {
               actions: [
                 'Review .pre-commit-config.yaml',
                 'Add missing hooks for code quality',
-                'Install pre-commit: pip install pre-commit'
-              ]
+                'Install pre-commit: pip install pre-commit',
+              ],
             });
             break;
 
@@ -505,8 +599,8 @@ class CIPipelineValidator {
               actions: [
                 'Review quality-gates.json',
                 'Add missing quality gates',
-                'Configure environment-specific thresholds'
-              ]
+                'Configure environment-specific thresholds',
+              ],
             });
             break;
 
@@ -518,8 +612,8 @@ class CIPipelineValidator {
               actions: [
                 'Add missing quality check scripts',
                 'Ensure scripts have proper permissions',
-                'Test script execution'
-              ]
+                'Test script execution',
+              ],
             });
             break;
 
@@ -531,8 +625,8 @@ class CIPipelineValidator {
               actions: [
                 'Add missing npm scripts to package.json',
                 'Install missing development dependencies',
-                'Update script references'
-              ]
+                'Update script references',
+              ],
             });
             break;
         }
@@ -547,15 +641,17 @@ class CIPipelineValidator {
    */
   printValidationSummary() {
     const report = this.generateValidationReport();
-    
+
     this.logSection('CI/CD Pipeline Validation Summary');
-    
+
     const overallValid = report.summary.overall_valid;
     const statusColor = overallValid ? COLORS.GREEN : COLORS.RED;
     const statusText = overallValid ? 'VALID' : 'ISSUES FOUND';
-    
+
     this.log(`Overall Status: ${statusText}`, statusColor);
-    this.log(`Checks Passed: ${report.summary.passed_checks}/${report.summary.total_checks}`);
+    this.log(
+      `Checks Passed: ${report.summary.passed_checks}/${report.summary.total_checks}`
+    );
     this.log(`Total Issues: ${report.summary.total_issues}`);
 
     // Detailed results
@@ -563,15 +659,19 @@ class CIPipelineValidator {
     console.log('┌─────────────────────┬─────────┬─────────────┐');
     console.log('│ Component           │ Status  │ Issues      │');
     console.log('├─────────────────────┼─────────┼─────────────┤');
-    
+
     Object.entries(this.validationResults).forEach(([component, result]) => {
-      const displayName = component.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+      const displayName = component
+        .replace(/_/g, ' ')
+        .replace(/\b\w/g, (l) => l.toUpperCase());
       const status = result.valid ? '✅ PASS' : '❌ FAIL';
       const issues = result.issues.length;
-      
-      console.log(`│ ${displayName.padEnd(19)} │ ${status.padEnd(7)} │ ${issues.toString().padEnd(11)} │`);
+
+      console.log(
+        `│ ${displayName.padEnd(19)} │ ${status.padEnd(7)} │ ${issues.toString().padEnd(11)} │`
+      );
     });
-    
+
     console.log('└─────────────────────┴─────────┴─────────────┘');
 
     // Issues details
@@ -579,9 +679,11 @@ class CIPipelineValidator {
       console.log('\n❌ Issues Found:');
       Object.entries(this.validationResults).forEach(([component, result]) => {
         if (result.issues.length > 0) {
-          const displayName = component.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+          const displayName = component
+            .replace(/_/g, ' ')
+            .replace(/\b\w/g, (l) => l.toUpperCase());
           this.log(`\n${displayName}:`, COLORS.YELLOW);
-          result.issues.forEach(issue => {
+          result.issues.forEach((issue) => {
             this.log(`  • ${issue}`, COLORS.RED);
           });
         }
@@ -592,17 +694,27 @@ class CIPipelineValidator {
     if (report.recommendations.length > 0) {
       console.log('\n🔧 Recommendations:');
       report.recommendations.forEach((rec, i) => {
-        const priorityColor = rec.priority === 'high' ? COLORS.RED : 
-                             rec.priority === 'medium' ? COLORS.YELLOW : COLORS.BLUE;
-        this.log(`\n${i + 1}. [${rec.priority.toUpperCase()}] ${rec.category}: ${rec.message}`, priorityColor);
-        rec.actions.forEach(action => {
+        const priorityColor =
+          rec.priority === 'high'
+            ? COLORS.RED
+            : rec.priority === 'medium'
+              ? COLORS.YELLOW
+              : COLORS.BLUE;
+        this.log(
+          `\n${i + 1}. [${rec.priority.toUpperCase()}] ${rec.category}: ${rec.message}`,
+          priorityColor
+        );
+        rec.actions.forEach((action) => {
           this.log(`   • ${action}`, COLORS.RESET);
         });
       });
     }
 
     // Save report
-    const reportPath = path.join(this.projectRoot, 'ci-pipeline-validation-report.json');
+    const reportPath = path.join(
+      this.projectRoot,
+      'ci-pipeline-validation-report.json'
+    );
     fs.writeFile(reportPath, JSON.stringify(report, null, 2)).then(() => {
       this.log(`\n📄 Validation report saved to: ${reportPath}`, COLORS.BLUE);
     });
@@ -627,24 +739,32 @@ class CIPipelineValidator {
    */
   async run() {
     try {
-      this.log(`${COLORS.BOLD}🔍 CI/CD Pipeline Validation - Medical Device Regulatory Assistant${COLORS.RESET}`, COLORS.BLUE);
-      
+      this.log(
+        `${COLORS.BOLD}🔍 CI/CD Pipeline Validation - Medical Device Regulatory Assistant${COLORS.RESET}`,
+        COLORS.BLUE
+      );
+
       await this.validateGitHubActions();
       await this.validatePreCommitConfig();
       await this.validateQualityGates();
       await this.validateQualityScripts();
       await this.validatePackageScripts();
-      
+
       const isValid = this.printValidationSummary();
-      
+
       if (isValid) {
-        this.log('\n🎉 CI/CD pipeline validation passed! All components are properly configured.', COLORS.GREEN);
+        this.log(
+          '\n🎉 CI/CD pipeline validation passed! All components are properly configured.',
+          COLORS.GREEN
+        );
         process.exit(0);
       } else {
-        this.log('\n❌ CI/CD pipeline validation failed. Please address the issues above.', COLORS.RED);
+        this.log(
+          '\n❌ CI/CD pipeline validation failed. Please address the issues above.',
+          COLORS.RED
+        );
         process.exit(1);
       }
-      
     } catch (error) {
       this.log(`\n💥 Pipeline validation failed: ${error.message}`, COLORS.RED);
       process.exit(1);

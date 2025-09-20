@@ -4,14 +4,14 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { 
-  HelpCircle, 
-  Info, 
-  Lightbulb, 
-  X, 
+import {
+  HelpCircle,
+  Info,
+  Lightbulb,
+  X,
   ExternalLink,
   BookOpen,
-  AlertTriangle
+  AlertTriangle,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -30,14 +30,14 @@ const tooltipIcons = {
   info: Info,
   help: HelpCircle,
   warning: AlertTriangle,
-  tip: Lightbulb
+  tip: Lightbulb,
 };
 
 const tooltipColors = {
   info: 'border-blue-200 bg-blue-50 text-blue-900',
   help: 'border-purple-200 bg-purple-50 text-purple-900',
   warning: 'border-orange-200 bg-orange-50 text-orange-900',
-  tip: 'border-green-200 bg-green-50 text-green-900'
+  tip: 'border-green-200 bg-green-50 text-green-900',
 };
 
 export const Tooltip: React.FC<TooltipProps> = ({
@@ -48,7 +48,7 @@ export const Tooltip: React.FC<TooltipProps> = ({
   trigger = 'hover',
   disabled = false,
   className,
-  children
+  children,
 }) => {
   const [isVisible, setIsVisible] = useState(false);
   const [actualPosition, setActualPosition] = useState(position);
@@ -58,12 +58,17 @@ export const Tooltip: React.FC<TooltipProps> = ({
   const Icon = tooltipIcons[type];
 
   useEffect(() => {
-    if (isVisible && position === 'auto' && triggerRef.current && tooltipRef.current) {
+    if (
+      isVisible &&
+      position === 'auto' &&
+      triggerRef.current &&
+      tooltipRef.current
+    ) {
       const triggerRect = triggerRef.current.getBoundingClientRect();
       const tooltipRect = tooltipRef.current.getBoundingClientRect();
       const viewport = {
         width: window.innerWidth,
-        height: window.innerHeight
+        height: window.innerHeight,
       };
 
       let bestPosition = 'bottom';
@@ -134,7 +139,7 @@ export const Tooltip: React.FC<TooltipProps> = ({
       >
         {children}
       </div>
-      
+
       {isVisible && (
         <>
           <div
@@ -142,10 +147,14 @@ export const Tooltip: React.FC<TooltipProps> = ({
             className={cn(
               'absolute z-50 w-80 p-3 rounded-lg border shadow-lg',
               tooltipColors[type],
-              actualPosition === 'top' && 'bottom-full mb-2 left-1/2 -translate-x-1/2',
-              actualPosition === 'bottom' && 'top-full mt-2 left-1/2 -translate-x-1/2',
-              actualPosition === 'left' && 'right-full mr-2 top-1/2 -translate-y-1/2',
-              actualPosition === 'right' && 'left-full ml-2 top-1/2 -translate-y-1/2'
+              actualPosition === 'top' &&
+                'bottom-full mb-2 left-1/2 -translate-x-1/2',
+              actualPosition === 'bottom' &&
+                'top-full mt-2 left-1/2 -translate-x-1/2',
+              actualPosition === 'left' &&
+                'right-full mr-2 top-1/2 -translate-y-1/2',
+              actualPosition === 'right' &&
+                'left-full ml-2 top-1/2 -translate-y-1/2'
             )}
           >
             <div className="space-y-2">
@@ -167,22 +176,28 @@ export const Tooltip: React.FC<TooltipProps> = ({
               )}
               <div className="text-sm">{content}</div>
             </div>
-            
+
             {/* Arrow */}
-            <div className={cn(
-              'absolute w-2 h-2 rotate-45 border',
-              tooltipColors[type].split(' ')[0], // Extract border color
-              tooltipColors[type].split(' ')[1], // Extract background color
-              actualPosition === 'top' && 'top-full left-1/2 -translate-x-1/2 -mt-1 border-b-0 border-r-0',
-              actualPosition === 'bottom' && 'bottom-full left-1/2 -translate-x-1/2 -mb-1 border-t-0 border-l-0',
-              actualPosition === 'left' && 'left-full top-1/2 -translate-y-1/2 -ml-1 border-t-0 border-r-0',
-              actualPosition === 'right' && 'right-full top-1/2 -translate-y-1/2 -mr-1 border-b-0 border-l-0'
-            )} />
+            <div
+              className={cn(
+                'absolute w-2 h-2 rotate-45 border',
+                tooltipColors[type].split(' ')[0], // Extract border color
+                tooltipColors[type].split(' ')[1], // Extract background color
+                actualPosition === 'top' &&
+                  'top-full left-1/2 -translate-x-1/2 -mt-1 border-b-0 border-r-0',
+                actualPosition === 'bottom' &&
+                  'bottom-full left-1/2 -translate-x-1/2 -mb-1 border-t-0 border-l-0',
+                actualPosition === 'left' &&
+                  'left-full top-1/2 -translate-y-1/2 -ml-1 border-t-0 border-r-0',
+                actualPosition === 'right' &&
+                  'right-full top-1/2 -translate-y-1/2 -mr-1 border-b-0 border-l-0'
+              )}
+            />
           </div>
-          
+
           {trigger === 'click' && (
-            <div 
-              className="fixed inset-0 z-40" 
+            <div
+              className="fixed inset-0 z-40"
               onClick={() => setIsVisible(false)}
             />
           )}
@@ -198,7 +213,13 @@ export const HelpTooltip: React.FC<{
   title?: string;
   className?: string;
 }> = ({ content, title, className }) => (
-  <Tooltip content={content} title={title} type="help" trigger="hover" className={className}>
+  <Tooltip
+    content={content}
+    title={title}
+    type="help"
+    trigger="hover"
+    className={className}
+  >
     <HelpCircle className="w-4 h-4 text-muted-foreground cursor-help" />
   </Tooltip>
 );
@@ -208,7 +229,13 @@ export const InfoTooltip: React.FC<{
   title?: string;
   className?: string;
 }> = ({ content, title, className }) => (
-  <Tooltip content={content} title={title} type="info" trigger="hover" className={className}>
+  <Tooltip
+    content={content}
+    title={title}
+    type="info"
+    trigger="hover"
+    className={className}
+  >
     <Info className="w-4 h-4 text-blue-500 cursor-help" />
   </Tooltip>
 );
@@ -218,7 +245,13 @@ export const WarningTooltip: React.FC<{
   title?: string;
   className?: string;
 }> = ({ content, title, className }) => (
-  <Tooltip content={content} title={title} type="warning" trigger="hover" className={className}>
+  <Tooltip
+    content={content}
+    title={title}
+    type="warning"
+    trigger="hover"
+    className={className}
+  >
     <AlertTriangle className="w-4 h-4 text-orange-500 cursor-help" />
   </Tooltip>
 );
@@ -228,7 +261,13 @@ export const TipTooltip: React.FC<{
   title?: string;
   className?: string;
 }> = ({ content, title, className }) => (
-  <Tooltip content={content} title={title} type="tip" trigger="hover" className={className}>
+  <Tooltip
+    content={content}
+    title={title}
+    type="tip"
+    trigger="hover"
+    className={className}
+  >
     <Lightbulb className="w-4 h-4 text-green-500 cursor-help" />
   </Tooltip>
 );
@@ -266,7 +305,13 @@ export const RegulatoryTooltip: React.FC<{
   );
 
   return (
-    <Tooltip content={content} title={term} type="help" trigger="hover" className={className}>
+    <Tooltip
+      content={content}
+      title={term}
+      type="help"
+      trigger="hover"
+      className={className}
+    >
       <span className="underline decoration-dotted cursor-help text-blue-600">
         {term}
       </span>
@@ -305,7 +350,13 @@ export const FDAGuidanceTooltip: React.FC<{
   );
 
   return (
-    <Tooltip content={content} title={title} type="info" trigger="hover" className={className}>
+    <Tooltip
+      content={content}
+      title={title}
+      type="info"
+      trigger="hover"
+      className={className}
+    >
       <Info className="w-4 h-4 text-blue-500 cursor-help" />
     </Tooltip>
   );
@@ -338,16 +389,16 @@ export const ConfidenceTooltip: React.FC<{
           {Math.round(score * 100)}%
         </Badge>
       </div>
-      
+
       <p className="text-sm">{getScoreLabel(score)}</p>
-      
+
       {reasoning && (
         <div>
           <p className="text-xs font-medium mb-1">Reasoning:</p>
           <p className="text-xs text-muted-foreground">{reasoning}</p>
         </div>
       )}
-      
+
       {factors && factors.length > 0 && (
         <div>
           <p className="text-xs font-medium mb-1">Key Factors:</p>
@@ -362,7 +413,12 @@ export const ConfidenceTooltip: React.FC<{
   );
 
   return (
-    <Tooltip content={content} type="info" trigger="hover" className={className}>
+    <Tooltip
+      content={content}
+      type="info"
+      trigger="hover"
+      className={className}
+    >
       <div className="flex items-center gap-1 cursor-help">
         <span className={cn('text-sm font-medium', getScoreColor(score))}>
           {Math.round(score * 100)}%

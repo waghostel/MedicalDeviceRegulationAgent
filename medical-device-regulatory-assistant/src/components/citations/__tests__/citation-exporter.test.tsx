@@ -43,15 +43,15 @@ describe('CitationExporter', () => {
       title: 'Cardiac Monitor 510(k) Summary',
       effectiveDate: '2023-01-15',
       documentType: 'FDA_510K',
-      accessedDate: '2024-01-15'
+      accessedDate: '2024-01-15',
     },
     {
       url: 'https://www.fda.gov/regulatory-information/search-fda-guidance-documents/software-medical-device',
       title: 'Software as Medical Device Guidance',
       effectiveDate: '2022-06-10',
       documentType: 'FDA_GUIDANCE',
-      accessedDate: '2024-01-10'
-    }
+      accessedDate: '2024-01-10',
+    },
   ];
 
   beforeEach(() => {
@@ -65,14 +65,18 @@ describe('CitationExporter', () => {
   it('should render disabled button when no citations', () => {
     render(<CitationExporter citations={[]} />);
 
-    const exportButton = screen.getByRole('button', { name: /export citations/i });
+    const exportButton = screen.getByRole('button', {
+      name: /export citations/i,
+    });
     expect(exportButton).toBeDisabled();
   });
 
   it('should render enabled button with citation count', () => {
     render(<CitationExporter citations={mockCitations} />);
 
-    const exportButton = screen.getByRole('button', { name: /export citations \(2\)/i });
+    const exportButton = screen.getByRole('button', {
+      name: /export citations \(2\)/i,
+    });
     expect(exportButton).toBeEnabled();
   });
 
@@ -80,7 +84,9 @@ describe('CitationExporter', () => {
     const user = userEvent.setup();
     render(<CitationExporter citations={mockCitations} />);
 
-    const exportButton = screen.getByRole('button', { name: /export citations \(2\)/i });
+    const exportButton = screen.getByRole('button', {
+      name: /export citations \(2\)/i,
+    });
     await user.click(exportButton);
 
     expect(screen.getByText('Export Citations')).toBeInTheDocument();
@@ -89,9 +95,13 @@ describe('CitationExporter', () => {
 
   it('should display bibliography preview in APA format by default', async () => {
     const user = userEvent.setup();
-    render(<CitationExporter citations={mockCitations} projectName="Test Project" />);
+    render(
+      <CitationExporter citations={mockCitations} projectName="Test Project" />
+    );
 
-    const exportButton = screen.getByRole('button', { name: /export citations \(2\)/i });
+    const exportButton = screen.getByRole('button', {
+      name: /export citations \(2\)/i,
+    });
     await user.click(exportButton);
 
     const preview = screen.getByRole('textbox');
@@ -104,13 +114,15 @@ describe('CitationExporter', () => {
     const user = userEvent.setup();
     render(<CitationExporter citations={mockCitations} />);
 
-    const exportButton = screen.getByRole('button', { name: /export citations \(2\)/i });
+    const exportButton = screen.getByRole('button', {
+      name: /export citations \(2\)/i,
+    });
     await user.click(exportButton);
 
     // Change format to MLA
     const formatSelect = screen.getByRole('combobox');
     await user.click(formatSelect);
-    
+
     const mlaOption = screen.getByText('MLA');
     await user.click(mlaOption);
 
@@ -123,10 +135,14 @@ describe('CitationExporter', () => {
     const user = userEvent.setup();
     render(<CitationExporter citations={mockCitations} />);
 
-    const exportButton = screen.getByRole('button', { name: /export citations \(2\)/i });
+    const exportButton = screen.getByRole('button', {
+      name: /export citations \(2\)/i,
+    });
     await user.click(exportButton);
 
-    const copyButton = screen.getByRole('button', { name: /copy to clipboard/i });
+    const copyButton = screen.getByRole('button', {
+      name: /copy to clipboard/i,
+    });
     await user.click(copyButton);
 
     expect(mockWriteText).toHaveBeenCalledWith(
@@ -136,17 +152,21 @@ describe('CitationExporter', () => {
 
   it('should download bibliography as text file', async () => {
     const user = userEvent.setup();
-    render(<CitationExporter citations={mockCitations} projectName="Test Project" />);
+    render(
+      <CitationExporter citations={mockCitations} projectName="Test Project" />
+    );
 
-    const exportButton = screen.getByRole('button', { name: /export citations \(2\)/i });
+    const exportButton = screen.getByRole('button', {
+      name: /export citations \(2\)/i,
+    });
     await user.click(exportButton);
 
-    const downloadTextButton = screen.getByRole('button', { name: /download as text/i });
+    const downloadTextButton = screen.getByRole('button', {
+      name: /download as text/i,
+    });
     await user.click(downloadTextButton);
 
-    expect(global.URL.createObjectURL).toHaveBeenCalledWith(
-      expect.any(Blob)
-    );
+    expect(global.URL.createObjectURL).toHaveBeenCalledWith(expect.any(Blob));
     expect(mockLink.download).toBe('Test_Project_bibliography_apa.txt');
     expect(mockLink.click).toHaveBeenCalled();
     expect(mockAppendChild).toHaveBeenCalledWith(mockLink);
@@ -156,17 +176,23 @@ describe('CitationExporter', () => {
 
   it('should download bibliography as markdown file', async () => {
     const user = userEvent.setup();
-    render(<CitationExporter citations={mockCitations} projectName="Test Project" />);
+    render(
+      <CitationExporter citations={mockCitations} projectName="Test Project" />
+    );
 
-    const exportButton = screen.getByRole('button', { name: /export citations \(2\)/i });
+    const exportButton = screen.getByRole('button', {
+      name: /export citations \(2\)/i,
+    });
     await user.click(exportButton);
 
-    const downloadMarkdownButton = screen.getByRole('button', { name: /download as markdown/i });
+    const downloadMarkdownButton = screen.getByRole('button', {
+      name: /download as markdown/i,
+    });
     await user.click(downloadMarkdownButton);
 
     expect(global.URL.createObjectURL).toHaveBeenCalledWith(
       expect.objectContaining({
-        type: 'text/markdown'
+        type: 'text/markdown',
       })
     );
     expect(mockLink.download).toBe('Test_Project_bibliography_apa.md');
@@ -175,12 +201,21 @@ describe('CitationExporter', () => {
 
   it('should handle project names with spaces in filenames', async () => {
     const user = userEvent.setup();
-    render(<CitationExporter citations={mockCitations} projectName="My Test Project" />);
+    render(
+      <CitationExporter
+        citations={mockCitations}
+        projectName="My Test Project"
+      />
+    );
 
-    const exportButton = screen.getByRole('button', { name: /export citations \(2\)/i });
+    const exportButton = screen.getByRole('button', {
+      name: /export citations \(2\)/i,
+    });
     await user.click(exportButton);
 
-    const downloadTextButton = screen.getByRole('button', { name: /download as text/i });
+    const downloadTextButton = screen.getByRole('button', {
+      name: /download as text/i,
+    });
     await user.click(downloadTextButton);
 
     expect(mockLink.download).toBe('My_Test_Project_bibliography_apa.txt');
@@ -190,7 +225,9 @@ describe('CitationExporter', () => {
     const user = userEvent.setup();
     render(<CitationExporter citations={mockCitations} />);
 
-    const exportButton = screen.getByRole('button', { name: /export citations \(2\)/i });
+    const exportButton = screen.getByRole('button', {
+      name: /export citations \(2\)/i,
+    });
     await user.click(exportButton);
 
     expect(screen.getByText('2 citations')).toBeInTheDocument();
@@ -200,7 +237,9 @@ describe('CitationExporter', () => {
     const user = userEvent.setup();
     render(<CitationExporter citations={[mockCitations[0]]} />);
 
-    const exportButton = screen.getByRole('button', { name: /export citations \(1\)/i });
+    const exportButton = screen.getByRole('button', {
+      name: /export citations \(1\)/i,
+    });
     await user.click(exportButton);
 
     expect(screen.getByText('1 citation')).toBeInTheDocument();
@@ -222,7 +261,9 @@ describe('CitationExporter', () => {
 
     render(<CitationExporter citations={mockCitations} />);
 
-    const exportButton = screen.getByRole('button', { name: /export citations \(2\)/i });
+    const exportButton = screen.getByRole('button', {
+      name: /export citations \(2\)/i,
+    });
     await user.click(exportButton);
 
     const preview = screen.getByRole('textbox');

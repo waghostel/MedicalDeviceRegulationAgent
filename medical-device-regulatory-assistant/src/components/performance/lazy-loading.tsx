@@ -1,19 +1,19 @@
 /**
  * Lazy Loading Components and Utilities
- * 
+ *
  * Provides components and hooks for implementing lazy loading of images,
  * components, and data to improve initial page load performance.
  */
 
-import React, { 
-  Suspense, 
-  lazy, 
-  useState, 
-  useEffect, 
-  useRef, 
+import React, {
+  Suspense,
+  lazy,
+  useState,
+  useEffect,
+  useRef,
   useCallback,
   memo,
-  ComponentType 
+  ComponentType,
 } from 'react';
 import { useIntersectionObserver } from '@/lib/performance/optimization';
 import { Card, CardContent } from '@/components/ui/card';
@@ -76,9 +76,7 @@ export const LazyImage = memo(function LazyImage({
 
   return (
     <div className={cn('relative overflow-hidden', className)}>
-      {!isLoaded && (
-        <Skeleton className="absolute inset-0 w-full h-full" />
-      )}
+      {!isLoaded && <Skeleton className="absolute inset-0 w-full h-full" />}
       <img
         ref={imgRef}
         src={imageSrc}
@@ -131,11 +129,7 @@ export const LazyComponent = memo(function LazyComponent({
     }
   }, [hasIntersected, delay]);
 
-  return (
-    <div ref={containerRef}>
-      {shouldRender ? children : fallback}
-    </div>
-  );
+  return <div ref={containerRef}>{shouldRender ? children : fallback}</div>;
 });
 
 // Higher-order component for lazy loading
@@ -150,7 +144,7 @@ export function withLazyLoading<P extends object>(
   ));
 
   LazyWrappedComponent.displayName = `withLazyLoading(${Component.displayName || Component.name})`;
-  
+
   return LazyWrappedComponent;
 }
 
@@ -194,13 +188,11 @@ export function LazyData<T>({
 
   return (
     <div ref={containerRef}>
-      {error && errorFallback ? (
-        errorFallback(error)
-      ) : loading || !data ? (
-        fallback
-      ) : (
-        children(data)
-      )}
+      {error && errorFallback
+        ? errorFallback(error)
+        : loading || !data
+          ? fallback
+          : children(data)}
     </div>
   );
 }
@@ -249,7 +241,7 @@ export class PreloadManager {
   }
 
   static preloadImages(srcs: string[]): Promise<void[]> {
-    return Promise.all(srcs.map(src => this.preloadImage(src)));
+    return Promise.all(srcs.map((src) => this.preloadImage(src)));
   }
 }
 
@@ -313,7 +305,7 @@ export function LazyList<T>({
 
   useEffect(() => {
     if (hasIntersected && visibleCount < items.length) {
-      setVisibleCount(prev => Math.min(prev + pageSize, items.length));
+      setVisibleCount((prev) => Math.min(prev + pageSize, items.length));
     }
   }, [hasIntersected, visibleCount, items.length, pageSize]);
 
@@ -328,11 +320,9 @@ export function LazyList<T>({
   return (
     <div className={className}>
       {visibleItems.map((item, index) => (
-        <div key={index}>
-          {renderItem(item, index)}
-        </div>
+        <div key={index}>{renderItem(item, index)}</div>
       ))}
-      
+
       {(visibleCount < items.length || hasMore) && (
         <div ref={loadMoreRef} className="py-4">
           {loadingComponent}
@@ -355,17 +345,19 @@ export const LazyProjectCard = withLazyLoading(
   <Skeleton className="w-full h-32" />
 );
 
-export const LazyChart = memo(function LazyChart({ 
-  data, 
-  type = 'line' 
-}: { 
-  data: any[]; 
-  type?: string; 
+export const LazyChart = memo(function LazyChart({
+  data,
+  type = 'line',
+}: {
+  data: any[];
+  type?: string;
 }) {
   return (
     <LazyComponent fallback={<Skeleton className="w-full h-64" />}>
       <div className="w-full h-64 flex items-center justify-center border rounded">
-        <p>Chart Component ({type}) - {data.length} data points</p>
+        <p>
+          Chart Component ({type}) - {data.length} data points
+        </p>
       </div>
     </LazyComponent>
   );

@@ -42,18 +42,12 @@
     "device_enforcement": {
       "path": "/device/enforcement.json",
       "description": "Device enforcement reports",
-      "test_queries": [
-        "?limit=1",
-        "?search=status:ongoing&limit=2"
-      ]
+      "test_queries": ["?limit=1", "?search=status:ongoing&limit=2"]
     },
     "device_recall": {
       "path": "/device/recall.json",
       "description": "Device recall information",
-      "test_queries": [
-        "?limit=1",
-        "?search=status:ongoing&limit=2"
-      ]
+      "test_queries": ["?limit=1", "?search=status:ongoing&limit=2"]
     }
   },
   "error_test_cases": [

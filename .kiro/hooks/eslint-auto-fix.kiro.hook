@@ -1,0 +1,20 @@
+{
+  "enabled": true,
+  "name": "ESLint Auto-Fix",
+  "description": "Automatically runs ESLint auto-fix on JavaScript/TypeScript files, reports remaining issues that cannot be auto-fixed, and provides suggestions for fixing complex issues",
+  "version": "1",
+  "when": {
+    "type": "userTriggered",
+    "patterns": [
+      "**/*.js",
+      "**/*.jsx",
+      "**/*.ts",
+      "**/*.tsx",
+      "**/*.mjs"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "A JavaScript/TypeScript file has been modified. Please:\n\n1. Run ESLint auto-fix on the file to automatically resolve fixable issues\n2. Analyze any remaining ESLint errors and warnings that could not be auto-fixed\n3. Provide specific suggestions and code examples for fixing complex issues\n4. Report the overall code quality status and any patterns that need attention\n\nFocus on:\n- Syntax errors and type issues\n- Code style and formatting problems\n- Best practices violations\n- Potential bugs or security concerns\n- Performance optimization opportunities\n\nProvide actionable recommendations with code examples where helpful."
+  }
+}

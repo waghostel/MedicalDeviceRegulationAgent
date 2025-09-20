@@ -4,15 +4,15 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from '@/components/ui/select';
 import { Calendar } from '@/components/ui/calendar';
-import { 
+import {
   Popover,
   PopoverContent,
   PopoverTrigger,
@@ -26,38 +26,47 @@ interface AuditLogFiltersProps {
   onFiltersChange: (filters: AuditLogFilter) => void;
 }
 
-export function AuditLogFilters({ filters, onFiltersChange }: AuditLogFiltersProps) {
+export function AuditLogFilters({
+  filters,
+  onFiltersChange,
+}: AuditLogFiltersProps) {
   const handleFilterChange = (key: keyof AuditLogFilter, value: any) => {
     onFiltersChange({
       ...filters,
-      [key]: value
+      [key]: value,
     });
   };
 
-  const handleDateRangeChange = (field: 'start' | 'end', date: Date | undefined) => {
+  const handleDateRangeChange = (
+    field: 'start' | 'end',
+    date: Date | undefined
+  ) => {
     if (!date) return;
-    
-    const currentRange = filters.dateRange || { start: new Date(), end: new Date() };
+
+    const currentRange = filters.dateRange || {
+      start: new Date(),
+      end: new Date(),
+    };
     onFiltersChange({
       ...filters,
       dateRange: {
         ...currentRange,
-        [field]: date
-      }
+        [field]: date,
+      },
     });
   };
 
   const handleConfidenceRangeChange = (field: 'min' | 'max', value: string) => {
     const numValue = parseFloat(value);
     if (isNaN(numValue)) return;
-    
+
     const currentRange = filters.confidenceRange || { min: 0, max: 1 };
     onFiltersChange({
       ...filters,
       confidenceRange: {
         ...currentRange,
-        [field]: numValue
-      }
+        [field]: numValue,
+      },
     });
   };
 
@@ -90,7 +99,9 @@ export function AuditLogFilters({ filters, onFiltersChange }: AuditLogFiltersPro
           <Label htmlFor="agent-action">Agent Action</Label>
           <Select
             value={filters.agentAction || ''}
-            onValueChange={(value) => handleFilterChange('agentAction', value || undefined)}
+            onValueChange={(value) =>
+              handleFilterChange('agentAction', value || undefined)
+            }
           >
             <SelectTrigger>
               <SelectValue placeholder="All actions" />
@@ -98,10 +109,16 @@ export function AuditLogFilters({ filters, onFiltersChange }: AuditLogFiltersPro
             <SelectContent>
               <SelectItem value="">All actions</SelectItem>
               <SelectItem value="predicate-search">Predicate Search</SelectItem>
-              <SelectItem value="classify-device">Device Classification</SelectItem>
-              <SelectItem value="compare-predicate">Predicate Comparison</SelectItem>
+              <SelectItem value="classify-device">
+                Device Classification
+              </SelectItem>
+              <SelectItem value="compare-predicate">
+                Predicate Comparison
+              </SelectItem>
               <SelectItem value="find-guidance">Guidance Search</SelectItem>
-              <SelectItem value="generate-checklist">Generate Checklist</SelectItem>
+              <SelectItem value="generate-checklist">
+                Generate Checklist
+              </SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -111,7 +128,9 @@ export function AuditLogFilters({ filters, onFiltersChange }: AuditLogFiltersPro
           <Label htmlFor="status">Status</Label>
           <Select
             value={filters.status || ''}
-            onValueChange={(value) => handleFilterChange('status', value || undefined)}
+            onValueChange={(value) =>
+              handleFilterChange('status', value || undefined)
+            }
           >
             <SelectTrigger>
               <SelectValue placeholder="All statuses" />
@@ -138,7 +157,9 @@ export function AuditLogFilters({ filters, onFiltersChange }: AuditLogFiltersPro
                   className="flex-1 justify-start text-left font-normal"
                 >
                   <CalendarIcon className="mr-2 h-4 w-4" />
-                  {filters.dateRange?.start ? format(filters.dateRange.start, 'MMM dd') : 'From'}
+                  {filters.dateRange?.start
+                    ? format(filters.dateRange.start, 'MMM dd')
+                    : 'From'}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="start">
@@ -150,7 +171,7 @@ export function AuditLogFilters({ filters, onFiltersChange }: AuditLogFiltersPro
                 />
               </PopoverContent>
             </Popover>
-            
+
             <Popover>
               <PopoverTrigger asChild>
                 <Button
@@ -159,7 +180,9 @@ export function AuditLogFilters({ filters, onFiltersChange }: AuditLogFiltersPro
                   className="flex-1 justify-start text-left font-normal"
                 >
                   <CalendarIcon className="mr-2 h-4 w-4" />
-                  {filters.dateRange?.end ? format(filters.dateRange.end, 'MMM dd') : 'To'}
+                  {filters.dateRange?.end
+                    ? format(filters.dateRange.end, 'MMM dd')
+                    : 'To'}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="start">
@@ -185,7 +208,9 @@ export function AuditLogFilters({ filters, onFiltersChange }: AuditLogFiltersPro
               max="1"
               step="0.1"
               value={filters.confidenceRange?.min || ''}
-              onChange={(e) => handleConfidenceRangeChange('min', e.target.value)}
+              onChange={(e) =>
+                handleConfidenceRangeChange('min', e.target.value)
+              }
               className="flex-1"
             />
             <Input
@@ -195,7 +220,9 @@ export function AuditLogFilters({ filters, onFiltersChange }: AuditLogFiltersPro
               max="1"
               step="0.1"
               value={filters.confidenceRange?.max || ''}
-              onChange={(e) => handleConfidenceRangeChange('max', e.target.value)}
+              onChange={(e) =>
+                handleConfidenceRangeChange('max', e.target.value)
+              }
               className="flex-1"
             />
           </div>
@@ -206,7 +233,7 @@ export function AuditLogFilters({ filters, onFiltersChange }: AuditLogFiltersPro
       {hasActiveFilters && (
         <div className="flex flex-wrap gap-2 pt-2 border-t">
           <span className="text-sm text-muted-foreground">Active filters:</span>
-          
+
           {filters.agentAction && (
             <div className="flex items-center gap-1 bg-primary/10 text-primary px-2 py-1 rounded-md text-sm">
               Action: {filters.agentAction}
@@ -220,7 +247,7 @@ export function AuditLogFilters({ filters, onFiltersChange }: AuditLogFiltersPro
               </Button>
             </div>
           )}
-          
+
           {filters.status && (
             <div className="flex items-center gap-1 bg-primary/10 text-primary px-2 py-1 rounded-md text-sm">
               Status: {filters.status}
@@ -234,10 +261,11 @@ export function AuditLogFilters({ filters, onFiltersChange }: AuditLogFiltersPro
               </Button>
             </div>
           )}
-          
+
           {filters.dateRange && (
             <div className="flex items-center gap-1 bg-primary/10 text-primary px-2 py-1 rounded-md text-sm">
-              Date: {format(filters.dateRange.start, 'MMM dd')} - {format(filters.dateRange.end, 'MMM dd')}
+              Date: {format(filters.dateRange.start, 'MMM dd')} -{' '}
+              {format(filters.dateRange.end, 'MMM dd')}
               <Button
                 variant="ghost"
                 size="sm"
@@ -248,10 +276,11 @@ export function AuditLogFilters({ filters, onFiltersChange }: AuditLogFiltersPro
               </Button>
             </div>
           )}
-          
+
           {filters.confidenceRange && (
             <div className="flex items-center gap-1 bg-primary/10 text-primary px-2 py-1 rounded-md text-sm">
-              Confidence: {filters.confidenceRange.min} - {filters.confidenceRange.max}
+              Confidence: {filters.confidenceRange.min} -{' '}
+              {filters.confidenceRange.max}
               <Button
                 variant="ghost"
                 size="sm"

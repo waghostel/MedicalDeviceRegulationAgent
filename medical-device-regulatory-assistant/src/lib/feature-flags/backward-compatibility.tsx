@@ -4,7 +4,11 @@
  */
 
 import React from 'react';
-import { useFeatureFlag, MIGRATION_FLAGS, FeatureFlagContext } from './feature-flag-system';
+import {
+  useFeatureFlag,
+  MIGRATION_FLAGS,
+  FeatureFlagContext,
+} from './feature-flag-system';
 
 export interface BackwardCompatibilityProps {
   children: React.ReactNode;
@@ -27,7 +31,7 @@ export function BackwardCompatibilityWrapper({
   componentProps = {},
   context,
   fallbackToMock = true,
-  children
+  children,
 }: BackwardCompatibilityProps) {
   const { isEnabled, isLoading, evaluation } = useFeatureFlag(flagKey, context);
 
@@ -45,7 +49,7 @@ export function BackwardCompatibilityWrapper({
     console.log(`Feature flag ${flagKey} evaluation:`, {
       enabled: evaluation.enabled,
       reason: evaluation.reason,
-      component: context?.component
+      component: context?.component,
     });
   }
 
@@ -54,13 +58,16 @@ export function BackwardCompatibilityWrapper({
     try {
       return <RealComponent {...componentProps}>{children}</RealComponent>;
     } catch (error) {
-      console.error(`Error rendering real component for flag ${flagKey}:`, error);
-      
+      console.error(
+        `Error rendering real component for flag ${flagKey}:`,
+        error
+      );
+
       // Fallback to mock component if real component fails
       if (fallbackToMock) {
         return <MockComponent {...componentProps}>{children}</MockComponent>;
       }
-      
+
       // Show error state if fallback is disabled
       return (
         <div className="bg-red-50 border border-red-200 rounded-md p-4">
@@ -84,7 +91,10 @@ export function useConditionalData<T>(
   realDataFetcher: () => T | Promise<T>,
   context?: Partial<FeatureFlagContext>
 ) {
-  const { isEnabled, isLoading: flagLoading } = useFeatureFlag(flagKey, context);
+  const { isEnabled, isLoading: flagLoading } = useFeatureFlag(
+    flagKey,
+    context
+  );
   const [data, setData] = React.useState<T | null>(null);
   const [isLoading, setIsLoading] = React.useState(true);
   const [error, setError] = React.useState<Error | null>(null);
@@ -103,7 +113,7 @@ export function useConditionalData<T>(
       } catch (err) {
         const error = err instanceof Error ? err : new Error('Unknown error');
         setError(error);
-        
+
         // Fallback to mock data if real data fails
         if (isEnabled) {
           try {
@@ -111,10 +121,13 @@ export function useConditionalData<T>(
             setData(fallbackResult);
             console.warn(`Fallback to mock data for flag ${flagKey}:`, error);
           } catch (fallbackErr) {
-            console.error(`Both real and mock data fetchers failed for flag ${flagKey}:`, {
-              realError: error,
-              mockError: fallbackErr
-            });
+            console.error(
+              `Both real and mock data fetchers failed for flag ${flagKey}:`,
+              {
+                realError: error,
+                mockError: fallbackErr,
+              }
+            );
           }
         }
       } finally {
@@ -129,7 +142,7 @@ export function useConditionalData<T>(
     data,
     isLoading: flagLoading || isLoading,
     error,
-    isUsingRealData: isEnabled && !error
+    isUsingRealData: isEnabled && !error,
   };
 }
 
@@ -138,7 +151,10 @@ export function useConditionalData<T>(
  */
 
 // Project data migration wrapper
-export function ProjectDataWrapper({ children, ...props }: Omit<BackwardCompatibilityProps, 'flagKey'>) {
+export function ProjectDataWrapper({
+  children,
+  ...props
+}: Omit<BackwardCompatibilityProps, 'flagKey'>) {
   return (
     <BackwardCompatibilityWrapper
       flagKey={MIGRATION_FLAGS.USE_REAL_PROJECT_DATA}
@@ -151,7 +167,10 @@ export function ProjectDataWrapper({ children, ...props }: Omit<BackwardCompatib
 }
 
 // Classification data migration wrapper
-export function ClassificationDataWrapper({ children, ...props }: Omit<BackwardCompatibilityProps, 'flagKey'>) {
+export function ClassificationDataWrapper({
+  children,
+  ...props
+}: Omit<BackwardCompatibilityProps, 'flagKey'>) {
   return (
     <BackwardCompatibilityWrapper
       flagKey={MIGRATION_FLAGS.USE_REAL_CLASSIFICATION_DATA}
@@ -164,7 +183,10 @@ export function ClassificationDataWrapper({ children, ...props }: Omit<BackwardC
 }
 
 // Predicate data migration wrapper
-export function PredicateDataWrapper({ children, ...props }: Omit<BackwardCompatibilityProps, 'flagKey'>) {
+export function PredicateDataWrapper({
+  children,
+  ...props
+}: Omit<BackwardCompatibilityProps, 'flagKey'>) {
   return (
     <BackwardCompatibilityWrapper
       flagKey={MIGRATION_FLAGS.USE_REAL_PREDICATE_DATA}
@@ -177,7 +199,10 @@ export function PredicateDataWrapper({ children, ...props }: Omit<BackwardCompat
 }
 
 // Agent backend migration wrapper
-export function AgentBackendWrapper({ children, ...props }: Omit<BackwardCompatibilityProps, 'flagKey'>) {
+export function AgentBackendWrapper({
+  children,
+  ...props
+}: Omit<BackwardCompatibilityProps, 'flagKey'>) {
   return (
     <BackwardCompatibilityWrapper
       flagKey={MIGRATION_FLAGS.USE_REAL_AGENT_BACKEND}
@@ -192,7 +217,13 @@ export function AgentBackendWrapper({ children, ...props }: Omit<BackwardCompati
 /**
  * Migration status indicator component
  */
-export function MigrationStatusIndicator({ flagKey, className = '' }: { flagKey: string; className?: string }) {
+export function MigrationStatusIndicator({
+  flagKey,
+  className = '',
+}: {
+  flagKey: string;
+  className?: string;
+}) {
   const { isEnabled, evaluation } = useFeatureFlag(flagKey);
 
   if (process.env.NODE_ENV !== 'development') {
@@ -200,7 +231,9 @@ export function MigrationStatusIndicator({ flagKey, className = '' }: { flagKey:
   }
 
   return (
-    <div className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${className}`}>
+    <div
+      className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${className}`}
+    >
       <div
         className={`w-2 h-2 rounded-full mr-2 ${
           isEnabled ? 'bg-green-400' : 'bg-gray-400'
@@ -211,7 +244,13 @@ export function MigrationStatusIndicator({ flagKey, className = '' }: { flagKey:
       </span>
       {evaluation && (
         <span className="ml-2 text-gray-500" title={evaluation.reason}>
-          ({Math.round((evaluation.conditions.filter(c => c.result).length / evaluation.conditions.length) * 100)}%)
+          (
+          {Math.round(
+            (evaluation.conditions.filter((c) => c.result).length /
+              evaluation.conditions.length) *
+              100
+          )}
+          %)
         </span>
       )}
     </div>
@@ -226,7 +265,11 @@ export interface ABTestProps {
   mockComponent: React.ComponentType<any>;
   realComponent: React.ComponentType<any>;
   componentProps?: any;
-  onPerformanceMetric?: (metric: { component: 'mock' | 'real'; renderTime: number; errorCount: number }) => void;
+  onPerformanceMetric?: (metric: {
+    component: 'mock' | 'real';
+    renderTime: number;
+    errorCount: number;
+  }) => void;
   context?: Partial<FeatureFlagContext>;
 }
 
@@ -236,7 +279,7 @@ export function ABTestWrapper({
   realComponent: RealComponent,
   componentProps = {},
   onPerformanceMetric,
-  context
+  context,
 }: ABTestProps) {
   const { isEnabled } = useFeatureFlag(flagKey, context);
   const [renderTime, setRenderTime] = React.useState<number>(0);
@@ -257,13 +300,13 @@ export function ABTestWrapper({
       onPerformanceMetric({
         component: isEnabled ? 'real' : 'mock',
         renderTime: duration,
-        errorCount
+        errorCount,
       });
     }
   });
 
   const handleError = React.useCallback(() => {
-    setErrorCount(prev => prev + 1);
+    setErrorCount((prev) => prev + 1);
   }, []);
 
   const ComponentToRender = isEnabled ? RealComponent : MockComponent;
@@ -307,7 +350,9 @@ class ErrorBoundary extends React.Component<
           </p>
           {process.env.NODE_ENV === 'development' && this.state.error && (
             <details className="mt-2">
-              <summary className="text-red-600 cursor-pointer">Error Details</summary>
+              <summary className="text-red-600 cursor-pointer">
+                Error Details
+              </summary>
               <pre className="text-xs text-red-600 mt-1 overflow-auto">
                 {this.state.error.stack}
               </pre>

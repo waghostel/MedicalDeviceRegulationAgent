@@ -4,13 +4,13 @@
  */
 
 import React from 'react';
-import { 
-  enhancedFormMocks, 
+import {
+  enhancedFormMocks,
   enhancedFormMockUtils,
   mockUseEnhancedForm,
   mockUseFormToast,
   mockUseAutoSave,
-  mockUseRealTimeValidation
+  mockUseRealTimeValidation,
 } from './enhanced-form-hook-mocks';
 
 /**
@@ -46,12 +46,20 @@ export const setupEnhancedFormMocks = () => {
     // Keep other exports from FormValidation
     projectFormSchema: jest.fn(),
     deviceSearchSchema: jest.fn(),
-    ValidatedInput: jest.fn(({ children, ...props }) => (
-      React.createElement('input', { 'data-testid': 'validated-input', ...props }, children)
-    )),
-    ValidatedTextarea: jest.fn(({ children, ...props }) => (
-      React.createElement('textarea', { 'data-testid': 'validated-textarea', ...props }, children)
-    )),
+    ValidatedInput: jest.fn(({ children, ...props }) =>
+      React.createElement(
+        'input',
+        { 'data-testid': 'validated-input', ...props },
+        children
+      )
+    ),
+    ValidatedTextarea: jest.fn(({ children, ...props }) =>
+      React.createElement(
+        'textarea',
+        { 'data-testid': 'validated-textarea', ...props },
+        children
+      )
+    ),
   }));
 
   // Mock localStorage for auto-save functionality
@@ -93,7 +101,7 @@ export const cleanupEnhancedFormMocks = () => {
  */
 export const resetEnhancedFormMocks = () => {
   enhancedFormMockUtils.resetAllMocks();
-  
+
   // Reset fake timers
   if (jest.isMockFunction(setTimeout)) {
     jest.clearAllTimers();
@@ -116,7 +124,7 @@ export const fastForwardAutoSave = (ms: number = 2000) => {
  */
 export const simulateFieldChange = async (fieldName: string, value: any) => {
   const formState = enhancedFormMockUtils.getFormState();
-  
+
   // Update form state
   enhancedFormMockUtils.setFormState({
     ...formState,
@@ -128,7 +136,7 @@ export const simulateFieldChange = async (fieldName: string, value: any) => {
 
   // Trigger validation
   await mockUseRealTimeValidation({} as any).validateField(fieldName, value);
-  
+
   // Fast-forward auto-save timer
   fastForwardAutoSave(300); // debounce time
 };
@@ -138,7 +146,7 @@ export const simulateFieldChange = async (fieldName: string, value: any) => {
  */
 export const simulateFormSubmission = async (formData: Record<string, any>) => {
   const formState = enhancedFormMockUtils.getFormState();
-  
+
   enhancedFormMockUtils.setFormState({
     ...formState,
     values: formData,
@@ -146,8 +154,8 @@ export const simulateFormSubmission = async (formData: Record<string, any>) => {
   });
 
   // Simulate async submission
-  await new Promise(resolve => setTimeout(resolve, 100));
-  
+  await new Promise((resolve) => setTimeout(resolve, 100));
+
   enhancedFormMockUtils.setFormState({
     ...formState,
     values: formData,
@@ -161,9 +169,11 @@ export const simulateFormSubmission = async (formData: Record<string, any>) => {
 /**
  * Create test scenario with pre-configured form state
  */
-export const createFormTestScenario = (scenario: 'empty' | 'filled' | 'invalid' | 'submitting') => {
+export const createFormTestScenario = (
+  scenario: 'empty' | 'filled' | 'invalid' | 'submitting'
+) => {
   const baseState = enhancedFormMockUtils.getFormState();
-  
+
   switch (scenario) {
     case 'empty':
       enhancedFormMockUtils.setFormState({
@@ -174,7 +184,7 @@ export const createFormTestScenario = (scenario: 'empty' | 'filled' | 'invalid' 
         isValid: false,
       });
       break;
-      
+
     case 'filled':
       enhancedFormMockUtils.setFormState({
         ...baseState,
@@ -200,7 +210,7 @@ export const createFormTestScenario = (scenario: 'empty' | 'filled' | 'invalid' 
         },
       });
       break;
-      
+
     case 'invalid':
       enhancedFormMockUtils.setFormState({
         ...baseState,
@@ -209,14 +219,17 @@ export const createFormTestScenario = (scenario: 'empty' | 'filled' | 'invalid' 
           description: '',
         },
         errors: {
-          name: { type: 'minLength', message: 'Name must be at least 3 characters' },
+          name: {
+            type: 'minLength',
+            message: 'Name must be at least 3 characters',
+          },
           description: { type: 'required', message: 'Description is required' },
         },
         isDirty: true,
         isValid: false,
       });
       break;
-      
+
     case 'submitting':
       enhancedFormMockUtils.setFormState({
         ...baseState,

@@ -5,27 +5,27 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { 
+import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { 
+import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
-import { 
-  ChevronDown, 
-  ChevronRight, 
-  Clock, 
+import {
+  ChevronDown,
+  ChevronRight,
+  Clock,
   ExternalLink,
   Info,
   CheckCircle,
   XCircle,
   AlertCircle,
-  Loader
+  Loader,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { AgentInteraction, ExpandedReasoning } from '@/types/audit';
@@ -36,7 +36,9 @@ interface AgentInteractionCardProps {
   interaction: AgentInteraction;
 }
 
-export function AgentInteractionCard({ interaction }: AgentInteractionCardProps) {
+export function AgentInteractionCard({
+  interaction,
+}: AgentInteractionCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [showReasoning, setShowReasoning] = useState(false);
   const [showSources, setShowSources] = useState(false);
@@ -58,18 +60,23 @@ export function AgentInteractionCard({ interaction }: AgentInteractionCardProps)
 
   const getStatusBadgeVariant = (status: AgentInteraction['status']) => {
     switch (status) {
-      case 'completed': return 'default';
-      case 'pending': return 'secondary';
-      case 'failed': return 'destructive';
-      case 'cancelled': return 'outline';
-      default: return 'secondary';
+      case 'completed':
+        return 'default';
+      case 'pending':
+        return 'secondary';
+      case 'failed':
+        return 'destructive';
+      case 'cancelled':
+        return 'outline';
+      default:
+        return 'secondary';
     }
   };
 
   const formatActionName = (action: string) => {
     return action
       .split('-')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
       .join(' ');
   };
 
@@ -89,13 +96,13 @@ export function AgentInteractionCard({ interaction }: AgentInteractionCardProps)
 
   // Parse reasoning into structured format for display
   const parseReasoning = (reasoning: string): ExpandedReasoning => {
-    // This is a simplified parser - in a real implementation, 
+    // This is a simplified parser - in a real implementation,
     // the reasoning would be structured from the backend
     const sentences = reasoning.split('. ');
     const steps = sentences.map((sentence, index) => ({
       step: index + 1,
       description: sentence.trim() + (sentence.endsWith('.') ? '' : '.'),
-      confidence: interaction.confidenceScore
+      confidence: interaction.confidenceScore,
     }));
 
     return {
@@ -104,8 +111,8 @@ export function AgentInteractionCard({ interaction }: AgentInteractionCardProps)
       conclusion: sentences[sentences.length - 1] || reasoning,
       limitations: [
         'Analysis based on publicly available data only',
-        'Human expert review recommended for final decisions'
-      ]
+        'Human expert review recommended for final decisions',
+      ],
     };
   };
 
@@ -126,12 +133,12 @@ export function AgentInteractionCard({ interaction }: AgentInteractionCardProps)
               </p>
             </div>
           </div>
-          
+
           <div className="flex items-center gap-2">
             <Badge variant={getStatusBadgeVariant(interaction.status)}>
               {interaction.status}
             </Badge>
-            
+
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -154,7 +161,11 @@ export function AgentInteractionCard({ interaction }: AgentInteractionCardProps)
               onClick={() => setIsExpanded(!isExpanded)}
               className="flex items-center gap-1"
             >
-              {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+              {isExpanded ? (
+                <ChevronDown className="h-4 w-4" />
+              ) : (
+                <ChevronRight className="h-4 w-4" />
+              )}
               Details
             </Button>
           </div>
@@ -168,7 +179,9 @@ export function AgentInteractionCard({ interaction }: AgentInteractionCardProps)
               <Tooltip>
                 <TooltipTrigger asChild>
                   <div className="flex items-center gap-1">
-                    <span className={`text-sm font-bold ${getConfidenceColor(interaction.confidenceScore)}`}>
+                    <span
+                      className={`text-sm font-bold ${getConfidenceColor(interaction.confidenceScore)}`}
+                    >
                       {Math.round(interaction.confidenceScore * 100)}%
                     </span>
                     <span className="text-xs text-muted-foreground">
@@ -179,21 +192,22 @@ export function AgentInteractionCard({ interaction }: AgentInteractionCardProps)
                 </TooltipTrigger>
                 <TooltipContent>
                   <div className="max-w-xs">
-                    <p className="font-medium mb-1">Confidence Score: {interaction.confidenceScore.toFixed(3)}</p>
+                    <p className="font-medium mb-1">
+                      Confidence Score: {interaction.confidenceScore.toFixed(3)}
+                    </p>
                     <p className="text-xs">
-                      This score reflects the AI's confidence in its analysis based on available data and regulatory precedent.
-                      Higher scores indicate stronger evidence and clearer regulatory pathways.
+                      This score reflects the AI's confidence in its analysis
+                      based on available data and regulatory precedent. Higher
+                      scores indicate stronger evidence and clearer regulatory
+                      pathways.
                     </p>
                   </div>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
           </div>
-          
-          <Progress 
-            value={interaction.confidenceScore * 100} 
-            className="h-2"
-          />
+
+          <Progress value={interaction.confidenceScore * 100} className="h-2" />
         </div>
       </CardHeader>
 
@@ -231,15 +245,22 @@ export function AgentInteractionCard({ interaction }: AgentInteractionCardProps)
                     onClick={() => setShowReasoning(!showReasoning)}
                     className="flex items-center gap-1"
                   >
-                    {showReasoning ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                    {showReasoning ? (
+                      <ChevronDown className="h-4 w-4" />
+                    ) : (
+                      <ChevronRight className="h-4 w-4" />
+                    )}
                     {showReasoning ? 'Hide' : 'Show'} Details
                   </Button>
                 </div>
-                
+
                 <div className="bg-muted p-3 rounded-md">
                   <p className="text-sm mb-2">{expandedReasoning.summary}</p>
-                  
-                  <Collapsible open={showReasoning} onOpenChange={setShowReasoning}>
+
+                  <Collapsible
+                    open={showReasoning}
+                    onOpenChange={setShowReasoning}
+                  >
                     <CollapsibleContent>
                       <ReasoningTrace reasoning={expandedReasoning} />
                     </CollapsibleContent>
@@ -260,11 +281,15 @@ export function AgentInteractionCard({ interaction }: AgentInteractionCardProps)
                       onClick={() => setShowSources(!showSources)}
                       className="flex items-center gap-1"
                     >
-                      {showSources ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                      {showSources ? (
+                        <ChevronDown className="h-4 w-4" />
+                      ) : (
+                        <ChevronRight className="h-4 w-4" />
+                      )}
                       {showSources ? 'Hide' : 'Show'} Sources
                     </Button>
                   </div>
-                  
+
                   <Collapsible open={showSources} onOpenChange={setShowSources}>
                     <CollapsibleContent>
                       <SourceCitations sources={interaction.sources} />

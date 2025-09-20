@@ -28,7 +28,10 @@ describe('MockValidator + MockDebugger Integration', () => {
       }));
 
       // Step 2: Validate the mock
-      const validationResult = validator.validateHookMock('useToast', problematicMock);
+      const validationResult = validator.validateHookMock(
+        'useToast',
+        problematicMock
+      );
 
       // Step 3: Verify validation detected issues
       expect(validationResult.isValid).toBe(false);
@@ -37,9 +40,12 @@ describe('MockValidator + MockDebugger Integration', () => {
 
       // Step 4: Simulate an error that would occur from this bad mock
       const runtimeError = new Error('toast is not a function');
-      
+
       // Step 5: Use debugger to diagnose the error
-      const diagnosis = MockDebugger.diagnoseHookFailure('useToast', runtimeError);
+      const diagnosis = MockDebugger.diagnoseHookFailure(
+        'useToast',
+        runtimeError
+      );
 
       // Step 6: Verify diagnosis provides actionable insights
       expect(diagnosis.diagnosis.category).toBe('STRUCTURE');
@@ -48,16 +54,18 @@ describe('MockValidator + MockDebugger Integration', () => {
       expect(diagnosis.codeExamples.length).toBeGreaterThan(0);
 
       // Step 7: Generate fix suggestions from validation failures
-      const failures = [{
-        mockName: 'useToast',
-        errors: validationResult.errors,
-        impact: 'breaking' as const,
-      }];
-      
+      const failures = [
+        {
+          mockName: 'useToast',
+          errors: validationResult.errors,
+          impact: 'breaking' as const,
+        },
+      ];
+
       const fixSuggestions = validator.suggestFixes(failures);
       expect(fixSuggestions.length).toBeGreaterThan(0);
-      expect(fixSuggestions.some(s => s.type === 'ADD_METHOD')).toBe(true);
-      expect(fixSuggestions.some(s => s.type === 'FIX_TYPE')).toBe(true);
+      expect(fixSuggestions.some((s) => s.type === 'ADD_METHOD')).toBe(true);
+      expect(fixSuggestions.some((s) => s.type === 'FIX_TYPE')).toBe(true);
 
       // Step 8: Generate comprehensive diff
       const expectedMock = jest.fn(() => ({
@@ -71,7 +79,11 @@ describe('MockValidator + MockDebugger Integration', () => {
         queue: [],
       }));
 
-      const diff = MockDebugger.generateMockDiff(expectedMock(), problematicMock(), 'useToast');
+      const diff = MockDebugger.generateMockDiff(
+        expectedMock(),
+        problematicMock(),
+        'useToast'
+      );
       expect(diff.differences.length).toBeGreaterThan(0);
       expect(diff.summary.overallHealth).toBe('critical');
       expect(diff.generatedCode).toContain('jest.fn()');
@@ -87,31 +99,42 @@ describe('MockValidator + MockDebugger Integration', () => {
       }));
 
       // Validate the mock
-      const validationResult = validator.validateHookMock('useToast', incompleteMock);
-      const validationFailures = [{
-        mockName: 'useToast',
-        errors: validationResult.errors,
-        impact: 'breaking' as const,
-      }];
+      const validationResult = validator.validateHookMock(
+        'useToast',
+        incompleteMock
+      );
+      const validationFailures = [
+        {
+          mockName: 'useToast',
+          errors: validationResult.errors,
+          impact: 'breaking' as const,
+        },
+      ];
       const validationSuggestions = validator.suggestFixes(validationFailures);
 
       // Simulate runtime error and diagnose
-      const error = new Error('Cannot read properties of undefined (reading \'dismiss\')');
+      const error = new Error(
+        "Cannot read properties of undefined (reading 'dismiss')"
+      );
       const diagnosis = MockDebugger.diagnoseHookFailure('useToast', error);
 
       // Both should identify missing methods as the core issue
-      const validationMentionsMissingMethods = validationSuggestions.some(s => 
-        s.description.includes('missing') || s.type === 'ADD_METHOD'
+      const validationMentionsMissingMethods = validationSuggestions.some(
+        (s) => s.description.includes('missing') || s.type === 'ADD_METHOD'
       );
-      const diagnosisMentionsMissingMethods = diagnosis.recommendations.some(r => 
-        r.description.includes('missing') || r.action.includes('Fix Mock Structure')
+      const diagnosisMentionsMissingMethods = diagnosis.recommendations.some(
+        (r) =>
+          r.description.includes('missing') ||
+          r.action.includes('Fix Mock Structure')
       );
 
       expect(validationMentionsMissingMethods).toBe(true);
       expect(diagnosisMentionsMissingMethods).toBe(true);
 
       // Both should provide code examples
-      const validationHasCode = validationSuggestions.some(s => s.codeExample);
+      const validationHasCode = validationSuggestions.some(
+        (s) => s.codeExample
+      );
       const diagnosisHasCode = diagnosis.codeExamples.length > 0;
 
       expect(validationHasCode).toBe(true);
@@ -125,13 +148,13 @@ describe('MockValidator + MockDebugger Integration', () => {
       const iterations = [
         // Iteration 1: Broken mock
         jest.fn(() => ({})),
-        
+
         // Iteration 2: Partially fixed
         jest.fn(() => ({
           toast: jest.fn(),
           toasts: [],
         })),
-        
+
         // Iteration 3: More complete
         jest.fn(() => ({
           toast: jest.fn(),
@@ -139,7 +162,7 @@ describe('MockValidator + MockDebugger Integration', () => {
           toasts: [],
           queue: [],
         })),
-        
+
         // Iteration 4: Complete mock
         jest.fn(() => ({
           toast: jest.fn(),
@@ -164,7 +187,7 @@ describe('MockValidator + MockDebugger Integration', () => {
         // Generate report to get coverage
         validator.registerMock('hook', 'useToast', mock);
         const reports = validator.generateMockReport();
-        const report = reports.find(r => r.mockName === 'useToast');
+        const report = reports.find((r) => r.mockName === 'useToast');
         if (report) {
           coveragePercentages.push(report.coverage.coveragePercentage);
         }
@@ -205,16 +228,21 @@ describe('MockValidator + MockDebugger Integration', () => {
         // Missing several methods
       }));
 
-      const regressedResult = validator.validateHookMock('useToast', regressedMock);
+      const regressedResult = validator.validateHookMock(
+        'useToast',
+        regressedMock
+      );
       expect(regressedResult.score).toBeLessThan(goodResult.score);
       expect(regressedResult.isValid).toBe(false);
 
       // Debugger should identify the regression
       const error = new Error('toast is not a function');
       const diagnosis = MockDebugger.diagnoseHookFailure('useToast', error);
-      
+
       expect(diagnosis.diagnosis.severity).toBe('critical');
-      expect(diagnosis.recommendations.some(r => r.priority === 'immediate')).toBe(true);
+      expect(
+        diagnosis.recommendations.some((r) => r.priority === 'immediate')
+      ).toBe(true);
     });
   });
 
@@ -230,8 +258,8 @@ describe('MockValidator + MockDebugger Integration', () => {
       // Analyze with validator
       const validationResult = validator.validateHookMock('useToast', testMock);
       const missingFromValidation = validationResult.errors
-        .filter(e => e.type === 'MISSING_METHOD')
-        .map(e => e.path.split('.').pop());
+        .filter((e) => e.type === 'MISSING_METHOD')
+        .map((e) => e.path.split('.').pop());
 
       // Analyze with debugger diff
       const expectedComplete = jest.fn(() => ({
@@ -245,16 +273,20 @@ describe('MockValidator + MockDebugger Integration', () => {
         queue: [],
       }));
 
-      const diff = MockDebugger.generateMockDiff(expectedComplete(), testMock(), 'useToast');
+      const diff = MockDebugger.generateMockDiff(
+        expectedComplete(),
+        testMock(),
+        'useToast'
+      );
       const missingFromDiff = diff.differences
-        .filter(d => d.type === 'MISSING' && d.path.startsWith('methods.'))
-        .map(d => d.path.split('.').pop());
+        .filter((d) => d.type === 'MISSING' && d.path.startsWith('methods.'))
+        .map((d) => d.path.split('.').pop());
 
       // Both should identify the same missing methods
-      const commonMissing = missingFromValidation.filter(method => 
+      const commonMissing = missingFromValidation.filter((method) =>
         missingFromDiff.includes(method)
       );
-      
+
       expect(commonMissing.length).toBeGreaterThan(0);
     });
 
@@ -267,9 +299,16 @@ describe('MockValidator + MockDebugger Integration', () => {
       }));
 
       // Validator focuses on completeness and correctness
-      const validationResult = validator.validateHookMock('useToast', problematicMock);
-      const hasTypeError = validationResult.errors.some(e => e.type === 'TYPE_MISMATCH');
-      const hasMissingMethod = validationResult.errors.some(e => e.type === 'MISSING_METHOD');
+      const validationResult = validator.validateHookMock(
+        'useToast',
+        problematicMock
+      );
+      const hasTypeError = validationResult.errors.some(
+        (e) => e.type === 'TYPE_MISMATCH'
+      );
+      const hasMissingMethod = validationResult.errors.some(
+        (e) => e.type === 'MISSING_METHOD'
+      );
 
       expect(hasTypeError).toBe(true);
       expect(hasMissingMethod).toBe(true);
@@ -277,16 +316,20 @@ describe('MockValidator + MockDebugger Integration', () => {
       // Debugger focuses on runtime error diagnosis
       const error = new Error('dismiss is not a function');
       const diagnosis = MockDebugger.diagnoseHookFailure('useToast', error);
-      
+
       expect(diagnosis.diagnosis.category).toBe('TYPE');
-      expect(diagnosis.recommendations.some(r => r.action.includes('Type'))).toBe(true);
+      expect(
+        diagnosis.recommendations.some((r) => r.action.includes('Type'))
+      ).toBe(true);
 
       // Both should provide actionable solutions
-      const validationSuggestions = validator.suggestFixes([{
-        mockName: 'useToast',
-        errors: validationResult.errors,
-        impact: 'breaking',
-      }]);
+      const validationSuggestions = validator.suggestFixes([
+        {
+          mockName: 'useToast',
+          errors: validationResult.errors,
+          impact: 'breaking',
+        },
+      ]);
 
       expect(validationSuggestions.length).toBeGreaterThan(0);
       expect(diagnosis.recommendations.length).toBeGreaterThan(0);
@@ -303,18 +346,18 @@ describe('MockValidator + MockDebugger Integration', () => {
       }));
 
       const startTime = Date.now();
-      
+
       // Run many validations
       for (let i = 0; i < 100; i++) {
         validator.validateHookMock('useToast', testMock);
       }
-      
+
       const endTime = Date.now();
       const totalTime = endTime - startTime;
-      
+
       // Should complete 100 validations in reasonable time (< 1 second)
       expect(totalTime).toBeLessThan(1000);
-      
+
       // History should be properly managed (limited to 10 entries)
       const history = validator.getValidationHistory('useToast');
       expect(history.length).toBe(10);
@@ -368,14 +411,22 @@ describe('MockValidator + MockDebugger Integration', () => {
       });
 
       // Validator should handle the error gracefully
-      const validationResult = validator.validateHookMock('useToast', throwingMock);
+      const validationResult = validator.validateHookMock(
+        'useToast',
+        throwingMock
+      );
       expect(validationResult.isValid).toBe(false);
-      expect(validationResult.errors.some(e => e.type === 'MOCK_FUNCTION_MISSING')).toBe(true);
+      expect(
+        validationResult.errors.some((e) => e.type === 'MOCK_FUNCTION_MISSING')
+      ).toBe(true);
 
       // Debugger should also handle it gracefully
       const runtimeError = new Error('useToast implementation failed');
-      const diagnosis = MockDebugger.diagnoseHookFailure('useToast', runtimeError);
-      
+      const diagnosis = MockDebugger.diagnoseHookFailure(
+        'useToast',
+        runtimeError
+      );
+
       expect(diagnosis.confidence).toBeGreaterThan(0);
       expect(diagnosis.recommendations.length).toBeGreaterThan(0);
     });
@@ -384,21 +435,29 @@ describe('MockValidator + MockDebugger Integration', () => {
       // Test null mock
       const nullResult = validator.validateHookMock('useToast', null);
       expect(nullResult.isValid).toBe(false);
-      expect(nullResult.errors.some(e => e.severity === 'critical')).toBe(true);
+      expect(nullResult.errors.some((e) => e.severity === 'critical')).toBe(
+        true
+      );
 
       // Test undefined mock
       const undefinedResult = validator.validateHookMock('useToast', undefined);
       expect(undefinedResult.isValid).toBe(false);
-      expect(undefinedResult.errors.some(e => e.severity === 'critical')).toBe(true);
+      expect(
+        undefinedResult.errors.some((e) => e.severity === 'critical')
+      ).toBe(true);
 
       // Debugger should provide helpful diagnosis
       const error = new Error('Cannot read properties of null');
       const diagnosis = MockDebugger.diagnoseHookFailure('useToast', error);
-      
+
       expect(diagnosis.diagnosis.category).toBe('STRUCTURE');
-      expect(diagnosis.recommendations.some(r => 
-        r.description.includes('mock') || r.description.includes('structure')
-      )).toBe(true);
+      expect(
+        diagnosis.recommendations.some(
+          (r) =>
+            r.description.includes('mock') ||
+            r.description.includes('structure')
+        )
+      ).toBe(true);
     });
   });
 });

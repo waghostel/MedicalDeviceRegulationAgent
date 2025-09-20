@@ -6,7 +6,10 @@
 import React from 'react';
 import { screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { renderWithProviders, createMockSession } from '@/lib/testing/test-utils';
+import {
+  renderWithProviders,
+  createMockSession,
+} from '@/lib/testing/test-utils';
 import { ProjectForm } from '../project-form';
 import { generateMockProject } from '@/lib/mock-data';
 import { ProjectStatus } from '@/types/project';
@@ -39,11 +42,19 @@ describe('ProjectForm Component', () => {
 
   describe('Dialog Rendering', () => {
     it('renders create form when no project is provided', () => {
-      renderWithProviders(<ProjectForm {...defaultProps} />, { session: mockSession });
+      renderWithProviders(<ProjectForm {...defaultProps} />, {
+        session: mockSession,
+      });
 
       expect(screen.getByText('Create New Project')).toBeInTheDocument();
-      expect(screen.getByText('Create a new medical device regulatory project to get started.')).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: /create project/i })).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          'Create a new medical device regulatory project to get started.'
+        )
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole('button', { name: /create project/i })
+      ).toBeInTheDocument();
     });
 
     it('renders edit form when project is provided', () => {
@@ -53,15 +64,18 @@ describe('ProjectForm Component', () => {
       );
 
       expect(screen.getByText('Edit Project')).toBeInTheDocument();
-      expect(screen.getByText('Update your project information and settings.')).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: /update project/i })).toBeInTheDocument();
+      expect(
+        screen.getByText('Update your project information and settings.')
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole('button', { name: /update project/i })
+      ).toBeInTheDocument();
     });
 
     it('does not render when open is false', () => {
-      renderWithProviders(
-        <ProjectForm {...defaultProps} open={false} />,
-        { session: mockSession }
-      );
+      renderWithProviders(<ProjectForm {...defaultProps} open={false} />, {
+        session: mockSession,
+      });
 
       expect(screen.queryByText('Create New Project')).not.toBeInTheDocument();
     });
@@ -69,7 +83,9 @@ describe('ProjectForm Component', () => {
 
   describe('Form Fields', () => {
     it('renders all required form fields', () => {
-      renderWithProviders(<ProjectForm {...defaultProps} />, { session: mockSession });
+      renderWithProviders(<ProjectForm {...defaultProps} />, {
+        session: mockSession,
+      });
 
       expect(screen.getByLabelText(/project name/i)).toBeInTheDocument();
       expect(screen.getByLabelText(/description/i)).toBeInTheDocument();
@@ -84,7 +100,9 @@ describe('ProjectForm Component', () => {
         { session: mockSession }
       );
 
-      expect(screen.queryByLabelText(/project status/i)).not.toBeInTheDocument();
+      expect(
+        screen.queryByLabelText(/project status/i)
+      ).not.toBeInTheDocument();
 
       // Edit mode - status field should be present
       rerender(<ProjectForm {...defaultProps} project={mockProject} />);
@@ -98,77 +116,107 @@ describe('ProjectForm Component', () => {
         { session: mockSession }
       );
 
-      expect(screen.getByDisplayValue('Test Cardiac Monitor')).toBeInTheDocument();
-      expect(screen.getByDisplayValue('A wireless cardiac monitoring device')).toBeInTheDocument();
-      expect(screen.getByDisplayValue('For continuous monitoring of cardiac rhythm')).toBeInTheDocument();
+      expect(
+        screen.getByDisplayValue('Test Cardiac Monitor')
+      ).toBeInTheDocument();
+      expect(
+        screen.getByDisplayValue('A wireless cardiac monitoring device')
+      ).toBeInTheDocument();
+      expect(
+        screen.getByDisplayValue('For continuous monitoring of cardiac rhythm')
+      ).toBeInTheDocument();
     });
   });
 
   describe('Form Validation', () => {
     it('shows validation error for empty project name', async () => {
       const user = userEvent.setup();
-      renderWithProviders(<ProjectForm {...defaultProps} />, { session: mockSession });
+      renderWithProviders(<ProjectForm {...defaultProps} />, {
+        session: mockSession,
+      });
 
-      const submitButton = screen.getByRole('button', { name: /create project/i });
+      const submitButton = screen.getByRole('button', {
+        name: /create project/i,
+      });
       await user.click(submitButton);
 
       await waitFor(() => {
-        expect(screen.getByText('Project name is required')).toBeInTheDocument();
+        expect(
+          screen.getByText('Project name is required')
+        ).toBeInTheDocument();
       });
     });
 
     it('shows validation error for project name too long', async () => {
       const user = userEvent.setup();
-      renderWithProviders(<ProjectForm {...defaultProps} />, { session: mockSession });
+      renderWithProviders(<ProjectForm {...defaultProps} />, {
+        session: mockSession,
+      });
 
       const nameInput = screen.getByLabelText(/project name/i);
       const longName = 'a'.repeat(101); // Exceeds 100 character limit
-      
+
       await user.type(nameInput, longName);
-      
-      const submitButton = screen.getByRole('button', { name: /create project/i });
+
+      const submitButton = screen.getByRole('button', {
+        name: /create project/i,
+      });
       await user.click(submitButton);
 
       await waitFor(() => {
-        expect(screen.getByText('Project name must be less than 100 characters')).toBeInTheDocument();
+        expect(
+          screen.getByText('Project name must be less than 100 characters')
+        ).toBeInTheDocument();
       });
     });
 
     it('shows validation error for description too long', async () => {
       const user = userEvent.setup();
-      renderWithProviders(<ProjectForm {...defaultProps} />, { session: mockSession });
+      renderWithProviders(<ProjectForm {...defaultProps} />, {
+        session: mockSession,
+      });
 
       const nameInput = screen.getByLabelText(/project name/i);
       const descriptionInput = screen.getByLabelText(/description/i);
       const longDescription = 'a'.repeat(501); // Exceeds 500 character limit
-      
+
       await user.type(nameInput, 'Valid Name');
       await user.type(descriptionInput, longDescription);
-      
-      const submitButton = screen.getByRole('button', { name: /create project/i });
+
+      const submitButton = screen.getByRole('button', {
+        name: /create project/i,
+      });
       await user.click(submitButton);
 
       await waitFor(() => {
-        expect(screen.getByText('Description must be less than 500 characters')).toBeInTheDocument();
+        expect(
+          screen.getByText('Description must be less than 500 characters')
+        ).toBeInTheDocument();
       });
     });
 
     it('shows validation error for intended use too long', async () => {
       const user = userEvent.setup();
-      renderWithProviders(<ProjectForm {...defaultProps} />, { session: mockSession });
+      renderWithProviders(<ProjectForm {...defaultProps} />, {
+        session: mockSession,
+      });
 
       const nameInput = screen.getByLabelText(/project name/i);
       const intendedUseInput = screen.getByLabelText(/intended use/i);
       const longIntendedUse = 'a'.repeat(1001); // Exceeds 1000 character limit
-      
+
       await user.type(nameInput, 'Valid Name');
       await user.type(intendedUseInput, longIntendedUse);
-      
-      const submitButton = screen.getByRole('button', { name: /create project/i });
+
+      const submitButton = screen.getByRole('button', {
+        name: /create project/i,
+      });
       await user.click(submitButton);
 
       await waitFor(() => {
-        expect(screen.getByText('Intended use must be less than 1000 characters')).toBeInTheDocument();
+        expect(
+          screen.getByText('Intended use must be less than 1000 characters')
+        ).toBeInTheDocument();
       });
     });
   });
@@ -176,30 +224,50 @@ describe('ProjectForm Component', () => {
   describe('Device Type Selection', () => {
     it('renders device type dropdown with common options', async () => {
       const user = userEvent.setup();
-      renderWithProviders(<ProjectForm {...defaultProps} />, { session: mockSession });
+      renderWithProviders(<ProjectForm {...defaultProps} />, {
+        session: mockSession,
+      });
 
-      const deviceTypeSelect = screen.getByRole('combobox', { name: /device type/i });
+      const deviceTypeSelect = screen.getByRole('combobox', {
+        name: /device type/i,
+      });
       await user.click(deviceTypeSelect);
 
       await waitFor(() => {
-        expect(screen.getByRole('option', { name: /cardiovascular device/i })).toBeInTheDocument();
-        expect(screen.getByRole('option', { name: /orthopedic device/i })).toBeInTheDocument();
-        expect(screen.getByRole('option', { name: /neurological device/i })).toBeInTheDocument();
-        expect(screen.getByRole('option', { name: /software as medical device/i })).toBeInTheDocument();
+        expect(
+          screen.getByRole('option', { name: /cardiovascular device/i })
+        ).toBeInTheDocument();
+        expect(
+          screen.getByRole('option', { name: /orthopedic device/i })
+        ).toBeInTheDocument();
+        expect(
+          screen.getByRole('option', { name: /neurological device/i })
+        ).toBeInTheDocument();
+        expect(
+          screen.getByRole('option', { name: /software as medical device/i })
+        ).toBeInTheDocument();
       });
     });
 
     it('selects device type correctly', async () => {
       const user = userEvent.setup();
-      renderWithProviders(<ProjectForm {...defaultProps} />, { session: mockSession });
+      renderWithProviders(<ProjectForm {...defaultProps} />, {
+        session: mockSession,
+      });
 
-      const deviceTypeSelect = screen.getByRole('combobox', { name: /device type/i });
+      const deviceTypeSelect = screen.getByRole('combobox', {
+        name: /device type/i,
+      });
       await user.click(deviceTypeSelect);
 
-      const cardiovascularOption = screen.getByRole('option', { name: /cardiovascular device/i });
+      const cardiovascularOption = screen.getByRole('option', {
+        name: /cardiovascular device/i,
+      });
       await user.click(cardiovascularOption);
 
-      expect(screen.getByDisplayValue('Cardiovascular Device')).toBeInTheDocument();
+      expect(
+        screen.getByDisplayValue('Cardiovascular Device')
+      ).toBeInTheDocument();
     });
   });
 
@@ -207,24 +275,39 @@ describe('ProjectForm Component', () => {
     it('submits form with valid data in create mode', async () => {
       const user = userEvent.setup();
       const mockOnSubmit = jest.fn().mockResolvedValue(mockProject);
-      
+
       renderWithProviders(
         <ProjectForm {...defaultProps} onSubmit={mockOnSubmit} />,
         { session: mockSession }
       );
 
       // Fill form
-      await user.type(screen.getByLabelText(/project name/i), 'New Test Project');
-      await user.type(screen.getByLabelText(/description/i), 'Test description');
-      await user.type(screen.getByLabelText(/intended use/i), 'Test intended use');
+      await user.type(
+        screen.getByLabelText(/project name/i),
+        'New Test Project'
+      );
+      await user.type(
+        screen.getByLabelText(/description/i),
+        'Test description'
+      );
+      await user.type(
+        screen.getByLabelText(/intended use/i),
+        'Test intended use'
+      );
 
       // Select device type
-      const deviceTypeSelect = screen.getByRole('combobox', { name: /device type/i });
+      const deviceTypeSelect = screen.getByRole('combobox', {
+        name: /device type/i,
+      });
       await user.click(deviceTypeSelect);
-      await user.click(screen.getByRole('option', { name: /cardiovascular device/i }));
+      await user.click(
+        screen.getByRole('option', { name: /cardiovascular device/i })
+      );
 
       // Submit form
-      const submitButton = screen.getByRole('button', { name: /create project/i });
+      const submitButton = screen.getByRole('button', {
+        name: /create project/i,
+      });
       await user.click(submitButton);
 
       await waitFor(() => {
@@ -241,9 +324,13 @@ describe('ProjectForm Component', () => {
     it('submits form with valid data in edit mode', async () => {
       const user = userEvent.setup();
       const mockOnSubmit = jest.fn().mockResolvedValue(mockProject);
-      
+
       renderWithProviders(
-        <ProjectForm {...defaultProps} project={mockProject} onSubmit={mockOnSubmit} />,
+        <ProjectForm
+          {...defaultProps}
+          project={mockProject}
+          onSubmit={mockOnSubmit}
+        />,
         { session: mockSession }
       );
 
@@ -253,7 +340,9 @@ describe('ProjectForm Component', () => {
       await user.type(nameInput, 'Updated Project Name');
 
       // Submit form
-      const submitButton = screen.getByRole('button', { name: /update project/i });
+      const submitButton = screen.getByRole('button', {
+        name: /update project/i,
+      });
       await user.click(submitButton);
 
       await waitFor(() => {
@@ -269,18 +358,22 @@ describe('ProjectForm Component', () => {
 
     it('shows loading state during submission', async () => {
       const user = userEvent.setup();
-      const mockOnSubmit = jest.fn().mockImplementation(
-        () => new Promise(resolve => setTimeout(resolve, 100))
-      );
-      
+      const mockOnSubmit = jest
+        .fn()
+        .mockImplementation(
+          () => new Promise((resolve) => setTimeout(resolve, 100))
+        );
+
       renderWithProviders(
         <ProjectForm {...defaultProps} onSubmit={mockOnSubmit} />,
         { session: mockSession }
       );
 
       await user.type(screen.getByLabelText(/project name/i), 'Test Project');
-      
-      const submitButton = screen.getByRole('button', { name: /create project/i });
+
+      const submitButton = screen.getByRole('button', {
+        name: /create project/i,
+      });
       await user.click(submitButton);
 
       // Should show loading state
@@ -292,38 +385,45 @@ describe('ProjectForm Component', () => {
       const user = userEvent.setup();
       const mockOnSubmit = jest.fn().mockResolvedValue(mockProject);
       const { toast } = require('@/hooks/use-toast');
-      
+
       renderWithProviders(
         <ProjectForm {...defaultProps} onSubmit={mockOnSubmit} />,
         { session: mockSession }
       );
 
       await user.type(screen.getByLabelText(/project name/i), 'Test Project');
-      
-      const submitButton = screen.getByRole('button', { name: /create project/i });
+
+      const submitButton = screen.getByRole('button', {
+        name: /create project/i,
+      });
       await user.click(submitButton);
 
       await waitFor(() => {
         expect(toast).toHaveBeenCalledWith({
           title: 'Project Created',
-          description: 'Project "Test Cardiac Monitor" has been created successfully.',
+          description:
+            'Project "Test Cardiac Monitor" has been created successfully.',
         });
       });
     });
 
     it('shows error toast on submission failure', async () => {
       const user = userEvent.setup();
-      const mockOnSubmit = jest.fn().mockRejectedValue(new Error('Submission failed'));
+      const mockOnSubmit = jest
+        .fn()
+        .mockRejectedValue(new Error('Submission failed'));
       const { toast } = require('@/hooks/use-toast');
-      
+
       renderWithProviders(
         <ProjectForm {...defaultProps} onSubmit={mockOnSubmit} />,
         { session: mockSession }
       );
 
       await user.type(screen.getByLabelText(/project name/i), 'Test Project');
-      
-      const submitButton = screen.getByRole('button', { name: /create project/i });
+
+      const submitButton = screen.getByRole('button', {
+        name: /create project/i,
+      });
       await user.click(submitButton);
 
       await waitFor(() => {
@@ -339,15 +439,21 @@ describe('ProjectForm Component', () => {
       const user = userEvent.setup();
       const mockOnSubmit = jest.fn().mockResolvedValue(mockProject);
       const mockOnOpenChange = jest.fn();
-      
+
       renderWithProviders(
-        <ProjectForm {...defaultProps} onSubmit={mockOnSubmit} onOpenChange={mockOnOpenChange} />,
+        <ProjectForm
+          {...defaultProps}
+          onSubmit={mockOnSubmit}
+          onOpenChange={mockOnOpenChange}
+        />,
         { session: mockSession }
       );
 
       await user.type(screen.getByLabelText(/project name/i), 'Test Project');
-      
-      const submitButton = screen.getByRole('button', { name: /create project/i });
+
+      const submitButton = screen.getByRole('button', {
+        name: /create project/i,
+      });
       await user.click(submitButton);
 
       await waitFor(() => {
@@ -360,7 +466,7 @@ describe('ProjectForm Component', () => {
     it('closes dialog when cancel button is clicked', async () => {
       const user = userEvent.setup();
       const mockOnOpenChange = jest.fn();
-      
+
       renderWithProviders(
         <ProjectForm {...defaultProps} onOpenChange={mockOnOpenChange} />,
         { session: mockSession }
@@ -395,30 +501,35 @@ describe('ProjectForm Component', () => {
 
   describe('Loading States', () => {
     it('disables form fields when loading prop is true', () => {
-      renderWithProviders(
-        <ProjectForm {...defaultProps} loading={true} />,
-        { session: mockSession }
-      );
+      renderWithProviders(<ProjectForm {...defaultProps} loading={true} />, {
+        session: mockSession,
+      });
 
       expect(screen.getByLabelText(/project name/i)).toBeDisabled();
       expect(screen.getByLabelText(/description/i)).toBeDisabled();
-      expect(screen.getByRole('button', { name: /create project/i })).toBeDisabled();
+      expect(
+        screen.getByRole('button', { name: /create project/i })
+      ).toBeDisabled();
     });
 
     it('disables form fields during submission', async () => {
       const user = userEvent.setup();
-      const mockOnSubmit = jest.fn().mockImplementation(
-        () => new Promise(resolve => setTimeout(resolve, 100))
-      );
-      
+      const mockOnSubmit = jest
+        .fn()
+        .mockImplementation(
+          () => new Promise((resolve) => setTimeout(resolve, 100))
+        );
+
       renderWithProviders(
         <ProjectForm {...defaultProps} onSubmit={mockOnSubmit} />,
         { session: mockSession }
       );
 
       await user.type(screen.getByLabelText(/project name/i), 'Test Project');
-      
-      const submitButton = screen.getByRole('button', { name: /create project/i });
+
+      const submitButton = screen.getByRole('button', {
+        name: /create project/i,
+      });
       await user.click(submitButton);
 
       // Fields should be disabled during submission
@@ -429,15 +540,25 @@ describe('ProjectForm Component', () => {
 
   describe('Accessibility', () => {
     it('has proper form labels and descriptions', () => {
-      renderWithProviders(<ProjectForm {...defaultProps} />, { session: mockSession });
+      renderWithProviders(<ProjectForm {...defaultProps} />, {
+        session: mockSession,
+      });
 
       expect(screen.getByLabelText(/project name/i)).toBeInTheDocument();
-      expect(screen.getByText('A descriptive name for your medical device project')).toBeInTheDocument();
-      expect(screen.getByText('Optional description to help identify and organize your project')).toBeInTheDocument();
+      expect(
+        screen.getByText('A descriptive name for your medical device project')
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          'Optional description to help identify and organize your project'
+        )
+      ).toBeInTheDocument();
     });
 
     it('associates form fields with their labels', () => {
-      renderWithProviders(<ProjectForm {...defaultProps} />, { session: mockSession });
+      renderWithProviders(<ProjectForm {...defaultProps} />, {
+        session: mockSession,
+      });
 
       const nameInput = screen.getByLabelText(/project name/i);
       const descriptionInput = screen.getByLabelText(/description/i);
@@ -450,9 +571,13 @@ describe('ProjectForm Component', () => {
 
     it('shows validation errors with proper ARIA attributes', async () => {
       const user = userEvent.setup();
-      renderWithProviders(<ProjectForm {...defaultProps} />, { session: mockSession });
+      renderWithProviders(<ProjectForm {...defaultProps} />, {
+        session: mockSession,
+      });
 
-      const submitButton = screen.getByRole('button', { name: /create project/i });
+      const submitButton = screen.getByRole('button', {
+        name: /create project/i,
+      });
       await user.click(submitButton);
 
       await waitFor(() => {

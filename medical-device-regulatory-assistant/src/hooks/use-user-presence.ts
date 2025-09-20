@@ -63,90 +63,105 @@ export function useUserPresence({
 
   // Subscribe to presence events
   useEffect(() => {
-    const unsubscribePresenceAnnounce = websocket.subscribe('presence_announce', (message) => {
-      const { user } = message.data || {};
-      if (user && user.userId !== userId) {
-        setUsers(prev => {
-          const newMap = new Map(prev);
-          newMap.set(user.userId, {
-            ...user,
-            lastSeen: new Date(user.lastSeen),
-            isOnline: true,
-          });
-          return newMap;
-        });
-      }
-    });
-
-    const unsubscribePresenceUpdate = websocket.subscribe('presence_update', (message) => {
-      const { user } = message.data || {};
-      if (user && user.userId !== userId) {
-        setUsers(prev => {
-          const newMap = new Map(prev);
-          const existing = newMap.get(user.userId);
-          newMap.set(user.userId, {
-            ...existing,
-            ...user,
-            lastSeen: new Date(user.lastSeen),
-          });
-          return newMap;
-        });
-      }
-    });
-
-    const unsubscribePresenceLeave = websocket.subscribe('presence_leave', (message) => {
-      const { userId: leavingUserId } = message.data || {};
-      if (leavingUserId && leavingUserId !== userId) {
-        setUsers(prev => {
-          const newMap = new Map(prev);
-          const user = newMap.get(leavingUserId);
-          if (user) {
-            newMap.set(leavingUserId, {
+    const unsubscribePresenceAnnounce = websocket.subscribe(
+      'presence_announce',
+      (message) => {
+        const { user } = message.data || {};
+        if (user && user.userId !== userId) {
+          setUsers((prev) => {
+            const newMap = new Map(prev);
+            newMap.set(user.userId, {
               ...user,
-              isOnline: false,
-              lastSeen: new Date(),
-            });
-          }
-          return newMap;
-        });
-      }
-    });
-
-    const unsubscribeCursorMove = websocket.subscribe('cursor_move', (message) => {
-      const { userId: movingUserId, cursor } = message.data || {};
-      if (movingUserId && movingUserId !== userId && cursor) {
-        setUsers(prev => {
-          const newMap = new Map(prev);
-          const user = newMap.get(movingUserId);
-          if (user) {
-            newMap.set(movingUserId, {
-              ...user,
-              cursor,
-              lastSeen: new Date(),
-            });
-          }
-          return newMap;
-        });
-      }
-    });
-
-    const unsubscribeHeartbeat = websocket.subscribe('presence_heartbeat', (message) => {
-      const { userId: heartbeatUserId } = message.data || {};
-      if (heartbeatUserId && heartbeatUserId !== userId) {
-        setUsers(prev => {
-          const newMap = new Map(prev);
-          const user = newMap.get(heartbeatUserId);
-          if (user) {
-            newMap.set(heartbeatUserId, {
-              ...user,
-              lastSeen: new Date(),
+              lastSeen: new Date(user.lastSeen),
               isOnline: true,
             });
-          }
-          return newMap;
-        });
+            return newMap;
+          });
+        }
       }
-    });
+    );
+
+    const unsubscribePresenceUpdate = websocket.subscribe(
+      'presence_update',
+      (message) => {
+        const { user } = message.data || {};
+        if (user && user.userId !== userId) {
+          setUsers((prev) => {
+            const newMap = new Map(prev);
+            const existing = newMap.get(user.userId);
+            newMap.set(user.userId, {
+              ...existing,
+              ...user,
+              lastSeen: new Date(user.lastSeen),
+            });
+            return newMap;
+          });
+        }
+      }
+    );
+
+    const unsubscribePresenceLeave = websocket.subscribe(
+      'presence_leave',
+      (message) => {
+        const { userId: leavingUserId } = message.data || {};
+        if (leavingUserId && leavingUserId !== userId) {
+          setUsers((prev) => {
+            const newMap = new Map(prev);
+            const user = newMap.get(leavingUserId);
+            if (user) {
+              newMap.set(leavingUserId, {
+                ...user,
+                isOnline: false,
+                lastSeen: new Date(),
+              });
+            }
+            return newMap;
+          });
+        }
+      }
+    );
+
+    const unsubscribeCursorMove = websocket.subscribe(
+      'cursor_move',
+      (message) => {
+        const { userId: movingUserId, cursor } = message.data || {};
+        if (movingUserId && movingUserId !== userId && cursor) {
+          setUsers((prev) => {
+            const newMap = new Map(prev);
+            const user = newMap.get(movingUserId);
+            if (user) {
+              newMap.set(movingUserId, {
+                ...user,
+                cursor,
+                lastSeen: new Date(),
+              });
+            }
+            return newMap;
+          });
+        }
+      }
+    );
+
+    const unsubscribeHeartbeat = websocket.subscribe(
+      'presence_heartbeat',
+      (message) => {
+        const { userId: heartbeatUserId } = message.data || {};
+        if (heartbeatUserId && heartbeatUserId !== userId) {
+          setUsers((prev) => {
+            const newMap = new Map(prev);
+            const user = newMap.get(heartbeatUserId);
+            if (user) {
+              newMap.set(heartbeatUserId, {
+                ...user,
+                lastSeen: new Date(),
+                isOnline: true,
+              });
+            }
+            return newMap;
+          });
+        }
+      }
+    );
 
     return () => {
       unsubscribePresenceAnnounce();
@@ -186,45 +201,51 @@ export function useUserPresence({
     }
   }, [websocket, userId, projectId]);
 
-  const updatePresence = useCallback((updates: Partial<UserPresence>) => {
-    if (websocket.connectionStatus === 'connected') {
-      websocket.sendMessage({
-        type: 'presence_update',
-        data: {
-          user: {
-            userId,
-            userName,
-            currentProject: projectId,
-            lastSeen: new Date().toISOString(),
-            ...updates,
+  const updatePresence = useCallback(
+    (updates: Partial<UserPresence>) => {
+      if (websocket.connectionStatus === 'connected') {
+        websocket.sendMessage({
+          type: 'presence_update',
+          data: {
+            user: {
+              userId,
+              userName,
+              currentProject: projectId,
+              lastSeen: new Date().toISOString(),
+              ...updates,
+            },
           },
-        },
-        timestamp: new Date().toISOString(),
-        project_id: projectId,
-      });
-    }
-  }, [websocket, userId, userName, projectId]);
+          timestamp: new Date().toISOString(),
+          project_id: projectId,
+        });
+      }
+    },
+    [websocket, userId, userName, projectId]
+  );
 
-  const updateCursor = useCallback((x: number, y: number, elementId?: string) => {
-    if (!trackCursor || websocket.connectionStatus !== 'connected') return;
+  const updateCursor = useCallback(
+    (x: number, y: number, elementId?: string) => {
+      if (!trackCursor || websocket.connectionStatus !== 'connected') return;
 
-    // Throttle cursor updates
-    if (cursorTimeoutRef.current) {
-      clearTimeout(cursorTimeoutRef.current);
-    }
+      // Throttle cursor updates
+      if (cursorTimeoutRef.current) {
+        clearTimeout(cursorTimeoutRef.current);
+      }
 
-    cursorTimeoutRef.current = setTimeout(() => {
-      websocket.sendMessage({
-        type: 'cursor_move',
-        data: {
-          userId,
-          cursor: { x, y, elementId },
-        },
-        timestamp: new Date().toISOString(),
-        project_id: projectId,
-      });
-    }, 100); // Throttle to 10 updates per second
-  }, [websocket, userId, projectId, trackCursor]);
+      cursorTimeoutRef.current = setTimeout(() => {
+        websocket.sendMessage({
+          type: 'cursor_move',
+          data: {
+            userId,
+            cursor: { x, y, elementId },
+          },
+          timestamp: new Date().toISOString(),
+          project_id: projectId,
+        });
+      }, 100); // Throttle to 10 updates per second
+    },
+    [websocket, userId, projectId, trackCursor]
+  );
 
   const startHeartbeat = useCallback(() => {
     if (heartbeatRef.current) {
@@ -244,19 +265,25 @@ export function useUserPresence({
   }, [websocket, userId, projectId, heartbeatInterval]);
 
   const getOnlineUsers = useCallback(() => {
-    return Array.from(users.values()).filter(user => user.isOnline);
+    return Array.from(users.values()).filter((user) => user.isOnline);
   }, [users]);
 
-  const getUsersInProject = useCallback((targetProjectId: number) => {
-    return Array.from(users.values()).filter(
-      user => user.isOnline && user.currentProject === targetProjectId
-    );
-  }, [users]);
+  const getUsersInProject = useCallback(
+    (targetProjectId: number) => {
+      return Array.from(users.values()).filter(
+        (user) => user.isOnline && user.currentProject === targetProjectId
+      );
+    },
+    [users]
+  );
 
-  const isUserOnline = useCallback((targetUserId: string) => {
-    const user = users.get(targetUserId);
-    return user?.isOnline || false;
-  }, [users]);
+  const isUserOnline = useCallback(
+    (targetUserId: string) => {
+      const user = users.get(targetUserId);
+      return user?.isOnline || false;
+    },
+    [users]
+  );
 
   // Track mouse movement for cursor sharing
   useEffect(() => {

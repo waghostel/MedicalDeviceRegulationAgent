@@ -1,23 +1,23 @@
-export { 
-  ErrorBoundary, 
-  RegulatoryErrorBoundary, 
-  AgentErrorBoundary 
+export {
+  ErrorBoundary,
+  RegulatoryErrorBoundary,
+  AgentErrorBoundary,
 } from './ErrorBoundary';
 
-export { 
+export {
   ErrorMessage,
   NetworkError,
   AuthError,
   FDAAPIError,
   ValidationError,
   TimeoutError,
-  type ErrorMessageProps
+  type ErrorMessageProps,
 } from './ErrorMessage';
 
 export {
   ProjectErrorBoundary,
   ProjectListErrorBoundary,
-  ProjectFormErrorBoundary
+  ProjectFormErrorBoundary,
 } from './ProjectErrorBoundary';
 
 export {
@@ -28,5 +28,5 @@ export {
   ValidationErrorFallback,
   FileOperationErrorFallback,
   SearchErrorFallback,
-  HelpErrorFallback
+  HelpErrorFallback,
 } from './ErrorFallbacks';

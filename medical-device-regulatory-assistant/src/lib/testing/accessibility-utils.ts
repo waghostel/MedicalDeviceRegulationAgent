@@ -78,9 +78,12 @@ export async function testAccessibility(
 
   // Run axe accessibility tests
   if (!options.skipAxe) {
-    const axeResults = await axe(renderResult.container, options.customAxeRules);
+    const axeResults = await axe(
+      renderResult.container,
+      options.customAxeRules
+    );
     report.axeViolations = axeResults.violations;
-    
+
     if (axeResults.violations.length > 0) {
       report.passed = false;
     }
@@ -88,8 +91,9 @@ export async function testAccessibility(
 
   // Test keyboard navigation
   if (!options.skipKeyboardNavigation) {
-    report.keyboardNavigationResults = await testKeyboardNavigation(renderResult);
-    if (report.keyboardNavigationResults.some(result => !result.passed)) {
+    report.keyboardNavigationResults =
+      await testKeyboardNavigation(renderResult);
+    if (report.keyboardNavigationResults.some((result) => !result.passed)) {
       report.passed = false;
     }
   }
@@ -97,7 +101,7 @@ export async function testAccessibility(
   // Test focus management
   if (!options.skipFocusManagement) {
     report.focusManagementResults = await testFocusManagement(renderResult);
-    if (report.focusManagementResults.some(result => !result.passed)) {
+    if (report.focusManagementResults.some((result) => !result.passed)) {
       report.passed = false;
     }
   }
@@ -105,7 +109,7 @@ export async function testAccessibility(
   // Test ARIA labels
   if (!options.skipAriaLabels) {
     report.ariaLabelResults = testAriaLabels(renderResult);
-    if (report.ariaLabelResults.some(result => !result.passed)) {
+    if (report.ariaLabelResults.some((result) => !result.passed)) {
       report.passed = false;
     }
   }
@@ -132,7 +136,7 @@ export async function testKeyboardNavigation(
     try {
       await user.tab();
       const focused = document.activeElement;
-      
+
       results.push({
         test: {
           element: element.tagName.toLowerCase(),
@@ -153,11 +157,15 @@ export async function testKeyboardNavigation(
     }
 
     // Test Enter key for buttons and links
-    if (element.tagName === 'BUTTON' || element.tagName === 'A' || element.getAttribute('role') === 'button') {
+    if (
+      element.tagName === 'BUTTON' ||
+      element.tagName === 'A' ||
+      element.getAttribute('role') === 'button'
+    ) {
       try {
         element.focus();
         await user.keyboard('{Enter}');
-        
+
         results.push({
           test: {
             element: element.tagName.toLowerCase(),
@@ -180,11 +188,14 @@ export async function testKeyboardNavigation(
     }
 
     // Test Space key for buttons
-    if (element.tagName === 'BUTTON' || element.getAttribute('role') === 'button') {
+    if (
+      element.tagName === 'BUTTON' ||
+      element.getAttribute('role') === 'button'
+    ) {
       try {
         element.focus();
         await user.keyboard(' ');
-        
+
         results.push({
           test: {
             element: element.tagName.toLowerCase(),
@@ -207,11 +218,14 @@ export async function testKeyboardNavigation(
     }
 
     // Test Escape key for modals and dropdowns
-    if (element.getAttribute('role') === 'dialog' || element.getAttribute('role') === 'menu') {
+    if (
+      element.getAttribute('role') === 'dialog' ||
+      element.getAttribute('role') === 'menu'
+    ) {
       try {
         element.focus();
         await user.keyboard('{Escape}');
-        
+
         results.push({
           test: {
             element: element.tagName.toLowerCase(),
@@ -254,7 +268,7 @@ export async function testFocusManagement(
     try {
       (element as HTMLElement).focus();
       const isFocused = document.activeElement === element;
-      
+
       results.push({
         test: `Element ${element.tagName.toLowerCase()} should be focusable`,
         passed: isFocused,
@@ -278,7 +292,7 @@ export async function testFocusManagement(
     try {
       (element as HTMLElement).focus();
       const isFocused = document.activeElement === element;
-      
+
       results.push({
         test: `Disabled element ${element.tagName.toLowerCase()} should not be focusable`,
         passed: !isFocused,
@@ -312,10 +326,16 @@ export function testAriaLabels(renderResult: RenderResult): AriaLabelResult[] {
     const hasAriaLabelledBy = element.hasAttribute('aria-labelledby');
     const hasAriaDescribedBy = element.hasAttribute('aria-describedby');
     const hasVisibleLabel = element.textContent?.trim() !== '';
-    const hasAssociatedLabel = element.tagName === 'INPUT' && 
-      renderResult.container.querySelector(`label[for="${element.id}"]`) !== null;
+    const hasAssociatedLabel =
+      element.tagName === 'INPUT' &&
+      renderResult.container.querySelector(`label[for="${element.id}"]`) !==
+        null;
 
-    const passed = hasAriaLabel || hasAriaLabelledBy || hasVisibleLabel || hasAssociatedLabel;
+    const passed =
+      hasAriaLabel ||
+      hasAriaLabelledBy ||
+      hasVisibleLabel ||
+      hasAssociatedLabel;
 
     results.push({
       element: element.tagName.toLowerCase(),
@@ -332,7 +352,9 @@ export function testAriaLabels(renderResult: RenderResult): AriaLabelResult[] {
 /**
  * Test color contrast (simplified version for testing environment)
  */
-export function testColorContrast(renderResult: RenderResult): ColorContrastResult[] {
+export function testColorContrast(
+  renderResult: RenderResult
+): ColorContrastResult[] {
   const results: ColorContrastResult[] = [];
 
   // Find text elements
@@ -348,8 +370,11 @@ export function testColorContrast(renderResult: RenderResult): ColorContrastResu
     const backgroundColor = computedStyle.backgroundColor;
 
     // Simplified contrast calculation (in real implementation, use a proper library)
-    const contrastRatio = calculateContrastRatio(foregroundColor, backgroundColor);
-    
+    const contrastRatio = calculateContrastRatio(
+      foregroundColor,
+      backgroundColor
+    );
+
     let wcagLevel: 'AA' | 'AAA' | 'fail' = 'fail';
     if (contrastRatio >= 7) {
       wcagLevel = 'AAA';
@@ -374,7 +399,10 @@ export function testColorContrast(renderResult: RenderResult): ColorContrastResu
  * Simplified contrast ratio calculation
  * In production, use a proper color contrast library
  */
-function calculateContrastRatio(foreground: string, background: string): number {
+function calculateContrastRatio(
+  foreground: string,
+  background: string
+): number {
   // This is a simplified implementation
   // In real tests, use a proper color contrast calculation library
   return 4.5; // Mock value that passes WCAG AA
@@ -385,21 +413,26 @@ function calculateContrastRatio(foreground: string, background: string): number 
  */
 export function toBeAccessible() {
   return {
-    async compare(component: ReactElement, options: AccessibilityTestOptions = {}) {
+    async compare(
+      component: ReactElement,
+      options: AccessibilityTestOptions = {}
+    ) {
       const report = await testAccessibility(component, options);
-      
+
       return {
         pass: report.passed,
         message: () => {
           if (report.passed) {
             return 'Component passed all accessibility tests';
           } else {
-            const violations = report.axeViolations.map(v => `- ${v.description}`).join('\n');
-            const keyboardIssues = report.keyboardNavigationResults
-              .filter(r => !r.passed)
-              .map(r => `- ${r.test.element} ${r.test.key}: ${r.error}`)
+            const violations = report.axeViolations
+              .map((v) => `- ${v.description}`)
               .join('\n');
-            
+            const keyboardIssues = report.keyboardNavigationResults
+              .filter((r) => !r.passed)
+              .map((r) => `- ${r.test.element} ${r.test.key}: ${r.error}`)
+              .join('\n');
+
             return `Component failed accessibility tests:\n\nAxe violations:\n${violations}\n\nKeyboard navigation issues:\n${keyboardIssues}`;
           }
         },
@@ -430,11 +463,14 @@ export class ScreenReaderSimulator {
   private setupAriaLiveRegions(): void {
     // Monitor aria-live regions for announcements
     const liveRegions = this.container.querySelectorAll('[aria-live]');
-    
-    liveRegions.forEach(region => {
+
+    liveRegions.forEach((region) => {
       const observer = new MutationObserver((mutations) => {
-        mutations.forEach(mutation => {
-          if (mutation.type === 'childList' || mutation.type === 'characterData') {
+        mutations.forEach((mutation) => {
+          if (
+            mutation.type === 'childList' ||
+            mutation.type === 'characterData'
+          ) {
             const text = (mutation.target as Element).textContent;
             if (text?.trim()) {
               this.announcements.push(text.trim());
@@ -461,27 +497,35 @@ export class ScreenReaderSimulator {
 
   simulateScreenReaderNavigation(): string[] {
     const navigation: string[] = [];
-    
+
     // Simulate reading headings
     const headings = this.container.querySelectorAll('h1, h2, h3, h4, h5, h6');
-    headings.forEach(heading => {
-      navigation.push(`Heading level ${heading.tagName.charAt(1)}: ${heading.textContent}`);
+    headings.forEach((heading) => {
+      navigation.push(
+        `Heading level ${heading.tagName.charAt(1)}: ${heading.textContent}`
+      );
     });
 
     // Simulate reading landmarks
-    const landmarks = this.container.querySelectorAll('[role="main"], [role="navigation"], [role="banner"], [role="contentinfo"], main, nav, header, footer');
-    landmarks.forEach(landmark => {
-      const role = landmark.getAttribute('role') || landmark.tagName.toLowerCase();
+    const landmarks = this.container.querySelectorAll(
+      '[role="main"], [role="navigation"], [role="banner"], [role="contentinfo"], main, nav, header, footer'
+    );
+    landmarks.forEach((landmark) => {
+      const role =
+        landmark.getAttribute('role') || landmark.tagName.toLowerCase();
       navigation.push(`Landmark: ${role}`);
     });
 
     // Simulate reading interactive elements
-    const interactive = this.container.querySelectorAll('button, a, input, select, textarea');
-    interactive.forEach(element => {
-      const label = element.getAttribute('aria-label') || 
-                   element.textContent || 
-                   element.getAttribute('alt') || 
-                   'unlabeled';
+    const interactive = this.container.querySelectorAll(
+      'button, a, input, select, textarea'
+    );
+    interactive.forEach((element) => {
+      const label =
+        element.getAttribute('aria-label') ||
+        element.textContent ||
+        element.getAttribute('alt') ||
+        'unlabeled';
       navigation.push(`${element.tagName.toLowerCase()}: ${label}`);
     });
 

@@ -4,7 +4,10 @@ import { axe, toHaveNoViolations } from 'jest-axe';
 import userEvent from '@testing-library/user-event';
 import { ErrorBoundary } from '@/components/error/ErrorBoundary';
 import { ErrorMessage } from '@/components/error/ErrorMessage';
-import { ValidatedInput, ValidatedTextarea } from '@/components/forms/FormValidation';
+import {
+  ValidatedInput,
+  ValidatedTextarea,
+} from '@/components/forms/FormValidation';
 import { KeyboardShortcutsProvider } from '@/components/accessibility/KeyboardShortcuts';
 import { AccessibilityProvider } from '@/components/accessibility/AccessibilityFeatures';
 import { OnboardingFlow } from '@/components/onboarding/OnboardingFlow';
@@ -27,7 +30,7 @@ describe('Accessibility Tests', () => {
           <ErrorComponent />
         </ErrorBoundary>
       );
-      
+
       const results = await axe(container);
       expect(results).toHaveNoViolations();
     });
@@ -50,18 +53,13 @@ describe('Accessibility Tests', () => {
     it('should be keyboard navigable', async () => {
       const user = userEvent.setup();
       const mockRetry = jest.fn();
-      
-      render(
-        <ErrorMessage
-          type="fda-api"
-          onRetry={mockRetry}
-        />
-      );
+
+      render(<ErrorMessage type="fda-api" onRetry={mockRetry} />);
 
       const retryButton = screen.getByRole('button', { name: /try again/i });
       await user.tab();
       expect(retryButton).toHaveFocus();
-      
+
       await user.keyboard('{Enter}');
       expect(mockRetry).toHaveBeenCalled();
     });
@@ -77,7 +75,7 @@ describe('Accessibility Tests', () => {
           description="Enter the name of your medical device"
         />
       );
-      
+
       const results = await axe(container);
       expect(results).toHaveNoViolations();
     });
@@ -94,7 +92,7 @@ describe('Accessibility Tests', () => {
 
       const input = screen.getByRole('textbox', { name: /device name/i });
       const label = screen.getByText(/device name/i);
-      
+
       expect(input).toHaveAttribute('aria-required', 'true');
       expect(input).toHaveAttribute('id');
       expect(label).toHaveAttribute('for', input.getAttribute('id'));
@@ -102,7 +100,7 @@ describe('Accessibility Tests', () => {
 
     it('should announce validation errors to screen readers', async () => {
       const user = userEvent.setup();
-      
+
       render(
         <ValidatedInput
           label="Device Name"
@@ -114,7 +112,7 @@ describe('Accessibility Tests', () => {
 
       const input = screen.getByRole('textbox');
       const errorMessage = screen.getByText('Device name is required');
-      
+
       expect(input).toHaveAttribute('aria-invalid', 'true');
       expect(input).toHaveAttribute('aria-describedby');
       expect(errorMessage).toHaveAttribute('role', 'alert');
@@ -123,7 +121,7 @@ describe('Accessibility Tests', () => {
     it('should support keyboard navigation in textarea', async () => {
       const user = userEvent.setup();
       const mockChange = jest.fn();
-      
+
       render(
         <ValidatedTextarea
           label="Description"
@@ -135,7 +133,7 @@ describe('Accessibility Tests', () => {
       const textarea = screen.getByRole('textbox', { name: /description/i });
       await user.click(textarea);
       await user.keyboard('Test description');
-      
+
       expect(mockChange).toHaveBeenCalledWith('Test description');
       expect(textarea).toHaveFocus();
     });
@@ -148,40 +146,40 @@ describe('Accessibility Tests', () => {
           <TestComponent />
         </KeyboardShortcutsProvider>
       );
-      
+
       // Trigger shortcuts dialog
       fireEvent.keyDown(document, { key: '?' });
-      
+
       await waitFor(() => {
         expect(screen.getByRole('dialog')).toBeInTheDocument();
       });
-      
+
       const results = await axe(container);
       expect(results).toHaveNoViolations();
     });
 
     it('should trap focus in shortcuts dialog', async () => {
       const user = userEvent.setup();
-      
+
       render(
         <KeyboardShortcutsProvider>
           <TestComponent />
         </KeyboardShortcutsProvider>
       );
-      
+
       // Open dialog
       fireEvent.keyDown(document, { key: '?' });
-      
+
       await waitFor(() => {
         expect(screen.getByRole('dialog')).toBeInTheDocument();
       });
 
       const dialog = screen.getByRole('dialog');
       const closeButton = screen.getByRole('button', { name: /close/i });
-      
+
       // Focus should be trapped within dialog
       expect(document.activeElement).toBe(closeButton);
-      
+
       await user.tab();
       expect(document.activeElement).toBe(closeButton); // Should cycle back
     });
@@ -189,7 +187,7 @@ describe('Accessibility Tests', () => {
     it('should handle keyboard shortcuts correctly', async () => {
       const mockNavigateHome = jest.fn();
       const mockOpenSearch = jest.fn();
-      
+
       render(
         <KeyboardShortcutsProvider
           onNavigateHome={mockNavigateHome}
@@ -198,11 +196,11 @@ describe('Accessibility Tests', () => {
           <TestComponent />
         </KeyboardShortcutsProvider>
       );
-      
+
       // Test Alt+H shortcut
       fireEvent.keyDown(document, { key: 'H', altKey: true });
       expect(mockNavigateHome).toHaveBeenCalled();
-      
+
       // Test Ctrl+K shortcut
       fireEvent.keyDown(document, { key: 'K', ctrlKey: true });
       expect(mockOpenSearch).toHaveBeenCalled();
@@ -216,7 +214,7 @@ describe('Accessibility Tests', () => {
           <div>Test content</div>
         </AccessibilityProvider>
       );
-      
+
       const results = await axe(container);
       expect(results).toHaveNoViolations();
     });
@@ -227,11 +225,11 @@ describe('Accessibility Tests', () => {
           <div>Test content</div>
         </AccessibilityProvider>
       );
-      
+
       // Simulate enabling high contrast
       const root = document.documentElement;
       root.classList.add('high-contrast');
-      
+
       expect(root).toHaveClass('high-contrast');
     });
 
@@ -239,7 +237,7 @@ describe('Accessibility Tests', () => {
       // Mock prefers-reduced-motion
       Object.defineProperty(window, 'matchMedia', {
         writable: true,
-        value: jest.fn().mockImplementation(query => ({
+        value: jest.fn().mockImplementation((query) => ({
           matches: query === '(prefers-reduced-motion: reduce)',
           media: query,
           onchange: null,
@@ -256,10 +254,10 @@ describe('Accessibility Tests', () => {
           <div>Test content</div>
         </AccessibilityProvider>
       );
-      
+
       const root = document.documentElement;
       root.classList.add('reduce-motion');
-      
+
       expect(root).toHaveClass('reduce-motion');
     });
   });
@@ -273,7 +271,7 @@ describe('Accessibility Tests', () => {
           onComplete={() => {}}
         />
       );
-      
+
       const results = await axe(container);
       expect(results).toHaveNoViolations();
     });
@@ -295,7 +293,7 @@ describe('Accessibility Tests', () => {
     it('should support keyboard navigation between steps', async () => {
       const user = userEvent.setup();
       const mockComplete = jest.fn();
-      
+
       render(
         <OnboardingFlow
           isOpen={true}
@@ -305,17 +303,19 @@ describe('Accessibility Tests', () => {
       );
 
       const nextButton = screen.getByRole('button', { name: /next/i });
-      
+
       // Navigate through steps
       await user.click(nextButton);
       await user.click(nextButton);
       await user.click(nextButton);
       await user.click(nextButton);
-      
+
       // Should reach final step
-      const getStartedButton = screen.getByRole('button', { name: /get started/i });
+      const getStartedButton = screen.getByRole('button', {
+        name: /get started/i,
+      });
       await user.click(getStartedButton);
-      
+
       expect(mockComplete).toHaveBeenCalled();
     });
   });
@@ -327,23 +327,23 @@ describe('Accessibility Tests', () => {
           <button>Hover me</button>
         </Tooltip>
       );
-      
+
       const results = await axe(container);
       expect(results).toHaveNoViolations();
     });
 
     it('should have proper ARIA attributes', async () => {
       const user = userEvent.setup();
-      
+
       render(
         <HelpTooltip content="This explains the feature" title="Feature Help" />
       );
 
       const trigger = screen.getByRole('button');
       expect(trigger).toHaveAttribute('aria-describedby');
-      
+
       await user.hover(trigger);
-      
+
       await waitFor(() => {
         const tooltip = screen.getByRole('tooltip');
         expect(tooltip).toBeInTheDocument();
@@ -352,7 +352,7 @@ describe('Accessibility Tests', () => {
 
     it('should be keyboard accessible', async () => {
       const user = userEvent.setup();
-      
+
       render(
         <Tooltip content="Keyboard accessible tooltip" trigger="focus">
           <button>Focus me</button>
@@ -362,9 +362,11 @@ describe('Accessibility Tests', () => {
       const button = screen.getByRole('button');
       await user.tab();
       expect(button).toHaveFocus();
-      
+
       await waitFor(() => {
-        expect(screen.getByText('Keyboard accessible tooltip')).toBeInTheDocument();
+        expect(
+          screen.getByText('Keyboard accessible tooltip')
+        ).toBeInTheDocument();
       });
     });
   });
@@ -380,13 +382,13 @@ describe('Accessibility Tests', () => {
           </button>
         </div>
       );
-      
+
       const results = await axe(container, {
         rules: {
-          'color-contrast': { enabled: true }
-        }
+          'color-contrast': { enabled: true },
+        },
       });
-      
+
       expect(results).toHaveNoViolations();
     });
   });
@@ -395,24 +397,29 @@ describe('Accessibility Tests', () => {
     it('should have visible focus indicators', () => {
       render(
         <div>
-          <button className="focus:ring-2 focus:ring-blue-500">Focusable Button</button>
-          <input className="focus:ring-2 focus:ring-blue-500" placeholder="Focusable Input" />
+          <button className="focus:ring-2 focus:ring-blue-500">
+            Focusable Button
+          </button>
+          <input
+            className="focus:ring-2 focus:ring-blue-500"
+            placeholder="Focusable Input"
+          />
         </div>
       );
 
       const button = screen.getByRole('button');
       const input = screen.getByRole('textbox');
-      
+
       button.focus();
       expect(button).toHaveFocus();
-      
+
       input.focus();
       expect(input).toHaveFocus();
     });
 
     it('should skip to main content', async () => {
       const user = userEvent.setup();
-      
+
       render(
         <div>
           <a href="#main-content" className="sr-only focus:not-sr-only">
@@ -427,7 +434,7 @@ describe('Accessibility Tests', () => {
 
       const skipLink = screen.getByText('Skip to main content');
       await user.click(skipLink);
-      
+
       const mainContent = screen.getByRole('main');
       expect(mainContent).toHaveFocus();
     });
@@ -446,7 +453,7 @@ describe('Accessibility Tests', () => {
       const h1 = screen.getByRole('heading', { level: 1 });
       const h2 = screen.getByRole('heading', { level: 2 });
       const h3 = screen.getByRole('heading', { level: 3 });
-      
+
       expect(h1).toBeInTheDocument();
       expect(h2).toBeInTheDocument();
       expect(h3).toBeInTheDocument();

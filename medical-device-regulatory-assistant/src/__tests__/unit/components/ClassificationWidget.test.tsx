@@ -12,7 +12,8 @@ const mockClassification: DeviceClassification = {
   regulatoryPathway: '510k',
   cfrSections: ['21 CFR 870.2300'],
   confidenceScore: 0.85,
-  reasoning: 'Device matches existing Class II cardiac monitors with similar intended use',
+  reasoning:
+    'Device matches existing Class II cardiac monitors with similar intended use',
   sources: [
     {
       url: 'https://www.fda.gov/medical-devices/classify-your-medical-device/device-classification',
@@ -80,7 +81,7 @@ describe('ClassificationWidget', () => {
 
   it('calls onStartClassification when start button is clicked', async () => {
     const user = userEvent.setup();
-    
+
     render(
       <ClassificationWidget
         classification={null}
@@ -97,7 +98,7 @@ describe('ClassificationWidget', () => {
 
   it('calls onViewDetails when view details button is clicked', async () => {
     const user = userEvent.setup();
-    
+
     render(
       <ClassificationWidget
         classification={mockClassification}
@@ -126,7 +127,9 @@ describe('ClassificationWidget', () => {
       />
     );
 
-    expect(screen.getByText('21 CFR 870.2300, 21 CFR 870.2310')).toBeInTheDocument();
+    expect(
+      screen.getByText('21 CFR 870.2300, 21 CFR 870.2310')
+    ).toBeInTheDocument();
   });
 
   it('handles low confidence scores with warning styling', () => {
@@ -181,7 +184,7 @@ describe('ClassificationWidget', () => {
 
   it('displays error state correctly', () => {
     const errorMessage = 'Failed to classify device. Please try again.';
-    
+
     render(
       <ClassificationWidget
         classification={null}
@@ -205,15 +208,21 @@ describe('ClassificationWidget', () => {
     );
 
     const widget = screen.getByRole('region');
-    expect(widget).toHaveAttribute('aria-label', 'Device Classification Status');
+    expect(widget).toHaveAttribute(
+      'aria-label',
+      'Device Classification Status'
+    );
 
     const progressBar = screen.getByRole('progressbar');
-    expect(progressBar).toHaveAttribute('aria-label', 'Classification confidence: 85%');
+    expect(progressBar).toHaveAttribute(
+      'aria-label',
+      'Classification confidence: 85%'
+    );
   });
 
   it('handles keyboard navigation correctly', async () => {
     const user = userEvent.setup();
-    
+
     render(
       <ClassificationWidget
         classification={null}
@@ -223,11 +232,11 @@ describe('ClassificationWidget', () => {
     );
 
     const startButton = screen.getByText('Start Classification');
-    
+
     // Tab to button and press Enter
     await user.tab();
     expect(startButton).toHaveFocus();
-    
+
     await user.keyboard('{Enter}');
     expect(mockOnStartClassification).toHaveBeenCalledTimes(1);
   });
@@ -253,7 +262,8 @@ describe('ClassificationWidget', () => {
   it('truncates long reasoning text with expand option', () => {
     const longReasoningClassification = {
       ...mockClassification,
-      reasoning: 'This is a very long reasoning text that should be truncated initially but can be expanded to show the full content when the user clicks the expand button or link.',
+      reasoning:
+        'This is a very long reasoning text that should be truncated initially but can be expanded to show the full content when the user clicks the expand button or link.',
     };
 
     render(
@@ -264,7 +274,9 @@ describe('ClassificationWidget', () => {
       />
     );
 
-    expect(screen.getByText(/This is a very long reasoning text/)).toBeInTheDocument();
+    expect(
+      screen.getByText(/This is a very long reasoning text/)
+    ).toBeInTheDocument();
     expect(screen.getByText('Show more')).toBeInTheDocument();
   });
 });

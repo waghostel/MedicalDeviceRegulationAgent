@@ -6,9 +6,23 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { ArrowLeft, Settings, Download, RefreshCw, AlertCircle, CheckCircle, Clock } from 'lucide-react';
+import {
+  ArrowLeft,
+  Settings,
+  Download,
+  RefreshCw,
+  AlertCircle,
+  CheckCircle,
+  Clock,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -29,12 +43,13 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
   const router = useRouter();
   const { toast } = useToast();
   const { isOffline } = useOffline();
-  const { projects, loading, error, updateProject, refreshProjects } = useProjects();
+  const { projects, loading, error, updateProject, refreshProjects } =
+    useProjects();
   const [activeTab, setActiveTab] = useState('overview');
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   // Find the current project
-  const project = projects.find(p => p.id === params.id);
+  const project = projects.find((p) => p.id === params.id);
 
   // Dashboard data and functionality
   const {
@@ -47,11 +62,11 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
     startClassification,
     searchPredicates,
     selectPredicate,
-    handleStepClick
-  } = useDashboard({ 
+    handleStepClick,
+  } = useDashboard({
     projectId: params.id,
     autoRefresh: true,
-    refreshInterval: 30000
+    refreshInterval: 30000,
   });
 
   // WebSocket connection for real-time updates (legacy)
@@ -62,11 +77,14 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
       // Handle real-time project updates
       try {
         const update = JSON.parse(lastMessage);
-        if (update.type === 'project_updated' && update.projectId === params.id) {
+        if (
+          update.type === 'project_updated' &&
+          update.projectId === params.id
+        ) {
           refreshProjects();
           toast({
-            title: "Project Updated",
-            description: "Project data has been updated in real-time.",
+            title: 'Project Updated',
+            description: 'Project data has been updated in real-time.',
           });
         }
       } catch (error) {
@@ -80,14 +98,14 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
     try {
       await refreshProjects();
       toast({
-        title: "Refreshed",
-        description: "Project data has been refreshed successfully.",
+        title: 'Refreshed',
+        description: 'Project data has been refreshed successfully.',
       });
     } catch (error) {
       toast({
-        title: "Refresh Failed",
-        description: "Failed to refresh project data. Please try again.",
-        variant: "destructive",
+        title: 'Refresh Failed',
+        description: 'Failed to refresh project data. Please try again.',
+        variant: 'destructive',
       });
     } finally {
       setIsRefreshing(false);
@@ -100,14 +118,14 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
     try {
       await updateProject(project.id, { status: newStatus });
       toast({
-        title: "Status Updated",
+        title: 'Status Updated',
         description: `Project status changed to ${newStatus}.`,
       });
     } catch (error) {
       toast({
-        title: "Update Failed",
-        description: "Failed to update project status. Please try again.",
-        variant: "destructive",
+        title: 'Update Failed',
+        description: 'Failed to update project status. Please try again.',
+        variant: 'destructive',
       });
     }
   };
@@ -167,9 +185,9 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
               Failed to load project data: {error}
-              <Button 
-                variant="outline" 
-                size="sm" 
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={handleRefresh}
                 className="ml-2"
               >
@@ -189,11 +207,12 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
           <Alert>
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
-              Project not found. It may have been deleted or you may not have access to it.
+              Project not found. It may have been deleted or you may not have
+              access to it.
             </AlertDescription>
           </Alert>
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             onClick={() => router.push('/projects')}
             className="mt-4"
           >
@@ -211,8 +230,8 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center space-x-4">
-            <Button 
-              variant="ghost" 
+            <Button
+              variant="ghost"
               size="sm"
               onClick={() => router.push('/projects')}
             >
@@ -220,24 +239,26 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
               Back to Projects
             </Button>
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">{project.name}</h1>
+              <h1 className="text-2xl font-bold text-gray-900">
+                {project.name}
+              </h1>
               <p className="text-gray-600">{project.description}</p>
             </div>
           </div>
           <div className="flex items-center space-x-2">
-            {isOffline && (
-              <Badge variant="destructive">Offline</Badge>
-            )}
+            {isOffline && <Badge variant="destructive">Offline</Badge>}
             {!isConnected && !isOffline && (
               <Badge variant="outline">Disconnected</Badge>
             )}
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               size="sm"
               onClick={handleRefresh}
               disabled={isRefreshing}
             >
-              <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
+              <RefreshCw
+                className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`}
+              />
               Refresh
             </Button>
             <Button variant="outline" size="sm">
@@ -259,8 +280,8 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
                 {getStatusIcon(project.status)}
                 <div>
                   <p className="text-sm font-medium">Status</p>
-                  <Badge 
-                    variant="secondary" 
+                  <Badge
+                    variant="secondary"
                     className={`${getStatusColor(project.status)} text-white`}
                   >
                     {project.status}
@@ -269,16 +290,18 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
               </div>
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardContent className="p-4">
               <div>
                 <p className="text-sm font-medium">Device Type</p>
-                <p className="text-lg font-semibold">{project.deviceType || 'Not specified'}</p>
+                <p className="text-lg font-semibold">
+                  {project.deviceType || 'Not specified'}
+                </p>
               </div>
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardContent className="p-4">
               <div>
@@ -289,7 +312,7 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
               </div>
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardContent className="p-4">
               <div>
@@ -320,4 +343,4 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
       </div>
     </div>
   );
-}  
+}

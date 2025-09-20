@@ -6,22 +6,28 @@
 'use client';
 
 import React from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { 
-  CheckCircle, 
-  Clock, 
-  AlertCircle, 
-  RefreshCw, 
+import {
+  CheckCircle,
+  Clock,
+  AlertCircle,
+  RefreshCw,
   Activity,
   Loader2,
   FileText,
   Search,
   BarChart3,
   Upload,
-  Bot
+  Bot,
 } from 'lucide-react';
 import { ActivityItem, ActivityWidgetProps } from '@/types/dashboard';
 
@@ -29,7 +35,7 @@ export function ActivityWidget({
   activities,
   loading = false,
   error,
-  onRefresh
+  onRefresh,
 }: ActivityWidgetProps) {
   const getActivityIcon = (type: string) => {
     switch (type) {
@@ -106,9 +112,7 @@ export function ActivityWidget({
         <CardContent>
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
-            <AlertDescription>
-              {error}
-            </AlertDescription>
+            <AlertDescription>{error}</AlertDescription>
           </Alert>
           <Button variant="outline" onClick={onRefresh} className="mt-4">
             <RefreshCw className="h-4 w-4 mr-2" />
@@ -163,7 +167,8 @@ export function ActivityWidget({
           <div className="text-center py-6">
             <Activity className="h-12 w-12 text-gray-400 mx-auto mb-4" />
             <p className="text-gray-600 mb-4">
-              No recent activity to display. Activity will appear here as you work on your project.
+              No recent activity to display. Activity will appear here as you
+              work on your project.
             </p>
             <Button variant="outline" onClick={onRefresh}>
               <RefreshCw className="h-4 w-4 mr-2" />
@@ -181,9 +186,7 @@ export function ActivityWidget({
         <CardTitle className="flex items-center gap-2">
           <Activity className="h-4 w-4 text-blue-500" />
           Recent Activity
-          <Badge variant="secondary">
-            {activities.length} Items
-          </Badge>
+          <Badge variant="secondary">{activities.length} Items</Badge>
         </CardTitle>
         <CardDescription>
           Latest project activity and agent interactions
@@ -204,27 +207,33 @@ export function ActivityWidget({
               {/* Activity Content */}
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
-                  <h4 className="font-medium text-sm truncate">{activity.title}</h4>
-                  <Badge variant={getStatusBadgeVariant(activity.status)} className="text-xs">
+                  <h4 className="font-medium text-sm truncate">
+                    {activity.title}
+                  </h4>
+                  <Badge
+                    variant={getStatusBadgeVariant(activity.status)}
+                    className="text-xs"
+                  >
                     {activity.status}
                   </Badge>
                 </div>
-                
+
                 <p className="text-xs text-gray-600 mb-2 line-clamp-2">
                   {activity.description}
                 </p>
-                
+
                 <div className="flex items-center justify-between">
                   <span className="text-xs text-gray-500">
                     {formatTimeAgo(activity.timestamp)}
                   </span>
-                  
+
                   {/* Metadata */}
                   {activity.metadata && (
                     <div className="flex items-center gap-2">
                       {activity.metadata.confidence_score && (
                         <span className="text-xs text-gray-500">
-                          {Math.round(activity.metadata.confidence_score * 100)}%
+                          {Math.round(activity.metadata.confidence_score * 100)}
+                          %
                         </span>
                       )}
                       {activity.metadata.execution_time_ms && (

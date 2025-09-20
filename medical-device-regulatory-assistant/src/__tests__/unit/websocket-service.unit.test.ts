@@ -20,7 +20,7 @@ class MockWebSocket {
 
   constructor(url: string) {
     this.url = url;
-    
+
     // Simulate connection opening
     setTimeout(() => {
       this.readyState = MockWebSocket.OPEN;
@@ -78,7 +78,7 @@ describe('WebSocketService', () => {
     expect(service.getStatus()).toBe('connecting');
 
     // Wait for connection to open
-    await new Promise(resolve => setTimeout(resolve, 20));
+    await new Promise((resolve) => setTimeout(resolve, 20));
     expect(service.getStatus()).toBe('connected');
     expect(statusHandler).toHaveBeenCalledWith('connecting');
     expect(statusHandler).toHaveBeenCalledWith('connected');
@@ -89,7 +89,7 @@ describe('WebSocketService', () => {
     service.subscribe('test_message', messageHandler);
 
     service.connect();
-    await new Promise(resolve => setTimeout(resolve, 20));
+    await new Promise((resolve) => setTimeout(resolve, 20));
 
     // Simulate message
     const testMessage = {
@@ -105,10 +105,10 @@ describe('WebSocketService', () => {
 
   it('should disconnect properly', async () => {
     service.connect();
-    await new Promise(resolve => setTimeout(resolve, 20));
-    
+    await new Promise((resolve) => setTimeout(resolve, 20));
+
     expect(service.getStatus()).toBe('connected');
-    
+
     service.disconnect();
     expect(service.getStatus()).toBe('disconnected');
   });
@@ -116,10 +116,10 @@ describe('WebSocketService', () => {
   it('should destroy and cleanup', () => {
     const statusHandler = jest.fn();
     const messageHandler = jest.fn();
-    
+
     service.onStatusChange(statusHandler);
     service.subscribe('test', messageHandler);
-    
+
     service.destroy();
     expect(service.getStatus()).toBe('disconnected');
   });

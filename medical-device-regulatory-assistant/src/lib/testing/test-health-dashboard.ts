@@ -3,7 +3,11 @@
  * Requirements: 8.1, 8.2, 8.3
  */
 
-import { TestHealthMonitor, HealthReport, ValidationIssue } from './test-health-monitor';
+import {
+  TestHealthMonitor,
+  HealthReport,
+  ValidationIssue,
+} from './test-health-monitor';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 
@@ -69,7 +73,7 @@ export class TestHealthDashboard {
   async initialize(): Promise<void> {
     await this.loadHistoricalData();
     await this.generateInitialReport();
-    
+
     console.log('🚀 Test Health Dashboard initialized');
     console.log(`📊 Monitoring ${this.reports.length} historical reports`);
     console.log(`⚡ Refresh interval: ${this.config.refreshInterval / 1000}s`);
@@ -81,7 +85,7 @@ export class TestHealthDashboard {
   async generateDashboardData(): Promise<DashboardData> {
     const currentReport = await this.monitor.createHealthReport();
     this.reports.push(currentReport);
-    
+
     // Limit history
     if (this.reports.length > this.config.historyLimit) {
       this.reports = this.reports.slice(-this.config.historyLimit);
@@ -93,7 +97,7 @@ export class TestHealthDashboard {
     const dashboardData: DashboardData = {
       currentReport,
       historicalReports: this.reports.slice(-10), // Last 10 reports
-      alerts: this.alerts.filter(a => !a.resolved).slice(-20), // Last 20 unresolved alerts
+      alerts: this.alerts.filter((a) => !a.resolved).slice(-20), // Last 20 unresolved alerts
       trends: this.calculateTrends(),
       summary: this.generateSummary(currentReport),
     };
@@ -108,11 +112,11 @@ export class TestHealthDashboard {
   async generateHTMLDashboard(): Promise<string> {
     const data = await this.generateDashboardData();
     const html = this.createHTMLTemplate(data);
-    
+
     const outputPath = path.join(this.config.outputDir, 'dashboard.html');
     await fs.mkdir(this.config.outputDir, { recursive: true });
     await fs.writeFile(outputPath, html);
-    
+
     console.log(`📊 Dashboard generated: ${outputPath}`);
     return outputPath;
   }
@@ -122,7 +126,7 @@ export class TestHealthDashboard {
    */
   startMonitoring(): void {
     console.log('🔄 Starting continuous test health monitoring...');
-    
+
     const monitoringInterval = setInterval(async () => {
       try {
         await this.generateDashboardData();
@@ -150,10 +154,14 @@ export class TestHealthDashboard {
   }> {
     const data = await this.generateDashboardData();
     const { currentReport } = data;
-    
-    const criticalIssues = currentReport.validation.issues.filter(i => i.severity === 'critical');
-    const highIssues = currentReport.validation.issues.filter(i => i.severity === 'high');
-    
+
+    const criticalIssues = currentReport.validation.issues.filter(
+      (i) => i.severity === 'critical'
+    );
+    const highIssues = currentReport.validation.issues.filter(
+      (i) => i.severity === 'high'
+    );
+
     let exitCode = 0;
     let summary = '';
     let details = '';
@@ -161,14 +169,16 @@ export class TestHealthDashboard {
     if (criticalIssues.length > 0) {
       exitCode = 1;
       summary = `❌ CRITICAL: ${criticalIssues.length} critical issues found`;
-      details = criticalIssues.map(i => `- ${i.message}`).join('\n');
+      details = criticalIssues.map((i) => `- ${i.message}`).join('\n');
     } else if (highIssues.length > 0) {
       exitCode = process.env.CI_FAIL_ON_HIGH_ISSUES === 'true' ? 1 : 0;
       summary = `⚠️ WARNING: ${highIssues.length} high priority issues found`;
-      details = highIssues.map(i => `- ${i.message}`).join('\n');
+      details = highIssues.map((i) => `- ${i.message}`).join('\n');
     } else if (currentReport.validation.warnings.length > 0) {
       summary = `💡 INFO: ${currentReport.validation.warnings.length} warnings found`;
-      details = currentReport.validation.warnings.map(w => `- ${w.message}`).join('\n');
+      details = currentReport.validation.warnings
+        .map((w) => `- ${w.message}`)
+        .join('\n');
     } else {
       summary = `✅ SUCCESS: All tests healthy (Score: ${currentReport.summary.score}/100)`;
       details = `
@@ -188,22 +198,26 @@ React 19 Compatibility: ${currentReport.metrics.react19Compatibility.compatibili
     try {
       const reportsDir = path.join(this.config.outputDir, 'history');
       const files = await fs.readdir(reportsDir);
-      
-      for (const file of files.filter(f => f.endsWith('.json'))) {
+
+      for (const file of files.filter((f) => f.endsWith('.json'))) {
         try {
-          const content = await fs.readFile(path.join(reportsDir, file), 'utf-8');
+          const content = await fs.readFile(
+            path.join(reportsDir, file),
+            'utf-8'
+          );
           const report = JSON.parse(content) as HealthReport;
           this.reports.push(report);
         } catch (error) {
           console.warn(`Failed to load report ${file}:`, error);
         }
       }
-      
+
       // Sort by timestamp
-      this.reports.sort((a, b) => 
-        new Date(a.summary.timestamp).getTime() - new Date(b.summary.timestamp).getTime()
+      this.reports.sort(
+        (a, b) =>
+          new Date(a.summary.timestamp).getTime() -
+          new Date(b.summary.timestamp).getTime()
       );
-      
     } catch (error) {
       console.log('No historical data found, starting fresh');
     }
@@ -218,13 +232,15 @@ React 19 Compatibility: ${currentReport.metrics.react19Compatibility.compatibili
 
   private async updateAlerts(report: HealthReport): Promise<void> {
     const newAlerts = this.monitor.generateAlerts(report.validation);
-    
+
     for (const alert of newAlerts) {
       const alertId = this.generateAlertId(alert.message);
-      
+
       // Check if alert already exists
-      const existingAlert = this.alerts.find(a => a.id === alertId && !a.resolved);
-      
+      const existingAlert = this.alerts.find(
+        (a) => a.id === alertId && !a.resolved
+      );
+
       if (!existingAlert) {
         this.alerts.push({
           id: alertId,
@@ -237,7 +253,7 @@ React 19 Compatibility: ${currentReport.metrics.react19Compatibility.compatibili
     }
 
     // Mark resolved alerts
-    const currentIssueMessages = report.validation.issues.map(i => i.message);
+    const currentIssueMessages = report.validation.issues.map((i) => i.message);
     for (const alert of this.alerts) {
       if (!alert.resolved && !currentIssueMessages.includes(alert.message)) {
         alert.resolved = true;
@@ -247,21 +263,21 @@ React 19 Compatibility: ${currentReport.metrics.react19Compatibility.compatibili
 
   private calculateTrends(): DashboardData['trends'] {
     const recentReports = this.reports.slice(-20);
-    
+
     return {
-      healthScore: recentReports.map(r => ({
+      healthScore: recentReports.map((r) => ({
         timestamp: r.summary.timestamp,
         score: r.summary.score,
       })),
-      performance: recentReports.map(r => ({
+      performance: recentReports.map((r) => ({
         timestamp: r.summary.timestamp,
         duration: r.metrics.executionTime,
       })),
-      coverage: recentReports.map(r => ({
+      coverage: recentReports.map((r) => ({
         timestamp: r.summary.timestamp,
         coverage: r.metrics.coverage,
       })),
-      passRate: recentReports.map(r => ({
+      passRate: recentReports.map((r) => ({
         timestamp: r.summary.timestamp,
         passRate: r.metrics.passRate,
       })),
@@ -274,25 +290,29 @@ React 19 Compatibility: ${currentReport.metrics.react19Compatibility.compatibili
       passRate: report.metrics.passRate,
       avgExecutionTime: report.metrics.executionTime,
       coveragePercentage: report.metrics.coverage,
-      react19CompatibilityScore: report.metrics.react19Compatibility.compatibilityScore,
+      react19CompatibilityScore:
+        report.metrics.react19Compatibility.compatibilityScore,
       lastUpdated: report.summary.timestamp,
     };
   }
 
   private async saveDashboardData(data: DashboardData): Promise<void> {
     await fs.mkdir(this.config.outputDir, { recursive: true });
-    
+
     // Save current data
     const dataPath = path.join(this.config.outputDir, 'dashboard-data.json');
     await fs.writeFile(dataPath, JSON.stringify(data, null, 2));
-    
+
     // Save historical report
     const historyDir = path.join(this.config.outputDir, 'history');
     await fs.mkdir(historyDir, { recursive: true });
-    
+
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
     const historyPath = path.join(historyDir, `report-${timestamp}.json`);
-    await fs.writeFile(historyPath, JSON.stringify(data.currentReport, null, 2));
+    await fs.writeFile(
+      historyPath,
+      JSON.stringify(data.currentReport, null, 2)
+    );
   }
 
   private generateAlertId(message: string): string {
@@ -301,7 +321,7 @@ React 19 Compatibility: ${currentReport.metrics.react19Compatibility.compatibili
 
   private createHTMLTemplate(data: DashboardData): string {
     const { currentReport, trends, summary, alerts } = data;
-    
+
     return `
 <!DOCTYPE html>
 <html lang="en">
@@ -371,17 +391,25 @@ React 19 Compatibility: ${currentReport.metrics.react19Compatibility.compatibili
             </div>
         </div>
 
-        ${alerts.length > 0 ? `
+        ${
+          alerts.length > 0
+            ? `
         <div class="alerts">
             <h2>Active Alerts</h2>
-            ${alerts.map(alert => `
+            ${alerts
+              .map(
+                (alert) => `
                 <div class="alert ${alert.level}">
                     <strong>${alert.level}:</strong> ${alert.message}
                     <div class="timestamp">${new Date(alert.timestamp).toLocaleString()}</div>
                 </div>
-            `).join('')}
+            `
+              )
+              .join('')}
         </div>
-        ` : ''}
+        `
+            : ''
+        }
 
         <div class="charts">
             <div class="chart-container">
@@ -401,10 +429,10 @@ React 19 Compatibility: ${currentReport.metrics.react19Compatibility.compatibili
         new Chart(healthCtx, {
             type: 'line',
             data: {
-                labels: ${JSON.stringify(trends.healthScore.map(d => new Date(d.timestamp).toLocaleTimeString()))},
+                labels: ${JSON.stringify(trends.healthScore.map((d) => new Date(d.timestamp).toLocaleTimeString()))},
                 datasets: [{
                     label: 'Health Score',
-                    data: ${JSON.stringify(trends.healthScore.map(d => d.score))},
+                    data: ${JSON.stringify(trends.healthScore.map((d) => d.score))},
                     borderColor: '#3b82f6',
                     backgroundColor: 'rgba(59, 130, 246, 0.1)',
                     tension: 0.4
@@ -423,10 +451,10 @@ React 19 Compatibility: ${currentReport.metrics.react19Compatibility.compatibili
         new Chart(performanceCtx, {
             type: 'line',
             data: {
-                labels: ${JSON.stringify(trends.performance.map(d => new Date(d.timestamp).toLocaleTimeString()))},
+                labels: ${JSON.stringify(trends.performance.map((d) => new Date(d.timestamp).toLocaleTimeString()))},
                 datasets: [{
                     label: 'Execution Time (ms)',
-                    data: ${JSON.stringify(trends.performance.map(d => d.duration))},
+                    data: ${JSON.stringify(trends.performance.map((d) => d.duration))},
                     borderColor: '#10b981',
                     backgroundColor: 'rgba(16, 185, 129, 0.1)',
                     tension: 0.4

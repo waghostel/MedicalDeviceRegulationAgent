@@ -7,7 +7,10 @@ import { apiClient, ApiResponse } from '@/lib/api-client';
 import { DeviceClassification, PredicateDevice } from '@/types/dashboard';
 
 export class DashboardService {
-  private cache = new Map<string, { data: any; timestamp: number; ttl: number }>();
+  private cache = new Map<
+    string,
+    { data: any; timestamp: number; ttl: number }
+  >();
   private readonly CACHE_TTL = 2 * 60 * 1000; // 2 minutes for dashboard data
 
   /**
@@ -25,7 +28,11 @@ export class DashboardService {
   /**
    * Set data in cache
    */
-  private setCache<T>(key: string, data: T, ttl: number = this.CACHE_TTL): void {
+  private setCache<T>(
+    key: string,
+    data: T,
+    ttl: number = this.CACHE_TTL
+  ): void {
     this.cache.set(key, {
       data,
       timestamp: Date.now(),
@@ -36,9 +43,11 @@ export class DashboardService {
   /**
    * Get device classification for a project
    */
-  async getClassification(projectId: number): Promise<DeviceClassification | null> {
+  async getClassification(
+    projectId: number
+  ): Promise<DeviceClassification | null> {
     const cacheKey = `classification-${projectId}`;
-    
+
     // Check cache first
     const cached = this.getCached<DeviceClassification>(cacheKey);
     if (cached) {
@@ -46,11 +55,13 @@ export class DashboardService {
     }
 
     try {
-      const response = await apiClient.get<DeviceClassification>(`/api/projects/${projectId}/classification`);
-      
+      const response = await apiClient.get<DeviceClassification>(
+        `/api/projects/${projectId}/classification`
+      );
+
       // Cache the result
       this.setCache(cacheKey, response.data);
-      
+
       return response.data;
     } catch (error: any) {
       // Return null if classification doesn't exist yet (404)
@@ -66,7 +77,7 @@ export class DashboardService {
    */
   async getPredicateDevices(projectId: number): Promise<PredicateDevice[]> {
     const cacheKey = `predicates-${projectId}`;
-    
+
     // Check cache first
     const cached = this.getCached<PredicateDevice[]>(cacheKey);
     if (cached) {
@@ -74,11 +85,13 @@ export class DashboardService {
     }
 
     try {
-      const response = await apiClient.get<PredicateDevice[]>(`/api/projects/${projectId}/predicates`);
-      
+      const response = await apiClient.get<PredicateDevice[]>(
+        `/api/projects/${projectId}/predicates`
+      );
+
       // Cache the result
       this.setCache(cacheKey, response.data);
-      
+
       return response.data;
     } catch (error: any) {
       // Return empty array if no predicates exist yet (404)
@@ -92,28 +105,32 @@ export class DashboardService {
   /**
    * Start device classification analysis
    */
-  async startClassification(projectId: number): Promise<{ message: string; taskId?: string }> {
+  async startClassification(
+    projectId: number
+  ): Promise<{ message: string; taskId?: string }> {
     const response = await apiClient.post<{ message: string; taskId?: string }>(
       `/api/projects/${projectId}/classification/start`
     );
-    
+
     // Invalidate cache
     this.cache.delete(`classification-${projectId}`);
-    
+
     return response.data;
   }
 
   /**
    * Start predicate search
    */
-  async startPredicateSearch(projectId: number): Promise<{ message: string; taskId?: string }> {
+  async startPredicateSearch(
+    projectId: number
+  ): Promise<{ message: string; taskId?: string }> {
     const response = await apiClient.post<{ message: string; taskId?: string }>(
       `/api/projects/${projectId}/predicates/search`
     );
-    
+
     // Invalidate cache
     this.cache.delete(`predicates-${projectId}`);
-    
+
     return response.data;
   }
 
@@ -121,18 +138,18 @@ export class DashboardService {
    * Update predicate selection status
    */
   async updatePredicateSelection(
-    projectId: number, 
-    predicateId: string, 
+    projectId: number,
+    predicateId: string,
     isSelected: boolean
   ): Promise<PredicateDevice> {
     const response = await apiClient.patch<PredicateDevice>(
       `/api/projects/${projectId}/predicates/${predicateId}`,
       { is_selected: isSelected }
     );
-    
+
     // Invalidate cache
     this.cache.delete(`predicates-${projectId}`);
-    
+
     return response.data;
   }
 

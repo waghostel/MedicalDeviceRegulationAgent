@@ -18,13 +18,13 @@ const requiredFiles = [
   'src/components/dashboard/regulatory-dashboard.tsx',
   'src/components/dashboard/index.ts',
   'src/hooks/use-dashboard.ts',
-  'backend/services/projects.py'
+  'backend/services/projects.py',
 ];
 
 let allFilesExist = true;
 
 console.log('📁 Checking required files:');
-requiredFiles.forEach(file => {
+requiredFiles.forEach((file) => {
   const filePath = path.join(process.cwd(), file);
   const exists = fs.existsSync(filePath);
   console.log(`  ${exists ? '✅' : '❌'} ${file}`);
@@ -40,18 +40,18 @@ if (!allFilesExist) {
 console.log('\n🔧 Checking dashboard types...');
 try {
   const dashboardTypes = fs.readFileSync('src/types/dashboard.ts', 'utf8');
-  
+
   const requiredTypes = [
     'DeviceClassification',
     'PredicateDevice',
     'ProjectProgress',
     'DashboardData',
     'ActivityItem',
-    'DashboardStatistics'
+    'DashboardStatistics',
   ];
-  
+
   let typesFound = 0;
-  requiredTypes.forEach(type => {
+  requiredTypes.forEach((type) => {
     if (dashboardTypes.includes(`interface ${type}`)) {
       console.log(`  ✅ ${type} interface found`);
       typesFound++;
@@ -59,7 +59,7 @@ try {
       console.log(`  ❌ ${type} interface missing`);
     }
   });
-  
+
   console.log(`  📊 Types found: ${typesFound}/${requiredTypes.length}`);
 } catch (error) {
   console.log(`  ❌ Error reading dashboard types: ${error.message}`);
@@ -69,17 +69,17 @@ try {
 console.log('\n🎨 Checking dashboard components...');
 const components = [
   'ClassificationWidget',
-  'PredicateWidget', 
+  'PredicateWidget',
   'ProgressWidget',
   'ActivityWidget',
-  'RegulatoryDashboard'
+  'RegulatoryDashboard',
 ];
 
-components.forEach(component => {
+components.forEach((component) => {
   try {
     const componentFile = `src/components/dashboard/${component.toLowerCase().replace('widget', '-widget').replace('regulatory', 'regulatory-')}.tsx`;
     const content = fs.readFileSync(componentFile, 'utf8');
-    
+
     if (content.includes(`export function ${component}`)) {
       console.log(`  ✅ ${component} component implemented`);
     } else {
@@ -94,18 +94,18 @@ components.forEach(component => {
 console.log('\n🪝 Checking dashboard hook...');
 try {
   const hookContent = fs.readFileSync('src/hooks/use-dashboard.ts', 'utf8');
-  
+
   const hookFeatures = [
     'loadDashboardData',
     'refreshDashboard',
     'exportDashboard',
     'startClassification',
     'searchPredicates',
-    'selectPredicate'
+    'selectPredicate',
   ];
-  
+
   let featuresFound = 0;
-  hookFeatures.forEach(feature => {
+  hookFeatures.forEach((feature) => {
     if (hookContent.includes(feature)) {
       console.log(`  ✅ ${feature} function found`);
       featuresFound++;
@@ -113,7 +113,7 @@ try {
       console.log(`  ❌ ${feature} function missing`);
     }
   });
-  
+
   console.log(`  📊 Hook features: ${featuresFound}/${hookFeatures.length}`);
 } catch (error) {
   console.log(`  ❌ Error reading dashboard hook: ${error.message}`);
@@ -122,8 +122,11 @@ try {
 // Check backend enhancements
 console.log('\n🔧 Checking backend enhancements...');
 try {
-  const projectsService = fs.readFileSync('backend/services/projects.py', 'utf8');
-  
+  const projectsService = fs.readFileSync(
+    'backend/services/projects.py',
+    'utf8'
+  );
+
   const backendFeatures = [
     '_calculate_project_progress',
     '_map_agent_action_to_activity_type',
@@ -132,11 +135,11 @@ try {
     'predicate_devices',
     'progress',
     'recent_activity',
-    'statistics'
+    'statistics',
   ];
-  
+
   let backendFeaturesFound = 0;
-  backendFeatures.forEach(feature => {
+  backendFeatures.forEach((feature) => {
     if (projectsService.includes(feature)) {
       console.log(`  ✅ ${feature} found in backend`);
       backendFeaturesFound++;
@@ -144,8 +147,10 @@ try {
       console.log(`  ❌ ${feature} missing in backend`);
     }
   });
-  
-  console.log(`  📊 Backend features: ${backendFeaturesFound}/${backendFeatures.length}`);
+
+  console.log(
+    `  📊 Backend features: ${backendFeaturesFound}/${backendFeatures.length}`
+  );
 } catch (error) {
   console.log(`  ❌ Error reading backend service: ${error.message}`);
 }
@@ -154,15 +159,15 @@ try {
 console.log('\n🔌 Checking WebSocket enhancements...');
 try {
   const websocketFile = fs.readFileSync('backend/api/websocket.py', 'utf8');
-  
+
   const websocketFeatures = [
     'notify_dashboard_update',
     'notify_progress_updated',
-    'notify_activity_added'
+    'notify_activity_added',
   ];
-  
+
   let websocketFeaturesFound = 0;
-  websocketFeatures.forEach(feature => {
+  websocketFeatures.forEach((feature) => {
     if (websocketFile.includes(feature)) {
       console.log(`  ✅ ${feature} found`);
       websocketFeaturesFound++;
@@ -170,8 +175,10 @@ try {
       console.log(`  ❌ ${feature} missing`);
     }
   });
-  
-  console.log(`  📊 WebSocket features: ${websocketFeaturesFound}/${websocketFeatures.length}`);
+
+  console.log(
+    `  📊 WebSocket features: ${websocketFeaturesFound}/${websocketFeatures.length}`
+  );
 } catch (error) {
   console.log(`  ❌ Error reading WebSocket file: ${error.message}`);
 }
@@ -179,18 +186,21 @@ try {
 // Check project detail page integration
 console.log('\n📄 Checking project detail page integration...');
 try {
-  const projectDetailPage = fs.readFileSync('src/app/projects/[id]/page.tsx', 'utf8');
-  
+  const projectDetailPage = fs.readFileSync(
+    'src/app/projects/[id]/page.tsx',
+    'utf8'
+  );
+
   const integrationFeatures = [
     'useDashboard',
     'RegulatoryDashboard',
     'dashboardData',
     'refreshDashboard',
-    'exportDashboard'
+    'exportDashboard',
   ];
-  
+
   let integrationFeaturesFound = 0;
-  integrationFeatures.forEach(feature => {
+  integrationFeatures.forEach((feature) => {
     if (projectDetailPage.includes(feature)) {
       console.log(`  ✅ ${feature} integrated`);
       integrationFeaturesFound++;
@@ -198,8 +208,10 @@ try {
       console.log(`  ❌ ${feature} not integrated`);
     }
   });
-  
-  console.log(`  📊 Integration features: ${integrationFeaturesFound}/${integrationFeatures.length}`);
+
+  console.log(
+    `  📊 Integration features: ${integrationFeaturesFound}/${integrationFeatures.length}`
+  );
 } catch (error) {
   console.log(`  ❌ Error reading project detail page: ${error.message}`);
 }
@@ -218,7 +230,9 @@ console.log('\n🎉 Dashboard Integration Implementation Complete!');
 
 console.log('\n📝 Key Features Implemented:');
 console.log('  • Real-time dashboard updates via WebSocket');
-console.log('  • Comprehensive dashboard widgets (Classification, Predicates, Progress, Activity)');
+console.log(
+  '  • Comprehensive dashboard widgets (Classification, Predicates, Progress, Activity)'
+);
 console.log('  • Dashboard data aggregation and caching');
 console.log('  • Dashboard export functionality');
 console.log('  • Widget refresh and customization');
@@ -226,7 +240,9 @@ console.log('  • Integration with existing project management');
 console.log('  • Responsive dashboard layout with tabs');
 
 console.log('\n🚀 Next Steps:');
-console.log('  1. Start the backend server: cd backend && poetry run uvicorn main:app --reload');
+console.log(
+  '  1. Start the backend server: cd backend && poetry run uvicorn main:app --reload'
+);
 console.log('  2. Start the frontend: pnpm dev');
 console.log('  3. Navigate to a project to see the new dashboard');
 console.log('  4. Test real-time updates by triggering agent actions');

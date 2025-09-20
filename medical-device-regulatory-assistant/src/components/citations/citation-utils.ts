@@ -5,7 +5,10 @@ export type CitationFormat = 'APA' | 'MLA';
 /**
  * Format a source citation according to the specified format
  */
-export function formatCitation(citation: SourceCitation, format: CitationFormat): string {
+export function formatCitation(
+  citation: SourceCitation,
+  format: CitationFormat
+): string {
   switch (format) {
     case 'APA':
       return formatAPACitation(citation);
@@ -21,20 +24,20 @@ export function formatCitation(citation: SourceCitation, format: CitationFormat)
  */
 function formatAPACitation(citation: SourceCitation): string {
   const { title, effectiveDate, url, documentType, accessedDate } = citation;
-  
+
   switch (documentType) {
     case 'FDA_510K':
       return `U.S. Food and Drug Administration. (${formatDate(effectiveDate)}). ${title}. Retrieved ${formatDate(accessedDate)}, from ${url}`;
-    
+
     case 'FDA_GUIDANCE':
       return `U.S. Food and Drug Administration. (${formatDate(effectiveDate)}). ${title} [Guidance document]. Retrieved ${formatDate(accessedDate)}, from ${url}`;
-    
+
     case 'CFR_SECTION':
       return `${title}, 21 C.F.R. (${formatDate(effectiveDate)}). Retrieved ${formatDate(accessedDate)}, from ${url}`;
-    
+
     case 'FDA_DATABASE':
       return `U.S. Food and Drug Administration. (${formatDate(effectiveDate)}). ${title} [Database]. Retrieved ${formatDate(accessedDate)}, from ${url}`;
-    
+
     default:
       return `${title}. (${formatDate(effectiveDate)}). Retrieved ${formatDate(accessedDate)}, from ${url}`;
   }
@@ -45,20 +48,20 @@ function formatAPACitation(citation: SourceCitation): string {
  */
 function formatMLACitation(citation: SourceCitation): string {
   const { title, effectiveDate, url, documentType, accessedDate } = citation;
-  
+
   switch (documentType) {
     case 'FDA_510K':
       return `U.S. Food and Drug Administration. "${title}." FDA, ${formatDateMLA(effectiveDate)}, ${url}. Accessed ${formatDateMLA(accessedDate)}.`;
-    
+
     case 'FDA_GUIDANCE':
       return `U.S. Food and Drug Administration. "${title}." FDA Guidance Document, ${formatDateMLA(effectiveDate)}, ${url}. Accessed ${formatDateMLA(accessedDate)}.`;
-    
+
     case 'CFR_SECTION':
       return `"${title}." Code of Federal Regulations, Title 21, ${formatDateMLA(effectiveDate)}, ${url}. Accessed ${formatDateMLA(accessedDate)}.`;
-    
+
     case 'FDA_DATABASE':
       return `U.S. Food and Drug Administration. "${title}." FDA Database, ${formatDateMLA(effectiveDate)}, ${url}. Accessed ${formatDateMLA(accessedDate)}.`;
-    
+
     default:
       return `"${title}." ${formatDateMLA(effectiveDate)}, ${url}. Accessed ${formatDateMLA(accessedDate)}.`;
   }
@@ -73,7 +76,7 @@ function formatDate(dateString: string): string {
     return date.toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'long',
-      day: 'numeric'
+      day: 'numeric',
     });
   } catch {
     return dateString;
@@ -117,36 +120,36 @@ export function validateCitation(citation: SourceCitation): {
   errors: string[];
 } {
   const errors: string[] = [];
-  
+
   if (!citation.title?.trim()) {
     errors.push('Title is required');
   }
-  
+
   if (!citation.url?.trim()) {
     errors.push('URL is required');
   } else if (!isValidUrl(citation.url)) {
     errors.push('URL format is invalid');
   }
-  
+
   if (!citation.effectiveDate?.trim()) {
     errors.push('Effective date is required');
   } else if (!isValidDate(citation.effectiveDate)) {
     errors.push('Effective date format is invalid');
   }
-  
+
   if (!citation.accessedDate?.trim()) {
     errors.push('Accessed date is required');
   } else if (!isValidDate(citation.accessedDate)) {
     errors.push('Accessed date format is invalid');
   }
-  
+
   if (!citation.documentType) {
     errors.push('Document type is required');
   }
-  
+
   return {
     isValid: errors.length === 0,
-    errors
+    errors,
   };
 }
 
@@ -173,7 +176,9 @@ function isValidDate(dateString: string): boolean {
 /**
  * Get document type display name
  */
-export function getDocumentTypeDisplayName(documentType: SourceCitation['documentType']): string {
+export function getDocumentTypeDisplayName(
+  documentType: SourceCitation['documentType']
+): string {
   switch (documentType) {
     case 'FDA_510K':
       return 'FDA 510(k)';
@@ -191,7 +196,9 @@ export function getDocumentTypeDisplayName(documentType: SourceCitation['documen
 /**
  * Get document type icon
  */
-export function getDocumentTypeIcon(documentType: SourceCitation['documentType']): string {
+export function getDocumentTypeIcon(
+  documentType: SourceCitation['documentType']
+): string {
   switch (documentType) {
     case 'FDA_510K':
       return '📋';

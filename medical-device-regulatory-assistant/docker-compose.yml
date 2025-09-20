@@ -7,7 +7,7 @@ services:
       context: .
       dockerfile: Dockerfile.frontend
     ports:
-      - "3000:3000"
+      - '3000:3000'
     environment:
       - NODE_ENV=production
       - NEXTAUTH_URL=http://localhost:3000
@@ -21,7 +21,7 @@ services:
       - app-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      test: ['CMD', 'curl', '-f', 'http://localhost:3000/api/health']
       interval: 30s
       timeout: 10s
       retries: 3
@@ -33,7 +33,7 @@ services:
       context: .
       dockerfile: Dockerfile.backend
     ports:
-      - "8000:8000"
+      - '8000:8000'
     environment:
       - ENVIRONMENT=production
       - DATABASE_URL=sqlite:///app/data/medical_device_assistant.db
@@ -51,7 +51,7 @@ services:
       - app-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      test: ['CMD', 'curl', '-f', 'http://localhost:8000/health']
       interval: 30s
       timeout: 10s
       retries: 3
@@ -61,14 +61,14 @@ services:
   redis:
     image: redis:7-alpine
     ports:
-      - "6379:6379"
+      - '6379:6379'
     volumes:
       - redis_data:/data
     networks:
       - app-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ['CMD', 'redis-cli', 'ping']
       interval: 30s
       timeout: 10s
       retries: 3
@@ -78,7 +78,7 @@ services:
   postgres:
     image: postgres:15-alpine
     ports:
-      - "5432:5432"
+      - '5432:5432'
     environment:
       - POSTGRES_DB=medical_device_assistant
       - POSTGRES_USER=${POSTGRES_USER:-postgres}
@@ -90,7 +90,7 @@ services:
       - app-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-postgres}']
       interval: 30s
       timeout: 10s
       retries: 3
@@ -99,7 +99,7 @@ services:
   prometheus:
     image: prom/prometheus:latest
     ports:
-      - "9090:9090"
+      - '9090:9090'
     volumes:
       - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
       - prometheus_data:/prometheus
@@ -118,7 +118,7 @@ services:
   grafana:
     image: grafana/grafana:latest
     ports:
-      - "3001:3000"
+      - '3001:3000'
     environment:
       - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin}
     volumes:
@@ -133,7 +133,7 @@ services:
   loki:
     image: grafana/loki:latest
     ports:
-      - "3100:3100"
+      - '3100:3100'
     volumes:
       - ./monitoring/loki-config.yml:/etc/loki/local-config.yaml
       - loki_data:/loki

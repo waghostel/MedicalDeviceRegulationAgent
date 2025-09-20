@@ -37,7 +37,7 @@
       "intended_use": "Test predicate for automated testing",
       "product_code": "ABC",
       "clearance_date": "2023-01-01",
-      "confidence_score": 0.80,
+      "confidence_score": 0.8,
       "is_selected": true,
       "comparison_data": {
         "similarities": ["Test similarity"],

@@ -79,7 +79,8 @@ describe('useAutoSave', () => {
   it('uses custom delay when provided', async () => {
     const mockOnSave = jest.fn().mockResolvedValue(undefined);
     const { rerender } = renderHook(
-      ({ content }) => useAutoSave(content, { onSave: mockOnSave, delay: 5000 }),
+      ({ content }) =>
+        useAutoSave(content, { onSave: mockOnSave, delay: 5000 }),
       { initialProps: { content: 'initial' } }
     );
 
@@ -106,7 +107,8 @@ describe('useAutoSave', () => {
   it('does not save when disabled', () => {
     const mockOnSave = jest.fn().mockResolvedValue(undefined);
     const { rerender } = renderHook(
-      ({ content }) => useAutoSave(content, { onSave: mockOnSave, enabled: false }),
+      ({ content }) =>
+        useAutoSave(content, { onSave: mockOnSave, enabled: false }),
       { initialProps: { content: 'initial' } }
     );
 
@@ -162,7 +164,7 @@ describe('useAutoSave', () => {
   it('handles save errors gracefully', async () => {
     const mockOnSave = jest.fn().mockRejectedValue(new Error('Save failed'));
     const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
-    
+
     const { rerender } = renderHook(
       ({ content }) => useAutoSave(content, { onSave: mockOnSave }),
       { initialProps: { content: 'initial' } }
@@ -178,8 +180,11 @@ describe('useAutoSave', () => {
       await Promise.resolve();
     });
 
-    expect(consoleSpy).toHaveBeenCalledWith('Auto-save failed:', expect.any(Error));
-    
+    expect(consoleSpy).toHaveBeenCalledWith(
+      'Auto-save failed:',
+      expect.any(Error)
+    );
+
     consoleSpy.mockRestore();
   });
 
@@ -189,7 +194,8 @@ describe('useAutoSave', () => {
       resolveFirstSave = resolve;
     });
 
-    const mockOnSave = jest.fn()
+    const mockOnSave = jest
+      .fn()
       .mockReturnValueOnce(firstSavePromise)
       .mockResolvedValue(undefined);
 

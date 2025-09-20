@@ -1,14 +1,17 @@
 /**
  * Component Mock Registry Setup
- * 
+ *
  * Integrates ComponentMockRegistry with existing enhanced form component mocks
  * and provides automatic loading and validation capabilities.
- * 
+ *
  * Requirements: 2.4, 4.4
  */
 
-import { ComponentMockRegistry, getDefaultComponentRegistry } from './ComponentMockRegistry';
-import { 
+import {
+  ComponentMockRegistry,
+  getDefaultComponentRegistry,
+} from './ComponentMockRegistry';
+import {
   componentMocks,
   registerEnhancedFormComponentMocks,
   setupEnhancedFormComponentMocks,
@@ -61,17 +64,41 @@ export function registerEnhancedFormComponentsWithRegistry(
       componentType: 'form',
       dependencies: [],
       compatibleVersions: ['19.1.0'],
-      description: 'Enhanced input component with validation, accessibility, and real-time feedback',
+      description:
+        'Enhanced input component with validation, accessibility, and real-time feedback',
       tags: ['form', 'input', 'enhanced', 'validation', 'accessibility'],
       requiredProps: ['name', 'label'],
       optionalProps: [
-        'type', 'placeholder', 'description', 'required', 'error', 'value',
-        'onChange', 'onBlur', 'onFocus', 'disabled', 'className', 'maxLength',
-        'showCharacterCount', 'validation', 'autoComplete', 'autoFocus'
+        'type',
+        'placeholder',
+        'description',
+        'required',
+        'error',
+        'value',
+        'onChange',
+        'onBlur',
+        'onFocus',
+        'disabled',
+        'className',
+        'maxLength',
+        'showCharacterCount',
+        'validation',
+        'autoComplete',
+        'autoFocus',
       ],
-      testAttributes: ['data-testid', 'data-error', 'data-valid', 'data-validating', 'data-touched'],
+      testAttributes: [
+        'data-testid',
+        'data-error',
+        'data-valid',
+        'data-validating',
+        'data-touched',
+      ],
       accessibilityFeatures: [
-        'aria-invalid', 'aria-required', 'aria-describedby', 'role', 'htmlFor'
+        'aria-invalid',
+        'aria-required',
+        'aria-describedby',
+        'role',
+        'htmlFor',
       ],
       variants: ['text', 'email', 'password', 'tel', 'url', 'search'],
       states: ['valid', 'invalid', 'validating', 'touched', 'disabled'],
@@ -99,19 +126,51 @@ export function registerEnhancedFormComponentsWithRegistry(
       componentType: 'form',
       dependencies: [],
       compatibleVersions: ['19.1.0'],
-      description: 'Enhanced textarea component with validation, accessibility, and character counting',
+      description:
+        'Enhanced textarea component with validation, accessibility, and character counting',
       tags: ['form', 'textarea', 'enhanced', 'validation', 'accessibility'],
       requiredProps: ['name', 'label'],
       optionalProps: [
-        'placeholder', 'description', 'required', 'error', 'value',
-        'onChange', 'onBlur', 'onFocus', 'disabled', 'className', 'rows',
-        'maxLength', 'showCharacterCount', 'validation', 'resize', 'autoFocus'
+        'placeholder',
+        'description',
+        'required',
+        'error',
+        'value',
+        'onChange',
+        'onBlur',
+        'onFocus',
+        'disabled',
+        'className',
+        'rows',
+        'maxLength',
+        'showCharacterCount',
+        'validation',
+        'resize',
+        'autoFocus',
       ],
-      testAttributes: ['data-testid', 'data-error', 'data-valid', 'data-validating', 'data-touched', 'data-resize'],
+      testAttributes: [
+        'data-testid',
+        'data-error',
+        'data-valid',
+        'data-validating',
+        'data-touched',
+        'data-resize',
+      ],
       accessibilityFeatures: [
-        'aria-invalid', 'aria-required', 'aria-describedby', 'role', 'htmlFor'
+        'aria-invalid',
+        'aria-required',
+        'aria-describedby',
+        'role',
+        'htmlFor',
       ],
-      states: ['valid', 'invalid', 'validating', 'touched', 'disabled', 'resizable'],
+      states: [
+        'valid',
+        'invalid',
+        'validating',
+        'touched',
+        'disabled',
+        'resizable',
+      ],
     },
     {
       enabled: true,
@@ -136,11 +195,17 @@ export function registerEnhancedFormComponentsWithRegistry(
       componentType: 'feedback',
       dependencies: [],
       compatibleVersions: ['19.1.0'],
-      description: 'Auto-save status indicator with saving state and last saved time display',
+      description:
+        'Auto-save status indicator with saving state and last saved time display',
       tags: ['form', 'autosave', 'indicator', 'status', 'feedback'],
       requiredProps: ['isSaving'],
       optionalProps: ['lastSaved', 'className', 'data-testid'],
-      testAttributes: ['data-testid', 'data-saving', 'data-status', 'data-last-saved'],
+      testAttributes: [
+        'data-testid',
+        'data-saving',
+        'data-status',
+        'data-last-saved',
+      ],
       accessibilityFeatures: ['role', 'aria-live', 'aria-hidden'],
       states: ['saving', 'saved', 'idle'],
     },
@@ -167,12 +232,24 @@ export function registerEnhancedFormComponentsWithRegistry(
       componentType: 'feedback',
       dependencies: [],
       compatibleVersions: ['19.1.0'],
-      description: 'Form submission progress indicator with progress bar and step information',
+      description:
+        'Form submission progress indicator with progress bar and step information',
       tags: ['form', 'progress', 'submission', 'status', 'feedback'],
       requiredProps: ['progress', 'currentStep'],
       optionalProps: ['totalSteps', 'className', 'data-testid'],
-      testAttributes: ['data-testid', 'data-progress', 'data-current-step', 'data-total-steps'],
-      accessibilityFeatures: ['role', 'aria-valuenow', 'aria-valuemin', 'aria-valuemax', 'aria-label'],
+      testAttributes: [
+        'data-testid',
+        'data-progress',
+        'data-current-step',
+        'data-total-steps',
+      ],
+      accessibilityFeatures: [
+        'role',
+        'aria-valuenow',
+        'aria-valuemin',
+        'aria-valuemax',
+        'aria-label',
+      ],
       states: ['in-progress', 'completed', 'error'],
     },
     {
@@ -198,16 +275,36 @@ export function registerEnhancedFormComponentsWithRegistry(
       componentType: 'ui',
       dependencies: [],
       compatibleVersions: ['19.1.0'],
-      description: 'Enhanced button component with variants, loading states, and accessibility features',
+      description:
+        'Enhanced button component with variants, loading states, and accessibility features',
       tags: ['button', 'enhanced', 'loading', 'variants', 'ui'],
       requiredProps: ['children'],
       optionalProps: [
-        'type', 'variant', 'size', 'disabled', 'loading', 'onClick',
-        'className', 'data-testid'
+        'type',
+        'variant',
+        'size',
+        'disabled',
+        'loading',
+        'onClick',
+        'className',
+        'data-testid',
       ],
-      testAttributes: ['data-testid', 'data-variant', 'data-size', 'data-loading', 'data-disabled'],
+      testAttributes: [
+        'data-testid',
+        'data-variant',
+        'data-size',
+        'data-loading',
+        'data-disabled',
+      ],
       accessibilityFeatures: ['aria-disabled', 'aria-busy', 'aria-hidden'],
-      variants: ['default', 'destructive', 'outline', 'secondary', 'ghost', 'link'],
+      variants: [
+        'default',
+        'destructive',
+        'outline',
+        'secondary',
+        'ghost',
+        'link',
+      ],
       states: ['default', 'disabled', 'loading', 'pressed'],
     },
     {
@@ -222,7 +319,9 @@ export function registerEnhancedFormComponentsWithRegistry(
     }
   );
 
-  console.log('[ComponentMockRegistry] All enhanced form components registered successfully');
+  console.log(
+    '[ComponentMockRegistry] All enhanced form components registered successfully'
+  );
 }
 
 /**
@@ -243,13 +342,19 @@ export function initializeComponentMockSystem(): {
 
   // Validate all registered components
   const validationResults = componentRegistry.validateAllComponents();
-  const invalidComponents = validationResults.filter(result => !result.isValid);
+  const invalidComponents = validationResults.filter(
+    (result) => !result.isValid
+  );
 
   if (invalidComponents.length > 0) {
-    console.warn('[ComponentMockRegistry] Some components failed validation:', 
-      invalidComponents.map(r => r.componentName));
+    console.warn(
+      '[ComponentMockRegistry] Some components failed validation:',
+      invalidComponents.map((r) => r.componentName)
+    );
   } else {
-    console.log('[ComponentMockRegistry] All components validated successfully');
+    console.log(
+      '[ComponentMockRegistry] All components validated successfully'
+    );
   }
 
   return {
@@ -287,13 +392,17 @@ export async function testAllRegisteredComponents(): Promise<{
 
   const summary = {
     totalComponents: results.length,
-    totalTests: results.reduce((sum, r) => sum + r.testsPassed + r.testsFailed + r.testsSkipped, 0),
+    totalTests: results.reduce(
+      (sum, r) => sum + r.testsPassed + r.testsFailed + r.testsSkipped,
+      0
+    ),
     totalPassed: results.reduce((sum, r) => sum + r.testsPassed, 0),
     totalFailed: results.reduce((sum, r) => sum + r.testsFailed, 0),
     totalSkipped: results.reduce((sum, r) => sum + r.testsSkipped, 0),
-    averageCoverage: results.length > 0 
-      ? results.reduce((sum, r) => sum + r.coverage, 0) / results.length 
-      : 0,
+    averageCoverage:
+      results.length > 0
+        ? results.reduce((sum, r) => sum + r.coverage, 0) / results.length
+        : 0,
     totalDuration: results.reduce((sum, r) => sum + r.duration, 0),
   };
 
@@ -315,44 +424,59 @@ export function generateComponentMockReport(): {
 } {
   const componentRegistry = getDefaultComponentRegistry();
   const stats = componentRegistry.getStats();
-  
+
   // Get validation results
   const validationResults = componentRegistry.validateAllComponents();
-  const validComponents = validationResults.filter(r => r.isValid);
-  const invalidComponents = validationResults.filter(r => !r.isValid);
-  
+  const validComponents = validationResults.filter((r) => r.isValid);
+  const invalidComponents = validationResults.filter((r) => !r.isValid);
+
   // Analyze common issues
-  const allErrors = invalidComponents.flatMap(r => r.errors);
-  const errorCounts = allErrors.reduce((acc, error) => {
-    acc[error.type] = (acc[error.type] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
-  
+  const allErrors = invalidComponents.flatMap((r) => r.errors);
+  const errorCounts = allErrors.reduce(
+    (acc, error) => {
+      acc[error.type] = (acc[error.type] || 0) + 1;
+      return acc;
+    },
+    {} as Record<string, number>
+  );
+
   const commonIssues = Object.entries(errorCounts)
-    .sort(([,a], [,b]) => b - a)
+    .sort(([, a], [, b]) => b - a)
     .slice(0, 5)
     .map(([type, count]) => `${type} (${count} occurrences)`);
 
   // Generate recommendations
   const recommendations: string[] = [];
-  
+
   if (stats.averageCoverage < 80) {
-    recommendations.push('Improve test coverage for component mocks (current: ' + 
-      stats.averageCoverage.toFixed(1) + '%)');
+    recommendations.push(
+      'Improve test coverage for component mocks (current: ' +
+        stats.averageCoverage.toFixed(1) +
+        '%)'
+    );
   }
-  
+
   if (invalidComponents.length > 0) {
-    recommendations.push(`Fix validation issues in ${invalidComponents.length} components`);
+    recommendations.push(
+      `Fix validation issues in ${invalidComponents.length} components`
+    );
   }
-  
-  if (stats.componentsByType.form && stats.componentsByType.form > stats.componentsByType.ui) {
-    recommendations.push('Consider adding more UI component mocks for better coverage');
+
+  if (
+    stats.componentsByType.form &&
+    stats.componentsByType.form > stats.componentsByType.ui
+  ) {
+    recommendations.push(
+      'Consider adding more UI component mocks for better coverage'
+    );
   }
-  
+
   if (commonIssues.includes('testAttributes')) {
-    recommendations.push('Add missing test attributes (data-testid) to components');
+    recommendations.push(
+      'Add missing test attributes (data-testid) to components'
+    );
   }
-  
+
   if (commonIssues.includes('accessibility')) {
     recommendations.push('Improve accessibility features in component mocks');
   }
@@ -380,7 +504,9 @@ export function cleanupComponentMockSystem(): void {
   // Cleanup legacy enhanced form component mocks
   cleanupEnhancedFormComponentMocks();
 
-  console.log('[ComponentMockRegistry] Component mock system cleanup completed');
+  console.log(
+    '[ComponentMockRegistry] Component mock system cleanup completed'
+  );
 }
 
 /**
@@ -410,7 +536,9 @@ function autoSetup(): void {
   if (typeof jest !== 'undefined' && process.env.NODE_ENV === 'test') {
     try {
       initializeComponentMockSystem();
-      console.log('[ComponentMockRegistry] Auto-setup completed for Jest environment');
+      console.log(
+        '[ComponentMockRegistry] Auto-setup completed for Jest environment'
+      );
     } catch (error) {
       console.warn('[ComponentMockRegistry] Auto-setup failed:', error);
     }

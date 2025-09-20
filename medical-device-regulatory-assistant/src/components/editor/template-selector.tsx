@@ -4,7 +4,13 @@ import React, { useState } from 'react';
 import { DocumentTemplate, TemplatePlaceholder } from '@/types/document';
 import { documentTemplates, renderTemplate } from '@/lib/document-templates';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import {
   Dialog,
   DialogContent,
@@ -31,21 +37,26 @@ interface TemplateSelectorProps {
   onSelectTemplate: (content: string, templateName: string) => void;
 }
 
-export function TemplateSelector({ isOpen, onClose, onSelectTemplate }: TemplateSelectorProps) {
-  const [selectedTemplate, setSelectedTemplate] = useState<DocumentTemplate | null>(null);
+export function TemplateSelector({
+  isOpen,
+  onClose,
+  onSelectTemplate,
+}: TemplateSelectorProps) {
+  const [selectedTemplate, setSelectedTemplate] =
+    useState<DocumentTemplate | null>(null);
   const [formValues, setFormValues] = useState<Record<string, string>>({});
   const [step, setStep] = useState<'select' | 'configure'>('select');
 
   const handleTemplateSelect = (template: DocumentTemplate) => {
     setSelectedTemplate(template);
-    
+
     // Initialize form values with default values
     const initialValues: Record<string, string> = {};
-    template.placeholders.forEach(placeholder => {
+    template.placeholders.forEach((placeholder) => {
       initialValues[placeholder.key] = placeholder.defaultValue || '';
     });
     setFormValues(initialValues);
-    
+
     setStep('configure');
   };
 
@@ -65,7 +76,7 @@ export function TemplateSelector({ isOpen, onClose, onSelectTemplate }: Template
   };
 
   const handleInputChange = (key: string, value: string) => {
-    setFormValues(prev => ({ ...prev, [key]: value }));
+    setFormValues((prev) => ({ ...prev, [key]: value }));
   };
 
   const renderFormField = (placeholder: TemplatePlaceholder) => {
@@ -82,15 +93,19 @@ export function TemplateSelector({ isOpen, onClose, onSelectTemplate }: Template
             rows={3}
           />
         );
-      
+
       case 'select':
         return (
           <Select
             value={value}
-            onValueChange={(newValue) => handleInputChange(placeholder.key, newValue)}
+            onValueChange={(newValue) =>
+              handleInputChange(placeholder.key, newValue)
+            }
           >
             <SelectTrigger>
-              <SelectValue placeholder={`Select ${placeholder.label.toLowerCase()}`} />
+              <SelectValue
+                placeholder={`Select ${placeholder.label.toLowerCase()}`}
+              />
             </SelectTrigger>
             <SelectContent>
               {placeholder.options?.map((option) => (
@@ -101,7 +116,7 @@ export function TemplateSelector({ isOpen, onClose, onSelectTemplate }: Template
             </SelectContent>
           </Select>
         );
-      
+
       case 'date':
         return (
           <Input
@@ -111,7 +126,7 @@ export function TemplateSelector({ isOpen, onClose, onSelectTemplate }: Template
             onChange={(e) => handleInputChange(placeholder.key, e.target.value)}
           />
         );
-      
+
       default:
         return (
           <Input
@@ -142,10 +157,10 @@ export function TemplateSelector({ isOpen, onClose, onSelectTemplate }: Template
 
   const isFormValid = () => {
     if (!selectedTemplate) return false;
-    
+
     return selectedTemplate.placeholders
-      .filter(p => p.required)
-      .every(p => formValues[p.key]?.trim());
+      .filter((p) => p.required)
+      .every((p) => formValues[p.key]?.trim());
   };
 
   return (
@@ -156,10 +171,11 @@ export function TemplateSelector({ isOpen, onClose, onSelectTemplate }: Template
             <DialogHeader>
               <DialogTitle>Choose Document Template</DialogTitle>
               <DialogDescription>
-                Select a template to create a new regulatory document with pre-filled structure and guidance.
+                Select a template to create a new regulatory document with
+                pre-filled structure and guidance.
               </DialogDescription>
             </DialogHeader>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-4">
               {documentTemplates.map((template) => (
                 <Card
@@ -171,7 +187,9 @@ export function TemplateSelector({ isOpen, onClose, onSelectTemplate }: Template
                     <div className="flex items-center gap-3">
                       {getTemplateIcon(template.type)}
                       <div>
-                        <CardTitle className="text-base">{template.name}</CardTitle>
+                        <CardTitle className="text-base">
+                          {template.name}
+                        </CardTitle>
                         <CardDescription className="text-sm">
                           {template.description}
                         </CardDescription>
@@ -190,32 +208,36 @@ export function TemplateSelector({ isOpen, onClose, onSelectTemplate }: Template
         ) : (
           <>
             <DialogHeader>
-              <DialogTitle>Configure Template: {selectedTemplate?.name}</DialogTitle>
+              <DialogTitle>
+                Configure Template: {selectedTemplate?.name}
+              </DialogTitle>
               <DialogDescription>
                 Fill in the required information to generate your document.
               </DialogDescription>
             </DialogHeader>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-4 max-h-96 overflow-y-auto">
               {selectedTemplate?.placeholders.map((placeholder) => (
                 <div key={placeholder.key} className="space-y-2">
-                  <Label htmlFor={placeholder.key} className="text-sm font-medium">
+                  <Label
+                    htmlFor={placeholder.key}
+                    className="text-sm font-medium"
+                  >
                     {placeholder.label}
-                    {placeholder.required && <span className="text-red-500 ml-1">*</span>}
+                    {placeholder.required && (
+                      <span className="text-red-500 ml-1">*</span>
+                    )}
                   </Label>
                   {renderFormField(placeholder)}
                 </div>
               ))}
             </div>
-            
+
             <DialogFooter className="gap-2">
               <Button variant="outline" onClick={() => setStep('select')}>
                 Back
               </Button>
-              <Button 
-                onClick={handleFormSubmit}
-                disabled={!isFormValid()}
-              >
+              <Button onClick={handleFormSubmit} disabled={!isFormValid()}>
                 Create Document
               </Button>
             </DialogFooter>

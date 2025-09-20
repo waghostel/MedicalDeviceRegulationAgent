@@ -6,7 +6,13 @@
 export interface ResourceAllocation {
   id: string;
   name: string;
-  type: 'developer' | 'tester' | 'devops' | 'designer' | 'product_manager' | 'tech_lead';
+  type:
+    | 'developer'
+    | 'tester'
+    | 'devops'
+    | 'designer'
+    | 'product_manager'
+    | 'tech_lead';
   availability: number; // 0-1 (percentage of time available)
   skills: string[];
   hourlyRate?: number;
@@ -69,7 +75,11 @@ export interface SubTask {
 
 export interface TaskDependency {
   taskId: string;
-  type: 'finish_to_start' | 'start_to_start' | 'finish_to_finish' | 'start_to_finish';
+  type:
+    | 'finish_to_start'
+    | 'start_to_start'
+    | 'finish_to_finish'
+    | 'start_to_finish';
   lag: number; // hours
 }
 
@@ -193,11 +203,12 @@ export class MigrationTimelineGenerator {
     const resources = this.generateResourceAllocation(teamSize);
     const phases = this.generateTimelinePhases(startDate, workingHoursPerDay);
     const criticalPath = this.calculateCriticalPath(phases);
-    
+
     return {
       id: 'migration-timeline-v1',
       name: 'Frontend Migration Timeline',
-      description: 'Comprehensive timeline for migrating from mock data to real backend connections',
+      description:
+        'Comprehensive timeline for migrating from mock data to real backend connections',
       startDate: startDate.toISOString(),
       endDate: this.calculateEndDate(phases).toISOString(),
       totalDuration: this.calculateTotalDuration(phases),
@@ -206,29 +217,43 @@ export class MigrationTimelineGenerator {
       criticalPath,
       bufferTime: 40, // 5 days buffer
       contingencyPlan: this.generateContingencyPlan(),
-      reportingSchedule: this.generateReportingSchedule()
+      reportingSchedule: this.generateReportingSchedule(),
     };
   }
 
-  private static generateResourceAllocation(teamSize: number): ResourceAllocation[] {
+  private static generateResourceAllocation(
+    teamSize: number
+  ): ResourceAllocation[] {
     const baseResources: ResourceAllocation[] = [
       {
         id: 'tech-lead-1',
         name: 'Senior Frontend Developer (Tech Lead)',
         type: 'tech_lead',
         availability: 0.8, // 80% available (20% for other responsibilities)
-        skills: ['React', 'TypeScript', 'Testing', 'Architecture', 'Migration Planning'],
+        skills: [
+          'React',
+          'TypeScript',
+          'Testing',
+          'Architecture',
+          'Migration Planning',
+        ],
         hourlyRate: 85,
-        assignments: []
+        assignments: [],
       },
       {
         id: 'frontend-dev-1',
         name: 'Frontend Developer',
         type: 'developer',
         availability: 1.0,
-        skills: ['React', 'TypeScript', 'Jest', 'Playwright', 'Component Testing'],
+        skills: [
+          'React',
+          'TypeScript',
+          'Jest',
+          'Playwright',
+          'Component Testing',
+        ],
         hourlyRate: 70,
-        assignments: []
+        assignments: [],
       },
       {
         id: 'backend-dev-1',
@@ -237,26 +262,37 @@ export class MigrationTimelineGenerator {
         availability: 0.6, // 60% available for migration support
         skills: ['FastAPI', 'Python', 'Database', 'API Design', 'SQLite'],
         hourlyRate: 75,
-        assignments: []
+        assignments: [],
       },
       {
         id: 'qa-engineer-1',
         name: 'QA Engineer',
         type: 'tester',
         availability: 1.0,
-        skills: ['Manual Testing', 'Automated Testing', 'Accessibility Testing', 'Performance Testing'],
+        skills: [
+          'Manual Testing',
+          'Automated Testing',
+          'Accessibility Testing',
+          'Performance Testing',
+        ],
         hourlyRate: 60,
-        assignments: []
+        assignments: [],
       },
       {
         id: 'devops-engineer-1',
         name: 'DevOps Engineer',
         type: 'devops',
         availability: 0.4, // 40% available for migration infrastructure
-        skills: ['CI/CD', 'Database Migration', 'Monitoring', 'Feature Flags', 'Rollback Procedures'],
+        skills: [
+          'CI/CD',
+          'Database Migration',
+          'Monitoring',
+          'Feature Flags',
+          'Rollback Procedures',
+        ],
         hourlyRate: 80,
-        assignments: []
-      }
+        assignments: [],
+      },
     ];
 
     // Scale resources based on team size
@@ -268,35 +304,48 @@ export class MigrationTimelineGenerator {
         availability: 1.0,
         skills: ['React', 'TypeScript', 'Basic Testing'],
         hourlyRate: 50,
-        assignments: []
+        assignments: [],
       });
     }
 
     return baseResources;
   }
 
-  private static generateTimelinePhases(startDate: Date, workingHoursPerDay: number): TimelinePhase[] {
+  private static generateTimelinePhases(
+    startDate: Date,
+    workingHoursPerDay: number
+  ): TimelinePhase[] {
     let currentDate = new Date(startDate);
 
     const phases: TimelinePhase[] = [
       {
         id: 'phase-1-planning',
         name: 'Planning and Infrastructure Setup',
-        description: 'Initial planning, infrastructure setup, and team preparation',
+        description:
+          'Initial planning, infrastructure setup, and team preparation',
         startDate: currentDate.toISOString(),
-        endDate: this.addWorkingHours(currentDate, 32, workingHoursPerDay).toISOString(),
+        endDate: this.addWorkingHours(
+          currentDate,
+          32,
+          workingHoursPerDay
+        ).toISOString(),
         duration: 32,
         status: 'not_started',
         tasks: [
           {
             id: 'task-1-1',
             name: 'Migration Strategy Finalization',
-            description: 'Finalize migration strategy and component priority matrix',
+            description:
+              'Finalize migration strategy and component priority matrix',
             type: 'documentation',
             priority: 'critical',
             estimatedHours: 8,
             startDate: currentDate.toISOString(),
-            endDate: this.addWorkingHours(currentDate, 8, workingHoursPerDay).toISOString(),
+            endDate: this.addWorkingHours(
+              currentDate,
+              8,
+              workingHoursPerDay
+            ).toISOString(),
             status: 'not_started',
             assignedTo: ['tech-lead-1'],
             dependencies: [],
@@ -304,10 +353,11 @@ export class MigrationTimelineGenerator {
               {
                 id: 'subtask-1-1-1',
                 name: 'Review component analysis',
-                description: 'Review existing component mock data usage analysis',
+                description:
+                  'Review existing component mock data usage analysis',
                 estimatedHours: 3,
                 status: 'not_started',
-                assignedTo: 'tech-lead-1'
+                assignedTo: 'tech-lead-1',
               },
               {
                 id: 'subtask-1-1-2',
@@ -315,7 +365,7 @@ export class MigrationTimelineGenerator {
                 description: 'Update component migration priority matrix',
                 estimatedHours: 3,
                 status: 'not_started',
-                assignedTo: 'tech-lead-1'
+                assignedTo: 'tech-lead-1',
               },
               {
                 id: 'subtask-1-1-3',
@@ -323,11 +373,11 @@ export class MigrationTimelineGenerator {
                 description: 'Document detailed rollback procedures',
                 estimatedHours: 2,
                 status: 'not_started',
-                assignedTo: 'tech-lead-1'
-              }
+                assignedTo: 'tech-lead-1',
+              },
             ],
             progress: 0,
-            blockers: []
+            blockers: [],
           },
           {
             id: 'task-1-2',
@@ -336,12 +386,20 @@ export class MigrationTimelineGenerator {
             type: 'development',
             priority: 'critical',
             estimatedHours: 16,
-            startDate: this.addWorkingHours(currentDate, 8, workingHoursPerDay).toISOString(),
-            endDate: this.addWorkingHours(currentDate, 24, workingHoursPerDay).toISOString(),
+            startDate: this.addWorkingHours(
+              currentDate,
+              8,
+              workingHoursPerDay
+            ).toISOString(),
+            endDate: this.addWorkingHours(
+              currentDate,
+              24,
+              workingHoursPerDay
+            ).toISOString(),
             status: 'not_started',
             assignedTo: ['backend-dev-1', 'devops-engineer-1'],
             dependencies: [
-              { taskId: 'task-1-1', type: 'finish_to_start', lag: 0 }
+              { taskId: 'task-1-1', type: 'finish_to_start', lag: 0 },
             ],
             subtasks: [
               {
@@ -350,7 +408,7 @@ export class MigrationTimelineGenerator {
                 description: 'Set up SQLite test database schema',
                 estimatedHours: 6,
                 status: 'not_started',
-                assignedTo: 'backend-dev-1'
+                assignedTo: 'backend-dev-1',
               },
               {
                 id: 'subtask-1-2-2',
@@ -358,7 +416,7 @@ export class MigrationTimelineGenerator {
                 description: 'Create database seeding scripts from mock data',
                 estimatedHours: 8,
                 status: 'not_started',
-                assignedTo: 'backend-dev-1'
+                assignedTo: 'backend-dev-1',
               },
               {
                 id: 'subtask-1-2-3',
@@ -366,11 +424,11 @@ export class MigrationTimelineGenerator {
                 description: 'Configure CI/CD for database operations',
                 estimatedHours: 2,
                 status: 'not_started',
-                assignedTo: 'devops-engineer-1'
-              }
+                assignedTo: 'devops-engineer-1',
+              },
             ],
             progress: 0,
-            blockers: []
+            blockers: [],
           },
           {
             id: 'task-1-3',
@@ -379,8 +437,16 @@ export class MigrationTimelineGenerator {
             type: 'development',
             priority: 'high',
             estimatedHours: 8,
-            startDate: this.addWorkingHours(currentDate, 16, workingHoursPerDay).toISOString(),
-            endDate: this.addWorkingHours(currentDate, 24, workingHoursPerDay).toISOString(),
+            startDate: this.addWorkingHours(
+              currentDate,
+              16,
+              workingHoursPerDay
+            ).toISOString(),
+            endDate: this.addWorkingHours(
+              currentDate,
+              24,
+              workingHoursPerDay
+            ).toISOString(),
             status: 'not_started',
             assignedTo: ['frontend-dev-1'],
             dependencies: [],
@@ -391,7 +457,7 @@ export class MigrationTimelineGenerator {
                 description: 'Create React context for feature flags',
                 estimatedHours: 4,
                 status: 'not_started',
-                assignedTo: 'frontend-dev-1'
+                assignedTo: 'frontend-dev-1',
               },
               {
                 id: 'subtask-1-3-2',
@@ -399,7 +465,7 @@ export class MigrationTimelineGenerator {
                 description: 'Create custom hooks for feature flag usage',
                 estimatedHours: 2,
                 status: 'not_started',
-                assignedTo: 'frontend-dev-1'
+                assignedTo: 'frontend-dev-1',
               },
               {
                 id: 'subtask-1-3-3',
@@ -407,12 +473,12 @@ export class MigrationTimelineGenerator {
                 description: 'Set up feature flag configuration system',
                 estimatedHours: 2,
                 status: 'not_started',
-                assignedTo: 'frontend-dev-1'
-              }
+                assignedTo: 'frontend-dev-1',
+              },
             ],
             progress: 0,
-            blockers: []
-          }
+            blockers: [],
+          },
         ],
         dependencies: [],
         resources: [
@@ -421,43 +487,59 @@ export class MigrationTimelineGenerator {
             hoursRequired: 16,
             skillsRequired: ['Architecture', 'Planning'],
             startDate: currentDate.toISOString(),
-            endDate: this.addWorkingHours(currentDate, 32, workingHoursPerDay).toISOString()
+            endDate: this.addWorkingHours(
+              currentDate,
+              32,
+              workingHoursPerDay
+            ).toISOString(),
           },
           {
             role: 'developer',
             hoursRequired: 24,
             skillsRequired: ['React', 'Database'],
             startDate: currentDate.toISOString(),
-            endDate: this.addWorkingHours(currentDate, 32, workingHoursPerDay).toISOString()
+            endDate: this.addWorkingHours(
+              currentDate,
+              32,
+              workingHoursPerDay
+            ).toISOString(),
           },
           {
             role: 'devops',
             hoursRequired: 8,
             skillsRequired: ['CI/CD', 'Database'],
             startDate: currentDate.toISOString(),
-            endDate: this.addWorkingHours(currentDate, 32, workingHoursPerDay).toISOString()
-          }
+            endDate: this.addWorkingHours(
+              currentDate,
+              32,
+              workingHoursPerDay
+            ).toISOString(),
+          },
         ],
         milestones: [
           {
             id: 'milestone-1-1',
             name: 'Infrastructure Ready',
             description: 'All infrastructure components are set up and tested',
-            targetDate: this.addWorkingHours(currentDate, 32, workingHoursPerDay).toISOString(),
+            targetDate: this.addWorkingHours(
+              currentDate,
+              32,
+              workingHoursPerDay
+            ).toISOString(),
             status: 'pending',
             criteria: [
               'Database schema created and tested',
               'Feature flag system operational',
               'CI/CD pipeline configured',
-              'Rollback procedures documented'
+              'Rollback procedures documented',
             ],
             deliverables: [
               'Database setup scripts',
               'Feature flag implementation',
               'Migration strategy document',
-              'Rollback procedures'
-            ]
-          }
+              'Rollback procedures',
+            ],
+          },
         ],
         risks: [
           {
@@ -467,46 +549,60 @@ export class MigrationTimelineGenerator {
             impact: 6,
             mitigation: 'Start with simple schema, iterate as needed',
             owner: 'backend-dev-1',
-            status: 'open'
-          }
+            status: 'open',
+          },
         ],
         deliverables: [
           {
             id: 'deliverable-1-1',
             name: 'Migration Strategy Document',
-            description: 'Comprehensive migration strategy with timelines and procedures',
+            description:
+              'Comprehensive migration strategy with timelines and procedures',
             type: 'documentation',
-            dueDate: this.addWorkingHours(currentDate, 8, workingHoursPerDay).toISOString(),
+            dueDate: this.addWorkingHours(
+              currentDate,
+              8,
+              workingHoursPerDay
+            ).toISOString(),
             status: 'not_started',
             owner: 'tech-lead-1',
             reviewers: ['frontend-dev-1', 'qa-engineer-1'],
-            location: 'docs/migration-strategy.md'
+            location: 'docs/migration-strategy.md',
           },
           {
             id: 'deliverable-1-2',
             name: 'Database Infrastructure',
             description: 'Test database setup with seeding capabilities',
             type: 'code',
-            dueDate: this.addWorkingHours(currentDate, 24, workingHoursPerDay).toISOString(),
+            dueDate: this.addWorkingHours(
+              currentDate,
+              24,
+              workingHoursPerDay
+            ).toISOString(),
             status: 'not_started',
             owner: 'backend-dev-1',
             reviewers: ['tech-lead-1'],
-            location: 'src/lib/database/'
-          }
-        ]
-      }
+            location: 'src/lib/database/',
+          },
+        ],
+      },
     ];
 
     // Update currentDate for next phase
     currentDate = this.addWorkingHours(currentDate, 32, workingHoursPerDay);
 
     // Add remaining phases (Phase 2-5)
-    phases.push(...this.generateRemainingPhases(currentDate, workingHoursPerDay));
+    phases.push(
+      ...this.generateRemainingPhases(currentDate, workingHoursPerDay)
+    );
 
     return phases;
   }
 
-  private static generateRemainingPhases(startDate: Date, workingHoursPerDay: number): TimelinePhase[] {
+  private static generateRemainingPhases(
+    startDate: Date,
+    workingHoursPerDay: number
+  ): TimelinePhase[] {
     let currentDate = new Date(startDate);
     const phases: TimelinePhase[] = [];
 
@@ -516,7 +612,11 @@ export class MigrationTimelineGenerator {
       name: 'Display Components Migration',
       description: 'Migrate display-only components to use real data',
       startDate: currentDate.toISOString(),
-      endDate: this.addWorkingHours(currentDate, 48, workingHoursPerDay).toISOString(),
+      endDate: this.addWorkingHours(
+        currentDate,
+        48,
+        workingHoursPerDay
+      ).toISOString(),
       duration: 48,
       status: 'not_started',
       tasks: [
@@ -528,7 +628,11 @@ export class MigrationTimelineGenerator {
           priority: 'critical',
           estimatedHours: 16,
           startDate: currentDate.toISOString(),
-          endDate: this.addWorkingHours(currentDate, 16, workingHoursPerDay).toISOString(),
+          endDate: this.addWorkingHours(
+            currentDate,
+            16,
+            workingHoursPerDay
+          ).toISOString(),
           status: 'not_started',
           assignedTo: ['frontend-dev-1'],
           dependencies: [],
@@ -539,7 +643,7 @@ export class MigrationTimelineGenerator {
               description: 'Create custom hook for real classification data',
               estimatedHours: 6,
               status: 'not_started',
-              assignedTo: 'frontend-dev-1'
+              assignedTo: 'frontend-dev-1',
             },
             {
               id: 'subtask-2-1-2',
@@ -547,7 +651,7 @@ export class MigrationTimelineGenerator {
               description: 'Update component to use real data hook',
               estimatedHours: 6,
               status: 'not_started',
-              assignedTo: 'frontend-dev-1'
+              assignedTo: 'frontend-dev-1',
             },
             {
               id: 'subtask-2-1-3',
@@ -555,12 +659,12 @@ export class MigrationTimelineGenerator {
               description: 'Update tests to work with real data',
               estimatedHours: 4,
               status: 'not_started',
-              assignedTo: 'frontend-dev-1'
-            }
+              assignedTo: 'frontend-dev-1',
+            },
           ],
           progress: 0,
-          blockers: []
-        }
+          blockers: [],
+        },
       ],
       dependencies: ['phase-1-planning'],
       resources: [
@@ -569,35 +673,47 @@ export class MigrationTimelineGenerator {
           hoursRequired: 32,
           skillsRequired: ['React', 'TypeScript', 'Testing'],
           startDate: currentDate.toISOString(),
-          endDate: this.addWorkingHours(currentDate, 48, workingHoursPerDay).toISOString()
+          endDate: this.addWorkingHours(
+            currentDate,
+            48,
+            workingHoursPerDay
+          ).toISOString(),
         },
         {
           role: 'tester',
           hoursRequired: 16,
           skillsRequired: ['Manual Testing', 'Automated Testing'],
           startDate: currentDate.toISOString(),
-          endDate: this.addWorkingHours(currentDate, 48, workingHoursPerDay).toISOString()
-        }
+          endDate: this.addWorkingHours(
+            currentDate,
+            48,
+            workingHoursPerDay
+          ).toISOString(),
+        },
       ],
       milestones: [
         {
           id: 'milestone-2-1',
           name: 'Display Components Migrated',
           description: 'All display-only components successfully migrated',
-          targetDate: this.addWorkingHours(currentDate, 48, workingHoursPerDay).toISOString(),
+          targetDate: this.addWorkingHours(
+            currentDate,
+            48,
+            workingHoursPerDay
+          ).toISOString(),
           status: 'pending',
           criteria: [
             'ClassificationWidget uses real data',
             'ProgressWidget uses real data',
             'All tests pass',
-            'Performance benchmarks met'
+            'Performance benchmarks met',
           ],
           deliverables: [
             'Migrated components',
             'Updated tests',
-            'Performance report'
-          ]
-        }
+            'Performance report',
+          ],
+        },
       ],
       risks: [
         {
@@ -607,8 +723,8 @@ export class MigrationTimelineGenerator {
           impact: 7,
           mitigation: 'Create data transformation layer',
           owner: 'frontend-dev-1',
-          status: 'open'
-        }
+          status: 'open',
+        },
       ],
       deliverables: [
         {
@@ -616,13 +732,17 @@ export class MigrationTimelineGenerator {
           name: 'Migrated Display Components',
           description: 'All display components using real data',
           type: 'code',
-          dueDate: this.addWorkingHours(currentDate, 48, workingHoursPerDay).toISOString(),
+          dueDate: this.addWorkingHours(
+            currentDate,
+            48,
+            workingHoursPerDay
+          ).toISOString(),
           status: 'not_started',
           owner: 'frontend-dev-1',
           reviewers: ['tech-lead-1', 'qa-engineer-1'],
-          location: 'src/components/dashboard/'
-        }
-      ]
+          location: 'src/components/dashboard/',
+        },
+      ],
     });
 
     // Continue with remaining phases...
@@ -634,7 +754,11 @@ export class MigrationTimelineGenerator {
       name: 'Interactive Components Migration',
       description: 'Migrate interactive components with user interactions',
       startDate: currentDate.toISOString(),
-      endDate: this.addWorkingHours(currentDate, 64, workingHoursPerDay).toISOString(),
+      endDate: this.addWorkingHours(
+        currentDate,
+        64,
+        workingHoursPerDay
+      ).toISOString(),
       duration: 64,
       status: 'not_started',
       tasks: [], // Tasks would be defined similarly
@@ -642,7 +766,7 @@ export class MigrationTimelineGenerator {
       resources: [],
       milestones: [],
       risks: [],
-      deliverables: []
+      deliverables: [],
     });
 
     currentDate = this.addWorkingHours(currentDate, 64, workingHoursPerDay);
@@ -653,7 +777,11 @@ export class MigrationTimelineGenerator {
       name: 'Complex Workflows Migration',
       description: 'Migrate complex workflows and agent interactions',
       startDate: currentDate.toISOString(),
-      endDate: this.addWorkingHours(currentDate, 80, workingHoursPerDay).toISOString(),
+      endDate: this.addWorkingHours(
+        currentDate,
+        80,
+        workingHoursPerDay
+      ).toISOString(),
       duration: 80,
       status: 'not_started',
       tasks: [],
@@ -661,7 +789,7 @@ export class MigrationTimelineGenerator {
       resources: [],
       milestones: [],
       risks: [],
-      deliverables: []
+      deliverables: [],
     });
 
     currentDate = this.addWorkingHours(currentDate, 80, workingHoursPerDay);
@@ -672,7 +800,11 @@ export class MigrationTimelineGenerator {
       name: 'Optimization and Cleanup',
       description: 'Final optimization, cleanup, and documentation',
       startDate: currentDate.toISOString(),
-      endDate: this.addWorkingHours(currentDate, 32, workingHoursPerDay).toISOString(),
+      endDate: this.addWorkingHours(
+        currentDate,
+        32,
+        workingHoursPerDay
+      ).toISOString(),
       duration: 32,
       status: 'not_started',
       tasks: [],
@@ -680,7 +812,7 @@ export class MigrationTimelineGenerator {
       resources: [],
       milestones: [],
       risks: [],
-      deliverables: []
+      deliverables: [],
     });
 
     return phases;
@@ -690,8 +822,10 @@ export class MigrationTimelineGenerator {
     // Simplified critical path calculation
     // In a real implementation, this would use proper critical path method (CPM)
     return phases
-      .filter(phase => phase.tasks.some(task => task.priority === 'critical'))
-      .map(phase => phase.id);
+      .filter((phase) =>
+        phase.tasks.some((task) => task.priority === 'critical')
+      )
+      .map((phase) => phase.id);
   }
 
   private static calculateEndDate(phases: TimelinePhase[]): Date {
@@ -703,7 +837,11 @@ export class MigrationTimelineGenerator {
     return phases.reduce((total, phase) => total + phase.duration, 0);
   }
 
-  private static addWorkingHours(startDate: Date, hours: number, workingHoursPerDay: number): Date {
+  private static addWorkingHours(
+    startDate: Date,
+    hours: number,
+    workingHoursPerDay: number
+  ): Date {
     const workingDays = Math.ceil(hours / workingHoursPerDay);
     const result = new Date(startDate);
     result.setDate(result.getDate() + workingDays);
@@ -721,10 +859,10 @@ export class MigrationTimelineGenerator {
           actions: [
             'Continue with enhanced mock data',
             'Implement API client with mock responses',
-            'Adjust timeline by 1 week'
+            'Adjust timeline by 1 week',
           ],
           impactAssessment: 'Low to medium impact, can continue with mock data',
-          timelineAdjustment: 40
+          timelineAdjustment: 40,
         },
         {
           id: 'scenario-2',
@@ -734,11 +872,12 @@ export class MigrationTimelineGenerator {
           actions: [
             'Redistribute tasks among remaining team',
             'Bring in contractor if needed',
-            'Prioritize critical path tasks'
+            'Prioritize critical path tasks',
           ],
-          impactAssessment: 'Medium to high impact, may require timeline extension',
-          timelineAdjustment: 80
-        }
+          impactAssessment:
+            'Medium to high impact, may require timeline extension',
+          timelineAdjustment: 80,
+        },
       ],
       escalationProcedure: [
         {
@@ -746,15 +885,19 @@ export class MigrationTimelineGenerator {
           triggerConditions: ['Task delayed by > 2 days', 'Blocker identified'],
           contacts: ['tech-lead-1'],
           actions: ['Assess impact', 'Reallocate resources', 'Update timeline'],
-          timeframe: 4
+          timeframe: 4,
         },
         {
           level: 2,
           triggerConditions: ['Phase delayed by > 1 week', 'Critical blocker'],
           contacts: ['product-manager', 'engineering-manager'],
-          actions: ['Executive review', 'Resource augmentation', 'Scope adjustment'],
-          timeframe: 8
-        }
+          actions: [
+            'Executive review',
+            'Resource augmentation',
+            'Scope adjustment',
+          ],
+          timeframe: 8,
+        },
       ],
       emergencyContacts: [
         {
@@ -762,16 +905,16 @@ export class MigrationTimelineGenerator {
           role: 'Tech Lead',
           email: 'john.smith@medtech.com',
           phone: '+1-555-0101',
-          availability: '24/7'
+          availability: '24/7',
         },
         {
           name: 'Sarah Johnson',
           role: 'Engineering Manager',
           email: 'sarah.johnson@medtech.com',
           phone: '+1-555-0102',
-          availability: 'Business hours + on-call'
-        }
-      ]
+          availability: 'Business hours + on-call',
+        },
+      ],
     };
   }
 
@@ -781,7 +924,7 @@ export class MigrationTimelineGenerator {
       recipients: [
         'team@medtech.com',
         'engineering-manager@medtech.com',
-        'product-manager@medtech.com'
+        'product-manager@medtech.com',
       ],
       format: 'email',
       metrics: [
@@ -789,14 +932,14 @@ export class MigrationTimelineGenerator {
         'Hours spent vs estimated',
         'Blockers identified and resolved',
         'Risk status updates',
-        'Milestone progress'
+        'Milestone progress',
       ],
       escalationThresholds: {
-        'tasks_behind_schedule': 20, // percentage
-        'budget_overrun': 15, // percentage
-        'critical_blockers': 1, // count
-        'milestone_delay': 3 // days
-      }
+        tasks_behind_schedule: 20, // percentage
+        budget_overrun: 15, // percentage
+        critical_blockers: 1, // count
+        milestone_delay: 3, // days
+      },
     };
   }
 }
@@ -806,16 +949,23 @@ export class MigrationTimelineGenerator {
  * Optimizes resource allocation across timeline
  */
 export class ResourceOptimizationCalculator {
-  static optimizeResourceAllocation(timeline: ProjectTimeline): ResourceAllocation[] {
+  static optimizeResourceAllocation(
+    timeline: ProjectTimeline
+  ): ResourceAllocation[] {
     const optimizedResources = [...timeline.resources];
 
     // Calculate resource utilization
     for (const resource of optimizedResources) {
-      const totalAssignedHours = this.calculateTotalAssignedHours(resource, timeline);
+      const totalAssignedHours = this.calculateTotalAssignedHours(
+        resource,
+        timeline
+      );
       const availableHours = this.calculateAvailableHours(resource, timeline);
-      
+
       if (totalAssignedHours > availableHours) {
-        console.warn(`Resource ${resource.name} is over-allocated by ${totalAssignedHours - availableHours} hours`);
+        console.warn(
+          `Resource ${resource.name} is over-allocated by ${totalAssignedHours - availableHours} hours`
+        );
         // In real implementation, would suggest reallocation strategies
       }
     }
@@ -823,15 +973,26 @@ export class ResourceOptimizationCalculator {
     return optimizedResources;
   }
 
-  private static calculateTotalAssignedHours(resource: ResourceAllocation, timeline: ProjectTimeline): number {
-    return resource.assignments.reduce((total, assignment) => total + assignment.hoursAllocated, 0);
+  private static calculateTotalAssignedHours(
+    resource: ResourceAllocation,
+    timeline: ProjectTimeline
+  ): number {
+    return resource.assignments.reduce(
+      (total, assignment) => total + assignment.hoursAllocated,
+      0
+    );
   }
 
-  private static calculateAvailableHours(resource: ResourceAllocation, timeline: ProjectTimeline): number {
+  private static calculateAvailableHours(
+    resource: ResourceAllocation,
+    timeline: ProjectTimeline
+  ): number {
     const startDate = new Date(timeline.startDate);
     const endDate = new Date(timeline.endDate);
-    const totalDays = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
-    const workingDays = totalDays * (5/7); // Assuming 5-day work week
+    const totalDays = Math.ceil(
+      (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
+    );
+    const workingDays = totalDays * (5 / 7); // Assuming 5-day work week
     return workingDays * 8 * resource.availability; // 8 hours per day
   }
 }
@@ -841,17 +1002,19 @@ export class ResourceOptimizationCalculator {
  * Tracks and reports on timeline progress
  */
 export class TimelineProgressTracker {
-  static generateProgressReport(timeline: ProjectTimeline): TimelineProgressReport {
+  static generateProgressReport(
+    timeline: ProjectTimeline
+  ): TimelineProgressReport {
     const completedTasks = this.getCompletedTasks(timeline);
     const totalTasks = this.getTotalTasks(timeline);
     const overallProgress = (completedTasks / totalTasks) * 100;
 
-    const phaseProgress = timeline.phases.map(phase => ({
+    const phaseProgress = timeline.phases.map((phase) => ({
       phaseId: phase.id,
       name: phase.name,
       progress: this.calculatePhaseProgress(phase),
       status: phase.status,
-      onTrack: this.isPhaseOnTrack(phase)
+      onTrack: this.isPhaseOnTrack(phase),
     }));
 
     return {
@@ -861,23 +1024,32 @@ export class TimelineProgressTracker {
       phaseProgress,
       upcomingMilestones: this.getUpcomingMilestones(timeline),
       blockers: this.getActiveBlockers(timeline),
-      recommendations: this.generateRecommendations(timeline)
+      recommendations: this.generateRecommendations(timeline),
     };
   }
 
   private static getCompletedTasks(timeline: ProjectTimeline): number {
-    return timeline.phases.reduce((total, phase) => 
-      total + phase.tasks.filter(task => task.status === 'completed').length, 0
+    return timeline.phases.reduce(
+      (total, phase) =>
+        total +
+        phase.tasks.filter((task) => task.status === 'completed').length,
+      0
     );
   }
 
   private static getTotalTasks(timeline: ProjectTimeline): number {
-    return timeline.phases.reduce((total, phase) => total + phase.tasks.length, 0);
+    return timeline.phases.reduce(
+      (total, phase) => total + phase.tasks.length,
+      0
+    );
   }
 
   private static calculatePhaseProgress(phase: TimelinePhase): number {
     if (phase.tasks.length === 0) return 0;
-    const totalProgress = phase.tasks.reduce((sum, task) => sum + task.progress, 0);
+    const totalProgress = phase.tasks.reduce(
+      (sum, task) => sum + task.progress,
+      0
+    );
     return totalProgress / phase.tasks.length;
   }
 
@@ -885,18 +1057,22 @@ export class TimelineProgressTracker {
     const now = new Date();
     const phaseStart = new Date(phase.startDate);
     const phaseEnd = new Date(phase.endDate);
-    
+
     if (now < phaseStart) return true; // Not started yet
     if (now > phaseEnd && phase.status !== 'completed') return false; // Overdue
-    
-    const expectedProgress = ((now.getTime() - phaseStart.getTime()) / 
-                             (phaseEnd.getTime() - phaseStart.getTime())) * 100;
+
+    const expectedProgress =
+      ((now.getTime() - phaseStart.getTime()) /
+        (phaseEnd.getTime() - phaseStart.getTime())) *
+      100;
     const actualProgress = this.calculatePhaseProgress(phase);
-    
+
     return actualProgress >= expectedProgress * 0.9; // 10% tolerance
   }
 
-  private static getUpcomingMilestones(timeline: ProjectTimeline): PhaseMilestone[] {
+  private static getUpcomingMilestones(
+    timeline: ProjectTimeline
+  ): PhaseMilestone[] {
     const now = new Date();
     const upcomingMilestones: PhaseMilestone[] = [];
 
@@ -909,9 +1085,12 @@ export class TimelineProgressTracker {
       }
     }
 
-    return upcomingMilestones.sort((a, b) => 
-      new Date(a.targetDate).getTime() - new Date(b.targetDate).getTime()
-    ).slice(0, 5); // Next 5 milestones
+    return upcomingMilestones
+      .sort(
+        (a, b) =>
+          new Date(a.targetDate).getTime() - new Date(b.targetDate).getTime()
+      )
+      .slice(0, 5); // Next 5 milestones
   }
 
   private static getActiveBlockers(timeline: ProjectTimeline): Blocker[] {
@@ -919,7 +1098,9 @@ export class TimelineProgressTracker {
 
     for (const phase of timeline.phases) {
       for (const task of phase.tasks) {
-        activeBlockers.push(...task.blockers.filter(blocker => !blocker.resolvedDate));
+        activeBlockers.push(
+          ...task.blockers.filter((blocker) => !blocker.resolvedDate)
+        );
       }
     }
 
@@ -934,17 +1115,22 @@ export class TimelineProgressTracker {
     const activeBlockers = this.getActiveBlockers(timeline);
 
     if (activeBlockers.length > 0) {
-      recommendations.push(`Address ${activeBlockers.length} active blockers, prioritizing critical and high severity items`);
+      recommendations.push(
+        `Address ${activeBlockers.length} active blockers, prioritizing critical and high severity items`
+      );
     }
 
-    const overdueTasks = timeline.phases.flatMap(phase => 
-      phase.tasks.filter(task => 
-        new Date(task.endDate) < new Date() && task.status !== 'completed'
+    const overdueTasks = timeline.phases.flatMap((phase) =>
+      phase.tasks.filter(
+        (task) =>
+          new Date(task.endDate) < new Date() && task.status !== 'completed'
       )
     );
 
     if (overdueTasks.length > 0) {
-      recommendations.push(`${overdueTasks.length} tasks are overdue and need immediate attention`);
+      recommendations.push(
+        `${overdueTasks.length} tasks are overdue and need immediate attention`
+      );
     }
 
     return recommendations;

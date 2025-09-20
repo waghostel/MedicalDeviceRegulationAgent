@@ -1,11 +1,15 @@
 /**
  * Performance Threshold Validator
- * 
+ *
  * Validates test performance against defined thresholds
  * Implements Requirements 5.1 and 5.2 validation logic
  */
 
-import { TestExecutionMetrics, SuitePerformanceMetrics, PerformanceThresholds } from './test-performance-tracker';
+import {
+  TestExecutionMetrics,
+  SuitePerformanceMetrics,
+  PerformanceThresholds,
+} from './test-performance-tracker';
 
 export interface ValidationResult {
   passed: boolean;
@@ -50,7 +54,7 @@ export class PerformanceThresholdValidator {
         requirement51: true,
         requirement52: true,
       },
-      ...config
+      ...config,
     };
   }
 
@@ -69,7 +73,7 @@ export class PerformanceThresholdValidator {
         actualValue: metrics.executionTime,
         thresholdValue: this.config.thresholds.maxTestExecutionTime,
         testName: metrics.testName,
-        suiteName: metrics.suiteName
+        suiteName: metrics.suiteName,
       });
     }
 
@@ -83,21 +87,26 @@ export class PerformanceThresholdValidator {
         actualValue: memoryUsageMB,
         thresholdValue: this.config.thresholds.maxMemoryUsage,
         testName: metrics.testName,
-        suiteName: metrics.suiteName
+        suiteName: metrics.suiteName,
       });
     }
 
     // Generate recommendations
-    const recommendations = this.generateTestRecommendations(metrics, violations);
+    const recommendations = this.generateTestRecommendations(
+      metrics,
+      violations
+    );
 
     // Calculate score
     const score = this.calculateTestScore(metrics, violations);
 
     return {
-      passed: violations.length === 0 || (!this.config.strictMode && !this.hasCriticalViolations(violations)),
+      passed:
+        violations.length === 0 ||
+        (!this.config.strictMode && !this.hasCriticalViolations(violations)),
       violations,
       score,
-      recommendations
+      recommendations,
     };
   }
 
@@ -108,28 +117,32 @@ export class PerformanceThresholdValidator {
     const violations: ThresholdViolation[] = [];
 
     // Requirement 5.1: Suite execution time must be ≤ 30 seconds
-    if (this.config.requirementCompliance.requirement51 && 
-        metrics.totalExecutionTime > this.config.thresholds.maxSuiteExecutionTime) {
+    if (
+      this.config.requirementCompliance.requirement51 &&
+      metrics.totalExecutionTime > this.config.thresholds.maxSuiteExecutionTime
+    ) {
       violations.push({
         type: 'suite_time',
         severity: 'critical',
         message: `Suite execution time ${(metrics.totalExecutionTime / 1000).toFixed(2)}s exceeds 30-second limit (Requirement 5.1)`,
         actualValue: metrics.totalExecutionTime,
         thresholdValue: this.config.thresholds.maxSuiteExecutionTime,
-        suiteName: metrics.suiteName
+        suiteName: metrics.suiteName,
       });
     }
 
     // Requirement 5.2: Consistency across runs
-    if (this.config.requirementCompliance.requirement52 && 
-        metrics.consistencyScore < (1 - this.config.thresholds.consistencyThreshold)) {
+    if (
+      this.config.requirementCompliance.requirement52 &&
+      metrics.consistencyScore < 1 - this.config.thresholds.consistencyThreshold
+    ) {
       violations.push({
         type: 'consistency',
         severity: 'critical',
         message: `Test consistency ${(metrics.consistencyScore * 100).toFixed(1)}% below threshold (Requirement 5.2)`,
         actualValue: metrics.consistencyScore * 100,
         thresholdValue: (1 - this.config.thresholds.consistencyThreshold) * 100,
-        suiteName: metrics.suiteName
+        suiteName: metrics.suiteName,
       });
     }
 
@@ -141,21 +154,26 @@ export class PerformanceThresholdValidator {
         message: `Peak memory usage ${metrics.memoryPeak.toFixed(2)}MB exceeds threshold`,
         actualValue: metrics.memoryPeak,
         thresholdValue: this.config.thresholds.maxMemoryUsage,
-        suiteName: metrics.suiteName
+        suiteName: metrics.suiteName,
       });
     }
 
     // Generate recommendations
-    const recommendations = this.generateSuiteRecommendations(metrics, violations);
+    const recommendations = this.generateSuiteRecommendations(
+      metrics,
+      violations
+    );
 
     // Calculate score
     const score = this.calculateSuiteScore(metrics, violations);
 
     return {
-      passed: violations.length === 0 || (!this.config.strictMode && !this.hasCriticalViolations(violations)),
+      passed:
+        violations.length === 0 ||
+        (!this.config.strictMode && !this.hasCriticalViolations(violations)),
       violations,
       score,
-      recommendations
+      recommendations,
     };
   }
 
@@ -174,7 +192,9 @@ export class PerformanceThresholdValidator {
         passed: true,
         violations: [],
         score: 100,
-        recommendations: ['No historical data available for regression analysis']
+        recommendations: [
+          'No historical data available for regression analysis',
+        ],
       };
     }
 
@@ -183,7 +203,7 @@ export class PerformanceThresholdValidator {
     const historicalByTest = this.groupMetricsByTest(historicalMetrics);
 
     // Check each test for regression
-    Object.keys(currentByTest).forEach(testName => {
+    Object.keys(currentByTest).forEach((testName) => {
       const current = currentByTest[testName];
       const historical = historicalByTest[testName];
 
@@ -200,19 +220,20 @@ export class PerformanceThresholdValidator {
           message: `Performance regression of ${(regressionPercentage * 100).toFixed(1)}% detected`,
           actualValue: regressionPercentage * 100,
           thresholdValue: regressionThreshold * 100,
-          testName
+          testName,
         });
       }
     });
 
     const recommendations = this.generateRegressionRecommendations(violations);
-    const score = violations.length === 0 ? 100 : Math.max(0, 100 - (violations.length * 20));
+    const score =
+      violations.length === 0 ? 100 : Math.max(0, 100 - violations.length * 20);
 
     return {
       passed: violations.length === 0,
       violations,
       score,
-      recommendations
+      recommendations,
     };
   }
 
@@ -224,35 +245,37 @@ export class PerformanceThresholdValidator {
     testResults: ValidationResult[]
   ): ValidationResult {
     const allViolations: ThresholdViolation[] = [
-      ...suiteResults.flatMap(result => result.violations),
-      ...testResults.flatMap(result => result.violations)
+      ...suiteResults.flatMap((result) => result.violations),
+      ...testResults.flatMap((result) => result.violations),
     ];
 
     // Check critical requirement violations
-    const requirement51Violations = allViolations.filter(v => 
-      v.type === 'suite_time' && v.severity === 'critical'
-    );
-    
-    const requirement52Violations = allViolations.filter(v => 
-      v.type === 'consistency' && v.severity === 'critical'
+    const requirement51Violations = allViolations.filter(
+      (v) => v.type === 'suite_time' && v.severity === 'critical'
     );
 
-    const criticalViolations = allViolations.filter(v => v.severity === 'critical');
+    const requirement52Violations = allViolations.filter(
+      (v) => v.type === 'consistency' && v.severity === 'critical'
+    );
+
+    const criticalViolations = allViolations.filter(
+      (v) => v.severity === 'critical'
+    );
 
     // Generate compliance recommendations
     const recommendations: string[] = [];
-    
+
     if (requirement51Violations.length > 0) {
       recommendations.push(
         'CRITICAL: Test suite execution time exceeds 30-second limit (Requirement 5.1). ' +
-        'Consider parallelizing tests or optimizing slow test cases.'
+          'Consider parallelizing tests or optimizing slow test cases.'
       );
     }
-    
+
     if (requirement52Violations.length > 0) {
       recommendations.push(
         'CRITICAL: Test execution consistency below threshold (Requirement 5.2). ' +
-        'Investigate flaky tests and improve test reliability.'
+          'Investigate flaky tests and improve test reliability.'
       );
     }
 
@@ -265,15 +288,19 @@ export class PerformanceThresholdValidator {
     // Calculate overall score
     const totalTests = testResults.length;
     const totalSuites = suiteResults.length;
-    const avgTestScore = testResults.reduce((sum, result) => sum + result.score, 0) / Math.max(totalTests, 1);
-    const avgSuiteScore = suiteResults.reduce((sum, result) => sum + result.score, 0) / Math.max(totalSuites, 1);
+    const avgTestScore =
+      testResults.reduce((sum, result) => sum + result.score, 0) /
+      Math.max(totalTests, 1);
+    const avgSuiteScore =
+      suiteResults.reduce((sum, result) => sum + result.score, 0) /
+      Math.max(totalSuites, 1);
     const overallScore = (avgTestScore + avgSuiteScore) / 2;
 
     return {
       passed: criticalViolations.length === 0,
       violations: allViolations,
       score: overallScore,
-      recommendations
+      recommendations,
     };
   }
 
@@ -297,11 +324,11 @@ export class PerformanceThresholdValidator {
     lines.push('');
 
     // Requirement compliance
-    const requirement51Passed = !overallResult.violations.some(v => 
-      v.type === 'suite_time' && v.severity === 'critical'
+    const requirement51Passed = !overallResult.violations.some(
+      (v) => v.type === 'suite_time' && v.severity === 'critical'
     );
-    const requirement52Passed = !overallResult.violations.some(v => 
-      v.type === 'consistency' && v.severity === 'critical'
+    const requirement52Passed = !overallResult.violations.some(
+      (v) => v.type === 'consistency' && v.severity === 'critical'
     );
 
     lines.push('Requirement Compliance:');
@@ -312,12 +339,12 @@ export class PerformanceThresholdValidator {
     // Suite summary
     if (suiteResults.length > 0) {
       lines.push('Suite Performance:');
-      suiteResults.forEach(result => {
+      suiteResults.forEach((result) => {
         const suiteName = result.violations[0]?.suiteName || 'Unknown';
         const status = result.passed ? '✅' : '❌';
         lines.push(`  ${status} ${suiteName}: ${result.score.toFixed(1)}/100`);
-        
-        result.violations.forEach(violation => {
+
+        result.violations.forEach((violation) => {
           const icon = violation.severity === 'critical' ? '🚨' : '⚠️';
           lines.push(`    ${icon} ${violation.message}`);
         });
@@ -326,10 +353,12 @@ export class PerformanceThresholdValidator {
     }
 
     // Critical violations
-    const criticalViolations = overallResult.violations.filter(v => v.severity === 'critical');
+    const criticalViolations = overallResult.violations.filter(
+      (v) => v.severity === 'critical'
+    );
     if (criticalViolations.length > 0) {
       lines.push('🚨 CRITICAL VIOLATIONS:');
-      criticalViolations.forEach(violation => {
+      criticalViolations.forEach((violation) => {
         lines.push(`  • ${violation.message}`);
       });
       lines.push('');
@@ -338,7 +367,7 @@ export class PerformanceThresholdValidator {
     // Recommendations
     if (overallResult.recommendations.length > 0) {
       lines.push('💡 RECOMMENDATIONS:');
-      overallResult.recommendations.forEach(rec => {
+      overallResult.recommendations.forEach((rec) => {
         lines.push(`  • ${rec}`);
       });
     }
@@ -347,7 +376,7 @@ export class PerformanceThresholdValidator {
   }
 
   private hasCriticalViolations(violations: ThresholdViolation[]): boolean {
-    return violations.some(v => v.severity === 'critical');
+    return violations.some((v) => v.severity === 'critical');
   }
 
   private generateTestRecommendations(
@@ -356,16 +385,22 @@ export class PerformanceThresholdValidator {
   ): string[] {
     const recommendations: string[] = [];
 
-    if (violations.some(v => v.type === 'test_time')) {
-      recommendations.push(`Optimize ${metrics.testName} to reduce execution time`);
+    if (violations.some((v) => v.type === 'test_time')) {
+      recommendations.push(
+        `Optimize ${metrics.testName} to reduce execution time`
+      );
     }
 
-    if (violations.some(v => v.type === 'memory')) {
-      recommendations.push(`Reduce memory usage in ${metrics.testName} by cleaning up resources`);
+    if (violations.some((v) => v.type === 'memory')) {
+      recommendations.push(
+        `Reduce memory usage in ${metrics.testName} by cleaning up resources`
+      );
     }
 
     if (metrics.retryCount > 0) {
-      recommendations.push(`Investigate flakiness in ${metrics.testName} (${metrics.retryCount} retries)`);
+      recommendations.push(
+        `Investigate flakiness in ${metrics.testName} (${metrics.retryCount} retries)`
+      );
     }
 
     return recommendations;
@@ -377,19 +412,19 @@ export class PerformanceThresholdValidator {
   ): string[] {
     const recommendations: string[] = [];
 
-    if (violations.some(v => v.type === 'suite_time')) {
+    if (violations.some((v) => v.type === 'suite_time')) {
       recommendations.push(
         `Parallelize tests in ${metrics.suiteName} or optimize the slowest test: ${metrics.slowestTest.name}`
       );
     }
 
-    if (violations.some(v => v.type === 'consistency')) {
+    if (violations.some((v) => v.type === 'consistency')) {
       recommendations.push(
         `Improve test reliability in ${metrics.suiteName} to reduce execution time variance`
       );
     }
 
-    if (violations.some(v => v.type === 'memory')) {
+    if (violations.some((v) => v.type === 'memory')) {
       recommendations.push(
         `Optimize memory usage in ${metrics.suiteName} by improving cleanup between tests`
       );
@@ -404,7 +439,9 @@ export class PerformanceThresholdValidator {
     return recommendations;
   }
 
-  private generateRegressionRecommendations(violations: ThresholdViolation[]): string[] {
+  private generateRegressionRecommendations(
+    violations: ThresholdViolation[]
+  ): string[] {
     const recommendations: string[] = [];
 
     if (violations.length > 0) {
@@ -418,11 +455,14 @@ export class PerformanceThresholdValidator {
     return recommendations;
   }
 
-  private calculateTestScore(metrics: TestExecutionMetrics, violations: ThresholdViolation[]): number {
+  private calculateTestScore(
+    metrics: TestExecutionMetrics,
+    violations: ThresholdViolation[]
+  ): number {
     let score = 100;
 
     // Deduct points for violations
-    violations.forEach(violation => {
+    violations.forEach((violation) => {
       switch (violation.severity) {
         case 'critical':
           score -= 30;
@@ -437,18 +477,24 @@ export class PerformanceThresholdValidator {
     });
 
     // Bonus for fast execution
-    if (metrics.executionTime < this.config.thresholds.maxTestExecutionTime * 0.5) {
+    if (
+      metrics.executionTime <
+      this.config.thresholds.maxTestExecutionTime * 0.5
+    ) {
       score += 5;
     }
 
     return Math.max(0, Math.min(100, score));
   }
 
-  private calculateSuiteScore(metrics: SuitePerformanceMetrics, violations: ThresholdViolation[]): number {
+  private calculateSuiteScore(
+    metrics: SuitePerformanceMetrics,
+    violations: ThresholdViolation[]
+  ): number {
     let score = 100;
 
     // Deduct points for violations
-    violations.forEach(violation => {
+    violations.forEach((violation) => {
       switch (violation.severity) {
         case 'critical':
           score -= 40;
@@ -476,19 +522,29 @@ export class PerformanceThresholdValidator {
     return Math.max(0, Math.min(100, score));
   }
 
-  private groupMetricsByTest(metrics: TestExecutionMetrics[]): Record<string, TestExecutionMetrics[]> {
-    return metrics.reduce((groups, metric) => {
-      const key = metric.testName;
-      if (!groups[key]) {
-        groups[key] = [];
-      }
-      groups[key].push(metric);
-      return groups;
-    }, {} as Record<string, TestExecutionMetrics[]>);
+  private groupMetricsByTest(
+    metrics: TestExecutionMetrics[]
+  ): Record<string, TestExecutionMetrics[]> {
+    return metrics.reduce(
+      (groups, metric) => {
+        const key = metric.testName;
+        if (!groups[key]) {
+          groups[key] = [];
+        }
+        groups[key].push(metric);
+        return groups;
+      },
+      {} as Record<string, TestExecutionMetrics[]>
+    );
   }
 
-  private calculateAverageExecutionTime(metrics: TestExecutionMetrics[]): number {
-    return metrics.reduce((sum, metric) => sum + metric.executionTime, 0) / metrics.length;
+  private calculateAverageExecutionTime(
+    metrics: TestExecutionMetrics[]
+  ): number {
+    return (
+      metrics.reduce((sum, metric) => sum + metric.executionTime, 0) /
+      metrics.length
+    );
   }
 }
 
@@ -496,11 +552,15 @@ export class PerformanceThresholdValidator {
 export const defaultValidator = new PerformanceThresholdValidator();
 
 // Convenience functions
-export function validateTestPerformance(metrics: TestExecutionMetrics): ValidationResult {
+export function validateTestPerformance(
+  metrics: TestExecutionMetrics
+): ValidationResult {
   return defaultValidator.validateTest(metrics);
 }
 
-export function validateSuitePerformance(metrics: SuitePerformanceMetrics): ValidationResult {
+export function validateSuitePerformance(
+  metrics: SuitePerformanceMetrics
+): ValidationResult {
   return defaultValidator.validateSuite(metrics);
 }
 

@@ -16,10 +16,14 @@ const categoryColors = {
   search: 'bg-blue-100 text-blue-800 hover:bg-blue-200',
   analysis: 'bg-green-100 text-green-800 hover:bg-green-200',
   classification: 'bg-purple-100 text-purple-800 hover:bg-purple-200',
-  guidance: 'bg-orange-100 text-orange-800 hover:bg-orange-200'
+  guidance: 'bg-orange-100 text-orange-800 hover:bg-orange-200',
 };
 
-export function SlashCommandCard({ command, onExecute, disabled = false }: SlashCommandCardProps) {
+export function SlashCommandCard({
+  command,
+  onExecute,
+  disabled = false,
+}: SlashCommandCardProps) {
   const handleClick = () => {
     if (!disabled && onExecute) {
       onExecute(command.command);
@@ -27,7 +31,7 @@ export function SlashCommandCard({ command, onExecute, disabled = false }: Slash
   };
 
   return (
-    <Card 
+    <Card
       className={`cursor-pointer transition-all duration-200 hover:shadow-md ${
         disabled ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105'
       }`}
@@ -41,8 +45,8 @@ export function SlashCommandCard({ command, onExecute, disabled = false }: Slash
               {command.command}
             </code>
           </CardTitle>
-          <Badge 
-            variant="secondary" 
+          <Badge
+            variant="secondary"
             className={categoryColors[command.category]}
           >
             {command.category}
@@ -53,9 +57,9 @@ export function SlashCommandCard({ command, onExecute, disabled = false }: Slash
         <p className="text-sm text-muted-foreground mb-4">
           {command.description}
         </p>
-        <Button 
-          variant="outline" 
-          size="sm" 
+        <Button
+          variant="outline"
+          size="sm"
           className="w-full"
           disabled={disabled}
         >
@@ -72,10 +76,10 @@ interface SlashCommandGridProps {
   disabled?: boolean;
 }
 
-export function SlashCommandGrid({ 
-  commands, 
-  onExecuteCommand, 
-  disabled = false 
+export function SlashCommandGrid({
+  commands,
+  onExecuteCommand,
+  disabled = false,
 }: SlashCommandGridProps) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

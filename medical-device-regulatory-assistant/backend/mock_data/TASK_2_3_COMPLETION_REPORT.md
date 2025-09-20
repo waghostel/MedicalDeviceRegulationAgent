@@ -189,7 +189,7 @@
 # Quick testing
 python validate_config.py minimal_test_config.json
 
-# Comprehensive testing  
+# Comprehensive testing
 python validate_config.py comprehensive_mock_data_config.json
 
 # Edge case testing

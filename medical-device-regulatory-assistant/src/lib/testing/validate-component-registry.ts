@@ -28,10 +28,10 @@ export function validateComponentMockRegistry(): {
 
     // Test 2: Register a simple component mock
     results.push('Registering test component mock...');
-    const testMockComponent = jest.fn<React.ReactElement, [any]>((props) => 
-      React.createElement('div', { 
+    const testMockComponent = jest.fn<React.ReactElement, [any]>((props) =>
+      React.createElement('div', {
         'data-testid': 'test-component',
-        ...props 
+        ...props,
       })
     );
 
@@ -49,7 +49,9 @@ export function validateComponentMockRegistry(): {
     if (registrationResult.success) {
       results.push('✓ Component mock registered successfully');
     } else {
-      errors.push(`✗ Component registration failed: ${registrationResult.errors.join(', ')}`);
+      errors.push(
+        `✗ Component registration failed: ${registrationResult.errors.join(', ')}`
+      );
     }
 
     // Test 3: Validate component
@@ -57,12 +59,14 @@ export function validateComponentMockRegistry(): {
     const component = componentRegistry.getComponent('TestComponent');
     if (component) {
       results.push('✓ Component retrieved successfully');
-      
+
       if (component.validationResult) {
         if (component.validationResult.isValid) {
           results.push('✓ Component validation passed');
         } else {
-          results.push(`⚠ Component validation issues: ${component.validationResult.errors.length} errors`);
+          results.push(
+            `⚠ Component validation issues: ${component.validationResult.errors.length} errors`
+          );
         }
       }
     } else {
@@ -73,7 +77,9 @@ export function validateComponentMockRegistry(): {
     results.push('Testing component mock functionality...');
     if (component) {
       try {
-        const mockResult = component.mockComponent({ children: 'Test Content' });
+        const mockResult = component.mockComponent({
+          children: 'Test Content',
+        });
         if (mockResult) {
           results.push('✓ Component mock renders successfully');
         } else {
@@ -87,7 +93,9 @@ export function validateComponentMockRegistry(): {
     // Test 5: Get registry statistics
     results.push('Getting registry statistics...');
     const stats = componentRegistry.getStats();
-    results.push(`✓ Registry stats: ${stats.totalComponents} components, ${stats.registeredComponents} registered`);
+    results.push(
+      `✓ Registry stats: ${stats.totalComponents} components, ${stats.registeredComponents} registered`
+    );
 
     // Test 6: List components
     results.push('Listing registered components...');
@@ -104,7 +112,6 @@ export function validateComponentMockRegistry(): {
       results,
       errors,
     };
-
   } catch (error) {
     errors.push(`✗ Validation failed with error: ${error}`);
     return {
@@ -131,26 +138,31 @@ export function validateComponentRegistryIntegration(): {
     results.push('Testing ComponentMockRegistry integration...');
 
     // Test integration with setup functions
-    const { initializeComponentMockSystem } = require('./setup-component-mock-registry');
-    
+    const {
+      initializeComponentMockSystem,
+    } = require('./setup-component-mock-registry');
+
     results.push('Initializing component mock system...');
     const { componentRegistry, mockRegistry } = initializeComponentMockSystem();
-    
+
     if (componentRegistry && mockRegistry) {
       results.push('✓ Component mock system initialized successfully');
-      
+
       // Test if enhanced form components are available
       const enhancedInput = componentRegistry.getComponent('EnhancedInput');
       if (enhancedInput) {
         results.push('✓ EnhancedInput component found in registry');
       } else {
-        results.push('⚠ EnhancedInput component not found (may be expected in test environment)');
+        results.push(
+          '⚠ EnhancedInput component not found (may be expected in test environment)'
+        );
       }
-      
+
       // Test registry stats
       const stats = componentRegistry.getStats();
-      results.push(`✓ Component registry contains ${stats.totalComponents} components`);
-      
+      results.push(
+        `✓ Component registry contains ${stats.totalComponents} components`
+      );
     } else {
       errors.push('✗ Failed to initialize component mock system');
     }
@@ -160,7 +172,6 @@ export function validateComponentRegistryIntegration(): {
       results,
       errors,
     };
-
   } catch (error) {
     errors.push(`✗ Integration validation failed: ${error}`);
     return {
@@ -183,31 +194,40 @@ export function runComponentMockRegistryValidation(): void {
   // Run basic validation
   console.log('\n1. Basic ComponentMockRegistry Validation:');
   const basicValidation = validateComponentMockRegistry();
-  
-  basicValidation.results.forEach(result => console.log(`   ${result}`));
+
+  basicValidation.results.forEach((result) => console.log(`   ${result}`));
   if (basicValidation.errors.length > 0) {
     console.log('\n   Errors:');
-    basicValidation.errors.forEach(error => console.log(`   ${error}`));
+    basicValidation.errors.forEach((error) => console.log(`   ${error}`));
   }
 
   // Run integration validation
   console.log('\n2. Integration Validation:');
   const integrationValidation = validateComponentRegistryIntegration();
-  
-  integrationValidation.results.forEach(result => console.log(`   ${result}`));
+
+  integrationValidation.results.forEach((result) =>
+    console.log(`   ${result}`)
+  );
   if (integrationValidation.errors.length > 0) {
     console.log('\n   Errors:');
-    integrationValidation.errors.forEach(error => console.log(`   ${error}`));
+    integrationValidation.errors.forEach((error) => console.log(`   ${error}`));
   }
 
   // Summary
   console.log('\n' + '='.repeat(60));
   console.log('Validation Summary:');
-  console.log(`Basic Validation: ${basicValidation.success ? '✅ PASSED' : '❌ FAILED'}`);
-  console.log(`Integration Validation: ${integrationValidation.success ? '✅ PASSED' : '❌ FAILED'}`);
-  
-  const overallSuccess = basicValidation.success && integrationValidation.success;
-  console.log(`Overall Result: ${overallSuccess ? '✅ SUCCESS' : '❌ FAILURE'}`);
+  console.log(
+    `Basic Validation: ${basicValidation.success ? '✅ PASSED' : '❌ FAILED'}`
+  );
+  console.log(
+    `Integration Validation: ${integrationValidation.success ? '✅ PASSED' : '❌ FAILED'}`
+  );
+
+  const overallSuccess =
+    basicValidation.success && integrationValidation.success;
+  console.log(
+    `Overall Result: ${overallSuccess ? '✅ SUCCESS' : '❌ FAILURE'}`
+  );
   console.log('='.repeat(60));
 }
 

@@ -33,24 +33,24 @@ export function measureRenderPerformance(
 ): PerformanceBenchmark {
   const startTime = performance.now();
   const startMemory = process.memoryUsage().heapUsed;
-  
+
   const result = render(component);
-  
+
   const endTime = performance.now();
   const endMemory = process.memoryUsage().heapUsed;
-  
+
   const renderTime = endTime - startTime;
   const memoryUsage = (endMemory - startMemory) / 1024 / 1024; // Convert to MB
   const componentCount = result.container.querySelectorAll('*').length;
-  
+
   const metrics: PerformanceMetrics = {
     renderTime,
     memoryUsage,
     componentCount,
   };
-  
+
   const passed = validatePerformanceThreshold(metrics, threshold);
-  
+
   return {
     componentName,
     metrics,
@@ -68,9 +68,9 @@ export function measureReRenderPerformance(
   threshold: PerformanceThreshold
 ): number {
   const startTime = performance.now();
-  
+
   renderResult.rerender(reRenderComponent);
-  
+
   const endTime = performance.now();
   return endTime - startTime;
 }
@@ -85,19 +85,30 @@ export function validatePerformanceThreshold(
   if (metrics.renderTime > threshold.maxRenderTime) {
     return false;
   }
-  
-  if (threshold.maxReRenderTime && metrics.reRenderTime && metrics.reRenderTime > threshold.maxReRenderTime) {
+
+  if (
+    threshold.maxReRenderTime &&
+    metrics.reRenderTime &&
+    metrics.reRenderTime > threshold.maxReRenderTime
+  ) {
     return false;
   }
-  
-  if (threshold.maxMemoryUsage && metrics.memoryUsage && metrics.memoryUsage > threshold.maxMemoryUsage) {
+
+  if (
+    threshold.maxMemoryUsage &&
+    metrics.memoryUsage &&
+    metrics.memoryUsage > threshold.maxMemoryUsage
+  ) {
     return false;
   }
-  
-  if (threshold.maxComponentCount && metrics.componentCount > threshold.maxComponentCount) {
+
+  if (
+    threshold.maxComponentCount &&
+    metrics.componentCount > threshold.maxComponentCount
+  ) {
     return false;
   }
-  
+
   return true;
 }
 
@@ -110,26 +121,36 @@ export function performanceTest(
   threshold: PerformanceThreshold
 ) {
   return () => {
-    const benchmark = measureRenderPerformance(component, componentName, threshold);
-    
+    const benchmark = measureRenderPerformance(
+      component,
+      componentName,
+      threshold
+    );
+
     expect(benchmark.passed).toBe(true);
-    expect(benchmark.metrics.renderTime).toBeLessThanOrEqual(threshold.maxRenderTime);
-    
+    expect(benchmark.metrics.renderTime).toBeLessThanOrEqual(
+      threshold.maxRenderTime
+    );
+
     if (threshold.maxMemoryUsage) {
-      expect(benchmark.metrics.memoryUsage).toBeLessThanOrEqual(threshold.maxMemoryUsage);
+      expect(benchmark.metrics.memoryUsage).toBeLessThanOrEqual(
+        threshold.maxMemoryUsage
+      );
     }
-    
+
     if (threshold.maxComponentCount) {
-      expect(benchmark.metrics.componentCount).toBeLessThanOrEqual(threshold.maxComponentCount);
+      expect(benchmark.metrics.componentCount).toBeLessThanOrEqual(
+        threshold.maxComponentCount
+      );
     }
-    
+
     // Log performance metrics for monitoring
     console.log(`Performance Benchmark - ${componentName}:`, {
       renderTime: `${benchmark.metrics.renderTime.toFixed(2)}ms`,
       memoryUsage: `${benchmark.metrics.memoryUsage?.toFixed(2)}MB`,
       componentCount: benchmark.metrics.componentCount,
     });
-    
+
     return benchmark;
   };
 }
@@ -167,7 +188,7 @@ export function measureWebVitals(): Promise<{
       fid: Math.random() * 100 + 50, // 50-150ms
       ttfb: Math.random() * 500 + 100, // 100-600ms
     };
-    
+
     setTimeout(() => resolve(mockMetrics), 100);
   });
 }
@@ -177,11 +198,11 @@ export function measureWebVitals(): Promise<{
  */
 export class PerformanceRegression {
   private baselines: Map<string, PerformanceMetrics> = new Map();
-  
+
   setBaseline(componentName: string, metrics: PerformanceMetrics): void {
     this.baselines.set(componentName, metrics);
   }
-  
+
   checkRegression(
     componentName: string,
     currentMetrics: PerformanceMetrics,
@@ -192,7 +213,7 @@ export class PerformanceRegression {
     details: string;
   } {
     const baseline = this.baselines.get(componentName);
-    
+
     if (!baseline) {
       return {
         hasRegression: false,
@@ -200,14 +221,15 @@ export class PerformanceRegression {
         details: 'No baseline found for comparison',
       };
     }
-    
-    const renderTimeRegression = (currentMetrics.renderTime - baseline.renderTime) / baseline.renderTime;
+
+    const renderTimeRegression =
+      (currentMetrics.renderTime - baseline.renderTime) / baseline.renderTime;
     const hasRegression = renderTimeRegression > regressionThreshold;
-    
+
     return {
       hasRegression,
       regressionPercentage: renderTimeRegression * 100,
-      details: hasRegression 
+      details: hasRegression
         ? `Render time increased by ${(renderTimeRegression * 100).toFixed(2)}%`
         : 'Performance within acceptable range',
     };

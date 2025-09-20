@@ -5,6 +5,7 @@ Generated: 2025-09-13 21:52:28
 ## GitHub Actions Configuration
 
 ### Basic Test Workflow
+
 ```yaml
 name: Test Suite
 on: [push, pull_request]
@@ -18,13 +19,13 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: '3.11'
-      
+
       - name: Install Poetry
         uses: snok/install-poetry@v1
-      
+
       - name: Install dependencies
         run: poetry install
-      
+
       - name: Run tests
         run: poetry run python -m pytest tests/ -v
         env:
@@ -35,6 +36,7 @@ jobs:
 ```
 
 ### Environment Variables for Testing
+
 ```yaml
 env:
   TESTING: true
@@ -45,11 +47,12 @@ env:
 ```
 
 ### Test Coverage Reporting
+
 ```yaml
 - name: Run tests with coverage
   run: |
     poetry run python -m pytest tests/ --cov=backend --cov-report=xml
-    
+
 - name: Upload coverage to Codecov
   uses: codecov/codecov-action@v3
   with:
@@ -59,6 +62,7 @@ env:
 ## Local Development Setup
 
 ### Environment Configuration
+
 ```bash
 # .env.testing
 TESTING=true
@@ -69,6 +73,7 @@ LOG_LEVEL=DEBUG
 ```
 
 ### Pre-commit Hooks
+
 ```yaml
 # .pre-commit-config.yaml
 repos:
@@ -85,16 +90,19 @@ repos:
 ## Quality Gates
 
 ### Test Coverage Requirements
+
 - Minimum 80% code coverage
 - 100% coverage for critical regulatory logic
 - No decrease in coverage for new code
 
 ### Performance Requirements
+
 - Full test suite must complete in < 60 seconds
 - No test should take longer than 10 seconds
 - Memory usage must not exceed 500MB
 
 ### Security Requirements
+
 - All tests must pass security linting
 - No hardcoded secrets in test code
 - Proper cleanup of sensitive test data
@@ -102,6 +110,7 @@ repos:
 ## Monitoring and Alerts
 
 ### Test Failure Notifications
+
 ```yaml
 - name: Notify on test failure
   if: failure()
@@ -112,6 +121,7 @@ repos:
 ```
 
 ### Performance Monitoring
+
 ```yaml
 - name: Performance regression check
   run: |

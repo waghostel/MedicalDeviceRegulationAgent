@@ -2,7 +2,7 @@
 
 /**
  * Automated Quality Check System
- * 
+ *
  * Comprehensive quality validation system that runs code quality checks,
  * test coverage analysis, performance validation, and detects common
  * error patterns and anti-patterns.
@@ -21,7 +21,7 @@ const COLORS = {
   MAGENTA: '\x1b[35m',
   CYAN: '\x1b[36m',
   RESET: '\x1b[0m',
-  BOLD: '\x1b[1m'
+  BOLD: '\x1b[1m',
 };
 
 /**
@@ -32,25 +32,25 @@ const QUALITY_THRESHOLDS = {
     statements: 85,
     branches: 80,
     functions: 85,
-    lines: 85
+    lines: 85,
   },
   performance: {
     maxTestExecutionTime: 30000, // 30 seconds
     maxMemoryUsage: 100, // MB
     maxBundleSize: 500, // KB
-    maxLighthouseScore: 90
+    maxLighthouseScore: 90,
   },
   codeQuality: {
     maxComplexity: 10,
     maxLinesPerFunction: 50,
     maxParametersPerFunction: 5,
-    maxNestingDepth: 4
+    maxNestingDepth: 4,
   },
   errorPatterns: {
     maxConsoleStatements: 5,
     maxTodoComments: 10,
-    maxFixmeComments: 5
-  }
+    maxFixmeComments: 5,
+  },
 };
 
 /**
@@ -62,50 +62,50 @@ const ANTI_PATTERNS = [
     pattern: /console\.(log|warn|error|info|debug)/g,
     severity: 'warning',
     files: ['src/**/*.ts', 'src/**/*.tsx', 'src/**/*.js', 'src/**/*.jsx'],
-    exclude: ['**/*.test.*', '**/*.spec.*', '**/test-utils.*']
+    exclude: ['**/*.test.*', '**/*.spec.*', '**/test-utils.*'],
   },
   {
     name: 'TODO comments',
     pattern: /\/\/\s*TODO|\/\*\s*TODO|\#\s*TODO/gi,
     severity: 'info',
     files: ['src/**/*', 'backend/**/*'],
-    exclude: ['**/node_modules/**', '**/coverage/**']
+    exclude: ['**/node_modules/**', '**/coverage/**'],
   },
   {
     name: 'FIXME comments',
     pattern: /\/\/\s*FIXME|\/\*\s*FIXME|\#\s*FIXME/gi,
     severity: 'warning',
     files: ['src/**/*', 'backend/**/*'],
-    exclude: ['**/node_modules/**', '**/coverage/**']
+    exclude: ['**/node_modules/**', '**/coverage/**'],
   },
   {
     name: 'Hardcoded API URLs',
     pattern: /https?:\/\/[^\s"'`]+/g,
     severity: 'warning',
     files: ['src/**/*.ts', 'src/**/*.tsx'],
-    exclude: ['**/*.test.*', '**/*.spec.*', '**/constants.*', '**/config.*']
+    exclude: ['**/*.test.*', '**/*.spec.*', '**/constants.*', '**/config.*'],
   },
   {
     name: 'Missing error handling in async functions',
     pattern: /async\s+function[^{]*{[^}]*(?!try|catch)[^}]*}/g,
     severity: 'warning',
     files: ['src/**/*.ts', 'src/**/*.tsx', 'backend/**/*.py'],
-    exclude: ['**/*.test.*', '**/*.spec.*']
+    exclude: ['**/*.test.*', '**/*.spec.*'],
   },
   {
     name: 'Direct DOM manipulation in React',
     pattern: /document\.(getElementById|querySelector|createElement)/g,
     severity: 'error',
     files: ['src/**/*.tsx', 'src/**/*.jsx'],
-    exclude: ['**/*.test.*', '**/*.spec.*', '**/test-utils.*']
+    exclude: ['**/*.test.*', '**/*.spec.*', '**/test-utils.*'],
   },
   {
     name: 'Unused imports',
     pattern: /^import\s+.*\s+from\s+['"][^'"]+['"];?\s*$/gm,
     severity: 'info',
     files: ['src/**/*.ts', 'src/**/*.tsx'],
-    exclude: ['**/*.test.*', '**/*.spec.*']
-  }
+    exclude: ['**/*.test.*', '**/*.spec.*'],
+  },
 ];
 
 /**
@@ -120,7 +120,7 @@ class QualityCheckSystem {
       performance: { passed: false, metrics: {}, issues: [] },
       antiPatterns: { passed: false, patterns: [], issues: [] },
       security: { passed: false, vulnerabilities: [], issues: [] },
-      dependencies: { passed: false, outdated: [], issues: [] }
+      dependencies: { passed: false, outdated: [], issues: [] },
     };
     this.startTime = Date.now();
   }
@@ -142,14 +142,14 @@ class QualityCheckSystem {
           encoding: 'utf8',
           cwd,
           stdio: options.silent ? 'pipe' : 'inherit',
-          ...options
+          ...options,
         });
         resolve({ success: true, output: result.trim() });
       } catch (error) {
-        resolve({ 
-          success: false, 
+        resolve({
+          success: false,
           output: error.stdout || error.stderr || error.message,
-          code: error.status
+          code: error.status,
         });
       }
     });
@@ -166,14 +166,18 @@ class QualityCheckSystem {
     try {
       // TypeScript type checking
       this.log('Running TypeScript type checking...', COLORS.YELLOW);
-      const tscResult = await this.runCommand('pnpm type-check', this.projectRoot, { silent: true });
-      
+      const tscResult = await this.runCommand(
+        'pnpm type-check',
+        this.projectRoot,
+        { silent: true }
+      );
+
       if (!tscResult.success) {
         issues.push({
           type: 'typescript',
           severity: 'error',
           message: 'TypeScript type checking failed',
-          details: tscResult.output
+          details: tscResult.output,
         });
         score -= 20;
       } else {
@@ -182,8 +186,12 @@ class QualityCheckSystem {
 
       // ESLint checking
       this.log('Running ESLint analysis...', COLORS.YELLOW);
-      const eslintResult = await this.runCommand('pnpm lint', this.projectRoot, { silent: true });
-      
+      const eslintResult = await this.runCommand(
+        'pnpm lint',
+        this.projectRoot,
+        { silent: true }
+      );
+
       if (!eslintResult.success) {
         const eslintIssues = this.parseESLintOutput(eslintResult.output);
         issues.push(...eslintIssues);
@@ -194,14 +202,18 @@ class QualityCheckSystem {
 
       // Prettier formatting check
       this.log('Running Prettier format checking...', COLORS.YELLOW);
-      const prettierResult = await this.runCommand('pnpm format:check', this.projectRoot, { silent: true });
-      
+      const prettierResult = await this.runCommand(
+        'pnpm format:check',
+        this.projectRoot,
+        { silent: true }
+      );
+
       if (!prettierResult.success) {
         issues.push({
           type: 'formatting',
           severity: 'warning',
           message: 'Code formatting issues found',
-          details: 'Run `pnpm format` to fix formatting issues'
+          details: 'Run `pnpm format` to fix formatting issues',
         });
         score -= 10;
       } else {
@@ -210,12 +222,11 @@ class QualityCheckSystem {
 
       // Backend code quality (Python)
       await this.checkPythonCodeQuality(issues);
-
     } catch (error) {
       issues.push({
         type: 'system',
         severity: 'error',
-        message: `Code quality check failed: ${error.message}`
+        message: `Code quality check failed: ${error.message}`,
       });
       score = 0;
     }
@@ -223,10 +234,13 @@ class QualityCheckSystem {
     this.results.codeQuality = {
       passed: score >= 80,
       score: Math.max(0, score),
-      issues
+      issues,
     };
 
-    this.log(`Code Quality Score: ${score}/100`, score >= 80 ? COLORS.GREEN : COLORS.RED);
+    this.log(
+      `Code Quality Score: ${score}/100`,
+      score >= 80 ? COLORS.GREEN : COLORS.RED
+    );
     return this.results.codeQuality.passed;
   }
 
@@ -235,62 +249,80 @@ class QualityCheckSystem {
    */
   async checkPythonCodeQuality(issues) {
     const backendDir = path.join(this.projectRoot, 'backend');
-    
+
     try {
       // Black formatting check
       this.log('Running Black formatting check...', COLORS.YELLOW);
-      const blackResult = await this.runCommand('poetry run black --check .', backendDir, { silent: true });
-      
+      const blackResult = await this.runCommand(
+        'poetry run black --check .',
+        backendDir,
+        { silent: true }
+      );
+
       if (!blackResult.success) {
         issues.push({
           type: 'python-formatting',
           severity: 'warning',
           message: 'Python code formatting issues found',
-          details: 'Run `poetry run black .` to fix formatting'
+          details: 'Run `poetry run black .` to fix formatting',
         });
       }
 
       // isort import sorting check
       this.log('Running isort import sorting check...', COLORS.YELLOW);
-      const isortResult = await this.runCommand('poetry run isort --check-only .', backendDir, { silent: true });
-      
+      const isortResult = await this.runCommand(
+        'poetry run isort --check-only .',
+        backendDir,
+        { silent: true }
+      );
+
       if (!isortResult.success) {
         issues.push({
           type: 'python-imports',
           severity: 'warning',
           message: 'Python import sorting issues found',
-          details: 'Run `poetry run isort .` to fix import sorting'
+          details: 'Run `poetry run isort .` to fix import sorting',
         });
       }
 
       // Flake8 linting
       this.log('Running Flake8 linting...', COLORS.YELLOW);
-      const flake8Result = await this.runCommand('poetry run flake8 .', backendDir, { silent: true });
-      
+      const flake8Result = await this.runCommand(
+        'poetry run flake8 .',
+        backendDir,
+        { silent: true }
+      );
+
       if (!flake8Result.success) {
         issues.push({
           type: 'python-linting',
           severity: 'warning',
           message: 'Python linting issues found',
-          details: flake8Result.output
+          details: flake8Result.output,
         });
       }
 
       // MyPy type checking
       this.log('Running MyPy type checking...', COLORS.YELLOW);
-      const mypyResult = await this.runCommand('poetry run mypy .', backendDir, { silent: true });
-      
+      const mypyResult = await this.runCommand(
+        'poetry run mypy .',
+        backendDir,
+        { silent: true }
+      );
+
       if (!mypyResult.success) {
         issues.push({
           type: 'python-types',
           severity: 'error',
           message: 'Python type checking issues found',
-          details: mypyResult.output
+          details: mypyResult.output,
         });
       }
-
     } catch (error) {
-      this.log(`⚠️  Python code quality check skipped: ${error.message}`, COLORS.YELLOW);
+      this.log(
+        `⚠️  Python code quality check skipped: ${error.message}`,
+        COLORS.YELLOW
+      );
     }
   }
 
@@ -305,8 +337,12 @@ class QualityCheckSystem {
     try {
       // Frontend coverage
       this.log('Running frontend test coverage...', COLORS.YELLOW);
-      const frontendResult = await this.runCommand('pnpm test:coverage --silent', this.projectRoot, { silent: true });
-      
+      const frontendResult = await this.runCommand(
+        'pnpm test:coverage --silent',
+        this.projectRoot,
+        { silent: true }
+      );
+
       if (frontendResult.success) {
         coverage.frontend = await this.parseFrontendCoverage();
         this.validateCoverageThresholds(coverage.frontend, 'frontend', issues);
@@ -315,7 +351,7 @@ class QualityCheckSystem {
           type: 'frontend-coverage',
           severity: 'error',
           message: 'Frontend test coverage analysis failed',
-          details: frontendResult.output
+          details: frontendResult.output,
         });
       }
 
@@ -327,7 +363,7 @@ class QualityCheckSystem {
         backendDir,
         { silent: true }
       );
-      
+
       if (backendResult.success) {
         coverage.backend = await this.parseBackendCoverage();
         this.validateCoverageThresholds(coverage.backend, 'backend', issues);
@@ -336,29 +372,31 @@ class QualityCheckSystem {
           type: 'backend-coverage',
           severity: 'error',
           message: 'Backend test coverage analysis failed',
-          details: backendResult.output
+          details: backendResult.output,
         });
       }
-
     } catch (error) {
       issues.push({
         type: 'system',
         severity: 'error',
-        message: `Coverage analysis failed: ${error.message}`
+        message: `Coverage analysis failed: ${error.message}`,
       });
     }
 
-    const overallPassed = issues.filter(i => i.severity === 'error').length === 0;
-    
+    const overallPassed =
+      issues.filter((i) => i.severity === 'error').length === 0;
+
     this.results.testCoverage = {
       passed: overallPassed,
       coverage,
-      issues
+      issues,
     };
 
-    this.log(`Test Coverage Analysis: ${overallPassed ? 'PASSED' : 'FAILED'}`, 
-             overallPassed ? COLORS.GREEN : COLORS.RED);
-    
+    this.log(
+      `Test Coverage Analysis: ${overallPassed ? 'PASSED' : 'FAILED'}`,
+      overallPassed ? COLORS.GREEN : COLORS.RED
+    );
+
     return overallPassed;
   }
 
@@ -367,14 +405,14 @@ class QualityCheckSystem {
    */
   validateCoverageThresholds(coverage, type, issues) {
     const thresholds = QUALITY_THRESHOLDS.coverage;
-    
+
     Object.entries(thresholds).forEach(([metric, threshold]) => {
       if (coverage[metric] !== undefined && coverage[metric] < threshold) {
         issues.push({
           type: `${type}-coverage-${metric}`,
           severity: 'warning',
           message: `${type} ${metric} coverage below threshold`,
-          details: `${coverage[metric]}% < ${threshold}%`
+          details: `${coverage[metric]}% < ${threshold}%`,
         });
       }
     });
@@ -385,14 +423,18 @@ class QualityCheckSystem {
    */
   async parseFrontendCoverage() {
     try {
-      const coveragePath = path.join(this.projectRoot, 'coverage', 'coverage-summary.json');
+      const coveragePath = path.join(
+        this.projectRoot,
+        'coverage',
+        'coverage-summary.json'
+      );
       const coverageData = JSON.parse(await fs.readFile(coveragePath, 'utf8'));
-      
+
       return {
         statements: coverageData.total.statements.pct,
         branches: coverageData.total.branches.pct,
         functions: coverageData.total.functions.pct,
-        lines: coverageData.total.lines.pct
+        lines: coverageData.total.lines.pct,
       };
     } catch (error) {
       return {};
@@ -404,14 +446,18 @@ class QualityCheckSystem {
    */
   async parseBackendCoverage() {
     try {
-      const coveragePath = path.join(this.projectRoot, 'backend', 'coverage.json');
+      const coveragePath = path.join(
+        this.projectRoot,
+        'backend',
+        'coverage.json'
+      );
       const coverageData = JSON.parse(await fs.readFile(coveragePath, 'utf8'));
-      
+
       return {
         statements: coverageData.totals.percent_covered,
         branches: coverageData.totals.percent_covered_display || 0,
         functions: coverageData.totals.percent_covered,
-        lines: coverageData.totals.percent_covered
+        lines: coverageData.totals.percent_covered,
       };
     } catch (error) {
       return {};
@@ -428,23 +474,23 @@ class QualityCheckSystem {
 
     for (const antiPattern of ANTI_PATTERNS) {
       this.log(`Checking for: ${antiPattern.name}...`, COLORS.YELLOW);
-      
+
       try {
         const matches = await this.findPatternInFiles(antiPattern);
-        
+
         if (matches.length > 0) {
           detectedPatterns.push({
             name: antiPattern.name,
             severity: antiPattern.severity,
             matches: matches.length,
-            files: matches
+            files: matches,
           });
 
           issues.push({
             type: 'anti-pattern',
             severity: antiPattern.severity,
             message: `${antiPattern.name} detected`,
-            details: `Found ${matches.length} occurrences`
+            details: `Found ${matches.length} occurrences`,
           });
 
           this.log(`  ⚠️  Found ${matches.length} occurrences`, COLORS.YELLOW);
@@ -456,12 +502,12 @@ class QualityCheckSystem {
       }
     }
 
-    const passed = issues.filter(i => i.severity === 'error').length === 0;
-    
+    const passed = issues.filter((i) => i.severity === 'error').length === 0;
+
     this.results.antiPatterns = {
       passed,
       patterns: detectedPatterns,
-      issues
+      issues,
     };
 
     return passed;
@@ -472,11 +518,11 @@ class QualityCheckSystem {
    */
   async findPatternInFiles(antiPattern) {
     const matches = [];
-    
+
     for (const filePattern of antiPattern.files) {
       const files = glob.sync(filePattern, {
         cwd: this.projectRoot,
-        ignore: antiPattern.exclude || []
+        ignore: antiPattern.exclude || [],
       });
 
       for (const file of files) {
@@ -484,12 +530,12 @@ class QualityCheckSystem {
           const filePath = path.join(this.projectRoot, file);
           const content = await fs.readFile(filePath, 'utf8');
           const patternMatches = content.match(antiPattern.pattern);
-          
+
           if (patternMatches) {
             matches.push({
               file,
               matches: patternMatches.length,
-              lines: this.findMatchingLines(content, antiPattern.pattern)
+              lines: this.findMatchingLines(content, antiPattern.pattern),
             });
           }
         } catch (error) {
@@ -507,13 +553,13 @@ class QualityCheckSystem {
   findMatchingLines(content, pattern) {
     const lines = content.split('\n');
     const matchingLines = [];
-    
+
     lines.forEach((line, index) => {
       if (pattern.test(line)) {
         matchingLines.push(index + 1);
       }
     });
-    
+
     return matchingLines;
   }
 
@@ -529,17 +575,23 @@ class QualityCheckSystem {
       // Test execution time
       this.log('Measuring test execution time...', COLORS.YELLOW);
       const testStartTime = Date.now();
-      const testResult = await this.runCommand('pnpm test --passWithNoTests --silent', this.projectRoot, { silent: true });
+      const testResult = await this.runCommand(
+        'pnpm test --passWithNoTests --silent',
+        this.projectRoot,
+        { silent: true }
+      );
       const testExecutionTime = Date.now() - testStartTime;
-      
+
       metrics.testExecutionTime = testExecutionTime;
-      
-      if (testExecutionTime > QUALITY_THRESHOLDS.performance.maxTestExecutionTime) {
+
+      if (
+        testExecutionTime > QUALITY_THRESHOLDS.performance.maxTestExecutionTime
+      ) {
         issues.push({
           type: 'performance-test-time',
           severity: 'warning',
           message: 'Test execution time exceeds threshold',
-          details: `${testExecutionTime}ms > ${QUALITY_THRESHOLDS.performance.maxTestExecutionTime}ms`
+          details: `${testExecutionTime}ms > ${QUALITY_THRESHOLDS.performance.maxTestExecutionTime}ms`,
         });
       }
 
@@ -550,21 +602,20 @@ class QualityCheckSystem {
       // Memory usage during tests
       this.log('Checking memory usage...', COLORS.YELLOW);
       await this.checkMemoryUsage(metrics, issues);
-
     } catch (error) {
       issues.push({
         type: 'performance-system',
         severity: 'error',
-        message: `Performance analysis failed: ${error.message}`
+        message: `Performance analysis failed: ${error.message}`,
       });
     }
 
-    const passed = issues.filter(i => i.severity === 'error').length === 0;
-    
+    const passed = issues.filter((i) => i.severity === 'error').length === 0;
+
     this.results.performance = {
       passed,
       metrics,
-      issues
+      issues,
     };
 
     return passed;
@@ -575,16 +626,25 @@ class QualityCheckSystem {
    */
   async analyzeBundleSize(metrics, issues) {
     try {
-      const buildResult = await this.runCommand('pnpm build', this.projectRoot, { silent: true });
-      
+      const buildResult = await this.runCommand(
+        'pnpm build',
+        this.projectRoot,
+        { silent: true }
+      );
+
       if (buildResult.success) {
         // Check .next/static/chunks for bundle sizes
-        const chunksDir = path.join(this.projectRoot, '.next', 'static', 'chunks');
-        
+        const chunksDir = path.join(
+          this.projectRoot,
+          '.next',
+          'static',
+          'chunks'
+        );
+
         try {
           const files = await fs.readdir(chunksDir);
           let totalSize = 0;
-          
+
           for (const file of files) {
             if (file.endsWith('.js')) {
               const filePath = path.join(chunksDir, file);
@@ -592,15 +652,17 @@ class QualityCheckSystem {
               totalSize += stats.size;
             }
           }
-          
+
           metrics.bundleSize = Math.round(totalSize / 1024); // KB
-          
-          if (metrics.bundleSize > QUALITY_THRESHOLDS.performance.maxBundleSize) {
+
+          if (
+            metrics.bundleSize > QUALITY_THRESHOLDS.performance.maxBundleSize
+          ) {
             issues.push({
               type: 'performance-bundle-size',
               severity: 'warning',
               message: 'Bundle size exceeds threshold',
-              details: `${metrics.bundleSize}KB > ${QUALITY_THRESHOLDS.performance.maxBundleSize}KB`
+              details: `${metrics.bundleSize}KB > ${QUALITY_THRESHOLDS.performance.maxBundleSize}KB`,
             });
           }
         } catch (error) {
@@ -618,21 +680,26 @@ class QualityCheckSystem {
   async checkMemoryUsage(metrics, issues) {
     try {
       const initialMemory = process.memoryUsage();
-      
+
       // Run a memory-intensive operation (test suite)
-      await this.runCommand('pnpm test --passWithNoTests --silent', this.projectRoot, { silent: true });
-      
+      await this.runCommand(
+        'pnpm test --passWithNoTests --silent',
+        this.projectRoot,
+        { silent: true }
+      );
+
       const finalMemory = process.memoryUsage();
-      const memoryDiff = (finalMemory.heapUsed - initialMemory.heapUsed) / 1024 / 1024; // MB
-      
+      const memoryDiff =
+        (finalMemory.heapUsed - initialMemory.heapUsed) / 1024 / 1024; // MB
+
       metrics.memoryUsage = Math.round(memoryDiff);
-      
+
       if (metrics.memoryUsage > QUALITY_THRESHOLDS.performance.maxMemoryUsage) {
         issues.push({
           type: 'performance-memory',
           severity: 'warning',
           message: 'Memory usage exceeds threshold',
-          details: `${metrics.memoryUsage}MB > ${QUALITY_THRESHOLDS.performance.maxMemoryUsage}MB`
+          details: `${metrics.memoryUsage}MB > ${QUALITY_THRESHOLDS.performance.maxMemoryUsage}MB`,
         });
       }
     } catch (error) {
@@ -651,39 +718,45 @@ class QualityCheckSystem {
     try {
       // Frontend security audit
       this.log('Running frontend security audit...', COLORS.YELLOW);
-      const auditResult = await this.runCommand('pnpm audit --audit-level moderate', this.projectRoot, { silent: true });
-      
+      const auditResult = await this.runCommand(
+        'pnpm audit --audit-level moderate',
+        this.projectRoot,
+        { silent: true }
+      );
+
       if (!auditResult.success) {
         const vulns = this.parseAuditOutput(auditResult.output);
         vulnerabilities.push(...vulns);
-        
+
         if (vulns.length > 0) {
           issues.push({
             type: 'security-frontend',
             severity: 'warning',
             message: `Found ${vulns.length} security vulnerabilities`,
-            details: 'Run `pnpm audit fix` to resolve'
+            details: 'Run `pnpm audit fix` to resolve',
           });
         }
       }
 
       // Backend security check (if available)
       await this.checkBackendSecurity(vulnerabilities, issues);
-
     } catch (error) {
       issues.push({
         type: 'security-system',
         severity: 'error',
-        message: `Security check failed: ${error.message}`
+        message: `Security check failed: ${error.message}`,
       });
     }
 
-    const passed = vulnerabilities.filter(v => v.severity === 'high' || v.severity === 'critical').length === 0;
-    
+    const passed =
+      vulnerabilities.filter(
+        (v) => v.severity === 'high' || v.severity === 'critical'
+      ).length === 0;
+
     this.results.security = {
       passed,
       vulnerabilities,
-      issues
+      issues,
     };
 
     return passed;
@@ -695,16 +768,23 @@ class QualityCheckSystem {
   async checkBackendSecurity(vulnerabilities, issues) {
     try {
       const backendDir = path.join(this.projectRoot, 'backend');
-      
+
       // Check for safety (Python security linter)
-      const safetyResult = await this.runCommand('poetry run safety check', backendDir, { silent: true });
-      
-      if (!safetyResult.success && !safetyResult.output.includes('No known security vulnerabilities found')) {
+      const safetyResult = await this.runCommand(
+        'poetry run safety check',
+        backendDir,
+        { silent: true }
+      );
+
+      if (
+        !safetyResult.success &&
+        !safetyResult.output.includes('No known security vulnerabilities found')
+      ) {
         issues.push({
           type: 'security-backend',
           severity: 'warning',
           message: 'Python security vulnerabilities found',
-          details: safetyResult.output
+          details: safetyResult.output,
         });
       }
     } catch (error) {
@@ -723,8 +803,12 @@ class QualityCheckSystem {
     try {
       // Frontend dependencies
       this.log('Checking frontend dependencies...', COLORS.YELLOW);
-      const frontendResult = await this.runCommand('pnpm outdated --format json', this.projectRoot, { silent: true });
-      
+      const frontendResult = await this.runCommand(
+        'pnpm outdated --format json',
+        this.projectRoot,
+        { silent: true }
+      );
+
       if (frontendResult.success && frontendResult.output) {
         try {
           const outdatedData = JSON.parse(frontendResult.output);
@@ -734,7 +818,7 @@ class QualityCheckSystem {
               current: info.current,
               wanted: info.wanted,
               latest: info.latest,
-              type: 'frontend'
+              type: 'frontend',
             });
           });
         } catch (parseError) {
@@ -744,16 +828,15 @@ class QualityCheckSystem {
 
       // Backend dependencies
       await this.checkBackendDependencies(outdated, issues);
-
     } catch (error) {
       issues.push({
         type: 'dependencies-system',
         severity: 'error',
-        message: `Dependency check failed: ${error.message}`
+        message: `Dependency check failed: ${error.message}`,
       });
     }
 
-    const criticalOutdated = outdated.filter(dep => {
+    const criticalOutdated = outdated.filter((dep) => {
       const currentVersion = dep.current.replace(/[^\d.]/g, '');
       const latestVersion = dep.latest.replace(/[^\d.]/g, '');
       return this.isVersionSignificantlyOutdated(currentVersion, latestVersion);
@@ -764,14 +847,16 @@ class QualityCheckSystem {
         type: 'dependencies-outdated',
         severity: 'warning',
         message: `${criticalOutdated.length} dependencies are significantly outdated`,
-        details: criticalOutdated.map(d => `${d.package}: ${d.current} -> ${d.latest}`).join(', ')
+        details: criticalOutdated
+          .map((d) => `${d.package}: ${d.current} -> ${d.latest}`)
+          .join(', '),
       });
     }
 
     this.results.dependencies = {
-      passed: issues.filter(i => i.severity === 'error').length === 0,
+      passed: issues.filter((i) => i.severity === 'error').length === 0,
       outdated,
-      issues
+      issues,
     };
 
     return this.results.dependencies.passed;
@@ -783,18 +868,22 @@ class QualityCheckSystem {
   async checkBackendDependencies(outdated, issues) {
     try {
       const backendDir = path.join(this.projectRoot, 'backend');
-      const showResult = await this.runCommand('poetry show --outdated', backendDir, { silent: true });
-      
+      const showResult = await this.runCommand(
+        'poetry show --outdated',
+        backendDir,
+        { silent: true }
+      );
+
       if (showResult.success && showResult.output) {
         const lines = showResult.output.split('\n');
-        lines.forEach(line => {
+        lines.forEach((line) => {
           const match = line.match(/^(\S+)\s+(\S+)\s+(\S+)/);
           if (match) {
             outdated.push({
               package: match[1],
               current: match[2],
               latest: match[3],
-              type: 'backend'
+              type: 'backend',
             });
           }
         });
@@ -811,13 +900,17 @@ class QualityCheckSystem {
     try {
       const currentParts = current.split('.').map(Number);
       const latestParts = latest.split('.').map(Number);
-      
+
       // Major version difference
       if (latestParts[0] > currentParts[0]) return true;
-      
+
       // Minor version difference > 5
-      if (latestParts[0] === currentParts[0] && latestParts[1] - currentParts[1] > 5) return true;
-      
+      if (
+        latestParts[0] === currentParts[0] &&
+        latestParts[1] - currentParts[1] > 5
+      )
+        return true;
+
       return false;
     } catch (error) {
       return false;
@@ -830,19 +923,19 @@ class QualityCheckSystem {
   parseESLintOutput(output) {
     const issues = [];
     const lines = output.split('\n');
-    
-    lines.forEach(line => {
+
+    lines.forEach((line) => {
       if (line.includes('error') || line.includes('warning')) {
         const severity = line.includes('error') ? 'error' : 'warning';
         issues.push({
           type: 'eslint',
           severity,
           message: line.trim(),
-          details: line
+          details: line,
         });
       }
     });
-    
+
     return issues;
   }
 
@@ -851,36 +944,36 @@ class QualityCheckSystem {
    */
   parseAuditOutput(output) {
     const vulnerabilities = [];
-    
+
     try {
       // Try to parse as JSON first
       const auditData = JSON.parse(output);
-      
+
       if (auditData.advisories) {
-        Object.values(auditData.advisories).forEach(advisory => {
+        Object.values(auditData.advisories).forEach((advisory) => {
           vulnerabilities.push({
             package: advisory.module_name,
             severity: advisory.severity,
             title: advisory.title,
-            url: advisory.url
+            url: advisory.url,
           });
         });
       }
     } catch (error) {
       // Fallback to text parsing
       const lines = output.split('\n');
-      lines.forEach(line => {
+      lines.forEach((line) => {
         if (line.includes('vulnerability') || line.includes('advisory')) {
           vulnerabilities.push({
             package: 'unknown',
             severity: 'unknown',
             title: line.trim(),
-            url: ''
+            url: '',
           });
         }
       });
     }
-    
+
     return vulnerabilities;
   }
 
@@ -890,19 +983,20 @@ class QualityCheckSystem {
   generateQualityReport() {
     const timestamp = new Date().toISOString();
     const totalDuration = Date.now() - this.startTime;
-    
+
     const report = {
       timestamp,
       duration: totalDuration,
       summary: {
         overallScore: this.calculateOverallScore(),
-        passedChecks: Object.values(this.results).filter(r => r.passed).length,
+        passedChecks: Object.values(this.results).filter((r) => r.passed)
+          .length,
         totalChecks: Object.keys(this.results).length,
         criticalIssues: this.getCriticalIssues().length,
-        warnings: this.getWarnings().length
+        warnings: this.getWarnings().length,
       },
       results: this.results,
-      recommendations: this.generateRecommendations()
+      recommendations: this.generateRecommendations(),
     };
 
     return report;
@@ -917,7 +1011,7 @@ class QualityCheckSystem {
       testCoverage: 0.25,
       performance: 0.2,
       antiPatterns: 0.15,
-      security: 0.1
+      security: 0.1,
     };
 
     let totalScore = 0;
@@ -925,8 +1019,9 @@ class QualityCheckSystem {
 
     Object.entries(weights).forEach(([check, weight]) => {
       if (this.results[check]) {
-        const score = this.results[check].passed ? 100 : 
-                     (this.results[check].score || 0);
+        const score = this.results[check].passed
+          ? 100
+          : this.results[check].score || 0;
         totalScore += score * weight;
         totalWeight += weight;
       }
@@ -940,13 +1035,15 @@ class QualityCheckSystem {
    */
   getCriticalIssues() {
     const criticalIssues = [];
-    
-    Object.values(this.results).forEach(result => {
+
+    Object.values(this.results).forEach((result) => {
       if (result.issues) {
-        criticalIssues.push(...result.issues.filter(i => i.severity === 'error'));
+        criticalIssues.push(
+          ...result.issues.filter((i) => i.severity === 'error')
+        );
       }
     });
-    
+
     return criticalIssues;
   }
 
@@ -955,13 +1052,13 @@ class QualityCheckSystem {
    */
   getWarnings() {
     const warnings = [];
-    
-    Object.values(this.results).forEach(result => {
+
+    Object.values(this.results).forEach((result) => {
       if (result.issues) {
-        warnings.push(...result.issues.filter(i => i.severity === 'warning'));
+        warnings.push(...result.issues.filter((i) => i.severity === 'warning'));
       }
     });
-    
+
     return warnings;
   }
 
@@ -970,22 +1067,32 @@ class QualityCheckSystem {
    */
   generateRecommendations() {
     const recommendations = [];
-    
+
     // Code quality recommendations
     if (!this.results.codeQuality.passed) {
-      recommendations.push('Fix TypeScript and ESLint errors to improve code quality');
-      recommendations.push('Run `pnpm lint:fix` and `pnpm format` to auto-fix issues');
+      recommendations.push(
+        'Fix TypeScript and ESLint errors to improve code quality'
+      );
+      recommendations.push(
+        'Run `pnpm lint:fix` and `pnpm format` to auto-fix issues'
+      );
     }
 
     // Coverage recommendations
     if (!this.results.testCoverage.passed) {
-      recommendations.push('Increase test coverage by adding more unit and integration tests');
-      recommendations.push('Focus on testing critical business logic and error paths');
+      recommendations.push(
+        'Increase test coverage by adding more unit and integration tests'
+      );
+      recommendations.push(
+        'Focus on testing critical business logic and error paths'
+      );
     }
 
     // Performance recommendations
     if (!this.results.performance.passed) {
-      recommendations.push('Optimize test execution time by parallelizing tests');
+      recommendations.push(
+        'Optimize test execution time by parallelizing tests'
+      );
       recommendations.push('Consider code splitting to reduce bundle size');
     }
 
@@ -1009,17 +1116,23 @@ class QualityCheckSystem {
    */
   printQualitySummary() {
     const report = this.generateQualityReport();
-    
+
     console.log('\n' + '='.repeat(70));
     this.log('QUALITY CHECK SYSTEM - SUMMARY REPORT', COLORS.BOLD);
     console.log('='.repeat(70));
-    
+
     const overallScore = report.summary.overallScore;
-    const scoreColor = overallScore >= 90 ? COLORS.GREEN : 
-                      overallScore >= 70 ? COLORS.YELLOW : COLORS.RED;
-    
+    const scoreColor =
+      overallScore >= 90
+        ? COLORS.GREEN
+        : overallScore >= 70
+          ? COLORS.YELLOW
+          : COLORS.RED;
+
     this.log(`\nOverall Quality Score: ${overallScore}/100`, scoreColor);
-    this.log(`Checks Passed: ${report.summary.passedChecks}/${report.summary.totalChecks}`);
+    this.log(
+      `Checks Passed: ${report.summary.passedChecks}/${report.summary.totalChecks}`
+    );
     this.log(`Critical Issues: ${report.summary.criticalIssues}`);
     this.log(`Warnings: ${report.summary.warnings}`);
     this.log(`Duration: ${(report.duration / 1000).toFixed(1)}s`);
@@ -1029,17 +1142,19 @@ class QualityCheckSystem {
     console.log('┌─────────────────────┬─────────┬───────┬─────────────┐');
     console.log('│ Check               │ Status  │ Score │ Issues      │');
     console.log('├─────────────────────┼─────────┼───────┼─────────────┤');
-    
+
     Object.entries(this.results).forEach(([check, result]) => {
       const displayName = check.replace(/([A-Z])/g, ' $1').toLowerCase();
       const name = displayName.charAt(0).toUpperCase() + displayName.slice(1);
       const status = result.passed ? '✅ PASS' : '❌ FAIL';
       const score = result.score !== undefined ? `${result.score}/100` : 'N/A';
       const issues = result.issues ? result.issues.length : 0;
-      
-      console.log(`│ ${name.padEnd(19)} │ ${status.padEnd(7)} │ ${score.padEnd(5)} │ ${issues.toString().padEnd(11)} │`);
+
+      console.log(
+        `│ ${name.padEnd(19)} │ ${status.padEnd(7)} │ ${score.padEnd(5)} │ ${issues.toString().padEnd(11)} │`
+      );
     });
-    
+
     console.log('└─────────────────────┴─────────┴───────┴─────────────┘');
 
     // Recommendations
@@ -1062,8 +1177,11 @@ class QualityCheckSystem {
    * Run comprehensive quality checks
    */
   async runQualityChecks() {
-    this.log(`${COLORS.BOLD}🔍 Medical Device Regulatory Assistant - Quality Check System${COLORS.RESET}`, COLORS.BLUE);
-    
+    this.log(
+      `${COLORS.BOLD}🔍 Medical Device Regulatory Assistant - Quality Check System${COLORS.RESET}`,
+      COLORS.BLUE
+    );
+
     try {
       await this.checkCodeQuality();
       await this.analyzeTestCoverage();
@@ -1071,19 +1189,27 @@ class QualityCheckSystem {
       await this.checkPerformanceMetrics();
       await this.checkSecurity();
       await this.checkDependencies();
-      
+
       const passed = this.printQualitySummary();
-      
+
       if (passed) {
-        this.log('\n🎉 Quality checks passed! Code is ready for production.', COLORS.GREEN);
+        this.log(
+          '\n🎉 Quality checks passed! Code is ready for production.',
+          COLORS.GREEN
+        );
         process.exit(0);
       } else {
-        this.log('\n❌ Quality checks failed. Please address the issues above.', COLORS.RED);
+        this.log(
+          '\n❌ Quality checks failed. Please address the issues above.',
+          COLORS.RED
+        );
         process.exit(1);
       }
-      
     } catch (error) {
-      this.log(`\n💥 Quality check system failed: ${error.message}`, COLORS.RED);
+      this.log(
+        `\n💥 Quality check system failed: ${error.message}`,
+        COLORS.RED
+      );
       process.exit(1);
     }
   }

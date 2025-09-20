@@ -11,13 +11,13 @@ const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:8000';
 
 async function getAuthHeaders(request: NextRequest) {
   const session = await getServerSession(authOptions);
-  
+
   if (!session?.user?.email) {
     throw new Error('Unauthorized');
   }
 
   return {
-    'Authorization': `Bearer ${session.accessToken || 'mock-token'}`,
+    Authorization: `Bearer ${session.accessToken || 'mock-token'}`,
     'Content-Type': 'application/json',
   };
 }
@@ -29,7 +29,7 @@ export async function GET(
   try {
     const headers = await getAuthHeaders(request);
     const projectId = params.id;
-    
+
     const response = await fetch(`${BACKEND_URL}/projects/${projectId}`, {
       method: 'GET',
       headers,
@@ -38,9 +38,9 @@ export async function GET(
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       return NextResponse.json(
-        { 
+        {
           message: errorData.message || `Backend error: ${response.status}`,
-          details: errorData 
+          details: errorData,
         },
         { status: response.status }
       );
@@ -48,10 +48,9 @@ export async function GET(
 
     const data = await response.json();
     return NextResponse.json(data);
-
   } catch (error) {
     console.error('Get project API error:', error);
-    
+
     if (error.message === 'Unauthorized') {
       return NextResponse.json(
         { message: 'Authentication required' },
@@ -74,7 +73,7 @@ export async function PUT(
     const headers = await getAuthHeaders(request);
     const projectId = params.id;
     const body = await request.json();
-    
+
     const response = await fetch(`${BACKEND_URL}/projects/${projectId}`, {
       method: 'PUT',
       headers,
@@ -84,9 +83,9 @@ export async function PUT(
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       return NextResponse.json(
-        { 
+        {
           message: errorData.message || `Backend error: ${response.status}`,
-          details: errorData 
+          details: errorData,
         },
         { status: response.status }
       );
@@ -94,10 +93,9 @@ export async function PUT(
 
     const data = await response.json();
     return NextResponse.json(data);
-
   } catch (error) {
     console.error('Update project API error:', error);
-    
+
     if (error.message === 'Unauthorized') {
       return NextResponse.json(
         { message: 'Authentication required' },
@@ -119,7 +117,7 @@ export async function DELETE(
   try {
     const headers = await getAuthHeaders(request);
     const projectId = params.id;
-    
+
     const response = await fetch(`${BACKEND_URL}/projects/${projectId}`, {
       method: 'DELETE',
       headers,
@@ -128,9 +126,9 @@ export async function DELETE(
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       return NextResponse.json(
-        { 
+        {
           message: errorData.message || `Backend error: ${response.status}`,
-          details: errorData 
+          details: errorData,
         },
         { status: response.status }
       );
@@ -138,10 +136,9 @@ export async function DELETE(
 
     const data = await response.json();
     return NextResponse.json(data);
-
   } catch (error) {
     console.error('Delete project API error:', error);
-    
+
     if (error.message === 'Unauthorized') {
       return NextResponse.json(
         { message: 'Authentication required' },

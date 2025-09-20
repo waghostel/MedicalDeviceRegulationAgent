@@ -3,19 +3,19 @@
 import React, { useState } from 'react';
 import { Download, FileText, Copy } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from '@/components/ui/select';
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogHeader, 
-  DialogTitle, 
-  DialogTrigger 
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
 } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { SourceCitation } from '@/types/copilot';
@@ -30,18 +30,23 @@ interface CitationExporterProps {
 export function CitationExporter({
   citations,
   projectName = 'Regulatory Project',
-  className = ''
+  className = '',
 }: CitationExporterProps) {
   const [format, setFormat] = useState<CitationFormat>('APA');
   const [isOpen, setIsOpen] = useState(false);
 
-  const generateBibliography = (citations: SourceCitation[], format: CitationFormat): string => {
+  const generateBibliography = (
+    citations: SourceCitation[],
+    format: CitationFormat
+  ): string => {
     const header = `# Bibliography - ${projectName}\n\n`;
     const formatLabel = `**Format:** ${format} Style\n`;
     const dateGenerated = `**Generated:** ${new Date().toLocaleDateString()}\n\n`;
-    
+
     const formattedCitations = citations
-      .map((citation, index) => `${index + 1}. ${formatCitation(citation, format)}`)
+      .map(
+        (citation, index) => `${index + 1}. ${formatCitation(citation, format)}`
+      )
       .join('\n\n');
 
     return header + formatLabel + dateGenerated + formattedCitations;
@@ -99,17 +104,20 @@ export function CitationExporter({
           Export Citations ({citations.length})
         </Button>
       </DialogTrigger>
-      
+
       <DialogContent className="max-w-4xl max-h-[80vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>Export Citations</DialogTitle>
         </DialogHeader>
-        
+
         <div className="flex-1 flex flex-col space-y-4 min-h-0">
           {/* Format Selection */}
           <div className="flex items-center gap-4">
             <label className="text-sm font-medium">Citation Format:</label>
-            <Select value={format} onValueChange={(value: CitationFormat) => setFormat(value)}>
+            <Select
+              value={format}
+              onValueChange={(value: CitationFormat) => setFormat(value)}
+            >
               <SelectTrigger className="w-32">
                 <SelectValue />
               </SelectTrigger>
@@ -118,7 +126,7 @@ export function CitationExporter({
                 <SelectItem value="MLA">MLA</SelectItem>
               </SelectContent>
             </Select>
-            
+
             <div className="text-sm text-muted-foreground">
               {citations.length} citation{citations.length !== 1 ? 's' : ''}
             </div>
@@ -144,7 +152,7 @@ export function CitationExporter({
               <Copy className="h-4 w-4 mr-2" />
               Copy to Clipboard
             </Button>
-            
+
             <Button
               variant="outline"
               onClick={handleDownloadAsText}
@@ -153,7 +161,7 @@ export function CitationExporter({
               <FileText className="h-4 w-4 mr-2" />
               Download as Text
             </Button>
-            
+
             <Button
               variant="outline"
               onClick={handleDownloadAsMarkdown}

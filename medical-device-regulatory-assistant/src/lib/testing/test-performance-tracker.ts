@@ -1,6 +1,6 @@
 /**
  * Test Performance Tracker
- * 
+ *
  * Enhanced performance monitoring system for test infrastructure
  * Implements Requirements 5.1 and 5.2:
  * - 5.1: Complete test suite within 30 seconds
@@ -85,18 +85,21 @@ export interface PerformanceReport {
 }
 
 export class TestPerformanceTracker {
-  private activeTests: Map<string, {
-    testName: string;
-    suiteName: string;
-    startTime: number;
-    startMemory: NodeJS.MemoryUsage;
-    retryCount: number;
-  }> = new Map();
+  private activeTests: Map<
+    string,
+    {
+      testName: string;
+      suiteName: string;
+      startTime: number;
+      startMemory: NodeJS.MemoryUsage;
+      retryCount: number;
+    }
+  > = new Map();
 
   private completedTests: TestExecutionMetrics[] = [];
   private suiteStartTimes: Map<string, number> = new Map();
   private suiteMetrics: Map<string, SuitePerformanceMetrics> = new Map();
-  
+
   private readonly thresholds: PerformanceThresholds;
   private readonly reportDir: string;
   private readonly historyFile: string;
@@ -108,12 +111,12 @@ export class TestPerformanceTracker {
       maxMemoryUsage: 512, // 512MB
       consistencyThreshold: 0.2, // 20% variance (Requirement 5.2)
       memoryLeakThreshold: 10, // 10MB
-      ...thresholds
+      ...thresholds,
     };
 
     this.reportDir = join(process.cwd(), 'test-reports', 'performance');
     this.historyFile = join(this.reportDir, 'performance-history.json');
-    
+
     // Ensure report directory exists
     if (!existsSync(this.reportDir)) {
       mkdirSync(this.reportDir, { recursive: true });
@@ -139,50 +142,63 @@ export class TestPerformanceTracker {
 
     const endTime = performance.now();
     const totalExecutionTime = endTime - startTime;
-    
-    const suiteTests = this.completedTests.filter(test => test.suiteName === suiteName);
-    
+
+    const suiteTests = this.completedTests.filter(
+      (test) => test.suiteName === suiteName
+    );
+
     if (suiteTests.length === 0) {
       throw new Error(`No tests found for suite ${suiteName}`);
     }
 
-    const passedTests = suiteTests.filter(test => test.status === 'passed').length;
-    const failedTests = suiteTests.filter(test => test.status === 'failed').length;
-    const skippedTests = suiteTests.filter(test => test.status === 'skipped').length;
-    
-    const executionTimes = suiteTests.map(test => test.executionTime);
-    const averageTestTime = executionTimes.reduce((sum, time) => sum + time, 0) / executionTimes.length;
-    
-    const slowestTest = suiteTests.reduce((slowest, test) => 
+    const passedTests = suiteTests.filter(
+      (test) => test.status === 'passed'
+    ).length;
+    const failedTests = suiteTests.filter(
+      (test) => test.status === 'failed'
+    ).length;
+    const skippedTests = suiteTests.filter(
+      (test) => test.status === 'skipped'
+    ).length;
+
+    const executionTimes = suiteTests.map((test) => test.executionTime);
+    const averageTestTime =
+      executionTimes.reduce((sum, time) => sum + time, 0) /
+      executionTimes.length;
+
+    const slowestTest = suiteTests.reduce((slowest, test) =>
       test.executionTime > slowest.executionTime ? test : slowest
     );
-    
-    const fastestTest = suiteTests.reduce((fastest, test) => 
+
+    const fastestTest = suiteTests.reduce((fastest, test) =>
       test.executionTime < fastest.executionTime ? test : fastest
     );
 
-    const memoryUsages = suiteTests.map(test => test.memoryUsage.heapUsed / 1024 / 1024);
+    const memoryUsages = suiteTests.map(
+      (test) => test.memoryUsage.heapUsed / 1024 / 1024
+    );
     const memoryPeak = Math.max(...memoryUsages);
-    const memoryAverage = memoryUsages.reduce((sum, usage) => sum + usage, 0) / memoryUsages.length;
+    const memoryAverage =
+      memoryUsages.reduce((sum, usage) => sum + usage, 0) / memoryUsages.length;
 
     // Calculate consistency score (Requirement 5.2)
     const consistencyScore = this.calculateConsistencyScore(executionTimes);
-    
+
     // Check threshold violations
     const thresholdViolations: string[] = [];
-    
+
     if (totalExecutionTime > this.thresholds.maxSuiteExecutionTime) {
       thresholdViolations.push(
         `Suite execution time ${(totalExecutionTime / 1000).toFixed(2)}s exceeds threshold ${this.thresholds.maxSuiteExecutionTime / 1000}s`
       );
     }
-    
-    if (consistencyScore < (1 - this.thresholds.consistencyThreshold)) {
+
+    if (consistencyScore < 1 - this.thresholds.consistencyThreshold) {
       thresholdViolations.push(
         `Test execution consistency ${(consistencyScore * 100).toFixed(1)}% below threshold ${((1 - this.thresholds.consistencyThreshold) * 100).toFixed(1)}%`
       );
     }
-    
+
     if (memoryPeak > this.thresholds.maxMemoryUsage) {
       thresholdViolations.push(
         `Peak memory usage ${memoryPeak.toFixed(2)}MB exceeds threshold ${this.thresholds.maxMemoryUsage}MB`
@@ -199,16 +215,16 @@ export class TestPerformanceTracker {
       averageTestTime,
       slowestTest: {
         name: slowestTest.testName,
-        time: slowestTest.executionTime
+        time: slowestTest.executionTime,
       },
       fastestTest: {
         name: fastestTest.testName,
-        time: fastestTest.executionTime
+        time: fastestTest.executionTime,
       },
       memoryPeak,
       memoryAverage,
       consistencyScore,
-      thresholdViolations
+      thresholdViolations,
     };
 
     this.suiteMetrics.set(suiteName, metrics);
@@ -218,13 +234,13 @@ export class TestPerformanceTracker {
     const status = thresholdViolations.length === 0 ? '✅' : '⚠️';
     console.log(
       `${status} Suite ${suiteName} completed: ` +
-      `${(totalExecutionTime / 1000).toFixed(2)}s, ` +
-      `${passedTests}/${suiteTests.length} passed, ` +
-      `consistency: ${(consistencyScore * 100).toFixed(1)}%`
+        `${(totalExecutionTime / 1000).toFixed(2)}s, ` +
+        `${passedTests}/${suiteTests.length} passed, ` +
+        `consistency: ${(consistencyScore * 100).toFixed(1)}%`
     );
 
     if (thresholdViolations.length > 0) {
-      thresholdViolations.forEach(violation => {
+      thresholdViolations.forEach((violation) => {
         console.warn(`  ⚠️  ${violation}`);
       });
     }
@@ -237,13 +253,13 @@ export class TestPerformanceTracker {
    */
   startTest(testName: string, suiteName: string): string {
     const testId = `${suiteName}::${testName}::${Date.now()}`;
-    
+
     this.activeTests.set(testId, {
       testName,
       suiteName,
       startTime: performance.now(),
       startMemory: process.memoryUsage(),
-      retryCount: 0
+      retryCount: 0,
     });
 
     return testId;
@@ -252,7 +268,11 @@ export class TestPerformanceTracker {
   /**
    * End tracking an individual test
    */
-  endTest(testId: string, status: 'passed' | 'failed' | 'skipped', warnings: string[] = []): TestExecutionMetrics {
+  endTest(
+    testId: string,
+    status: 'passed' | 'failed' | 'skipped',
+    warnings: string[] = []
+  ): TestExecutionMetrics {
     const activeTest = this.activeTests.get(testId);
     if (!activeTest) {
       throw new Error(`Test ${testId} was not started`);
@@ -266,12 +286,12 @@ export class TestPerformanceTracker {
       heapUsed: endMemory.heapUsed - activeTest.startMemory.heapUsed,
       heapTotal: endMemory.heapTotal,
       external: endMemory.external - activeTest.startMemory.external,
-      rss: endMemory.rss - activeTest.startMemory.rss
+      rss: endMemory.rss - activeTest.startMemory.rss,
     };
 
     // Add performance warnings
     const performanceWarnings = [...warnings];
-    
+
     if (executionTime > this.thresholds.maxTestExecutionTime) {
       performanceWarnings.push(
         `Test execution time ${executionTime.toFixed(2)}ms exceeds threshold ${this.thresholds.maxTestExecutionTime}ms`
@@ -299,8 +319,8 @@ export class TestPerformanceTracker {
         nodeVersion: process.version,
         reactVersion: '19.1.0', // From package.json
         testEnvironment: 'jsdom',
-        ci: process.env.CI === 'true'
-      }
+        ci: process.env.CI === 'true',
+      },
     };
 
     this.completedTests.push(metrics);
@@ -325,25 +345,31 @@ export class TestPerformanceTracker {
   generateReport(): PerformanceReport {
     const suiteMetrics = Array.from(this.suiteMetrics.values());
     const totalTests = this.completedTests.length;
-    const passedTests = this.completedTests.filter(test => test.status === 'passed').length;
-    
+    const passedTests = this.completedTests.filter(
+      (test) => test.status === 'passed'
+    ).length;
+
     const overallExecutionTime = suiteMetrics.reduce(
-      (sum, suite) => sum + suite.totalExecutionTime, 0
+      (sum, suite) => sum + suite.totalExecutionTime,
+      0
     );
-    
-    const overallPassRate = totalTests > 0 ? (passedTests / totalTests) * 100 : 0;
+
+    const overallPassRate =
+      totalTests > 0 ? (passedTests / totalTests) * 100 : 0;
 
     // Check threshold compliance
     const suiteTimeCompliance = suiteMetrics.every(
-      suite => suite.totalExecutionTime <= this.thresholds.maxSuiteExecutionTime
+      (suite) =>
+        suite.totalExecutionTime <= this.thresholds.maxSuiteExecutionTime
     );
-    
+
     const consistencyCompliance = suiteMetrics.every(
-      suite => suite.consistencyScore >= (1 - this.thresholds.consistencyThreshold)
+      (suite) =>
+        suite.consistencyScore >= 1 - this.thresholds.consistencyThreshold
     );
-    
+
     const memoryCompliance = suiteMetrics.every(
-      suite => suite.memoryPeak <= this.thresholds.maxMemoryUsage
+      (suite) => suite.memoryPeak <= this.thresholds.maxMemoryUsage
     );
 
     // Generate recommendations
@@ -361,11 +387,11 @@ export class TestPerformanceTracker {
       thresholdCompliance: {
         suiteTimeCompliance,
         consistencyCompliance,
-        memoryCompliance
+        memoryCompliance,
       },
       suiteMetrics,
       recommendations,
-      regressionAnalysis
+      regressionAnalysis,
     };
 
     // Save report
@@ -381,8 +407,12 @@ export class TestPerformanceTracker {
   private calculateConsistencyScore(executionTimes: number[]): number {
     if (executionTimes.length < 2) return 1.0;
 
-    const mean = executionTimes.reduce((sum, time) => sum + time, 0) / executionTimes.length;
-    const variance = executionTimes.reduce((sum, time) => sum + Math.pow(time - mean, 2), 0) / executionTimes.length;
+    const mean =
+      executionTimes.reduce((sum, time) => sum + time, 0) /
+      executionTimes.length;
+    const variance =
+      executionTimes.reduce((sum, time) => sum + Math.pow(time - mean, 2), 0) /
+      executionTimes.length;
     const standardDeviation = Math.sqrt(variance);
     const coefficientOfVariation = standardDeviation / mean;
 
@@ -394,48 +424,55 @@ export class TestPerformanceTracker {
   /**
    * Generate performance recommendations
    */
-  private generateRecommendations(suiteMetrics: SuitePerformanceMetrics[]): string[] {
+  private generateRecommendations(
+    suiteMetrics: SuitePerformanceMetrics[]
+  ): string[] {
     const recommendations: string[] = [];
 
     // Check for slow suites
     const slowSuites = suiteMetrics.filter(
-      suite => suite.totalExecutionTime > this.thresholds.maxSuiteExecutionTime * 0.8
+      (suite) =>
+        suite.totalExecutionTime > this.thresholds.maxSuiteExecutionTime * 0.8
     );
-    
+
     if (slowSuites.length > 0) {
       recommendations.push(
-        `Consider optimizing slow test suites: ${slowSuites.map(s => s.suiteName).join(', ')}`
+        `Consider optimizing slow test suites: ${slowSuites.map((s) => s.suiteName).join(', ')}`
       );
     }
 
     // Check for inconsistent suites
     const inconsistentSuites = suiteMetrics.filter(
-      suite => suite.consistencyScore < 0.8
+      (suite) => suite.consistencyScore < 0.8
     );
-    
+
     if (inconsistentSuites.length > 0) {
       recommendations.push(
-        `Improve test consistency for: ${inconsistentSuites.map(s => s.suiteName).join(', ')}`
+        `Improve test consistency for: ${inconsistentSuites.map((s) => s.suiteName).join(', ')}`
       );
     }
 
     // Check for memory-intensive suites
     const memoryIntensiveSuites = suiteMetrics.filter(
-      suite => suite.memoryPeak > this.thresholds.maxMemoryUsage * 0.8
+      (suite) => suite.memoryPeak > this.thresholds.maxMemoryUsage * 0.8
     );
-    
+
     if (memoryIntensiveSuites.length > 0) {
       recommendations.push(
-        `Optimize memory usage for: ${memoryIntensiveSuites.map(s => s.suiteName).join(', ')}`
+        `Optimize memory usage for: ${memoryIntensiveSuites.map((s) => s.suiteName).join(', ')}`
       );
     }
 
     // General recommendations
-    const overallPassRate = suiteMetrics.reduce((sum, suite) => sum + suite.passedTests, 0) /
-                           suiteMetrics.reduce((sum, suite) => sum + suite.totalTests, 0) * 100;
-    
+    const overallPassRate =
+      (suiteMetrics.reduce((sum, suite) => sum + suite.passedTests, 0) /
+        suiteMetrics.reduce((sum, suite) => sum + suite.totalTests, 0)) *
+      100;
+
     if (overallPassRate < 95) {
-      recommendations.push('Focus on improving test reliability to achieve >95% pass rate');
+      recommendations.push(
+        'Focus on improving test reliability to achieve >95% pass rate'
+      );
     }
 
     return recommendations;
@@ -452,27 +489,36 @@ export class TestPerformanceTracker {
     try {
       const historyData = JSON.parse(readFileSync(this.historyFile, 'utf8'));
       const previousReports: PerformanceReport[] = historyData.reports || [];
-      
+
       if (previousReports.length === 0) {
         return undefined;
       }
 
       const latestReport = previousReports[previousReports.length - 1];
-      const currentExecutionTime = this.completedTests.reduce((sum, test) => sum + test.executionTime, 0);
+      const currentExecutionTime = this.completedTests.reduce(
+        (sum, test) => sum + test.executionTime,
+        0
+      );
       const previousExecutionTime = latestReport.overallExecutionTime;
 
-      const regressionPercentage = ((currentExecutionTime - previousExecutionTime) / previousExecutionTime) * 100;
+      const regressionPercentage =
+        ((currentExecutionTime - previousExecutionTime) /
+          previousExecutionTime) *
+        100;
       const hasRegression = regressionPercentage > 20; // 20% regression threshold
 
       const affectedTests: string[] = [];
       if (hasRegression) {
         // Identify specific tests that regressed
-        this.completedTests.forEach(currentTest => {
+        this.completedTests.forEach((currentTest) => {
           const previousTest = latestReport.suiteMetrics
-            .flatMap(suite => [suite.slowestTest, suite.fastestTest])
-            .find(test => test.name === currentTest.testName);
-          
-          if (previousTest && currentTest.executionTime > previousTest.time * 1.2) {
+            .flatMap((suite) => [suite.slowestTest, suite.fastestTest])
+            .find((test) => test.name === currentTest.testName);
+
+          if (
+            previousTest &&
+            currentTest.executionTime > previousTest.time * 1.2
+          ) {
             affectedTests.push(currentTest.testName);
           }
         });
@@ -481,7 +527,7 @@ export class TestPerformanceTracker {
       return {
         hasRegression,
         regressionPercentage,
-        affectedTests
+        affectedTests,
       };
     } catch (error) {
       console.warn('Failed to perform regression analysis:', error);
@@ -499,7 +545,7 @@ export class TestPerformanceTracker {
 
     // Update history
     let historyData: { reports: PerformanceReport[] } = { reports: [] };
-    
+
     if (existsSync(this.historyFile)) {
       try {
         historyData = JSON.parse(readFileSync(this.historyFile, 'utf8'));
@@ -509,14 +555,14 @@ export class TestPerformanceTracker {
     }
 
     historyData.reports.push(report);
-    
+
     // Keep only last 50 reports
     if (historyData.reports.length > 50) {
       historyData.reports = historyData.reports.slice(-50);
     }
 
     writeFileSync(this.historyFile, JSON.stringify(historyData, null, 2));
-    
+
     console.log(`📊 Performance report saved: ${reportFile}`);
   }
 
@@ -525,10 +571,10 @@ export class TestPerformanceTracker {
    */
   getPerformanceSummary(): string {
     const report = this.generateReport();
-    
+
     const summary = [
       '📊 Test Performance Summary',
-      '=' .repeat(50),
+      '='.repeat(50),
       `Total Suites: ${report.totalSuites}`,
       `Total Tests: ${report.totalTests}`,
       `Overall Execution Time: ${(report.overallExecutionTime / 1000).toFixed(2)}s`,
@@ -542,14 +588,18 @@ export class TestPerformanceTracker {
 
     if (report.recommendations.length > 0) {
       summary.push('', 'Recommendations:');
-      report.recommendations.forEach(rec => summary.push(`  • ${rec}`));
+      report.recommendations.forEach((rec) => summary.push(`  • ${rec}`));
     }
 
     if (report.regressionAnalysis?.hasRegression) {
       summary.push('', '⚠️  Performance Regression Detected:');
-      summary.push(`  Regression: ${report.regressionAnalysis.regressionPercentage.toFixed(1)}%`);
+      summary.push(
+        `  Regression: ${report.regressionAnalysis.regressionPercentage.toFixed(1)}%`
+      );
       if (report.regressionAnalysis.affectedTests.length > 0) {
-        summary.push(`  Affected Tests: ${report.regressionAnalysis.affectedTests.join(', ')}`);
+        summary.push(
+          `  Affected Tests: ${report.regressionAnalysis.affectedTests.join(', ')}`
+        );
       }
     }
 
@@ -597,6 +647,6 @@ export function withPerformanceTracking(suiteName: string) {
     },
     afterEach: (testId: string, status: 'passed' | 'failed' | 'skipped') => {
       return getPerformanceTracker().endTest(testId, status);
-    }
+    },
   };
 }

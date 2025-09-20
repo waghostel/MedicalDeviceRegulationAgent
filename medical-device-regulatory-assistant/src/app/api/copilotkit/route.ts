@@ -25,15 +25,18 @@ async function callBackendAgent(
       body: JSON.stringify({
         task_type: taskType,
         project_id: projectContext?.projectId || 'default-project',
-        device_description: projectContext?.deviceDescription || parameters.deviceDescription,
+        device_description:
+          projectContext?.deviceDescription || parameters.deviceDescription,
         intended_use: projectContext?.intendedUse || parameters.intendedUse,
         device_type: projectContext?.deviceType || parameters.deviceType,
-        parameters: parameters
-      })
+        parameters: parameters,
+      }),
     });
 
     if (!response.ok) {
-      throw new Error(`Backend API error: ${response.status} ${response.statusText}`);
+      throw new Error(
+        `Backend API error: ${response.status} ${response.statusText}`
+      );
     }
 
     const result = await response.json();
@@ -43,7 +46,7 @@ async function callBackendAgent(
     // Return fallback response
     return {
       error: `Backend unavailable: ${error instanceof Error ? error.message : 'Unknown error'}`,
-      fallback: true
+      fallback: true,
     };
   }
 }
@@ -53,37 +56,43 @@ const copilotKit = new CopilotRuntime({
   actions: [
     {
       name: 'predicate_search',
-      description: 'Search for FDA 510(k) predicate devices based on device description and intended use',
+      description:
+        'Search for FDA 510(k) predicate devices based on device description and intended use',
       parameters: {
         type: 'object',
         properties: {
           deviceDescription: {
             type: 'string',
-            description: 'Description of the medical device'
+            description: 'Description of the medical device',
           },
           intendedUse: {
             type: 'string',
-            description: 'Intended use statement for the device'
+            description: 'Intended use statement for the device',
           },
           productCode: {
             type: 'string',
-            description: 'FDA product code if known (optional)'
+            description: 'FDA product code if known (optional)',
           },
           projectId: {
             type: 'string',
-            description: 'Project ID for context (optional)'
-          }
+            description: 'Project ID for context (optional)',
+          },
         },
-        required: ['deviceDescription', 'intendedUse']
+        required: ['deviceDescription', 'intendedUse'],
       },
-      handler: async ({ deviceDescription, intendedUse, productCode, projectId }) => {
+      handler: async ({
+        deviceDescription,
+        intendedUse,
+        productCode,
+        projectId,
+      }) => {
         const result = await callBackendAgent(
           'predicate_search',
           { productCode },
           {
             projectId: projectId || 'copilot-session',
             deviceDescription,
-            intendedUse
+            intendedUse,
           }
         );
 
@@ -97,8 +106,8 @@ const copilotKit = new CopilotRuntime({
                 intendedUse: 'Similar indication for testing',
                 productCode: productCode || 'ABC',
                 clearanceDate: '2023-01-15',
-                confidenceScore: 0.85
-              }
+                confidenceScore: 0.85,
+              },
             ],
             confidence: 0.85,
             reasoning: `Backend unavailable. Mock response for device: "${deviceDescription}" and intended use: "${intendedUse}"`,
@@ -108,10 +117,10 @@ const copilotKit = new CopilotRuntime({
                 title: 'FDA 510(k) Database - K123456 (Mock)',
                 effectiveDate: '2023-01-15',
                 documentType: 'FDA_510K' as const,
-                accessedDate: new Date().toISOString()
-              }
+                accessedDate: new Date().toISOString(),
+              },
             ],
-            warning: result.error
+            warning: result.error,
           };
         }
 
@@ -123,36 +132,42 @@ const copilotKit = new CopilotRuntime({
           reasoning: result.reasoning || 'Analysis completed',
           sources: result.sources || [],
           executionTime: result.execution_time_ms,
-          sessionId: result.session_id
+          sessionId: result.session_id,
         };
-      }
+      },
     },
     {
       name: 'classify_device',
-      description: 'Classify a medical device and determine FDA product code and regulatory pathway',
+      description:
+        'Classify a medical device and determine FDA product code and regulatory pathway',
       parameters: {
         type: 'object',
         properties: {
           deviceDescription: {
             type: 'string',
-            description: 'Description of the medical device'
+            description: 'Description of the medical device',
           },
           intendedUse: {
             type: 'string',
-            description: 'Intended use statement for the device'
+            description: 'Intended use statement for the device',
           },
           technologyType: {
             type: 'string',
-            description: 'Technology type (e.g., active, passive, software)'
+            description: 'Technology type (e.g., active, passive, software)',
           },
           projectId: {
             type: 'string',
-            description: 'Project ID for context (optional)'
-          }
+            description: 'Project ID for context (optional)',
+          },
         },
-        required: ['deviceDescription', 'intendedUse']
+        required: ['deviceDescription', 'intendedUse'],
       },
-      handler: async ({ deviceDescription, intendedUse, technologyType, projectId }) => {
+      handler: async ({
+        deviceDescription,
+        intendedUse,
+        technologyType,
+        projectId,
+      }) => {
         const result = await callBackendAgent(
           'device_classification',
           { technologyType },
@@ -160,7 +175,7 @@ const copilotKit = new CopilotRuntime({
             projectId: projectId || 'copilot-session',
             deviceDescription,
             intendedUse,
-            deviceType: technologyType
+            deviceType: technologyType,
           }
         );
 
@@ -179,10 +194,10 @@ const copilotKit = new CopilotRuntime({
                 title: 'FDA CFR Database (Mock)',
                 effectiveDate: '2024-01-01',
                 documentType: 'CFR_SECTION' as const,
-                accessedDate: new Date().toISOString()
-              }
+                accessedDate: new Date().toISOString(),
+              },
             ],
-            warning: result.error
+            warning: result.error,
           };
         }
 
@@ -197,9 +212,9 @@ const copilotKit = new CopilotRuntime({
           reasoning: result.reasoning || 'Classification completed',
           sources: result.sources || [],
           executionTime: result.execution_time_ms,
-          sessionId: result.session_id
+          sessionId: result.session_id,
         };
-      }
+      },
     },
     {
       name: 'compare_predicate',
@@ -212,31 +227,31 @@ const copilotKit = new CopilotRuntime({
             properties: {
               name: { type: 'string' },
               description: { type: 'string' },
-              intendedUse: { type: 'string' }
-            }
+              intendedUse: { type: 'string' },
+            },
           },
           predicateKNumber: {
             type: 'string',
-            description: 'K-number of the predicate device to compare against'
+            description: 'K-number of the predicate device to compare against',
           },
           projectId: {
             type: 'string',
-            description: 'Project ID for context (optional)'
-          }
+            description: 'Project ID for context (optional)',
+          },
         },
-        required: ['userDevice', 'predicateKNumber']
+        required: ['userDevice', 'predicateKNumber'],
       },
       handler: async ({ userDevice, predicateKNumber, projectId }) => {
         const result = await callBackendAgent(
           'predicate_comparison',
-          { 
+          {
             predicate_k_number: predicateKNumber,
-            user_device: userDevice
+            user_device: userDevice,
           },
           {
             projectId: projectId || 'copilot-session',
             deviceDescription: userDevice.description,
-            intendedUse: userDevice.intendedUse
+            intendedUse: userDevice.intendedUse,
           }
         );
 
@@ -250,8 +265,9 @@ const copilotKit = new CopilotRuntime({
                 predicateDevice: 'Similar therapeutic indication',
                 similarity: 'similar' as const,
                 impact: 'low' as const,
-                justification: 'Both devices target similar patient populations'
-              }
+                justification:
+                  'Both devices target similar patient populations',
+              },
             ],
             differences: [
               {
@@ -260,13 +276,14 @@ const copilotKit = new CopilotRuntime({
                 predicateDevice: 'Traditional stainless steel',
                 similarity: 'different' as const,
                 impact: 'medium' as const,
-                justification: 'Material difference may require biocompatibility testing'
-              }
+                justification:
+                  'Material difference may require biocompatibility testing',
+              },
             ],
             riskAssessment: 'medium' as const,
             testingRecommendations: [
               'Biocompatibility testing per ISO 10993',
-              'Mechanical testing comparison'
+              'Mechanical testing comparison',
             ],
             confidence: 0.82,
             sources: [
@@ -275,10 +292,10 @@ const copilotKit = new CopilotRuntime({
                 title: `FDA 510(k) Database - ${predicateKNumber} (Mock)`,
                 effectiveDate: '2023-01-15',
                 documentType: 'FDA_510K' as const,
-                accessedDate: new Date().toISOString()
-              }
+                accessedDate: new Date().toISOString(),
+              },
             ],
-            warning: result.error
+            warning: result.error,
           };
         }
 
@@ -293,9 +310,9 @@ const copilotKit = new CopilotRuntime({
           reasoning: result.reasoning || 'Comparison completed',
           sources: result.sources || [],
           executionTime: result.execution_time_ms,
-          sessionId: result.session_id
+          sessionId: result.session_id,
         };
-      }
+      },
     },
     {
       name: 'find_guidance',
@@ -305,39 +322,45 @@ const copilotKit = new CopilotRuntime({
         properties: {
           deviceType: {
             type: 'string',
-            description: 'Type of medical device'
+            description: 'Type of medical device',
           },
           topic: {
             type: 'string',
-            description: 'Specific topic or area of interest'
+            description: 'Specific topic or area of interest',
           },
           deviceDescription: {
             type: 'string',
-            description: 'Description of the medical device (optional)'
+            description: 'Description of the medical device (optional)',
           },
           intendedUse: {
             type: 'string',
-            description: 'Intended use statement (optional)'
+            description: 'Intended use statement (optional)',
           },
           projectId: {
             type: 'string',
-            description: 'Project ID for context (optional)'
-          }
+            description: 'Project ID for context (optional)',
+          },
         },
-        required: ['deviceType']
+        required: ['deviceType'],
       },
-      handler: async ({ deviceType, topic, deviceDescription, intendedUse, projectId }) => {
+      handler: async ({
+        deviceType,
+        topic,
+        deviceDescription,
+        intendedUse,
+        projectId,
+      }) => {
         const result = await callBackendAgent(
           'guidance_search',
-          { 
+          {
             device_type: deviceType,
-            topic: topic
+            topic: topic,
           },
           {
             projectId: projectId || 'copilot-session',
             deviceDescription: deviceDescription || `${deviceType} device`,
             intendedUse: intendedUse || `Medical device of type: ${deviceType}`,
-            deviceType: deviceType
+            deviceType: deviceType,
           }
         );
 
@@ -350,8 +373,8 @@ const copilotKit = new CopilotRuntime({
                 url: 'https://www.fda.gov/regulatory-information/search-fda-guidance-documents/510k-submissions',
                 effectiveDate: '2023-01-01',
                 summary: 'General guidance for 510(k) submission requirements',
-                relevanceScore: 0.9
-              }
+                relevanceScore: 0.9,
+              },
             ],
             confidence: 0.88,
             sources: [
@@ -360,10 +383,10 @@ const copilotKit = new CopilotRuntime({
                 title: 'FDA Guidance Documents Database (Mock)',
                 effectiveDate: '2024-01-01',
                 documentType: 'FDA_GUIDANCE' as const,
-                accessedDate: new Date().toISOString()
-              }
+                accessedDate: new Date().toISOString(),
+              },
             ],
-            warning: result.error
+            warning: result.error,
           };
         }
 
@@ -375,16 +398,16 @@ const copilotKit = new CopilotRuntime({
           reasoning: result.reasoning || 'Guidance search completed',
           sources: result.sources || [],
           executionTime: result.execution_time_ms,
-          sessionId: result.session_id
+          sessionId: result.session_id,
         };
-      }
-    }
-  ]
+      },
+    },
+  ],
 });
 
 export async function POST(req: NextRequest) {
   const openaiApiKey = process.env.OPENAI_API_KEY;
-  
+
   if (!openaiApiKey) {
     return new Response('OpenAI API key not configured', { status: 500 });
   }
